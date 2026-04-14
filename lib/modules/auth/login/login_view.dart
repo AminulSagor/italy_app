@@ -268,17 +268,15 @@ class LoginView extends StatelessWidget {
             ),
           ),
           Positioned(
-            right: 65.w,
-            bottom: 15.h,
-            child: Container(
-              width: 32.w,
-              height: 32.w,
-              decoration: const BoxDecoration(
-                color: Color(0xFF8A560E),
-                shape: BoxShape.circle,
+            right: -12.w,
+            bottom: 0.h,
+            child: SizedBox(
+              width: 55.sp,
+              height: 55.sp,
+              child: Image.asset(
+                'assets/icons_png/Background_login.png',
+                fit: BoxFit.contain,
               ),
-              alignment: Alignment.center,
-              child: Icon(Icons.park_rounded, color: Colors.white, size: 16.sp),
             ),
           ),
         ],
