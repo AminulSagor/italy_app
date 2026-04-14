@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/bindings/initial_bindings.dart';
 import 'core/localization/app_translations.dart';
-import 'core/services/services.dart';
+// import 'core/services/services.dart';
 import 'core/themes/app_theme.dart';
 import 'routes/routes.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Get.putAsync(() => StorageService().init());
+  //await Get.putAsync(() => StorageService().init()); //transfered to initialbindings
   runApp(ItalyApp(initialRoute: AppPages.initial));
 }
 
@@ -26,6 +27,7 @@ class ItalyApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return GetMaterialApp(
+          initialBinding: InitialBindings(),
           debugShowCheckedModeBanner: false,
           title: 'Italir Pothe',
           translations: AppTranslations(),

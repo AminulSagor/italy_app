@@ -231,7 +231,7 @@ class SplashView extends GetView<SplashController> {
 
           Align(
             child: Container(
-              width: 282.w,
+              width: 270.w,
               padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
               decoration: BoxDecoration(
                 color: AppTheme.splashChipContainer,
@@ -246,22 +246,43 @@ class SplashView extends GetView<SplashController> {
                 ],
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  _ServiceChip(
+                  // Legacy implementation kept for quick revert.
+                  // _ServiceChip(
+                  //   icon: Icons.menu_book,
+                  //   label: 'splash_service_italian'.tr,
+                  //   active: true,
+                  // ),
+                  // _ServiceChip(
+                  //   icon: Icons.gavel,
+                  //   label: 'splash_service_caf'.tr,
+                  //   iconColor: AppTheme.splashChipCafIcon,
+                  // ),
+                  // _ServiceChip(
+                  //   icon: Icons.work,
+                  //   label: 'splash_service_cv'.tr,
+                  //   iconColor: AppTheme.splashChipCvIcon,
+                  // ),
+                  _ServiceChipHighlighted(
                     icon: Icons.menu_book,
                     label: 'splash_service_italian'.tr,
-                    active: true,
+                    iconColor: AppTheme.splashChipActiveIcon,
+                    iconBackground: AppTheme.splashChipActiveBg,
                   ),
-                  _ServiceChip(
+                  SizedBox(width: 23.w),
+                  _ServiceChipPlain(
                     icon: Icons.gavel,
                     label: 'splash_service_caf'.tr,
                     iconColor: AppTheme.splashChipCafIcon,
+                    iconBackground: AppTheme.splashChipInactiveBg,
                   ),
-                  _ServiceChip(
+                  SizedBox(width: 23.w),
+                  _ServiceChipPlain(
                     icon: Icons.work,
                     label: 'splash_service_cv'.tr,
                     iconColor: AppTheme.splashChipCvIcon,
+                    iconBackground: AppTheme.splashChipInactiveBg,
                   ),
                 ],
               ),
@@ -271,8 +292,8 @@ class SplashView extends GetView<SplashController> {
           SizedBox(height: 28.h),
 
           SizedBox(
-            width: double.infinity,
-            height: 52.h,
+            width: 270.w,
+            height: 60.h,
             child: ElevatedButton(
               onPressed: controller.onPrimaryButtonTap,
               style: ElevatedButton.styleFrom(
@@ -564,6 +585,71 @@ class _ServiceChip extends StatelessWidget {
           Text(label, style: AppTheme.splashServiceChipLabelStyle),
         ],
       ),
+    );
+  }
+}
+
+class _ServiceChipHighlighted extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color iconColor;
+  final Color iconBackground;
+
+  const _ServiceChipHighlighted({
+    required this.icon,
+    required this.label,
+    required this.iconColor,
+    required this.iconBackground,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
+      decoration: BoxDecoration(
+        color: AppTheme.splashChipCardBg,
+        borderRadius: BorderRadius.circular(36.r),
+      ),
+      child: _ServiceChipPlain(
+        icon: icon,
+        label: label,
+        iconColor: iconColor,
+        iconBackground: iconBackground,
+      ),
+    );
+  }
+}
+
+class _ServiceChipPlain extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color iconColor;
+  final Color iconBackground;
+
+  const _ServiceChipPlain({
+    required this.icon,
+    required this.label,
+    required this.iconColor,
+    required this.iconBackground,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Container(
+          width: 48.r,
+          height: 48.r,
+          decoration: BoxDecoration(
+            color: iconBackground,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 21.r, color: iconColor),
+        ),
+        SizedBox(height: 8.h),
+        Text(label, style: AppTheme.splashServiceChipLabelStyle),
+      ],
     );
   }
 }
