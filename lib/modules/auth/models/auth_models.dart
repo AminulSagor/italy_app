@@ -1,3 +1,6 @@
+//payload models will be updated according to api contract.
+// for now, these are just placeholders to allow development of UI
+// and flow without waiting for backend integration.
 class SignupPayloadModel {
   const SignupPayloadModel({
     required this.fullName,
