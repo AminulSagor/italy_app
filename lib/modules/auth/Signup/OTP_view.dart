@@ -109,8 +109,8 @@ class OtpView extends GetView<SignupController> {
                           'resend'.tr,
                             style: TextStyle(
                               color: AppTheme.primaryGreen,
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                   ),
@@ -174,7 +174,7 @@ class OtpView extends GetView<SignupController> {
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFFECEFF0),
-                  borderRadius: BorderRadius.circular(26.r),
+                  borderRadius: BorderRadius.circular(68.r),
                 ),
                 child: Row(
                   children: <Widget>[
@@ -209,8 +209,9 @@ class OtpView extends GetView<SignupController> {
                             'otp_security_desc'.tr,
                             style: TextStyle(
                               color: const Color(0xFF4E5255),
-                              fontSize: 15.sp,
+                              fontSize: 12.sp,
                               height: 1.3,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ],

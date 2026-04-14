@@ -56,32 +56,53 @@ class AccountCreatedView extends GetView<SignupController> {
               Obx(
                 () => Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 16.h,
-                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F2F2),
                     borderRadius: BorderRadius.circular(34.r),
                   ),
-                  child: Column(
-                    children: <Widget>[
-                      _buildInfoRow(
-                        icon: Icons.person_outline,
-                        iconBg: const Color(0xFFA9CCF0),
-                        title: 'field_full_name'.tr,
-                        value: controller.accountCreatedUi.value.fullName,
-                      ),
-                      SizedBox(height: 14.h),
-                      _buildInfoRow(
-                        icon: Icons.mail_outline,
-                        iconBg: const Color(0xFFC8E8B7),
-                        title: controller.form.value.isEmailMode
-                          ? 'field_email'.tr
-                          : 'field_phone'.tr,
-                        value: controller.accountCreatedUi.value.identifier,
-                      ),
-                    ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(34.r),
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned(
+                          top: -100.h,
+                          right: -70.w,
+                          child: Container(
+                            width: 160.w,
+                            height: 160.w,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFE4E8EB),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 16.h,
+                          ),
+                          child: Column(
+                            children: <Widget>[
+                              _buildInfoRow(
+                                icon: Icons.person_outline,
+                                iconBg: const Color(0xFFA9CCF0),
+                                title: 'field_full_name'.tr,
+                                value: controller.accountCreatedUi.value.fullName,
+                              ),
+                              SizedBox(height: 14.h),
+                              _buildInfoRow(
+                                icon: Icons.mail_outline,
+                                iconBg: const Color(0xFFC8E8B7),
+                                title: controller.form.value.isEmailMode
+                                  ? 'field_email'.tr
+                                  : 'field_phone'.tr,
+                                value: controller.accountCreatedUi.value.identifier,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
