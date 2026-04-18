@@ -33,8 +33,7 @@ class SplashView extends GetView<SplashController> {
                     title: 'splash_slide_1_title'.tr,
                     highlight: 'splash_slide_1_highlight'.tr,
                     titleSuffix: 'splash_slide_1_suffix'.tr,
-                    description:
-                      'splash_slide_1_desc'.tr,
+                    description: 'splash_slide_1_desc'.tr,
                   ),
                   _buildOnboardingPage(
                     context: context,
@@ -42,8 +41,7 @@ class SplashView extends GetView<SplashController> {
                     title: 'splash_slide_2_title'.tr,
                     highlight: 'splash_slide_2_highlight'.tr,
                     titleSuffix: 'splash_slide_2_suffix'.tr,
-                    description:
-                      'splash_slide_2_desc'.tr,
+                    description: 'splash_slide_2_desc'.tr,
                   ),
                   _buildOnboardingPage(
                     context: context,
@@ -51,8 +49,7 @@ class SplashView extends GetView<SplashController> {
                     title: 'splash_slide_3_title'.tr,
                     highlight: 'splash_slide_3_highlight'.tr,
                     titleSuffix: 'splash_slide_3_suffix'.tr,
-                    description:
-                      'splash_slide_3_desc'.tr,
+                    description: 'splash_slide_3_desc'.tr,
                   ),
                 ],
               ),
@@ -118,7 +115,10 @@ class SplashView extends GetView<SplashController> {
                                   ),
                                 ),
                                 SizedBox(width: 4.w),
-                                const Icon(Icons.arrow_forward, color: Colors.white),
+                                const Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                ),
                               ],
                             ),
                           ),
@@ -190,7 +190,11 @@ class SplashView extends GetView<SplashController> {
                   CircleAvatar(
                     radius: 13.r,
                     backgroundColor: AppTheme.primaryGreen,
-                    child: Icon(Icons.language, color: AppTheme.white, size: 14.r),
+                    child: Icon(
+                      Icons.language,
+                      color: AppTheme.white,
+                      size: 14.r,
+                    ),
                   ),
                   SizedBox(width: 8.w),
                   Text(
@@ -231,8 +235,9 @@ class SplashView extends GetView<SplashController> {
 
           Align(
             child: Container(
-              width: 270.w,
-              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
+              width: 263.w,
+              height: 142.h,
+              padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
                 color: AppTheme.splashChipContainer,
                 borderRadius: BorderRadius.circular(42.r),
@@ -246,7 +251,7 @@ class SplashView extends GetView<SplashController> {
                 ],
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   // Legacy implementation kept for quick revert.
                   // _ServiceChip(
@@ -270,14 +275,12 @@ class SplashView extends GetView<SplashController> {
                     iconColor: AppTheme.splashChipActiveIcon,
                     iconBackground: AppTheme.splashChipActiveBg,
                   ),
-                  SizedBox(width: 23.w),
                   _ServiceChipPlain(
                     icon: Icons.gavel,
                     label: 'splash_service_caf'.tr,
                     iconColor: AppTheme.splashChipCafIcon,
                     iconBackground: AppTheme.splashChipInactiveBg,
                   ),
-                  SizedBox(width: 23.w),
                   _ServiceChipPlain(
                     icon: Icons.work,
                     label: 'splash_service_cv'.tr,
@@ -409,7 +412,8 @@ class SplashView extends GetView<SplashController> {
   }) {
     final int imageIndex = (index - 1).clamp(0, _splashHeaderImages.length - 1);
     final TextStyle headlineLargeStyle =
-        Theme.of(context).textTheme.headlineLarge ?? AppTheme.splashHeadlineStyle;
+        Theme.of(context).textTheme.headlineLarge ??
+        AppTheme.splashHeadlineStyle;
 
     return Container(
       decoration: const BoxDecoration(
@@ -469,10 +473,7 @@ class SplashView extends GetView<SplashController> {
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(
-                  text: title,
-                  style: headlineLargeStyle,
-                ),
+                TextSpan(text: title, style: headlineLargeStyle),
                 TextSpan(
                   text: highlight,
                   style: headlineLargeStyle.copyWith(
@@ -480,10 +481,7 @@ class SplashView extends GetView<SplashController> {
                     fontStyle: FontStyle.italic,
                   ),
                 ),
-                TextSpan(
-                  text: titleSuffix,
-                  style: headlineLargeStyle,
-                ),
+                TextSpan(text: titleSuffix, style: headlineLargeStyle),
               ],
             ),
             textAlign: TextAlign.center,
@@ -604,18 +602,12 @@ class _ServiceChipHighlighted extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        color: AppTheme.splashChipCardBg,
-        borderRadius: BorderRadius.circular(36.r),
-      ),
-      child: _ServiceChipPlain(
-        icon: icon,
-        label: label,
-        iconColor: iconColor,
-        iconBackground: iconBackground,
-      ),
+    return _ServiceChipPlain(
+      icon: icon,
+      label: label,
+      iconColor: iconColor,
+      iconBackground: iconBackground,
+      backgroundColor: AppTheme.splashChipCardBg,
     );
   }
 }
@@ -625,31 +617,42 @@ class _ServiceChipPlain extends StatelessWidget {
   final String label;
   final Color iconColor;
   final Color iconBackground;
+  final Color backgroundColor;
 
   const _ServiceChipPlain({
     required this.icon,
     required this.label,
     required this.iconColor,
     required this.iconBackground,
+    this.backgroundColor = Colors.transparent,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Container(
-          width: 48.r,
-          height: 48.r,
-          decoration: BoxDecoration(
-            color: iconBackground,
-            shape: BoxShape.circle,
+    return Container(
+      height: 124.h,
+      width: 79.w,
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 18.h),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(36.r),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Container(
+            width: 48.r,
+            height: 48.r,
+            decoration: BoxDecoration(
+              color: iconBackground,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 21.r, color: iconColor),
           ),
-          child: Icon(icon, size: 21.r, color: iconColor),
-        ),
-        SizedBox(height: 8.h),
-        Text(label, style: AppTheme.splashServiceChipLabelStyle),
-      ],
+          SizedBox(height: 8.h),
+          Text(label, style: AppTheme.splashServiceChipLabelStyle),
+        ],
+      ),
     );
   }
 }
