@@ -95,6 +95,7 @@ class _HomeLoadedBody extends StatelessWidget {
           AiTutorCard(tutor: data.aiTutor),
           SizedBox(height: 28.h),
           DailyChallengesCard(challenges: data.dailyChallenges),
+          SizedBox(height: 60.h),
         ],
       ),
     );
