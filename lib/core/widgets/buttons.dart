@@ -12,6 +12,8 @@ class DarkGreenButton extends StatelessWidget {
   final bool showShadow;
   final bool isElevated;
   final IconData? icon;
+  final Color? primaryColor;
+  final Color? secondaryColor;
   const DarkGreenButton({
     super.key,
     required this.onPressed,
@@ -22,16 +24,13 @@ class DarkGreenButton extends StatelessWidget {
     this.showShadow = false,
     this.isElevated = false,
     this.icon,
+    this.primaryColor = AppTheme.primaryGreen,
+    this.secondaryColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final shadowDepth = showShadow ? 7.h : 0.0;
-    final darkShadowColor = Color.lerp(
-      AppTheme.primaryGreen,
-      Colors.black,
-      0.35,
-    )!;
 
     return SizedBox(
       width: width.w,
@@ -42,7 +41,9 @@ class DarkGreenButton extends StatelessWidget {
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  color: darkShadowColor,
+                  color:
+                      secondaryColor ??
+                      Color.lerp(primaryColor, Colors.black, 0.35)!,
                   borderRadius: BorderRadius.circular(30.r),
                 ),
               ),
@@ -57,9 +58,9 @@ class DarkGreenButton extends StatelessWidget {
               onPressed: isLoading ? null : onPressed,
               style: ElevatedButton.styleFrom(
                 elevation: isElevated ? 10 : 0,
-                shadowColor: AppTheme.primaryGreen.withAlpha(140),
-                backgroundColor: AppTheme.primaryGreen,
-                disabledBackgroundColor: AppTheme.primaryGreen.withAlpha(180),
+                shadowColor: primaryColor!.withAlpha(140),
+                backgroundColor: primaryColor,
+                disabledBackgroundColor: primaryColor!.withAlpha(180),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30.r),
                 ),
