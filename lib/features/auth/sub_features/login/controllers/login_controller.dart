@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '../../../core/services/storage_service.dart';
-import '../../../routes/routes.dart';
-import '../models/auth_models.dart';
-import 'login_models.dart';
+import '../../../../../core/services/storage_service.dart';
+import '../../../../../routes/routes.dart';
+import '../../../models/auth_models.dart';
+import '../models/login_models.dart';
 
 class LoginController extends GetxController {
   final StorageService _storageService = Get.find<StorageService>();
@@ -34,7 +34,9 @@ class LoginController extends GetxController {
 
   void setLanguage(String value) {
     final Locale locale = _localeFromLabel(value);
-    form.value = form.value.copyWith(selectedLanguage: _labelFromLocale(locale));
+    form.value = form.value.copyWith(
+      selectedLanguage: _labelFromLocale(locale),
+    );
     Get.updateLocale(locale);
   }
 
@@ -120,8 +122,11 @@ class LoginController extends GetxController {
   }
 
   void _syncSelectedLanguageWithLocale() {
-    final Locale locale = Get.locale ?? Get.deviceLocale ?? const Locale('en', 'US');
-    form.value = form.value.copyWith(selectedLanguage: _labelFromLocale(locale));
+    final Locale locale =
+        Get.locale ?? Get.deviceLocale ?? const Locale('en', 'US');
+    form.value = form.value.copyWith(
+      selectedLanguage: _labelFromLocale(locale),
+    );
   }
 
   void _onFormInputChanged() {

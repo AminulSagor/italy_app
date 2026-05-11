@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/themes/app_theme.dart';
-import 'signup_controller.dart';
+import '../../../../../core/themes/app_theme.dart';
+import '../controllers/signup_controller.dart';
 
 class AccountCreatedView extends GetView<SignupController> {
   const AccountCreatedView({super.key});
@@ -87,16 +87,20 @@ class AccountCreatedView extends GetView<SignupController> {
                                 icon: Icons.person_outline,
                                 iconBg: const Color(0xFFA9CCF0),
                                 title: 'field_full_name'.tr,
-                                value: controller.accountCreatedUi.value.fullName,
+                                value:
+                                    controller.accountCreatedUi.value.fullName,
                               ),
                               SizedBox(height: 14.h),
                               _buildInfoRow(
                                 icon: Icons.mail_outline,
                                 iconBg: const Color(0xFFC8E8B7),
                                 title: controller.form.value.isEmailMode
-                                  ? 'field_email'.tr
-                                  : 'field_phone'.tr,
-                                value: controller.accountCreatedUi.value.identifier,
+                                    ? 'field_email'.tr
+                                    : 'field_phone'.tr,
+                                value: controller
+                                    .accountCreatedUi
+                                    .value
+                                    .identifier,
                               ),
                             ],
                           ),

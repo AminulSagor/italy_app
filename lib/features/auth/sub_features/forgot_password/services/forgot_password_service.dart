@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../core/services/api_error_handler.dart';
-import 'forgot_password_models.dart';
+import '../../../../../core/services/api_error_handler.dart';
+import '../models/forgot_password_models.dart';
 
 class ForgotPasswordService {
   Future<ApiHandledResponse<ForgotPasswordRequestUiModel>> requestResetCode({

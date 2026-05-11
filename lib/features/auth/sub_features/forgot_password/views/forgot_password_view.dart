@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/themes/app_theme.dart';
-import 'forgot_password_controller.dart';
+import '../../../../../core/themes/app_theme.dart';
+import '../controllers/forgot_password_controller.dart';
 
 class ForgotPasswordView extends GetView<ForgotPasswordController> {
   const ForgotPasswordView({super.key});
@@ -160,7 +160,6 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
               size: 48.sp,
             ),
           ),
-          
         ],
       ),
     );

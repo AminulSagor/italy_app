@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/themes/app_theme.dart';
-import 'signup_controller.dart';
+import '../../../../../core/themes/app_theme.dart';
+import '../controllers/signup_controller.dart';
 
 class OtpView extends GetView<SignupController> {
   const OtpView({super.key});
@@ -36,9 +36,9 @@ class OtpView extends GetView<SignupController> {
                 child: Text(
                   'verify'.tr,
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        fontSize: 48.sp.clamp(28, 48),
-                        height: 1,
-                      ),
+                    fontSize: 48.sp.clamp(28, 48),
+                    height: 1,
+                  ),
                 ),
               ),
               SizedBox(height: 8.h),
@@ -106,7 +106,7 @@ class OtpView extends GetView<SignupController> {
                             ),
                           )
                         : Text(
-                          'resend'.tr,
+                            'resend'.tr,
                             style: TextStyle(
                               color: AppTheme.primaryGreen,
                               fontSize: 15.sp,
@@ -128,8 +128,9 @@ class OtpView extends GetView<SignupController> {
                         : controller.onOtpContinueTap,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryGreen,
-                      disabledBackgroundColor:
-                          AppTheme.primaryGreen.withValues(alpha: 0.6),
+                      disabledBackgroundColor: AppTheme.primaryGreen.withValues(
+                        alpha: 0.6,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(34.r),
                       ),
@@ -291,9 +292,7 @@ class OtpView extends GetView<SignupController> {
               shape: BoxShape.circle,
               color: const Color(0xFFF8F8F8),
               border: Border.all(
-                color: isFocused
-                    ? AppTheme.primaryGreen
-                    : Colors.transparent,
+                color: isFocused ? AppTheme.primaryGreen : Colors.transparent,
                 width: 1.6,
               ),
             ),
