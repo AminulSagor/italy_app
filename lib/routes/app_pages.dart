@@ -1,21 +1,21 @@
 import 'package:get/get.dart';
 
-import '../modules/auth/forgot_password/forgot_password_controller.dart';
-import '../modules/auth/forgot_password/forgot_password_otp_view.dart';
-import '../modules/auth/forgot_password/forgot_password_view.dart';
-import '../modules/auth/forgot_password/password_changed_view.dart';
-import '../modules/auth/forgot_password/reset_password_view.dart';
-import '../modules/auth/login/login_view.dart';
-import '../modules/auth/Signup/account_created.dart';
-import '../modules/auth/Signup/OTP_view.dart';
-import '../modules/auth/Signup/signup_controller.dart';
-import '../modules/auth/Signup/signup_view.dart';
-import '../modules/splash/splash_view.dart';
-import '../modules/splash/splash_controller.dart';
+import '../features/auth/sub_features/forgot_password/controllers/forgot_password_controller.dart';
+import '../features/auth/sub_features/forgot_password/views/forgot_password_otp_view.dart';
+import '../features/auth/sub_features/forgot_password/views/forgot_password_view.dart';
+import '../features/auth/sub_features/forgot_password/views/password_changed_view.dart';
+import '../features/auth/sub_features/forgot_password/views/reset_password_view.dart';
+import '../features/auth/sub_features/login/views/login_view.dart';
+import '../features/auth/sub_features/Signup/views/account_created.dart';
+import '../features/auth/sub_features/Signup/views/OTP_view.dart';
+import '../features/auth/sub_features/Signup/controllers/signup_controller.dart';
+import '../features/auth/sub_features/Signup/views/signup_view.dart';
+import '../features/splash/splash_view.dart';
+import '../features/splash/splash_controller.dart';
 import 'app_routes.dart';
 import '../core/bootstrap/app_bootstrap_view.dart';
 import '../core/bootstrap/app_bootstrap_controller.dart';
-import '../modules/auth/login/login_controller.dart';
+import '../features/auth/sub_features/login/controllers/login_controller.dart';
 
 class AppPages {
   AppPages._();

@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/themes/app_theme.dart';
-import 'forgot_password_controller.dart';
+import '../../../../../core/themes/app_theme.dart';
+import '../controllers/forgot_password_controller.dart';
 
 class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
   const ForgotPasswordOtpView({super.key});
@@ -147,7 +147,7 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
                             ),
                           )
                         : Text(
-                          'resend_code'.tr,
+                            'resend_code'.tr,
                             style: TextStyle(
                               color: AppTheme.primaryGreen,
                               fontSize: 19.sp,
@@ -179,7 +179,7 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
-        ]
+        ],
       ),
       child: Column(
         children: <Widget>[

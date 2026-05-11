@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/themes/app_theme.dart';
-import '../../../routes/routes.dart';
-import 'login_controller.dart';
+import '../../../../../core/themes/app_theme.dart';
+import '../../../../../routes/routes.dart';
+import '../controllers/login_controller.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
@@ -78,8 +78,8 @@ class LoginView extends StatelessWidget {
                                     ? Icons.alternate_email
                                     : Icons.phone_outlined,
                                 hint: isEmailMode
-                                  ? 'hint_email_login'.tr
-                                  : 'hint_phone'.tr,
+                                    ? 'hint_email_login'.tr
+                                    : 'hint_phone'.tr,
                                 keyboardType: isEmailMode
                                     ? TextInputType.emailAddress
                                     : TextInputType.phone,

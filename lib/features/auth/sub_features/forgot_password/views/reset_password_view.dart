@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/themes/app_theme.dart';
-import 'forgot_password_controller.dart';
-import 'forgot_password_models.dart';
+import '../../../../../core/themes/app_theme.dart';
+import '../controllers/forgot_password_controller.dart';
+import '../models/forgot_password_models.dart';
 
 class ResetPasswordView extends GetView<ForgotPasswordController> {
   const ResetPasswordView({super.key});
@@ -264,10 +264,7 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
             passed: reset.hasUppercaseAndNumber,
           ),
           SizedBox(height: 10.h),
-          _ChecklistItem(
-            label: 'check_match'.tr,
-            passed: reset.matchesConfirm,
-          ),
+          _ChecklistItem(label: 'check_match'.tr, passed: reset.matchesConfirm),
         ],
       ),
     );

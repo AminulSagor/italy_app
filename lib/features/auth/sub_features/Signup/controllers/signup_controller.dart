@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../routes/routes.dart';
-import '../models/auth_models.dart';
-import 'signup_models.dart';
+import '../../../../../routes/routes.dart';
+import '../../../models/auth_models.dart';
+import '../models/signup_models.dart';
 
 class SignupController extends GetxController {
   final Rx<SignupFormModel> form = SignupFormModel.initial().obs;

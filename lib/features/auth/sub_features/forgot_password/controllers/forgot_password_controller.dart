@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../routes/routes.dart';
-import 'forgot_password_models.dart';
-import 'forgot_password_service.dart';
+import '../../../../../routes/routes.dart';
+import '../models/forgot_password_models.dart';
+import '../services/forgot_password_service.dart';
 
 class ForgotPasswordController extends GetxController {
   ForgotPasswordController({ForgotPasswordService? service})
@@ -179,7 +179,10 @@ class ForgotPasswordController extends GetxController {
       );
 
       if (!result.success || result.data == null) {
-        Get.snackbar('snack_verification_failed'.tr, 'snack_check_code_retry'.tr);
+        Get.snackbar(
+          'snack_verification_failed'.tr,
+          'snack_check_code_retry'.tr,
+        );
         return;
       }
 

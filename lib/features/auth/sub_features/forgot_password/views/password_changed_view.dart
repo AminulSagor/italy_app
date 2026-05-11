@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/themes/app_theme.dart';
-import 'forgot_password_controller.dart';
+import '../../../../../core/themes/app_theme.dart';
+import '../controllers/forgot_password_controller.dart';
 
 class PasswordChangedView extends GetView<ForgotPasswordController> {
   const PasswordChangedView({super.key});
@@ -197,11 +197,16 @@ class PasswordChangedView extends GetView<ForgotPasswordController> {
                 borderRadius: BorderRadius.circular(24.r),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color.fromARGB(178, 104, 104, 104).withAlpha(100),
+                    color: const Color.fromARGB(
+                      178,
+                      104,
+                      104,
+                      104,
+                    ).withAlpha(100),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
-                ]
+                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -242,7 +247,7 @@ class PasswordChangedView extends GetView<ForgotPasswordController> {
           Container(
             width: 48.w,
             height: 32.w,
-            decoration:  BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xFFAAD2F6),
               borderRadius: BorderRadius.circular(20.r),
               //shape: BoxShape.circle,

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/themes/app_theme.dart';
-import 'signup_models.dart';
-import 'signup_controller.dart';
+import '../../../../../core/themes/app_theme.dart';
+import '../models/signup_models.dart';
+import '../controllers/signup_controller.dart';
 
 class SignupView extends GetView<SignupController> {
   const SignupView({super.key});
@@ -77,7 +77,7 @@ class SignupView extends GetView<SignupController> {
                       Obx(() {
                         final SignupFormModel form = controller.form.value;
                         final bool isEmailMode = form.isEmailMode;
-                            
+
                         return Column(
                           children: <Widget>[
                             _buildFieldLabel(
