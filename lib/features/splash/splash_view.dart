@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-
+import 'package:italir_pothe/core/widgets/buttons.dart';
 import '../../core/themes/app_theme.dart';
 import 'splash_controller.dart';
 
@@ -88,40 +88,15 @@ class SplashView extends GetView<SplashController> {
                           controller.currentPage.value,
                         ),
                         SizedBox(height: 20.h),
-                        SizedBox(
+                        DarkGreenButton(
+                          onPressed: controller.onPrimaryButtonTap,
+                          text: controller.isLastPage ? 'get_started' : 'next',
+                          height: 60,
                           width: double.infinity,
-                          height: 56.h,
-                          child: ElevatedButton(
-                            onPressed: controller.onPrimaryButtonTap,
-                            style: ElevatedButton.styleFrom(
-                              elevation: 10,
-                              shadowColor: AppTheme.primaryGreen.withAlpha(140),
-                              backgroundColor: AppTheme.primaryGreen,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30.r),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  controller.isLastPage
-                                      ? 'get_started'.tr
-                                      : 'next'.tr,
-                                  style: TextStyle(
-                                    fontSize: 22.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppTheme.white,
-                                  ),
-                                ),
-                                SizedBox(width: 4.w),
-                                const Icon(
-                                  Icons.arrow_forward,
-                                  color: Colors.white,
-                                ),
-                              ],
-                            ),
-                          ),
+                          isElevated: true,
+                          icon: controller.isLastPage
+                              ? null
+                              : Icons.arrow_forward,
                         ),
                         if (controller.isLastPage)
                           TextButton(
@@ -294,28 +269,13 @@ class SplashView extends GetView<SplashController> {
 
           SizedBox(height: 28.h),
 
-          SizedBox(
-            width: 270.w,
-            height: 60.h,
-            child: ElevatedButton(
-              onPressed: controller.onPrimaryButtonTap,
-              style: ElevatedButton.styleFrom(
-                elevation: 10,
-                shadowColor: AppTheme.primaryGreen.withAlpha(140),
-                backgroundColor: AppTheme.primaryGreen,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.r),
-                ),
-              ),
-              child: Text(
-                'splash_get_started'.tr,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppTheme.white,
-                ),
-              ),
-            ),
+          DarkGreenButton(
+            onPressed: controller.onPrimaryButtonTap,
+            text: 'splash_get_started',
+            height: 60,
+            width: 270,
+            isElevated: true,
+            //showShadow: false,
           ),
 
           SizedBox(height: 16.h),
