@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../core/themes/app_theme.dart';
-import '../../../core/widgets/app_home_bottom_navigation_bar.dart';
 import '../../../core/widgets/app_home_top_bar.dart';
 import '../controllers/home_controller.dart';
 import '../models/home_models.dart';
@@ -17,26 +16,15 @@ import '../widgets/quick_tools_section.dart';
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
-  static const List<AppBottomNavItem> _navItems = <AppBottomNavItem>[
-    AppBottomNavItem(icon: Icons.home_rounded, semanticLabel: 'Home'),
-    AppBottomNavItem(icon: Icons.menu_book_outlined, semanticLabel: 'Lessons'),
-    AppBottomNavItem(icon: Icons.auto_awesome_rounded, semanticLabel: 'AI Tutor'),
-    AppBottomNavItem(icon: Icons.emoji_events_outlined, semanticLabel: 'Progress'),
-    AppBottomNavItem(icon: Icons.handyman_outlined, semanticLabel: 'Tools'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Scaffold(
-        backgroundColor: AppTheme.homeBackground,
-        bottomNavigationBar: AppHomeBottomNavigationBar(
-          selectedIndex: controller.selectedNavIndex.value,
-          items: _navItems,
-          onTap: controller.onBottomNavTap,
-        ),
-        body: SafeArea(
-          child: controller.isLoading.value && controller.dashboard.value == null
+      () => Material(
+        color: AppTheme.homeBackground,
+        child: SafeArea(
+          top: false,
+          child:
+              controller.isLoading.value && controller.dashboard.value == null
               ? const _HomeLoadingState()
               : _HomeLoadedBody(dashboard: controller.dashboard.value),
         ),
@@ -54,9 +42,7 @@ class _HomeLoadingState extends StatelessWidget {
       child: SizedBox(
         width: AppTheme.homeLoadingSize.w,
         height: AppTheme.homeLoadingSize.w,
-        child: const CircularProgressIndicator(
-          color: AppTheme.primaryGreen,
-        ),
+        child: const CircularProgressIndicator(color: AppTheme.primaryGreen),
       ),
     );
   }
@@ -82,13 +68,13 @@ class _HomeLoadedBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          AppHomeTopBar(
-            greeting: data.user.greeting,
-            userName: data.user.displayName,
-            streakLabel: data.user.streakLabel,
-            notificationCount: data.user.notificationCount,
-            messageCount: data.user.messageCount,
-          ),
+          // AppHomeTopBar(
+          //   greeting: data.user.greeting,
+          //   userName: data.user.displayName,
+          //   streakLabel: data.user.streakLabel,
+          //   notificationCount: data.user.notificationCount,
+          //   messageCount: data.user.messageCount,
+          // ),
           SizedBox(height: 30.h),
           DailyOverviewSection(overview: data.overview),
           SizedBox(height: 24.h),
@@ -164,6 +150,10 @@ class _HomeLoadedBody extends StatelessWidget {
       body: '',
       actionLabel: '',
     ),
-    dailyChallenges: HomeDailyChallengesModel(label: '', completed: 0, total: 0),
+    dailyChallenges: HomeDailyChallengesModel(
+      label: '',
+      completed: 0,
+      total: 0,
+    ),
   );
 }

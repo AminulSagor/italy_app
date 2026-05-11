@@ -84,7 +84,7 @@ class AppTheme {
   static const double homeStreakHeight = 88;
   static const double homeTutorCardMinHeight = 260;
   static const double homeChallengeCardHeight = 136;
-  static const double homeBottomNavHeight = 72;
+  static const double homeBottomNavHeight = 60;
   static const double homeBottomNavIconBox = 64;
   static const double homeBottomNavOuterPadding = 12;
   static const double homeLoadingSize = 28;
@@ -269,11 +269,8 @@ class AppTheme {
     color: homePaleGreen,
   );
 
-  static TextStyle get homeWebinarTitleStyle => TextStyle(
-    fontSize: 22.sp,
-    fontWeight: FontWeight.w900,
-    color: white,
-  );
+  static TextStyle get homeWebinarTitleStyle =>
+      TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: white);
 
   static TextStyle get homeWebinarNameStyle => TextStyle(
     fontSize: 12.sp,
@@ -314,11 +311,8 @@ class AppTheme {
     color: white,
   );
 
-  static TextStyle get homeStreakSubtitleStyle => TextStyle(
-    fontSize: 13.sp,
-    fontWeight: FontWeight.w700,
-    color: white,
-  );
+  static TextStyle get homeStreakSubtitleStyle =>
+      TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: white);
 
   static TextStyle get homeAiEyebrowStyle => TextStyle(
     fontSize: 10.sp,
@@ -341,11 +335,8 @@ class AppTheme {
     color: homeSecondaryText,
   );
 
-  static TextStyle get homeChatButtonStyle => TextStyle(
-    fontSize: 18.sp,
-    fontWeight: FontWeight.w900,
-    color: white,
-  );
+  static TextStyle get homeChatButtonStyle =>
+      TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: white);
 
   static TextStyle get homeChallengeLabelStyle => TextStyle(
     fontSize: 11.sp,

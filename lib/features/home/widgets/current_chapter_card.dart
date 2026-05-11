@@ -18,7 +18,7 @@ class CurrentChapterCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: AppTheme.homeChapterCardHeight.h,
+      constraints: BoxConstraints(minHeight: AppTheme.homeChapterCardHeight.h),
       padding: EdgeInsets.fromLTRB(32.w, 28.h, 32.w, 26.h),
       decoration: BoxDecoration(
         gradient: AppTheme.homeChapterGradient,
@@ -32,12 +32,13 @@ class CurrentChapterCard extends StatelessWidget {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(chapter.eyebrow, style: AppTheme.homeChapterEyebrowStyle),
           SizedBox(height: 14.h),
           Text(chapter.title, style: AppTheme.homeChapterTitleStyle),
-          const Spacer(),
+          SizedBox(height: 18.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
@@ -55,7 +56,9 @@ class CurrentChapterCard extends StatelessWidget {
               minHeight: AppTheme.homeProgressHeight.h,
               value: chapter.progress,
               backgroundColor: AppTheme.homeProgressTrack,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.homeLime),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppTheme.homeLime,
+              ),
             ),
           ),
           SizedBox(height: 28.h),
@@ -69,13 +72,18 @@ class CurrentChapterCard extends StatelessWidget {
                 foregroundColor: AppTheme.primaryGreen,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.homePillRadius.r),
+                  borderRadius: BorderRadius.circular(
+                    AppTheme.homePillRadius.r,
+                  ),
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(chapter.buttonLabel, style: AppTheme.homePrimaryButtonStyle),
+                  Text(
+                    chapter.buttonLabel,
+                    style: AppTheme.homePrimaryButtonStyle,
+                  ),
                   SizedBox(width: 6.w),
                   Icon(
                     Icons.play_arrow_rounded,

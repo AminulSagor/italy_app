@@ -13,7 +13,9 @@ class CulturalTipCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(minHeight: AppTheme.homeCultureCardMinHeight.h),
+      constraints: BoxConstraints(
+        minHeight: AppTheme.homeCultureCardMinHeight.h,
+      ),
       padding: EdgeInsets.fromLTRB(22.w, 20.h, 24.w, 20.h),
       decoration: BoxDecoration(
         gradient: AppTheme.homeCultureGradient,
@@ -149,7 +151,9 @@ class AiTutorCard extends StatelessWidget {
                 elevation: 8,
                 shadowColor: AppTheme.homeCardShadow,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.homePillRadius.r),
+                  borderRadius: BorderRadius.circular(
+                    AppTheme.homePillRadius.r,
+                  ),
                 ),
               ),
               child: Row(
@@ -180,7 +184,9 @@ class DailyChallengesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: AppTheme.homeChallengeCardHeight.h,
+      constraints: BoxConstraints(
+        minHeight: AppTheme.homeChallengeCardHeight.h,
+      ),
       padding: EdgeInsets.fromLTRB(22.w, 18.h, 22.w, 20.h),
       decoration: BoxDecoration(
         color: AppTheme.white,
@@ -194,6 +200,7 @@ class DailyChallengesCard extends StatelessWidget {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
@@ -209,7 +216,7 @@ class DailyChallengesCard extends StatelessWidget {
               size: AppTheme.homeTopIconSize.w,
             ),
           ),
-          const Spacer(),
+          SizedBox(height: 12.h),
           Text(challenges.label, style: AppTheme.homeChallengeLabelStyle),
           SizedBox(height: 3.h),
           Text(challenges.valueLabel, style: AppTheme.homeChallengeValueStyle),

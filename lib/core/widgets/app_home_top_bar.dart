@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../themes/app_theme.dart';
 
-class AppHomeTopBar extends StatelessWidget {
+class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
+  @override
+  Size get preferredSize => Size.fromHeight(60.h);
   final String greeting;
   final String userName;
   final String streakLabel;
@@ -25,38 +27,52 @@ class AppHomeTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        _AvatarBadge(streakLabel: streakLabel),
-        SizedBox(width: 10.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+    return SafeArea(
+      child: Container(
+        color: AppTheme.homeBackground, // padding: const EdgeInsets.all(8.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+
+          child: Row(
             children: <Widget>[
-              Text(greeting, style: AppTheme.homeWelcomeLabelStyle),
-              SizedBox(height: 3.h),
-              Text(
-                userName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTheme.homeWelcomeNameStyle,
+              _AvatarBadge(streakLabel: streakLabel),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      greeting,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTheme.homeWelcomeLabelStyle,
+                    ),
+                    SizedBox(height: 3.h),
+                    Text(
+                      userName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTheme.homeWelcomeNameStyle,
+                    ),
+                  ],
+                ),
+              ),
+              _TopActionIcon(
+                icon: Icons.notifications_none_rounded,
+                badgeCount: notificationCount,
+                onTap: onNotificationTap,
+              ),
+              SizedBox(width: 16.w),
+              _TopActionIcon(
+                icon: Icons.chat_bubble_outline_rounded,
+                badgeCount: messageCount,
+                onTap: onMessageTap,
               ),
             ],
           ),
         ),
-        _TopActionIcon(
-          icon: Icons.notifications_none_rounded,
-          badgeCount: notificationCount,
-          onTap: onNotificationTap,
-        ),
-        SizedBox(width: 16.w),
-        _TopActionIcon(
-          icon: Icons.chat_bubble_outline_rounded,
-          badgeCount: messageCount,
-          onTap: onMessageTap,
-        ),
-      ],
+      ),
     );
   }
 }

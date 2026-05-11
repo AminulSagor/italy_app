@@ -91,7 +91,7 @@ class LoginController extends GetxController {
       const String dummyToken = 'dummy_auth_token';
       await _storageService.setLoggedInData(dummyToken);
       // Navigate to the home screen or dashboard after successful login
-      Get.offAllNamed(AppRoutes.home);
+      Get.offAllNamed(AppRoutes.wrapper);
     } finally {
       form.value = form.value.copyWith(isLoading: false);
     }

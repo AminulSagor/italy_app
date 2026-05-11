@@ -20,7 +20,9 @@ class QuickToolsSection extends StatelessWidget {
           children: List<Widget>.generate(tools.length, (int index) {
             return Expanded(
               child: Padding(
-                padding: EdgeInsets.only(right: index == tools.length - 1 ? 0 : 16.w),
+                padding: EdgeInsets.only(
+                  right: index == tools.length - 1 ? 0 : 16.w,
+                ),
                 child: _QuickToolCard(tool: tools[index]),
               ),
             );
@@ -39,13 +41,14 @@ class _QuickToolCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: AppTheme.homeToolCardHeight.h,
+      constraints: BoxConstraints(minHeight: AppTheme.homeToolCardHeight.h),
       padding: EdgeInsets.all(22.w),
       decoration: BoxDecoration(
         color: _cardColor(tool.tone),
         borderRadius: BorderRadius.circular(AppTheme.homeSmallCardRadius.r),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
@@ -61,7 +64,7 @@ class _QuickToolCard extends StatelessWidget {
               size: AppTheme.homeTopIconSize.w,
             ),
           ),
-          const Spacer(),
+          SizedBox(height: 16.h),
           Text(tool.title, style: AppTheme.homeToolTitleStyle),
           SizedBox(height: 3.h),
           Text(tool.subtitle, style: AppTheme.homeToolSubtitleStyle),

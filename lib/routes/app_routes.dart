@@ -12,4 +12,6 @@ class AppRoutes {
   static const String splash = '/splash';
   static const String bootstrap = '/bootstrap';
   static const String home = '/home';
+  static const String wrapper = '/wrapper';
+  static const String notifications = '/notifications';
 }

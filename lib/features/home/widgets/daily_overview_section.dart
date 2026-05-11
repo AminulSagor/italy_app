@@ -32,7 +32,10 @@ class DailyOverviewSection extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
-                Text(overview.totalTime, style: AppTheme.homeOverviewValueStyle),
+                Text(
+                  overview.totalTime,
+                  style: AppTheme.homeOverviewValueStyle,
+                ),
                 SizedBox(height: 2.h),
                 Text(
                   overview.totalTimeLabel,
@@ -48,13 +51,9 @@ class DailyOverviewSection extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: overview.activities
-                .map((HomeActivityModel activity) {
-                  return Expanded(
-                    child: _DailyActivityBar(activity: activity),
-                  );
-                })
-                .toList(),
+            children: overview.activities.map((HomeActivityModel activity) {
+              return Expanded(child: _DailyActivityBar(activity: activity));
+            }).toList(),
           ),
         ),
       ],
@@ -73,7 +72,7 @@ class _DailyActivityBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
         SizedBox(
-          height: AppTheme.homeChartHeight.h,
+          height: AppTheme.homeChartHeight.h - 1,
           child: Align(
             alignment: Alignment.bottomCenter,
             child: SizedBox(

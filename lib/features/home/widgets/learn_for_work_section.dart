@@ -22,7 +22,12 @@ class LearnForWorkSection extends StatelessWidget {
         Row(
           children: <Widget>[
             Expanded(
-              child: Text('Learn For Work', style: AppTheme.homeSectionTitleStyle),
+              child: Text(
+                'Learn For Work',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTheme.homeSectionTitleStyle,
+              ),
             ),
             InkWell(
               borderRadius: BorderRadius.circular(AppTheme.homePillRadius.r),
@@ -31,9 +36,16 @@ class LearnForWorkSection extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 7.h),
                 decoration: BoxDecoration(
                   color: AppTheme.homeGreenChip,
-                  borderRadius: BorderRadius.circular(AppTheme.homePillRadius.r),
+                  borderRadius: BorderRadius.circular(
+                    AppTheme.homePillRadius.r,
+                  ),
                 ),
-                child: Text('View All', style: AppTheme.homeActionChipStyle),
+                child: Text(
+                  'View All',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTheme.homeActionChipStyle,
+                ),
               ),
             ),
           ],

@@ -19,6 +19,8 @@ import 'app_routes.dart';
 import '../core/bootstrap/app_bootstrap_view.dart';
 import '../core/bootstrap/app_bootstrap_controller.dart';
 import '../features/auth/sub_features/login/controllers/login_controller.dart';
+import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
+import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_view.dart';
 
 class AppPages {
   AppPages._();
@@ -120,6 +122,16 @@ class AppPages {
         Get.lazyPut<HomeMockService>(() => HomeMockService());
         Get.lazyPut<HomeController>(
           () => HomeController(homeMockService: Get.find<HomeMockService>()),
+        );
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.wrapper,
+      page: () => const NavbarAndAppbarWrapper(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<NavbarAndAppbarWrapperController>(
+          () => NavbarAndAppbarWrapperController(),
         );
       }),
     ),

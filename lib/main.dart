@@ -3,16 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'core/bindings/initial_bindings.dart';
 import 'core/localization/app_translations.dart';
-import 'core/services/storage_service.dart';
 import 'core/themes/app_theme.dart';
 import 'routes/routes.dart';
+import 'core/bootstrap/app_bootstrap_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Get.putAsync<StorageService>(
-    () => StorageService().init(),
-    permanent: true,
-  );
+  await AppBootstrapController.init();
   runApp(ItalyApp(initialRoute: AppPages.initial));
 }
 
