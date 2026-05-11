@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../../../core/themes/app_theme.dart';
 import '../models/signup_models.dart';
 import '../controllers/signup_controller.dart';
+
+import '../../../../../core/themes/app_colors.dart';
+import '../../../../../core/themes/app_font.dart';
+import '../../../../../core/themes/app_constants.dart';
 
 class SignupView extends GetView<SignupController> {
   const SignupView({super.key});
@@ -12,7 +15,7 @@ class SignupView extends GetView<SignupController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
@@ -25,7 +28,7 @@ class SignupView extends GetView<SignupController> {
                     icon: Icon(
                       Icons.arrow_back_ios_new_rounded,
                       size: 19.sp,
-                      color: AppTheme.primaryGreen,
+                      color: AppColors.primaryGreen,
                     ),
                   ),
                   Expanded(child: Center(child: _buildLanguageSwitcher())),
@@ -38,7 +41,7 @@ class SignupView extends GetView<SignupController> {
               Text(
                 'welcome'.tr,
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontSize: 40.sp.clamp(28, 52),
+                  fontSize: AppFont.font40.sp.clamp(AppFont.font28, AppFont.font52).toDouble(),
                   height: 1,
                 ),
               ),
@@ -47,9 +50,9 @@ class SignupView extends GetView<SignupController> {
                 'signup_tagline'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: AppFont.font14.sp,
                   fontWeight: FontWeight.w500,
-                  color: AppTheme.bodyText,
+                  color: AppColors.bodyText,
                 ),
               ),
               SizedBox(height: 22.h),
@@ -57,8 +60,8 @@ class SignupView extends GetView<SignupController> {
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 18.h),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(42.r),
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(kRadius42.r),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -116,7 +119,7 @@ class SignupView extends GetView<SignupController> {
                               controller.form.value.obscurePassword
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
-                              color: const Color(0xFF666666),
+                              color: AppColors.legacyColorFF666666,
                             ),
                           ),
                         ),
@@ -125,7 +128,7 @@ class SignupView extends GetView<SignupController> {
                       Obx(
                         () => InkWell(
                           onTap: controller.toggleTermsAgreement,
-                          borderRadius: BorderRadius.circular(20.r),
+                          borderRadius: BorderRadius.circular(kRadius20.r),
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 4.h),
                             child: Row(
@@ -138,18 +141,18 @@ class SignupView extends GetView<SignupController> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: const Color(0xFFA2A2A2),
+                                      color: AppColors.legacyColorFFA2A2A2,
                                       width: 1.7,
                                     ),
                                     color: controller.form.value.agreedToTerms
-                                        ? AppTheme.primaryGreen
-                                        : Colors.transparent,
+                                        ? AppColors.primaryGreen
+                                        : AppColors.transparent,
                                   ),
                                   child: controller.form.value.agreedToTerms
                                       ? Icon(
                                           Icons.check,
                                           size: 14.sp,
-                                          color: Colors.white,
+                                          color: AppColors.white,
                                         )
                                       : null,
                                 ),
@@ -159,15 +162,15 @@ class SignupView extends GetView<SignupController> {
                                     TextSpan(
                                       text: 'terms_prefix'.tr,
                                       style: TextStyle(
-                                        fontSize: 15.sp,
+                                        fontSize: AppFont.font15.sp,
                                         fontWeight: FontWeight.w500,
-                                        color: const Color(0xFF4D5053),
+                                        color: AppColors.legacyColorFF4D5053,
                                       ),
                                       children: <InlineSpan>[
                                         TextSpan(
                                           text: 'terms_and_conditions'.tr,
                                           style: TextStyle(
-                                            color: AppTheme.primaryGreen,
+                                            color: AppColors.primaryGreen,
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -175,7 +178,7 @@ class SignupView extends GetView<SignupController> {
                                         TextSpan(
                                           text: 'privacy_policy'.tr,
                                           style: TextStyle(
-                                            color: AppTheme.primaryGreen,
+                                            color: AppColors.primaryGreen,
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -198,14 +201,14 @@ class SignupView extends GetView<SignupController> {
                                 ? null
                                 : controller.onCreateAccountTap,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryGreen,
-                              disabledBackgroundColor: AppTheme.primaryGreen
+                              backgroundColor: AppColors.primaryGreen,
+                              disabledBackgroundColor: AppColors.primaryGreen
                                   .withValues(alpha: 0.6),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(34.r),
+                                borderRadius: BorderRadius.circular(kRadius34.r),
                               ),
                               elevation: 10,
-                              shadowColor: AppTheme.primaryGreen.withAlpha(70),
+                              shadowColor: AppColors.primaryGreen.withAlpha(70),
                             ),
                             child: controller.form.value.isLoading
                                 ? SizedBox(
@@ -213,7 +216,7 @@ class SignupView extends GetView<SignupController> {
                                     width: 22.h,
                                     child: const CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: Colors.white,
+                                      color: AppColors.white,
                                     ),
                                   )
                                 : Row(
@@ -222,16 +225,16 @@ class SignupView extends GetView<SignupController> {
                                       Text(
                                         'create_account'.tr,
                                         style: TextStyle(
-                                          fontSize: 18.sp,
+                                          fontSize: AppFont.font18.sp,
                                           fontWeight: FontWeight.w700,
-                                          color: Colors.white,
+                                          color: AppColors.white,
                                         ),
                                       ),
                                       SizedBox(width: 8.w),
                                       Icon(
                                         Icons.arrow_forward,
                                         size: 20.sp,
-                                        color: Colors.white,
+                                        color: AppColors.white,
                                       ),
                                     ],
                                   ),
@@ -242,9 +245,9 @@ class SignupView extends GetView<SignupController> {
                       Text(
                         'already_have_account'.tr,
                         style: TextStyle(
-                          fontSize: 17.sp,
+                          fontSize: AppFont.font17.sp,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF5B5D60),
+                          color: AppColors.legacyColorFF5B5D60,
                         ),
                       ),
                       SizedBox(height: 6.h),
@@ -253,9 +256,9 @@ class SignupView extends GetView<SignupController> {
                         child: Text(
                           'log_in'.tr,
                           style: TextStyle(
-                            fontSize: 17.sp,
+                            fontSize: AppFont.font17.sp,
                             fontWeight: FontWeight.w800,
-                            color: AppTheme.primaryGreen,
+                            color: AppColors.primaryGreen,
                           ),
                         ),
                       ),
@@ -279,9 +282,9 @@ class SignupView extends GetView<SignupController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const <Widget>[
-                  _BottomDot(color: Color(0xFFCDE6BD)),
-                  _BottomDot(color: Color(0xFFD8DEE9)),
-                  _BottomDot(color: Color(0xFFEBD8B6)),
+                  _BottomDot(color: AppColors.legacyColorFFCDE6BD),
+                  _BottomDot(color: AppColors.legacyColorFFD8DEE9),
+                  _BottomDot(color: AppColors.legacyColorFFEBD8B6),
                 ],
               ),
             ],
@@ -297,8 +300,8 @@ class SignupView extends GetView<SignupController> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFD5D5D5),
-        borderRadius: BorderRadius.circular(26.r),
+        color: AppColors.legacyColorFFD5D5D5,
+        borderRadius: BorderRadius.circular(kRadius26.r),
       ),
       child: Obx(
         () => Row(
@@ -308,7 +311,7 @@ class SignupView extends GetView<SignupController> {
                 (String language) => Padding(
                   padding: EdgeInsets.symmetric(horizontal: 2.w),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(22.r),
+                    borderRadius: BorderRadius.circular(kRadius22.r),
                     onTap: () => controller.setLanguage(language),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
@@ -319,19 +322,19 @@ class SignupView extends GetView<SignupController> {
                       decoration: BoxDecoration(
                         color:
                             controller.form.value.selectedLanguage == language
-                            ? AppTheme.primaryGreen
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(18.r),
+                            ? AppColors.primaryGreen
+                            : AppColors.transparent,
+                        borderRadius: BorderRadius.circular(kRadius18.r),
                       ),
                       child: Text(
                         language,
                         style: TextStyle(
-                          fontSize: 13.sp,
+                          fontSize: AppFont.font13.sp,
                           fontWeight: FontWeight.w700,
                           color:
                               controller.form.value.selectedLanguage == language
-                              ? Colors.white
-                              : const Color(0xFF545454),
+                              ? AppColors.white
+                              : AppColors.legacyColorFF545454,
                         ),
                       ),
                     ),
@@ -349,11 +352,11 @@ class SignupView extends GetView<SignupController> {
       width: 110.w,
       height: 110.w,
       decoration: BoxDecoration(
-        color: const Color(0xFF7CEE3E),
-        borderRadius: BorderRadius.circular(38.r),
+        color: AppColors.legacyColorFF7CEE3E,
+        borderRadius: BorderRadius.circular(kRadius38.r),
         boxShadow: const <BoxShadow>[
           BoxShadow(
-            color: Color(0x22000000),
+            color: AppColors.legacyColor22000000,
             offset: Offset(0, 8),
             blurRadius: 12,
           ),
@@ -366,8 +369,8 @@ class SignupView extends GetView<SignupController> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFD0D1D2),
-        borderRadius: BorderRadius.circular(22.r),
+        color: AppColors.legacyColorFFD0D1D2,
+        borderRadius: BorderRadius.circular(kRadius22.r),
       ),
       child: Obx(
         () => Row(
@@ -400,21 +403,21 @@ class SignupView extends GetView<SignupController> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20.r),
+      borderRadius: BorderRadius.circular(kRadius20.r),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: EdgeInsets.symmetric(vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF0F0F0) : Colors.transparent,
-          borderRadius: BorderRadius.circular(18.r),
+          color: isSelected ? AppColors.legacyColorFFF0F0F0 : AppColors.transparent,
+          borderRadius: BorderRadius.circular(kRadius18.r),
         ),
         alignment: Alignment.center,
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 15.sp,
+            fontSize: AppFont.font15.sp,
             fontWeight: FontWeight.w700,
-            color: isSelected ? AppTheme.primaryGreen : const Color(0xFF5A5A5A),
+            color: isSelected ? AppColors.primaryGreen : AppColors.legacyColorFF5A5A5A,
           ),
         ),
       ),
@@ -427,10 +430,10 @@ class SignupView extends GetView<SignupController> {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 12.sp,
+          fontSize: AppFont.font12.sp,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.5,
-          color: const Color(0xFF67686A),
+          color: AppColors.legacyColorFF67686A,
         ),
       ),
     );
@@ -446,26 +449,26 @@ class SignupView extends GetView<SignupController> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F0),
-        borderRadius: BorderRadius.circular(28.r),
+        color: AppColors.legacyColorFFF0F0F0,
+        borderRadius: BorderRadius.circular(kRadius28.r),
       ),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         style: TextStyle(
-          fontSize: 16.sp,
+          fontSize: AppFont.font16.sp,
           fontWeight: FontWeight.w500,
-          color: const Color(0xFF3E4042),
+          color: AppColors.legacyColorFF3E4042,
         ),
         decoration: InputDecoration(
-          prefixIcon: Icon(prefix, color: const Color(0xFF676767), size: 23.sp),
+          prefixIcon: Icon(prefix, color: AppColors.legacyColorFF676767, size: 23.sp),
           suffixIcon: suffix,
           hintText: hint,
           hintStyle: TextStyle(
-            fontSize: 17.sp,
+            fontSize: AppFont.font17.sp,
             fontWeight: FontWeight.w500,
-            color: const Color(0xFFABABAB),
+            color: AppColors.legacyColorFFABABAB,
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
@@ -480,14 +483,14 @@ class SignupView extends GetView<SignupController> {
   Widget _buildBottomBadge(IconData icon, String label) {
     return Row(
       children: <Widget>[
-        Icon(icon, color: const Color(0xFF9A9B9C), size: 16.sp),
+        Icon(icon, color: AppColors.legacyColorFF9A9B9C, size: 16.sp),
         SizedBox(width: 5.w),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12.sp,
+            fontSize: AppFont.font12.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF9A9B9C),
+            color: AppColors.legacyColorFF9A9B9C,
           ),
         ),
       ],

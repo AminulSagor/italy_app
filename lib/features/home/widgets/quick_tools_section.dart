@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../core/themes/app_theme.dart';
 import '../models/home_models.dart';
+
+import '../../../core/themes/app_colors.dart';
+import '../../../core/themes/app_font.dart';
+import '../../../core/themes/app_constants.dart';
 
 class QuickToolsSection extends StatelessWidget {
   final List<HomeToolModel> tools;
@@ -14,7 +17,7 @@ class QuickToolsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Quick Tools', style: AppTheme.homeSectionTitleStyle),
+        Text('Quick Tools', style: TextStyle(fontSize: AppFont.font20.sp, fontWeight: FontWeight.w800, height: 1.1, color: AppColors.homePrimaryText)),
         SizedBox(height: 16.h),
         Row(
           children: List<Widget>.generate(tools.length, (int index) {
@@ -41,33 +44,33 @@ class _QuickToolCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(minHeight: AppTheme.homeToolCardHeight.h),
+      constraints: BoxConstraints(minHeight: kHomeToolCardHeight.h),
       padding: EdgeInsets.all(22.w),
       decoration: BoxDecoration(
         color: _cardColor(tool.tone),
-        borderRadius: BorderRadius.circular(AppTheme.homeSmallCardRadius.r),
+        borderRadius: BorderRadius.circular(kHomeSmallCardRadius.r),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            width: AppTheme.homeIconCircleSize.w,
-            height: AppTheme.homeIconCircleSize.w,
+            width: kHomeIconCircleSize.w,
+            height: kHomeIconCircleSize.w,
             decoration: const BoxDecoration(
-              color: AppTheme.white,
+              color: AppColors.white,
               shape: BoxShape.circle,
             ),
             child: Icon(
               _iconFor(tool.iconKey),
               color: _iconColor(tool.tone),
-              size: AppTheme.homeTopIconSize.w,
+              size: kHomeTopIconSize.w,
             ),
           ),
           SizedBox(height: 16.h),
-          Text(tool.title, style: AppTheme.homeToolTitleStyle),
+          Text(tool.title, style: TextStyle(fontSize: AppFont.font17.sp, fontWeight: FontWeight.w900, height: 1.05, color: AppColors.homePrimaryText)),
           SizedBox(height: 3.h),
-          Text(tool.subtitle, style: AppTheme.homeToolSubtitleStyle),
+          Text(tool.subtitle, style: TextStyle(fontSize: AppFont.font12.sp, fontWeight: FontWeight.w700, height: 1.2, color: AppColors.homeSecondaryText)),
         ],
       ),
     );
@@ -76,18 +79,18 @@ class _QuickToolCard extends StatelessWidget {
   Color _cardColor(HomeToolTone tone) {
     switch (tone) {
       case HomeToolTone.orange:
-        return AppTheme.homeOrange;
+        return AppColors.homeOrange;
       case HomeToolTone.blue:
-        return AppTheme.homeBlueCard;
+        return AppColors.homeBlueCard;
     }
   }
 
   Color _iconColor(HomeToolTone tone) {
     switch (tone) {
       case HomeToolTone.orange:
-        return AppTheme.homeBrownIcon;
+        return AppColors.homeBrownIcon;
       case HomeToolTone.blue:
-        return AppTheme.homeBlueIcon;
+        return AppColors.homeBlueIcon;
     }
   }
 

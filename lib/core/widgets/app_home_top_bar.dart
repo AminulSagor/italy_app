@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../themes/app_theme.dart';
+
+import '../themes/app_colors.dart';
+import '../themes/app_font.dart';
+import '../themes/app_constants.dart';
 
 class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
   @override
@@ -29,7 +32,7 @@ class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        color: AppTheme.homeBackground, // padding: const EdgeInsets.all(8.0),
+        color: AppColors.homeBackground, // padding: const EdgeInsets.all(8.0),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0),
 
@@ -46,14 +49,14 @@ class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
                       greeting,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTheme.homeWelcomeLabelStyle,
+                      style: TextStyle(fontSize: AppFont.font11.sp, fontWeight: FontWeight.w600, color: AppColors.homeSecondaryText),
                     ),
                     SizedBox(height: 3.h),
                     Text(
                       userName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTheme.homeWelcomeNameStyle,
+                      style: TextStyle(fontSize: AppFont.font18.sp, fontWeight: FontWeight.w800, height: 1, color: AppColors.primaryGreen),
                     ),
                   ],
                 ),
@@ -85,28 +88,28 @@ class _AvatarBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: (AppTheme.homeAvatarSize + 10).w,
-      height: (AppTheme.homeAvatarSize + 8).w,
+      width: (kHomeAvatarSize + 10).w,
+      height: (kHomeAvatarSize + 8).w,
       child: Stack(
         clipBehavior: Clip.none,
         children: <Widget>[
           Container(
-            width: AppTheme.homeAvatarSize.w,
-            height: AppTheme.homeAvatarSize.w,
+            width: kHomeAvatarSize.w,
+            height: kHomeAvatarSize.w,
             padding: EdgeInsets.all(3.w),
             decoration: const BoxDecoration(
-              color: AppTheme.homeLime,
+              color: AppColors.homeLime,
               shape: BoxShape.circle,
             ),
             child: Container(
               decoration: const BoxDecoration(
-                color: AppTheme.white,
+                color: AppColors.white,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.person_rounded,
-                size: AppTheme.homeTopIconSize.w,
-                color: AppTheme.primaryGreen,
+                size: kHomeTopIconSize.w,
+                color: AppColors.primaryGreen,
               ),
             ),
           ),
@@ -114,14 +117,14 @@ class _AvatarBadge extends StatelessWidget {
             right: 0,
             bottom: 0,
             child: Container(
-              height: AppTheme.homeTinyBadgeSize.h,
+              height: kHomeTinyBadgeSize.h,
               padding: EdgeInsets.symmetric(horizontal: 7.w),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: AppTheme.homeLime,
-                borderRadius: BorderRadius.circular(AppTheme.homePillRadius.r),
+                color: AppColors.homeLime,
+                borderRadius: BorderRadius.circular(kHomePillRadius.r),
               ),
-              child: Text(streakLabel, style: AppTheme.homeActionChipStyle),
+              child: Text(streakLabel, style: TextStyle(fontSize: AppFont.font12.sp, fontWeight: FontWeight.w900, color: AppColors.primaryGreen)),
             ),
           ),
         ],
@@ -144,19 +147,19 @@ class _TopActionIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(AppTheme.homePillRadius.r),
+      borderRadius: BorderRadius.circular(kHomePillRadius.r),
       onTap: onTap,
       child: SizedBox(
-        width: AppTheme.homeIconCircleSize.w,
-        height: AppTheme.homeIconCircleSize.w,
+        width: kHomeIconCircleSize.w,
+        height: kHomeIconCircleSize.w,
         child: Stack(
           alignment: Alignment.center,
           clipBehavior: Clip.none,
           children: <Widget>[
             Icon(
               icon,
-              size: AppTheme.homeTopIconSize.w,
-              color: AppTheme.primaryGreen,
+              size: kHomeTopIconSize.w,
+              color: AppColors.primaryGreen,
             ),
             if (badgeCount > 0)
               Positioned(
@@ -166,9 +169,9 @@ class _TopActionIcon extends StatelessWidget {
                   width: 9.w,
                   height: 9.w,
                   decoration: BoxDecoration(
-                    color: AppTheme.homeNotificationRed,
+                    color: AppColors.homeNotificationRed,
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppTheme.white, width: 1.6.w),
+                    border: Border.all(color: AppColors.white, width: 1.6.w),
                   ),
                 ),
               ),
@@ -181,14 +184,14 @@ class _TopActionIcon extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 6.w),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: AppTheme.homeNotificationRed,
+                    color: AppColors.homeNotificationRed,
                     borderRadius: BorderRadius.circular(
-                      AppTheme.homePillRadius.r,
+                      kHomePillRadius.r,
                     ),
                   ),
                   child: Text(
                     badgeCount.toString(),
-                    style: AppTheme.homeWebinarBadgeStyle,
+                    style: TextStyle(fontSize: AppFont.font9.sp, fontWeight: FontWeight.w900, letterSpacing: 1.0, color: AppColors.homePaleGreen),
                   ),
                 ),
               ),

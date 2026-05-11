@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../core/themes/app_theme.dart';
 import '../models/home_models.dart';
+
+import '../../../core/themes/app_colors.dart';
+import '../../../core/themes/app_font.dart';
+import '../../../core/themes/app_constants.dart';
 
 class LearnForWorkSection extends StatelessWidget {
   final List<HomeWorkItemModel> items;
@@ -26,25 +29,25 @@ class LearnForWorkSection extends StatelessWidget {
                 'Learn For Work',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTheme.homeSectionTitleStyle,
+                style: TextStyle(fontSize: AppFont.font20.sp, fontWeight: FontWeight.w800, height: 1.1, color: AppColors.homePrimaryText),
               ),
             ),
             InkWell(
-              borderRadius: BorderRadius.circular(AppTheme.homePillRadius.r),
+              borderRadius: BorderRadius.circular(kHomePillRadius.r),
               onTap: onViewAllTap,
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 7.h),
                 decoration: BoxDecoration(
-                  color: AppTheme.homeGreenChip,
+                  color: AppColors.homeGreenChip,
                   borderRadius: BorderRadius.circular(
-                    AppTheme.homePillRadius.r,
+                    kHomePillRadius.r,
                   ),
                 ),
                 child: Text(
                   'View All',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTheme.homeActionChipStyle,
+                  style: TextStyle(fontSize: AppFont.font12.sp, fontWeight: FontWeight.w900, color: AppColors.primaryGreen),
                 ),
               ),
             ),
@@ -78,14 +81,14 @@ class _WorkChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: AppTheme.homeWorkChipHeight.h,
+      height: kHomeWorkChipHeight.h,
       padding: EdgeInsets.symmetric(horizontal: 22.w),
       decoration: BoxDecoration(
-        color: AppTheme.white,
-        borderRadius: BorderRadius.circular(AppTheme.homePillRadius.r),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(kHomePillRadius.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppTheme.homeNeutralShadow,
+            color: AppColors.homeNeutralShadow,
             blurRadius: 14.r,
             offset: Offset(0, 5.h),
           ),
@@ -94,9 +97,9 @@ class _WorkChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text(item.emoji, style: AppTheme.homeWorkChipStyle),
+          Text(item.emoji, style: TextStyle(fontSize: AppFont.font14.sp, fontWeight: FontWeight.w800, color: AppColors.homePrimaryText)),
           SizedBox(width: 6.w),
-          Text(item.title, style: AppTheme.homeWorkChipStyle),
+          Text(item.title, style: TextStyle(fontSize: AppFont.font14.sp, fontWeight: FontWeight.w800, color: AppColors.homePrimaryText)),
         ],
       ),
     );

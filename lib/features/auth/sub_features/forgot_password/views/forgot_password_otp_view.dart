@@ -3,8 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../../../core/themes/app_theme.dart';
 import '../controllers/forgot_password_controller.dart';
+
+import '../../../../../core/themes/app_colors.dart';
+import '../../../../../core/themes/app_font.dart';
+import '../../../../../core/themes/app_constants.dart';
 
 class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
   const ForgotPasswordOtpView({super.key});
@@ -12,7 +15,7 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
@@ -23,7 +26,7 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
                 onPressed: controller.onBackTap,
                 icon: Icon(
                   Icons.arrow_back,
-                  color: AppTheme.primaryGreen,
+                  color: AppColors.primaryGreen,
                   size: 23.sp,
                 ),
               ),
@@ -34,7 +37,7 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
               //   child: Text(
               //     'Verify Code',
               //     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              //       fontSize: 46.sp.clamp(30, 50),
+              //       fontSize: AppFont.font46.sp.clamp(AppFont.font30, AppFont.font50).toDouble(),
               //       height: 1,
               //     ),
               //   ),
@@ -44,8 +47,8 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
               //   child: Text(
               //     'Enter the 4-digit code sent to',
               //     style: TextStyle(
-              //       color: AppTheme.bodyText,
-              //       fontSize: 18.sp,
+              //       color: AppColors.bodyText,
+              //       fontSize: AppFont.font18.sp,
               //       fontWeight: FontWeight.w500,
               //     ),
               //   ),
@@ -56,8 +59,8 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
               //     () => Text(
               //       controller.otpUi.value.maskedIdentifier,
               //       style: TextStyle(
-              //         color: const Color(0xFF2F3337),
-              //         fontSize: 20.sp,
+              //         color: AppColors.headerText,
+              //         fontSize: AppFont.font20.sp,
               //         fontWeight: FontWeight.w800,
               //       ),
               //     ),
@@ -78,15 +81,15 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
                         ? null
                         : controller.onVerifyCodeTap,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryGreen,
-                      disabledBackgroundColor: AppTheme.primaryGreen.withValues(
+                      backgroundColor: AppColors.primaryGreen,
+                      disabledBackgroundColor: AppColors.primaryGreen.withValues(
                         alpha: 0.6,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(34.r),
+                        borderRadius: BorderRadius.circular(kRadius34.r),
                       ),
                       elevation: 10,
-                      shadowColor: AppTheme.primaryGreen.withAlpha(70),
+                      shadowColor: AppColors.primaryGreen.withAlpha(70),
                     ),
                     child: controller.otpUi.value.isVerifying
                         ? SizedBox(
@@ -94,7 +97,7 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
                             height: 22.w,
                             child: const CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           )
                         : Row(
@@ -103,15 +106,15 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
                               Text(
                                 'verify_continue'.tr,
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18.sp,
+                                  color: AppColors.white,
+                                  fontSize: AppFont.font18.sp,
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
                               SizedBox(width: 9.w),
                               Icon(
                                 Icons.arrow_forward,
-                                color: Colors.white,
+                                color: AppColors.white,
                                 size: 21.sp,
                               ),
                             ],
@@ -124,8 +127,8 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
                 child: Text(
                   'fp_otp_didnt_receive'.tr,
                   style: TextStyle(
-                    color: const Color(0xFF5A5D61),
-                    fontSize: 16.sp,
+                    color: AppColors.legacyColorFF5A5D61,
+                    fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -143,14 +146,14 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
                             height: 18.w,
                             child: const CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppTheme.primaryGreen,
+                              color: AppColors.primaryGreen,
                             ),
                           )
                         : Text(
                             'resend_code'.tr,
                             style: TextStyle(
-                              color: AppTheme.primaryGreen,
-                              fontSize: 19.sp,
+                              color: AppColors.primaryGreen,
+                              fontSize: AppFont.font19.sp,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -171,8 +174,8 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFE7E8E8),
-        borderRadius: BorderRadius.circular(38.r),
+        color: AppColors.legacyColorFFE7E8E8,
+        borderRadius: BorderRadius.circular(kRadius38.r),
         boxShadow: [
           BoxShadow(
             color: const Color.fromARGB(255, 152, 156, 160).withAlpha(50),
@@ -187,12 +190,12 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
             width: 82.w,
             height: 82.w,
             decoration: const BoxDecoration(
-              color: Color(0xFF76EC37),
+              color: AppColors.legacyColorFF76EC37,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.mark_email_unread,
-              color: AppTheme.primaryGreen,
+              color: AppColors.primaryGreen,
               size: 38.sp,
             ),
           ),
@@ -201,7 +204,7 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
             'verify_code'.tr,
             style: Theme.of(
               context,
-            ).textTheme.headlineLarge?.copyWith(fontSize: 28.sp, height: 1),
+            ).textTheme.headlineLarge?.copyWith(fontSize: AppFont.font28.sp, height: 1),
           ),
           SizedBox(height: 10.h),
           Text(
@@ -210,8 +213,8 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
                 : 'fp_otp_hero_desc_phone'.tr,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: AppTheme.bodyText,
-              fontSize: 15.sp,
+              color: AppColors.bodyText,
+              fontSize: AppFont.font15.sp,
               fontWeight: FontWeight.w900,
               height: 1.35,
             ),
@@ -234,9 +237,9 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 199, 199, 199),
-              borderRadius: BorderRadius.circular(36.r),
+              borderRadius: BorderRadius.circular(kRadius36.r),
               border: Border.all(
-                color: isFocused ? AppTheme.primaryGreen : Colors.transparent,
+                color: isFocused ? AppColors.primaryGreen : AppColors.transparent,
                 width: 1.6,
               ),
             ),
@@ -251,8 +254,8 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
                 LengthLimitingTextInputFormatter(1),
               ],
               style: TextStyle(
-                color: const Color(0xFF626C7B),
-                fontSize: 30.sp,
+                color: AppColors.legacyColorFF626C7B,
+                fontSize: AppFont.font30.sp,
                 fontWeight: FontWeight.w800,
               ),
               decoration: const InputDecoration(
@@ -275,20 +278,20 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFD3E2F4),
-        borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(color: const Color(0xFFBCD4EF)),
+        color: AppColors.legacyColorFFD3E2F4,
+        borderRadius: BorderRadius.circular(kRadius28.r),
+        border: Border.all(color: AppColors.legacyColorFFBCD4EF),
       ),
       child: Row(
         children: <Widget>[
-          Icon(Icons.info, color: const Color(0xFF0B5B9A), size: 25.sp),
+          Icon(Icons.info, color: AppColors.legacyColorFF0B5B9A, size: 25.sp),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
               'fp_otp_info'.tr,
               style: TextStyle(
-                color: const Color(0xFF0B4A7D),
-                fontSize: 15.sp,
+                color: AppColors.legacyColorFF0B4A7D,
+                fontSize: AppFont.font15.sp,
                 fontWeight: FontWeight.w500,
                 height: 1.35,
               ),

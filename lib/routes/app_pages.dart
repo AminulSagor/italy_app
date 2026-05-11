@@ -13,6 +13,9 @@ import '../features/auth/sub_features/Signup/views/signup_view.dart';
 import '../features/home/controllers/home_controller.dart';
 import '../features/home/services/home_mock_service.dart';
 import '../features/home/views/home_view.dart';
+import '../features/messages/controllers/messages_controller.dart';
+import '../features/messages/services/messages_mock_service.dart';
+import '../features/notifications/services/notifications_mock_service.dart';
 import '../features/splash/splash_view.dart';
 import '../features/splash/splash_controller.dart';
 import 'app_routes.dart';
@@ -130,6 +133,19 @@ class AppPages {
       name: AppRoutes.wrapper,
       page: () => const NavbarAndAppbarWrapper(),
       binding: BindingsBuilder(() {
+        if (!Get.isRegistered<MessagesMockService>()) {
+          Get.lazyPut<MessagesMockService>(() => MessagesMockService());
+        }
+        if (!Get.isRegistered<MessagesController>()) {
+          Get.lazyPut<MessagesController>(
+            () => MessagesController(
+              messagesMockService: Get.find<MessagesMockService>(),
+            ),
+          );
+        }
+        if (!Get.isRegistered<NotificationsMockService>()) {
+          Get.lazyPut<NotificationsMockService>(() => NotificationsMockService());
+        }
         Get.lazyPut<NavbarAndAppbarWrapperController>(
           () => NavbarAndAppbarWrapperController(),
         );

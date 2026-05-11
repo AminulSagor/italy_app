@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/themes/app_theme.dart';
 import '../../../core/widgets/app_home_top_bar.dart';
 import '../controllers/home_controller.dart';
 import '../models/home_models.dart';
@@ -13,6 +12,9 @@ import '../widgets/home_info_cards.dart';
 import '../widgets/learn_for_work_section.dart';
 import '../widgets/quick_tools_section.dart';
 
+import '../../../core/themes/app_colors.dart';
+import '../../../core/themes/app_constants.dart';
+
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
@@ -20,7 +22,7 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Obx(
       () => Material(
-        color: AppTheme.homeBackground,
+        color: AppColors.homeBackground,
         child: SafeArea(
           top: false,
           child:
@@ -40,9 +42,9 @@ class _HomeLoadingState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
-        width: AppTheme.homeLoadingSize.w,
-        height: AppTheme.homeLoadingSize.w,
-        child: const CircularProgressIndicator(color: AppTheme.primaryGreen),
+        width: kHomeLoadingSize.w,
+        height: kHomeLoadingSize.w,
+        child: const CircularProgressIndicator(color: AppColors.primaryGreen),
       ),
     );
   }
@@ -60,9 +62,9 @@ class _HomeLoadedBody extends StatelessWidget {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(
-        AppTheme.homeHorizontalPadding.w,
+        kHomeHorizontalPadding.w,
         16.h,
-        AppTheme.homeHorizontalPadding.w,
+        kHomeHorizontalPadding.w,
         20.h,
       ),
       child: Column(
@@ -79,9 +81,9 @@ class _HomeLoadedBody extends StatelessWidget {
           DailyOverviewSection(overview: data.overview),
           SizedBox(height: 24.h),
           CurrentChapterCard(chapter: data.currentChapter),
-          SizedBox(height: AppTheme.homeSectionSpacing.h),
+          SizedBox(height: kHomeSectionSpacing.h),
           QuickToolsSection(tools: data.quickTools),
-          SizedBox(height: AppTheme.homeSectionSpacing.h),
+          SizedBox(height: kHomeSectionSpacing.h),
           LearnForWorkSection(items: data.workItems),
           SizedBox(height: 26.h),
           SupportCommunityCard(support: data.support),

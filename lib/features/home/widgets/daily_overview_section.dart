@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../core/themes/app_theme.dart';
 import '../models/home_models.dart';
+
+import '../../../core/themes/app_colors.dart';
+import '../../../core/themes/app_font.dart';
+import '../../../core/themes/app_constants.dart';
 
 class DailyOverviewSection extends StatelessWidget {
   final HomeOverviewModel overview;
@@ -20,11 +23,11 @@ class DailyOverviewSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(overview.title, style: AppTheme.homeSectionTitleStyle),
+                  Text(overview.title, style: TextStyle(fontSize: AppFont.font20.sp, fontWeight: FontWeight.w800, height: 1.1, color: AppColors.homePrimaryText)),
                   SizedBox(height: 4.h),
                   Text(
                     overview.subtitle,
-                    style: AppTheme.homeSectionSubtitleStyle,
+                    style: TextStyle(fontSize: AppFont.font12.sp, fontWeight: FontWeight.w500, height: 1.2, color: AppColors.homeSecondaryText),
                   ),
                 ],
               ),
@@ -34,12 +37,12 @@ class DailyOverviewSection extends StatelessWidget {
               children: <Widget>[
                 Text(
                   overview.totalTime,
-                  style: AppTheme.homeOverviewValueStyle,
+                  style: TextStyle(fontSize: AppFont.font24.sp, fontWeight: FontWeight.w900, height: 1, color: AppColors.primaryGreen),
                 ),
                 SizedBox(height: 2.h),
                 Text(
                   overview.totalTimeLabel,
-                  style: AppTheme.homeOverviewUnitStyle,
+                  style: TextStyle(fontSize: AppFont.font9.sp, fontWeight: FontWeight.w900, letterSpacing: 1.1, color: AppColors.homeSecondaryText),
                 ),
               ],
             ),
@@ -47,7 +50,7 @@ class DailyOverviewSection extends StatelessWidget {
         ),
         SizedBox(height: 10.h),
         SizedBox(
-          height: (AppTheme.homeChartHeight + 24).h,
+          height: (kHomeChartHeight + 24).h,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -72,7 +75,7 @@ class _DailyActivityBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
         SizedBox(
-          height: AppTheme.homeChartHeight.h - 1,
+          height: kHomeChartHeight.h - 1,
           child: Align(
             alignment: Alignment.bottomCenter,
             child: SizedBox(
@@ -85,9 +88,9 @@ class _DailyActivityBar extends StatelessWidget {
                     width: 42.w,
                     height: activity.trackHeight.h,
                     decoration: BoxDecoration(
-                      color: AppTheme.homeBarTrack,
+                      color: AppColors.homeBarTrack,
                       borderRadius: BorderRadius.circular(
-                        AppTheme.homePillRadius.r,
+                        kHomePillRadius.r,
                       ),
                     ),
                   ),
@@ -97,7 +100,7 @@ class _DailyActivityBar extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: _barColor(activity.tone),
                       borderRadius: BorderRadius.circular(
-                        AppTheme.homePillRadius.r,
+                        kHomePillRadius.r,
                       ),
                     ),
                   ),
@@ -109,10 +112,10 @@ class _DailyActivityBar extends StatelessWidget {
         SizedBox(height: 10.h),
         Text(
           activity.dayLabel,
-          style: AppTheme.homeChartAxisStyle.copyWith(
+          style: TextStyle(fontSize: AppFont.font10.sp, fontWeight: FontWeight.w900, color: AppColors.homeSecondaryText).copyWith(
             color: activity.isSelected
-                ? AppTheme.primaryGreen
-                : AppTheme.homeSecondaryText,
+                ? AppColors.primaryGreen
+                : AppColors.homeSecondaryText,
           ),
         ),
       ],
@@ -122,13 +125,13 @@ class _DailyActivityBar extends StatelessWidget {
   Color _barColor(HomeActivityTone tone) {
     switch (tone) {
       case HomeActivityTone.primary:
-        return AppTheme.primaryGreen;
+        return AppColors.primaryGreen;
       case HomeActivityTone.lime:
-        return AppTheme.homeBarPale;
+        return AppColors.homeBarPale;
       case HomeActivityTone.muted:
-        return AppTheme.homeSoftGreen;
+        return AppColors.homeSoftGreen;
       case HomeActivityTone.soft:
-        return AppTheme.homeBarLight;
+        return AppColors.homeBarLight;
     }
   }
 }
