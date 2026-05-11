@@ -10,6 +10,9 @@ import '../features/auth/sub_features/Signup/views/account_created.dart';
 import '../features/auth/sub_features/Signup/views/OTP_view.dart';
 import '../features/auth/sub_features/Signup/controllers/signup_controller.dart';
 import '../features/auth/sub_features/Signup/views/signup_view.dart';
+import '../features/home/controllers/home_controller.dart';
+import '../features/home/services/home_mock_service.dart';
+import '../features/home/views/home_view.dart';
 import '../features/splash/splash_view.dart';
 import '../features/splash/splash_controller.dart';
 import 'app_routes.dart';
@@ -107,6 +110,17 @@ class AppPages {
       page: () => const AppBootstrapView(),
       binding: BindingsBuilder(() {
         Get.put<AppBootstrapController>(AppBootstrapController());
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.home,
+      page: () => const HomeView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<HomeMockService>(() => HomeMockService());
+        Get.lazyPut<HomeController>(
+          () => HomeController(homeMockService: Get.find<HomeMockService>()),
+        );
       }),
     ),
   ];
