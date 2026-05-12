@@ -21,6 +21,7 @@ class CustomButton extends StatefulWidget {
   final double borderRadius;
   final double borderWidth;
   final Color textColor;
+  final double textSize;
 
   const CustomButton({
     super.key,
@@ -38,6 +39,7 @@ class CustomButton extends StatefulWidget {
     this.borderRadius = kButtonDefaultRadius,
     this.borderWidth = kButtonBorderWidth,
     this.textColor = AppColors.white,
+    this.textSize = AppFont.font20,
   });
 
   const CustomButton.primary({
@@ -52,10 +54,11 @@ class CustomButton extends StatefulWidget {
     this.borderColor = AppColors.primaryBtnColor,
     this.borderRadius = kButtonDefaultRadius,
     this.borderWidth = kButtonBorderWidth,
-    this.textColor = AppColors.white,
-  })  : height = kButtonDefaultHeight,
-        width = double.infinity,
-        showShadow = true;
+    this.textColor = AppColors.limeTextColor,
+    this.textSize = AppFont.font20,
+  }) : height = kButtonDefaultHeight,
+       width = double.infinity,
+       showShadow = true;
 
   @override
   State<CustomButton> createState() => _CustomButtonState();
@@ -127,7 +130,9 @@ class _CustomButtonState extends State<CustomButton> {
                 ]
               : const <BoxShadow>[],
         ),
-        child: widget.isLoading ? _LoadingIcon(color: widget.textColor) : _ButtonContent(widget: widget),
+        child: widget.isLoading
+            ? _LoadingIcon(color: widget.textColor)
+            : _ButtonContent(widget: widget),
       ),
     );
   }
@@ -144,10 +149,7 @@ class _LoadingIcon extends StatelessWidget {
       width: 20.r,
       height: 20.r,
       alignment: Alignment.center,
-      child: CircularProgressIndicator(
-        strokeWidth: 2.w,
-        color: color,
-      ),
+      child: CircularProgressIndicator(strokeWidth: 2.w, color: color),
     );
   }
 }
@@ -169,8 +171,8 @@ class _ButtonContent extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: AppFont.font20.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: widget.textSize.sp,
+              fontWeight: FontWeight.w800,
               letterSpacing: 1.1,
               color: widget.textColor,
             ),

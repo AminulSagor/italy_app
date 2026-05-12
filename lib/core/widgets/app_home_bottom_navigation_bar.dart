@@ -13,6 +13,14 @@ class AppBottomNavItem {
 }
 
 class AppHomeBottomNavigationBar extends StatelessWidget {
+  static const List<AppBottomNavItem> defaultItems = <AppBottomNavItem>[
+    AppBottomNavItem(icon: Icons.home_rounded, semanticLabel: 'Home'),
+    AppBottomNavItem(icon: Icons.menu_book_outlined, semanticLabel: 'Courses'),
+    AppBottomNavItem(icon: Icons.auto_awesome_rounded, semanticLabel: 'AI Tutor'),
+    AppBottomNavItem(icon: Icons.emoji_events_outlined, semanticLabel: 'Progress'),
+    AppBottomNavItem(icon: Icons.handyman_outlined, semanticLabel: 'Tools'),
+  ];
+
   final int selectedIndex;
   final List<AppBottomNavItem> items;
   final ValueChanged<int>? onTap;

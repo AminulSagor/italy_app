@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import '../../features/courses/controllers/courses_controller.dart';
+import '../../features/courses/services/courses_mock_service.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/home/services/home_mock_service.dart';
 import '../../features/messages/controllers/messages_controller.dart';
@@ -9,6 +11,12 @@ class InitialBindings extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<HomeMockService>(() => HomeMockService());
+    Get.lazyPut<CoursesMockService>(() => CoursesMockService());
+    Get.lazyPut<CoursesController>(
+      () => CoursesController(
+        coursesMockService: Get.find<CoursesMockService>(),
+      ),
+    );
     Get.lazyPut<HomeController>(
       () => HomeController(homeMockService: Get.find<HomeMockService>()),
     );

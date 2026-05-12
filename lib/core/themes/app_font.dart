@@ -27,6 +27,11 @@ class AppFont {
   static const double font36 = 36;
   static const double font38 = 38;
   static const double font40 = 40;
+
+  static const double font42 = 42;
+  static const double font44 = 44;
+  static const double font56 = 56;
+  static const double font64 = 64;
   static const double font46 = 46;
   static const double font48 = 48;
   static const double font50 = 50;

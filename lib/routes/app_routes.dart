@@ -14,4 +14,14 @@ class AppRoutes {
   static const String home = '/home';
   static const String wrapper = '/wrapper';
   static const String notifications = '/notifications';
+
+  static const String courseDetail = '/courses/detail';
+  static const String chapterDetail = '/courses/chapter-detail';
+  static const String quiz = '/courses/chapter-detail/quiz';
+  static const String vocabulary = '/courses/chapter-detail/vocabulary';
+  static const String quizCompletion = '/courses/chapter-detail/quiz/completion';
+  static const String quizReviewAnswers = '/courses/chapter-detail/quiz/review-answers';
+  static const String proOrderSummary = '/courses/pro/order-summary';
+  static const String proCheckout = '/courses/pro/checkout';
+  static const String proPurchaseSuccess = '/courses/pro/purchase-success';
 }

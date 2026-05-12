@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../features/courses/views/courses_view.dart';
 import '../../../features/home/views/home_view.dart';
 import '../../../features/messages/views/messages_view.dart';
 import '../app_home_bottom_navigation_bar.dart';
@@ -10,20 +11,6 @@ import 'navbar_and_appbar_wrapper_controller.dart';
 class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
   const NavbarAndAppbarWrapper({super.key});
 
-  static const List<AppBottomNavItem> _navItems = <AppBottomNavItem>[
-    AppBottomNavItem(icon: Icons.home_rounded, semanticLabel: 'Home'),
-    AppBottomNavItem(icon: Icons.menu_book_outlined, semanticLabel: 'Messages'),
-    AppBottomNavItem(
-      icon: Icons.auto_awesome_rounded,
-      semanticLabel: 'AI Tutor',
-    ),
-    AppBottomNavItem(
-      icon: Icons.emoji_events_outlined,
-      semanticLabel: 'Progress',
-    ),
-    AppBottomNavItem(icon: Icons.handyman_outlined, semanticLabel: 'Tools'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -31,8 +18,8 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
         final bool shouldPop = await controller.onWillPop();
-        if (shouldPop && context.mounted) {
-          Navigator.of(context).pop();
+        if (shouldPop) {
+          Get.back<void>();
         }
       },
       child: Scaffold(
@@ -71,7 +58,7 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
               child: Obx(
                 () => AppHomeBottomNavigationBar(
                   selectedIndex: controller.currentIndex.value,
-                  items: _navItems,
+                  items: AppHomeBottomNavigationBar.defaultItems,
                   onTap: controller.onBottomNavTap,
                 ),
               ),
@@ -86,35 +73,30 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
     switch (index) {
       case 0:
         return _TabNavigator(
-          id: 0,
           content: const HomeView(),
           onNotificationTap: controller.openNotifications,
           onMessageTap: controller.openMessages,
         );
       case 1:
         return _TabNavigator(
-          id: 1,
-          content: const CustomPlaceHolder(),
+          content: const CoursesView(),
           onNotificationTap: controller.openNotifications,
           onMessageTap: controller.openMessages,
         );
       case 2:
         return _TabNavigator(
-          id: 2,
           content: const CustomPlaceHolder(),
           onNotificationTap: controller.openNotifications,
           onMessageTap: controller.openMessages,
         );
       case 3:
         return _TabNavigator(
-          id: 3,
           content: const CustomPlaceHolder(),
           onNotificationTap: controller.openNotifications,
           onMessageTap: controller.openMessages,
         );
       case 4:
         return _TabNavigator(
-          id: 4,
           content: const CustomPlaceHolder(),
           onNotificationTap: controller.openNotifications,
           onMessageTap: controller.openMessages,
@@ -126,14 +108,12 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
 }
 
 class _TabNavigator extends StatelessWidget {
-  final int id;
   final Widget content;
   final bool showTopBar;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onMessageTap;
 
   const _TabNavigator({
-    required this.id,
     required this.content,
     this.showTopBar = true,
     this.onNotificationTap,
@@ -142,16 +122,11 @@ class _TabNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: Get.nestedKey(id),
-      onGenerateRoute: (_) => MaterialPageRoute<void>(
-        builder: (_) => AppBarWrapper(
-          showTopBar: showTopBar,
-          onNotificationTap: onNotificationTap,
-          onMessageTap: onMessageTap,
-          child: content,
-        ),
-      ),
+    return AppBarWrapper(
+      showTopBar: showTopBar,
+      onNotificationTap: onNotificationTap,
+      onMessageTap: onMessageTap,
+      child: content,
     );
   }
 }
