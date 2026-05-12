@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/localization/translation_service.dart';
 import '../../../../../routes/routes.dart';
 import '../../../models/auth_models.dart';
 import '../models/signup_models.dart';
 
 class SignupController extends GetxController {
+  final TranslationService _translationService = Get.find<TranslationService>();
   final Rx<SignupFormModel> form = SignupFormModel.initial().obs;
   final Rx<SignupOtpUiModel> otpUi = SignupOtpUiModel.initial().obs;
   final Rx<SignupAccountCreatedUiModel> accountCreatedUi =
@@ -24,6 +26,9 @@ class SignupController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    form.value = form.value.copyWith(
+      selectedLanguage: _translationService.selectedLabel.value,
+    );
     fullNameController = TextEditingController();
     identifierController = TextEditingController();
     passwordController = TextEditingController();
@@ -39,9 +44,10 @@ class SignupController extends GetxController {
   }
 
   void setLanguage(String value) {
-    form.value = form.value.copyWith(selectedLanguage: value);
-    final Locale locale = _localeFromLabel(value);
-    Get.updateLocale(locale);
+    _translationService.setLanguageLabel(value);
+    form.value = form.value.copyWith(
+      selectedLanguage: _translationService.selectedLabel.value,
+    );
   }
 
   void setSignupMode(String value) {
@@ -200,18 +206,6 @@ class SignupController extends GetxController {
       Get.toNamed(AppRoutes.accountCreated);
     } finally {
       otpUi.value = otpUi.value.copyWith(isVerifying: false);
-    }
-  }
-
-  Locale _localeFromLabel(String label) {
-    switch (label) {
-      case 'IT':
-        return const Locale('it', 'IT');
-      case 'বাং':
-        return const Locale('bn', 'BD');
-      case 'EN':
-      default:
-        return const Locale('en', 'US');
     }
   }
 

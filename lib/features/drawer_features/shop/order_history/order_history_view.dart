@@ -1,0 +1,481 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+
+import '../shop_controller.dart';
+
+class OrderHistoryView extends GetView<ShopController> {
+  const OrderHistoryView({super.key});
+
+  static const Color _bg = Color(0xFFF3F3F3);
+  static const Color _green = Color(0xFF267A05);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _bg,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 40.h),
+          child: Column(
+            children: <Widget>[
+              const _HistoryTopBar(),
+              SizedBox(height: 40.h),
+              const _FilterTabs(),
+              SizedBox(height: 24.h),
+              const _SearchBox(),
+              SizedBox(height: 24.h),
+              const _OrdersList(),
+              SizedBox(height: 18.h),
+              const _SupportCard(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HistoryTopBar extends StatelessWidget {
+  const _HistoryTopBar();
+
+  static const Color _green = Color(0xFF267A05);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44.r,
+      child: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: GestureDetector(
+              onTap: Get.back,
+              child: Container(
+                width: 44.r,
+                height: 44.r,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10.r,
+                      offset: Offset(0, 4.h),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  size: 24.r,
+                  color: _green,
+                ),
+              ),
+            ),
+          ),
+          Text(
+            'Order History',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w900,
+              color: _green,
+              letterSpacing: -0.25,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterTabs extends GetView<ShopController> {
+  const _FilterTabs();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 50.h,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: controller.orderHistoryFilters.length,
+        separatorBuilder: (_, __) => SizedBox(width: 12.w),
+        itemBuilder: (context, index) {
+          final String title = controller.orderHistoryFilters[index];
+
+          return Obx(() {
+            final bool selected =
+                controller.selectedOrderHistoryFilter.value == title;
+
+            return GestureDetector(
+              onTap: () => controller.selectOrderHistoryFilter(title),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                height: 50.h,
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: selected ? const Color(0xFF267A05) : Colors.white,
+                  borderRadius: BorderRadius.circular(100.r),
+                  border: Border.all(
+                    color: selected
+                        ? const Color(0xFF267A05)
+                        : const Color(0xFFC9DDBF),
+                    width: 1.5.w,
+                  ),
+                  boxShadow: selected
+                      ? <BoxShadow>[
+                          BoxShadow(
+                            color: const Color(
+                              0xFF267A05,
+                            ).withValues(alpha: 0.22),
+                            blurRadius: 14.r,
+                            offset: Offset(0, 7.h),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w900,
+                    color: selected ? Colors.white : const Color(0xFF267A05),
+                  ),
+                ),
+              ),
+            );
+          });
+        },
+      ),
+    );
+  }
+}
+
+class _SearchBox extends GetView<ShopController> {
+  const _SearchBox();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 56.h,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(100.r),
+        border: Border.all(color: const Color(0xFFD9D9D9)),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.035),
+            blurRadius: 10.r,
+            offset: Offset(0, 4.h),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller.orderSearchTextController,
+        onChanged: controller.onOrderSearchChanged,
+        cursorColor: const Color(0xFF267A05),
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF333333),
+        ),
+        decoration: InputDecoration(
+          hintText: 'Search orders...',
+          hintStyle: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF9A9A9A),
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            size: 26.r,
+            color: const Color(0xFF555555),
+          ),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.only(top: 16.h),
+        ),
+      ),
+    );
+  }
+}
+
+class _OrdersList extends GetView<ShopController> {
+  const _OrdersList();
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final List<OrderHistoryItem> orders =
+          controller.filteredOrderHistoryItems;
+
+      if (orders.isEmpty) {
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(vertical: 40.h, horizontal: 20.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(34.r),
+          ),
+          child: Text(
+            'No orders found',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF666666),
+            ),
+          ),
+        );
+      }
+
+      return Column(
+        children: List.generate(
+          orders.length,
+          (index) => Padding(
+            padding: EdgeInsets.only(
+              bottom: index == orders.length - 1 ? 0 : 16.h,
+            ),
+            child: _OrderCard(item: orders[index]),
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class _OrderCard extends StatelessWidget {
+  final OrderHistoryItem item;
+
+  const _OrderCard({required this.item});
+
+  static const Color _text = Color(0xFF2D3032);
+  static const Color _muted = Color(0xFF5F6265);
+  static const Color _green = Color(0xFF267A05);
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isCourse = item.category == OrderHistoryFilterTitles.courses;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(24.w, 22.h, 24.w, 22.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(42.r),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.035),
+            blurRadius: 10.r,
+            offset: Offset(0, 4.h),
+          ),
+        ],
+      ),
+      child: Column(
+        children: <Widget>[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: 48.r,
+                height: 48.r,
+                decoration: BoxDecoration(
+                  color: isCourse
+                      ? const Color(0xFFFF9700)
+                      : const Color(0xFFAED2FF),
+                  borderRadius: BorderRadius.circular(15.r),
+                ),
+                child: Icon(
+                  isCourse ? Icons.school_outlined : Icons.mic_none_rounded,
+                  size: 24.r,
+                  color: isCourse
+                      ? const Color(0xFF905000)
+                      : const Color(0xFF0065A8),
+                ),
+              ),
+              SizedBox(width: 18.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      item.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        height: 1.38,
+                        fontWeight: FontWeight.w900,
+                        color: _text,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      item.date,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: _muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    item.price,
+                    style: TextStyle(
+                      fontSize: 19.sp,
+                      fontWeight: FontWeight.w900,
+                      color: _text,
+                      letterSpacing: -0.25,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Container(
+                        width: 8.r,
+                        height: 8.r,
+                        decoration: const BoxDecoration(
+                          color: _green,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        item.status,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w900,
+                          color: _green,
+                          letterSpacing: 0.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Divider(height: 1.h, color: const Color(0xFFE8E8E8)),
+          SizedBox(height: 12.h),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text.rich(
+              TextSpan(
+                text: 'ID : ',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: _muted,
+                  letterSpacing: 0.6,
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: item.id,
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SupportCard extends GetView<ShopController> {
+  const _SupportCard();
+
+  static const Color _green = Color(0xFF267A05);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(30.w, 32.h, 30.w, 24.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F2F2),
+        borderRadius: BorderRadius.circular(42.r),
+        border: Border.all(color: Colors.white, width: 2.w),
+      ),
+      child: Stack(
+        children: <Widget>[
+          Positioned(
+            right: -28.w,
+            bottom: -44.h,
+            child: Icon(
+              Icons.support_agent_rounded,
+              size: 112.r,
+              color: Colors.white.withValues(alpha: 0.55),
+            ),
+          ),
+          Column(
+            children: <Widget>[
+              Text(
+                'Questions about an order?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF2D3032),
+                  letterSpacing: -0.35,
+                ),
+              ),
+              SizedBox(height: 20.h),
+              GestureDetector(
+                onTap: controller.contactOrderSupport,
+                child: Container(
+                  width: double.infinity,
+                  height: 62.h,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: _green,
+                    borderRadius: BorderRadius.circular(100.r),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: const Color(0xFF155200),
+                        blurRadius: 0,
+                        offset: Offset(0, 7.h),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Contact Support',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        size: 24.r,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 7.h),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

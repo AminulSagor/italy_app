@@ -1,14 +1,22 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
+import '../../core/localization/translation_service.dart';
 import '../../routes/app_routes.dart';
 
 class SplashController extends GetxController {
+  final TranslationService _translationService = Get.find<TranslationService>();
   final PageController pageController = PageController();
   final RxInt currentPage = 0.obs;
-  final RxString selectedLanguage = 'EN'.obs;
+  late final RxString selectedLanguage;
 
   static const int totalPages = 4;
+
+  @override
+  void onInit() {
+    super.onInit();
+    selectedLanguage = _translationService.selectedLabel;
+  }
 
   bool get isFirstPage => currentPage.value == 0;
   bool get isLastPage => currentPage.value == totalPages - 1;
@@ -38,20 +46,7 @@ class SplashController extends GetxController {
   }
 
   void setLanguage(String value) {
-    selectedLanguage.value = value;
-    Get.updateLocale(_localeFromLabel(value));
-  }
-
-  Locale _localeFromLabel(String label) {
-    switch (label) {
-      case 'IT':
-        return const Locale('it', 'IT');
-      case 'বাং':
-        return const Locale('bn', 'BD');
-      case 'EN':
-      default:
-        return const Locale('en', 'US');
-    }
+    _translationService.setLanguageLabel(value);
   }
 
   void _goToLogin() {

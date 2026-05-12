@@ -14,6 +14,7 @@ class CustomButton extends StatefulWidget {
   final bool isLoading;
   final bool showShadow;
   final bool isElevated;
+  final IconData? prefixIcon;
   final IconData? icon;
   final Color btnColor;
   final Color btnShadowColor;
@@ -31,6 +32,7 @@ class CustomButton extends StatefulWidget {
     this.isLoading = false,
     this.showShadow = false,
     this.isElevated = false,
+    this.prefixIcon,
     this.icon,
     this.btnColor = AppColors.primaryBtnColor,
     this.btnShadowColor = AppColors.primaryBtnShadow,
@@ -45,6 +47,7 @@ class CustomButton extends StatefulWidget {
     required this.onPressed,
     required this.text,
     this.isLoading = false,
+    this.prefixIcon,
     this.icon,
     this.isElevated = false,
     this.btnColor = AppColors.primaryBtnColor,
@@ -53,9 +56,9 @@ class CustomButton extends StatefulWidget {
     this.borderRadius = kButtonDefaultRadius,
     this.borderWidth = kButtonBorderWidth,
     this.textColor = AppColors.white,
-  })  : height = kButtonDefaultHeight,
-        width = double.infinity,
-        showShadow = true;
+  }) : height = kButtonDefaultHeight,
+       width = double.infinity,
+       showShadow = true;
 
   @override
   State<CustomButton> createState() => _CustomButtonState();
@@ -127,7 +130,9 @@ class _CustomButtonState extends State<CustomButton> {
                 ]
               : const <BoxShadow>[],
         ),
-        child: widget.isLoading ? _LoadingIcon(color: widget.textColor) : _ButtonContent(widget: widget),
+        child: widget.isLoading
+            ? _LoadingIcon(color: widget.textColor)
+            : _ButtonContent(widget: widget),
       ),
     );
   }
@@ -144,10 +149,7 @@ class _LoadingIcon extends StatelessWidget {
       width: 20.r,
       height: 20.r,
       alignment: Alignment.center,
-      child: CircularProgressIndicator(
-        strokeWidth: 2.w,
-        color: color,
-      ),
+      child: CircularProgressIndicator(strokeWidth: 2.w, color: color),
     );
   }
 }
@@ -159,13 +161,30 @@ class _ButtonContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String label = widget.text.tr;
+    final bool hasLabel = label.trim().isNotEmpty;
+
+    if (!hasLabel) {
+      final IconData? icon = widget.icon ?? widget.prefixIcon;
+
+      if (icon != null) {
+        return Icon(icon, size: 24.w, color: widget.textColor);
+      }
+
+      return const SizedBox.shrink();
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        if (widget.prefixIcon != null) ...<Widget>[
+          Icon(widget.prefixIcon, size: 24.w, color: widget.textColor),
+          SizedBox(width: 8.w),
+        ],
         Flexible(
           child: Text(
-            widget.text.tr,
+            label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(

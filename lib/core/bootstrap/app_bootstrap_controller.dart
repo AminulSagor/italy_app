@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../services/storage_service.dart';
+import '../localization/translation_service.dart';
 import '../../routes/routes.dart';
 
 class AppBootstrapController extends GetxController {
@@ -10,6 +11,11 @@ class AppBootstrapController extends GetxController {
       () => StorageService().init(),
       permanent: true,
     );
+
+    final translationService = Get.put<TranslationService>(
+      TranslationService(storageService: Get.find<StorageService>()),
+    );
+    Get.put<TranslationService>(translationService, permanent: true);
   }
 
   @override

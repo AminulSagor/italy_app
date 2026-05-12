@@ -24,6 +24,35 @@ import '../core/bootstrap/app_bootstrap_controller.dart';
 import '../features/auth/sub_features/login/controllers/login_controller.dart';
 import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_view.dart';
+import '../features/drawer_features/shop/shop_view.dart';
+import '../features/drawer_features/shop/shop_controller.dart';
+import '../features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart';
+import '../features/drawer_features/shop/refill_ai_credits/views/order_summary_view.dart';
+import '../features/drawer_features/shop/refill_ai_credits/views/checkout_view.dart';
+import '../features/drawer_features/shop/refill_ai_credits/views/purchase_complete.dart';
+import '../features/drawer_features/shop/streak_freeze_store/streak_freeze_store_view.dart';
+import '../features/drawer_features/shop/streak_freeze_store/order_summary_view.dart';
+import '../features/drawer_features/shop/cv_credit_store/cv_credit_store_view.dart';
+import '../features/drawer_features/shop/cv_credit_store/cv_credit_order_summary_view.dart';
+import '../features/drawer_features/shop/order_history/order_history_view.dart';
+import '../features/drawer_features/guide/guide_controller.dart';
+import '../features/drawer_features/guide/views/guide_view.dart';
+import '../features/drawer_features/guide/views/guide_faq_view.dart';
+import '../features/drawer_features/rewards/reward_controller.dart';
+import '../features/drawer_features/rewards/views/rewards_view.dart';
+import '../features/drawer_features/rewards/views/reward_chest_view.dart';
+import '../features/drawer_features/rewards/views/rewards_history_view.dart';
+import '../features/drawer_features/rewards/views/reward_details_view.dart';
+import '../features/drawer_features/contact/contact_controller.dart';
+import '../features/drawer_features/contact/contact_support_view.dart';
+import '../features/drawer_features/settings/settings_controller.dart';
+import '../features/drawer_features/settings/settings_view.dart';
+import '../features/drawer_features/settings/sub_features/profile_security/views/profile_security_veiw.dart';
+import '../features/drawer_features/settings/sub_features/profile_photo/views/profile_photo_view.dart';
+import '../features/drawer_features/settings/sub_features/change_password/views/change_password_view.dart';
+import '../features/drawer_features/settings/sub_features/verify_contact/views/verify_contact_view.dart';
+import '../features/drawer_features/settings/sub_features/success/views/settings_success_view.dart';
+import '../features/drawer_features/settings/sub_features/delete_account/views/delete_account_confirm_view.dart';
 
 class AppPages {
   AppPages._();
@@ -144,11 +173,180 @@ class AppPages {
           );
         }
         if (!Get.isRegistered<NotificationsMockService>()) {
-          Get.lazyPut<NotificationsMockService>(() => NotificationsMockService());
+          Get.lazyPut<NotificationsMockService>(
+            () => NotificationsMockService(),
+          );
         }
         Get.lazyPut<NavbarAndAppbarWrapperController>(
           () => NavbarAndAppbarWrapperController(),
         );
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.shop,
+      page: () => ShopView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ShopController>(() => ShopController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.aiRefillCenter,
+      page: () => const AiRefillCenterPage(),
+    ),
+    GetPage(name: AppRoutes.orderSummary, page: () => const OrderSummaryPage()),
+    GetPage(name: AppRoutes.checkout, page: () => const CheckoutPage()),
+    GetPage(
+      name: AppRoutes.purchaseCompleted,
+      page: () => const PurchaseCompletedPage(),
+    ),
+    GetPage(name: AppRoutes.streakFreeze, page: () => const StreakFreezeView()),
+    GetPage(
+      name: AppRoutes.streakFreezeOrderSummary,
+      page: () => const StreakOrderSummaryView(),
+    ),
+
+    GetPage(
+      name: AppRoutes.cvCreditStore,
+      page: () => const CvCreditStoreView(),
+    ),
+
+    GetPage(
+      name: AppRoutes.cvCreditOrderSummary,
+      page: () => const CvCreditOrderSummaryView(),
+    ),
+    GetPage(
+      name: AppRoutes.orderHistory,
+      page: () => const OrderHistoryView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<ShopController>()) {
+          Get.lazyPut<ShopController>(() => ShopController());
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.guide,
+      page: () => const GuideView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<GuideController>(() => GuideController());
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.guideFaq,
+      page: () => const GuideFaqView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<GuideController>()) {
+          Get.lazyPut<GuideController>(() => GuideController());
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.rewards,
+      page: () => const RewardsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.rewardChest,
+      page: () => const RewardChestView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<RewardController>()) {
+          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.rewardsHistory,
+      page: () => const RewardsHistoryView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<RewardController>()) {
+          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.rewardDetails,
+      page: () => const RewardDetailsView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<RewardController>()) {
+          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.contactSupport,
+      page: () => const ContactSupportView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ContactController>(() => ContactController(), fenix: true);
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.settings,
+      page: () => const SettingsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<SettingsController>(
+          () => SettingsController(),
+          fenix: true,
+        );
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.profileSecurity,
+      page: () => const ProfileSecurityView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.lazyPut<SettingsController>(
+            () => SettingsController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.changePassword,
+      page: () => const ChangePasswordView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.lazyPut<SettingsController>(
+            () => SettingsController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(name: AppRoutes.profilePhoto, page: () => const ProfilePhotoView()),
+
+    GetPage(
+      name: AppRoutes.verifyContact,
+      page: () => const VerifyContactView(),
+    ),
+
+    GetPage(
+      name: AppRoutes.profileSuccess,
+      page: () => const SettingsSuccessView(),
+    ),
+
+    GetPage(
+      name: AppRoutes.deleteAccountConfirm,
+      page: () => const DeleteAccountConfirmView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.lazyPut<SettingsController>(
+            () => SettingsController(),
+            fenix: true,
+          );
+        }
       }),
     ),
   ];

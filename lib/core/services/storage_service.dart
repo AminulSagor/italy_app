@@ -24,4 +24,17 @@ class StorageService extends GetxService {
     await _prefs.setBool('isLoggedIn', false);
     await _prefs.remove('authToken');
   }
+
+  // app locale data
+  static const String _appLocaleKey = 'appLocale';
+
+  String? get savedAppLocale => _prefs.getString(_appLocaleKey);
+
+  Future<void> saveAppLocale(String localeLabel) async {
+    await _prefs.setString(_appLocaleKey, localeLabel);
+  }
+
+  Future<void> clearAppLocale() async {
+    await _prefs.remove(_appLocaleKey);
+  }
 }

@@ -6,6 +6,7 @@ import '../../../features/messages/views/messages_view.dart';
 import '../app_home_bottom_navigation_bar.dart';
 import '../app_home_top_bar.dart';
 import 'navbar_and_appbar_wrapper_controller.dart';
+import '../custom_drawer.dart';
 
 class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
   const NavbarAndAppbarWrapper({super.key});
@@ -26,6 +27,7 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
 
   @override
   Widget build(BuildContext context) {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) async {
@@ -36,6 +38,21 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
         }
       },
       child: Scaffold(
+        key: scaffoldKey,
+        appBar: AppHomeTopBar(
+          greeting: 'Buongiorno,',
+          userName: 'Arif!',
+          streakLabel: '🔥 5',
+          notificationCount: 3,
+          messageCount: 1,
+          onNotificationTap: controller.openNotifications,
+          onMessageTap: controller.openMessages,
+          onProfileTap: () => scaffoldKey.currentState?.openDrawer(),
+        ),
+        drawer: AppDrawer(
+          onLanguageTap: () => controller.onLanguageTap(context),
+          onShopTap: controller.onShopTap,
+        ),
         body: Stack(
           children: <Widget>[
             Obx(
@@ -85,40 +102,15 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
   Widget _buildTab(int index) {
     switch (index) {
       case 0:
-        return _TabNavigator(
-          id: 0,
-          content: const HomeView(),
-          onNotificationTap: controller.openNotifications,
-          onMessageTap: controller.openMessages,
-        );
+        return _TabNavigator(id: 0, content: const HomeView());
       case 1:
-        return _TabNavigator(
-          id: 1,
-          content: const CustomPlaceHolder(),
-          onNotificationTap: controller.openNotifications,
-          onMessageTap: controller.openMessages,
-        );
+        return _TabNavigator(id: 1, content: const CustomPlaceHolder());
       case 2:
-        return _TabNavigator(
-          id: 2,
-          content: const CustomPlaceHolder(),
-          onNotificationTap: controller.openNotifications,
-          onMessageTap: controller.openMessages,
-        );
+        return _TabNavigator(id: 2, content: const CustomPlaceHolder());
       case 3:
-        return _TabNavigator(
-          id: 3,
-          content: const CustomPlaceHolder(),
-          onNotificationTap: controller.openNotifications,
-          onMessageTap: controller.openMessages,
-        );
+        return _TabNavigator(id: 3, content: const CustomPlaceHolder());
       case 4:
-        return _TabNavigator(
-          id: 4,
-          content: const CustomPlaceHolder(),
-          onNotificationTap: controller.openNotifications,
-          onMessageTap: controller.openMessages,
-        );
+        return _TabNavigator(id: 4, content: const CustomPlaceHolder());
       default:
         return const CustomPlaceHolder();
     }
@@ -128,63 +120,14 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
 class _TabNavigator extends StatelessWidget {
   final int id;
   final Widget content;
-  final bool showTopBar;
-  final VoidCallback? onNotificationTap;
-  final VoidCallback? onMessageTap;
 
-  const _TabNavigator({
-    required this.id,
-    required this.content,
-    this.showTopBar = true,
-    this.onNotificationTap,
-    this.onMessageTap,
-  });
+  const _TabNavigator({required this.id, required this.content});
 
   @override
   Widget build(BuildContext context) {
     return Navigator(
       key: Get.nestedKey(id),
-      onGenerateRoute: (_) => MaterialPageRoute<void>(
-        builder: (_) => AppBarWrapper(
-          showTopBar: showTopBar,
-          onNotificationTap: onNotificationTap,
-          onMessageTap: onMessageTap,
-          child: content,
-        ),
-      ),
-    );
-  }
-}
-
-class AppBarWrapper extends StatelessWidget {
-  final Widget child;
-  final bool showTopBar;
-  final VoidCallback? onNotificationTap;
-  final VoidCallback? onMessageTap;
-
-  const AppBarWrapper({
-    super.key,
-    required this.child,
-    this.showTopBar = true,
-    this.onNotificationTap,
-    this.onMessageTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: showTopBar
-          ? AppHomeTopBar(
-              greeting: 'Buongiorno,',
-              userName: 'Arif!',
-              streakLabel: '🔥 5',
-              notificationCount: 3,
-              messageCount: 1,
-              onNotificationTap: onNotificationTap,
-              onMessageTap: onMessageTap,
-            )
-          : null,
-      body: child,
+      onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => content),
     );
   }
 }
