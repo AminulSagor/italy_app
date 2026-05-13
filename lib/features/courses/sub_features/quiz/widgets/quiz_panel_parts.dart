@@ -19,7 +19,11 @@ class _ListeningPanel extends StatelessWidget {
       children: <Widget>[
         const AudioPromptCard(),
         SizedBox(height: 56.h),
-        _TitleBlock(title: question.title, subtitle: question.subtitle, center: true),
+        _TitleBlock(
+          title: question.title,
+          subtitle: question.subtitle,
+          center: true,
+        ),
         SizedBox(height: 46.h),
         ...List<Widget>.generate(question.options.length, (int index) {
           return Padding(
@@ -56,26 +60,29 @@ class _WordTranslationPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _Eyebrow(question.eyebrow),
-        SizedBox(height: 24.h),
+        SizedBox(height: 20.h),
         RichText(
           text: TextSpan(
             style: TextStyle(
-              fontSize: AppFont.font36.sp,
+              fontSize: AppFont.font34.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.homePrimaryText,
               height: 1.22,
             ),
             children: const <TextSpan>[
               TextSpan(text: 'How do you say\n'),
-              TextSpan(text: '"Hello"', style: TextStyle(color: AppColors.primaryGreen)),
+              TextSpan(
+                text: '"Hello"',
+                style: TextStyle(color: AppColors.primaryGreen),
+              ),
               TextSpan(text: ' in Italian?'),
             ],
           ),
         ),
-        SizedBox(height: 64.h),
+        SizedBox(height: 30.h),
         ...List<Widget>.generate(question.options.length, (int index) {
           return Padding(
-            padding: EdgeInsets.only(bottom: 34.h),
+            padding: EdgeInsets.only(bottom: 20.h),
             child: CustomQuizButton(
               label: question.options[index],
               isSelected: !showWrongResult && selectedIndex == index,
@@ -120,14 +127,18 @@ class _SentenceTranslationPanel extends StatelessWidget {
                 color: AppColors.homeLime,
                 shape: BoxShape.circle,
               ),
-              child: Center(child: Text('🇮🇹', style: TextStyle(fontSize: 44.sp))),
+              child: Center(
+                child: Text('🇮🇹', style: TextStyle(fontSize: 44.sp)),
+              ),
             ),
             Expanded(
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 26.h),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
+                  borderRadius: BorderRadius.circular(
+                    kCourseDetailCardRadius.r,
+                  ),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
                       color: AppColors.homeNeutralShadow,
@@ -190,12 +201,16 @@ class _TrueFalsePanel extends StatelessWidget {
         SizedBox(height: 28.h),
         Container(
           width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 34.w, vertical: 58.h),
+          padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 48.h),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
             boxShadow: <BoxShadow>[
-              BoxShadow(color: AppColors.quizAnswerShadow, blurRadius: 0, offset: Offset(0, 10.h)),
+              BoxShadow(
+                color: AppColors.quizAnswerShadow,
+                blurRadius: 0,
+                offset: Offset(0, 10.h),
+              ),
             ],
           ),
           child: Column(
@@ -204,18 +219,18 @@ class _TrueFalsePanel extends StatelessWidget {
                 question.title,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: AppFont.font28.sp,
-                  fontWeight: FontWeight.w900,
+                  fontSize: AppFont.font24.sp,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.homePrimaryText,
                   height: 1.3,
                 ),
               ),
-              SizedBox(height: 64.h),
+              SizedBox(height: 55.h),
               Text(
                 question.subtitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: AppFont.font20.sp,
+                  fontSize: AppFont.font16.sp,
                   fontWeight: FontWeight.w500,
                   color: AppColors.bodyText,
                   height: 1.35,
@@ -224,7 +239,7 @@ class _TrueFalsePanel extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 86.h),
+        SizedBox(height: 48.h),
         Row(
           children: <Widget>[
             Expanded(
@@ -268,14 +283,17 @@ class _FillBlankPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool hasSelection = selectedIndex >= 0 && selectedIndex < question.options.length;
-    final String selectedText = hasSelection ? question.options[selectedIndex] : '';
+    final bool hasSelection =
+        selectedIndex >= 0 && selectedIndex < question.options.length;
+    final String selectedText = hasSelection
+        ? question.options[selectedIndex]
+        : '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _TitleBlock(title: question.title, subtitle: question.subtitle),
-        SizedBox(height: 42.h),
+        SizedBox(height: 30.h),
         Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 34.w, vertical: 32.h),
@@ -284,27 +302,33 @@ class _FillBlankPanel extends StatelessWidget {
             borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Text('Io', style: _bigPromptStyle(context)),
-              SizedBox(width: 18.w),
+              Text(
+                'Io',
+                style: TextStyle(
+                  fontSize: AppFont.font22.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.homePrimaryText,
+                ),
+              ),
+              SizedBox(width: 12.w),
               Container(
-                width: 128.w,
-                height: 58.h,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: showWrongResult && hasSelection
                       ? AppColors.quizWrongLightBg
                       : hasSelection
-                          ? AppColors.white
-                          : AppColors.legacyColorFFF1F2F2,
+                      ? AppColors.white
+                      : AppColors.legacyColorFFF1F2F2,
                   borderRadius: BorderRadius.circular(kRadius22.r),
                   border: Border.all(
                     color: showWrongResult && hasSelection
                         ? AppColors.quizWrongBorder
                         : hasSelection
-                            ? AppColors.homeLime
-                            : AppColors.quizBlankBorder,
+                        ? AppColors.homeLime
+                        : AppColors.quizBlankBorder,
                     width: 2.w,
                   ),
                 ),
@@ -313,25 +337,34 @@ class _FillBlankPanel extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppFont.font20.sp,
                     fontWeight: FontWeight.w900,
-                    color: showWrongResult ? AppColors.quizWrongBorder : AppColors.primaryGreen,
+                    color: showWrongResult
+                        ? AppColors.quizWrongBorder
+                        : AppColors.primaryGreen,
                   ),
                 ),
               ),
-              SizedBox(width: 18.w),
-              Text('un caffé.', style: _bigPromptStyle(context)),
+              SizedBox(width: 12.w),
+              Text(
+                'un caffé.',
+                style: TextStyle(
+                  fontSize: AppFont.font22.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.homePrimaryText,
+                ),
+              ),
             ],
           ),
         ),
-        SizedBox(height: 210.h),
+        SizedBox(height: 150.h),
         GridView.builder(
           itemCount: question.options.length,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            childAspectRatio: 2.15,
-            crossAxisSpacing: 28.w,
-            mainAxisSpacing: 28.h,
+            childAspectRatio: 2.2,
+            crossAxisSpacing: 16.w,
+            mainAxisSpacing: 16.h,
           ),
           itemBuilder: (_, int index) => CustomQuizButton(
             label: question.options[index],

@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../../../routes/app_routes.dart';
+
 import '../models/home_models.dart';
 import '../services/home_mock_service.dart';
 
@@ -34,5 +36,9 @@ class HomeController extends GetxController {
 
   void onBottomNavTap(int index) {
     selectedNavIndex.value = index;
+  }
+
+  void openWebinars() {
+    Get.toNamed(AppRoutes.webinar);
   }
 }

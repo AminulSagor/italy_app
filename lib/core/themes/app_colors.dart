@@ -224,7 +224,7 @@ class AppColors {
   static const coursesSpecialBg = Color(0xFF183314);
   static const coursesSpecialBgEnd = Color(0xFF1E3218);
   static const coursesSpecialMuted = Color(0xFF667361);
-  static const coursesDetailBg = Color(0xFFF5F5F5);
+  static const coursesDetailBg = Color(0xFFF6F6F6);
   static const coursesProgressBadgeBg = Color(0xFFFFF3DD);
   static const coursesDetailBannerBg = Color(0xFFFFE4B5);
   static const coursesUnlockedCardBg = Color(0xFFFFFFFF);
@@ -310,6 +310,26 @@ class AppColors {
   static const vocabularyStreakText = Color(0xFF875300);
   static const vocabularyCompletionRightBg = Color(0xFFD8FFC5);
   static const vocabularyCompletionWrongBg = Color(0xFFFFE6BF);
+
+  static const webinarVideoTop = Color(0xFF34402D);
+  static const webinarVideoBottom = Color(0xFF10150F);
+  static const webinarVideoAltTop = Color(0xFF2F4A35);
+  static const webinarVideoAltBottom = Color(0xFF8C6844);
+  static const webinarHeroBorder = Color(0xFF78FF3B);
+  static const webinarLiveRed = Color(0xFFC72A0D);
+  static const webinarViewerBadge = Color(0xFF7CFF3B);
+  static const webinarDateBg = Color(0xFFCFFFAC);
+  static const webinarSessionBg = Color(0xFFFFFFFF);
+  static const webinarControlBg = Color(0xFFF0F1F1);
+  static const webinarHostChipBg = Color(0xB02E3336);
+  static const webinarChatBubble = Color(0xFFF0F1F1);
+  static const webinarHostBorder = Color(0xFF78FF3B);
+  static const webinarStagePanelBg = Color(0xFFE2E4E4);
+  static const webinarStageBorderIdle = Color(0xFFBFC3C3);
+  static const webinarStageShadow = Color(0x3378FF3B);
+  static const webinarLeaveRed = Color(0xFFB42A0B);
+  static const webinarAccentBlue = Color(0xFFADD3FF);
+  static const webinarAccentOrange = Color(0xFFFF9800);
 
   static const splashWelcomeGradient = LinearGradient(
     begin: Alignment.topCenter,

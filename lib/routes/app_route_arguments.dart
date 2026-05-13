@@ -26,6 +26,28 @@ class ControllerTagRouteArguments {
   const ControllerTagRouteArguments({required this.controllerTag});
 }
 
+class QuizRouteArguments {
+  final String controllerTag;
+  final bool isExamMode;
+  final int questionCount;
+
+  const QuizRouteArguments({
+    required this.controllerTag,
+    this.isExamMode = false,
+    this.questionCount = 15,
+  });
+}
+
+class FinalExamRouteArguments {
+  final String controllerTag;
+  final String courseId;
+
+  const FinalExamRouteArguments({
+    required this.controllerTag,
+    required this.courseId,
+  });
+}
+
 class ProOrderSummaryRouteArguments {
   final String controllerTag;
   final String courseDetailControllerTag;
@@ -34,4 +56,11 @@ class ProOrderSummaryRouteArguments {
     required this.controllerTag,
     required this.courseDetailControllerTag,
   });
+}
+
+
+class CourseCertificateRouteArguments {
+  final String controllerTag;
+
+  const CourseCertificateRouteArguments({required this.controllerTag});
 }

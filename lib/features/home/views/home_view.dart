@@ -88,7 +88,7 @@ class _HomeLoadedBody extends StatelessWidget {
           SizedBox(height: 26.h),
           SupportCommunityCard(support: data.support),
           SizedBox(height: 26.h),
-          WebinarCard(webinar: data.webinar),
+          WebinarCard(webinar: data.webinar, onJoinTap: Get.find<HomeController>().openWebinars),
           SizedBox(height: 26.h),
           CulturalTipCard(tip: data.culturalTip),
           SizedBox(height: 28.h),

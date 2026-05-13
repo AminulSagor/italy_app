@@ -1,10 +1,12 @@
+import 'dart:math';
+
 import '../models/quiz_models.dart';
 
 class QuizMockService {
-  Future<List<QuizQuestionModel>> fetchQuestions() async {
+  Future<List<QuizQuestionModel>> fetchQuestions({int questionCount = 15}) async {
     await Future<void>.delayed(const Duration(milliseconds: 350));
 
-    return <QuizQuestionModel>[
+    final List<QuizQuestionModel> templates = <QuizQuestionModel>[
       QuizQuestionModel.fromJson(<String, dynamic>{
         'id': 'listening',
         'type': 'listening',
@@ -115,6 +117,14 @@ class QuizMockService {
         'correctMeaning': 'Meaning: The object is an apple, which is Mela in Italian.',
       }),
     ];
+
+    final Random random = Random();
+    return List<QuizQuestionModel>.generate(questionCount, (int index) {
+      final QuizQuestionModel base = templates[random.nextInt(templates.length)];
+      final Map<String, dynamic> json = base.toJson();
+      json['id'] = '${base.id}_$index';
+      return QuizQuestionModel.fromJson(json);
+    });
   }
 
   Future<QuizLessonCompleteModel> fetchLessonComplete() async {

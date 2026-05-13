@@ -147,7 +147,10 @@ class CourseDetailView extends GetView<CourseDetailController> {
                   130.h,
                 ),
                 sliver: SliverToBoxAdapter(
-                  child: CourseFinalExamCard(finalExam: detail.finalExam),
+                  child: CourseFinalExamCard(
+                    finalExam: detail.finalExam,
+                    onTap: controller.openFinalExam,
+                  ),
                 ),
               ),
             ],

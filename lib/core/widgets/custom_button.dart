@@ -168,12 +168,10 @@ class _ButtonContent extends StatelessWidget {
         Flexible(
           child: Text(
             widget.text.tr,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: widget.textSize.sp,
               fontWeight: FontWeight.w800,
-              letterSpacing: 1.1,
               color: widget.textColor,
             ),
           ),

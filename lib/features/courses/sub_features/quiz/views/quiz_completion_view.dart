@@ -22,137 +22,139 @@ class QuizCompletionView extends GetView<QuizController> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.coursesDetailBg,
-      child: SafeArea(
-        bottom: false,
-        child: Obx(
-          () {
-            final QuizLessonCompleteModel? complete =
-                controller.lessonComplete.value;
+    return Scaffold(
+      backgroundColor: AppColors.coursesDetailBg,
+      body: SafeArea(
+        child: Obx(() {
+          final QuizLessonCompleteModel? complete =
+              controller.lessonComplete.value;
 
-            if (controller.isCompleting.value && complete == null) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primaryGreen),
-              );
-            }
+          if (controller.isCompleting.value && complete == null) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+            );
+          }
 
-            if (complete == null) {
-              return const SizedBox.shrink();
-            }
+          if (complete == null) {
+            return const SizedBox.shrink();
+          }
 
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(
-                kLessonCompleteHorizontalPadding.w,
-                38.h,
-                kLessonCompleteHorizontalPadding.w,
-                42.h,
-              ),
-              child: Column(
-                children: <Widget>[
-                  _CompletionTopBar(
-                    title: complete.title,
-                    onCloseTap: () => Get.back<bool>(result: true),
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              kLessonCompleteHorizontalPadding.w,
+              20.h,
+              kLessonCompleteHorizontalPadding.w,
+              20.h,
+            ),
+            child: Column(
+              children: <Widget>[
+                _CompletionTopBar(
+                  title: complete.title,
+                  onCloseTap: () => Get.back<bool>(result: true),
+                ),
+                SizedBox(height: 26.h),
+                LessonTrophyHero(size: kLessonCompleteHeroSize),
+                SizedBox(height: 12.h),
+                Text(
+                  complete.headline,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font42.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.primaryGreen,
+                    height: 1,
                   ),
-                  SizedBox(height: 46.h),
-                  LessonTrophyHero(size: kLessonCompleteHeroSize),
-                  SizedBox(height: 18.h),
-                  Text(
-                    complete.headline,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFont.font56.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.primaryGreen,
-                      height: 1,
-                    ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  'You completed ${complete.chapterTitle}!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.bodyText,
                   ),
-                  SizedBox(height: 14.h),
-                  Text(
-                    'You completed ${complete.chapterTitle}!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFont.font24.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.bodyText,
-                    ),
-                  ),
-                  SizedBox(height: 44.h),
-                  LessonXpPill(complete: complete),
-                  SizedBox(height: 26.h),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: LessonMetricCard(
-                          icon: Icons.track_changes_rounded,
-                          value: '${complete.accuracyPercent}%',
-                          label: 'ACCURACY',
-                          backgroundColor: AppColors.lessonAccuracyBg,
-                          iconBackgroundColor: AppColors.homeLime,
-                          valueColor: AppColors.primaryGreen,
-                        ),
+                ),
+                SizedBox(height: 30.h),
+                LessonXpPill(complete: complete),
+                SizedBox(height: 20.h),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: LessonMetricCard(
+                        icon: Icons.track_changes_rounded,
+                        value: '${complete.accuracyPercent}%',
+                        label: 'ACCURACY',
+                        backgroundColor: AppColors.lessonAccuracyBg,
+                        iconBackgroundColor: AppColors.homeLime,
+                        valueColor: AppColors.primaryGreen,
                       ),
-                      SizedBox(width: 22.w),
-                      Expanded(
-                        child: LessonMetricCard(
-                          icon: Icons.local_fire_department_rounded,
-                          value: complete.timeTaken,
-                          label: 'TIME TAKEN',
-                          backgroundColor: AppColors.lessonTimeBg,
-                          iconBackgroundColor: AppColors.reportReviewIconBg,
-                          valueColor: AppColors.lessonTimeText,
+                    ),
+                    SizedBox(width: 20.w),
+                    Expanded(
+                      child: LessonMetricCard(
+                        icon: Icons.local_fire_department_rounded,
+                        value: complete.timeTaken,
+                        label: 'TIME TAKEN',
+                        backgroundColor: AppColors.lessonTimeBg,
+                        iconBackgroundColor: AppColors.reportReviewIconBg,
+                        valueColor: AppColors.lessonTimeText,
+                      ),
+                    ),
+                  ],
+                ),
+                if (complete.hasXpBoost) ...<Widget>[
+                  SizedBox(height: 20.h),
+                  LessonBoostPill(complete: complete),
+                ],
+                SizedBox(height: 20.h),
+                LessonSimplePill(
+                  icon: Icons.shield_outlined,
+                  title: complete.leagueMessage,
+                  iconColor: AppColors.lessonTimeText,
+                ),
+                SizedBox(height: 24.h),
+                LessonSimplePill(
+                  icon: Icons.local_fire_department_rounded,
+                  subtitle: 'DAILY STREAK',
+                  title: '${complete.streakDays} Days',
+                  iconColor: AppColors.blockDangerRed,
+                  backgroundColor: AppColors.lessonStreakBg,
+                ),
+                SizedBox(height: 50.h),
+                GestureDetector(
+                  onTap: _openReviewAnswers,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Icons.search_rounded,
+                        size: 20.w,
+                        color: AppColors.lessonTimeText,
+                      ),
+                      SizedBox(width: 10.w),
+                      Text(
+                        'Review Answers',
+                        style: TextStyle(
+                          fontSize: AppFont.font14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.lessonTimeText,
                         ),
                       ),
                     ],
                   ),
-                  if (complete.hasXpBoost) ...<Widget>[
-                    SizedBox(height: 28.h),
-                    LessonBoostPill(complete: complete),
-                  ],
-                  SizedBox(height: 34.h),
-                  LessonSimplePill(
-                    icon: Icons.shield_outlined,
-                    title: complete.leagueMessage,
-                    iconColor: AppColors.lessonTimeText,
-                  ),
-                  SizedBox(height: 30.h),
-                  LessonSimplePill(
-                    icon: Icons.local_fire_department_rounded,
-                    subtitle: 'DAILY STREAK',
-                    title: '${complete.streakDays} Days',
-                    iconColor: AppColors.blockDangerRed,
-                    backgroundColor: AppColors.lessonStreakBg,
-                  ),
-                  SizedBox(height: 42.h),
-                  GestureDetector(
-                    onTap: _openReviewAnswers,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(Icons.search_rounded, size: 22.w, color: AppColors.lessonTimeText),
-                        SizedBox(width: 10.w),
-                        Text(
-                          'Review Answers',
-                          style: TextStyle(
-                            fontSize: AppFont.font18.sp,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.lessonTimeText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 34.h),
-                  CustomButton.primary(
-                    onPressed: () => _showMilestoneDialog(complete),
-                    text: 'CONTINUE',
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+                SizedBox(height: 24.h),
+                CustomButton.primary(
+                  onPressed: () => _showMilestoneDialog(complete),
+                  text: 'CONTINUE',
+                ),
+                SizedBox(height: 24.h),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
@@ -191,20 +193,24 @@ class _CompletionTopBar extends StatelessWidget {
       children: <Widget>[
         GestureDetector(
           onTap: onCloseTap,
-          child: Icon(Icons.close_rounded, size: 32.w, color: AppColors.bodyText),
+          child: Icon(
+            Icons.close_rounded,
+            size: 22.w,
+            color: AppColors.bodyText,
+          ),
         ),
         Expanded(
           child: Text(
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: AppFont.font22.sp,
+              fontSize: AppFont.font18.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.primaryGreen,
             ),
           ),
         ),
-        Icon(Icons.share_rounded, size: 30.w, color: AppColors.bodyText),
+        Icon(Icons.share_rounded, size: 20.w, color: AppColors.bodyText),
       ],
     );
   }

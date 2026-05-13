@@ -23,22 +23,22 @@ class _ListeningAssemblyPanel extends StatelessWidget {
         Text(
           question.title,
           style: TextStyle(
-            fontSize: AppFont.font34.sp,
-            fontWeight: FontWeight.w900,
+            fontSize: AppFont.font26.sp,
+            fontWeight: FontWeight.w800,
             color: AppColors.homePrimaryText,
             height: 1.2,
           ),
         ),
-        SizedBox(height: 42.h),
+        SizedBox(height: 30.h),
         const AudioPromptCard(compact: true),
-        SizedBox(height: 58.h),
+        SizedBox(height: 30.h),
         _AssemblyLines(
           selectedWords: selectedWords,
           slotCount: question.answerWordCount,
           isWrong: showWrongResult,
           onWordTap: onSelectedWordTap,
         ),
-        SizedBox(height: 46.h),
+        SizedBox(height: 30.h),
         _WordBank(
           words: question.options,
           selected: selectedWords,
@@ -81,8 +81,12 @@ class _MatchingPairsPanel extends StatelessWidget {
 
     return Column(
       children: <Widget>[
-        _TitleBlock(title: question.title, subtitle: question.subtitle, center: true),
-        SizedBox(height: 58.h),
+        _TitleBlock(
+          title: question.title,
+          subtitle: question.subtitle,
+          center: true,
+        ),
+        SizedBox(height: 30.h),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -94,7 +98,7 @@ class _MatchingPairsPanel extends StatelessWidget {
                 onTap: onLeftTap,
               ),
             ),
-            SizedBox(width: 32.w),
+            SizedBox(width: 20.w),
             Expanded(
               child: _PairColumn(
                 words: rightOptions,
@@ -159,10 +163,10 @@ class _WritingWordPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _ImagePlaceholder(height: kQuizImageCardHeight, showBook: true),
-        SizedBox(height: 48.h),
+        SizedBox(height: 30.h),
         Container(
-          height: 92.h,
           width: double.infinity,
+          padding: EdgeInsets.symmetric(vertical: 26.h),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: AppColors.white,
@@ -178,55 +182,67 @@ class _WritingWordPanel extends StatelessWidget {
           child: Text(
             question.objectLabel ?? '',
             style: TextStyle(
-              fontSize: AppFont.font34.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font28.sp,
+              fontWeight: FontWeight.w800,
               color: AppColors.homePrimaryText,
             ),
           ),
         ),
-        SizedBox(height: 46.h),
-        _TitleBlock(title: question.title, subtitle: question.subtitle),
         SizedBox(height: 30.h),
+        _TitleBlock(title: question.title, subtitle: question.subtitle),
+        SizedBox(height: 20.h),
         TextField(
           controller: answerController,
           cursorColor: AppColors.primaryGreen,
           style: TextStyle(
-            fontSize: AppFont.font20.sp,
-            fontWeight: FontWeight.w900,
-            color: showWrongResult ? AppColors.quizWrongBorder : AppColors.homePrimaryText,
+            fontSize: AppFont.font18.sp,
+            fontWeight: FontWeight.w800,
+            color: showWrongResult
+                ? AppColors.quizWrongBorder
+                : AppColors.homePrimaryText,
           ),
           readOnly: showWrongResult,
           decoration: InputDecoration(
             hintText: 'Type in Italian...',
             hintStyle: TextStyle(
-              fontSize: AppFont.font20.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font18.sp,
+              fontWeight: FontWeight.w800,
               color: AppColors.homeSecondaryText,
             ),
             filled: true,
-            fillColor: showWrongResult ? AppColors.quizWrongLightBg : AppColors.legacyColorFFF1F2F2,
+            fillColor: showWrongResult
+                ? AppColors.quizWrongLightBg
+                : AppColors.legacyColorFFF1F2F2,
             suffixIcon: Icon(
               Icons.edit_note_rounded,
               color: AppColors.bodyText,
-              size: 30.w,
+              size: 22.w,
             ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 22.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 28.w,
+              vertical: 22.h,
+            ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
               borderSide: BorderSide(
-                color: showWrongResult ? AppColors.quizWrongBorder : AppColors.modalBorderGrey,
+                color: showWrongResult
+                    ? AppColors.quizWrongBorder
+                    : AppColors.modalBorderGrey,
                 width: 2.w,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
               borderSide: BorderSide(
-                color: showWrongResult ? AppColors.quizWrongBorder : AppColors.primaryGreen,
+                color: showWrongResult
+                    ? AppColors.quizWrongBorder
+                    : AppColors.primaryGreen,
                 width: 2.w,
               ),
             ),
           ),
         ),
+        SizedBox(height: 30.h),
       ],
     );
   }
@@ -249,21 +265,26 @@ class _IdentifyImagePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        _TitleBlock(title: question.title, subtitle: question.subtitle, center: true),
-        SizedBox(height: 58.h),
+        _TitleBlock(
+          title: question.title,
+          subtitle: question.subtitle,
+          center: true,
+        ),
+        SizedBox(height: 30.h),
         _ImagePlaceholder(height: 320),
-        SizedBox(height: 60.h),
+        SizedBox(height: 30.h),
         GridView.builder(
           itemCount: question.options.length,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            childAspectRatio: 1.95,
-            crossAxisSpacing: 28.w,
-            mainAxisSpacing: 28.h,
+            childAspectRatio: 2.2,
+            crossAxisSpacing: 16.w,
+            mainAxisSpacing: 16.h,
           ),
           itemBuilder: (_, int index) => CustomQuizButton(
+            radius: kRadius32,
             label: question.options[index],
             isSelected: !showWrongResult && selectedIndex == index,
             isWrong: showWrongResult && selectedIndex == index,
@@ -280,24 +301,40 @@ class _TitleBlock extends StatelessWidget {
   final String subtitle;
   final bool center;
 
-  const _TitleBlock({required this.title, this.subtitle = '', this.center = false});
+  const _TitleBlock({
+    required this.title,
+    this.subtitle = '',
+    this.center = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: center ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      crossAxisAlignment: center
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           title,
           textAlign: center ? TextAlign.center : TextAlign.start,
-          style: TextStyle(fontSize: AppFont.font34.sp, fontWeight: FontWeight.w900, color: AppColors.homePrimaryText, height: 1.22),
+          style: TextStyle(
+            fontSize: AppFont.font26.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColors.homePrimaryText,
+            height: 1.22,
+          ),
         ),
         if (subtitle.isNotEmpty) ...<Widget>[
-          SizedBox(height: 14.h),
+          SizedBox(height: 8.h),
           Text(
             subtitle,
             textAlign: center ? TextAlign.center : TextAlign.start,
-            style: TextStyle(fontSize: AppFont.font20.sp, fontWeight: FontWeight.w500, color: AppColors.bodyText, height: 1.35),
+            style: TextStyle(
+              fontSize: AppFont.font16.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.bodyText,
+              height: 1.35,
+            ),
           ),
         ],
       ],
@@ -314,7 +351,12 @@ class _Eyebrow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TextStyle(fontSize: AppFont.font16.sp, fontWeight: FontWeight.w900, color: AppColors.primaryGreen, letterSpacing: 2.6),
+      style: TextStyle(
+        fontSize: AppFont.font14.sp,
+        fontWeight: FontWeight.w700,
+        color: AppColors.primaryGreen,
+        letterSpacing: 1.5,
+      ),
     );
   }
 }
@@ -334,7 +376,9 @@ class _WordDropArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int remainingSlots = (slotCount - selectedWords.length).clamp(0, slotCount).toInt();
+    final int remainingSlots = (slotCount - selectedWords.length)
+        .clamp(0, slotCount)
+        .toInt();
 
     return Container(
       width: double.infinity,
@@ -382,7 +426,9 @@ class _AssemblyLines extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int remainingSlots = (slotCount - selectedWords.length).clamp(0, slotCount).toInt();
+    final int remainingSlots = (slotCount - selectedWords.length)
+        .clamp(0, slotCount)
+        .toInt();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -467,28 +513,30 @@ class _WordChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: kQuizSmallWordChipHeight.h,
-        constraints: BoxConstraints(minWidth: isBlank ? 112.w : 0),
-        padding: EdgeInsets.symmetric(horizontal: 26.w),
+        padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: isWrong
               ? AppColors.quizWrongLightBg
               : isDisabled
-                  ? AppColors.legacyColorFFD4D6D7
-                  : AppColors.white,
+              ? AppColors.legacyColorFFD4D6D7
+              : AppColors.white,
           borderRadius: BorderRadius.circular(kHomePillRadius.r),
           border: Border.all(
             color: isWrong
                 ? AppColors.quizWrongBorder
                 : isSelected
-                    ? AppColors.homeLime
-                    : AppColors.modalBorderGrey,
+                ? AppColors.homeLime
+                : AppColors.modalBorderGrey,
             width: 1.5.w,
           ),
           boxShadow: isSelected || isDisabled || isWrong
               ? const <BoxShadow>[]
               : <BoxShadow>[
-                  BoxShadow(color: AppColors.quizAnswerShadow, blurRadius: 0, offset: Offset(0, 4.h)),
+                  BoxShadow(
+                    color: AppColors.quizAnswerShadow,
+                    blurRadius: 0,
+                    offset: Offset(0, 3.h),
+                  ),
                 ],
         ),
         child: Center(
@@ -497,13 +545,13 @@ class _WordChip extends StatelessWidget {
           child: Text(
             word,
             style: TextStyle(
-              fontSize: AppFont.font20.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font16.sp,
+              fontWeight: FontWeight.w700,
               color: isWrong
                   ? AppColors.quizWrongBorder
                   : isDisabled
-                      ? AppColors.homeMutedText
-                      : AppColors.primaryGreen,
+                  ? AppColors.homeMutedText
+                  : AppColors.primaryGreen,
             ),
           ),
         ),
@@ -524,7 +572,7 @@ class _DashedBlank extends StatelessWidget {
       height: kQuizSmallWordChipHeight.h,
       decoration: BoxDecoration(
         color: AppColors.legacyColorFFF1F2F2,
-        borderRadius: BorderRadius.circular(kRadius22.r),
+        borderRadius: BorderRadius.circular(kRadius48.r),
         border: Border.all(color: AppColors.legacyColorFFABABAB, width: 2.w),
       ),
     );
@@ -540,44 +588,50 @@ class _ImagePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height.h,
       width: double.infinity,
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(kRadius28.r),
+        borderRadius: BorderRadius.circular(kRadius48.r),
         border: Border.all(color: AppColors.modalBorderGrey, width: 2.w),
-        boxShadow: <BoxShadow>[BoxShadow(color: AppColors.quizAnswerShadow, blurRadius: 0, offset: Offset(0, 10.h))],
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: AppColors.quizAnswerShadow,
+            blurRadius: 0,
+            offset: Offset(0, 10.h),
+          ),
+        ],
       ),
       child: Stack(
         children: <Widget>[
           Center(
             child: Container(
-              width: showBook ? 150.w : 278.w,
-              height: showBook ? 150.w : 248.w,
+              height: height.h,
               decoration: BoxDecoration(
-                color: AppColors.legacyColorFFF1F2F2,
-                borderRadius: BorderRadius.circular(kRadius24.r),
+                color: showBook
+                    ? AppColors.white
+                    : AppColors.legacyColorFFF1F2F2,
+                borderRadius: BorderRadius.circular(kRadius48.r),
               ),
               alignment: Alignment.center,
-              child: Text('🍎', style: TextStyle(fontSize: showBook ? 92.sp : 160.sp)),
+              child: Text(
+                '🍎',
+                style: TextStyle(fontSize: showBook ? 92.sp : 160.sp),
+              ),
             ),
           ),
           if (showBook)
             Positioned(
               right: 24.w,
               top: 24.h,
-              child: Icon(Icons.menu_book_rounded, color: AppColors.modalBorderGrey, size: 34.w),
+              child: Icon(
+                Icons.menu_book_rounded,
+                color: AppColors.modalBorderGrey,
+                size: 34.w,
+              ),
             ),
         ],
       ),
     );
   }
-}
-
-TextStyle _bigPromptStyle(BuildContext context) {
-  return TextStyle(
-    fontSize: AppFont.font34.sp,
-    fontWeight: FontWeight.w900,
-    color: AppColors.homePrimaryText,
-  );
 }

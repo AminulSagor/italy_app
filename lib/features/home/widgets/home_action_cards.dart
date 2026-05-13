@@ -76,7 +76,9 @@ class WebinarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onJoinTap,
+      child: Container(
       height: kHomeWebinarCardHeight.h,
       padding: EdgeInsets.fromLTRB(30.w, 26.h, 26.w, 24.h),
       decoration: BoxDecoration(
@@ -144,6 +146,7 @@ class WebinarCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

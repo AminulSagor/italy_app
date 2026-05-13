@@ -24,4 +24,14 @@ class AppRoutes {
   static const String proOrderSummary = '/courses/pro/order-summary';
   static const String proCheckout = '/courses/pro/checkout';
   static const String proPurchaseSuccess = '/courses/pro/purchase-success';
+  static const String courseCertificate = '/courses/certificate';
+
+  static const String finalExamOverview = '/courses/final-exam';
+  static const String finalExamListening = '/courses/final-exam/listening';
+  static const String finalExamWriting = '/courses/final-exam/writing';
+  static const String finalExamSpeaking = '/courses/final-exam/speaking';
+  static const String finalExamSuccess = '/courses/final-exam/success';
+  static const String finalExamResult = '/courses/final-exam/result';
+  static const String webinar = '/webinar';
+  static const String webinarLive = '/webinar/live';
 }

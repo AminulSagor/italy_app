@@ -132,7 +132,7 @@ class _LessonContentCardState extends State<LessonContentCard> {
               ],
             ),
           ),
-          Divider(),
+          Divider(height: 20.h),
           SizedBox(
             width: double.infinity,
             child: Text(
@@ -172,45 +172,6 @@ class _LessonContentCardState extends State<LessonContentCard> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _SliderMock extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.centerLeft,
-      children: <Widget>[
-        Container(
-          height: 10.h,
-          decoration: BoxDecoration(
-            color: AppColors.legacyColorFFD0D1D2,
-            borderRadius: BorderRadius.circular(kHomePillRadius.r),
-          ),
-        ),
-        FractionallySizedBox(
-          widthFactor: 0.43,
-          child: Container(
-            height: 10.h,
-            decoration: BoxDecoration(
-              color: AppColors.primaryGreen,
-              borderRadius: BorderRadius.circular(kHomePillRadius.r),
-            ),
-          ),
-        ),
-        Positioned(
-          left: 118.w,
-          child: Container(
-            width: 24.w,
-            height: 24.w,
-            decoration: const BoxDecoration(
-              color: AppColors.primaryGreen,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

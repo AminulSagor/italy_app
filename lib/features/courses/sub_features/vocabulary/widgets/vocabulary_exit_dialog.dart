@@ -19,11 +19,11 @@ class VocabularyExitDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: EdgeInsets.symmetric(horizontal: 34.w),
+      insetPadding: EdgeInsets.symmetric(horizontal: 16.w),
       backgroundColor: AppColors.transparent,
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.fromLTRB(34.w, 58.h, 34.w, 44.h),
+        padding: EdgeInsets.fromLTRB(16.w, 58.h, 16.w, 44.h),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(kQuizExitDialogRadius.r),
@@ -52,10 +52,10 @@ class VocabularyExitDialog extends StatelessWidget {
                   ),
                   Positioned(
                     right: -6.w,
-                    bottom: 10.h,
+                    bottom: 4.h,
                     child: Container(
-                      width: 54.w,
-                      height: 54.w,
+                      width: 48.w,
+                      height: 48.w,
                       decoration: BoxDecoration(
                         color: AppColors.homeOrange,
                         shape: BoxShape.circle,
@@ -71,58 +71,41 @@ class VocabularyExitDialog extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 48.h),
+            SizedBox(height: 32.h),
             Text(
               'Wait! Are you sure?',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: AppFont.font38.sp,
-                fontWeight: FontWeight.w900,
+                fontSize: AppFont.font28.sp,
+                fontWeight: FontWeight.w800,
                 color: AppColors.primaryGreen,
               ),
             ),
-            SizedBox(height: 28.h),
+            SizedBox(height: 16.h),
             Text(
-              "If you quit now, you'll lose your\nprogress.",
+              "If you quit now, you'll lose your progress.",
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: AppFont.font26.sp,
+                fontSize: AppFont.font18.sp,
                 fontWeight: FontWeight.w500,
                 height: 1.45,
                 color: AppColors.bodyText,
               ),
             ),
-            SizedBox(height: 52.h),
+            SizedBox(height: 68.h),
             CustomButton.primary(
               onPressed: onKeepGoingTap,
               text: 'Keep Going',
               icon: Icons.play_arrow_rounded,
             ),
-            SizedBox(height: 28.h),
-            GestureDetector(
-              onTap: onQuitTap,
-              child: Container(
-                height: 68.h,
-                width: double.infinity,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(kHomePillRadius.r),
-                  border: Border.all(
-                    color: AppColors.profileReportBorder,
-                    width: 2.w,
-                  ),
-                ),
-                child: Text(
-                  'QUIT VOCABULARY',
-                  style: TextStyle(
-                    fontSize: AppFont.font22.sp,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.6,
-                    color: AppColors.blockDangerRed,
-                  ),
-                ),
-              ),
+            SizedBox(height: 16.h),
+            CustomButton(
+              onPressed: onQuitTap,
+              text: 'Quit Vocabulary',
+              textColor: AppColors.blockDangerRed,
+              btnColor: AppColors.transparent,
+              borderColor: AppColors.blockDangerRed,
+              showShadow: false,
             ),
           ],
         ),

@@ -24,84 +24,87 @@ class QuizReviewAnswersView extends GetView<QuizController> {
       color: AppColors.coursesDetailBg,
       child: SafeArea(
         bottom: false,
-        child: Obx(
-          () {
-            return Column(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.fromLTRB(22.w, 22.h, 22.w, 18.h),
-                  child: _ReviewTopBar(
-                    score: '${controller.correctAnswerCount}/${controller.totalQuestions}',
-                    onCloseTap: () => Get.back<void>(),
-                  ),
+        child: Obx(() {
+          return Column(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 16.h),
+                child: _ReviewTopBar(
+                  score:
+                      '${controller.correctAnswerCount}/${controller.totalQuestions}',
+                  onCloseTap: () => Get.back<void>(),
                 ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(22.w, 0, 22.w, 24.h),
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(height: 12.h),
-                        Text(
-                          'Great Effort!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: AppFont.font28.sp,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.homePrimaryText,
-                          ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(22.w, 0, 22.w, 24.h),
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 12.h),
+                      Text(
+                        'Great Effort!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: AppFont.font24.sp,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.homePrimaryText,
                         ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          "Let's look at how you did in your Italian\nbasics.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: AppFont.font14.sp,
-                            fontWeight: FontWeight.w600,
-                            height: 1.35,
-                            color: AppColors.bodyText,
-                          ),
-                        ),
-                        SizedBox(height: 26.h),
-                        ...controller.questions.map((QuizQuestionModel question) {
-                          final QuizAnswerReviewModel? review =
-                              _findReview(question.id);
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 24.h),
-                            child: ReviewAnswerCard(
-                              question: question,
-                              review: review,
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.fromLTRB(22.w, 20.h, 22.w, 24.h),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: AppColors.homeNeutralShadow,
-                        blurRadius: 18.r,
-                        offset: Offset(0, -8.h),
                       ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        "Let's look at how you did in your Italian\nbasics.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: AppFont.font12.sp,
+                          fontWeight: FontWeight.w500,
+                          height: 1.35,
+                          color: AppColors.bodyText,
+                        ),
+                      ),
+                      SizedBox(height: 26.h),
+                      ...controller.questions.map((QuizQuestionModel question) {
+                        final QuizAnswerReviewModel? review = _findReview(
+                          question.id,
+                        );
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 24.h),
+                          child: ReviewAnswerCard(
+                            question: question,
+                            review: review,
+                          ),
+                        );
+                      }),
                     ],
                   ),
-                  child: SafeArea(
-                    top: false,
-                    child: CustomButton.primary(
-                      onPressed: () => Get.back<void>(),
-                      text: 'Done',
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(22.w, 20.h, 22.w, 24.h),
+                decoration: BoxDecoration(
+                  color: AppColors.white.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(kRadius16.r),
+                  ),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: AppColors.homeNeutralShadow,
+                      blurRadius: 18.r,
+                      offset: Offset(0, -8.h),
                     ),
+                  ],
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: CustomButton.primary(
+                    onPressed: () => Get.back<void>(),
+                    text: 'Done',
                   ),
                 ),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -135,7 +138,11 @@ class _ReviewTopBar extends StatelessWidget {
               color: AppColors.legacyColorFFF1F2F2,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.close_rounded, size: 22.w, color: AppColors.bodyText),
+            child: Icon(
+              Icons.close_rounded,
+              size: 20.w,
+              color: AppColors.bodyText,
+            ),
           ),
         ),
         SizedBox(width: 18.w),
@@ -143,14 +150,14 @@ class _ReviewTopBar extends StatelessWidget {
           child: Text(
             'Review Answers',
             style: TextStyle(
-              fontSize: AppFont.font18.sp,
+              fontSize: AppFont.font16.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.primaryGreen,
             ),
           ),
         ),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
           decoration: BoxDecoration(
             color: AppColors.homeLime,
             borderRadius: BorderRadius.circular(kHomePillRadius.r),
@@ -158,8 +165,8 @@ class _ReviewTopBar extends StatelessWidget {
           child: Text(
             score,
             style: TextStyle(
-              fontSize: AppFont.font14.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font12.sp,
+              fontWeight: FontWeight.w800,
               color: AppColors.primaryGreen,
             ),
           ),

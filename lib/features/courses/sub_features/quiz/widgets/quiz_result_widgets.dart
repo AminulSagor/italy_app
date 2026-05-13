@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:italir_pothe/core/widgets/custom_button.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -33,7 +34,7 @@ class QuizCorrectAnswerSheet extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.quizCorrectSheetBg,
               borderRadius: BorderRadius.vertical(
-                top: Radius.circular(kQuizCorrectSheetRadius.r),
+                top: Radius.circular(kRadius48.r),
               ),
             ),
             child: SafeArea(
@@ -46,8 +47,8 @@ class QuizCorrectAnswerSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Container(
-                        width: kQuizCorrectSheetIconSize.w,
-                        height: kQuizCorrectSheetIconSize.w,
+                        width: 64.w,
+                        height: 64.w,
                         decoration: const BoxDecoration(
                           color: AppColors.quizCorrectIconBg,
                           shape: BoxShape.circle,
@@ -55,7 +56,7 @@ class QuizCorrectAnswerSheet extends StatelessWidget {
                         child: Icon(
                           Icons.check_rounded,
                           color: AppColors.white,
-                          size: 48.w,
+                          size: 32.w,
                         ),
                       ),
                       SizedBox(width: 24.w),
@@ -66,8 +67,8 @@ class QuizCorrectAnswerSheet extends StatelessWidget {
                             Text(
                               'Excellent!',
                               style: TextStyle(
-                                fontSize: AppFont.font34.sp,
-                                fontWeight: FontWeight.w900,
+                                fontSize: AppFont.font22.sp,
+                                fontWeight: FontWeight.w700,
                                 color: AppColors.primaryGreen,
                               ),
                             ),
@@ -75,7 +76,7 @@ class QuizCorrectAnswerSheet extends StatelessWidget {
                             Text(
                               meaning,
                               style: TextStyle(
-                                fontSize: AppFont.font24.sp,
+                                fontSize: AppFont.font16.sp,
                                 fontWeight: FontWeight.w700,
                                 height: 1.35,
                                 color: AppColors.primaryGreen,
@@ -86,8 +87,11 @@ class QuizCorrectAnswerSheet extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 58.h),
-                  CustomQuizButton(label: 'Continue', onTap: onContinueTap),
+                  SizedBox(height: 30.h),
+                  CustomButton.primary(
+                    text: 'Continue',
+                    onPressed: onContinueTap,
+                  ),
                 ],
               ),
             ),
@@ -117,15 +121,19 @@ class QuizWrongAnswerFeedback extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Container(
-            width: 64.w,
-            height: 64.w,
+            width: 48.w,
+            height: 48.w,
             decoration: const BoxDecoration(
               color: AppColors.notificationRed,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.close_rounded, color: AppColors.white, size: 36.w),
+            child: Icon(
+              Icons.close_rounded,
+              color: AppColors.white,
+              size: 36.w,
+            ),
           ),
-          SizedBox(width: 22.w),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,8 +141,8 @@ class QuizWrongAnswerFeedback extends StatelessWidget {
                 Text(
                   'Oh no!',
                   style: TextStyle(
-                    fontSize: AppFont.font20.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.quizWrongBorder,
                   ),
                 ),
@@ -142,8 +150,8 @@ class QuizWrongAnswerFeedback extends StatelessWidget {
                 Text(
                   "That's not quite right.",
                   style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w400,
                     color: AppColors.quizWrongBorder,
                   ),
                 ),
@@ -151,16 +159,16 @@ class QuizWrongAnswerFeedback extends StatelessWidget {
                 Text(
                   'Correct Answer:',
                   style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w400,
                     color: AppColors.primaryGreen,
                   ),
                 ),
                 Text(
                   correctAnswer,
                   style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w700,
                     height: 1.25,
                     color: AppColors.primaryGreen,
                   ),

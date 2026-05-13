@@ -70,6 +70,18 @@ class CourseDetailController extends GetxController {
     );
   }
 
+  Future<void> openFinalExam() async {
+    final String tag = 'final_exam_${course.id}_${DateTime.now().millisecondsSinceEpoch}';
+
+    await Get.toNamed(
+      AppRoutes.finalExamOverview,
+      arguments: FinalExamRouteArguments(
+        controllerTag: tag,
+        courseId: course.id,
+      ),
+    );
+  }
+
   Future<void> openChapter(CourseChapterModel chapter) async {
     if (chapter.state == CourseChapterState.locked) {
       return;

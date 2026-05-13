@@ -8,12 +8,19 @@ import '../models/course_models.dart';
 
 class CourseFinalExamCard extends StatelessWidget {
   final CourseFinalExamModel finalExam;
+  final VoidCallback? onTap;
 
-  const CourseFinalExamCard({super.key, required this.finalExam});
+  const CourseFinalExamCard({
+    super.key,
+    required this.finalExam,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 38.h),
       decoration: BoxDecoration(
@@ -100,6 +107,7 @@ class CourseFinalExamCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

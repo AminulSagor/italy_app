@@ -1,0 +1,196 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+
+import '../../../../../core/themes/app_colors.dart';
+import '../../../../../core/themes/app_constants.dart';
+import '../../../../../core/themes/app_font.dart';
+import '../controllers/final_exam_controller.dart';
+import '../models/final_exam_models.dart';
+import '../widgets/final_exam_common_widgets.dart';
+
+class FinalExamOverviewView extends GetView<FinalExamController> {
+  final String controllerTag;
+
+  const FinalExamOverviewView({super.key, required this.controllerTag});
+
+  @override
+  String? get tag => controllerTag;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.coursesDetailBg,
+      bottomNavigationBar: FinalExamBottomButton(
+        label: 'Start The Exam',
+        onTap: controller.startExam,
+      ),
+      body: SafeArea(
+        bottom: false,
+        child: Obx(() {
+          final FinalExamOverviewModel? overview = controller.overview.value;
+
+          if (controller.isLoading.value && overview == null) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+            );
+          }
+
+          if (overview == null) {
+            return const SizedBox.shrink();
+          }
+
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(28.w, 38.h, 28.w, 132.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                FinalExamTopBar(
+                  title: overview.title,
+                  onBackTap: () => Get.back<void>(),
+                ),
+                SizedBox(height: 46.h),
+                _HeroCard(overview: overview),
+                SizedBox(height: 46.h),
+                Text(
+                  'EXAM COMPONENTS',
+                  style: TextStyle(
+                    fontSize: AppFont.font18.sp,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2.4,
+                    color: AppColors.bodyText,
+                  ),
+                ),
+                SizedBox(height: 22.h),
+                ...overview.components.map(
+                  (FinalExamComponentModel item) => Padding(
+                    padding: EdgeInsets.only(bottom: 18.h),
+                    child: FinalExamComponentTile(component: item),
+                  ),
+                ),
+                SizedBox(height: 22.h),
+                _ManualReviewNote(
+                  bangla: overview.noteBangla,
+                  english: overview.noteEnglish,
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _HeroCard extends StatelessWidget {
+  final FinalExamOverviewModel overview;
+
+  const _HeroCard({required this.overview});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(24.w, 34.h, 24.w, 34.h),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[AppColors.homeDarkGreen, AppColors.primaryGreen],
+        ),
+        borderRadius: BorderRadius.circular(kRadius42.r),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: AppColors.homeNeutralShadow,
+            blurRadius: 22.r,
+            offset: Offset(0, 12.h),
+          ),
+        ],
+      ),
+      child: Column(
+        children: <Widget>[
+          Icon(Icons.school_rounded, color: AppColors.homePaleGreen, size: 110.w),
+          SizedBox(height: 20.h),
+          Text(
+            overview.heroTitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: AppFont.font34.sp,
+              fontWeight: FontWeight.w900,
+              color: AppColors.white,
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            overview.heroSubtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: AppFont.font18.sp,
+              fontWeight: FontWeight.w500,
+              height: 1.45,
+              color: AppColors.homePaleGreen,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ManualReviewNote extends StatelessWidget {
+  final String bangla;
+  final String english;
+
+  const _ManualReviewNote({required this.bangla, required this.english});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(28.w),
+      decoration: BoxDecoration(
+        color: AppColors.reportReviewBg,
+        borderRadius: BorderRadius.circular(kRadius34.r),
+        border: Border.all(
+          color: AppColors.reportReviewText.withValues(alpha: 0.35),
+          width: 2.w,
+          style: BorderStyle.solid,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Icon(Icons.manage_search_rounded, color: AppColors.reportReviewText, size: 54.w),
+          SizedBox(width: 24.w),
+          Expanded(
+            child: Column(
+              children: <Widget>[
+                Text(
+                  bangla,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font17.sp,
+                    fontWeight: FontWeight.w700,
+                    height: 1.55,
+                    color: AppColors.reportReviewText,
+                  ),
+                ),
+                SizedBox(height: 18.h),
+                Text(
+                  english,
+                  style: TextStyle(
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w700,
+                    height: 1.45,
+                    color: AppColors.reportReviewText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

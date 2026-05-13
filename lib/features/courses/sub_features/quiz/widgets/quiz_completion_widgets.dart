@@ -18,24 +18,17 @@ class LessonTrophyHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size.w,
-      height: size.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppColors.lessonMilestoneGlow,
-            blurRadius: compact ? 58.r : 90.r,
-            spreadRadius: compact ? 16.r : 30.r,
+            color: AppColors.lessonMilestoneGlow.withValues(alpha: 0.12),
+            blurRadius: 50,
+            spreadRadius: 0,
           ),
         ],
       ),
-      child: Center(
-        child: Text(
-          '🏆',
-          style: TextStyle(fontSize: compact ? 128.sp : 170.sp),
-        ),
-      ),
+      child: Center(child: Image.asset('assets/decor_png/lesson_complete.png')),
     );
   }
 }
@@ -48,16 +41,14 @@ class LessonXpPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kLessonCompletePillHeight.h,
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 30.w),
+      padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
         color: AppColors.lessonXpBg,
-        borderRadius: BorderRadius.circular(kXXLargeBorderRadius.r),
+        borderRadius: BorderRadius.circular(kRadius48.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
-            offset: Offset(0, 6.h),
+            offset: Offset(0, 4.h),
             blurRadius: 0,
           ),
         ],
@@ -65,19 +56,19 @@ class LessonXpPill extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Container(
-            width: 64.w,
-            height: 64.w,
+            width: 48.w,
+            height: 48.w,
             decoration: const BoxDecoration(
               color: AppColors.homeOrange,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.bolt_rounded,
-              size: 42.w,
+              size: 28.w,
               color: AppColors.lessonXpText,
             ),
           ),
-          SizedBox(width: 26.w),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -86,17 +77,16 @@ class LessonXpPill extends StatelessWidget {
                 Text(
                   complete.hasXpBoost ? complete.xpBoostLabel : 'POINTS EARNED',
                   style: TextStyle(
-                    fontSize: AppFont.font14.sp,
+                    fontSize: AppFont.font12.sp,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 2.2,
                     color: AppColors.bodyText,
                   ),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 6.h),
                 Text(
                   '+${complete.xpEarned} XP',
                   style: TextStyle(
-                    fontSize: AppFont.font40.sp,
+                    fontSize: AppFont.font30.sp,
                     fontWeight: FontWeight.w900,
                     color: AppColors.lessonXpText,
                   ),
@@ -131,11 +121,10 @@ class LessonMetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kLessonCompleteStatCardHeight.h,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 22.h),
+      padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(kXXLargeBorderRadius.r),
+        borderRadius: BorderRadius.circular(kRadius48.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
@@ -148,31 +137,29 @@ class LessonMetricCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
-            width: 54.w,
-            height: 54.w,
+            width: 40.w,
+            height: 40.w,
             decoration: BoxDecoration(
               color: iconBackgroundColor,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: valueColor, size: 32.w),
+            child: Icon(icon, color: valueColor, size: 24.w),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 10.h),
           Text(
             value,
             style: TextStyle(
-              fontSize: AppFont.font36.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font30.sp,
+              fontWeight: FontWeight.w700,
               color: valueColor,
               height: 1,
             ),
           ),
-          SizedBox(height: 8.h),
           Text(
             label,
             style: TextStyle(
-              fontSize: AppFont.font13.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.7,
+              fontSize: AppFont.font10.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.bodyText,
             ),
           ),
@@ -201,12 +188,11 @@ class LessonSimplePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kLessonCompleteSmallPillHeight.h,
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 18.h),
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 22.h),
       decoration: BoxDecoration(
         color: backgroundColor ?? AppColors.white,
-        borderRadius: BorderRadius.circular(kXXLargeBorderRadius.r),
+        borderRadius: BorderRadius.circular(9999.r),
         border: backgroundColor == null
             ? Border.all(color: AppColors.modalBorderGrey, width: 2.w)
             : null,
@@ -221,15 +207,15 @@ class LessonSimplePill extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Container(
-            width: 56.w,
-            height: 56.w,
+            width: 40.w,
+            height: 40.w,
             decoration: const BoxDecoration(
               color: AppColors.white,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 30.w),
+            child: Icon(icon, color: iconColor, size: 28.w),
           ),
-          SizedBox(width: 24.w),
+          SizedBox(width: 8.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,19 +225,18 @@ class LessonSimplePill extends StatelessWidget {
                   Text(
                     subtitle!,
                     style: TextStyle(
-                      fontSize: AppFont.font14.sp,
+                      fontSize: AppFont.font12.sp,
                       fontWeight: FontWeight.w900,
                       color: AppColors.bodyText,
-                      letterSpacing: 2.2,
                     ),
                   ),
                 Text(
                   title,
                   style: TextStyle(
                     fontSize: subtitle == null
-                        ? AppFont.font18.sp
-                        : AppFont.font34.sp,
-                    fontWeight: FontWeight.w900,
+                        ? AppFont.font12.sp
+                        : AppFont.font28.sp,
+                    fontWeight: FontWeight.w800,
                     color: iconColor,
                   ),
                 ),
@@ -262,7 +247,7 @@ class LessonSimplePill extends StatelessWidget {
             Icon(
               Icons.trending_up_rounded,
               color: AppColors.primaryGreen,
-              size: 34.w,
+              size: 24.w,
             ),
         ],
       ),
@@ -278,26 +263,24 @@ class LessonBoostPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kLessonCompleteBoostHeight.h,
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 28.w),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h),
       decoration: BoxDecoration(
         color: AppColors.primaryGreen,
-        borderRadius: BorderRadius.circular(kXXLargeBorderRadius.r),
+        borderRadius: BorderRadius.circular(9999.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppColors.lessonMilestoneGlow,
+            color: AppColors.lessonMilestoneGlow.withValues(alpha: 0.3),
             blurRadius: 30.r,
-            offset: Offset(0, 10.h),
+            offset: Offset(0, 0.h),
           ),
         ],
       ),
       child: Row(
         children: <Widget>[
           Container(
-            width: 66.w,
-            height: 66.w,
             alignment: Alignment.center,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: AppColors.homeLime,
               borderRadius: BorderRadius.circular(kRadius22.r),
@@ -305,19 +288,19 @@ class LessonBoostPill extends StatelessWidget {
             child: Text(
               '2×',
               style: TextStyle(
-                fontSize: AppFont.font28.sp,
+                fontSize: AppFont.font20.sp,
                 fontWeight: FontWeight.w900,
                 color: AppColors.primaryGreen,
               ),
             ),
           ),
-          SizedBox(width: 28.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Text(
               'Boost Active:\n${complete.boostRemaining}',
               style: TextStyle(
-                fontSize: AppFont.font20.sp,
-                fontWeight: FontWeight.w800,
+                fontSize: AppFont.font16.sp,
+                fontWeight: FontWeight.w700,
                 height: 1.25,
                 color: AppColors.limeTextColor,
               ),

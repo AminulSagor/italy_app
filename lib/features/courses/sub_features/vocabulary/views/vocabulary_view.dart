@@ -24,7 +24,6 @@ class VocabularyView extends GetView<VocabularyController> {
     return Material(
       color: AppColors.coursesDetailBg,
       child: SafeArea(
-        bottom: false,
         child: Obx(() {
           final VocabularySessionModel? session = controller.session.value;
           final VocabularyCardModel? card = controller.currentCard;
@@ -52,23 +51,24 @@ class VocabularyView extends GetView<VocabularyController> {
               children: <Widget>[
                 _VocabularyHeader(
                   title: session.title,
-                  cardLabel: 'Card ${controller.currentCardNumber} of ${controller.totalCards}',
+                  cardLabel:
+                      'Card ${controller.currentCardNumber} of ${controller.totalCards}',
                   onBackTap: controller.showExitConfirmation,
                 ),
-                SizedBox(height: 50.h),
+                SizedBox(height: 26.h),
                 _VocabularyProgressBar(value: controller.progressValue),
-                SizedBox(height: 76.h),
+                SizedBox(height: 30.h),
                 _VocabularyFlashCard(
                   card: card,
                   isRevealed: controller.isRevealed.value,
                   onTap: controller.flipCard,
                 ),
-                SizedBox(height: 108.h),
+                SizedBox(height: 70.h),
                 _VocabularyStats(
                   streakDays: session.streakDays,
                   level: session.level,
                 ),
-                SizedBox(height: 64.h),
+                SizedBox(height: 40.h),
                 if (controller.isRevealed.value)
                   _VocabularyRevealedActions(
                     onStudyAgainTap: controller.studyAgain,
@@ -109,15 +109,15 @@ class _VocabularyHeader extends StatelessWidget {
           child: Icon(
             Icons.arrow_back_rounded,
             color: AppColors.primaryGreen,
-            size: 30.w,
+            size: 20.w,
           ),
         ),
-        SizedBox(width: 32.w),
+        SizedBox(width: 10.w),
         Expanded(
           child: Text(
             title,
             style: TextStyle(
-              fontSize: AppFont.font30.sp,
+              fontSize: AppFont.font16.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.primaryGreen,
             ),
@@ -126,7 +126,7 @@ class _VocabularyHeader extends StatelessWidget {
         Text(
           cardLabel,
           style: TextStyle(
-            fontSize: AppFont.font24.sp,
+            fontSize: AppFont.font12.sp,
             fontWeight: FontWeight.w500,
             color: AppColors.bodyText,
           ),
@@ -148,6 +148,7 @@ class _VocabularyProgressBar extends StatelessWidget {
       child: LinearProgressIndicator(
         value: value,
         minHeight: kVocabularyProgressHeight.h,
+        borderRadius: BorderRadius.circular(999.r),
         color: AppColors.primaryGreen,
         backgroundColor: AppColors.vocabularyProgressTrack,
       ),
@@ -187,11 +188,10 @@ class _VocabularyFlashCard extends StatelessWidget {
               transform: Matrix4.identity()..rotateY(showBack ? math.pi : 0),
               child: Container(
                 width: double.infinity,
-                height: kVocabularyCardHeight.h,
-                padding: EdgeInsets.fromLTRB(36.w, 44.h, 36.w, 44.h),
+                padding: EdgeInsets.all(30.w),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(kVocabularyCardRadius.r),
+                  borderRadius: BorderRadius.circular(kRadius48.r),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
                       color: AppColors.vocabularyCardShadow,
@@ -200,28 +200,19 @@ class _VocabularyFlashCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Stack(
-                  children: <Widget>[
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: _VocabularyAudioButton(onTap: () {}),
-                    ),
-                    Center(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 140),
-                        child: showBack
-                            ? _VocabularyBackSide(
-                                card: card,
-                                key: const ValueKey<String>('back'),
-                              )
-                            : _VocabularyFrontSide(
-                                card: card,
-                                key: const ValueKey<String>('front'),
-                              ),
-                      ),
-                    ),
-                  ],
+                child: Center(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 140),
+                    child: showBack
+                        ? _VocabularyBackSide(
+                            card: card,
+                            key: const ValueKey<String>('back'),
+                          )
+                        : _VocabularyFrontSide(
+                            card: card,
+                            key: const ValueKey<String>('front'),
+                          ),
+                  ),
                 ),
               ),
             ),
@@ -250,7 +241,7 @@ class _VocabularyAudioButton extends StatelessWidget {
         ),
         child: Icon(
           Icons.volume_up_rounded,
-          size: 46.w,
+          size: 28.w,
           color: AppColors.primaryGreen,
         ),
       ),
@@ -268,39 +259,44 @@ class _VocabularyFrontSide extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [_VocabularyAudioButton(onTap: () {})],
+        ),
+        SizedBox(height: 60.h),
         Text(
           card.word,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: AppFont.font64.sp,
-            fontWeight: FontWeight.w900,
+            fontSize: AppFont.font44.sp,
+            fontWeight: FontWeight.w800,
             color: AppColors.primaryGreen,
             height: 1,
           ),
         ),
-        SizedBox(height: 34.h),
+        SizedBox(height: 12.h),
         Text(
           card.languageLabel,
           style: TextStyle(
-            fontSize: AppFont.font22.sp,
+            fontSize: AppFont.font18.sp,
             fontWeight: FontWeight.w500,
             letterSpacing: 1.2,
             color: AppColors.bodyText,
           ),
         ),
-        SizedBox(height: 118.h),
+        SizedBox(height: 60.h),
         Icon(
           Icons.pan_tool_alt_outlined,
-          size: 34.w,
+          size: 26.w,
           color: AppColors.bodyText,
         ),
-        SizedBox(height: 14.h),
+        SizedBox(height: 8.h),
         Text(
           'TAP CARD TO FLIP',
           style: TextStyle(
-            fontSize: AppFont.font20.sp,
+            fontSize: AppFont.font16.sp,
             fontWeight: FontWeight.w900,
-            letterSpacing: 3,
+            letterSpacing: 1.5,
             color: AppColors.bodyText,
           ),
         ),
@@ -319,37 +315,43 @@ class _VocabularyBackSide extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [_VocabularyAudioButton(onTap: () {})],
+        ),
+        SizedBox(height: 60.h),
         Text(
           card.word,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: AppFont.font56.sp,
+            fontSize: AppFont.font44.sp,
             fontWeight: FontWeight.w900,
             color: AppColors.homePrimaryText,
             height: 1,
           ),
         ),
-        SizedBox(height: 54.h),
+        SizedBox(height: 32.h),
         Text(
           card.meaning,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: AppFont.font36.sp,
-            fontWeight: FontWeight.w500,
+            fontSize: AppFont.font22.sp,
+            fontWeight: FontWeight.w600,
             color: AppColors.vocabularyBlueText,
             height: 1.15,
           ),
         ),
-        SizedBox(height: 32.h),
+        SizedBox(height: 8.h),
         Text(
           card.example,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: AppFont.font28.sp,
-            fontWeight: FontWeight.w500,
+            fontSize: AppFont.font16.sp,
+            fontWeight: FontWeight.w400,
             color: AppColors.bodyText,
           ),
         ),
+        SizedBox(height: 80.h),
       ],
     );
   }
@@ -401,9 +403,11 @@ class _VocabularyStatText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: alignEnd ? MainAxisAlignment.end : MainAxisAlignment.start,
+      mainAxisAlignment: alignEnd
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
       children: <Widget>[
-        Icon(icon, color: color, size: 30.w),
+        Icon(icon, color: color, size: 22.w),
         SizedBox(width: 8.w),
         Flexible(
           child: Text(
@@ -411,8 +415,8 @@ class _VocabularyStatText extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: AppFont.font20.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font16.sp,
+              fontWeight: FontWeight.w700,
               color: color,
             ),
           ),
@@ -439,19 +443,20 @@ class _VocabularyRevealedActions extends StatelessWidget {
           child: CustomButton(
             onPressed: onStudyAgainTap,
             text: 'Study Again',
-            height: kVocabularyBottomButtonHeight,
             icon: Icons.refresh_rounded,
             showShadow: true,
             btnColor: AppColors.vocabularyOrange,
             btnShadowColor: AppColors.vocabularyOrangeShadow,
             borderColor: AppColors.vocabularyOrange,
             textColor: AppColors.white,
+            textSize: 14.sp,
             borderRadius: kRadius42,
           ),
         ),
         SizedBox(width: 20.w),
         Expanded(
           child: CustomButton.primary(
+            textSize: 14.sp,
             onPressed: onKnownTap,
             text: 'I Know This',
             icon: Icons.check_circle_rounded,

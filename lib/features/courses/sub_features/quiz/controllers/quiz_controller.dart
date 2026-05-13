@@ -6,9 +6,14 @@ import '../services/quiz_mock_service.dart';
 
 class QuizController extends GetxController {
   final QuizMockService _quizMockService;
+  final bool isExamMode;
+  final int questionCount;
 
-  QuizController({required QuizMockService quizMockService})
-      : _quizMockService = quizMockService;
+  QuizController({
+    required QuizMockService quizMockService,
+    this.isExamMode = false,
+    this.questionCount = 15,
+  }) : _quizMockService = quizMockService;
 
   final RxBool isLoading = false.obs;
   final RxBool isCompleting = false.obs;
@@ -84,7 +89,9 @@ class QuizController extends GetxController {
 
     isLoading.value = true;
     try {
-      questions.assignAll(await _quizMockService.fetchQuestions());
+      questions.assignAll(
+        await _quizMockService.fetchQuestions(questionCount: questionCount),
+      );
       answerReviews.clear();
       lessonComplete.value = null;
       currentIndex.value = 0;

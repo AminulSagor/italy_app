@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:italir_pothe/core/widgets/custom_button.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -25,7 +26,11 @@ class QuizTopBar extends StatelessWidget {
       children: <Widget>[
         GestureDetector(
           onTap: onCloseTap,
-          child: Icon(Icons.close_rounded, color: AppColors.bodyText, size: 32.w),
+          child: Icon(
+            Icons.close_rounded,
+            color: AppColors.bodyText,
+            size: 20.w,
+          ),
         ),
         SizedBox(width: 28.w),
         Expanded(
@@ -51,7 +56,7 @@ class QuizTopBar extends StatelessWidget {
           child: Text(
             '$current/$total',
             style: TextStyle(
-              fontSize: AppFont.font20.sp,
+              fontSize: AppFont.font12.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.bodyText,
             ),
@@ -86,10 +91,8 @@ class QuizBottomAction extends StatelessWidget {
         24.h,
       ),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: showWrongResult
-            ? BorderRadius.vertical(top: Radius.circular(kRadius16.r))
-            : BorderRadius.zero,
+        color: AppColors.white.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(kRadius16.r)),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
@@ -104,12 +107,15 @@ class QuizBottomAction extends StatelessWidget {
             ? Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  if (feedback != null) feedback!,
+                  ?feedback,
                   SizedBox(height: 18.h),
-                  CustomQuizButton(label: 'Next Question', onTap: onNextTap),
+                  CustomButton.primary(
+                    text: 'Next Question',
+                    onPressed: onNextTap,
+                  ),
                 ],
               )
-            : CustomQuizButton(label: 'Check Answer', onTap: onCheckTap),
+            : CustomButton.primary(text: 'Check Answer', onPressed: onCheckTap),
       ),
     );
   }
@@ -121,6 +127,7 @@ class CustomQuizButton extends StatelessWidget {
   final bool isSelected;
   final bool isWrong;
   final double height;
+  final double radius;
 
   const CustomQuizButton({
     super.key,
@@ -129,6 +136,7 @@ class CustomQuizButton extends StatelessWidget {
     this.isSelected = false,
     this.isWrong = false,
     this.height = kQuizOptionHeight,
+    this.radius = kRadius48,
   });
 
   @override
@@ -136,18 +144,18 @@ class CustomQuizButton extends StatelessWidget {
     final Color bg = isWrong
         ? AppColors.quizWrongBg
         : isSelected
-            ? AppColors.homeLime
-            : AppColors.white;
+        ? AppColors.homeLime
+        : AppColors.white;
     final Color border = isWrong
         ? AppColors.quizWrongBorder
         : isSelected
-            ? AppColors.chapterSelectedGreenBorder
-            : AppColors.white;
+        ? AppColors.chapterSelectedGreenBorder
+        : AppColors.quizAnswerShadow;
     final Color shadow = isWrong
         ? AppColors.quizWrongShadow
         : isSelected
-            ? AppColors.primaryBtnShadow
-            : AppColors.quizAnswerShadow;
+        ? AppColors.primaryBtnShadow
+        : AppColors.quizAnswerShadow;
 
     return GestureDetector(
       onTap: onTap,
@@ -156,23 +164,21 @@ class CustomQuizButton extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: bg,
-          borderRadius: BorderRadius.circular(kQuizOptionRadius.r),
+          borderRadius: BorderRadius.circular(radius.r),
           border: Border.all(color: border, width: 2.w),
           boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: shadow,
-              blurRadius: 0,
-              offset: Offset(0, 8.h),
-            ),
+            BoxShadow(color: shadow, blurRadius: 0, offset: Offset(0, 8.h)),
           ],
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: AppFont.font22.sp,
+            fontSize: AppFont.font18.sp,
             fontWeight: FontWeight.w900,
-            color: isWrong ? AppColors.quizWrongShadow : AppColors.homePrimaryText,
+            color: isWrong
+                ? AppColors.quizWrongShadow
+                : AppColors.homePrimaryText,
           ),
         ),
       ),
@@ -188,7 +194,7 @@ class AudioPromptCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: compact ? 330.h : kQuizAudioCardHeight.h,
+      height: 280.h,
       width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -205,13 +211,16 @@ class AudioPromptCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
-            width: kQuizAudioIconSize.w,
-            height: kQuizAudioIconSize.w,
+            padding: EdgeInsets.all(24.w),
             decoration: const BoxDecoration(
               color: AppColors.homeLime,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.volume_up_rounded, color: AppColors.primaryGreen, size: 66.w),
+            child: Icon(
+              Icons.volume_up_rounded,
+              color: AppColors.primaryGreen,
+              size: 50.w,
+            ),
           ),
           SizedBox(height: 46.h),
           Row(
@@ -220,13 +229,17 @@ class AudioPromptCard extends StatelessWidget {
               _RoundAudioButton(label: '1X'),
               SizedBox(width: 48.w),
               Container(
-                width: 74.w,
-                height: 74.w,
+                width: 64.w,
+                height: 64.w,
                 decoration: const BoxDecoration(
                   color: AppColors.primaryGreen,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.play_arrow_rounded, color: AppColors.white, size: 44.w),
+                child: Icon(
+                  Icons.play_arrow_rounded,
+                  color: AppColors.white,
+                  size: 32.w,
+                ),
               ),
               SizedBox(width: 48.w),
               _RoundAudioButton(icon: Icons.replay_rounded),
@@ -247,20 +260,23 @@ class _RoundAudioButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 56.w,
-      height: 56.w,
+      width: 48.w,
+      height: 48.w,
       alignment: Alignment.center,
-      decoration: const BoxDecoration(color: AppColors.legacyColorFFF1F2F2, shape: BoxShape.circle),
+      decoration: const BoxDecoration(
+        color: AppColors.legacyColorFFF1F2F2,
+        shape: BoxShape.circle,
+      ),
       child: icon == null
           ? Text(
               label!,
               style: TextStyle(
-                fontSize: AppFont.font16.sp,
+                fontSize: AppFont.font14.sp,
                 fontWeight: FontWeight.w900,
                 color: AppColors.bodyText,
               ),
             )
-          : Icon(icon, color: AppColors.bodyText, size: 28.w),
+          : Icon(icon, color: AppColors.bodyText, size: 20.w),
     );
   }
 }

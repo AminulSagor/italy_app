@@ -28,13 +28,19 @@ class ReviewAnswerCard extends StatelessWidget {
       padding: EdgeInsets.all(22.w),
       decoration: BoxDecoration(
         color: isWrong ? AppColors.lessonReviewWrongBg : AppColors.white,
-        borderRadius: BorderRadius.circular(kLessonReviewCardRadius.r),
+        borderRadius: BorderRadius.circular(kRadius48.r),
         border: Border.all(
-          color: isWrong ? AppColors.notificationWarningBorder : AppColors.legacyColorFFE8F4DF,
+          color: isWrong
+              ? AppColors.notificationWarningBorder
+              : AppColors.legacyColorFFE8F4DF,
           width: 1.5.w,
         ),
         boxShadow: <BoxShadow>[
-          BoxShadow(color: AppColors.homeNeutralShadow, blurRadius: 16.r, offset: Offset(0, 8.h)),
+          BoxShadow(
+            color: AppColors.homeNeutralShadow,
+            blurRadius: 16.r,
+            offset: Offset(0, 8.h),
+          ),
         ],
       ),
       child: Column(
@@ -48,15 +54,17 @@ class ReviewAnswerCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppFont.font10.sp,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 1.5,
+                    letterSpacing: 1.2,
                     color: AppColors.bodyText,
                   ),
                 ),
               ),
               Icon(
                 _isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                color: _isCorrect ? AppColors.primaryGreen : AppColors.blockDangerRed,
-                size: 22.w,
+                color: _isCorrect
+                    ? AppColors.primaryGreen
+                    : AppColors.blockDangerRed,
+                size: 20.w,
               ),
             ],
           ),
@@ -132,17 +140,31 @@ class _ListeningReview extends StatelessWidget {
         Container(
           width: 42.w,
           height: 42.w,
-          decoration: const BoxDecoration(color: AppColors.primaryGreen, shape: BoxShape.circle),
-          child: Icon(Icons.play_arrow_rounded, color: AppColors.white, size: 26.w),
+          decoration: const BoxDecoration(
+            color: AppColors.primaryGreen,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.play_arrow_rounded,
+            color: AppColors.white,
+            size: 26.w,
+          ),
         ),
         SizedBox(width: 18.w),
         Expanded(
           child: Text(
             question.title,
-            style: TextStyle(fontSize: AppFont.font16.sp, fontWeight: FontWeight.w900, color: AppColors.homePrimaryText),
+            style: TextStyle(
+              fontSize: AppFont.font16.sp,
+              fontWeight: FontWeight.w900,
+              color: AppColors.homePrimaryText,
+            ),
           ),
         ),
-        _AnswerChip(label: review?.selectedAnswer ?? question.correctAnswer, isCorrect: review?.isCorrect ?? true),
+        _AnswerChip(
+          label: review?.selectedAnswer ?? question.correctAnswer,
+          isCorrect: review?.isCorrect ?? true,
+        ),
       ],
     );
   }
@@ -163,17 +185,28 @@ class _ChoiceReview extends StatelessWidget {
           question.type == QuizQuestionType.identifyImage
               ? '🍎  ${question.objectLabel ?? 'Apple'}'
               : question.title.replaceAll('\n', ' '),
-          style: TextStyle(fontSize: AppFont.font17.sp, fontWeight: FontWeight.w800, color: AppColors.homePrimaryText, height: 1.35),
+          style: TextStyle(
+            fontSize: AppFont.font16.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColors.homePrimaryText,
+            height: 1.35,
+          ),
         ),
-        SizedBox(height: 18.h),
+        SizedBox(height: 14.h),
         Wrap(
           spacing: 10.w,
           runSpacing: 10.h,
           children: <Widget>[
             if ((review?.selectedAnswer ?? '').isNotEmpty)
-              _AnswerChip(label: review!.selectedAnswer, isCorrect: review!.isCorrect),
+              _AnswerChip(
+                label: review!.selectedAnswer,
+                isCorrect: review!.isCorrect,
+              ),
             if (review != null && !review!.isCorrect)
-              _AnswerChip(label: 'Correct: ${review!.correctAnswer}', isCorrect: true),
+              _AnswerChip(
+                label: 'Correct: ${review!.correctAnswer}',
+                isCorrect: true,
+              ),
           ],
         ),
       ],
@@ -198,14 +231,21 @@ class _WordsReview extends StatelessWidget {
       children: <Widget>[
         Text(
           question.title.replaceAll('\n', ' '),
-          style: TextStyle(fontSize: AppFont.font17.sp, fontWeight: FontWeight.w800, color: AppColors.homePrimaryText),
+          style: TextStyle(
+            fontSize: AppFont.font16.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColors.homePrimaryText,
+          ),
         ),
         SizedBox(height: 16.h),
         Wrap(
           spacing: 8.w,
           runSpacing: 8.h,
           children: words.map((String word) {
-            return _AnswerChip(label: word, isCorrect: review?.isCorrect ?? true);
+            return _AnswerChip(
+              label: word,
+              isCorrect: review?.isCorrect ?? true,
+            );
           }).toList(),
         ),
       ],
@@ -227,12 +267,19 @@ class _FillBlankReview extends StatelessWidget {
 
     return RichText(
       text: TextSpan(
-        style: TextStyle(fontSize: AppFont.font20.sp, fontWeight: FontWeight.w900, color: AppColors.homePrimaryText),
+        style: TextStyle(
+          fontSize: AppFont.font20.sp,
+          fontWeight: FontWeight.w900,
+          color: AppColors.homePrimaryText,
+        ),
         children: <InlineSpan>[
           const TextSpan(text: 'Io  '),
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
-            child: _AnswerChip(label: answer, isCorrect: review?.isCorrect ?? true),
+            child: _AnswerChip(
+              label: answer,
+              isCorrect: review?.isCorrect ?? true,
+            ),
           ),
           const TextSpan(text: '  un caffè.'),
         ],
@@ -250,17 +297,31 @@ class _MatchingReview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Row(children: <Widget>[
-          Expanded(child: _GreyPairChip(label: 'Buongiorno')),
-          Container(width: 44.w, height: 2.h, color: AppColors.primaryGreen),
-          Expanded(child: _GreyPairChip(label: 'Good\nmorning')),
-        ]),
+        Row(
+          children: <Widget>[
+            Expanded(child: _GreyPairChip(label: 'Buongiorno')),
+            Container(width: 44.w, height: 2.h, color: AppColors.primaryGreen),
+            Expanded(child: _GreyPairChip(label: 'Good\nmorning')),
+          ],
+        ),
         SizedBox(height: 18.h),
-        Row(children: <Widget>[
-          Expanded(child: _GreyPairChip(label: 'Ciao')),
-          Container(width: 44.w, height: 2.h, color: AppColors.blockDangerRed),
-          Expanded(child: _GreyPairChip(label: review?.selectedAnswer.contains('Hello') ?? false ? 'Hello' : 'Thank you')),
-        ]),
+        Row(
+          children: <Widget>[
+            Expanded(child: _GreyPairChip(label: 'Ciao')),
+            Container(
+              width: 44.w,
+              height: 2.h,
+              color: AppColors.blockDangerRed,
+            ),
+            Expanded(
+              child: _GreyPairChip(
+                label: review?.selectedAnswer.contains('Hello') ?? false
+                    ? 'Hello'
+                    : 'Thank you',
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -276,15 +337,22 @@ class _WritingReview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        Text('🍎', style: TextStyle(fontSize: 54.sp)),
+        Text('🍎', style: TextStyle(fontSize: 46.sp)),
         SizedBox(width: 20.w),
         Expanded(
           child: Text(
             question.objectLabel ?? '',
-            style: TextStyle(fontSize: AppFont.font24.sp, fontWeight: FontWeight.w900, color: AppColors.homePrimaryText),
+            style: TextStyle(
+              fontSize: AppFont.font22.sp,
+              fontWeight: FontWeight.w900,
+              color: AppColors.homePrimaryText,
+            ),
           ),
         ),
-        _AnswerChip(label: review?.selectedAnswer ?? question.correctAnswer, isCorrect: review?.isCorrect ?? true),
+        _AnswerChip(
+          label: review?.selectedAnswer ?? question.correctAnswer,
+          isCorrect: review?.isCorrect ?? true,
+        ),
       ],
     );
   }
@@ -301,9 +369,15 @@ class _AnswerChip extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
       decoration: BoxDecoration(
-        color: isCorrect ? AppColors.lessonReviewGreenPill : AppColors.quizWrongLightBg,
+        color: isCorrect
+            ? AppColors.lessonReviewGreenPill
+            : AppColors.quizWrongLightBg,
         borderRadius: BorderRadius.circular(kHomePillRadius.r),
-        border: Border.all(color: isCorrect ? AppColors.homeLime : AppColors.notificationWarningBorder),
+        border: Border.all(
+          color: isCorrect
+              ? AppColors.homeLime
+              : AppColors.notificationWarningBorder,
+        ),
       ),
       child: Text(
         '${isCorrect ? '✓ ' : '× '}$label',
@@ -334,7 +408,11 @@ class _GreyPairChip extends StatelessWidget {
       child: Text(
         label,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: AppFont.font14.sp, fontWeight: FontWeight.w900, color: AppColors.homePrimaryText),
+        style: TextStyle(
+          fontSize: AppFont.font14.sp,
+          fontWeight: FontWeight.w900,
+          color: AppColors.homePrimaryText,
+        ),
       ),
     );
   }
