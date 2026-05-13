@@ -362,11 +362,11 @@ class ShopController extends GetxController {
   String streakFreezePackSubtitle(String title) {
     switch (title) {
       case StreakFreezePackTitles.tripleProtectionTitle:
-        return 'Best for short breaks';
+        return "A weekend's worth of protection";
       case StreakFreezePackTitles.unlimitedMonthlyShieldTitle:
-        return 'Maximum streak safety';
+        return 'Never lose a streak again';
       default:
-        return 'Protect 1 missed day';
+        return 'Save a 1-day missed streak';
     }
   }
 

@@ -7,6 +7,8 @@ import '../app_home_bottom_navigation_bar.dart';
 import '../app_home_top_bar.dart';
 import 'navbar_and_appbar_wrapper_controller.dart';
 import '../custom_drawer.dart';
+import '../../../features/leaderboard/views/leaderboard_view.dart';
+import '../../../features/ai_chat/ai_chat_view.dart';
 
 class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
   const NavbarAndAppbarWrapper({super.key});
@@ -38,6 +40,7 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
         }
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         key: scaffoldKey,
         appBar: AppHomeTopBar(
           greeting: 'Buongiorno,',
@@ -106,9 +109,9 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
       case 1:
         return _TabNavigator(id: 1, content: const CustomPlaceHolder());
       case 2:
-        return _TabNavigator(id: 2, content: const CustomPlaceHolder());
+        return _TabNavigator(id: 2, content: const AiChatView());
       case 3:
-        return _TabNavigator(id: 3, content: const CustomPlaceHolder());
+        return _TabNavigator(id: 3, content: const LeaderboardView());
       case 4:
         return _TabNavigator(id: 4, content: const CustomPlaceHolder());
       default:

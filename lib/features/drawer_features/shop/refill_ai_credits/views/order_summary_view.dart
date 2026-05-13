@@ -338,7 +338,7 @@ class OrderSummaryPage extends StatelessWidget {
           CustomButton(
             onPressed: () {},
             text: '',
-            height: 55.h,
+            height: 60.h,
             width: 82.w,
             showShadow: true,
             btnColor: Colors.white,
@@ -361,11 +361,13 @@ class OrderSummaryPage extends StatelessWidget {
           onChanged: controller.onCouponChanged,
         ),
         SizedBox(height: 12.h),
-        CustomButton(
-          height: 62,
+        CustomButton.primary(
+          // height: 62,
           onPressed: controller.applyCoupon,
           text: 'APPLY',
-          showShadow: true,
+          textColor: AppColors.primaryGreen,
+          // showShadow: true,
+          btnColor: bg,
         ),
         //_applyButton(onTap: controller.applyCoupon),
       ],
@@ -380,7 +382,7 @@ class OrderSummaryPage extends StatelessWidget {
     Color borderColor = const Color(0xFFD8D8D8),
   }) {
     return SizedBox(
-      height: 58.h,
+      height: 50.h,
       child: TextField(
         controller: controller,
         onChanged: onChanged,
@@ -388,14 +390,14 @@ class OrderSummaryPage extends StatelessWidget {
         cursorColor: green,
         style: TextStyle(
           color: textDark,
-          fontSize: 16.sp,
+          fontSize: 18.sp,
           fontWeight: FontWeight.w800,
         ),
         decoration: InputDecoration(
           hintText: 'Enter Coupon Code',
           hintStyle: TextStyle(
             color: const Color(0xFFA5A5A5),
-            fontSize: 16.sp,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w700,
           ),
           filled: true,

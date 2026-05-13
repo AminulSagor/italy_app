@@ -3,8 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:italir_pothe/core/themes/app_colors.dart';
 import 'package:italir_pothe/core/widgets/custom_button.dart';
-
+import 'package:italir_pothe/core/widgets/widgets.dart';
 import '../../shop_controller.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class PurchaseCompletedPage extends StatelessWidget {
   const PurchaseCompletedPage({super.key});
@@ -23,6 +24,11 @@ class PurchaseCompletedPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: bg,
+      appBar: SimpleAppbar(
+        onBackTap: () => Get.back(),
+        title: 'Refill Completed',
+        icon: Icons.close,
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -32,8 +38,7 @@ class PurchaseCompletedPage extends StatelessWidget {
                 padding: EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 24.h),
                 child: Column(
                   children: [
-                    _topBar(),
-
+                    // _topBar(),
                     SizedBox(height: 42.h),
 
                     _successIcon(),
@@ -87,7 +92,7 @@ class PurchaseCompletedPage extends StatelessWidget {
                           Expanded(
                             child: _creditCard(
                               bgColor: orangeCard,
-                              icon: Icons.inventory_2_outlined,
+                              icon: Symbols.deployed_code,
                               iconColor: const Color(0xFF9A5A00),
                               value: controller.selectedPlanTokensShort,
                               label: 'AI Smart Tokens',
@@ -177,13 +182,14 @@ class PurchaseCompletedPage extends StatelessWidget {
         ],
       ),
       child: Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(Icons.settings, color: green, size: 66.r),
-            Icon(Icons.check, color: Colors.white, size: 31.r),
-          ],
-        ),
+        child: Image.asset('assets/icons_png/Container (1).png'),
+        // child: Stack(
+        //   alignment: Alignment.center,
+        //   children: [
+        //     Icon(Icons.settings, color: green, size: 66.r),
+        //     Icon(Icons.check, color: Colors.white, size: 31.r),
+        //   ],
+        // ),
       ),
     );
   }

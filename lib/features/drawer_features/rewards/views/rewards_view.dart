@@ -128,58 +128,11 @@ class _WinnerCard extends StatelessWidget {
         alignment: Alignment.center,
         children: <Widget>[
           Positioned(
-            top: 70.h,
-            child: Container(
-              width: 128.r,
-              height: 128.r,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF6CFF3B).withValues(alpha: 0.18),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: const Color(0xFF79F535).withValues(alpha: 0.25),
-                    blurRadius: 42.r,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: 67.h,
+            top: 60.h,
             child: SizedBox(
-              width: 132.r,
-              height: 104.r,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: <Widget>[
-                  Positioned(
-                    left: 12.w,
-                    top: 20.h,
-                    child: Icon(
-                      Icons.card_giftcard_rounded,
-                      size: 90.r,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 48.r,
-                      height: 48.r,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF79F535),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.auto_awesome_rounded,
-                        size: 24.r,
-                        color: const Color(0xFF267A05),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              width: 150.r,
+              height: 150.r,
+              child: Image.asset('assets/icons_png/reward.png'),
             ),
           ),
           Positioned(
@@ -297,7 +250,7 @@ class _RewardCard extends StatelessWidget {
               onTap: onTap,
               child: Container(
                 height: 35.h,
-                padding: EdgeInsets.symmetric(horizontal: 13.w),
+                //padding: EdgeInsets.symmetric(horizontal: 0.w),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: item.buttonColor,

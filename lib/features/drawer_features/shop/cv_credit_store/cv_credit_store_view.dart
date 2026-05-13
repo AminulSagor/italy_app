@@ -227,12 +227,12 @@ class _CvCreditOfferCard extends GetView<ShopController> {
             AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               width: double.infinity,
-              height: selected ? 160.h : 120.h,
+              height: selected ? 170.h : 155.h,
               padding: EdgeInsets.fromLTRB(
                 selected ? 26.w : 28.w,
                 selected ? 30.h : 26.h,
                 selected ? 14.w : 28.w,
-                selected ? 26.h : 26.h,
+                selected ? 20.h : 20.h,
               ),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -274,8 +274,8 @@ class _CvCreditOfferCard extends GetView<ShopController> {
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 21.sp,
-                            height: 1.28,
+                            fontSize: 20.sp,
+                            height: 1.2,
                             fontWeight: FontWeight.w900,
                             color: _text,
                             letterSpacing: -0.35,
@@ -285,7 +285,7 @@ class _CvCreditOfferCard extends GetView<ShopController> {
                         Text(
                           offer.subtitle,
                           style: TextStyle(
-                            fontSize: 15.sp,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: _muted,
                           ),

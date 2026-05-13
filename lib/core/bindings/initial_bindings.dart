@@ -4,6 +4,7 @@ import '../../features/home/services/home_mock_service.dart';
 import '../../features/messages/controllers/messages_controller.dart';
 import '../../features/messages/services/messages_mock_service.dart';
 import '../../features/notifications/services/notifications_mock_service.dart';
+import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 
 class InitialBindings extends Bindings {
   @override
@@ -19,5 +20,6 @@ class InitialBindings extends Bindings {
       ),
     );
     Get.lazyPut<NotificationsMockService>(() => NotificationsMockService());
+    Get.lazyPut<LeaderboardController>(() => LeaderboardController());
   }
 }

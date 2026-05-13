@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:italir_pothe/core/themes/app_colors.dart';
 import 'package:italir_pothe/core/widgets/custom_button.dart';
-
+import 'package:italir_pothe/core/widgets/widgets.dart';
 import '../../shop_controller.dart';
 
 class CheckoutPage extends StatelessWidget {
@@ -22,117 +22,120 @@ class CheckoutPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _bg,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 34),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 44),
-              _CheckoutHeader(onBackTap: () => Navigator.maybePop(context)),
-              const SizedBox(height: 28),
-              Obx(
-                () => _CurrencySelector(
-                  selectedCurrency: controller.selectedCurrency.value,
-                  onChanged: controller.selectCurrency,
-                ),
+      appBar: SimpleAppbar(
+        onBackTap: () => Navigator.maybePop(context),
+        title: 'Checkout',
+        icon: Icons.arrow_back,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 34),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // const SizedBox(height: 44),
+            // _CheckoutHeader(onBackTap: () => Navigator.maybePop(context)),
+            const SizedBox(height: 28),
+            Obx(
+              () => _CurrencySelector(
+                selectedCurrency: controller.selectedCurrency.value,
+                onChanged: controller.selectCurrency,
               ),
-              const SizedBox(height: 32),
-              Obx(
-                () => _OrderSummaryCard(
-                  title: controller.selectedPlanTitle,
-                  subtitle: controller.selectedPlanSubtitle,
-                  payableAmount: controller.checkoutPayablePriceText,
-                  originalAmount: controller.checkoutOriginalPriceText,
-                  savedAmount: controller.checkoutSavedAmountText,
-                ),
+            ),
+            const SizedBox(height: 32),
+            Obx(
+              () => _OrderSummaryCard(
+                title: controller.selectedPlanTitle,
+                subtitle: controller.selectedPlanSubtitle,
+                payableAmount: controller.checkoutPayablePriceText,
+                originalAmount: controller.checkoutOriginalPriceText,
+                savedAmount: controller.checkoutSavedAmountText,
               ),
-              const SizedBox(height: 36),
-              const Text(
-                'PAYMENT METHOD',
-                style: TextStyle(
-                  color: _bodyText,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.15,
-                ),
+            ),
+            const SizedBox(height: 36),
+            const Text(
+              'PAYMENT METHOD',
+              style: TextStyle(
+                color: _bodyText,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.15,
               ),
-              const SizedBox(height: 18),
-              Obx(
-                () => Column(
-                  children: controller.availablePaymentMethods
-                      .map(
-                        (method) => Padding(
-                          padding: const EdgeInsets.only(bottom: 32),
-                          child: _PaymentMethodPill(
-                            method: method,
-                            isSelected: controller.isPaymentMethodSelected(
-                              method,
-                            ),
-                            onTap: () => controller.selectPaymentMethod(method),
+            ),
+            const SizedBox(height: 18),
+            Obx(
+              () => Column(
+                children: controller.availablePaymentMethods
+                    .map(
+                      (method) => Padding(
+                        padding: const EdgeInsets.only(bottom: 32),
+                        child: _PaymentMethodPill(
+                          method: method,
+                          isSelected: controller.isPaymentMethodSelected(
+                            method,
+                          ),
+                          onTap: () => controller.selectPaymentMethod(method),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Obx(
+              () => CustomButton.primary(
+                text: controller.isCheckoutLoading.value
+                    ? 'Processing...'
+                    : 'Complete Purchase',
+                onPressed: controller.isCheckoutLoading.value
+                    ? () {}
+                    : controller.goToPurchaseCompleted,
+                btnColor: controller.isCheckoutLoading.value
+                    ? AppColors.bodyText
+                    : _green,
+                btnShadowColor: controller.isCheckoutLoading.value
+                    ? AppColors.bodyText
+                    : _darkGreen,
+                borderRadius: 32,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.lock, size: 13, color: _bodyText),
+                  SizedBox(width: 7),
+                  Text(
+                    'SECURE SSL ENCRYPTION',
+                    style: TextStyle(
+                      color: _bodyText,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Obx(
+              () => controller.checkoutError.value.isEmpty
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Center(
+                        child: Text(
+                          controller.checkoutError.value,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: AppColors.notificationRed,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      )
-                      .toList(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Obx(
-                () => CustomButton.primary(
-                  text: controller.isCheckoutLoading.value
-                      ? 'Processing...'
-                      : 'Complete Purchase',
-                  onPressed: controller.isCheckoutLoading.value
-                      ? () {}
-                      : controller.goToPurchaseCompleted,
-                  btnColor: controller.isCheckoutLoading.value
-                      ? AppColors.bodyText
-                      : _green,
-                  btnShadowColor: controller.isCheckoutLoading.value
-                      ? AppColors.bodyText
-                      : _darkGreen,
-                  borderRadius: 32,
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.lock, size: 13, color: _bodyText),
-                    SizedBox(width: 7),
-                    Text(
-                      'SECURE SSL ENCRYPTION',
-                      style: TextStyle(
-                        color: _bodyText,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.35,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              Obx(
-                () => controller.checkoutError.value.isEmpty
-                    ? const SizedBox.shrink()
-                    : Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Center(
-                          child: Text(
-                            controller.checkoutError.value,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: AppColors.notificationRed,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -196,6 +199,7 @@ class _CurrencySelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 44,
+      //elevation: 0,
       width: double.infinity,
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
@@ -280,132 +284,138 @@ class _OrderSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(31, 31, 28, 30),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(40),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.topRight,
-          colors: [Colors.white, Colors.white, Color(0xFFE9FFDF)],
-          stops: [0.0, 0.62, 1.0],
+    return Material(
+      elevation: 8,
+      shadowColor: const Color(0xFFE0E0E0).withValues(alpha: 0.3),
+      //shadowRadius: 10,
+      borderRadius: BorderRadius.circular(40),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(31, 31, 28, 30),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(40),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.topRight,
+            colors: [Colors.white, Colors.white, Color(0xFFE9FFDF)],
+            stops: [0.0, 0.62, 1.0],
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'ORDER SUMMARY',
-            style: TextStyle(
-              color: CheckoutPage._green,
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.25,
-            ),
-          ),
-          const SizedBox(height: 7),
-          Text(
-            title,
-            style: const TextStyle(
-              color: CheckoutPage._textDark,
-              fontSize: 24,
-              height: 1.15,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.55,
-            ),
-          ),
-          const SizedBox(height: 17),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              color: CheckoutPage._bodyText,
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 32),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    payableAmount,
-                    maxLines: 1,
-                    style: const TextStyle(
-                      color: CheckoutPage._textDark,
-                      fontSize: 40,
-                      height: 0.95,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1.15,
-                    ),
-                  ),
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'ORDER SUMMARY',
+              style: TextStyle(
+                color: CheckoutPage._green,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.25,
               ),
-              const SizedBox(width: 10),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  originalAmount,
-                  style: const TextStyle(
-                    color: Color(0xFF9E9E9E),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    decoration: TextDecoration.lineThrough,
-                    decorationColor: Color(0xFF8E8E8E),
-                    decorationThickness: 2,
-                  ),
-                ),
+            ),
+            const SizedBox(height: 7),
+            Text(
+              title,
+              style: const TextStyle(
+                color: CheckoutPage._textDark,
+                fontSize: 24,
+                height: 1.15,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.55,
               ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Container(
-                height: 18,
-                padding: const EdgeInsets.symmetric(horizontal: 7),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE4F3DC),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.redeem_outlined,
-                      size: 11,
-                      color: CheckoutPage._green,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      'YOU SAVED $savedAmount',
+            ),
+            const SizedBox(height: 17),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                color: CheckoutPage._bodyText,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      payableAmount,
+                      maxLines: 1,
                       style: const TextStyle(
-                        color: CheckoutPage._green,
-                        fontSize: 9,
+                        color: CheckoutPage._textDark,
+                        fontSize: 40,
+                        height: 0.95,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: .25,
+                        letterSpacing: -1.15,
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              const Text(
-                '/ one-time',
-                style: TextStyle(
-                  color: CheckoutPage._bodyText,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
+                const SizedBox(width: 10),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    originalAmount,
+                    style: const TextStyle(
+                      color: Color(0xFF9E9E9E),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      decoration: TextDecoration.lineThrough,
+                      decorationColor: Color(0xFF8E8E8E),
+                      decorationThickness: 2,
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Container(
+                  height: 18,
+                  padding: const EdgeInsets.symmetric(horizontal: 7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE4F3DC),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.redeem_outlined,
+                        size: 11,
+                        color: CheckoutPage._green,
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        'YOU SAVED $savedAmount',
+                        style: const TextStyle(
+                          color: CheckoutPage._green,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .25,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  '/ one-time',
+                  style: TextStyle(
+                    color: CheckoutPage._bodyText,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -97,7 +97,7 @@ class _HistoryTile extends StatelessWidget {
       child: Container(
         height: 120.h,
         width: double.infinity,
-        padding: EdgeInsets.fromLTRB(24.w, 22.h, 20.w, 22.h),
+        padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(30.r),
