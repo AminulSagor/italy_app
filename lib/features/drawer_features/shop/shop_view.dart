@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:italir_pothe/core/widgets/simple_appbar.dart';
 import 'shop_controller.dart';
+import '../../../../../core/widgets/widgets.dart';
 
 class ShopView extends GetView<ShopController> {
   const ShopView({super.key});
@@ -183,7 +183,7 @@ class _CvCreditPackCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 22.h),
+        padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 22.h),
         decoration: BoxDecoration(
           color: const Color(0xFFFFF1DA),
           borderRadius: BorderRadius.circular(42.r),
@@ -192,6 +192,7 @@ class _CvCreditPackCard extends StatelessWidget {
         child: Column(
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   width: 56.r,
@@ -200,11 +201,7 @@ class _CvCreditPackCard extends StatelessWidget {
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.article_outlined,
-                    size: 28.r,
-                    color: const Color(0xFFA76500),
-                  ),
+                  child: Image.asset('assets/icons_png/wingmail.png'),
                 ),
                 SizedBox(width: 16.w),
                 Expanded(
@@ -215,16 +212,16 @@ class _CvCreditPackCard extends StatelessWidget {
                         'CV Credit Pack',
                         style: TextStyle(
                           fontSize: 24.sp,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.bold,
                           color: const Color(0xFF8A4E00),
                         ),
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        'Generate and export professional\nresumes.',
+                        'Generate and export professional resumes.',
                         style: TextStyle(
-                          fontSize: 15.sp,
-                          height: 1.35,
+                          fontSize: 14.sp,
+                          height: 1.2,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF616161),
                         ),
@@ -244,11 +241,21 @@ class _CvCreditPackCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 22.h),
-            _BuyNowButton(
+            CustomButton(
+              height: 50.h,
+              text: 'BUY NOW',
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w900,
+              btnColor: const Color(0xFFA76500),
               textColor: Colors.white,
-              bgColor: const Color(0xFFA76500),
-              onTap: onTap,
+              onPressed: onTap,
+              borderColor: Colors.transparent,
             ),
+            // _BuyNowButton(
+            //   textColor: Colors.white,
+            //   bgColor: const Color(0xFFA76500),
+            //   onTap: onTap,
+            // ),
           ],
         ),
       ),

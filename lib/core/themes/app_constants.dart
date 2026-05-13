@@ -71,7 +71,7 @@ const double kProfileInfoCardHeight = 180;
 const double kProfileSafetyCardHeight = 160;
 const double kProfileActionIconSize = 40;
 
-const double kButtonDefaultHeight = 68;
+const double kButtonDefaultHeight = 60;
 const double kButtonDefaultRadius = 999;
 const double kButtonShadowOffsetY = 6;
 const double kButtonBorderWidth = 2;

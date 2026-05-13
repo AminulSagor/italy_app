@@ -47,12 +47,12 @@ import '../features/drawer_features/contact/contact_controller.dart';
 import '../features/drawer_features/contact/contact_support_view.dart';
 import '../features/drawer_features/settings/settings_controller.dart';
 import '../features/drawer_features/settings/settings_view.dart';
-import '../features/drawer_features/settings/sub_features/profile_security/views/profile_security_veiw.dart';
-import '../features/drawer_features/settings/sub_features/profile_photo/views/profile_photo_view.dart';
-import '../features/drawer_features/settings/sub_features/change_password/views/change_password_view.dart';
-import '../features/drawer_features/settings/sub_features/verify_contact/views/verify_contact_view.dart';
-import '../features/drawer_features/settings/sub_features/success/views/settings_success_view.dart';
-import '../features/drawer_features/settings/sub_features/delete_account/views/delete_account_confirm_view.dart';
+import '../features/drawer_features/settings/sub_features/views/profile_security_veiw.dart';
+import '../features/drawer_features/settings/sub_features/views/profile_photo_view.dart';
+import '../features/drawer_features/settings/sub_features/views/change_password_view.dart';
+import '../features/drawer_features/settings/sub_features/views/verify_contact_view.dart';
+import '../features/drawer_features/settings/sub_features/views/settings_success_view.dart';
+import '../features/drawer_features/settings/sub_features/views/delete_account_confirm_view.dart';
 
 class AppPages {
   AppPages._();

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:italir_pothe/core/themes/app_colors.dart';
 import 'package:italir_pothe/core/widgets/custom_button.dart';
 import 'package:italir_pothe/core/widgets/simple_appbar.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shop_controller.dart';
 
@@ -127,9 +128,9 @@ class AiRefillCenterPage extends StatelessWidget {
           Container(height: 34, width: 1, color: const Color(0xFFE7E7E7)),
           Expanded(
             child: _statItem(
-              icon: Icons.inventory_2_outlined,
+              icon: Symbols.deployed_code,
               label: '1,200 Tokens',
-              color: orange,
+              color: const Color.fromARGB(255, 202, 114, 42),
             ),
           ),
         ],

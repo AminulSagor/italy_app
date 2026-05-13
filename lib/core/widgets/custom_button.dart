@@ -22,6 +22,8 @@ class CustomButton extends StatefulWidget {
   final double borderRadius;
   final double borderWidth;
   final Color textColor;
+  final double? fontSize;
+  final FontWeight? fontWeight;
 
   const CustomButton({
     super.key,
@@ -40,6 +42,8 @@ class CustomButton extends StatefulWidget {
     this.borderRadius = kButtonDefaultRadius,
     this.borderWidth = kButtonBorderWidth,
     this.textColor = AppColors.white,
+    this.fontSize = AppFont.font20,
+    this.fontWeight = FontWeight.w900,
   });
 
   const CustomButton.primary({
@@ -56,6 +60,8 @@ class CustomButton extends StatefulWidget {
     this.borderRadius = kButtonDefaultRadius,
     this.borderWidth = kButtonBorderWidth,
     this.textColor = AppColors.white,
+    this.fontSize = AppFont.font20,
+    this.fontWeight = FontWeight.w900,
   }) : height = kButtonDefaultHeight,
        width = double.infinity,
        showShadow = true;
@@ -188,8 +194,8 @@ class _ButtonContent extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: AppFont.font20.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: widget.fontSize ?? 16.sp,
+              fontWeight: widget.fontWeight ?? FontWeight.w900,
               letterSpacing: 1.1,
               color: widget.textColor,
             ),
