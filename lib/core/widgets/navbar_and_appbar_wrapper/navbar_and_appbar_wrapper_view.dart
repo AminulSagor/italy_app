@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../features/home/views/home_view.dart';
 import '../../../features/messages/views/messages_view.dart';
+import '../../../features/service_hub/views/service_hub_view.dart';
 import '../app_home_bottom_navigation_bar.dart';
 import '../app_home_top_bar.dart';
 import 'navbar_and_appbar_wrapper_controller.dart';
@@ -115,7 +116,10 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
       case 4:
         return _TabNavigator(
           id: 4,
-          content: const CustomPlaceHolder(),
+          content: const ServiceHubView(),
+          showTopBar: false,
+          showSimpleAppBar: true,
+          simpleAppBarTitle: 'Service Hub',
           onNotificationTap: controller.openNotifications,
           onMessageTap: controller.openMessages,
         );
@@ -129,6 +133,8 @@ class _TabNavigator extends StatelessWidget {
   final int id;
   final Widget content;
   final bool showTopBar;
+  final bool showSimpleAppBar;
+  final String? simpleAppBarTitle;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onMessageTap;
 
@@ -136,6 +142,8 @@ class _TabNavigator extends StatelessWidget {
     required this.id,
     required this.content,
     this.showTopBar = true,
+    this.showSimpleAppBar = false,
+    this.simpleAppBarTitle,
     this.onNotificationTap,
     this.onMessageTap,
   });
@@ -147,6 +155,8 @@ class _TabNavigator extends StatelessWidget {
       onGenerateRoute: (_) => MaterialPageRoute<void>(
         builder: (_) => AppBarWrapper(
           showTopBar: showTopBar,
+          showSimpleAppBar: showSimpleAppBar,
+          simpleAppBarTitle: simpleAppBarTitle,
           onNotificationTap: onNotificationTap,
           onMessageTap: onMessageTap,
           child: content,
@@ -159,6 +169,8 @@ class _TabNavigator extends StatelessWidget {
 class AppBarWrapper extends StatelessWidget {
   final Widget child;
   final bool showTopBar;
+  final bool showSimpleAppBar;
+  final String? simpleAppBarTitle;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onMessageTap;
 
@@ -166,6 +178,8 @@ class AppBarWrapper extends StatelessWidget {
     super.key,
     required this.child,
     this.showTopBar = true,
+    this.showSimpleAppBar = false,
+    this.simpleAppBarTitle,
     this.onNotificationTap,
     this.onMessageTap,
   });
@@ -175,14 +189,35 @@ class AppBarWrapper extends StatelessWidget {
     return Scaffold(
       appBar: showTopBar
           ? AppHomeTopBar(
-              greeting: 'Buongiorno,',
-              userName: 'Arif!',
-              streakLabel: '🔥 5',
-              notificationCount: 3,
-              messageCount: 1,
-              onNotificationTap: onNotificationTap,
-              onMessageTap: onMessageTap,
-            )
+        greeting: 'Buongiorno,',
+        userName: 'Arif!',
+        streakLabel: '🔥 5',
+        notificationCount: 3,
+        messageCount: 1,
+        onNotificationTap: onNotificationTap,
+        onMessageTap: onMessageTap,
+      )
+          : showSimpleAppBar
+          ? AppBar(
+        backgroundColor: const Color(0xFFF7F7F7),
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Color(0xFF2F6B1F),
+          ),
+          onPressed: () => Get.back(),
+        ),
+        title: Text(
+          simpleAppBarTitle ?? '',
+          style: const TextStyle(
+            color: Color(0xFF246B17),
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      )
           : null,
       body: child,
     );

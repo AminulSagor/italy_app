@@ -14,4 +14,12 @@ class AppRoutes {
   static const String home = '/home';
   static const String wrapper = '/wrapper';
   static const String notifications = '/notifications';
+  static const String cvBuilder = '/cv-builder';
+  static const String createCvChoice = '/create-cv-choice';
+  static const String chooseCvTemplate = '/choose-cv-template';
+  static const String createCvContact = '/create-cv-contact';
+  static const String createCvExperience = '/create-cv-experience';
+  static const String createCvEducation = '/create-cv-education';
+  static const String createCvSummary = '/create-cv-summary';
+  static const String cvReady = '/cv-ready';
 }

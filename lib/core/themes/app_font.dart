@@ -1,6 +1,7 @@
 class AppFont {
   AppFont._();
 
+  static const double font7 = 7;
   static const double font8 = 8;
   static const double font9 = 9;
   static const double font10 = 10;
