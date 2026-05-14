@@ -38,4 +38,11 @@ class AppRoutes {
   static const String verifyContact = '/settings/verify-contact';
   static const String profileSuccess = '/settings/profile-success';
   static const String deleteAccountConfirm = '/settings/delete-account/confirm';
+  static const String verbDetails = '/practice-hub/verb-details';
+  static const String survivalItalian = '/practice-hub/survival-italian';
+  static const String practiceHubPdfViewer = '/practice-hub/pdf-viewer';
+  static const String jobSentences = '/practice-hub/job-sentences';
+  static const String jobDetails = '/practice-hub/job-details';
+  static const String jobPhraseDetails = '/practice-hub/job-phrase-details';
+  static const String dailyChallenges = '/practice-hub/daily-challenges';
 }

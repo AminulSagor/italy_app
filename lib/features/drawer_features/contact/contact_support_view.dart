@@ -24,41 +24,55 @@ class ContactSupportView extends GetView<ContactController> {
             children: <Widget>[
               const _ContactTopBar(),
 
-              SizedBox(height: 53.h),
+              // SizedBox(height: 53.h),
+              Image.asset(
+                'assets/heroes/Hero Section customer support.png',
+                width: double.infinity,
+              ),
 
-              const _SupportAvatar(),
+              // const _SupportAvatar(),
+              // SizedBox(height: 23.h),
 
-              SizedBox(height: 23.h),
+              // Text(
+              //   'How can we help you?',
+              //   textAlign: TextAlign.center,
+              //   style: TextStyle(
+              //     fontSize: 30.sp,
+              //     height: 1.12,
+              //     fontWeight: FontWeight.w900,
+              //     color: const Color(0xFF185E04),
+              //     letterSpacing: -0.75,
+              //   ),
+              // ),
+              // SizedBox(height: 9.h),
 
-              Text(
-                'How can we help you?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 30.sp,
-                  height: 1.12,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF185E04),
-                  letterSpacing: -0.75,
+              // Text(
+              //   'Select a way to connect with our team.',
+              //   textAlign: TextAlign.center,
+              //   style: TextStyle(
+              //     fontSize: 16.sp,
+              //     fontWeight: FontWeight.w500,
+              //     color: const Color(0xFF666666),
+              //     letterSpacing: -0.1,
+              //   ),
+              // ),
+              SizedBox(height: 35.h),
+              GestureDetector(
+                onTap: controller.chatOnWhatsapp,
+                child: SizedBox(
+                  height: 210.h,
+                  width: double.infinity,
+                  child: Transform.scale(
+                    scale: 1.45,
+                    child: Image.asset(
+                      'assets/heroes/Priority Card (WhatsApp).png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
               ),
 
-              SizedBox(height: 9.h),
-
-              Text(
-                'Select a way to connect with our team.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF666666),
-                  letterSpacing: -0.1,
-                ),
-              ),
-
-              SizedBox(height: 58.h),
-
-              _WhatsAppCard(onTap: controller.chatOnWhatsapp),
-
+              //_WhatsAppCard(onTap: controller.chatOnWhatsapp),
               SizedBox(height: 16.h),
 
               Row(
@@ -168,205 +182,205 @@ class _ContactTopBar extends StatelessWidget {
   }
 }
 
-class _SupportAvatar extends StatelessWidget {
-  const _SupportAvatar();
+// class _SupportAvatar extends StatelessWidget {
+//   const _SupportAvatar();
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 156.r,
-      height: 156.r,
-      padding: EdgeInsets.all(5.r),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: const Color(0xFF79F535).withValues(alpha: 0.28),
-            blurRadius: 42.r,
-            spreadRadius: 8.r,
-          ),
-        ],
-      ),
-      child: ClipOval(
-        child: Image.asset(
-          'assets/support/support_agent.png',
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: <Color>[Color(0xFF315F5C), Color(0xFF173D45)],
-              ),
-            ),
-            child: Icon(
-              Icons.support_agent_rounded,
-              size: 104.r,
-              color: Colors.white.withValues(alpha: 0.95),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       width: 156.r,
+//       height: 156.r,
+//       padding: EdgeInsets.all(5.r),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         shape: BoxShape.circle,
+//         boxShadow: <BoxShadow>[
+//           BoxShadow(
+//             color: const Color(0xFF79F535).withValues(alpha: 0.28),
+//             blurRadius: 42.r,
+//             spreadRadius: 8.r,
+//           ),
+//         ],
+//       ),
+//       // child: ClipOval(
+//       //   child: Image.asset(
+//       //     'assets/support/support_agent.png',
+//       //     fit: BoxFit.cover,
+//       //     errorBuilder: (_, __, ___) => Container(
+//       //       decoration: const BoxDecoration(
+//       //         shape: BoxShape.circle,
+//       //         gradient: LinearGradient(
+//       //           begin: Alignment.topCenter,
+//       //           end: Alignment.bottomCenter,
+//       //           colors: <Color>[Color(0xFF315F5C), Color(0xFF173D45)],
+//       //         ),
+//       //       ),
+//       //       child: Icon(
+//       //         Icons.support_agent_rounded,
+//       //         size: 104.r,
+//       //         color: Colors.white.withValues(alpha: 0.95),
+//       //       ),
+//       //     ),
+//       //   ),
+//       // ),
+//     );
+//   }
+// }
 
-class _WhatsAppCard extends StatelessWidget {
-  final VoidCallback onTap;
+// class _WhatsAppCard extends StatelessWidget {
+//   final VoidCallback onTap;
 
-  const _WhatsAppCard({required this.onTap});
+//   const _WhatsAppCard({required this.onTap});
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 210.h,
-        width: double.infinity,
-        padding: EdgeInsets.fromLTRB(32.w, 32.h, 26.w, 30.h),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(52.r),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[Color(0xFF46D900), Color(0xFF217000)],
-          ),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: const Color(0xFF79F535).withValues(alpha: 0.28),
-              blurRadius: 34.r,
-              offset: Offset(-14.w, 18.h),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              right: -4.w,
-              top: -8.h,
-              child: Container(
-                width: 100.w,
-                height: 100.h,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-              ),
-            ),
-            Positioned(
-              right: 20.w,
-              top: 24.h,
-              child: CustomPaint(
-                size: Size(78.w, 78.h),
-                painter: _BubbleTailPainter(),
-              ),
-            ),
-            Positioned(
-              right: 6.w,
-              top: 31.h,
-              child: Container(
-                height: 29.h,
-                padding: EdgeInsets.symmetric(horizontal: 13.w),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.22),
-                  borderRadius: BorderRadius.circular(100.r),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.35),
-                  ),
-                ),
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      width: 11.r,
-                      height: 11.r,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      'ONLINE NOW',
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              width: 64.r,
-              height: 64.r,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(22.r),
-              ),
-              child: Icon(
-                Icons.chat_bubble_outline_rounded,
-                size: 33.r,
-                color: const Color(0xFF36B900),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              bottom: 1.h,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Chat on WhatsApp',
-                    style: TextStyle(
-                      fontSize: 24.sp,
-                      height: 1,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    'Fastest response for learning help.',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.84),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Container(
+//         height: 210.h,
+//         width: double.infinity,
+//         padding: EdgeInsets.fromLTRB(32.w, 32.h, 26.w, 30.h),
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(52.r),
+//           gradient: const LinearGradient(
+//             begin: Alignment.topLeft,
+//             end: Alignment.bottomRight,
+//             colors: <Color>[Color(0xFF46D900), Color(0xFF217000)],
+//           ),
+//           boxShadow: <BoxShadow>[
+//             BoxShadow(
+//               color: const Color(0xFF79F535).withValues(alpha: 0.28),
+//               blurRadius: 34.r,
+//               offset: Offset(-14.w, 18.h),
+//             ),
+//           ],
+//         ),
+//         child: Stack(
+//           children: <Widget>[
+//             Positioned(
+//               right: -4.w,
+//               top: -8.h,
+//               child: Container(
+//                 width: 100.w,
+//                 height: 100.h,
+//                 decoration: BoxDecoration(
+//                   color: Colors.white.withValues(alpha: 0.18),
+//                   borderRadius: BorderRadius.circular(10.r),
+//                 ),
+//               ),
+//             ),
+//             Positioned(
+//               right: 20.w,
+//               top: 24.h,
+//               child: CustomPaint(
+//                 size: Size(78.w, 78.h),
+//                 painter: _BubbleTailPainter(),
+//               ),
+//             ),
+//             Positioned(
+//               right: 6.w,
+//               top: 31.h,
+//               child: Container(
+//                 height: 29.h,
+//                 padding: EdgeInsets.symmetric(horizontal: 13.w),
+//                 decoration: BoxDecoration(
+//                   color: Colors.white.withValues(alpha: 0.22),
+//                   borderRadius: BorderRadius.circular(100.r),
+//                   border: Border.all(
+//                     color: Colors.white.withValues(alpha: 0.35),
+//                   ),
+//                 ),
+//                 child: Row(
+//                   children: <Widget>[
+//                     Container(
+//                       width: 11.r,
+//                       height: 11.r,
+//                       decoration: const BoxDecoration(
+//                         color: Colors.white,
+//                         shape: BoxShape.circle,
+//                       ),
+//                     ),
+//                     SizedBox(width: 8.w),
+//                     Text(
+//                       'ONLINE NOW',
+//                       style: TextStyle(
+//                         fontSize: 10.sp,
+//                         fontWeight: FontWeight.w900,
+//                         color: Colors.white,
+//                         letterSpacing: 1,
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//             Container(
+//               width: 64.r,
+//               height: 64.r,
+//               decoration: BoxDecoration(
+//                 color: Colors.white,
+//                 borderRadius: BorderRadius.circular(22.r),
+//               ),
+//               child: Icon(
+//                 Icons.chat_bubble_outline_rounded,
+//                 size: 33.r,
+//                 color: const Color(0xFF36B900),
+//               ),
+//             ),
+//             Positioned(
+//               left: 0,
+//               bottom: 1.h,
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: <Widget>[
+//                   Text(
+//                     'Chat on WhatsApp',
+//                     style: TextStyle(
+//                       fontSize: 24.sp,
+//                       height: 1,
+//                       fontWeight: FontWeight.w900,
+//                       color: Colors.white,
+//                       letterSpacing: -0.5,
+//                     ),
+//                   ),
+//                   SizedBox(height: 6.h),
+//                   Text(
+//                     'Fastest response for learning help.',
+//                     style: TextStyle(
+//                       fontSize: 14.sp,
+//                       fontWeight: FontWeight.w600,
+//                       color: Colors.white.withValues(alpha: 0.84),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
-class _BubbleTailPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.16)
-      ..style = PaintingStyle.fill;
+// class _BubbleTailPainter extends CustomPainter {
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     final Paint paint = Paint()
+//       ..color = Colors.white.withValues(alpha: 0.16)
+//       ..style = PaintingStyle.fill;
 
-    final Path path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(0, size.height)
-      ..close();
+//     final Path path = Path()
+//       ..moveTo(0, 0)
+//       ..lineTo(size.width, 0)
+//       ..lineTo(0, size.height)
+//       ..close();
 
-    canvas.drawPath(path, paint);
-  }
+//     canvas.drawPath(path, paint);
+//   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
+//   @override
+//   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+// }
 
 class _SmallContactCard extends StatelessWidget {
   final IconData icon;
@@ -465,7 +479,7 @@ class _FacebookCommunityCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 128.h,
+        height: 145.h,
         width: double.infinity,
         padding: EdgeInsets.fromLTRB(24.w, 24.h, 20.w, 22.h),
         decoration: BoxDecoration(

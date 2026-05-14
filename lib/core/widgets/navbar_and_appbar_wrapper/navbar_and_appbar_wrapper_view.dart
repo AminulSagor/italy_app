@@ -9,6 +9,7 @@ import 'navbar_and_appbar_wrapper_controller.dart';
 import '../custom_drawer.dart';
 import '../../../features/leaderboard/views/leaderboard_view.dart';
 import '../../../features/ai_chat/ai_chat_view.dart';
+import '../../../features/practice_hub/views/practice_hub_view.dart';
 
 class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
   const NavbarAndAppbarWrapper({super.key});
@@ -107,7 +108,7 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
       case 0:
         return _TabNavigator(id: 0, content: const HomeView());
       case 1:
-        return _TabNavigator(id: 1, content: const CustomPlaceHolder());
+        return _TabNavigator(id: 1, content: const PracticeHubView());
       case 2:
         return _TabNavigator(id: 2, content: const AiChatView());
       case 3:

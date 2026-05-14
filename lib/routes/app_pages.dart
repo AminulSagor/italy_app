@@ -53,6 +53,13 @@ import '../features/drawer_features/settings/sub_features/views/change_password_
 import '../features/drawer_features/settings/sub_features/views/verify_contact_view.dart';
 import '../features/drawer_features/settings/sub_features/views/settings_success_view.dart';
 import '../features/drawer_features/settings/sub_features/views/delete_account_confirm_view.dart';
+import '../features/practice_hub/controllers/practice_hub_controller.dart';
+import '../features/practice_hub/views/important_verbs/verb_details.dart';
+import '../features/practice_hub/views/survival_italian/survival_italian_view.dart';
+import '../features/practice_hub/views/widgets/pdf_viewer.dart';
+import '../features/practice_hub/views/job_sentences/job_sentences_view.dart';
+import '../features/practice_hub/views/job_sentences/job_details_view.dart';
+import '../features/practice_hub/views/daily_challenges/daily_challenges_view.dart';
 
 class AppPages {
   AppPages._();
@@ -344,6 +351,107 @@ class AppPages {
         if (!Get.isRegistered<SettingsController>()) {
           Get.lazyPut<SettingsController>(
             () => SettingsController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.verbDetails,
+      page: () => const VerbDetailsView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+
+        final Object? args = Get.arguments;
+
+        if (args is Map<String, dynamic>) {
+          Get.find<PracticeHubController>().setSelectedVerbForDetails(args);
+        } else if (args is Map) {
+          Get.find<PracticeHubController>().setSelectedVerbForDetails(
+            Map<String, dynamic>.from(args),
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.survivalItalian,
+      page: () => const SurvivalItalianView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.practiceHubPdfViewer,
+      page: () => const PracticeHubPdfViewer(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.jobSentences,
+      page: () => const JobSentencesView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.jobDetails,
+      page: () => const JobDetailsView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.jobPhraseDetails,
+      page: () => const JobPhraseDetailsView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.dailyChallenges,
+      page: () => const DailyChallengesView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
             fenix: true,
           );
         }

@@ -48,38 +48,42 @@ class RewardChestView extends GetView<RewardController> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(44.r),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(44.r),
-                        child: Image.asset(
-                          'assets/rewards/tablet.png',
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Stack(
-                            alignment: Alignment.center,
-                            children: <Widget>[
-                              Transform.rotate(
-                                angle: -0.18,
-                                child: Icon(
-                                  Icons.tablet_mac_rounded,
-                                  size: 175.r,
-                                  color: const Color(0xFF2D3032),
-                                ),
-                              ),
-                              Positioned(
-                                top: 52.h,
-                                right: 46.w,
-                                child: Transform.rotate(
-                                  angle: 0.55,
-                                  child: Icon(
-                                    Icons.edit_rounded,
-                                    size: 142.r,
-                                    color: const Color(0xFF5E5E5E),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: Image.asset(
+                        'assets/heroes/chest_img.png',
+                        fit: BoxFit.cover,
                       ),
+                      // child: ClipRRect(
+                      //   borderRadius: BorderRadius.circular(44.r),
+                      //   child: Image.asset(
+                      //     'assets/rewards/tablet.png',
+                      //     fit: BoxFit.cover,
+                      //     errorBuilder: (_, __, ___) => Stack(
+                      //       alignment: Alignment.center,
+                      //       children: <Widget>[
+                      //         Transform.rotate(
+                      //           angle: -0.18,
+                      //           // child: Icon(
+                      //           //   Icons.tablet_mac_rounded,
+                      //           //   size: 175.r,
+                      //           //   color: const Color(0xFF2D3032),
+                      //           // ),
+                      //         ),
+                      //         Positioned(
+                      //           top: 52.h,
+                      //           right: 46.w,
+                      //           child: Transform.rotate(
+                      //             angle: 0.55,
+                      //             child: Icon(
+                      //               Icons.edit_rounded,
+                      //               size: 142.r,
+                      //               color: const Color(0xFF5E5E5E),
+                      //             ),
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
                     ),
 
                     SizedBox(height: 32.h),
