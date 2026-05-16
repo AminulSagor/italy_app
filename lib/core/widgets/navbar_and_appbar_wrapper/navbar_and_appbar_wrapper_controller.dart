@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../features/drawer_features/language/language_switch_dialogue.dart';
 import '../../../features/messages/controllers/messages_controller.dart';
 import '../../../features/messages/services/messages_mock_service.dart';
 import '../../../features/notifications/controllers/notifications_controller.dart';
 import '../../../features/notifications/services/notifications_mock_service.dart';
 import '../../../features/notifications/views/notifications_bottom_sheet.dart';
+import '../../localization/translation_service.dart';
 import '../../themes/app_colors.dart';
+import '../../../routes/routes.dart';
 
 class NavbarAndAppbarWrapperController extends GetxController {
+  final TranslationService _translationService = Get.find<TranslationService>();
   final RxInt currentIndex = 0.obs;
   final RxBool isMessagesPageOpen = false.obs;
   final RxSet<int> visitedTabs = <int>{0}.obs;
@@ -90,5 +94,29 @@ class NavbarAndAppbarWrapperController extends GetxController {
     }
 
     return true;
+  }
+
+  // drawer callbacks
+  Future<void> onLanguageTap(BuildContext context) async {
+    final BuildContext dialogContext = Get.context ?? context;
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+
+    final AppLanguage? selectedLanguage = await showLanguageDialog(
+      context: dialogContext,
+      initialLanguage: _translationService.currentLanguage,
+    );
+
+    if (selectedLanguage == null) {
+      return;
+    }
+
+    _translationService.setLanguage(selectedLanguage);
+  }
+
+  void onShopTap() {
+    Get.toNamed(AppRoutes.shop);
   }
 }

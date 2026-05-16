@@ -60,6 +60,47 @@ import '../features/webinar/views/webinar_live_view.dart';
 import '../features/webinar/views/webinar_view.dart';
 import 'app_route_arguments.dart';
 import 'app_routes.dart';
+import '../core/bootstrap/app_bootstrap_view.dart';
+import '../core/bootstrap/app_bootstrap_controller.dart';
+import '../features/auth/sub_features/login/controllers/login_controller.dart';
+import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
+import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_view.dart';
+import '../features/drawer_features/shop/shop_view.dart';
+import '../features/drawer_features/shop/shop_controller.dart';
+import '../features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart';
+import '../features/drawer_features/shop/refill_ai_credits/views/order_summary_view.dart';
+import '../features/drawer_features/shop/refill_ai_credits/views/checkout_view.dart';
+import '../features/drawer_features/shop/refill_ai_credits/views/purchase_complete.dart';
+import '../features/drawer_features/shop/streak_freeze_store/streak_freeze_store_view.dart';
+import '../features/drawer_features/shop/streak_freeze_store/order_summary_view.dart';
+import '../features/drawer_features/shop/cv_credit_store/cv_credit_store_view.dart';
+import '../features/drawer_features/shop/cv_credit_store/cv_credit_order_summary_view.dart';
+import '../features/drawer_features/shop/order_history/order_history_view.dart';
+import '../features/drawer_features/guide/guide_controller.dart';
+import '../features/drawer_features/guide/views/guide_view.dart';
+import '../features/drawer_features/guide/views/guide_faq_view.dart';
+import '../features/drawer_features/rewards/reward_controller.dart';
+import '../features/drawer_features/rewards/views/rewards_view.dart';
+import '../features/drawer_features/rewards/views/reward_chest_view.dart';
+import '../features/drawer_features/rewards/views/rewards_history_view.dart';
+import '../features/drawer_features/rewards/views/reward_details_view.dart';
+import '../features/drawer_features/contact/contact_controller.dart';
+import '../features/drawer_features/contact/contact_support_view.dart';
+import '../features/drawer_features/settings/settings_controller.dart';
+import '../features/drawer_features/settings/settings_view.dart';
+import '../features/drawer_features/settings/sub_features/views/profile_security_veiw.dart';
+import '../features/drawer_features/settings/sub_features/views/profile_photo_view.dart';
+import '../features/drawer_features/settings/sub_features/views/change_password_view.dart';
+import '../features/drawer_features/settings/sub_features/views/verify_contact_view.dart';
+import '../features/drawer_features/settings/sub_features/views/settings_success_view.dart';
+import '../features/drawer_features/settings/sub_features/views/delete_account_confirm_view.dart';
+import '../features/practice_hub/controllers/practice_hub_controller.dart';
+import '../features/practice_hub/views/important_verbs/verb_details.dart';
+import '../features/practice_hub/views/survival_italian/survival_italian_view.dart';
+import '../features/practice_hub/views/widgets/pdf_viewer.dart';
+import '../features/practice_hub/views/job_sentences/job_sentences_view.dart';
+import '../features/practice_hub/views/job_sentences/job_details_view.dart';
+import '../features/practice_hub/views/daily_challenges/daily_challenges_view.dart';
 
 class AppPages {
   AppPages._();
@@ -194,7 +235,9 @@ class AppPages {
           );
         }
         if (!Get.isRegistered<NotificationsMockService>()) {
-          Get.lazyPut<NotificationsMockService>(() => NotificationsMockService());
+          Get.lazyPut<NotificationsMockService>(
+            () => NotificationsMockService(),
+          );
         }
         Get.lazyPut<NavbarAndAppbarWrapperController>(
           () => NavbarAndAppbarWrapperController(),
@@ -204,11 +247,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.courseDetail,
       page: () {
-        final CourseDetailRouteArguments args = _arguments<CourseDetailRouteArguments>();
+        final CourseDetailRouteArguments args =
+            _arguments<CourseDetailRouteArguments>();
         return CourseDetailView(controllerTag: args.controllerTag);
       },
       binding: BindingsBuilder(() {
-        final CourseDetailRouteArguments args = _arguments<CourseDetailRouteArguments>();
+        final CourseDetailRouteArguments args =
+            _arguments<CourseDetailRouteArguments>();
         _ensureCoursesMockService();
         Get.lazyPut<CourseDetailController>(
           () => CourseDetailController(
@@ -223,16 +268,23 @@ class AppPages {
     GetPage(
       name: AppRoutes.chapterDetail,
       page: () {
-        final ChapterDetailRouteArguments args = _arguments<ChapterDetailRouteArguments>();
+        final ChapterDetailRouteArguments args =
+            _arguments<ChapterDetailRouteArguments>();
         return ChapterDetailView(controllerTag: args.controllerTag);
       },
       binding: BindingsBuilder(() {
-        final ChapterDetailRouteArguments args = _arguments<ChapterDetailRouteArguments>();
-        Get.lazyPut<ChapterDetailMockService>(() => ChapterDetailMockService(), tag: args.controllerTag);
+        final ChapterDetailRouteArguments args =
+            _arguments<ChapterDetailRouteArguments>();
+        Get.lazyPut<ChapterDetailMockService>(
+          () => ChapterDetailMockService(),
+          tag: args.controllerTag,
+        );
         Get.lazyPut<ChapterDetailController>(
           () => ChapterDetailController(
             chapter: args.chapter,
-            chapterDetailMockService: Get.find<ChapterDetailMockService>(tag: args.controllerTag),
+            chapterDetailMockService: Get.find<ChapterDetailMockService>(
+              tag: args.controllerTag,
+            ),
           ),
           tag: args.controllerTag,
         );
@@ -242,15 +294,22 @@ class AppPages {
     GetPage(
       name: AppRoutes.vocabulary,
       page: () {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
         return VocabularyView(controllerTag: args.controllerTag);
       },
       binding: BindingsBuilder(() {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
-        Get.lazyPut<VocabularyMockService>(() => VocabularyMockService(), tag: args.controllerTag);
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
+        Get.lazyPut<VocabularyMockService>(
+          () => VocabularyMockService(),
+          tag: args.controllerTag,
+        );
         Get.lazyPut<VocabularyController>(
           () => VocabularyController(
-            vocabularyMockService: Get.find<VocabularyMockService>(tag: args.controllerTag),
+            vocabularyMockService: Get.find<VocabularyMockService>(
+              tag: args.controllerTag,
+            ),
           ),
           tag: args.controllerTag,
         );
@@ -270,9 +329,13 @@ class AppPages {
         final QuizRouteArguments args = routeArgs is QuizRouteArguments
             ? routeArgs
             : QuizRouteArguments(
-                controllerTag: (routeArgs as ControllerTagRouteArguments).controllerTag,
+                controllerTag:
+                    (routeArgs as ControllerTagRouteArguments).controllerTag,
               );
-        Get.lazyPut<QuizMockService>(() => QuizMockService(), tag: args.controllerTag);
+        Get.lazyPut<QuizMockService>(
+          () => QuizMockService(),
+          tag: args.controllerTag,
+        );
         Get.lazyPut<QuizController>(
           () => QuizController(
             quizMockService: Get.find<QuizMockService>(tag: args.controllerTag),
@@ -286,29 +349,38 @@ class AppPages {
     GetPage(
       name: AppRoutes.quizCompletion,
       page: () {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
         return QuizCompletionView(controllerTag: args.controllerTag);
       },
     ),
     GetPage(
       name: AppRoutes.quizReviewAnswers,
       page: () {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
         return QuizReviewAnswersView(controllerTag: args.controllerTag);
       },
     ),
     GetPage(
       name: AppRoutes.proOrderSummary,
       page: () {
-        final ProOrderSummaryRouteArguments args = _arguments<ProOrderSummaryRouteArguments>();
+        final ProOrderSummaryRouteArguments args =
+            _arguments<ProOrderSummaryRouteArguments>();
         return ProOrderSummaryView(controllerTag: args.controllerTag);
       },
       binding: BindingsBuilder(() {
-        final ProOrderSummaryRouteArguments args = _arguments<ProOrderSummaryRouteArguments>();
-        Get.lazyPut<ProCheckoutMockService>(() => ProCheckoutMockService(), tag: args.controllerTag);
+        final ProOrderSummaryRouteArguments args =
+            _arguments<ProOrderSummaryRouteArguments>();
+        Get.lazyPut<ProCheckoutMockService>(
+          () => ProCheckoutMockService(),
+          tag: args.controllerTag,
+        );
         Get.lazyPut<ProCheckoutController>(
           () => ProCheckoutController(
-            proCheckoutMockService: Get.find<ProCheckoutMockService>(tag: args.controllerTag),
+            proCheckoutMockService: Get.find<ProCheckoutMockService>(
+              tag: args.controllerTag,
+            ),
             onPurchaseCompleted: Get.find<CourseDetailController>(
               tag: args.courseDetailControllerTag,
             ).enablePro,
@@ -320,34 +392,39 @@ class AppPages {
     GetPage(
       name: AppRoutes.proCheckout,
       page: () {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
         return ProCheckoutView(controllerTag: args.controllerTag);
       },
     ),
     GetPage(
       name: AppRoutes.proPurchaseSuccess,
       page: () {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
         return ProPurchaseSuccessView(controllerTag: args.controllerTag);
       },
     ),
 
-
     GetPage(
       name: AppRoutes.courseCertificate,
       page: () {
-        final CourseCertificateRouteArguments args = _arguments<CourseCertificateRouteArguments>();
+        final CourseCertificateRouteArguments args =
+            _arguments<CourseCertificateRouteArguments>();
         return CourseCertificateView(controllerTag: args.controllerTag);
       },
       binding: BindingsBuilder(() {
-        final CourseCertificateRouteArguments args = _arguments<CourseCertificateRouteArguments>();
+        final CourseCertificateRouteArguments args =
+            _arguments<CourseCertificateRouteArguments>();
         Get.lazyPut<CourseCertificateMockService>(
           () => CourseCertificateMockService(),
           tag: args.controllerTag,
         );
         Get.lazyPut<CourseCertificateController>(
           () => CourseCertificateController(
-            certificateMockService: Get.find<CourseCertificateMockService>(tag: args.controllerTag),
+            certificateMockService: Get.find<CourseCertificateMockService>(
+              tag: args.controllerTag,
+            ),
           ),
           tag: args.controllerTag,
         );
@@ -357,16 +434,23 @@ class AppPages {
     GetPage(
       name: AppRoutes.finalExamOverview,
       page: () {
-        final FinalExamRouteArguments args = _arguments<FinalExamRouteArguments>();
+        final FinalExamRouteArguments args =
+            _arguments<FinalExamRouteArguments>();
         return FinalExamOverviewView(controllerTag: args.controllerTag);
       },
       binding: BindingsBuilder(() {
-        final FinalExamRouteArguments args = _arguments<FinalExamRouteArguments>();
-        Get.lazyPut<FinalExamMockService>(() => FinalExamMockService(), tag: args.controllerTag);
+        final FinalExamRouteArguments args =
+            _arguments<FinalExamRouteArguments>();
+        Get.lazyPut<FinalExamMockService>(
+          () => FinalExamMockService(),
+          tag: args.controllerTag,
+        );
         Get.lazyPut<FinalExamController>(
           () => FinalExamController(
             controllerTag: args.controllerTag,
-            finalExamMockService: Get.find<FinalExamMockService>(tag: args.controllerTag),
+            finalExamMockService: Get.find<FinalExamMockService>(
+              tag: args.controllerTag,
+            ),
           ),
           tag: args.controllerTag,
         );
@@ -375,35 +459,40 @@ class AppPages {
     GetPage(
       name: AppRoutes.finalExamListening,
       page: () {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
         return FinalExamListeningView(controllerTag: args.controllerTag);
       },
     ),
     GetPage(
       name: AppRoutes.finalExamWriting,
       page: () {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
         return FinalExamWritingView(controllerTag: args.controllerTag);
       },
     ),
     GetPage(
       name: AppRoutes.finalExamSpeaking,
       page: () {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
         return FinalExamSpeakingView(controllerTag: args.controllerTag);
       },
     ),
     GetPage(
       name: AppRoutes.finalExamSuccess,
       page: () {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
         return FinalExamSuccessView(controllerTag: args.controllerTag);
       },
     ),
     GetPage(
       name: AppRoutes.finalExamResult,
       page: () {
-        final ControllerTagRouteArguments args = _arguments<ControllerTagRouteArguments>();
+        final ControllerTagRouteArguments args =
+            _arguments<ControllerTagRouteArguments>();
         return FinalExamResultView(controllerTag: args.controllerTag);
       },
     ),
@@ -424,6 +513,135 @@ class AppPages {
         }
       }),
     ),
+
+    GetPage(
+      name: AppRoutes.shop,
+      page: () => ShopView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ShopController>(() => ShopController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.aiRefillCenter,
+      page: () => const AiRefillCenterPage(),
+    ),
+    GetPage(name: AppRoutes.orderSummary, page: () => const OrderSummaryPage()),
+    GetPage(name: AppRoutes.checkout, page: () => const CheckoutPage()),
+    GetPage(
+      name: AppRoutes.purchaseCompleted,
+      page: () => const PurchaseCompletedPage(),
+    ),
+    GetPage(name: AppRoutes.streakFreeze, page: () => const StreakFreezeView()),
+    GetPage(
+      name: AppRoutes.streakFreezeOrderSummary,
+      page: () => const StreakOrderSummaryView(),
+    ),
+
+    GetPage(
+      name: AppRoutes.cvCreditStore,
+      page: () => const CvCreditStoreView(),
+    ),
+
+    GetPage(
+      name: AppRoutes.cvCreditOrderSummary,
+      page: () => const CvCreditOrderSummaryView(),
+    ),
+    GetPage(
+      name: AppRoutes.orderHistory,
+      page: () => const OrderHistoryView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<ShopController>()) {
+          Get.lazyPut<ShopController>(() => ShopController());
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.guide,
+      page: () => const GuideView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<GuideController>(() => GuideController());
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.guideFaq,
+      page: () => const GuideFaqView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<GuideController>()) {
+          Get.lazyPut<GuideController>(() => GuideController());
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.rewards,
+      page: () => const RewardsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.rewardChest,
+      page: () => const RewardChestView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<RewardController>()) {
+          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.rewardsHistory,
+      page: () => const RewardsHistoryView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<RewardController>()) {
+          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.rewardDetails,
+      page: () => const RewardDetailsView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<RewardController>()) {
+          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.contactSupport,
+      page: () => const ContactSupportView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ContactController>(() => ContactController(), fenix: true);
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.settings,
+      page: () => const SettingsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<SettingsController>(
+          () => SettingsController(),
+          fenix: true,
+        );
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.profileSecurity,
+      page: () => const ProfileSecurityView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.lazyPut<SettingsController>(
+            () => SettingsController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
     GetPage(
       name: AppRoutes.webinarLive,
       page: () => const WebinarLiveView(),
@@ -436,6 +654,145 @@ class AppPages {
             () => WebinarController(
               webinarMockService: Get.find<WebinarMockService>(),
             ),
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.changePassword,
+      page: () => const ChangePasswordView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.lazyPut<SettingsController>(
+            () => SettingsController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(name: AppRoutes.profilePhoto, page: () => const ProfilePhotoView()),
+
+    GetPage(
+      name: AppRoutes.verifyContact,
+      page: () => const VerifyContactView(),
+    ),
+
+    GetPage(
+      name: AppRoutes.profileSuccess,
+      page: () => const SettingsSuccessView(),
+    ),
+
+    GetPage(
+      name: AppRoutes.deleteAccountConfirm,
+      page: () => const DeleteAccountConfirmView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.lazyPut<SettingsController>(
+            () => SettingsController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.verbDetails,
+      page: () => const VerbDetailsView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+
+        final Object? args = Get.arguments;
+
+        if (args is Map<String, dynamic>) {
+          Get.find<PracticeHubController>().setSelectedVerbForDetails(args);
+        } else if (args is Map) {
+          Get.find<PracticeHubController>().setSelectedVerbForDetails(
+            Map<String, dynamic>.from(args),
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.survivalItalian,
+      page: () => const SurvivalItalianView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.practiceHubPdfViewer,
+      page: () => const PracticeHubPdfViewer(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.jobSentences,
+      page: () => const JobSentencesView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.jobDetails,
+      page: () => const JobDetailsView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.jobPhraseDetails,
+      page: () => const JobPhraseDetailsView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
+          );
+        }
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.dailyChallenges,
+      page: () => const DailyChallengesView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<PracticeHubController>()) {
+          Get.lazyPut<PracticeHubController>(
+            () => PracticeHubController(),
+            fenix: true,
           );
         }
       }),

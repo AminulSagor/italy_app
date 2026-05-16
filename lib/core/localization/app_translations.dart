@@ -1,8 +1,5 @@
-import 'package:get/get.dart';
-
-class AppTranslations extends Translations {
-  @override
-  Map<String, Map<String, String>> get keys => <String, Map<String, String>>{
+const Map<String, Map<String, String>>
+appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
     'app_name': 'Italir Pothe',
     'login': 'Login',
@@ -46,24 +43,23 @@ class AppTranslations extends Translations {
     'otp_didnt_receive_code': 'Didn\'t receive code?',
     'otp_security_title': 'Guaranteed Security',
     'otp_security_desc':
-      'Your privacy is our absolute priority\nduring your learning journey.',
+        'Your privacy is our absolute priority\nduring your learning journey.',
     'account_created_title': 'Congratulations!\nAccount Created!',
     'account_created_desc': 'You\'re all set to start your Italian\njourney.',
     'forgot_desc':
-      'Enter your email or phone number and we\'ll\nsend you a link to reset your password.',
+        'Enter your email or phone number and we\'ll\nsend you a link to reset your password.',
     'forgot_hint_email': 'Enter your email address',
     'forgot_hint_phone': 'Enter your phone number',
     'send_reset_link': 'Send Reset Link',
-    'fp_otp_hero_desc_email':
-      'Enter the 4-digit code sent to your\nemail.',
+    'fp_otp_hero_desc_email': 'Enter the 4-digit code sent to your\nemail.',
     'fp_otp_hero_desc_phone':
-      'Enter the 4-digit code sent to your\nphone number.',
+        'Enter the 4-digit code sent to your\nphone number.',
     'fp_otp_didnt_receive': 'Didn\'t receive the code?',
     'fp_otp_info':
-      'Please check your spam folder if you don\'t see the code within 2 minutes. The code is valid for 10 minutes.',
+        'Please check your spam folder if you don\'t see the code within 2 minutes. The code is valid for 10 minutes.',
     'reset_title': 'Create New\nPassword',
     'reset_desc':
-      'Your new password must be\ndifferent from previous used\npasswords.',
+        'Your new password must be\ndifferent from previous used\npasswords.',
     'new_password': 'New Password',
     'confirm_password': 'Confirm Password',
     'reset_password': 'Reset Password',
@@ -73,7 +69,7 @@ class AppTranslations extends Translations {
     'encrypted_verification': 'END-TO-END ENCRYPTED VERIFICATION',
     'password_changed': 'Password Changed!',
     'password_changed_desc':
-      'Your password has been\nsuccessfully updated. You can now\nlog in with your new credentials.',
+        'Your password has been\nsuccessfully updated. You can now\nlog in with your new credentials.',
     'secure_protected': 'SECURE & PROTECTED',
     'secure': 'SECURE',
     'login_ready': 'Login Ready',
@@ -89,17 +85,17 @@ class AppTranslations extends Translations {
     'splash_slide_1_highlight': 'daily life',
     'splash_slide_1_suffix': ' and\nwork',
     'splash_slide_1_desc':
-      'Unlock new opportunities with our\nimmersive, playful curriculum.',
+        'Unlock new opportunities with our\nimmersive, playful curriculum.',
     'splash_slide_2_title': 'Create a\nprofessional\n',
     'splash_slide_2_highlight': 'CV',
     'splash_slide_2_suffix': ' in 2 minutes',
     'splash_slide_2_desc':
-      'Master the Italian job market with\nindustry-standard templates.',
+        'Master the Italian job market with\nindustry-standard templates.',
     'splash_slide_3_title': 'Get ',
     'splash_slide_3_highlight': 'CAF Support',
     'splash_slide_3_suffix': '\n& Training',
     'splash_slide_3_desc':
-      'Your Italian Journey, Simplified.\nCAF Support & Training.',
+        'Your Italian Journey, Simplified.\nCAF Support & Training.',
     'skip': 'SKIP',
     'next': 'Next',
     'get_started': 'Get started',
@@ -115,12 +111,12 @@ class AppTranslations extends Translations {
     'snack_password_min_8': 'Password must be at least 8 characters.',
     'snack_terms_required': 'Terms required',
     'snack_accept_terms':
-      'Please agree to the Terms & Conditions and Privacy Policy.',
+        'Please agree to the Terms & Conditions and Privacy Policy.',
     'snack_code_resent': 'Code resent',
     'snack_fresh_code_sent': 'A fresh verification code has been sent.',
     'snack_incomplete_code': 'Incomplete code',
     'snack_enter_4_digit_verification':
-      'Please enter the 4-digit verification code.',
+        'Please enter the 4-digit verification code.',
     'snack_enter_full_4_digit': 'Please enter the full 4-digit code.',
     'snack_missing_payload': 'Missing payload',
     'snack_payload_not_ready': 'Signup payload is not ready yet.',
@@ -134,7 +130,7 @@ class AppTranslations extends Translations {
     'snack_session_expired': 'Session expired',
     'snack_verify_again': 'Please verify your code again.',
     'snack_need_upper_number':
-      'Password needs at least one uppercase letter and one number.',
+        'Password needs at least one uppercase letter and one number.',
     'snack_mismatch': 'Mismatch',
     'snack_passwords_match': 'Both password fields must match.',
     'snack_could_not_reset': 'Could not reset',
@@ -186,7 +182,7 @@ class AppTranslations extends Translations {
     'account_created_title': 'স্বাগতম! অ্যাকাউন্ট\nতৈরি হয়েছে!',
     'account_created_desc': 'আপনি আপনার ইতালীয় যাত্রা শুরু\nকরতে প্রস্তুত',
     'forgot_desc':
-      'আপনার ইমেইল বা ফোন নম্বর দিন,\nআমরা পাসওয়ার্ড রিসেটের লিংক পাঠাব।',
+        'আপনার ইমেইল বা ফোন নম্বর দিন,\nআমরা পাসওয়ার্ড রিসেটের লিংক পাঠাব।',
     'forgot_hint_email': 'আপনার ইমেইল ঠিকানা দিন',
     'forgot_hint_phone': 'আপনার ফোন নম্বর দিন',
     'send_reset_link': 'রিসেট লিংক পাঠান',
@@ -194,10 +190,10 @@ class AppTranslations extends Translations {
     'fp_otp_hero_desc_phone': 'আপনার ফোনে পাঠানো\n৪-সংখ্যার কোড লিখুন।',
     'fp_otp_didnt_receive': 'কোড পাননি?',
     'fp_otp_info':
-      '২ মিনিটের মধ্যে কোড না পেলে স্প্যাম ফোল্ডার দেখুন। কোড ১০ মিনিট পর্যন্ত বৈধ।',
+        '২ মিনিটের মধ্যে কোড না পেলে স্প্যাম ফোল্ডার দেখুন। কোড ১০ মিনিট পর্যন্ত বৈধ।',
     'reset_title': 'নতুন\nপাসওয়ার্ড তৈরি করুন',
     'reset_desc':
-      'নতুন পাসওয়ার্ডটি\nআগের ব্যবহৃত পাসওয়ার্ড থেকে\nভিন্ন হতে হবে।',
+        'নতুন পাসওয়ার্ডটি\nআগের ব্যবহৃত পাসওয়ার্ড থেকে\nভিন্ন হতে হবে।',
     'new_password': 'নতুন পাসওয়ার্ড',
     'confirm_password': 'পাসওয়ার্ড নিশ্চিত করুন',
     'reset_password': 'পাসওয়ার্ড রিসেট',
@@ -207,7 +203,7 @@ class AppTranslations extends Translations {
     'encrypted_verification': 'এন্ড-টু-এন্ড এনক্রিপ্টেড ভেরিফিকেশন',
     'password_changed': 'পাসওয়ার্ড পরিবর্তিত!',
     'password_changed_desc':
-      'আপনার পাসওয়ার্ড সফলভাবে\nআপডেট হয়েছে। এখন নতুন তথ্য দিয়ে\nলগ ইন করতে পারবেন।',
+        'আপনার পাসওয়ার্ড সফলভাবে\nআপডেট হয়েছে। এখন নতুন তথ্য দিয়ে\nলগ ইন করতে পারবেন।',
     'secure_protected': 'নিরাপদ ও সুরক্ষিত',
     'secure': 'নিরাপদ',
     'login_ready': 'লগইন প্রস্তুত',
@@ -223,17 +219,17 @@ class AppTranslations extends Translations {
     'splash_slide_1_highlight': 'ইতালীয়\nভাষায়',
     'splash_slide_1_suffix': ' দক্ষ হয়ে উঠুন',
     'splash_slide_1_desc':
-      'আমাদের আনন্দদায়ক পাঠ্যক্রমের\nমাধ্যমে নতুন সব সুযোগের দুয়ার খুলে\nদিন',
+        'আমাদের আনন্দদায়ক পাঠ্যক্রমের\nমাধ্যমে নতুন সব সুযোগের দুয়ার খুলে\nদিন',
     'splash_slide_2_title': '',
     'splash_slide_2_highlight': 'মাত্র ২ মিনিটে',
     'splash_slide_2_suffix': ' একটি\nপ্রফেশনাল সিভি (CV)\nতৈরি করুন',
     'splash_slide_2_desc':
-      'মানসম্মত টেমপ্লেট ব্যবহার করে ইতালীয়\nজব মার্কেটে নিজেকে সেরা প্রমাণ করুন',
+        'মানসম্মত টেমপ্লেট ব্যবহার করে ইতালীয়\nজব মার্কেটে নিজেকে সেরা প্রমাণ করুন',
     'splash_slide_3_title': 'CAF সার্ভিস ও ট্রেনিং\nএখন আপনার পাশে',
     'splash_slide_3_highlight': '',
     'splash_slide_3_suffix': '',
     'splash_slide_3_desc':
-      'আপনার ইতালি প্রবাস হোক আরও সহজ\nCAF সার্ভিস ও ট্রেনিং এখন আপনার\nপাশে',
+        'আপনার ইতালি প্রবাস হোক আরও সহজ\nCAF সার্ভিস ও ট্রেনিং এখন আপনার\nপাশে',
     'skip': 'SKIP',
     'next': 'পরবর্তী',
     'get_started': 'শুরু করুন',
@@ -266,7 +262,7 @@ class AppTranslations extends Translations {
     'snack_session_expired': 'সেশন শেষ হয়েছে',
     'snack_verify_again': 'আবার কোড যাচাই করুন।',
     'snack_need_upper_number':
-      'পাসওয়ার্ডে অন্তত একটি বড় হাতের অক্ষর ও একটি সংখ্যা লাগবে।',
+        'পাসওয়ার্ডে অন্তত একটি বড় হাতের অক্ষর ও একটি সংখ্যা লাগবে।',
     'snack_mismatch': 'মেলেনি',
     'snack_passwords_match': 'দুই পাসওয়ার্ড এক হতে হবে।',
     'snack_could_not_reset': 'রিসেট করা যায়নি',
@@ -315,25 +311,25 @@ class AppTranslations extends Translations {
     'otp_didnt_receive_code': 'Non hai ricevuto il codice?',
     'otp_security_title': 'Sicurezza garantita',
     'otp_security_desc':
-      'La tua privacy \'e la nostra priorit\'a assoluta\ndurante il tuo percorso di apprendimento.',
+        'La tua privacy \'e la nostra priorit\'a assoluta\ndurante il tuo percorso di apprendimento.',
     'account_created_title': 'Benvenuto!\nAccount creato!',
     'account_created_desc':
-      'Sei pronto per iniziare il tuo\nviaggio in Italia.',
+        'Sei pronto per iniziare il tuo\nviaggio in Italia.',
     'forgot_desc':
-      'Inserisci la tua email o il numero di telefono e ti\ninvieremo un link per resettare la password.',
+        'Inserisci la tua email o il numero di telefono e ti\ninvieremo un link per resettare la password.',
     'forgot_hint_email': 'Inserisci il tuo indirizzo email',
     'forgot_hint_phone': 'Inserisci il tuo numero di telefono',
     'send_reset_link': 'Invia link di ripristino',
     'fp_otp_hero_desc_email':
-      'Inserisci il codice a 4 cifre inviato\nalla tua email',
+        'Inserisci il codice a 4 cifre inviato\nalla tua email',
     'fp_otp_hero_desc_phone':
-      'Inserisci il codice a 4 cifre inviato al\ntuo numero di telefono.',
+        'Inserisci il codice a 4 cifre inviato al\ntuo numero di telefono.',
     'fp_otp_didnt_receive': 'Non hai ricevuto il codice?',
     'fp_otp_info':
-      'Controlla la cartella spam se non ricevi l\'email entro 2 minuti. Il codice e valido per 10 minuti.',
+        'Controlla la cartella spam se non ricevi l\'email entro 2 minuti. Il codice e valido per 10 minuti.',
     'reset_title': 'Crea nuova\npassword',
     'reset_desc':
-      'La tua nuova password deve\nessere diversa dalle\nprecedenti.',
+        'La tua nuova password deve\nessere diversa dalle\nprecedenti.',
     'new_password': 'Nuova password',
     'confirm_password': 'Conferma password',
     'reset_password': 'Ripristina password',
@@ -343,7 +339,7 @@ class AppTranslations extends Translations {
     'encrypted_verification': 'VERIFICA CRITTOGRAFATA END-TO-END',
     'password_changed': 'Password modificata!',
     'password_changed_desc':
-      'La tua password e stata aggiornata\ncon successo. Ora puoi accedere\ncon le nuove credenziali.',
+        'La tua password e stata aggiornata\ncon successo. Ora puoi accedere\ncon le nuove credenziali.',
     'secure_protected': 'SICURO E PROTETTO',
     'secure': 'SICURO',
     'login_ready': 'Accesso pronto',
@@ -359,17 +355,17 @@ class AppTranslations extends Translations {
     'splash_slide_1_highlight': 'vita quotidiana',
     'splash_slide_1_suffix': ' e\nil lavoro',
     'splash_slide_1_desc':
-      'Sblocca nuove opportunit\'a con il\nnostro programma coinvolgente\ne divertente.',
+        'Sblocca nuove opportunit\'a con il\nnostro programma coinvolgente\ne divertente.',
     'splash_slide_2_title': 'Crea un\n',
     'splash_slide_2_highlight': 'CV professionale',
     'splash_slide_2_suffix': '\nin 2 minuti',
     'splash_slide_2_desc':
-      'Domina il mercato del lavoro italiano con\nmodelli standard di settore.',
+        'Domina il mercato del lavoro italiano con\nmodelli standard di settore.',
     'splash_slide_3_title': 'Assistenza esperta\nper i servizi\n',
     'splash_slide_3_highlight': 'amministrativi',
     'splash_slide_3_suffix': '',
     'splash_slide_3_desc':
-      'Il tuo percorso in Italia, semplificato.\nSupporto CAF e formazione.',
+        'Il tuo percorso in Italia, semplificato.\nSupporto CAF e formazione.',
     'skip': 'SALTA',
     'next': 'Avanti',
     'get_started': 'Inizia',
@@ -384,14 +380,12 @@ class AppTranslations extends Translations {
     'snack_weak_password': 'Password debole',
     'snack_password_min_8': 'La password deve avere almeno 8 caratteri.',
     'snack_terms_required': 'Termini richiesti',
-    'snack_accept_terms':
-      'Accetta Termini e Condizioni e Privacy Policy.',
+    'snack_accept_terms': 'Accetta Termini e Condizioni e Privacy Policy.',
     'snack_code_resent': 'Codice reinviato',
-    'snack_fresh_code_sent':
-      'Un nuovo codice di verifica e stato inviato.',
+    'snack_fresh_code_sent': 'Un nuovo codice di verifica e stato inviato.',
     'snack_incomplete_code': 'Codice incompleto',
     'snack_enter_4_digit_verification':
-      'Inserisci il codice di verifica a 4 cifre.',
+        'Inserisci il codice di verifica a 4 cifre.',
     'snack_enter_full_4_digit': 'Inserisci tutte le 4 cifre del codice.',
     'snack_missing_payload': 'Payload mancante',
     'snack_payload_not_ready': 'Il payload di registrazione non e pronto.',
@@ -405,11 +399,10 @@ class AppTranslations extends Translations {
     'snack_session_expired': 'Sessione scaduta',
     'snack_verify_again': 'Verifica di nuovo il codice.',
     'snack_need_upper_number':
-      'La password deve contenere almeno una maiuscola e un numero.',
+        'La password deve contenere almeno una maiuscola e un numero.',
     'snack_mismatch': 'Non corrisponde',
     'snack_passwords_match': 'Le due password devono coincidere.',
     'snack_could_not_reset': 'Impossibile reimpostare',
     'snack_password_reset': 'Password reimpostata',
   },
-  };
-}
+};

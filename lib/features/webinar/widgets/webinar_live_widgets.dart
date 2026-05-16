@@ -208,7 +208,7 @@ class WebinarRequestButton extends StatelessWidget {
       onPressed: onTap,
       text: text,
       icon: icon,
-      textSize: AppFont.font16,
+      fontSize: AppFont.font16,
     );
   }
 }

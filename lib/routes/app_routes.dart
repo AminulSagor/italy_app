@@ -19,8 +19,10 @@ class AppRoutes {
   static const String chapterDetail = '/courses/chapter-detail';
   static const String quiz = '/courses/chapter-detail/quiz';
   static const String vocabulary = '/courses/chapter-detail/vocabulary';
-  static const String quizCompletion = '/courses/chapter-detail/quiz/completion';
-  static const String quizReviewAnswers = '/courses/chapter-detail/quiz/review-answers';
+  static const String quizCompletion =
+      '/courses/chapter-detail/quiz/completion';
+  static const String quizReviewAnswers =
+      '/courses/chapter-detail/quiz/review-answers';
   static const String proOrderSummary = '/courses/pro/order-summary';
   static const String proCheckout = '/courses/pro/checkout';
   static const String proPurchaseSuccess = '/courses/pro/purchase-success';
@@ -34,4 +36,35 @@ class AppRoutes {
   static const String finalExamResult = '/courses/final-exam/result';
   static const String webinar = '/webinar';
   static const String webinarLive = '/webinar/live';
+  static const String shop = '/shop';
+  static const String aiRefillCenter = '/shop/ai-refill-center';
+  static const String orderSummary = '/shop/order-summary';
+  static const String checkout = '/shop/checkout';
+  static const String purchaseCompleted = '/purchase-completed';
+  static const String streakFreeze = '/streak-freeze';
+  static const String streakFreezeOrderSummary = '/streak-freeze/order-summary';
+  static const cvCreditStore = '/cv-credit-store';
+  static const cvCreditOrderSummary = '/cv-credit-order-summary';
+  static const String orderHistory = '/shop/order-history';
+  static const String guide = '/guide';
+  static const String guideFaq = '/guide/faq';
+  static const String rewards = '/rewards';
+  static const String rewardChest = '/rewards/chest';
+  static const String rewardsHistory = '/rewards/history';
+  static const String rewardDetails = '/rewards/details';
+  static const String contactSupport = '/contact-support';
+  static const String settings = '/settings';
+  static const String profileSecurity = '/settings/profile-security';
+  static const String changePassword = '/settings/change-password';
+  static const String profilePhoto = '/settings/profile-photo';
+  static const String verifyContact = '/settings/verify-contact';
+  static const String profileSuccess = '/settings/profile-success';
+  static const String deleteAccountConfirm = '/settings/delete-account/confirm';
+  static const String verbDetails = '/practice-hub/verb-details';
+  static const String survivalItalian = '/practice-hub/survival-italian';
+  static const String practiceHubPdfViewer = '/practice-hub/pdf-viewer';
+  static const String jobSentences = '/practice-hub/job-sentences';
+  static const String jobDetails = '/practice-hub/job-details';
+  static const String jobPhraseDetails = '/practice-hub/job-phrase-details';
+  static const String dailyChallenges = '/practice-hub/daily-challenges';
 }

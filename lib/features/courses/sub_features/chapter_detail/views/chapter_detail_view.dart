@@ -191,7 +191,7 @@ class _BottomActions extends StatelessWidget {
           btnShadowColor: AppColors.homeNeutralShadow,
           borderColor: AppColors.white,
           textColor: AppColors.homePrimaryText,
-          textSize: AppFont.font16.sp,
+          fontSize: AppFont.font16.sp,
         ),
         SizedBox(width: 12.w),
         Expanded(
@@ -205,7 +205,7 @@ class _BottomActions extends StatelessWidget {
             btnShadowColor: AppColors.primaryBtnShadow,
             borderColor: AppColors.primaryBtnColor,
             textColor: AppColors.limeTextColor,
-            textSize: AppFont.font16.sp,
+            fontSize: AppFont.font16.sp,
           ),
         ),
       ],

@@ -427,7 +427,7 @@ class LessonMilestoneDialog extends StatelessWidget {
                             height: 44,
                             width: double.infinity,
                             showShadow: false,
-                            textSize: AppFont.font14,
+                            fontSize: AppFont.font14,
                           ),
                         ),
                       ],

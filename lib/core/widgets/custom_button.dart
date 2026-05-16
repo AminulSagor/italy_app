@@ -14,6 +14,7 @@ class CustomButton extends StatefulWidget {
   final bool isLoading;
   final bool showShadow;
   final bool isElevated;
+  final IconData? prefixIcon;
   final IconData? icon;
   final Color btnColor;
   final Color btnShadowColor;
@@ -21,7 +22,8 @@ class CustomButton extends StatefulWidget {
   final double borderRadius;
   final double borderWidth;
   final Color textColor;
-  final double textSize;
+  final double? fontSize;
+  final FontWeight? fontWeight;
 
   const CustomButton({
     super.key,
@@ -32,6 +34,7 @@ class CustomButton extends StatefulWidget {
     this.isLoading = false,
     this.showShadow = false,
     this.isElevated = false,
+    this.prefixIcon,
     this.icon,
     this.btnColor = AppColors.primaryBtnColor,
     this.btnShadowColor = AppColors.primaryBtnShadow,
@@ -39,7 +42,8 @@ class CustomButton extends StatefulWidget {
     this.borderRadius = kButtonDefaultRadius,
     this.borderWidth = kButtonBorderWidth,
     this.textColor = AppColors.white,
-    this.textSize = AppFont.font20,
+    this.fontSize = AppFont.font20,
+    this.fontWeight = FontWeight.w900,
   });
 
   const CustomButton.primary({
@@ -47,6 +51,7 @@ class CustomButton extends StatefulWidget {
     required this.onPressed,
     required this.text,
     this.isLoading = false,
+    this.prefixIcon,
     this.icon,
     this.isElevated = false,
     this.btnColor = AppColors.primaryBtnColor,
@@ -55,7 +60,8 @@ class CustomButton extends StatefulWidget {
     this.borderRadius = kButtonDefaultRadius,
     this.borderWidth = kButtonBorderWidth,
     this.textColor = AppColors.limeTextColor,
-    this.textSize = AppFont.font20,
+    this.fontSize = AppFont.font20,
+    this.fontWeight = FontWeight.w900,
   }) : height = kButtonDefaultHeight,
        width = double.infinity,
        showShadow = true;
@@ -161,17 +167,36 @@ class _ButtonContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String label = widget.text.tr;
+    final bool hasLabel = label.trim().isNotEmpty;
+
+    if (!hasLabel) {
+      final IconData? icon = widget.icon ?? widget.prefixIcon;
+
+      if (icon != null) {
+        return Icon(icon, size: 24.w, color: widget.textColor);
+      }
+
+      return const SizedBox.shrink();
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        if (widget.prefixIcon != null) ...<Widget>[
+          Icon(widget.prefixIcon, size: 24.w, color: widget.textColor),
+          SizedBox(width: 8.w),
+        ],
         Flexible(
           child: Text(
-            widget.text.tr,
+            label,
             textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: widget.textSize.sp,
-              fontWeight: FontWeight.w800,
+              fontSize: widget.fontSize ?? 16.sp,
+              fontWeight: widget.fontWeight ?? FontWeight.w900,
+              letterSpacing: 1.1,
               color: widget.textColor,
             ),
           ),

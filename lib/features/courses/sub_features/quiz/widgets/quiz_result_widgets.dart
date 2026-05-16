@@ -280,7 +280,7 @@ class QuizExitConfirmationDialog extends StatelessWidget {
               textColor: AppColors.blockDangerRed,
               btnColor: AppColors.white,
               borderColor: AppColors.blockDangerRed,
-              textSize: AppFont.font16.sp,
+              fontSize: AppFont.font16.sp,
             ),
           ],
         ),

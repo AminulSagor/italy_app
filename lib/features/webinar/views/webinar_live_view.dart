@@ -128,7 +128,7 @@ class _ParticipationBody extends StatelessWidget {
           btnColor: AppColors.white,
           textColor: AppColors.profileRedText,
           borderColor: AppColors.profileRedText,
-          textSize: 16.sp,
+          fontSize: 16.sp,
           icon: Icons.logout,
         ),
       ],

@@ -452,14 +452,14 @@ class _VocabularyRevealedActions extends StatelessWidget {
             btnShadowColor: AppColors.vocabularyOrangeShadow,
             borderColor: AppColors.vocabularyOrange,
             textColor: AppColors.white,
-            textSize: 14.sp,
+            fontSize: 14.sp,
             borderRadius: kRadius42,
           ),
         ),
         SizedBox(width: 16.w),
         Expanded(
           child: CustomButton.primary(
-            textSize: 14.sp,
+            fontSize: 14.sp,
             onPressed: onKnownTap,
             text: 'I Know\nThis',
             icon: Icons.check_circle_rounded,

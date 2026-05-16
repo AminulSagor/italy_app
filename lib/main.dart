@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'core/bindings/initial_bindings.dart';
-import 'core/localization/app_translations.dart';
+import 'core/localization/translation_service.dart';
 import 'core/themes/app_theme.dart';
 import 'routes/routes.dart';
 import 'core/bootstrap/app_bootstrap_controller.dart';
@@ -26,13 +26,15 @@ class ItalyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
+        final TranslationService translationService =
+            Get.find<TranslationService>();
         return GetMaterialApp(
           initialBinding: InitialBindings(),
           debugShowCheckedModeBanner: false,
           title: 'Italir Pothe',
-          translations: AppTranslations(),
-          locale: const Locale('en', 'US'),
-          fallbackLocale: const Locale('en', 'US'),
+          translations: translationService,
+          locale: translationService.currentLocale,
+          fallbackLocale: TranslationService.fallbackLocale,
           theme: AppTheme.lightTheme,
           getPages: AppPages.pages,
           initialRoute: initialRoute,

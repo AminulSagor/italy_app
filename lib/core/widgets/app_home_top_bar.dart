@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-
 import '../themes/app_colors.dart';
 import '../themes/app_font.dart';
 import '../themes/app_constants.dart';
@@ -16,6 +15,7 @@ class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
   final int messageCount;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onMessageTap;
+  final VoidCallback? onProfileTap;
 
   const AppHomeTopBar({
     super.key,
@@ -26,6 +26,7 @@ class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
     required this.messageCount,
     this.onNotificationTap,
     this.onMessageTap,
+    this.onProfileTap,
   });
 
   @override
@@ -38,7 +39,10 @@ class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
 
           child: Row(
             children: <Widget>[
-              _AvatarBadge(streakLabel: streakLabel),
+              GestureDetector(
+                onTap: onProfileTap,
+                child: _AvatarBadge(streakLabel: streakLabel),
+              ),
               SizedBox(width: 10.w),
               Expanded(
                 child: Column(
@@ -49,14 +53,23 @@ class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
                       greeting,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: AppFont.font11.sp, fontWeight: FontWeight.w600, color: AppColors.homeSecondaryText),
+                      style: TextStyle(
+                        fontSize: AppFont.font11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.homeSecondaryText,
+                      ),
                     ),
                     SizedBox(height: 3.h),
                     Text(
                       userName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: AppFont.font18.sp, fontWeight: FontWeight.w800, height: 1, color: AppColors.primaryGreen),
+                      style: TextStyle(
+                        fontSize: AppFont.font18.sp,
+                        fontWeight: FontWeight.w800,
+                        height: 1,
+                        color: AppColors.primaryGreen,
+                      ),
                     ),
                   ],
                 ),
@@ -124,7 +137,14 @@ class _AvatarBadge extends StatelessWidget {
                 color: AppColors.homeLime,
                 borderRadius: BorderRadius.circular(kHomePillRadius.r),
               ),
-              child: Text(streakLabel, style: TextStyle(fontSize: AppFont.font12.sp, fontWeight: FontWeight.w900, color: AppColors.primaryGreen)),
+              child: Text(
+                streakLabel,
+                style: TextStyle(
+                  fontSize: AppFont.font12.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primaryGreen,
+                ),
+              ),
             ),
           ),
         ],
@@ -156,11 +176,7 @@ class _TopActionIcon extends StatelessWidget {
           alignment: Alignment.center,
           clipBehavior: Clip.none,
           children: <Widget>[
-            Icon(
-              icon,
-              size: kHomeTopIconSize.w,
-              color: AppColors.primaryGreen,
-            ),
+            Icon(icon, size: kHomeTopIconSize.w, color: AppColors.primaryGreen),
             if (badgeCount > 0)
               Positioned(
                 right: 7.w,
@@ -185,13 +201,16 @@ class _TopActionIcon extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: AppColors.homeNotificationRed,
-                    borderRadius: BorderRadius.circular(
-                      kHomePillRadius.r,
-                    ),
+                    borderRadius: BorderRadius.circular(kHomePillRadius.r),
                   ),
                   child: Text(
                     badgeCount.toString(),
-                    style: TextStyle(fontSize: AppFont.font9.sp, fontWeight: FontWeight.w900, letterSpacing: 1.0, color: AppColors.homePaleGreen),
+                    style: TextStyle(
+                      fontSize: AppFont.font9.sp,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                      color: AppColors.homePaleGreen,
+                    ),
                   ),
                 ),
               ),

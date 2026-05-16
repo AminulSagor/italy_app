@@ -160,7 +160,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
                       text: 'Join the Italian journey!',
                       height: 44,
                       showShadow: true,
-                      textSize: AppFont.font16,
+                      fontSize: AppFont.font16,
                       textColor: AppColors.limeTextColor,
                     ),
                   ],

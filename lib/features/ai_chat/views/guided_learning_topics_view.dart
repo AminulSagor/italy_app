@@ -1,0 +1,287 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+
+import '../../../core/themes/app_colors.dart';
+import '../../../core/themes/app_font.dart';
+import '../controllers/ai_chat_controller.dart';
+
+class GuidedLearningTopicsView extends GetView<AiChatController> {
+  final String level;
+
+  const GuidedLearningTopicsView({super.key, required this.level});
+
+  @override
+  AiChatController get controller {
+    if (Get.isRegistered<AiChatController>()) {
+      return Get.find<AiChatController>();
+    }
+    return Get.put<AiChatController>(AiChatController());
+  }
+
+  List<Map<String, dynamic>> get topics => <Map<String, dynamic>>[
+    {
+      'title': 'Comprare un\nbiglietto',
+      'subtitle': 'বাসের টিকিট কেনা',
+      'icon': Icons.directions_bus_rounded,
+    },
+    {
+      'title': 'Ordinare al bar',
+      'subtitle': 'বারে কফি অর্ডার করা',
+      'icon': Icons.local_cafe_rounded,
+    },
+    {
+      'title': 'Fare la spesa',
+      'subtitle': 'সুপারমার্কেটে কেনাকাটা',
+      'icon': Icons.shopping_cart_rounded,
+    },
+    {
+      'title': 'Chiedere\nindicazioni',
+      'subtitle': 'রাস্তা জিজ্ঞাসা করা',
+      'icon': Icons.map_outlined,
+    },
+    {
+      'title': 'Dal dottore',
+      'subtitle': 'ডাক্তারের কাছে',
+      'icon': Icons.medical_services_outlined,
+    },
+    {
+      'title': 'Prenotare un\nhotel',
+      'subtitle': 'হোটেল বুক করা',
+      'icon': Icons.hotel_rounded,
+    },
+    {
+      'title': 'In posta',
+      'subtitle': 'পোস্ট অফিসে',
+      'icon': Icons.email_outlined,
+    },
+    {
+      'title': 'Incontrare\namici',
+      'subtitle': 'বন্ধুদের সাথে দেখা',
+      'icon': Icons.group_outlined,
+    },
+    {
+      'title': 'Al lavoro',
+      'subtitle': 'কাজের জায়গায়',
+      'icon': Icons.work_outline_rounded,
+    },
+    {
+      'title': 'Al ristorante',
+      'subtitle': 'রেস্টুরেন্টে',
+      'icon': Icons.restaurant_rounded,
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFA),
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(40.w, 27.h, 40.w, 70.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              GestureDetector(
+                onTap: () => Get.back<void>(),
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  size: 24.r,
+                  color: AppColors.primaryGreen,
+                ),
+              ),
+              SizedBox(height: 28.h),
+              Center(
+                child: Text(
+                  'Level $level Topics',
+                  style: TextStyle(
+                    fontSize: 24.sp,
+                    height: 1,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.7,
+                    color: AppColors.primaryGreen,
+                  ),
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Center(
+                child: Text(
+                  'Select a real world scenario. The AI will\nstart the conversation on that.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    height: 1.35,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF666D6A),
+                  ),
+                ),
+              ),
+              SizedBox(height: 31.h),
+              ...topics.map((Map<String, dynamic> item) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 24.h),
+                  child: _TopicCard(
+                    title: item['title'] as String,
+                    subtitle: item['subtitle'] as String,
+                    icon: item['icon'] as IconData,
+                    onTap: () => controller.onGuidedTopicTap(
+                      (item['title'] as String).replaceAll('\n', ' '),
+                    ),
+                  ),
+                );
+              }),
+              SizedBox(height: 3.h),
+              const _TipCard(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TopicCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _TopicCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 108.h,
+        padding: EdgeInsets.fromLTRB(25.w, 18.h, 25.w, 17.h),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(46.r),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.045),
+              blurRadius: 22.r,
+              offset: Offset(0, 11.h),
+            ),
+          ],
+        ),
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 54.r,
+              height: 54.r,
+              decoration: const BoxDecoration(
+                color: Color(0xFFEFF8E8),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 25.r, color: AppColors.primaryGreen),
+            ),
+            SizedBox(width: 22.w),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 21.sp,
+                      height: 1.18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.7,
+                      color: const Color(0xFF303837),
+                    ),
+                  ),
+                  SizedBox(height: 5.h),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      height: 1.2,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF6D7471),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 14.w),
+            Container(
+              width: 49.r,
+              height: 49.r,
+              decoration: const BoxDecoration(
+                color: AppColors.primaryGreen,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.chat_bubble_outline_rounded,
+                size: 26.r,
+                color: AppColors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TipCard extends StatelessWidget {
+  const _TipCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(25.w, 24.h, 25.w, 27.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE9FFD8),
+        borderRadius: BorderRadius.circular(36.r),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Icon(
+            Icons.lightbulb_outline_rounded,
+            size: 28.r,
+            color: AppColors.primaryGreen,
+          ),
+          SizedBox(width: 18.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Tip for chatting',
+                  style: TextStyle(
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.primaryGreen,
+                  ),
+                ),
+                SizedBox(height: 13.h),
+                Text(
+                  'The AI will play the role of that\nscenario (e.g. cashier, waiter, driver!)',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    height: 1.45,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF7C8581),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

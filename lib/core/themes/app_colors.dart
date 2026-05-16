@@ -8,7 +8,7 @@ class AppColors {
   static const limeTextColor = Color(0xFFD5FFB9);
 
   static const primaryGreen = Color(0xFF2A6900);
-  static const scaffoldBackground = Color(0xFFE3E3E3);
+  static const scaffoldBackground = Color.fromARGB(255, 252, 251, 251);
   static const white = Colors.white;
   static const transparent = Colors.transparent;
   static const headerText = Color(0xFF2F3337);

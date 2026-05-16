@@ -150,7 +150,7 @@ class VocabularyCompletionDialog extends StatelessWidget {
                           text: 'Join the Italian journey!',
                           height: 44.h,
                           showShadow: false,
-                          textSize: 14.sp,
+                          fontSize: 14.sp,
                         ),
                       ],
                     ),
