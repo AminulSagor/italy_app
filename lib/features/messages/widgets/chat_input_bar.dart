@@ -1,0 +1,83 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../core/themes/app_colors.dart';
+import '../../../core/themes/app_constants.dart';
+import '../../../core/themes/app_font.dart';
+
+class ChatInputBar extends StatelessWidget {
+  const ChatInputBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 26.h),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(kRadius60.r),
+          topRight: Radius.circular(kRadius60.r),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                height: kChatInputHeight.h,
+                alignment: Alignment.centerLeft,
+                decoration: BoxDecoration(
+                  color: AppColors.chatInputBg,
+                  borderRadius: BorderRadius.circular(kRadius34.r),
+                ),
+                child: TextField(
+                  cursorColor: AppColors.primaryGreen,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 17.h,
+                    ),
+                    hintText: 'Type a message...',
+                    hintStyle: TextStyle(
+                      fontSize: AppFont.font16.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.bodyText,
+                    ),
+                  ),
+                  style: TextStyle(
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.homePrimaryText,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Container(
+              width: kChatSendButtonSize.w,
+              height: kChatSendButtonSize.w,
+              decoration: BoxDecoration(
+                color: AppColors.primaryGreen,
+                shape: BoxShape.circle,
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: AppColors.homeCardShadow,
+                    blurRadius: 16.r,
+                    offset: Offset(0, 8.h),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.send_rounded,
+                color: AppColors.limeTextColor,
+                size: 26.w,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

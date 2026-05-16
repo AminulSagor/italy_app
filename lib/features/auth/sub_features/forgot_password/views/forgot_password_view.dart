@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../../../core/themes/app_theme.dart';
 import '../controllers/forgot_password_controller.dart';
+
+import '../../../../../core/themes/app_colors.dart';
+import '../../../../../core/themes/app_font.dart';
+import '../../../../../core/themes/app_constants.dart';
 
 class ForgotPasswordView extends GetView<ForgotPasswordController> {
   const ForgotPasswordView({super.key});
@@ -11,7 +14,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -22,7 +25,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                 onPressed: controller.onBackTap,
                 icon: Icon(
                   Icons.arrow_back,
-                  color: AppTheme.primaryGreen,
+                  color: AppColors.primaryGreen,
                   size: 23.sp,
                 ),
               ),
@@ -34,7 +37,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                   'forgot_password'.tr,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontSize: 36.sp.clamp(30, 50),
+                    fontSize: AppFont.font36.sp.clamp(AppFont.font30, AppFont.font50).toDouble(),
                     height: 1,
                   ),
                 ),
@@ -45,8 +48,8 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                   'forgot_desc'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppTheme.bodyText,
-                    fontSize: 17.sp,
+                    color: AppColors.bodyText,
+                    fontSize: AppFont.font17.sp,
                     fontWeight: FontWeight.w900,
                     height: 1.45,
                   ),
@@ -78,15 +81,15 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                         ? null
                         : controller.onSendResetLinkTap,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryGreen,
-                      disabledBackgroundColor: AppTheme.primaryGreen.withValues(
+                      backgroundColor: AppColors.primaryGreen,
+                      disabledBackgroundColor: AppColors.primaryGreen.withValues(
                         alpha: 0.6,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(35.r),
+                        borderRadius: BorderRadius.circular(kRadius35.r),
                       ),
                       elevation: 10,
-                      shadowColor: AppTheme.primaryGreen.withAlpha(70),
+                      shadowColor: AppColors.primaryGreen.withAlpha(70),
                     ),
                     child: controller.form.value.isSubmitting
                         ? SizedBox(
@@ -94,7 +97,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                             width: 22.w,
                             child: const CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           )
                         : Row(
@@ -103,15 +106,15 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                               Text(
                                 'send_reset_link'.tr,
                                 style: TextStyle(
-                                  color: const Color(0xFFE8F4DF),
-                                  fontSize: 18.sp,
+                                  color: AppColors.legacyColorFFE8F4DF,
+                                  fontSize: AppFont.font18.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               SizedBox(width: 9.w),
                               Icon(
                                 Icons.arrow_forward,
-                                color: const Color(0xFFE8F4DF),
+                                color: AppColors.legacyColorFFE8F4DF,
                                 size: 22.sp,
                               ),
                             ],
@@ -126,8 +129,8 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                   child: Text(
                     'back_to_login'.tr,
                     style: TextStyle(
-                      color: AppTheme.primaryGreen,
-                      fontSize: 18.sp,
+                      color: AppColors.primaryGreen,
+                      fontSize: AppFont.font18.sp,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -151,12 +154,12 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
             width: 110.w,
             height: 110.w,
             decoration: BoxDecoration(
-              color: const Color(0xFFA6F04B),
-              borderRadius: BorderRadius.circular(34.r),
+              color: AppColors.legacyColorFFA6F04B,
+              borderRadius: BorderRadius.circular(kRadius34.r),
             ),
             child: Icon(
               Icons.lock_reset_rounded,
-              color: AppTheme.primaryGreen,
+              color: AppColors.primaryGreen,
               size: 48.sp,
             ),
           ),
@@ -169,8 +172,8 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFC8C9CA),
-        borderRadius: BorderRadius.circular(24.r),
+        color: AppColors.legacyColorFFC8C9CA,
+        borderRadius: BorderRadius.circular(kRadius24.r),
       ),
       child: Obx(
         () => Row(
@@ -204,27 +207,27 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFDBDCDD),
-        borderRadius: BorderRadius.circular(30.r),
+        color: AppColors.legacyColorFFDBDCDD,
+        borderRadius: BorderRadius.circular(kRadius30.r),
       ),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
         style: TextStyle(
-          color: const Color(0xFF33383C),
-          fontSize: 16.sp,
+          color: AppColors.legacyColorFF33383C,
+          fontSize: AppFont.font16.sp,
           fontWeight: FontWeight.w600,
         ),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: const Color(0xFF6B6F73), size: 25.sp),
+          prefixIcon: Icon(icon, color: AppColors.legacyColorFF6B6F73, size: 25.sp),
           hintText: hint,
           hintStyle: TextStyle(
-            color: const Color(0xFF8A8E92),
-            fontSize: 16.sp,
+            color: AppColors.legacyColorFF8A8E92,
+            fontSize: AppFont.font16.sp,
             fontWeight: FontWeight.w900,
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30.r),
+            borderRadius: BorderRadius.circular(kRadius30.r),
             borderSide: BorderSide.none,
           ),
           contentPadding: EdgeInsets.symmetric(
@@ -252,22 +255,22 @@ class _ModeItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(22.r),
+      borderRadius: BorderRadius.circular(kRadius22.r),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: EdgeInsets.symmetric(vertical: 9.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF3F4F3) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20.r),
+          color: isSelected ? AppColors.legacyColorFFF3F4F3 : AppColors.transparent,
+          borderRadius: BorderRadius.circular(kRadius20.r),
         ),
         alignment: Alignment.center,
         child: Text(
           label,
           style: TextStyle(
             color: isSelected
-                ? const Color(0xFF293034)
-                : const Color(0xFF5E6165),
-            fontSize: 15.sp,
+                ? AppColors.legacyColorFF293034
+                : AppColors.legacyColorFF5E6165,
+            fontSize: AppFont.font15.sp,
             fontWeight: FontWeight.w700,
           ),
         ),

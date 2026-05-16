@@ -3,8 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../../../core/themes/app_theme.dart';
 import '../controllers/signup_controller.dart';
+
+import '../../../../../core/themes/app_colors.dart';
+import '../../../../../core/themes/app_font.dart';
+import '../../../../../core/themes/app_constants.dart';
 
 class OtpView extends GetView<SignupController> {
   const OtpView({super.key});
@@ -12,7 +15,7 @@ class OtpView extends GetView<SignupController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
@@ -23,7 +26,7 @@ class OtpView extends GetView<SignupController> {
                 onPressed: controller.onBackFromOtp,
                 icon: Icon(
                   Icons.arrow_back,
-                  color: AppTheme.primaryGreen,
+                  color: AppColors.primaryGreen,
                   size: 22.sp,
                 ),
               ),
@@ -36,7 +39,7 @@ class OtpView extends GetView<SignupController> {
                 child: Text(
                   'verify'.tr,
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontSize: 48.sp.clamp(28, 48),
+                    fontSize: AppFont.font48.sp.clamp(AppFont.font28, AppFont.font48).toDouble(),
                     height: 1,
                   ),
                 ),
@@ -47,8 +50,8 @@ class OtpView extends GetView<SignupController> {
                 child: Text(
                   'otp_enter_code_to'.tr,
                   style: TextStyle(
-                    color: const Color(0xFF5D6164),
-                    fontSize: 18.sp,
+                    color: AppColors.legacyColorFF5D6164,
+                    fontSize: AppFont.font18.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -60,8 +63,8 @@ class OtpView extends GetView<SignupController> {
                   () => Text(
                     controller.otpUi.value.maskedIdentifier,
                     style: TextStyle(
-                      color: const Color(0xFF2F3337),
-                      fontSize: 18.sp.clamp(20, 34),
+                      color: AppColors.headerText,
+                      fontSize: AppFont.font18.sp.clamp(AppFont.font20, AppFont.font34).toDouble(),
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -82,8 +85,8 @@ class OtpView extends GetView<SignupController> {
                 child: Text(
                   'otp_didnt_receive_code'.tr,
                   style: TextStyle(
-                    color: const Color(0xFF4E5255),
-                    fontSize: 16.sp,
+                    color: AppColors.legacyColorFF4E5255,
+                    fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -102,14 +105,14 @@ class OtpView extends GetView<SignupController> {
                             height: 18.w,
                             child: const CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppTheme.primaryGreen,
+                              color: AppColors.primaryGreen,
                             ),
                           )
                         : Text(
                             'resend'.tr,
                             style: TextStyle(
-                              color: AppTheme.primaryGreen,
-                              fontSize: 15.sp,
+                              color: AppColors.primaryGreen,
+                              fontSize: AppFont.font15.sp,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -127,15 +130,15 @@ class OtpView extends GetView<SignupController> {
                         ? null
                         : controller.onOtpContinueTap,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryGreen,
-                      disabledBackgroundColor: AppTheme.primaryGreen.withValues(
+                      backgroundColor: AppColors.primaryGreen,
+                      disabledBackgroundColor: AppColors.primaryGreen.withValues(
                         alpha: 0.6,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(34.r),
+                        borderRadius: BorderRadius.circular(kRadius34.r),
                       ),
                       elevation: 10,
-                      shadowColor: AppTheme.primaryGreen.withAlpha(70),
+                      shadowColor: AppColors.primaryGreen.withAlpha(70),
                     ),
                     child: controller.otpUi.value.isVerifying
                         ? SizedBox(
@@ -143,7 +146,7 @@ class OtpView extends GetView<SignupController> {
                             height: 22.w,
                             child: const CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           )
                         : Row(
@@ -152,15 +155,15 @@ class OtpView extends GetView<SignupController> {
                               Text(
                                 'continue'.tr,
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18.sp,
+                                  color: AppColors.white,
+                                  fontSize: AppFont.font18.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               SizedBox(width: 8.w),
                               Icon(
                                 Icons.arrow_forward,
-                                color: Colors.white,
+                                color: AppColors.white,
                                 size: 20.sp,
                               ),
                             ],
@@ -174,8 +177,8 @@ class OtpView extends GetView<SignupController> {
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFECEFF0),
-                  borderRadius: BorderRadius.circular(68.r),
+                  color: AppColors.legacyColorFFECEFF0,
+                  borderRadius: BorderRadius.circular(kRadius68.r),
                 ),
                 child: Row(
                   children: <Widget>[
@@ -183,12 +186,12 @@ class OtpView extends GetView<SignupController> {
                       width: 66.w,
                       height: 66.w,
                       decoration: const BoxDecoration(
-                        color: Color(0xFFCDE6BD),
+                        color: AppColors.legacyColorFFCDE6BD,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.lock_outline,
-                        color: AppTheme.primaryGreen,
+                        color: AppColors.primaryGreen,
                         size: 30.sp,
                       ),
                     ),
@@ -200,8 +203,8 @@ class OtpView extends GetView<SignupController> {
                           Text(
                             'otp_security_title'.tr,
                             style: TextStyle(
-                              color: AppTheme.primaryGreen,
-                              fontSize: 17.sp,
+                              color: AppColors.primaryGreen,
+                              fontSize: AppFont.font17.sp,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -209,8 +212,8 @@ class OtpView extends GetView<SignupController> {
                           Text(
                             'otp_security_desc'.tr,
                             style: TextStyle(
-                              color: const Color(0xFF4E5255),
-                              fontSize: 12.sp,
+                              color: AppColors.legacyColorFF4E5255,
+                              fontSize: AppFont.font12.sp,
                               height: 1.3,
                               fontWeight: FontWeight.w800,
                             ),
@@ -242,7 +245,7 @@ class OtpView extends GetView<SignupController> {
               width: 60.w,
               height: 60.w,
               decoration: const BoxDecoration(
-                color: Color(0xFFD4DEE8),
+                color: AppColors.legacyColorFFD4DEE8,
                 shape: BoxShape.circle,
               ),
             ),
@@ -254,7 +257,7 @@ class OtpView extends GetView<SignupController> {
               width: 48.w,
               height: 48.w,
               decoration: const BoxDecoration(
-                color: Color(0xFFECCF9D),
+                color: AppColors.legacyColorFFECCF9D,
                 shape: BoxShape.circle,
               ),
             ),
@@ -263,13 +266,13 @@ class OtpView extends GetView<SignupController> {
             width: 130.w,
             height: 130.w,
             decoration: const BoxDecoration(
-              color: Color(0xFFA2EE4A),
+              color: AppColors.legacyColorFFA2EE4A,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.verified_user,
               size: 46.sp,
-              color: AppTheme.primaryGreen,
+              color: AppColors.primaryGreen,
             ),
           ),
         ],
@@ -290,9 +293,9 @@ class OtpView extends GetView<SignupController> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFFF8F8F8),
+              color: AppColors.legacyColorFFF8F8F8,
               border: Border.all(
-                color: isFocused ? AppTheme.primaryGreen : Colors.transparent,
+                color: isFocused ? AppColors.primaryGreen : AppColors.transparent,
                 width: 1.6,
               ),
             ),
@@ -308,8 +311,8 @@ class OtpView extends GetView<SignupController> {
                 LengthLimitingTextInputFormatter(1),
               ],
               style: TextStyle(
-                color: const Color(0xFF646C7A),
-                fontSize: 28.sp,
+                color: AppColors.legacyColorFF646C7A,
+                fontSize: AppFont.font28.sp,
                 fontWeight: FontWeight.w700,
               ),
               decoration: const InputDecoration(

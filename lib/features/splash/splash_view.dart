@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-
-import '../../core/themes/app_theme.dart';
+import 'package:italir_pothe/core/widgets/custom_button.dart';
 import 'splash_controller.dart';
+
+import '../../core/themes/app_colors.dart';
+import '../../core/themes/app_font.dart';
+import '../../core/themes/app_constants.dart';
 
 class SplashView extends GetView<SplashController> {
   const SplashView({super.key});
@@ -17,7 +20,7 @@ class SplashView extends GetView<SplashController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: Obx(
           () => Stack(
@@ -65,8 +68,8 @@ class SplashView extends GetView<SplashController> {
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1,
-                        fontSize: 12.sp,
-                        color: AppTheme.splashSkipText,
+                        fontSize: AppFont.font12.sp,
+                        color: AppColors.splashSkipText,
                       ),
                     ),
                   ),
@@ -88,40 +91,15 @@ class SplashView extends GetView<SplashController> {
                           controller.currentPage.value,
                         ),
                         SizedBox(height: 20.h),
-                        SizedBox(
+                        CustomButton(
+                          onPressed: controller.onPrimaryButtonTap,
+                          text: controller.isLastPage ? 'get_started' : 'next',
+                          height: 60,
                           width: double.infinity,
-                          height: 56.h,
-                          child: ElevatedButton(
-                            onPressed: controller.onPrimaryButtonTap,
-                            style: ElevatedButton.styleFrom(
-                              elevation: 10,
-                              shadowColor: AppTheme.primaryGreen.withAlpha(140),
-                              backgroundColor: AppTheme.primaryGreen,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30.r),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  controller.isLastPage
-                                      ? 'get_started'.tr
-                                      : 'next'.tr,
-                                  style: TextStyle(
-                                    fontSize: 22.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppTheme.white,
-                                  ),
-                                ),
-                                SizedBox(width: 4.w),
-                                const Icon(
-                                  Icons.arrow_forward,
-                                  color: Colors.white,
-                                ),
-                              ],
-                            ),
-                          ),
+                          isElevated: true,
+                          icon: controller.isLastPage
+                              ? null
+                              : Icons.arrow_forward,
                         ),
                         if (controller.isLastPage)
                           TextButton(
@@ -129,9 +107,9 @@ class SplashView extends GetView<SplashController> {
                             child: Text(
                               'already_have_account_lower'.tr,
                               style: TextStyle(
-                                fontSize: 13.sp,
+                                fontSize: AppFont.font13.sp,
                                 fontWeight: FontWeight.w600,
-                                color: AppTheme.splashSecondaryActionText,
+                                color: AppColors.splashSecondaryActionText,
                               ),
                             ),
                           ),
@@ -152,7 +130,9 @@ class SplashView extends GetView<SplashController> {
 
   Widget _buildWelcomePage(BuildContext context, SplashController controller) {
     return Container(
-      decoration: const BoxDecoration(gradient: AppTheme.splashWelcomeGradient),
+      decoration: const BoxDecoration(
+        gradient: AppColors.splashWelcomeGradient,
+      ),
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 18.h),
       child: Column(
         children: <Widget>[
@@ -189,22 +169,29 @@ class SplashView extends GetView<SplashController> {
                 children: <Widget>[
                   CircleAvatar(
                     radius: 13.r,
-                    backgroundColor: AppTheme.primaryGreen,
+                    backgroundColor: AppColors.primaryGreen,
                     child: Icon(
                       Icons.language,
-                      color: AppTheme.white,
+                      color: AppColors.white,
                       size: 14.r,
                     ),
                   ),
                   SizedBox(width: 8.w),
                   Text(
                     'app_name'.tr,
-                    style: AppTheme.brandHeaderStyle.copyWith(
-                      fontSize: 22.sp,
-                      height: 1,
-                      letterSpacing: 0,
-                      color: AppTheme.splashBrandText,
-                    ),
+                    style:
+                        TextStyle(
+                          fontSize: AppFont.font36.sp,
+                          fontWeight: FontWeight.w800,
+                          height: 40 / 36,
+                          letterSpacing: -0.9,
+                          color: AppColors.headerText,
+                        ).copyWith(
+                          fontSize: AppFont.font22.sp,
+                          height: 1,
+                          letterSpacing: 0,
+                          color: AppColors.splashBrandText,
+                        ),
                   ),
                 ],
               ),
@@ -218,7 +205,7 @@ class SplashView extends GetView<SplashController> {
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
               height: 1.12,
-              color: AppTheme.splashTextPrimary,
+              color: AppColors.splashTextPrimary,
             ),
           ),
 
@@ -227,7 +214,7 @@ class SplashView extends GetView<SplashController> {
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
               fontStyle: FontStyle.italic,
-              color: AppTheme.primaryGreen,
+              color: AppColors.primaryGreen,
             ),
           ),
 
@@ -239,12 +226,12 @@ class SplashView extends GetView<SplashController> {
               height: 142.h,
               padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
-                color: AppTheme.splashChipContainer,
-                borderRadius: BorderRadius.circular(42.r),
-                border: Border.all(color: AppTheme.splashChipBorder),
+                color: AppColors.splashChipContainer,
+                borderRadius: BorderRadius.circular(kRadius42.r),
+                border: Border.all(color: AppColors.splashChipBorder),
                 boxShadow: const <BoxShadow>[
                   BoxShadow(
-                    color: Color(0x10000000),
+                    color: AppColors.legacyColor10000000,
                     offset: Offset(0, 3),
                     blurRadius: 10,
                   ),
@@ -262,30 +249,30 @@ class SplashView extends GetView<SplashController> {
                   // _ServiceChip(
                   //   icon: Icons.gavel,
                   //   label: 'splash_service_caf'.tr,
-                  //   iconColor: AppTheme.splashChipCafIcon,
+                  //   iconColor: AppColors.splashChipCafIcon,
                   // ),
                   // _ServiceChip(
                   //   icon: Icons.work,
                   //   label: 'splash_service_cv'.tr,
-                  //   iconColor: AppTheme.splashChipCvIcon,
+                  //   iconColor: AppColors.splashChipCvIcon,
                   // ),
                   _ServiceChipHighlighted(
                     icon: Icons.menu_book,
                     label: 'splash_service_italian'.tr,
-                    iconColor: AppTheme.splashChipActiveIcon,
-                    iconBackground: AppTheme.splashChipActiveBg,
+                    iconColor: AppColors.splashChipActiveIcon,
+                    iconBackground: AppColors.splashChipActiveBg,
                   ),
                   _ServiceChipPlain(
                     icon: Icons.gavel,
                     label: 'splash_service_caf'.tr,
-                    iconColor: AppTheme.splashChipCafIcon,
-                    iconBackground: AppTheme.splashChipInactiveBg,
+                    iconColor: AppColors.splashChipCafIcon,
+                    iconBackground: AppColors.splashChipInactiveBg,
                   ),
                   _ServiceChipPlain(
                     icon: Icons.work,
                     label: 'splash_service_cv'.tr,
-                    iconColor: AppTheme.splashChipCvIcon,
-                    iconBackground: AppTheme.splashChipInactiveBg,
+                    iconColor: AppColors.splashChipCvIcon,
+                    iconBackground: AppColors.splashChipInactiveBg,
                   ),
                 ],
               ),
@@ -294,28 +281,13 @@ class SplashView extends GetView<SplashController> {
 
           SizedBox(height: 28.h),
 
-          SizedBox(
-            width: 270.w,
-            height: 60.h,
-            child: ElevatedButton(
-              onPressed: controller.onPrimaryButtonTap,
-              style: ElevatedButton.styleFrom(
-                elevation: 10,
-                shadowColor: AppTheme.primaryGreen.withAlpha(140),
-                backgroundColor: AppTheme.primaryGreen,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.r),
-                ),
-              ),
-              child: Text(
-                'splash_get_started'.tr,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppTheme.white,
-                ),
-              ),
-            ),
+          CustomButton(
+            onPressed: controller.onPrimaryButtonTap,
+            text: 'splash_get_started',
+            height: 60,
+            width: 270,
+            isElevated: true,
+            //showShadow: false,
           ),
 
           SizedBox(height: 16.h),
@@ -323,16 +295,16 @@ class SplashView extends GetView<SplashController> {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(
-              color: AppTheme.splashTrustedBadgeBg,
-              borderRadius: BorderRadius.circular(20.r),
+              color: AppColors.splashTrustedBadgeBg,
+              borderRadius: BorderRadius.circular(kRadius20.r),
             ),
             child: Text(
               'splash_trusted'.tr,
               style: TextStyle(
-                fontSize: 11.sp,
+                fontSize: AppFont.font11.sp,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.1,
-                color: AppTheme.splashTrustedBadgeText,
+                color: AppColors.splashTrustedBadgeText,
               ),
             ),
           ),
@@ -353,8 +325,8 @@ class SplashView extends GetView<SplashController> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFD5D5D5),
-        borderRadius: BorderRadius.circular(26.r),
+        color: AppColors.legacyColorFFD5D5D5,
+        borderRadius: BorderRadius.circular(kRadius26.r),
       ),
       child: Obx(
         () => Row(
@@ -364,7 +336,7 @@ class SplashView extends GetView<SplashController> {
                 (String language) => Padding(
                   padding: EdgeInsets.symmetric(horizontal: 2.w),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(22.r),
+                    borderRadius: BorderRadius.circular(kRadius22.r),
                     onTap: () => controller.setLanguage(language),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
@@ -374,18 +346,18 @@ class SplashView extends GetView<SplashController> {
                       ),
                       decoration: BoxDecoration(
                         color: controller.selectedLanguage.value == language
-                            ? AppTheme.primaryGreen
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(18.r),
+                            ? AppColors.primaryGreen
+                            : AppColors.transparent,
+                        borderRadius: BorderRadius.circular(kRadius18.r),
                       ),
                       child: Text(
                         language,
                         style: TextStyle(
-                          fontSize: 13.sp,
+                          fontSize: AppFont.font13.sp,
                           fontWeight: FontWeight.w700,
                           color: controller.selectedLanguage.value == language
-                              ? Colors.white
-                              : const Color(0xFF545454),
+                              ? AppColors.white
+                              : AppColors.legacyColorFF545454,
                         ),
                       ),
                     ),
@@ -413,11 +385,17 @@ class SplashView extends GetView<SplashController> {
     final int imageIndex = (index - 1).clamp(0, _splashHeaderImages.length - 1);
     final TextStyle headlineLargeStyle =
         Theme.of(context).textTheme.headlineLarge ??
-        AppTheme.splashHeadlineStyle;
+        TextStyle(
+          fontSize: AppFont.font38.sp,
+          fontWeight: FontWeight.w800,
+          height: 1.13,
+          letterSpacing: -0.9,
+          color: AppColors.splashTextPrimary,
+        );
 
     return Container(
       decoration: const BoxDecoration(
-        gradient: AppTheme.splashOnboardingGradient,
+        gradient: AppColors.splashOnboardingGradient,
       ),
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 18.h),
       child: Column(
@@ -477,7 +455,7 @@ class SplashView extends GetView<SplashController> {
                 TextSpan(
                   text: highlight,
                   style: headlineLargeStyle.copyWith(
-                    color: AppTheme.splashHighlight,
+                    color: AppColors.splashHighlight,
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -494,10 +472,10 @@ class SplashView extends GetView<SplashController> {
             description,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 15.sp,
+              fontSize: AppFont.font15.sp,
               fontWeight: FontWeight.w500,
               height: 1.45,
-              color: AppTheme.splashBodyText,
+              color: AppColors.splashBodyText,
             ),
           ),
 
@@ -524,9 +502,9 @@ class SplashView extends GetView<SplashController> {
           height: 8.h,
           decoration: BoxDecoration(
             color: isActive
-                ? AppTheme.primaryGreen
-                : AppTheme.splashIndicatorInactive,
-            borderRadius: BorderRadius.circular(10.r),
+                ? AppColors.primaryGreen
+                : AppColors.splashIndicatorInactive,
+            borderRadius: BorderRadius.circular(kRadius10.r),
           ),
         );
       }),
@@ -556,8 +534,8 @@ class _ServiceChip extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
       decoration: BoxDecoration(
-        color: AppTheme.splashChipCardBg,
-        borderRadius: BorderRadius.circular(36.r),
+        color: AppColors.splashChipCardBg,
+        borderRadius: BorderRadius.circular(kRadius36.r),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -567,20 +545,27 @@ class _ServiceChip extends StatelessWidget {
             height: 48.r,
             decoration: BoxDecoration(
               color: active
-                  ? AppTheme.splashChipActiveBg
-                  : AppTheme.splashChipInactiveBg,
+                  ? AppColors.splashChipActiveBg
+                  : AppColors.splashChipInactiveBg,
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
               size: 21.r,
               color: active
-                  ? AppTheme.splashChipActiveIcon
-                  : (iconColor ?? AppTheme.splashChipCafIcon),
+                  ? AppColors.splashChipActiveIcon
+                  : (iconColor ?? AppColors.splashChipCafIcon),
             ),
           ),
           SizedBox(height: 8.h),
-          Text(label, style: AppTheme.splashServiceChipLabelStyle),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: AppFont.font12.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.splashTextSecondary,
+            ),
+          ),
         ],
       ),
     );
@@ -607,7 +592,7 @@ class _ServiceChipHighlighted extends StatelessWidget {
       label: label,
       iconColor: iconColor,
       iconBackground: iconBackground,
-      backgroundColor: AppTheme.splashChipCardBg,
+      backgroundColor: AppColors.splashChipCardBg,
     );
   }
 }
@@ -624,7 +609,7 @@ class _ServiceChipPlain extends StatelessWidget {
     required this.label,
     required this.iconColor,
     required this.iconBackground,
-    this.backgroundColor = Colors.transparent,
+    this.backgroundColor = AppColors.transparent,
   });
 
   @override
@@ -635,7 +620,7 @@ class _ServiceChipPlain extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 18.h),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(36.r),
+        borderRadius: BorderRadius.circular(kRadius36.r),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -650,7 +635,14 @@ class _ServiceChipPlain extends StatelessWidget {
             child: Icon(icon, size: 21.r, color: iconColor),
           ),
           SizedBox(height: 8.h),
-          Text(label, style: AppTheme.splashServiceChipLabelStyle),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: AppFont.font12.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.splashTextSecondary,
+            ),
+          ),
         ],
       ),
     );

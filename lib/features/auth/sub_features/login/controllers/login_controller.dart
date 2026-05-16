@@ -1,12 +1,14 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/services/storage_service.dart';
+import '../../../../../core/localization/translation_service.dart';
 import '../../../../../routes/routes.dart';
 import '../../../models/auth_models.dart';
 import '../models/login_models.dart';
 
 class LoginController extends GetxController {
   final StorageService _storageService = Get.find<StorageService>();
+  final TranslationService _translationService = Get.find<TranslationService>();
 
   final Rx<LoginFormModel> form = LoginFormModel.initial().obs;
   final Rxn<LoginPayloadModel> pendingPayload = Rxn<LoginPayloadModel>();
@@ -33,11 +35,10 @@ class LoginController extends GetxController {
   }
 
   void setLanguage(String value) {
-    final Locale locale = _localeFromLabel(value);
+    _translationService.setLanguageLabel(value);
     form.value = form.value.copyWith(
-      selectedLanguage: _labelFromLocale(locale),
+      selectedLanguage: _translationService.selectedLabel.value,
     );
-    Get.updateLocale(locale);
   }
 
   void setLoginMode(String value) {
@@ -91,41 +92,15 @@ class LoginController extends GetxController {
       const String dummyToken = 'dummy_auth_token';
       await _storageService.setLoggedInData(dummyToken);
       // Navigate to the home screen or dashboard after successful login
-      Get.offAllNamed(AppRoutes.home);
+      Get.offAllNamed(AppRoutes.wrapper);
     } finally {
       form.value = form.value.copyWith(isLoading: false);
     }
   }
 
-  Locale _localeFromLabel(String label) {
-    switch (label) {
-      case 'IT':
-        return const Locale('it', 'IT');
-      case 'বাং':
-        return const Locale('bn', 'BD');
-      case 'EN':
-      default:
-        return const Locale('en', 'US');
-    }
-  }
-
-  String _labelFromLocale(Locale locale) {
-    if (locale.languageCode == 'it') {
-      return 'IT';
-    }
-
-    if (locale.languageCode == 'bn') {
-      return 'বাং';
-    }
-
-    return 'EN';
-  }
-
   void _syncSelectedLanguageWithLocale() {
-    final Locale locale =
-        Get.locale ?? Get.deviceLocale ?? const Locale('en', 'US');
     form.value = form.value.copyWith(
-      selectedLanguage: _labelFromLocale(locale),
+      selectedLanguage: _translationService.selectedLabel.value,
     );
   }
 

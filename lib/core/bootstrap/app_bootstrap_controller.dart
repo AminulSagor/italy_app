@@ -1,17 +1,30 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../services/storage_service.dart';
+import '../localization/translation_service.dart';
 import '../../routes/routes.dart';
 
 class AppBootstrapController extends GetxController {
-  final StorageService _storageService = Get.find<StorageService>();
+  AppBootstrapController();
+  static Future<void> init() async {
+    await Get.putAsync<StorageService>(
+      () => StorageService().init(),
+      permanent: true,
+    );
+
+    final translationService = Get.put<TranslationService>(
+      TranslationService(storageService: Get.find<StorageService>()),
+    );
+    Get.put<TranslationService>(translationService, permanent: true);
+  }
+
   @override
   void onInit() {
     super.onInit();
     //_bootstrap();
   }
 
-  @override 
+  @override
   void onReady() {
     super.onReady();
     _bootstrap();
@@ -19,19 +32,22 @@ class AppBootstrapController extends GetxController {
 
   Future<void> _bootstrap() async {
     try {
-      if (_storageService.isLoggedIn) {
+      final StorageService storageService = Get.find<StorageService>();
+      Get.offAllNamed(AppRoutes.splash);
+      return;
+      if (storageService.isLoggedIn) {
         // Fallback to login if home route is not yet registered.
         if (_isRouteRegistered(AppRoutes.home)) {
           Get.offAllNamed(AppRoutes.home);
         } else {
-          await _storageService.clearLoggedInData();
+          await storageService.clearLoggedInData();
           Get.offAllNamed(AppRoutes.login);
         }
         return;
       }
 
-      if (_storageService.isFirstTimeUser) {
-        //await _storageService.setFirstTimeUser(false);
+      if (storageService.isFirstTimeUser) {
+        //await storageService.setFirstTimeUser(false);
         Get.offAllNamed(AppRoutes.splash);
         return;
       }
@@ -45,6 +61,8 @@ class AppBootstrapController extends GetxController {
   }
 
   bool _isRouteRegistered(String routeName) {
-    return AppPages.pages.any((GetPage<dynamic> page) => page.name == routeName);
+    return AppPages.pages.any(
+      (GetPage<dynamic> page) => page.name == routeName,
+    );
   }
 }

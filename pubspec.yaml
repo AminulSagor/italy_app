@@ -16,6 +16,11 @@ dependencies:
   flutter_screenutil: ^5.9.3
   google_fonts: ^6.3.0
   shared_preferences: ^2.5.5
+  image_picker: ^1.2.2
+  audio_waveforms: ^1.3.0
+  flutter_svg: ^2.3.0
+  material_symbols_icons: ^4.2928.1
+  syncfusion_flutter_pdfviewer: ^33.2.6
   
 dev_dependencies:
   flutter_test:
@@ -31,3 +36,28 @@ flutter:
   assets:
     - assets/decor_png/
     - assets/icons_png/
+    - assets/icons_svg/
+    - assets/profile_images/
+    - assets/heroes/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Poppins-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Poppins-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Poppins-Black.ttf
+          weight: 900

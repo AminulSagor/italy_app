@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../../../core/themes/app_theme.dart';
 import '../controllers/signup_controller.dart';
+
+import '../../../../../core/themes/app_colors.dart';
+import '../../../../../core/themes/app_font.dart';
+import '../../../../../core/themes/app_constants.dart';
 
 class AccountCreatedView extends GetView<SignupController> {
   const AccountCreatedView({super.key});
@@ -11,7 +14,7 @@ class AccountCreatedView extends GetView<SignupController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
@@ -22,7 +25,7 @@ class AccountCreatedView extends GetView<SignupController> {
                 onPressed: Get.back,
                 icon: Icon(
                   Icons.close,
-                  color: const Color(0xFF5A5D60),
+                  color: AppColors.legacyColorFF5A5D60,
                   size: 22.sp,
                 ),
               ),
@@ -34,7 +37,7 @@ class AccountCreatedView extends GetView<SignupController> {
                   'account_created_title'.tr,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontSize: 36.sp.clamp(28, 40),
+                    fontSize: AppFont.font36.sp.clamp(AppFont.font28, AppFont.font40).toDouble(),
                     height: 1.15,
                   ),
                 ),
@@ -45,8 +48,8 @@ class AccountCreatedView extends GetView<SignupController> {
                   'account_created_desc'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: const Color(0xFF5D6164),
-                    fontSize: 16.sp,
+                    color: AppColors.legacyColorFF5D6164,
+                    fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w500,
                     height: 1.35,
                   ),
@@ -57,11 +60,11 @@ class AccountCreatedView extends GetView<SignupController> {
                 () => Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F2F2),
-                    borderRadius: BorderRadius.circular(34.r),
+                    color: AppColors.legacyColorFFF1F2F2,
+                    borderRadius: BorderRadius.circular(kRadius34.r),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(34.r),
+                    borderRadius: BorderRadius.circular(kRadius34.r),
                     child: Stack(
                       children: <Widget>[
                         Positioned(
@@ -71,7 +74,7 @@ class AccountCreatedView extends GetView<SignupController> {
                             width: 160.w,
                             height: 160.w,
                             decoration: const BoxDecoration(
-                              color: Color(0xFFE4E8EB),
+                              color: AppColors.legacyColorFFE4E8EB,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -85,7 +88,7 @@ class AccountCreatedView extends GetView<SignupController> {
                             children: <Widget>[
                               _buildInfoRow(
                                 icon: Icons.person_outline,
-                                iconBg: const Color(0xFFA9CCF0),
+                                iconBg: AppColors.legacyColorFFA9CCF0,
                                 title: 'field_full_name'.tr,
                                 value:
                                     controller.accountCreatedUi.value.fullName,
@@ -93,7 +96,7 @@ class AccountCreatedView extends GetView<SignupController> {
                               SizedBox(height: 14.h),
                               _buildInfoRow(
                                 icon: Icons.mail_outline,
-                                iconBg: const Color(0xFFC8E8B7),
+                                iconBg: AppColors.legacyColorFFC8E8B7,
                                 title: controller.form.value.isEmailMode
                                     ? 'field_email'.tr
                                     : 'field_phone'.tr,
@@ -120,15 +123,15 @@ class AccountCreatedView extends GetView<SignupController> {
                         ? null
                         : controller.onStartLearningTap,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryGreen,
-                      disabledBackgroundColor: AppTheme.primaryGreen.withValues(
+                      backgroundColor: AppColors.primaryGreen,
+                      disabledBackgroundColor: AppColors.primaryGreen.withValues(
                         alpha: 0.6,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(34.r),
+                        borderRadius: BorderRadius.circular(kRadius34.r),
                       ),
                       elevation: 10,
-                      shadowColor: AppTheme.primaryGreen.withAlpha(70),
+                      shadowColor: AppColors.primaryGreen.withAlpha(70),
                     ),
                     child: controller.accountCreatedUi.value.isStarting
                         ? SizedBox(
@@ -136,7 +139,7 @@ class AccountCreatedView extends GetView<SignupController> {
                             height: 22.w,
                             child: const CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           )
                         : Row(
@@ -145,15 +148,15 @@ class AccountCreatedView extends GetView<SignupController> {
                               Text(
                                 'start_learning'.tr,
                                 style: TextStyle(
-                                  color: const Color(0xFFE8F4DF),
-                                  fontSize: 18.sp,
+                                  color: AppColors.legacyColorFFE8F4DF,
+                                  fontSize: AppFont.font18.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               SizedBox(width: 8.w),
                               Icon(
                                 Icons.play_arrow_rounded,
-                                color: const Color(0xFFE8F4DF),
+                                color: AppColors.legacyColorFFE8F4DF,
                                 size: 24.sp,
                               ),
                             ],
@@ -181,7 +184,7 @@ class AccountCreatedView extends GetView<SignupController> {
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 255, 255, 255),
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF6FE13B), width: 3),
+              border: Border.all(color: AppColors.legacyColorFF6FE13B, width: 3),
               // boxShadow: const <BoxShadow>[
               //   BoxShadow(
               //     color: Color.fromARGB(255, 255, 255, 255),
@@ -195,10 +198,10 @@ class AccountCreatedView extends GetView<SignupController> {
             width: 58.w,
             height: 58.w,
             decoration: const BoxDecoration(
-              color: AppTheme.primaryGreen,
+              color: AppColors.primaryGreen,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.check, color: Colors.white, size: 36.sp),
+            child: Icon(Icons.check, color: AppColors.white, size: 36.sp),
           ),
           Positioned(
             top: 4.h,
@@ -232,9 +235,9 @@ class AccountCreatedView extends GetView<SignupController> {
           height: 48.w,
           decoration: BoxDecoration(
             color: iconBg,
-            borderRadius: BorderRadius.circular(14.r),
+            borderRadius: BorderRadius.circular(kRadius14.r),
           ),
-          child: Icon(icon, color: const Color(0xFF0F5F21), size: 24.sp),
+          child: Icon(icon, color: AppColors.legacyColorFF0F5F21, size: 24.sp),
         ),
         SizedBox(width: 12.w),
         Expanded(
@@ -244,8 +247,8 @@ class AccountCreatedView extends GetView<SignupController> {
               Text(
                 title,
                 style: TextStyle(
-                  color: const Color(0xFF6C7074),
-                  fontSize: 11.sp,
+                  color: AppColors.legacyColorFF6C7074,
+                  fontSize: AppFont.font11.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.6,
                 ),
@@ -254,8 +257,8 @@ class AccountCreatedView extends GetView<SignupController> {
               Text(
                 value,
                 style: TextStyle(
-                  color: const Color(0xFF2B2F32),
-                  fontSize: 18.sp,
+                  color: AppColors.legacyColorFF2B2F32,
+                  fontSize: AppFont.font18.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),

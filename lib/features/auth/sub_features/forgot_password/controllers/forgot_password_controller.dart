@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/localization/translation_service.dart';
 import '../../../../../routes/routes.dart';
 import '../models/forgot_password_models.dart';
 import '../services/forgot_password_service.dart';
@@ -10,6 +11,7 @@ class ForgotPasswordController extends GetxController {
     : _service = service ?? ForgotPasswordService();
 
   final ForgotPasswordService _service;
+  final TranslationService _translationService = Get.find<TranslationService>();
 
   final Rx<ForgotPasswordFormModel> form =
       ForgotPasswordFormModel.initial().obs;
@@ -34,6 +36,9 @@ class ForgotPasswordController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    form.value = form.value.copyWith(
+      selectedLanguage: _translationService.selectedLabel.value,
+    );
     identifierController = TextEditingController();
     otpControllers = List<TextEditingController>.generate(
       4,
@@ -49,9 +54,10 @@ class ForgotPasswordController extends GetxController {
   }
 
   void setLanguage(String value) {
-    form.value = form.value.copyWith(selectedLanguage: value);
-    final Locale locale = _localeFromLabel(value);
-    Get.updateLocale(locale);
+    _translationService.setLanguageLabel(value);
+    form.value = form.value.copyWith(
+      selectedLanguage: _translationService.selectedLabel.value,
+    );
   }
 
   void setResetMode(String value) {
@@ -253,18 +259,6 @@ class ForgotPasswordController extends GetxController {
       Get.offNamed(AppRoutes.forgotPasswordSuccess);
     } finally {
       resetForm.value = resetForm.value.copyWith(isSubmitting: false);
-    }
-  }
-
-  Locale _localeFromLabel(String label) {
-    switch (label) {
-      case 'IT':
-        return const Locale('it', 'IT');
-      case 'বাং':
-        return const Locale('bn', 'BD');
-      case 'EN':
-      default:
-        return const Locale('en', 'US');
     }
   }
 

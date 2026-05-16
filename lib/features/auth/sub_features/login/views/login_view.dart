@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
-import '../../../../../core/themes/app_theme.dart';
 import '../../../../../routes/routes.dart';
 import '../controllers/login_controller.dart';
+
+import '../../../../../core/themes/app_colors.dart';
+import '../../../../../core/themes/app_font.dart';
+import '../../../../../core/themes/app_constants.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
@@ -14,7 +18,7 @@ class LoginView extends StatelessWidget {
     final LoginController controller = Get.find<LoginController>();
 
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
@@ -24,12 +28,18 @@ class LoginView extends StatelessWidget {
                 SizedBox(height: 8.h),
                 _buildLanguageSwitcher(controller),
                 SizedBox(height: 16.h),
-                _buildBrandMark(),
+                SvgPicture.asset(
+                  'assets/icons_svg/app_icon.svg',
+                  width: 110.w,
+                  fit: BoxFit.cover,
+                ),
                 SizedBox(height: 14.h),
                 Text(
                   'app_name'.tr,
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontSize: 40.sp.clamp(24, 48),
+                    fontSize: AppFont.font40.sp
+                        .clamp(AppFont.font24, AppFont.font48)
+                        .toDouble(),
                     height: 1,
                   ),
                 ),
@@ -37,9 +47,9 @@ class LoginView extends StatelessWidget {
                 Text(
                   'unlock_career'.tr,
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.bodyText,
+                    color: AppColors.bodyText,
                   ),
                 ),
                 SizedBox(height: 24.h),
@@ -50,8 +60,8 @@ class LoginView extends StatelessWidget {
                     vertical: 16.h,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDFDFDF),
-                    borderRadius: BorderRadius.circular(32.r),
+                    color: AppColors.legacyColorFFDFDFDF,
+                    borderRadius: BorderRadius.circular(kRadius32.r),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -102,7 +112,7 @@ class LoginView extends StatelessWidget {
                                 controller.form.value.obscurePassword
                                     ? Icons.visibility_outlined
                                     : Icons.visibility_off_outlined,
-                                color: const Color(0xFF666666),
+                                color: AppColors.legacyColorFF666666,
                               ),
                             ),
                           ),
@@ -114,9 +124,9 @@ class LoginView extends StatelessWidget {
                           child: Text(
                             'forgot_password'.tr,
                             style: TextStyle(
-                              fontSize: 17.sp,
+                              fontSize: AppFont.font17.sp,
                               fontWeight: FontWeight.w700,
-                              color: AppTheme.primaryGreen,
+                              color: AppColors.primaryGreen,
                             ),
                           ),
                         ),
@@ -130,12 +140,14 @@ class LoginView extends StatelessWidget {
                                   ? null
                                   : controller.onLoginTap,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.primaryGreen,
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor: AppTheme.primaryGreen
+                                backgroundColor: AppColors.primaryGreen,
+                                foregroundColor: AppColors.white,
+                                disabledBackgroundColor: AppColors.primaryGreen
                                     .withValues(alpha: 0.6),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(34.r),
+                                  borderRadius: BorderRadius.circular(
+                                    kRadius34.r,
+                                  ),
                                 ),
                                 elevation: 0,
                               ),
@@ -145,13 +157,18 @@ class LoginView extends StatelessWidget {
                                       width: 22.h,
                                       child: const CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: Colors.white,
+                                        color: AppColors.white,
                                       ),
                                     )
                                   : Text(
                                       'log_in'.tr,
                                       style: TextStyle(
-                                        fontSize: 20.sp.clamp(12, 32),
+                                        fontSize: AppFont.font20.sp
+                                            .clamp(
+                                              AppFont.font12,
+                                              AppFont.font32,
+                                            )
+                                            .toDouble(),
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
@@ -165,9 +182,9 @@ class LoginView extends StatelessWidget {
                             Text(
                               'dont_have_account'.tr,
                               style: TextStyle(
-                                fontSize: 16.sp,
+                                fontSize: AppFont.font16.sp,
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF57595B),
+                                color: AppColors.legacyColorFF57595B,
                               ),
                             ),
                             TextButton(
@@ -180,9 +197,9 @@ class LoginView extends StatelessWidget {
                               child: Text(
                                 'signup'.tr,
                                 style: TextStyle(
-                                  fontSize: 16.sp,
+                                  fontSize: AppFont.font16.sp,
                                   fontWeight: FontWeight.w700,
-                                  color: AppTheme.primaryGreen,
+                                  color: AppColors.primaryGreen,
                                 ),
                               ),
                             ),
@@ -206,8 +223,8 @@ class LoginView extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFD5D5D5),
-        borderRadius: BorderRadius.circular(26.r),
+        color: AppColors.legacyColorFFD5D5D5,
+        borderRadius: BorderRadius.circular(kRadius26.r),
       ),
       child: Obx(
         () => Row(
@@ -217,7 +234,7 @@ class LoginView extends StatelessWidget {
                 (String language) => Padding(
                   padding: EdgeInsets.symmetric(horizontal: 2.w),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(22.r),
+                    borderRadius: BorderRadius.circular(kRadius22.r),
                     onTap: () => controller.setLanguage(language),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
@@ -228,19 +245,19 @@ class LoginView extends StatelessWidget {
                       decoration: BoxDecoration(
                         color:
                             controller.form.value.selectedLanguage == language
-                            ? AppTheme.primaryGreen
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(18.r),
+                            ? AppColors.primaryGreen
+                            : AppColors.transparent,
+                        borderRadius: BorderRadius.circular(kRadius18.r),
                       ),
                       child: Text(
                         language,
                         style: TextStyle(
-                          fontSize: 13.sp,
+                          fontSize: AppFont.font13.sp,
                           fontWeight: FontWeight.w700,
                           color:
                               controller.form.value.selectedLanguage == language
-                              ? Colors.white
-                              : const Color(0xFF545454),
+                              ? AppColors.white
+                              : AppColors.legacyColorFF545454,
                         ),
                       ),
                     ),
@@ -253,43 +270,12 @@ class LoginView extends StatelessWidget {
     );
   }
 
-  Widget _buildBrandMark() {
-    return SizedBox(
-      height: 138.h,
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          Container(
-            width: 110.w,
-            height: 110.w,
-            decoration: BoxDecoration(
-              color: const Color(0xFF7CEE3E),
-              borderRadius: BorderRadius.circular(38.r),
-            ),
-          ),
-          Positioned(
-            right: -12.w,
-            bottom: 0.h,
-            child: SizedBox(
-              width: 55.sp,
-              height: 55.sp,
-              child: Image.asset(
-                'assets/icons_png/Background_login.png',
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEmailPhoneSwitcher(LoginController controller) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFD0D1D2),
-        borderRadius: BorderRadius.circular(22.r),
+        color: AppColors.legacyColorFFD0D1D2,
+        borderRadius: BorderRadius.circular(kRadius22.r),
       ),
       child: Obx(
         () => Row(
@@ -322,21 +308,25 @@ class LoginView extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20.r),
+      borderRadius: BorderRadius.circular(kRadius20.r),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: EdgeInsets.symmetric(vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF0F0F0) : Colors.transparent,
-          borderRadius: BorderRadius.circular(18.r),
+          color: isSelected
+              ? AppColors.legacyColorFFF0F0F0
+              : AppColors.transparent,
+          borderRadius: BorderRadius.circular(kRadius18.r),
         ),
         alignment: Alignment.center,
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 15.sp,
+            fontSize: AppFont.font15.sp,
             fontWeight: FontWeight.w700,
-            color: isSelected ? AppTheme.primaryGreen : const Color(0xFF5A5A5A),
+            color: isSelected
+                ? AppColors.primaryGreen
+                : AppColors.legacyColorFF5A5A5A,
           ),
         ),
       ),
@@ -349,10 +339,10 @@ class LoginView extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 13.sp,
+          fontSize: AppFont.font13.sp,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.5,
-          color: const Color(0xFF67686A),
+          color: AppColors.legacyColorFF67686A,
         ),
       ),
     );
@@ -368,26 +358,30 @@ class LoginView extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F0),
-        borderRadius: BorderRadius.circular(28.r),
+        color: AppColors.legacyColorFFF0F0F0,
+        borderRadius: BorderRadius.circular(kRadius28.r),
       ),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         style: TextStyle(
-          fontSize: 16.sp,
+          fontSize: AppFont.font16.sp,
           fontWeight: FontWeight.w500,
-          color: const Color(0xFF3E4042),
+          color: AppColors.legacyColorFF3E4042,
         ),
         decoration: InputDecoration(
-          prefixIcon: Icon(prefix, color: const Color(0xFF676767), size: 23.sp),
+          prefixIcon: Icon(
+            prefix,
+            color: AppColors.legacyColorFF676767,
+            size: 23.sp,
+          ),
           suffixIcon: suffix,
           hintText: hint,
           hintStyle: TextStyle(
-            fontSize: 17.sp,
+            fontSize: AppFont.font17.sp,
             fontWeight: FontWeight.w500,
-            color: const Color(0xFFABABAB),
+            color: AppColors.legacyColorFFABABAB,
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
