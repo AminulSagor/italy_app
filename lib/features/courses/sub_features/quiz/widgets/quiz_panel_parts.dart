@@ -121,16 +121,17 @@ class _SentenceTranslationPanel extends StatelessWidget {
         Row(
           children: <Widget>[
             Container(
-              width: 92.w,
-              height: 92.w,
+              width: 76.w,
+              height: 76.w,
               decoration: const BoxDecoration(
                 color: AppColors.homeLime,
                 shape: BoxShape.circle,
               ),
               child: Center(
-                child: Text('🇮🇹', style: TextStyle(fontSize: 44.sp)),
+                child: Text('🇮🇹', style: TextStyle(fontSize: 34.sp)),
               ),
             ),
+            14.w.horizontalSpace,
             Expanded(
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 26.h),
@@ -150,8 +151,8 @@ class _SentenceTranslationPanel extends StatelessWidget {
                 child: Text(
                   question.title,
                   style: TextStyle(
-                    fontSize: AppFont.font28.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font22.sp,
+                    fontWeight: FontWeight.w800,
                     color: AppColors.homePrimaryText,
                     height: 1.35,
                   ),

@@ -10,12 +10,16 @@ class ProBackHeader extends StatelessWidget {
   final String title;
   final VoidCallback onBackTap;
 
-  const ProBackHeader({super.key, required this.title, required this.onBackTap});
+  const ProBackHeader({
+    super.key,
+    required this.title,
+    required this.onBackTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 64.h,
+      height: 36.h,
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
@@ -24,17 +28,21 @@ class ProBackHeader extends StatelessWidget {
             child: GestureDetector(
               onTap: onBackTap,
               child: SizedBox(
-                width: 44.w,
-                height: 44.w,
-                child: Icon(Icons.arrow_back, color: AppColors.primaryGreen, size: 26.w),
+                width: 30.w,
+                height: 30.w,
+                child: Icon(
+                  Icons.arrow_back,
+                  color: AppColors.primaryGreen,
+                  size: 20.w,
+                ),
               ),
             ),
           ),
           Text(
             title,
             style: TextStyle(
-              fontSize: AppFont.font20.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font16.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.primaryGreen,
             ),
           ),
@@ -80,7 +88,11 @@ class ProHeroIllustration extends StatelessWidget {
               color: AppColors.proHeroBookLight,
               borderRadius: BorderRadius.circular(28.r),
             ),
-            child: Icon(Icons.menu_book_rounded, color: AppColors.primaryGreen, size: 64.w),
+            child: Icon(
+              Icons.menu_book_rounded,
+              color: AppColors.primaryGreen,
+              size: 64.w,
+            ),
           ),
           ...<Widget>[
             _floatingLetter('C', -88, -42, AppColors.proLetterTan),
@@ -125,9 +137,9 @@ class ProFeatureGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 16.w,
-        mainAxisSpacing: 16.h,
-        childAspectRatio: 1.0,
+        crossAxisSpacing: 8.w,
+        mainAxisSpacing: 8.h,
+        childAspectRatio: 1.1,
       ),
       itemBuilder: (_, int index) {
         return ProFeatureCard(feature: features[index]);
@@ -147,29 +159,29 @@ class ProFeatureCard extends StatelessWidget {
     final Color iconColor = _iconColor(feature.tone);
 
     return Container(
-      alignment: Alignment.center,
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(kProFeatureCardRadius.r),
+        borderRadius: BorderRadius.circular(kRadius48.r),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
-            width: 52.w,
-            height: 52.w,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(color: AppColors.white, shape: BoxShape.circle),
-            child: Icon(_icon(feature.iconName), color: iconColor, size: 26.w),
+            padding: EdgeInsets.all(12.w),
+            decoration: const BoxDecoration(
+              color: AppColors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(_icon(feature.iconName), color: iconColor, size: 24.w),
           ),
-          SizedBox(height: 22.h),
+          SizedBox(height: 14.h),
           Text(
             feature.title,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: AppFont.font16.sp,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               color: AppColors.homePrimaryText,
               height: 1.12,
             ),
@@ -232,7 +244,7 @@ class ProCurrencyToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 54.h,
+      height: 44.h,
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: AppColors.proToggleBg,
@@ -291,8 +303,8 @@ class _CurrencySegment extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: AppFont.font15.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font14.sp,
+              fontWeight: FontWeight.w700,
               color: isSelected ? AppColors.primaryGreen : AppColors.bodyText,
             ),
           ),

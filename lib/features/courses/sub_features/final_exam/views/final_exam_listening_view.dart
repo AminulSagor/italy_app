@@ -46,11 +46,11 @@ class FinalExamListeningView extends GetView<FinalExamController> {
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(28.w, 34.h, 28.w, 132.h),
+            padding: EdgeInsets.fromLTRB(28.w, 10.h, 28.w, 132.h),
             child: Column(
               children: <Widget>[
                 _ExamProgressHeader(onCloseTap: () => Get.back<void>()),
-                SizedBox(height: 28.h),
+                SizedBox(height: 25.h),
                 _AudioClipCard(
                   task: task,
                   isPlaying: controller.isAudioPlaying.value,
@@ -59,7 +59,9 @@ class FinalExamListeningView extends GetView<FinalExamController> {
                 ),
                 SizedBox(height: 26.h),
                 const ExamInfoTip(
-                  text: 'STRICT EXAM MODE\nOnce the audio finishes, you cannot replay it. Make your selection carefully.',
+                  text: 'STRICT EXAM MODE',
+                  subText:
+                      'Once the audio finishes, you cannot replay it. Make your selection carefully.',
                   bg: AppColors.coursesCreamLightBg,
                   borderColor: AppColors.vocabularyOrangeShadow,
                   color: AppColors.profileOrangeText,
@@ -74,14 +76,15 @@ class FinalExamListeningView extends GetView<FinalExamController> {
                     child: _ListeningOption(
                       label: task.options[index],
                       index: index,
-                      isSelected: controller.selectedListeningOption.value == index,
+                      isSelected:
+                          controller.selectedListeningOption.value == index,
                       onTap: () => controller.selectListeningOption(index),
                     ),
                   );
                 }),
                 SizedBox(height: 12.h),
                 ExamInfoTip(
-                  text: task.tip,
+                  subText: task.tip,
                   bg: AppColors.reportReviewBg,
                   borderColor: AppColors.transparent,
                   color: AppColors.reportReviewText,
@@ -109,37 +112,34 @@ class _ExamProgressHeader extends StatelessWidget {
           children: <Widget>[
             GestureDetector(
               onTap: onCloseTap,
-              child: Icon(Icons.close_rounded, color: AppColors.bodyText, size: 30.w),
+              child: Icon(
+                Icons.close_rounded,
+                color: AppColors.bodyText,
+                size: 22.w,
+              ),
             ),
             const Spacer(),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
               decoration: BoxDecoration(
                 color: AppColors.modalBorderGrey,
-                borderRadius: BorderRadius.circular(kHomePillRadius.r),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: AppColors.homeNeutralShadow,
-                    blurRadius: 0,
-                    offset: Offset(0, 5.h),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(999.r),
               ),
               child: Text(
                 '⏱ 00:15:00',
                 style: TextStyle(
-                  fontSize: AppFont.font18.sp,
-                  fontWeight: FontWeight.w900,
+                  fontSize: AppFont.font16.sp,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.primaryGreen,
                 ),
               ),
             ),
             const Spacer(),
             Text(
-              '2 of 5',
+              '2 of 4',
               style: TextStyle(
-                fontSize: AppFont.font16.sp,
-                fontWeight: FontWeight.w900,
+                fontSize: AppFont.font14.sp,
+                fontWeight: FontWeight.w600,
                 color: AppColors.bodyText,
               ),
             ),
@@ -150,7 +150,8 @@ class _ExamProgressHeader extends StatelessWidget {
           borderRadius: BorderRadius.circular(kHomePillRadius.r),
           child: LinearProgressIndicator(
             value: 0.4,
-            minHeight: 16.h,
+            minHeight: 12.h,
+            borderRadius: BorderRadius.circular(999.r),
             color: AppColors.primaryGreen,
             backgroundColor: AppColors.quizProgressTrack,
           ),
@@ -180,7 +181,7 @@ class _AudioClipCard extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 42.h),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(kRadius42.r),
+        borderRadius: BorderRadius.circular(kRadius48.r),
         border: Border.all(color: AppColors.homeSoftGreen, width: 2.w),
       ),
       child: Column(
@@ -188,17 +189,18 @@ class _AudioClipCard extends StatelessWidget {
           Text(
             'Press play to start the clip',
             style: TextStyle(
-              fontSize: AppFont.font16.sp,
+              fontSize: AppFont.font14.sp,
+              fontWeight: FontWeight.w500,
               color: AppColors.bodyText,
             ),
           ),
-          SizedBox(height: 14.h),
+          SizedBox(height: 8.h),
           Text(
             task.clipTitle,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: AppFont.font24.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font22.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.homePrimaryText,
             ),
           ),
@@ -206,8 +208,8 @@ class _AudioClipCard extends StatelessWidget {
           GestureDetector(
             onTap: onPlayTap,
             child: Container(
-              width: 112.w,
-              height: 112.w,
+              width: 96.w,
+              height: 96.w,
               decoration: BoxDecoration(
                 color: AppColors.primaryGreen,
                 shape: BoxShape.circle,
@@ -222,12 +224,15 @@ class _AudioClipCard extends StatelessWidget {
               child: Icon(
                 isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                 color: AppColors.white,
-                size: 58.w,
+                size: 40.w,
               ),
             ),
           ),
           SizedBox(height: 26.h),
-          FinalExamPlayerWaveform(playerController: playerController, height: 64),
+          FinalExamPlayerWaveform(
+            playerController: playerController,
+            height: 64,
+          ),
         ],
       ),
     );
@@ -252,27 +257,27 @@ class _QuestionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 7.h),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
             decoration: BoxDecoration(
               color: AppColors.reportReviewIconBg,
-              borderRadius: BorderRadius.circular(kHomePillRadius.r),
+              borderRadius: BorderRadius.circular(999.r),
             ),
             child: Text(
               task.questionTag,
               style: TextStyle(
-                fontSize: AppFont.font12.sp,
+                fontSize: AppFont.font10.sp,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1.2,
                 color: AppColors.reportReviewText,
               ),
             ),
           ),
-          SizedBox(height: 18.h),
+          SizedBox(height: 10.h),
           Text(
             task.question,
             style: TextStyle(
-              fontSize: AppFont.font30.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font28.sp,
+              fontWeight: FontWeight.w700,
               height: 1.16,
               color: AppColors.homePrimaryText,
             ),
@@ -314,11 +319,13 @@ class _ListeningOption extends StatelessWidget {
         child: Row(
           children: <Widget>[
             Container(
-              width: 36.w,
-              height: 36.w,
+              width: 30.w,
+              height: 30.w,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primaryGreen : AppColors.modalBorderGrey,
+                color: isSelected
+                    ? AppColors.primaryGreen
+                    : AppColors.modalBorderGrey,
                 shape: BoxShape.circle,
               ),
               child: Text(
@@ -330,12 +337,12 @@ class _ListeningOption extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: 22.w),
+            SizedBox(width: 16.w),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: AppFont.font19.sp,
+                  fontSize: AppFont.font18.sp,
                   height: 1.35,
                   fontWeight: FontWeight.w700,
                   color: AppColors.homePrimaryText,
@@ -343,7 +350,11 @@ class _ListeningOption extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle_rounded, color: AppColors.primaryGreen, size: 26.w),
+              Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.primaryGreen,
+                size: 20.w,
+              ),
           ],
         ),
       ),

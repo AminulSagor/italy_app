@@ -333,7 +333,7 @@ class LessonMilestoneDialog extends StatelessWidget {
           child: SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(22.w, 48.h, 22.w, 42.h),
+              padding: EdgeInsets.fromLTRB(22.w, 28.h, 22.w, 42.h),
               child: Column(
                 children: <Widget>[
                   Row(
@@ -343,7 +343,7 @@ class LessonMilestoneDialog extends StatelessWidget {
                         child: Icon(
                           Icons.close_rounded,
                           color: AppColors.white,
-                          size: 40.w,
+                          size: 22.w,
                         ),
                       ),
                       Expanded(
@@ -351,8 +351,8 @@ class LessonMilestoneDialog extends StatelessWidget {
                           'Milestone Reached',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: AppFont.font30.sp,
-                            fontWeight: FontWeight.w900,
+                            fontSize: AppFont.font16.sp,
+                            fontWeight: FontWeight.w800,
                             color: AppColors.white,
                           ),
                         ),
@@ -360,7 +360,7 @@ class LessonMilestoneDialog extends StatelessWidget {
                       SizedBox(width: 40.w),
                     ],
                   ),
-                  SizedBox(height: 26.h),
+                  SizedBox(height: 22.h),
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 38.h),
@@ -375,8 +375,8 @@ class LessonMilestoneDialog extends StatelessWidget {
                         Text(
                           '🇮🇹  ${complete.appName}',
                           style: TextStyle(
-                            fontSize: AppFont.font22.sp,
-                            fontWeight: FontWeight.w900,
+                            fontSize: AppFont.font16.sp,
+                            fontWeight: FontWeight.w800,
                             color: AppColors.primaryGreen,
                           ),
                         ),
@@ -384,22 +384,22 @@ class LessonMilestoneDialog extends StatelessWidget {
                         Text(
                           complete.headline,
                           style: TextStyle(
-                            fontSize: AppFont.font56.sp,
+                            fontSize: AppFont.font44.sp,
                             fontWeight: FontWeight.w900,
                             color: AppColors.primaryGreen,
                             height: 1,
                           ),
                         ),
-                        SizedBox(height: 18.h),
+                        SizedBox(height: 16.h),
                         Text(
                           'You completed ${complete.chapterTitle}!',
                           style: TextStyle(
-                            fontSize: AppFont.font26.sp,
+                            fontSize: AppFont.font18.sp,
                             fontWeight: FontWeight.w500,
                             color: AppColors.bodyText,
                           ),
                         ),
-                        SizedBox(height: 22.h),
+                        SizedBox(height: 18.h),
                         Wrap(
                           alignment: WrapAlignment.center,
                           spacing: 14.w,
@@ -418,42 +418,41 @@ class LessonMilestoneDialog extends StatelessWidget {
                             ),
                           ],
                         ),
-                        SizedBox(height: 32.h),
+                        SizedBox(height: 28.h),
                         SizedBox(
                           width: 296.w,
                           child: CustomButton(
                             onPressed: onCloseTap,
                             text: 'Join the Italian journey!',
-                            height: 58,
+                            height: 44,
                             width: double.infinity,
-                            showShadow: true,
+                            showShadow: false,
+                            textSize: AppFont.font14,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 46.h),
+                  SizedBox(height: 20.h),
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.fromLTRB(36.w, 34.h, 36.w, 38.h),
+                    padding: EdgeInsets.fromLTRB(32.w, 24.h, 32.w, 24.h),
                     decoration: BoxDecoration(
                       color: AppColors.white,
-                      borderRadius: BorderRadius.circular(
-                        kLessonMilestoneDialogRadius.r,
-                      ),
+                      borderRadius: BorderRadius.circular(9999.r),
                     ),
                     child: Column(
                       children: <Widget>[
                         Text(
                           'SHARE YOUR VICTORY',
                           style: TextStyle(
-                            fontSize: AppFont.font16.sp,
-                            fontWeight: FontWeight.w900,
+                            fontSize: AppFont.font11.sp,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.bodyText,
-                            letterSpacing: 3,
+                            letterSpacing: 1.2,
                           ),
                         ),
-                        SizedBox(height: 34.h),
+                        SizedBox(height: 14.h),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: const <Widget>[
@@ -503,8 +502,8 @@ class _MilestoneChip extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: AppFont.font16.sp,
-          fontWeight: FontWeight.w900,
+          fontSize: AppFont.font14.sp,
+          fontWeight: FontWeight.w700,
           color: textColor,
         ),
       ),
@@ -520,13 +519,13 @@ class _ShareCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 78.w,
-      height: 78.w,
+      width: 56.w,
+      height: 56.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.primaryGreen, width: 4.w),
+        border: Border.all(color: AppColors.primaryGreen, width: 3.w),
       ),
-      child: Icon(icon, color: AppColors.primaryGreen, size: 34.w),
+      child: Icon(icon, color: AppColors.primaryGreen, size: 28.w),
     );
   }
 }

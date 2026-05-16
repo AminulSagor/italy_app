@@ -15,7 +15,8 @@ class WebinarController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final Rxn<WebinarModel> webinar = Rxn<WebinarModel>();
-  final RxList<WebinarLiveChatModel> liveMessages = <WebinarLiveChatModel>[].obs;
+  final RxList<WebinarLiveChatModel> liveMessages =
+      <WebinarLiveChatModel>[].obs;
   final RxBool isParticipating = false.obs;
   final RxBool isChatFocused = false.obs;
   final RxBool isTalking = false.obs;
@@ -24,6 +25,14 @@ class WebinarController extends GetxController {
   final RxBool isLiveVideoAlt = false.obs;
 
   final TextEditingController chatTextController = TextEditingController();
+
+  List<WebinarLiveChatModel> get latestStageMessages {
+    if (liveMessages.length <= 3) return liveMessages.toList(growable: false);
+    return liveMessages
+        .sublist(liveMessages.length - 3)
+        .toList(growable: false);
+  }
+
   Timer? _chatTimer;
   int _chatIndex = 0;
 

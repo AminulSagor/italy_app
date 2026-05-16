@@ -35,7 +35,7 @@ class WebinarBackButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(Icons.arrow_back_rounded, color: iconColor, size: 26.w),
+        child: Icon(Icons.arrow_back_rounded, color: iconColor, size: 24.w),
       ),
     );
   }
@@ -63,8 +63,8 @@ class WebinarPageHeader extends StatelessWidget {
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: AppFont.font22.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font18.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.primaryGreen,
             ),
           ),
@@ -79,7 +79,11 @@ class WebinarTeacherImage extends StatelessWidget {
   final bool alt;
   final double borderRadius;
 
-  const WebinarTeacherImage({super.key, this.alt = false, required this.borderRadius});
+  const WebinarTeacherImage({
+    super.key,
+    this.alt = false,
+    required this.borderRadius,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -91,24 +95,15 @@ class WebinarTeacherImage extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: <Color>[
             alt ? AppColors.webinarVideoAltTop : AppColors.webinarVideoTop,
-            alt ? AppColors.webinarVideoAltBottom : AppColors.webinarVideoBottom,
+            alt
+                ? AppColors.webinarVideoAltBottom
+                : AppColors.webinarVideoBottom,
           ],
         ),
       ),
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              height: alt ? 90.h : 74.h,
-              margin: EdgeInsets.only(top: 10.h),
-              decoration: BoxDecoration(
-                color: AppColors.black.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(18.r),
-              ),
-            ),
-          ),
           Align(
             alignment: alt ? Alignment.center : Alignment.center,
             child: Icon(
@@ -117,6 +112,7 @@ class WebinarTeacherImage extends StatelessWidget {
               size: alt ? 168.w : 148.w,
             ),
           ),
+          Image.asset('assets/decor_png/webinar.png'),
           DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(borderRadius.r),
@@ -142,7 +138,7 @@ class WebinarLiveBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: AppColors.webinarLiveRed,
         borderRadius: BorderRadius.circular(kHomePillRadius.r),
@@ -151,19 +147,19 @@ class WebinarLiveBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(
-            width: 8.w,
-            height: 8.w,
+            width: 6.w,
+            height: 6.w,
             decoration: const BoxDecoration(
               color: AppColors.white,
               shape: BoxShape.circle,
             ),
           ),
-          SizedBox(width: 6.w),
+          SizedBox(width: 4.w),
           Text(
             'LIVE',
             style: TextStyle(
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font10.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.white,
             ),
           ),

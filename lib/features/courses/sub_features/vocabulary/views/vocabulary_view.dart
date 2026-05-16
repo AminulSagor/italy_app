@@ -38,37 +38,38 @@ class VocabularyView extends GetView<VocabularyController> {
             return const SizedBox.shrink();
           }
 
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              kVocabularyHorizontalPadding.w,
-              34.h,
-              kVocabularyHorizontalPadding.w,
-              48.h,
-            ),
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 26.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                _VocabularyHeader(
-                  title: session.title,
-                  cardLabel:
-                      'Card ${controller.currentCardNumber} of ${controller.totalCards}',
-                  onBackTap: controller.showExitConfirmation,
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _VocabularyHeader(
+                        title: session.title,
+                        cardLabel:
+                            'Card ${controller.currentCardNumber} of ${controller.totalCards}',
+                        onBackTap: controller.showExitConfirmation,
+                      ),
+                      SizedBox(height: 26.h),
+                      _VocabularyProgressBar(value: controller.progressValue),
+                      SizedBox(height: 30.h),
+                      _VocabularyFlashCard(
+                        card: card,
+                        isRevealed: controller.isRevealed.value,
+                        onTap: controller.flipCard,
+                      ),
+                    ],
+                  ),
                 ),
-                SizedBox(height: 26.h),
-                _VocabularyProgressBar(value: controller.progressValue),
-                SizedBox(height: 30.h),
-                _VocabularyFlashCard(
-                  card: card,
-                  isRevealed: controller.isRevealed.value,
-                  onTap: controller.flipCard,
-                ),
-                SizedBox(height: 70.h),
+                Spacer(),
                 _VocabularyStats(
                   streakDays: session.streakDays,
                   level: session.level,
                 ),
-                SizedBox(height: 40.h),
+                SizedBox(height: 30.h),
                 if (controller.isRevealed.value)
                   _VocabularyRevealedActions(
                     onStudyAgainTap: controller.studyAgain,
@@ -80,6 +81,7 @@ class VocabularyView extends GetView<VocabularyController> {
                     text: 'Reveal Answer',
                     icon: Icons.visibility_outlined,
                   ),
+                SizedBox(height: 20.h),
               ],
             ),
           );
@@ -188,6 +190,7 @@ class _VocabularyFlashCard extends StatelessWidget {
               transform: Matrix4.identity()..rotateY(showBack ? math.pi : 0),
               child: Container(
                 width: double.infinity,
+                height: 440.h,
                 padding: EdgeInsets.all(30.w),
                 decoration: BoxDecoration(
                   color: AppColors.white,
@@ -351,7 +354,7 @@ class _VocabularyBackSide extends StatelessWidget {
             color: AppColors.bodyText,
           ),
         ),
-        SizedBox(height: 80.h),
+        SizedBox(height: 110.h),
       ],
     );
   }
@@ -453,12 +456,12 @@ class _VocabularyRevealedActions extends StatelessWidget {
             borderRadius: kRadius42,
           ),
         ),
-        SizedBox(width: 20.w),
+        SizedBox(width: 16.w),
         Expanded(
           child: CustomButton.primary(
             textSize: 14.sp,
             onPressed: onKnownTap,
-            text: 'I Know This',
+            text: 'I Know\nThis',
             icon: Icons.check_circle_rounded,
             borderRadius: kRadius42,
           ),

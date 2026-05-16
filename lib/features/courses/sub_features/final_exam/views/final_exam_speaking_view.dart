@@ -46,14 +46,14 @@ class FinalExamSpeakingView extends GetView<FinalExamController> {
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(28.w, 34.h, 28.w, 132.h),
+            padding: EdgeInsets.fromLTRB(24.w, 10.h, 24.w, 80.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 _SpeakingHeader(taskTitle: task.title),
-                SizedBox(height: 32.h),
+                SizedBox(height: 24.h),
                 _SpeakingTaskCard(task: task),
-                SizedBox(height: 34.h),
+                SizedBox(height: 24.h),
                 _RecordingCard(
                   isRecording: controller.isRecording.value,
                   hasRecording: controller.hasRecording.value,
@@ -66,7 +66,7 @@ class FinalExamSpeakingView extends GetView<FinalExamController> {
                   onResetTap: controller.resetRecording,
                   onPlayTap: controller.toggleRecordedAudio,
                 ),
-                SizedBox(height: 28.h),
+                SizedBox(height: 24.h),
                 _SpeakingTip(text: task.tip),
               ],
             ),
@@ -90,21 +90,25 @@ class _SpeakingHeader extends StatelessWidget {
           children: <Widget>[
             GestureDetector(
               onTap: () => Get.back<void>(),
-              child: Icon(Icons.arrow_back_rounded, color: AppColors.primaryGreen, size: 28.w),
+              child: Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.primaryGreen,
+                size: 22.w,
+              ),
             ),
             SizedBox(width: 12.w),
             Expanded(
               child: Text(
                 taskTitle,
                 style: TextStyle(
-                  fontSize: AppFont.font18.sp,
+                  fontSize: AppFont.font16.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.homePrimaryText,
                 ),
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               decoration: BoxDecoration(
                 color: AppColors.modalBorderGrey,
                 borderRadius: BorderRadius.circular(kHomePillRadius.r),
@@ -112,7 +116,7 @@ class _SpeakingHeader extends StatelessWidget {
               child: Text(
                 '⏱ 28:05',
                 style: TextStyle(
-                  fontSize: AppFont.font18.sp,
+                  fontSize: AppFont.font14.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.homePrimaryText,
                 ),
@@ -124,14 +128,17 @@ class _SpeakingHeader extends StatelessWidget {
         Row(
           children: <Widget>[
             Text(
-              '1/5',
-              style: TextStyle(fontSize: AppFont.font18.sp, color: AppColors.bodyText),
+              '1/4',
+              style: TextStyle(
+                fontSize: AppFont.font14.sp,
+                color: AppColors.bodyText,
+              ),
             ),
             const Spacer(),
             Text(
               '80%',
               style: TextStyle(
-                fontSize: AppFont.font18.sp,
+                fontSize: AppFont.font14.sp,
                 fontWeight: FontWeight.w900,
                 color: AppColors.primaryGreen,
               ),
@@ -143,7 +150,8 @@ class _SpeakingHeader extends StatelessWidget {
           borderRadius: BorderRadius.circular(kHomePillRadius.r),
           child: LinearProgressIndicator(
             value: 0.8,
-            minHeight: 14.h,
+            minHeight: 12.h,
+            borderRadius: BorderRadius.circular(9999.r),
             color: AppColors.primaryGreen,
             backgroundColor: AppColors.quizProgressTrack,
           ),
@@ -162,7 +170,7 @@ class _SpeakingTaskCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(26.w),
+      padding: EdgeInsets.all(22.w),
       decoration: BoxDecoration(
         color: AppColors.homeSoftGreen,
         borderRadius: BorderRadius.circular(kRadius34.r),
@@ -171,12 +179,19 @@ class _SpeakingTaskCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            width: 58.w,
-            height: 58.w,
-            decoration: const BoxDecoration(color: AppColors.white, shape: BoxShape.circle),
-            child: Icon(Icons.mic_rounded, color: AppColors.primaryGreen, size: 36.w),
+            width: 40.w,
+            height: 40.w,
+            decoration: const BoxDecoration(
+              color: AppColors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.mic_rounded,
+              color: AppColors.primaryGreen,
+              size: 25.w,
+            ),
           ),
-          SizedBox(width: 24.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,28 +199,28 @@ class _SpeakingTaskCard extends StatelessWidget {
                 Text(
                   task.taskTitle,
                   style: TextStyle(
-                    fontSize: AppFont.font26.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font18.sp,
+                    fontWeight: FontWeight.w700,
                     height: 1.2,
                     color: AppColors.homePrimaryText,
                   ),
                 ),
-                SizedBox(height: 24.h),
+                SizedBox(height: 8.h),
                 Text(
                   task.instruction,
                   style: TextStyle(
-                    fontSize: AppFont.font20.sp,
-                    fontWeight: FontWeight.w500,
-                    height: 1.35,
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w400,
+                    height: 1.55,
                     color: AppColors.bodyText,
                   ),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 8.h),
                 Text(
                   task.banglaInstruction,
                   style: TextStyle(
-                    fontSize: AppFont.font17.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w300,
                     height: 1.55,
                     color: AppColors.primaryGreen,
                   ),
@@ -250,7 +265,7 @@ class _RecordingCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(24.w, 44.h, 24.w, 34.h),
+      padding: EdgeInsets.all(33.w),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(kRadius34.r),
@@ -270,7 +285,7 @@ class _RecordingCard extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.primaryGreen, width: 6.w),
+              border: Border.all(color: AppColors.primaryGreen, width: 8.w),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -278,19 +293,25 @@ class _RecordingCard extends StatelessWidget {
                 Text(
                   '00:$seconds',
                   style: TextStyle(
-                    fontSize: AppFont.font36.sp,
+                    fontSize: AppFont.font32.sp,
                     fontWeight: FontWeight.w900,
                     color: AppColors.homePrimaryText,
                   ),
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  isRecording ? '● RECORDING...' : hasRecording ? 'RECORDED' : 'READY',
+                  isRecording
+                      ? '● RECORDING...'
+                      : hasRecording
+                      ? 'RECORDED'
+                      : 'READY',
                   style: TextStyle(
-                    fontSize: AppFont.font13.sp,
+                    fontSize: AppFont.font12.sp,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.4,
-                    color: isRecording ? AppColors.blockDangerRed : AppColors.bodyText,
+                    color: isRecording
+                        ? AppColors.blockDangerRed
+                        : AppColors.bodyText,
                   ),
                 ),
               ],
@@ -298,9 +319,15 @@ class _RecordingCard extends StatelessWidget {
           ),
           SizedBox(height: 34.h),
           if (isRecording)
-            FinalExamRecorderWaveform(recorderController: recorderController, height: 92)
+            FinalExamRecorderWaveform(
+              recorderController: recorderController,
+              height: 92,
+            )
           else if (hasRecording)
-            FinalExamPlayerWaveform(playerController: playerController, height: 92)
+            FinalExamPlayerWaveform(
+              playerController: playerController,
+              height: 92,
+            )
           else
             _IdleWaveform(),
           SizedBox(height: 34.h),
@@ -312,17 +339,23 @@ class _RecordingCard extends StatelessWidget {
                 onLongPressStart: (_) => onRecordStart(),
                 onLongPressEnd: (_) => onRecordEnd(),
                 child: Container(
-                  width: 126.w,
-                  height: 126.w,
+                  width: 100.w,
+                  height: 100.w,
                   decoration: const BoxDecoration(
                     color: AppColors.primaryGreen,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.mic_rounded, color: AppColors.white, size: 58.w),
+                  child: Icon(
+                    Icons.mic_rounded,
+                    color: AppColors.white,
+                    size: 50.w,
+                  ),
                 ),
               ),
               _RoundControl(
-                icon: isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                icon: isPlaying
+                    ? Icons.pause_rounded
+                    : Icons.play_arrow_rounded,
                 onTap: onPlayTap,
               ),
             ],
@@ -331,15 +364,15 @@ class _RecordingCard extends StatelessWidget {
           Text(
             'HOLD TO RECORD',
             style: TextStyle(
-              fontSize: AppFont.font14.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font12.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.homePrimaryText,
             ),
           ),
           Text(
             'চেপে ধরে কথা বলুন',
             style: TextStyle(
-              fontSize: AppFont.font12.sp,
+              fontSize: AppFont.font10.sp,
               color: AppColors.bodyText,
             ),
           ),
@@ -352,7 +385,7 @@ class _RecordingCard extends StatelessWidget {
 class _IdleWaveform extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final List<double> heights = <double>[18, 34, 52, 78, 64, 30, 58, 22, 44, 72];
+    final List<double> heights = <double>[18, 34, 52, 78, 64, 30, 58, 22];
     return SizedBox(
       height: 92.h,
       child: Row(
@@ -363,7 +396,9 @@ class _IdleWaveform extends StatelessWidget {
             height: item.h,
             margin: EdgeInsets.symmetric(horizontal: 6.w),
             decoration: BoxDecoration(
-              color: AppColors.primaryGreen.withValues(alpha: item > 60 ? 1 : 0.42),
+              color: AppColors.primaryGreen.withValues(
+                alpha: item > 60 ? 1 : 0.42,
+              ),
               borderRadius: BorderRadius.circular(kRadius10.r),
             ),
           );
@@ -384,8 +419,8 @@ class _RoundControl extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 62.w,
-        height: 62.w,
+        width: 50.w,
+        height: 50.w,
         decoration: BoxDecoration(
           color: AppColors.legacyColorFFF1F2F2,
           shape: BoxShape.circle,
@@ -412,28 +447,32 @@ class _SpeakingTip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 18.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(kRadius28.r),
+        borderRadius: BorderRadius.circular(999.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
-            blurRadius: 0,
-            offset: Offset(0, 5.h),
+            blurRadius: 2,
+            offset: Offset(0, 1.h),
           ),
         ],
       ),
       child: Row(
         children: <Widget>[
-          Icon(Icons.lightbulb_rounded, color: AppColors.vocabularyOrangeShadow, size: 26.w),
+          Icon(
+            Icons.lightbulb_rounded,
+            color: AppColors.vocabularyOrangeShadow,
+            size: 14.w,
+          ),
           SizedBox(width: 14.w),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
-                fontSize: AppFont.font16.sp,
-                fontWeight: FontWeight.w500,
+                fontSize: AppFont.font12.sp,
+                fontWeight: FontWeight.w400,
                 color: AppColors.bodyText,
                 height: 1.2,
               ),

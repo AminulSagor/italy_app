@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -43,8 +45,14 @@ class CourseCertificateController extends GetxController {
     }
 
     Get.dialog<void>(
-      CourseCertificateShareDialog(certificate: data),
-      barrierColor: AppColors.black.withValues(alpha: 0.42),
+      BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          color: AppColors.black.withValues(alpha: 0.15),
+          child: CourseCertificateShareDialog(certificate: data),
+        ),
+      ),
+      barrierColor: Colors.transparent,
       useSafeArea: false,
     );
   }

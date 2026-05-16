@@ -41,79 +41,69 @@ class ProPurchaseSuccessView extends GetView<ProCheckoutController> {
     return Material(
       color: AppColors.coursesDetailBg,
       child: SafeArea(
-        bottom: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24.w, 40.h, 24.w, 58.h),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.sizeOf(context).height -
-                  MediaQuery.paddingOf(context).top -
-                  98.h,
-            ),
-            child: Column(
-              children: <Widget>[
-                SizedBox(
-                  height: 58.h,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: GestureDetector(
-                          onTap: _backToCourse,
-                          child: Icon(
-                            Icons.close_rounded,
-                            color: AppColors.bodyText,
-                            size: 32.w,
-                          ),
-                        ),
+          padding: EdgeInsets.fromLTRB(24.w, 0.h, 24.w, 58.h),
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: 16.h),
+              Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: _backToCourse,
+                      child: Icon(
+                        Icons.close_rounded,
+                        color: AppColors.bodyText,
+                        size: 22.w,
                       ),
-                      Text(
-                        'Course Unlocked',
-                        style: TextStyle(
-                          fontSize: AppFont.font24.sp,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.primaryGreen,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 86.h),
-                const _SuccessHeroIcon(),
-                SizedBox(height: 64.h),
-                Text(
-                  result.title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: AppFont.font48.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.homePrimaryText,
-                    height: 1.06,
+                  Text(
+                    'Course Unlocked',
+                    style: TextStyle(
+                      fontSize: AppFont.font16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryGreen,
+                    ),
                   ),
+                ],
+              ),
+              SizedBox(height: 48.h),
+              const _SuccessHeroIcon(),
+              SizedBox(height: 30.h),
+              Text(
+                result.title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: AppFont.font36.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.homePrimaryText,
+                  height: 1.06,
                 ),
-                SizedBox(height: 72.h),
-                Text(
-                  result.description,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: AppFont.font24.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.bodyText,
-                    height: 1.55,
-                  ),
+              ),
+              SizedBox(height: 40.h),
+              Text(
+                result.description,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: AppFont.font18.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.bodyText,
+                  height: 1.55,
                 ),
-                SizedBox(height: 54.h),
-                _OrderStatusCard(result: result),
-                SizedBox(height: 94.h),
-                CustomButton.primary(
-                  text: result.buttonLabel,
-                  icon: Icons.play_arrow_rounded,
-                  onPressed: _backToCourse,
-                ),
-              ],
-            ),
+              ),
+              SizedBox(height: 40.h),
+              _OrderStatusCard(result: result),
+              SizedBox(height: 40.h),
+              CustomButton.primary(
+                text: result.buttonLabel,
+                icon: Icons.play_arrow_rounded,
+                onPressed: _backToCourse,
+              ),
+            ],
           ),
         ),
       ),
@@ -127,8 +117,8 @@ class _SuccessHeroIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 210.w,
-      height: 210.w,
+      width: 180.w,
+      height: 180.w,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -144,7 +134,7 @@ class _SuccessHeroIcon extends StatelessWidget {
       ),
       child: Icon(
         Icons.verified_rounded,
-        size: 82.w,
+        size: 60.w,
         color: AppColors.primaryGreen,
       ),
     );
@@ -160,7 +150,7 @@ class _OrderStatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 28.h),
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(kRadius30.r),
         border: Border.all(
@@ -178,18 +168,18 @@ class _OrderStatusCard extends StatelessWidget {
                 Text(
                   'ORDER ID',
                   style: TextStyle(
-                    fontSize: AppFont.font14.sp,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.8,
+                    fontSize: AppFont.font10.sp,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
                     color: AppColors.bodyText,
                   ),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 4.h),
                 Text(
                   result.orderId,
                   style: TextStyle(
-                    fontSize: AppFont.font22.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.homePrimaryText,
                   ),
                 ),
@@ -197,27 +187,27 @@ class _OrderStatusCard extends StatelessWidget {
             ),
           ),
           Container(
-            width: 1.5.w,
+            width: 1.w,
             height: 42.h,
             color: AppColors.quizProgressTrack,
           ),
-          SizedBox(width: 22.w),
+          SizedBox(width: 16.w),
           Container(
-            width: 12.w,
-            height: 12.w,
+            width: 8.w,
+            height: 8.w,
             decoration: const BoxDecoration(
               color: AppColors.primaryGreen,
               shape: BoxShape.circle,
             ),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 6.w),
           Flexible(
             child: Text(
               result.statusLabel,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: AppFont.font20.sp,
+                fontSize: AppFont.font12.sp,
                 fontWeight: FontWeight.w900,
                 color: AppColors.homePrimaryText,
               ),

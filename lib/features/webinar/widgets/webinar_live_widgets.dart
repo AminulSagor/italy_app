@@ -28,21 +28,25 @@ class WebinarLiveHeader extends StatelessWidget {
       children: <Widget>[
         GestureDetector(
           onTap: onBackTap,
-          child: Icon(Icons.arrow_back_rounded, color: AppColors.homePrimaryText, size: 34.w),
+          child: Icon(
+            Icons.arrow_back_rounded,
+            color: AppColors.homePrimaryText,
+            size: 24.w,
+          ),
         ),
-        SizedBox(width: 36.w),
+        SizedBox(width: 22.w),
         Expanded(
           child: Text(
             webinar.liveTitle,
             style: TextStyle(
-              fontSize: AppFont.font34.sp,
-              fontWeight: FontWeight.w500,
+              fontSize: AppFont.font18.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.homePrimaryText,
             ),
           ),
         ),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 10.h),
+          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 4.h),
           decoration: BoxDecoration(
             color: AppColors.webinarViewerBadge,
             borderRadius: BorderRadius.circular(kHomePillRadius.r),
@@ -50,8 +54,8 @@ class WebinarLiveHeader extends StatelessWidget {
           child: Text(
             '${webinar.watchingCount} Watching',
             style: TextStyle(
-              fontSize: AppFont.font22.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font14.sp,
+              fontWeight: FontWeight.w600,
               color: AppColors.primaryGreen,
             ),
           ),
@@ -102,7 +106,7 @@ class WebinarVideoCard extends StatelessWidget {
               bottom: showTopHostChip ? null : 34.h,
               top: showTopHostChip ? 20.h : null,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
                 decoration: BoxDecoration(
                   color: showTopHostChip
                       ? AppColors.webinarHostChipBg
@@ -114,8 +118,8 @@ class WebinarVideoCard extends StatelessWidget {
                   children: <Widget>[
                     if (showTopHostChip) ...<Widget>[
                       Container(
-                        width: 11.w,
-                        height: 11.w,
+                        width: 8.w,
+                        height: 8.w,
                         decoration: const BoxDecoration(
                           color: AppColors.webinarViewerBadge,
                           shape: BoxShape.circle,
@@ -128,14 +132,22 @@ class WebinarVideoCard extends StatelessWidget {
                           ? 'Host: ${webinar.hostName}'
                           : 'Host: ${webinar.hostName}',
                       style: TextStyle(
-                        fontSize: showTopHostChip ? AppFont.font20.sp : AppFont.font22.sp,
-                        fontWeight: showTopHostChip ? FontWeight.w500 : FontWeight.w900,
-                        color: showTopHostChip ? AppColors.white : AppColors.black,
+                        fontSize: AppFont.font12.sp,
+                        fontWeight: showTopHostChip
+                            ? FontWeight.w500
+                            : FontWeight.w900,
+                        color: showTopHostChip
+                            ? AppColors.white
+                            : AppColors.black,
                       ),
                     ),
                     if (!showTopHostChip) ...<Widget>[
                       SizedBox(width: 10.w),
-                      Icon(Icons.verified_rounded, color: AppColors.primaryGreen, size: 24.w),
+                      Icon(
+                        Icons.verified_rounded,
+                        color: AppColors.primaryGreen,
+                        size: 18.w,
+                      ),
                     ],
                   ],
                 ),
@@ -166,8 +178,8 @@ class _VideoControlIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 58.w,
-      height: 58.w,
+      width: 40.w,
+      height: 40.w,
       decoration: BoxDecoration(
         color: AppColors.black.withValues(alpha: 0.45),
         shape: BoxShape.circle,
@@ -196,7 +208,7 @@ class WebinarRequestButton extends StatelessWidget {
       onPressed: onTap,
       text: text,
       icon: icon,
-      textSize: AppFont.font24,
+      textSize: AppFont.font16,
     );
   }
 }
@@ -221,8 +233,8 @@ class WebinarLiveChatSection extends StatelessWidget {
             Text(
               'Live Chat',
               style: TextStyle(
-                fontSize: AppFont.font30.sp,
-                fontWeight: FontWeight.w900,
+                fontSize: AppFont.font20.sp,
+                fontWeight: FontWeight.w600,
                 color: AppColors.homePrimaryText,
               ),
             ),
@@ -232,14 +244,18 @@ class WebinarLiveChatSection extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: compact
-                ? math.min(controller.liveMessages.length, 4)
+                ? math.min(controller.liveMessages.length, 3)
                 : math.min(controller.liveMessages.length, 8),
-            separatorBuilder: (_, __) => SizedBox(height: compact ? 12.h : 20.h),
+            separatorBuilder: (_, __) =>
+                SizedBox(height: compact ? 12.h : 20.h),
             itemBuilder: (_, int index) {
               final int start = compact
-                  ? math.max(0, controller.liveMessages.length - 4)
+                  ? math.max(0, controller.liveMessages.length - 3)
                   : math.max(0, controller.liveMessages.length - 8);
-              return WebinarChatBubble(message: controller.liveMessages[start + index], compact: compact);
+              return WebinarChatBubble(
+                message: controller.liveMessages[start + index],
+                compact: compact,
+              );
             },
           ),
         ],
@@ -265,14 +281,16 @@ class WebinarChatBubble extends StatelessWidget {
       2 => AppColors.webinarAccentOrange,
       _ => AppColors.webinarAccentBlue,
     };
-    final Color textColor = message.colorIndex == 1 ? AppColors.white : AppColors.primaryGreen;
+    final Color textColor = message.colorIndex == 1
+        ? AppColors.white
+        : AppColors.primaryGreen;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          width: compact ? 42.w : 56.w,
-          height: compact ? 42.w : 56.w,
+          width: compact ? 40.w : 40.w,
+          height: compact ? 40.w : 40.w,
           decoration: BoxDecoration(
             color: avatarColor,
             shape: BoxShape.circle,
@@ -284,7 +302,7 @@ class WebinarChatBubble extends StatelessWidget {
             child: Text(
               message.initials,
               style: TextStyle(
-                fontSize: compact ? AppFont.font13.sp : AppFont.font18.sp,
+                fontSize: AppFont.font14.sp,
                 fontWeight: FontWeight.w900,
                 color: textColor,
               ),
@@ -294,10 +312,14 @@ class WebinarChatBubble extends StatelessWidget {
         SizedBox(width: 20.w),
         Expanded(
           child: Container(
-            padding: EdgeInsets.fromLTRB(22.w, 18.h, 22.w, 18.h),
+            padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: AppColors.webinarChatBubble.withValues(alpha: compact ? 0.58 : 1),
-              borderRadius: BorderRadius.circular(compact ? kRadius22.r : kRadius28.r),
+              color: AppColors.webinarChatBubble.withValues(
+                alpha: compact ? 0.58 : 1,
+              ),
+              borderRadius: BorderRadius.circular(
+                compact ? kRadius22.r : kRadius28.r,
+              ),
               border: message.isHost && !compact
                   ? Border.all(color: AppColors.webinarHostBorder, width: 2.w)
                   : null,
@@ -322,25 +344,33 @@ class WebinarChatBubble extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: compact ? AppFont.font14.sp : AppFont.font17.sp,
+                          fontSize: AppFont.font12.sp,
                           fontWeight: FontWeight.w900,
-                          color: message.isHost ? AppColors.primaryGreen : AppColors.bodyText,
+                          color: message.isHost
+                              ? AppColors.primaryGreen
+                              : AppColors.bodyText,
                         ),
                       ),
                     ),
                     if (message.isHost) ...<Widget>[
-                      SizedBox(width: 10.w),
-                      Icon(Icons.verified_rounded, color: AppColors.primaryGreen, size: 18.w),
+                      SizedBox(width: 8.w),
+                      Icon(
+                        Icons.verified_rounded,
+                        color: AppColors.primaryGreen,
+                        size: 18.w,
+                      ),
                     ],
                   ],
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 6.h),
                 Text(
                   message.message,
                   style: TextStyle(
-                    fontSize: compact ? AppFont.font16.sp : AppFont.font23.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.homePrimaryText.withValues(alpha: compact ? 0.68 : 1),
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.homePrimaryText.withValues(
+                      alpha: compact ? 0.68 : 1,
+                    ),
                     height: 1.38,
                   ),
                 ),
@@ -362,10 +392,10 @@ class WebinarChatInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: kWebinarChatInputHeight.h,
-      padding: EdgeInsets.only(left: 28.w, right: 8.w),
+      padding: EdgeInsets.only(left: 24.w, right: 8.w),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(kHomePillRadius.r),
+        borderRadius: BorderRadius.circular(999.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
@@ -383,13 +413,13 @@ class WebinarChatInput extends StatelessWidget {
                 border: InputBorder.none,
                 hintText: 'Type a message...',
                 hintStyle: TextStyle(
-                  fontSize: AppFont.font22.sp,
+                  fontSize: AppFont.font16.sp,
                   fontWeight: FontWeight.w500,
                   color: AppColors.proHintText,
                 ),
               ),
               style: TextStyle(
-                fontSize: AppFont.font18.sp,
+                fontSize: AppFont.font16.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.homePrimaryText,
               ),
@@ -398,225 +428,20 @@ class WebinarChatInput extends StatelessWidget {
           GestureDetector(
             onTap: controller.sendMessage,
             child: Container(
-              width: 58.w,
-              height: 58.w,
+              width: 48.w,
+              height: 48.w,
               decoration: const BoxDecoration(
                 color: AppColors.primaryGreen,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.send_rounded, color: AppColors.limeTextColor, size: 28.w),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class WebinarStageArea extends StatelessWidget {
-  final WebinarController controller;
-
-  const WebinarStageArea({super.key, required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(
-      () => Container(
-        height: kWebinarStagePanelHeight.h,
-        padding: EdgeInsets.fromLTRB(30.w, 32.h, 30.w, 28.h),
-        decoration: BoxDecoration(
-          color: AppColors.webinarStagePanelBg,
-          borderRadius: BorderRadius.circular(kWebinarStageRadius.r),
-          border: Border.all(
-            color: controller.isTalking.value
-                ? AppColors.webinarHeroBorder
-                : AppColors.webinarStageBorderIdle,
-            width: 3.w,
-          ),
-          boxShadow: controller.isTalking.value
-              ? <BoxShadow>[
-                  BoxShadow(
-                    color: AppColors.webinarStageShadow,
-                    blurRadius: 28.r,
-                    spreadRadius: 4.r,
-                  ),
-                ]
-              : const <BoxShadow>[],
-        ),
-        child: Stack(
-          children: <Widget>[
-            Align(
-              alignment: Alignment.topLeft,
               child: Icon(
-                Icons.bar_chart_rounded,
-                color: AppColors.webinarHeroBorder,
-                size: 48.w,
+                Icons.send_rounded,
+                color: AppColors.limeTextColor,
+                size: 28.w,
               ),
             ),
-            Align(
-              alignment: Alignment.center,
-              child: WebinarLiveChatSection(controller: controller, compact: true),
-            ),
-            Positioned(
-              left: 6.w,
-              bottom: 2.h,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-                decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.88),
-                  borderRadius: BorderRadius.circular(kHomePillRadius.r),
-                ),
-                child: Text(
-                  'Tu (In Diretta)',
-                  style: TextStyle(
-                    fontSize: AppFont.font20.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.black,
-                  ),
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(kWebinarStageRadius.r),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[
-                        AppColors.white.withValues(alpha: 0.05),
-                        AppColors.white.withValues(alpha: 0.46),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class WebinarStageControls extends StatelessWidget {
-  final WebinarController controller;
-
-  const WebinarStageControls({super.key, required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(
-      () => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          GestureDetector(
-            onLongPressStart: (_) => controller.startTalking(),
-            onLongPressEnd: (_) => controller.stopTalking(),
-            onTap: controller.toggleMic,
-            child: _RoundControl(
-              icon: controller.isMicEnabled.value ? Icons.mic_rounded : Icons.mic_off_rounded,
-              isActive: controller.isMicEnabled.value,
-              isLarge: true,
-            ),
-          ),
-          SizedBox(width: 26.w),
-          GestureDetector(
-            onTap: controller.toggleCamera,
-            child: _RoundControl(
-              icon: controller.isCameraEnabled.value ? Icons.videocam_rounded : Icons.videocam_off_rounded,
-            ),
-          ),
-          SizedBox(width: 26.w),
-          const _RoundControl(icon: Icons.flip_camera_ios_rounded),
-          SizedBox(width: 26.w),
-          GestureDetector(
-            onTap: controller.openChatMode,
-            child: const _RoundControl(icon: Icons.chat_bubble_outline_rounded),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _RoundControl extends StatelessWidget {
-  final IconData icon;
-  final bool isActive;
-  final bool isLarge;
-
-  const _RoundControl({
-    required this.icon,
-    this.isActive = false,
-    this.isLarge = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final double size = isLarge ? 80 : kWebinarControlSize;
-    return Container(
-      width: size.w,
-      height: size.w,
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primaryGreen : AppColors.white,
-        shape: BoxShape.circle,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AppColors.homeNeutralShadow,
-            blurRadius: 16.r,
-            offset: Offset(0, 8.h),
-          ),
-        ],
-      ),
-      child: Icon(
-        icon,
-        color: isActive ? AppColors.white : AppColors.black,
-        size: isLarge ? 38.w : 30.w,
-      ),
-    );
-  }
-}
-
-class WebinarLeaveStageButton extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const WebinarLeaveStageButton({super.key, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 76.h,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(kHomePillRadius.r),
-          border: Border.all(color: AppColors.profileWarningBorder, width: 2.w),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: AppColors.homeNeutralShadow,
-              blurRadius: 14.r,
-              offset: Offset(0, 6.h),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(Icons.exit_to_app_rounded, color: AppColors.webinarLeaveRed, size: 28.w),
-            SizedBox(width: 16.w),
-            Text(
-              'Stop and Leave the Stage',
-              style: TextStyle(
-                fontSize: AppFont.font26.sp,
-                fontWeight: FontWeight.w900,
-                color: AppColors.webinarLeaveRed,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

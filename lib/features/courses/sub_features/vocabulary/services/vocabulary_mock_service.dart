@@ -32,24 +32,22 @@ class VocabularyMockService {
       },
     ];
 
-    final List<Map<String, dynamic>> cards = List<Map<String, dynamic>>.generate(
-      45,
-      (int index) {
-        final Map<String, String> item = baseCards[index % baseCards.length];
-        return <String, dynamic>{
-          'id': 'vocab_${index + 1}',
-          'word': item['word'],
-          'languageLabel': 'ITALIAN',
-          'meaning': item['meaning'],
-          'example': item['example'],
-          'hasAudio': true,
-        };
-      },
-    );
+    final List<Map<String, dynamic>> cards =
+        List<Map<String, dynamic>>.generate(9, (int index) {
+          final Map<String, String> item = baseCards[index % baseCards.length];
+          return <String, dynamic>{
+            'id': 'vocab_${index + 1}',
+            'word': item['word'],
+            'languageLabel': 'ITALIAN',
+            'meaning': item['meaning'],
+            'example': item['example'],
+            'hasAudio': true,
+          };
+        });
 
     return VocabularySessionModel.fromJson(<String, dynamic>{
       'title': 'Vocabulary',
-      'currentCardIndex': 8,
+      'currentCardIndex': 0,
       'streakDays': 12,
       'level': 4,
       'cards': cards,

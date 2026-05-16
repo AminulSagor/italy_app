@@ -35,7 +35,7 @@ class FinalExamTopBar extends StatelessWidget {
           child: Icon(
             closeIcon ? Icons.close_rounded : Icons.arrow_back_rounded,
             color: closeIcon ? AppColors.bodyText : AppColors.primaryGreen,
-            size: 30.w,
+            size: 22.w,
           ),
         ),
         SizedBox(width: 18.w),
@@ -44,8 +44,8 @@ class FinalExamTopBar extends StatelessWidget {
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: AppFont.font22.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font16.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.primaryGreen,
             ),
           ),
@@ -53,19 +53,23 @@ class FinalExamTopBar extends StatelessWidget {
         SizedBox(width: 18.w),
         if (timerText != null)
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(
               color: AppColors.modalBorderGrey,
               borderRadius: BorderRadius.circular(kHomePillRadius.r),
             ),
             child: Row(
               children: <Widget>[
-                Icon(Icons.timer_outlined, color: AppColors.primaryGreen, size: 18.w),
+                Icon(
+                  Icons.timer_outlined,
+                  color: AppColors.primaryGreen,
+                  size: 14.w,
+                ),
                 SizedBox(width: 6.w),
                 Text(
                   timerText!,
                   style: TextStyle(
-                    fontSize: AppFont.font18.sp,
+                    fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.primaryGreen,
                   ),
@@ -76,7 +80,11 @@ class FinalExamTopBar extends StatelessWidget {
         else
           GestureDetector(
             onTap: onTrailingTap,
-            child: Icon(trailingIcon, color: AppColors.primaryGreen, size: 30.w),
+            child: Icon(
+              trailingIcon,
+              color: AppColors.primaryGreen,
+              size: 24.w,
+            ),
           ),
       ],
     );
@@ -134,10 +142,10 @@ class FinalExamComponentTile extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 18.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(kRadius34.r),
+        borderRadius: BorderRadius.circular(kRadius32.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
@@ -149,12 +157,12 @@ class FinalExamComponentTile extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Container(
-            width: 54.w,
-            height: 54.w,
+            width: 44.w,
+            height: 44.w,
             decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-            child: Icon(_icon(component.iconName), color: color, size: 30.w),
+            child: Icon(_icon(component.iconName), color: color, size: 22.w),
           ),
-          SizedBox(width: 20.w),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,8 +170,8 @@ class FinalExamComponentTile extends StatelessWidget {
                 Text(
                   component.title,
                   style: TextStyle(
-                    fontSize: AppFont.font20.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w800,
                     color: AppColors.homePrimaryText,
                   ),
                 ),
@@ -171,15 +179,14 @@ class FinalExamComponentTile extends StatelessWidget {
                 Text(
                   component.subtitle,
                   style: TextStyle(
-                    fontSize: AppFont.font15.sp,
-                    fontWeight: FontWeight.w600,
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w400,
                     color: AppColors.bodyText,
                   ),
                 ),
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: AppColors.quizAnswerShadow, size: 34.w),
         ],
       ),
     );
@@ -262,7 +269,6 @@ class AnimatedWaveform extends StatelessWidget {
   }
 }
 
-
 class FinalExamPlayerWaveform extends StatelessWidget {
   final PlayerController playerController;
   final Color color;
@@ -331,7 +337,8 @@ class FinalExamRecorderWaveform extends StatelessWidget {
 }
 
 class ExamInfoTip extends StatelessWidget {
-  final String text;
+  final String? text;
+  final String? subText;
   final Color bg;
   final Color borderColor;
   final Color color;
@@ -339,7 +346,8 @@ class ExamInfoTip extends StatelessWidget {
 
   const ExamInfoTip({
     super.key,
-    required this.text,
+    this.text,
+    this.subText,
     required this.bg,
     required this.borderColor,
     required this.color,
@@ -354,21 +362,41 @@ class ExamInfoTip extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(kRadius32.r),
-        border: Border(left: BorderSide(color: borderColor, width: 6.w)),
+        border: Border(
+          left: BorderSide(color: borderColor, width: 6.w),
+        ),
       ),
       child: Row(
+        crossAxisAlignment: .start,
         children: <Widget>[
-          Icon(icon, color: color, size: 34.w),
+          Icon(icon, color: color, size: 30.w),
           SizedBox(width: 18.w),
           Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: AppFont.font16.sp,
-                height: 1.35,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
+            child: Column(
+              crossAxisAlignment: .start,
+              children: [
+                if (text != null)
+                  Text(
+                    text!,
+                    style: TextStyle(
+                      fontSize: AppFont.font14.sp,
+                      height: 1.3,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                  ),
+                if (text != null && subText != null) SizedBox(height: 4.h),
+                if (subText != null)
+                  Text(
+                    subText!,
+                    style: TextStyle(
+                      fontSize: AppFont.font14.sp,
+                      height: 1.3,
+                      fontWeight: FontWeight.w400,
+                      color: color,
+                    ),
+                  ),
+              ],
             ),
           ),
         ],

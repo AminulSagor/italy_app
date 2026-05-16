@@ -59,37 +59,48 @@ class FinalExamResultView extends GetView<FinalExamController> {
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(28.w, 38.h, 28.w, 132.h),
+            padding: EdgeInsets.fromLTRB(24.w, 10.h, 24.w, 60.h),
             child: Column(
               children: <Widget>[
                 Row(
                   children: <Widget>[
                     GestureDetector(
                       onTap: () => Get.back<void>(),
-                      child: Icon(Icons.arrow_back_rounded, color: AppColors.primaryGreen, size: 26.w),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: AppColors.primaryGreen,
+                        size: 22.w,
+                      ),
                     ),
                     Expanded(
                       child: Text(
                         'Exam Results',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: AppFont.font18.sp,
-                          fontWeight: FontWeight.w900,
+                          fontSize: AppFont.font16.sp,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.primaryGreen,
                         ),
                       ),
                     ),
-                    Icon(Icons.share_outlined, color: AppColors.primaryGreen, size: 24.w),
+                    Icon(
+                      Icons.share_outlined,
+                      color: AppColors.primaryGreen,
+                      size: 22.w,
+                    ),
                   ],
                 ),
-                SizedBox(height: 34.h),
+                SizedBox(height: 18.h),
                 Container(
-                  width: 210.w,
-                  height: 210.w,
+                  width: 200.w,
+                  height: 200.w,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primaryGreen, width: 12.w),
+                    border: Border.all(
+                      color: AppColors.primaryGreen,
+                      width: 10.w,
+                    ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -97,8 +108,8 @@ class FinalExamResultView extends GetView<FinalExamController> {
                       Text(
                         '${result.markPercent}%',
                         style: TextStyle(
-                          fontSize: AppFont.font42.sp,
-                          fontWeight: FontWeight.w900,
+                          fontSize: AppFont.font36.sp,
+                          fontWeight: FontWeight.w800,
                           color: AppColors.primaryGreen,
                         ),
                       ),
@@ -106,26 +117,26 @@ class FinalExamResultView extends GetView<FinalExamController> {
                         'MARK ACHIEVED',
                         style: TextStyle(
                           fontSize: AppFont.font14.sp,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.4,
                           color: AppColors.bodyText,
                         ),
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 46.h),
+                SizedBox(height: 40.h),
                 Text(
                   result.title,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: AppFont.font28.sp,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                     color: AppColors.primaryGreen,
                     height: 1.1,
                   ),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 8.h),
                 Text(
                   result.subtitle,
                   textAlign: TextAlign.center,
@@ -138,14 +149,17 @@ class FinalExamResultView extends GetView<FinalExamController> {
                 ),
                 SizedBox(height: 36.h),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 16.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 32.w,
+                    vertical: 12.h,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(kHomePillRadius.r),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
                         color: AppColors.homeNeutralShadow,
-                        blurRadius: 18.r,
+                        blurRadius: 30.r,
                         offset: Offset(0, 8.h),
                       ),
                     ],
@@ -153,7 +167,7 @@ class FinalExamResultView extends GetView<FinalExamController> {
                   child: Text(
                     '⚡ +${result.xpAwarded} XP Awarded',
                     style: TextStyle(
-                      fontSize: AppFont.font20.sp,
+                      fontSize: AppFont.font18.sp,
                       fontWeight: FontWeight.w900,
                       color: AppColors.homeOrange,
                     ),
@@ -164,9 +178,9 @@ class FinalExamResultView extends GetView<FinalExamController> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 2,
-                  crossAxisSpacing: 28.w,
-                  mainAxisSpacing: 28.h,
-                  childAspectRatio: 0.92,
+                  crossAxisSpacing: 24.w,
+                  mainAxisSpacing: 24.h,
+                  childAspectRatio: 0.84,
                   children: const <Widget>[
                     _ResultStatCard(
                       icon: Icons.description_outlined,
@@ -228,40 +242,40 @@ class _ResultStatCard extends StatelessWidget {
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
-            blurRadius: 18.r,
-            offset: Offset(0, 8.h),
+            blurRadius: 35.r,
+            offset: Offset(0, 15.h),
           ),
         ],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Container(
-            width: 54.w,
-            height: 54.w,
+            width: 48.w,
+            height: 48.w,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(kRadius14.r),
+              borderRadius: BorderRadius.circular(kRadius16.r),
             ),
-            child: Icon(icon, color: color, size: 28.w),
+            child: Icon(icon, color: color, size: 20.w),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 14.h),
           Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: AppFont.font16.sp,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               height: 1.25,
               color: AppColors.bodyText,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 4.h),
           Text(
             value,
             style: TextStyle(
-              fontSize: AppFont.font26.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font24.sp,
+              fontWeight: FontWeight.w800,
               color: AppColors.primaryGreen,
             ),
           ),
@@ -283,7 +297,7 @@ class _TeacherCommentCard extends StatelessWidget {
       padding: EdgeInsets.all(30.w),
       decoration: BoxDecoration(
         color: AppColors.homeSoftGreen,
-        borderRadius: BorderRadius.circular(kRadius34.r),
+        borderRadius: BorderRadius.circular(kRadius48.r),
         border: Border.all(
           color: AppColors.coursesCertificationBorder.withValues(alpha: 0.35),
           width: 2.w,
@@ -294,13 +308,17 @@ class _TeacherCommentCard extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              Icon(Icons.chat_bubble_outline_rounded, color: AppColors.primaryGreen, size: 26.w),
+              Icon(
+                Icons.chat_bubble_outline_rounded,
+                color: AppColors.primaryGreen,
+                size: 22.w,
+              ),
               SizedBox(width: 12.w),
               Text(
                 "Teacher's Comments",
                 style: TextStyle(
                   fontSize: AppFont.font20.sp,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.primaryGreen,
                 ),
               ),
@@ -310,14 +328,17 @@ class _TeacherCommentCard extends StatelessWidget {
           Text(
             '"${result.teacherComment}"',
             style: TextStyle(
-              fontSize: AppFont.font19.sp,
+              fontSize: AppFont.font18.sp,
               fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.w500,
               height: 1.45,
               color: AppColors.homePrimaryText,
             ),
           ),
-          SizedBox(height: 22.h),
-          Divider(color: AppColors.coursesCertificationBorder.withValues(alpha: 0.18)),
+          SizedBox(height: 16.h),
+          Divider(
+            color: AppColors.coursesCertificationBorder.withValues(alpha: 0.18),
+          ),
           SizedBox(height: 16.h),
           Text(
             result.teacherCommentBangla,

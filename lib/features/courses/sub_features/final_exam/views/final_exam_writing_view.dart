@@ -42,7 +42,7 @@ class FinalExamWritingView extends GetView<FinalExamController> {
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(28.w, 38.h, 28.w, 132.h),
+            padding: EdgeInsets.fromLTRB(28.w, 10.h, 28.w, 60.h),
             child: Column(
               children: <Widget>[
                 FinalExamTopBar(
@@ -58,10 +58,13 @@ class FinalExamWritingView extends GetView<FinalExamController> {
                 SizedBox(height: 28.h),
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 22.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 26.w,
+                    vertical: 22.h,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.white,
-                    borderRadius: BorderRadius.circular(kRadius28.r),
+                    borderRadius: BorderRadius.circular(9999.r),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
                         color: AppColors.homeNeutralShadow,
@@ -72,14 +75,18 @@ class FinalExamWritingView extends GetView<FinalExamController> {
                   ),
                   child: Row(
                     children: <Widget>[
-                      Icon(Icons.verified_user_outlined, color: AppColors.primaryGreen, size: 26.w),
-                      SizedBox(width: 16.w),
+                      Icon(
+                        Icons.verified_user_outlined,
+                        color: AppColors.primaryGreen,
+                        size: 20.w,
+                      ),
+                      SizedBox(width: 10.w),
                       Expanded(
                         child: Text(
                           'AI IS MONITORING FOR COPY PASTE ACTIONS.',
                           style: TextStyle(
-                            fontSize: AppFont.font16.sp,
-                            fontWeight: FontWeight.w900,
+                            fontSize: AppFont.font12.sp,
+                            fontWeight: FontWeight.w700,
                             letterSpacing: 1.1,
                             color: AppColors.bodyText,
                           ),
@@ -106,55 +113,61 @@ class _WritingTaskCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(28.w),
+      padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
         color: AppColors.homeSoftGreen,
         borderRadius: BorderRadius.circular(kRadius34.r),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Container(
-            width: 56.w,
-            height: 56.w,
-            decoration: const BoxDecoration(color: AppColors.white, shape: BoxShape.circle),
-            child: Icon(Icons.draw_rounded, color: AppColors.vocabularyOrangeShadow, size: 34.w),
-          ),
-          SizedBox(width: 22.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
+          Row(
+            children: [
+              Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: const BoxDecoration(
+                  color: AppColors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.draw_rounded,
+                  color: AppColors.vocabularyOrangeShadow,
+                  size: 34.w,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Text(
                   task.taskTitle,
                   style: TextStyle(
-                    fontSize: AppFont.font30.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font22.sp,
+                    fontWeight: FontWeight.w800,
                     height: 1.2,
                     color: AppColors.primaryGreen,
                   ),
                 ),
-                SizedBox(height: 24.h),
-                Text(
-                  task.instruction,
-                  style: TextStyle(
-                    fontSize: AppFont.font24.sp,
-                    fontWeight: FontWeight.w500,
-                    height: 1.45,
-                    color: AppColors.homePrimaryText,
-                  ),
-                ),
-                SizedBox(height: 18.h),
-                Text(
-                  task.banglaInstruction,
-                  style: TextStyle(
-                    fontSize: AppFont.font19.sp,
-                    fontWeight: FontWeight.w500,
-                    height: 1.65,
-                    color: AppColors.bodyText,
-                  ),
-                ),
-              ],
+              ),
+            ],
+          ),
+          SizedBox(height: 14.h),
+          Text(
+            task.instruction,
+            style: TextStyle(
+              fontSize: AppFont.font16.sp,
+              fontWeight: FontWeight.w500,
+              height: 1.45,
+              color: AppColors.homePrimaryText,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            task.banglaInstruction,
+            style: TextStyle(
+              fontSize: AppFont.font14.sp,
+              fontWeight: FontWeight.w400,
+              height: 1.65,
+              color: AppColors.bodyText,
             ),
           ),
         ],
@@ -172,7 +185,7 @@ class _WritingAnswerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 520.h,
+      height: 420.h,
       padding: EdgeInsets.fromLTRB(28.w, 28.h, 28.w, 24.h),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -180,8 +193,8 @@ class _WritingAnswerCard extends StatelessWidget {
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
-            blurRadius: 20.r,
-            offset: Offset(0, 8.h),
+            blurRadius: 4.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -195,16 +208,16 @@ class _WritingAnswerCard extends StatelessWidget {
               textAlignVertical: TextAlignVertical.top,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'Inizia a scrivere qui la tua\nstoria...',
+                hintText: 'Inizia a scrivere qui la tua storia...',
                 hintStyle: TextStyle(
-                  fontSize: AppFont.font26.sp,
-                  fontWeight: FontWeight.w700,
+                  fontSize: AppFont.font16.sp,
+                  fontWeight: FontWeight.w500,
                   height: 1.5,
                   color: AppColors.modalBorderGrey,
                 ),
               ),
               style: TextStyle(
-                fontSize: AppFont.font20.sp,
+                fontSize: AppFont.font16.sp,
                 height: 1.45,
                 color: AppColors.homePrimaryText,
               ),
@@ -213,15 +226,15 @@ class _WritingAnswerCard extends StatelessWidget {
           Divider(color: AppColors.modalBorderGrey, height: 1.h),
           SizedBox(height: 22.h),
           Wrap(
-            spacing: 12.w,
-            runSpacing: 12.h,
+            spacing: 8.w,
+            runSpacing: 8.h,
             children: <String>['à', 'è', 'é', 'ì', 'ò', 'ù']
                 .map(
                   (String item) => GestureDetector(
                     onTap: () => controller.text = '${controller.text}$item',
                     child: Container(
-                      width: 48.w,
-                      height: 48.w,
+                      width: 38.w,
+                      height: 38.w,
                       alignment: Alignment.center,
                       decoration: const BoxDecoration(
                         color: AppColors.legacyColorFFF1F2F2,
@@ -230,7 +243,7 @@ class _WritingAnswerCard extends StatelessWidget {
                       child: Text(
                         item,
                         style: TextStyle(
-                          fontSize: AppFont.font22.sp,
+                          fontSize: AppFont.font18.sp,
                           fontWeight: FontWeight.w900,
                           color: AppColors.bodyText,
                         ),

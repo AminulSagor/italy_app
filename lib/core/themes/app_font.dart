@@ -36,6 +36,7 @@ class AppFont {
   static const double font48 = 48;
   static const double font50 = 50;
   static const double font52 = 52;
+  static const double font60 = 60;
 
   static const double tinyLabelFontSize = font9;
   static const double smallLabelFontSize = font11;

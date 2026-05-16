@@ -19,7 +19,7 @@ class UnlockChapterDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: EdgeInsets.symmetric(horizontal: 34.w),
+      insetPadding: EdgeInsets.symmetric(horizontal: 16.w),
       backgroundColor: AppColors.transparent,
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -28,118 +28,135 @@ class UnlockChapterDialog extends StatelessWidget {
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.fromLTRB(32.w, 52.h, 32.w, 44.h),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(kProUnlockDialogRadius.r),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    SizedBox(
-                      width: 142.w,
-                      height: 128.h,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        alignment: Alignment.center,
-                        children: <Widget>[
-                          Container(
-                            width: 116.w,
-                            height: 116.w,
-                            decoration: BoxDecoration(
-                              color: AppColors.homePaleGreen,
-                              shape: BoxShape.circle,
-                              boxShadow: <BoxShadow>[
-                                BoxShadow(
-                                  color: AppColors.homeLime.withValues(alpha: 0.22),
-                                  blurRadius: 42.r,
-                                  spreadRadius: 20.r,
-                                ),
-                              ],
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(22.w, 34.h, 22.w, 34.h),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(kProUnlockDialogRadius.r),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                SizedBox(
+                  width: 142.w,
+                  height: 128.h,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: <Widget>[
+                      Container(
+                        width: 116.w,
+                        height: 116.w,
+                        decoration: BoxDecoration(
+                          color: AppColors.homePaleGreen,
+                          shape: BoxShape.circle,
+                          boxShadow: <BoxShadow>[
+                            BoxShadow(
+                              color: AppColors.homeLime.withValues(alpha: 0.22),
+                              blurRadius: 42.r,
+                              spreadRadius: 20.r,
                             ),
-                          ),
-                          Icon(Icons.lock_rounded, color: AppColors.homeOrange, size: 58.w),
-                          Positioned(
-                            right: 6.w,
-                            bottom: 14.h,
-                            child: Container(
-                              width: 46.w,
-                              height: 46.w,
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryGreen,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: AppColors.white, width: 5.w),
-                                boxShadow: <BoxShadow>[
-                                  BoxShadow(
-                                    color: AppColors.homeNeutralShadow,
-                                    blurRadius: 8.r,
-                                    offset: Offset(0, 3.h),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.workspace_premium_outlined,
-                                color: AppColors.white,
-                                size: 22.w,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 34.h),
-                    Text(
-                      'Unlock this\nChapter!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: AppFont.font38.sp,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.proDialogTitle,
-                        height: 1.08,
-                      ),
-                    ),
-                    SizedBox(height: 28.h),
-                    Text(
-                      'Upgrade to Pro to access all 30+\nchapters and premium features.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: AppFont.font21.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.bodyText,
-                        height: 1.45,
-                      ),
-                    ),
-                    SizedBox(height: 38.h),
-                    const _DialogBenefitWide(),
-                    SizedBox(height: 16.h),
-                    Row(
-                      children: <Widget>[
-                        const Expanded(child: _DialogBenefitSmall(icon: Icons.psychology_outlined, label: 'AI\nPractice')),
-                        SizedBox(width: 16.w),
-                        const Expanded(child: _DialogBenefitSmall(icon: Icons.school_outlined, label: 'Certificates')),
-                      ],
-                    ),
-                    SizedBox(height: 42.h),
-                    CustomButton.primary(
-                      text: 'Get Pro Now',
-                      icon: Icons.play_arrow_rounded,
-                      onPressed: onGetProTap,
-                    ),
-                    SizedBox(height: 28.h),
-                    GestureDetector(
-                      onTap: onMaybeLaterTap,
-                      child: Text(
-                        'Maybe later',
-                        style: TextStyle(
-                          fontSize: AppFont.font20.sp,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.bodyText,
+                          ],
                         ),
+                      ),
+                      Icon(
+                        Icons.lock_rounded,
+                        color: AppColors.homeOrange,
+                        size: 40.w,
+                      ),
+                      Positioned(
+                        right: 6.w,
+                        bottom: 14.h,
+                        child: Container(
+                          width: 32.w,
+                          height: 32.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryGreen,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.white,
+                              width: 5.w,
+                            ),
+                            boxShadow: <BoxShadow>[
+                              BoxShadow(
+                                color: AppColors.homeNeutralShadow,
+                                blurRadius: 8.r,
+                                offset: Offset(0, 3.h),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.workspace_premium_outlined,
+                            color: AppColors.white,
+                            size: 16.w,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 34.h),
+                Text(
+                  'Unlock this\nChapter!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font28.sp,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.proDialogTitle,
+                    height: 1.08,
+                  ),
+                ),
+                SizedBox(height: 10.h),
+                Text(
+                  'Upgrade to Pro to access all 30+\nchapters and premium features.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.bodyText,
+                    height: 1.45,
+                  ),
+                ),
+                SizedBox(height: 26.h),
+                const _DialogBenefitWide(),
+                SizedBox(height: 16.h),
+                Row(
+                  children: <Widget>[
+                    const Expanded(
+                      child: _DialogBenefitSmall(
+                        icon: Icons.psychology_outlined,
+                        label: 'AI\nPractice',
+                      ),
+                    ),
+                    SizedBox(width: 16.w),
+                    const Expanded(
+                      child: _DialogBenefitSmall(
+                        icon: Icons.school_outlined,
+                        label: 'Certificates',
                       ),
                     ),
                   ],
                 ),
+                SizedBox(height: 36.h),
+                CustomButton.primary(
+                  text: 'Get Pro Now',
+                  icon: Icons.play_arrow_rounded,
+                  onPressed: onGetProTap,
+                ),
+                SizedBox(height: 28.h),
+                GestureDetector(
+                  onTap: onMaybeLaterTap,
+                  child: Text(
+                    'Maybe later',
+                    style: TextStyle(
+                      fontSize: AppFont.font16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.bodyText,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -153,9 +170,8 @@ class _DialogBenefitWide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 88.h,
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppColors.proBenefitBg,
         borderRadius: BorderRadius.circular(kHomePillRadius.r),
@@ -163,17 +179,24 @@ class _DialogBenefitWide extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Container(
-            width: 48.w,
-            height: 48.w,
-            decoration: const BoxDecoration(color: AppColors.proFeatureBlueBg, shape: BoxShape.circle),
-            child: Icon(Icons.menu_book_rounded, color: AppColors.coursesChapterBlue, size: 27.w),
+            width: 40.w,
+            height: 40.w,
+            decoration: const BoxDecoration(
+              color: AppColors.proFeatureBlueBg,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.menu_book_rounded,
+              color: AppColors.coursesChapterBlue,
+              size: 20.w,
+            ),
           ),
-          SizedBox(width: 24.w),
+          SizedBox(width: 14.w),
           Text(
             'All Chapters',
             style: TextStyle(
-              fontSize: AppFont.font21.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font16.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.homePrimaryText,
             ),
           ),
@@ -192,30 +215,32 @@ class _DialogBenefitSmall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 110.h,
       alignment: Alignment.center,
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: AppColors.proBenefitBg,
         borderRadius: BorderRadius.circular(kRadius28.r),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Container(
-            width: 46.w,
-            height: 46.w,
-            decoration: BoxDecoration(color: AppColors.homeLime, borderRadius: BorderRadius.circular(18.r)),
-            child: Icon(icon, color: AppColors.primaryGreen, size: 25.w),
+            width: 36.w,
+            height: 36.w,
+            decoration: BoxDecoration(
+              color: AppColors.homeLime,
+              borderRadius: BorderRadius.circular(kRadius32.r),
+            ),
+            child: Icon(icon, color: AppColors.primaryGreen, size: 18.w),
           ),
-          SizedBox(width: 12.w),
-          Flexible(
+          SizedBox(width: 6.w),
+          Expanded(
             child: Text(
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: AppFont.font19.sp,
-                fontWeight: FontWeight.w900,
+                fontSize: AppFont.font14.sp,
+                fontWeight: FontWeight.w700,
                 color: AppColors.homePrimaryText,
                 height: 1.2,
               ),

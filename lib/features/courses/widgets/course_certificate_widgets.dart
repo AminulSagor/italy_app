@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
@@ -14,43 +15,30 @@ class CourseCertificateHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double size = compact ? 214.w : 232.w;
+    final double size = compact ? 205.w : 224.w;
 
     return SizedBox(
-      width: size,
+      width: double.infinity,
       height: size,
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
-          Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.homeSoftGreen.withValues(alpha: 0.56),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: AppColors.homeLime.withValues(alpha: 0.18),
-                  blurRadius: 46.r,
-                  spreadRadius: 20.r,
-                ),
-              ],
+          if (compact)
+            Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: AppColors.homeLime.withValues(alpha: 0.1),
+                    blurRadius: 46.r,
+                    spreadRadius: 20.r,
+                  ),
+                ],
+              ),
             ),
-          ),
-          Icon(
-            Icons.school_rounded,
-            color: AppColors.primaryGreen,
-            size: compact ? 122.w : 142.w,
-          ),
-          Positioned(
-            right: compact ? 28.w : 18.w,
-            bottom: compact ? 42.h : 46.h,
-            child: Icon(
-              Icons.workspace_premium_rounded,
-              color: AppColors.vocabularyOrangeShadow,
-              size: 48.w,
-            ),
-          ),
+          Image.asset('assets/decor_png/achievement.png'),
         ],
       ),
     );
@@ -71,20 +59,17 @@ class CourseCertificateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 34.w : 38.w,
-        vertical: compact ? 42.h : 52.h,
-      ),
+      padding: EdgeInsets.all(32.w),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(kRadius42.r),
         gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: <Color>[
+            AppColors.coursesCreamLightBg.withValues(alpha: 0.4),
             AppColors.white,
-            AppColors.homeSoftGreen.withValues(alpha: 0.2),
-            AppColors.coursesCreamLightBg.withValues(alpha: 0.35),
+            AppColors.coursesCreamLightBg.withValues(alpha: 0.4),
           ],
         ),
         boxShadow: <BoxShadow>[
@@ -98,109 +83,121 @@ class CourseCertificateCard extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Container(
-            width: 72.w,
-            height: 72.w,
+            width: 56.w,
+            height: 56.w,
             decoration: BoxDecoration(
               color: AppColors.primaryGreen,
               borderRadius: BorderRadius.circular(kRadius18.r),
             ),
-            child: Icon(Icons.school_rounded, color: AppColors.limeTextColor, size: 34.w),
+            child: Icon(
+              Icons.school_rounded,
+              color: AppColors.white,
+              size: 32.w,
+            ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 10.h),
           Text(
             'ITALIR POTHE',
             style: TextStyle(
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 4,
+              fontSize: AppFont.font10.sp,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 3,
               color: AppColors.primaryGreen,
             ),
           ),
-          SizedBox(height: compact ? 42.h : 54.h),
+          SizedBox(height: compact ? 30.h : 30.h),
           Text(
             'CERTIFICATE OF\nACHIEVEMENT',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: compact ? AppFont.font24.sp : AppFont.font22.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: compact ? AppFont.font20.sp : AppFont.font20.sp,
+              fontWeight: FontWeight.w800,
               height: 1.25,
-              color: AppColors.bodyText,
+              color: AppColors.headerText,
             ),
           ),
-          SizedBox(height: 44.h),
+          SizedBox(height: 30.h),
           Text(
             'THIS CERTIFIES THAT',
             style: TextStyle(
-              fontSize: AppFont.font13.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font12.sp,
+              fontWeight: FontWeight.w700,
               letterSpacing: 2.4,
-              color: AppColors.quizAnswerShadow,
+              color: AppColors.bodyText,
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 8.h),
           Text(
             certificate.learnerName,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: compact ? AppFont.font42.sp : AppFont.font36.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font30.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.homePrimaryText,
             ),
           ),
-          SizedBox(height: 12.h),
-          Container(width: 70.w, height: 2.h, color: AppColors.coursesCertificationBorder),
-          SizedBox(height: 42.h),
+          SizedBox(height: 10.h),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 14.h),
+            width: 48.w,
+            height: 2.h,
+            color: AppColors.coursesCertificationBorder,
+          ),
+          SizedBox(height: 30.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
             decoration: BoxDecoration(
               color: AppColors.homeSoftGreen.withValues(alpha: 0.34),
               borderRadius: BorderRadius.circular(kHomePillRadius.r),
-              border: Border.all(color: AppColors.coursesCertificationBorder),
+              border: Border.all(
+                color: AppColors.coursesCertificationBorder.withValues(
+                  alpha: 0.3,
+                ),
+              ),
             ),
             child: Text(
               'Proficiency Level: ${certificate.proficiencyLevel}',
               style: TextStyle(
-                fontSize: AppFont.font16.sp,
-                fontWeight: FontWeight.w900,
+                fontSize: AppFont.font14.sp,
+                fontWeight: FontWeight.w700,
                 color: AppColors.primaryGreen,
               ),
             ),
           ),
           if (!compact) ...<Widget>[
-            SizedBox(height: 54.h),
-            Divider(color: AppColors.modalBorderGrey.withValues(alpha: 0.5)),
-            SizedBox(height: 28.h),
+            SizedBox(height: 30.h),
+            Divider(color: AppColors.modalBorderGrey.withValues(alpha: 0.4)),
+            SizedBox(height: 16.h),
             Row(
+              mainAxisAlignment: .spaceBetween,
               children: <Widget>[
-                Expanded(
-                  child: _CertificateMeta(label: 'ISSUE DATE', value: certificate.issueDate),
+                _CertificateMeta(
+                  label: 'ISSUE DATE',
+                  value: certificate.issueDate,
                 ),
                 Container(
-                  width: 86.w,
-                  height: 86.w,
+                  width: 70.w,
+                  height: 70.w,
                   decoration: BoxDecoration(
                     color: AppColors.primaryGreen,
                     borderRadius: BorderRadius.circular(kRadius24.r),
                   ),
-                  child: Icon(Icons.verified_rounded, color: AppColors.homeLime, size: 46.w),
+                  child: SvgPicture.asset('assets/icons_svg/app_icon.svg'),
                 ),
-                Expanded(
-                  child: _CertificateMeta(
-                    label: 'FINAL SCORE',
-                    value: '${certificate.finalScore} / 100',
-                    alignEnd: true,
-                  ),
+                _CertificateMeta(
+                  label: 'FINAL SCORE',
+                  value: '${certificate.finalScore} / 100',
+                  alignEnd: true,
                 ),
               ],
             ),
-            SizedBox(height: 96.h),
+            SizedBox(height: 60.h),
             Text(
               'VERIFIED DIGITAL SIGNATURE',
               style: TextStyle(
                 fontSize: AppFont.font9.sp,
                 fontWeight: FontWeight.w900,
-                letterSpacing: 4,
-                color: AppColors.quizAnswerShadow.withValues(alpha: 0.6),
+                letterSpacing: 2,
+                color: AppColors.bodyText,
               ),
             ),
           ],
@@ -280,23 +277,30 @@ class CourseCertificateActions extends StatelessWidget {
           onTap: onDownloadTap,
           child: Container(
             width: double.infinity,
-            height: 66.h,
+            height: 60.h,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(kHomePillRadius.r),
-              border: Border.all(color: AppColors.coursesCertificationBorder, width: 2.w),
+              borderRadius: BorderRadius.circular(999.r),
+              border: Border.all(
+                color: AppColors.coursesCertificationBorder,
+                width: 2.w,
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(Icons.download_rounded, color: AppColors.primaryGreen, size: 22.w),
-                SizedBox(width: 10.w),
+                Icon(
+                  Icons.download_rounded,
+                  color: AppColors.primaryGreen,
+                  size: 20.w,
+                ),
+                SizedBox(width: 8.w),
                 Text(
                   'Download PDF Certificate',
                   style: TextStyle(
-                    fontSize: AppFont.font18.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.primaryGreen,
                   ),
                 ),
@@ -329,24 +333,28 @@ class _CertificateMeta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: alignEnd
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           label,
           style: TextStyle(
-            fontSize: AppFont.font11.sp,
-            fontWeight: FontWeight.w900,
+            fontSize: AppFont.font9.sp,
+            fontWeight: FontWeight.w700,
             letterSpacing: 1.8,
             color: AppColors.bodyText,
           ),
         ),
-        SizedBox(height: 8.h),
+        SizedBox(height: 6.h),
         Text(
           value,
           style: TextStyle(
-            fontSize: AppFont.font16.sp,
-            fontWeight: FontWeight.w900,
-            color: alignEnd ? AppColors.primaryGreen : AppColors.homePrimaryText,
+            fontSize: AppFont.font14.sp,
+            fontWeight: FontWeight.w700,
+            color: alignEnd
+                ? AppColors.primaryGreen
+                : AppColors.homePrimaryText,
           ),
         ),
       ],
@@ -377,29 +385,29 @@ class _CertificateStatCard extends StatelessWidget {
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
-            blurRadius: 18.r,
-            offset: Offset(0, 8.h),
+            blurRadius: 12.r,
+            offset: Offset(0, 4.h),
           ),
         ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Icon(icon, color: iconColor, size: 24.w),
+          Icon(icon, color: iconColor, size: 20.w),
           SizedBox(height: 8.h),
           Text(
             value,
             style: TextStyle(
-              fontSize: AppFont.font18.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font14.sp,
+              fontWeight: FontWeight.w700,
               color: AppColors.homePrimaryText,
             ),
           ),
           Text(
             label,
             style: TextStyle(
-              fontSize: AppFont.font9.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font12.sp,
+              fontWeight: FontWeight.w500,
               letterSpacing: 1.1,
               color: AppColors.bodyText,
             ),

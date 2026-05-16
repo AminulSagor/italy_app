@@ -26,10 +26,10 @@ class ProPlanCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(28.w, 24.h, 28.w, 24.h),
+      padding: EdgeInsets.all(32.w),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(kProPlanCardRadius.r),
+        borderRadius: BorderRadius.circular(kRadius48.r),
         border: Border.all(color: AppColors.proPlanBorder, width: 1.2.w),
         boxShadow: <BoxShadow>[
           BoxShadow(
@@ -48,8 +48,8 @@ class ProPlanCard extends StatelessWidget {
                 Text(
                   plan.title,
                   style: TextStyle(
-                    fontSize: AppFont.font24.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font20.sp,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.homePrimaryText,
                   ),
                 ),
@@ -57,7 +57,7 @@ class ProPlanCard extends StatelessWidget {
                 Text(
                   plan.subtitle,
                   style: TextStyle(
-                    fontSize: AppFont.font18.sp,
+                    fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.bodyText,
                     height: 1.35,
@@ -69,7 +69,7 @@ class ProPlanCard extends StatelessWidget {
           Text(
             plan.priceLabel(currency),
             style: TextStyle(
-              fontSize: AppFont.font34.sp,
+              fontSize: AppFont.font30.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.primaryGreen,
             ),
@@ -107,7 +107,7 @@ class _CouponPlanCard extends StatelessWidget {
           Text(
             plan.title,
             style: TextStyle(
-              fontSize: AppFont.font26.sp,
+              fontSize: AppFont.font24.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.homePrimaryText,
             ),
@@ -116,7 +116,7 @@ class _CouponPlanCard extends StatelessWidget {
           Text(
             plan.subtitle,
             style: TextStyle(
-              fontSize: AppFont.font16.sp,
+              fontSize: AppFont.font14.sp,
               fontWeight: FontWeight.w500,
               color: AppColors.bodyText,
             ),
@@ -125,7 +125,7 @@ class _CouponPlanCard extends StatelessWidget {
           Text(
             plan.priceLabel(currency),
             style: TextStyle(
-              fontSize: AppFont.font18.sp,
+              fontSize: AppFont.font14.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.proPriceStruck,
               decoration: TextDecoration.lineThrough,
@@ -134,13 +134,11 @@ class _CouponPlanCard extends StatelessWidget {
           Text(
             plan.priceLabel(currency, isCouponApplied: true),
             style: TextStyle(
-              fontSize: AppFont.font56.sp,
+              fontSize: AppFont.font60.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.primaryGreen,
-              height: 1.02,
             ),
           ),
-          SizedBox(height: 22.h),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
             decoration: BoxDecoration(
@@ -157,9 +155,8 @@ class _CouponPlanCard extends StatelessWidget {
             child: Text(
               plan.couponSaveLabelFor(currency),
               style: TextStyle(
-                fontSize: AppFont.font13.sp,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.0,
+                fontSize: AppFont.font12.sp,
+                fontWeight: FontWeight.w700,
                 color: AppColors.primaryGreen,
               ),
             ),
@@ -197,12 +194,15 @@ class ProCouponInput extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.proCouponAppliedBg,
                 borderRadius: BorderRadius.circular(kHomePillRadius.r),
-                border: Border.all(color: AppColors.proPlanBorder, width: 1.2.w),
+                border: Border.all(
+                  color: AppColors.proPlanBorder,
+                  width: 1.2.w,
+                ),
               ),
               child: Text(
                 controller.text,
                 style: TextStyle(
-                  fontSize: AppFont.font18.sp,
+                  fontSize: AppFont.font16.sp,
                   fontWeight: FontWeight.w900,
                   color: AppColors.homePrimaryText,
                 ),
@@ -213,14 +213,18 @@ class ProCouponInput extends StatelessWidget {
           GestureDetector(
             onTap: onApplyTap,
             child: Container(
-              width: 70.w,
-              height: 70.w,
+              width: 64.w,
+              height: 64.w,
               decoration: BoxDecoration(
                 color: AppColors.white,
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.primaryGreen, width: 3.w),
               ),
-              child: Icon(Icons.check_rounded, color: AppColors.primaryGreen, size: 28.w),
+              child: Icon(
+                Icons.check_rounded,
+                color: AppColors.primaryGreen,
+                size: 22.w,
+              ),
             ),
           ),
         ],
@@ -246,14 +250,23 @@ class ProCouponInput extends StatelessWidget {
             ),
             filled: true,
             fillColor: AppColors.white,
-            contentPadding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 20.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 28.w,
+              vertical: 20.h,
+            ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(kHomePillRadius.r),
-              borderSide: BorderSide(color: AppColors.modalBorderGrey, width: 1.5.w),
+              borderSide: BorderSide(
+                color: AppColors.modalBorderGrey,
+                width: 1.5.w,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(kHomePillRadius.r),
-              borderSide: BorderSide(color: AppColors.primaryGreen, width: 1.8.w),
+              borderSide: BorderSide(
+                color: AppColors.primaryGreen,
+                width: 1.8.w,
+              ),
             ),
           ),
         ),
@@ -273,7 +286,10 @@ class ProCouponInput extends StatelessWidget {
                 ? SizedBox(
                     width: 22.w,
                     height: 22.w,
-                    child: const CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryGreen),
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primaryGreen,
+                    ),
                   )
                 : Text(
                     'APPLY',
@@ -318,10 +334,16 @@ class TrustedLearnersPill extends StatelessWidget {
                     height: 24.w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: index == 0 ? AppColors.chatIncomingBubbleBg : AppColors.primaryGreen,
+                      color: index == 0
+                          ? AppColors.chatIncomingBubbleBg
+                          : AppColors.primaryGreen,
                       border: Border.all(color: AppColors.white, width: 2.w),
                     ),
-                    child: Icon(Icons.person, color: AppColors.white, size: 13.w),
+                    child: Icon(
+                      Icons.person,
+                      color: AppColors.white,
+                      size: 13.w,
+                    ),
                   ),
                 );
               }),

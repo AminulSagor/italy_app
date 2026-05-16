@@ -24,7 +24,7 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
       bottomNavigationBar: Container(
         padding: EdgeInsets.fromLTRB(28.w, 18.h, 28.w, 24.h),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.white.withValues(alpha: 0.8),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: AppColors.homeNeutralShadow,
@@ -46,22 +46,26 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
         child: Obx(
           () => SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(30.w, 36.h, 30.w, 132.h),
+            padding: EdgeInsets.fromLTRB(24.w, 10.h, 24.w, 80.h),
             child: Column(
               children: <Widget>[
                 Row(
                   children: <Widget>[
                     GestureDetector(
                       onTap: () => Get.offAllNamed(AppRoutes.wrapper),
-                      child: Icon(Icons.close_rounded, color: AppColors.primaryGreen, size: 28.w),
+                      child: Icon(
+                        Icons.close_rounded,
+                        color: AppColors.primaryGreen,
+                        size: 28.w,
+                      ),
                     ),
                     Expanded(
                       child: Text(
                         'Exam Success',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: AppFont.font22.sp,
-                          fontWeight: FontWeight.w900,
+                          fontSize: AppFont.font16.sp,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.primaryGreen,
                         ),
                       ),
@@ -69,35 +73,39 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                     SizedBox(width: 28.w),
                   ],
                 ),
-                SizedBox(height: 58.h),
-                Icon(Icons.workspace_premium_rounded, color: AppColors.primaryGreen, size: 190.w),
-                SizedBox(height: 42.h),
+                SizedBox(height: 30.h),
+                Image.asset('assets/decor_png/achievement_2.png'),
+                SizedBox(height: 36.h),
                 Text(
                   'Exam Submitted!',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: AppFont.font38.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.homeDarkGreen,
+                    fontSize: AppFont.font34.sp,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryBtnShadow,
                   ),
                 ),
-                SizedBox(height: 18.h),
+                SizedBox(height: 12.h),
                 Text(
-                  "Bravissimo! You've done the hard work.\nNow, it's our turn.",
+                  "Bravissimo! You've done the hard work. Now, it's our turn.",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: AppFont.font22.sp,
+                    fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w500,
-                    height: 1.35,
+                    height: 1.5,
                     color: AppColors.bodyText,
                   ),
                 ),
-                SizedBox(height: 42.h),
+                SizedBox(height: 38.h),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 22.w,
+                    vertical: 14.h,
+                  ),
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: AppColors.reportReviewBg,
-                    borderRadius: BorderRadius.circular(kHomePillRadius.r),
+                    borderRadius: BorderRadius.circular(999.r),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -105,26 +113,30 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                       Text(
                         '#',
                         style: TextStyle(
-                          fontSize: AppFont.font26.sp,
+                          fontSize: AppFont.font18.sp,
                           fontWeight: FontWeight.w900,
                           color: AppColors.reportReviewText,
                         ),
                       ),
-                      SizedBox(width: 12.w),
+                      SizedBox(width: 10.w),
                       Text(
                         'Reference ID: ${controller.referenceId.value}',
                         style: TextStyle(
-                          fontSize: AppFont.font16.sp,
-                          fontWeight: FontWeight.w900,
+                          fontSize: AppFont.font14.sp,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.reportReviewText,
                         ),
                       ),
-                      SizedBox(width: 12.w),
-                      Icon(Icons.copy_rounded, color: AppColors.reportReviewText, size: 22.w),
+                      Spacer(),
+                      Icon(
+                        Icons.copy_rounded,
+                        color: AppColors.reportReviewText,
+                        size: 18.w,
+                      ),
                     ],
                   ),
                 ),
-                SizedBox(height: 46.h),
+                SizedBox(height: 30.h),
                 _TimelineCard(
                   teacherDone: controller.teacherReviewComplete.value,
                   resultDone: controller.resultComplete.value,
@@ -136,7 +148,7 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                   padding: EdgeInsets.all(24.w),
                   decoration: BoxDecoration(
                     color: AppColors.white,
-                    borderRadius: BorderRadius.circular(kRadius28.r),
+                    borderRadius: BorderRadius.circular(kRadius32.r),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
                         color: AppColors.homeNeutralShadow,
@@ -148,21 +160,26 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                   child: Row(
                     children: <Widget>[
                       Container(
-                        width: 64.w,
-                        height: 64.w,
+                        width: 56.w,
+                        height: 56.w,
                         decoration: BoxDecoration(
                           color: AppColors.coursesCreamLightBg,
                           borderRadius: BorderRadius.circular(kRadius16.r),
                         ),
-                        child: Icon(Icons.lightbulb_rounded, color: AppColors.vocabularyOrangeShadow, size: 32.w),
+                        child: Icon(
+                          Icons.lightbulb_rounded,
+                          color: AppColors.vocabularyOrangeShadow,
+                          size: 28.w,
+                        ),
                       ),
-                      SizedBox(width: 22.w),
+                      SizedBox(width: 20.w),
                       Expanded(
                         child: Text(
                           'While you wait, why not try a Daily Challenge or start Level A2 for free?',
                           style: TextStyle(
-                            fontSize: AppFont.font18.sp,
-                            height: 1.35,
+                            fontSize: AppFont.font16.sp,
+                            fontWeight: FontWeight.w500,
+                            height: 1.4,
                             color: AppColors.homePrimaryText,
                           ),
                         ),
@@ -194,10 +211,10 @@ class _TimelineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(34.w, 32.h, 34.w, 34.h),
+      padding: EdgeInsets.all(32.w),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(kRadius34.r),
+        borderRadius: BorderRadius.circular(kRadius48.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
@@ -212,9 +229,9 @@ class _TimelineCard extends StatelessWidget {
           Text(
             'EVALUATION TIMELINE',
             style: TextStyle(
-              fontSize: AppFont.font14.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.8,
+              fontSize: AppFont.font12.sp,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.1,
               color: AppColors.bodyText,
             ),
           ),
@@ -230,24 +247,28 @@ class _TimelineCard extends StatelessWidget {
             isDone: teacherDone,
             isActive: teacherDone,
             title: 'Teacher Review',
-            subtitle: teacherDone ? 'Manual review completed' : 'Reviewing Speaking & Writing...',
-            icon: Icons.circle,
+            subtitle: teacherDone
+                ? 'Manual review completed'
+                : 'Reviewing Speaking & Writing...',
+            icon: teacherDone ? Icons.check_rounded : Icons.circle,
           ),
           _TimelineStep(
             isDone: resultDone,
             isActive: resultDone,
             title: 'Result & Certificate',
-            subtitle: resultDone ? 'Result is ready' : 'Unlock your achievement',
+            subtitle: resultDone
+                ? 'Result is ready'
+                : 'Unlock your achievement',
             icon: resultDone ? Icons.check_rounded : Icons.lock_outline_rounded,
             showConnector: false,
           ),
-          SizedBox(height: 22.h),
+          SizedBox(height: 16.h),
           if (resultDone)
             GestureDetector(
               onTap: onViewResultTap,
               child: Container(
                 width: double.infinity,
-                height: 58.h,
+                padding: EdgeInsets.symmetric(vertical: 12.h),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: AppColors.homeSoftGreen,
@@ -256,8 +277,8 @@ class _TimelineCard extends StatelessWidget {
                 child: Text(
                   'View Result',
                   style: TextStyle(
-                    fontSize: AppFont.font18.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.primaryGreen,
                   ),
                 ),
@@ -273,7 +294,11 @@ class _TimelineCard extends StatelessWidget {
               ),
               child: Row(
                 children: <Widget>[
-                  Icon(Icons.access_time_rounded, color: AppColors.primaryGreen, size: 22.w),
+                  Icon(
+                    Icons.access_time_rounded,
+                    color: AppColors.primaryGreen,
+                    size: 22.w,
+                  ),
                   SizedBox(width: 10.w),
                   Expanded(
                     child: Text(
@@ -313,7 +338,9 @@ class _TimelineStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = isActive ? AppColors.primaryGreen : AppColors.quizAnswerShadow;
+    final Color color = isActive
+        ? AppColors.primaryGreen
+        : AppColors.quizAnswerShadow;
 
     return IntrinsicHeight(
       child: Row(
@@ -322,14 +349,19 @@ class _TimelineStep extends StatelessWidget {
           Column(
             children: <Widget>[
               Container(
-                width: 42.w,
-                height: 42.w,
+                width: 36.w,
+                height: 36.w,
                 decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                child: Icon(icon, color: AppColors.white, size: 24.w),
+                child: Icon(icon, color: AppColors.white, size: 20.w),
               ),
               if (showConnector)
                 Expanded(
-                  child: Container(width: 4.w, color: isDone ? AppColors.primaryGreen : AppColors.quizProgressTrack),
+                  child: Container(
+                    width: 4.w,
+                    color: isDone
+                        ? AppColors.primaryGreen
+                        : AppColors.quizProgressTrack,
+                  ),
                 ),
             ],
           ),
@@ -343,19 +375,23 @@ class _TimelineStep extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: AppFont.font20.sp,
-                      fontWeight: FontWeight.w900,
-                      color: isActive ? AppColors.homePrimaryText : AppColors.quizAnswerShadow,
+                      fontSize: AppFont.font16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: isActive
+                          ? AppColors.homePrimaryText
+                          : AppColors.quizAnswerShadow,
                     ),
                   ),
                   SizedBox(height: 4.h),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: AppFont.font16.sp,
-                      fontWeight: FontWeight.w500,
+                      fontSize: AppFont.font14.sp,
+                      fontWeight: FontWeight.w400,
                       height: 1.25,
-                      color: isActive ? AppColors.bodyText : AppColors.quizAnswerShadow,
+                      color: isActive
+                          ? AppColors.bodyText
+                          : AppColors.quizAnswerShadow,
                     ),
                   ),
                 ],

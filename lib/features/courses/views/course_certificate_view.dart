@@ -22,7 +22,8 @@ class CourseCertificateView extends GetView<CourseCertificateController> {
       backgroundColor: AppColors.coursesDetailBg,
       body: SafeArea(
         child: Obx(() {
-          final CourseCertificateModel? certificate = controller.certificate.value;
+          final CourseCertificateModel? certificate =
+              controller.certificate.value;
 
           if (controller.isLoading.value && certificate == null) {
             return const Center(
@@ -36,55 +37,60 @@ class CourseCertificateView extends GetView<CourseCertificateController> {
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(30.w, 32.h, 30.w, 34.h),
+            padding: EdgeInsets.fromLTRB(24.w, 10.h, 24.w, 34.h),
             child: Column(
               children: <Widget>[
                 Row(
                   children: <Widget>[
                     GestureDetector(
                       onTap: controller.closeCertificate,
-                      child: Icon(Icons.close_rounded, color: AppColors.bodyText, size: 34.w),
+                      child: Icon(
+                        Icons.close_rounded,
+                        color: AppColors.bodyText,
+                        size: 22.w,
+                      ),
                     ),
                     Expanded(
                       child: Text(
                         'Achievement Unlocked',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: AppFont.font20.sp,
-                          fontWeight: FontWeight.w900,
+                          fontSize: AppFont.font16.sp,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.primaryGreen,
                         ),
                       ),
                     ),
                     GestureDetector(
                       onTap: controller.showShareDialog,
-                      child: Icon(Icons.share_outlined, color: AppColors.bodyText, size: 30.w),
+                      child: Icon(
+                        Icons.share_outlined,
+                        color: AppColors.bodyText,
+                        size: 22.w,
+                      ),
                     ),
                   ],
                 ),
-                SizedBox(height: 54.h),
                 const CourseCertificateHero(),
-                SizedBox(height: 28.h),
                 Text(
                   'Congratulazioni!',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: AppFont.font42.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font36.sp,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.primaryGreen,
                   ),
                 ),
-                SizedBox(height: 6.h),
                 Text(
                   "You've reached a new milestone",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: AppFont.font18.sp,
+                    fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.bodyText,
                   ),
                 ),
-                SizedBox(height: 42.h),
+                SizedBox(height: 30.h),
                 CourseCertificateCard(certificate: certificate),
                 SizedBox(height: 28.h),
                 CourseCertificateStatsRow(certificate: certificate),

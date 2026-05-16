@@ -25,97 +25,93 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
       color: AppColors.coursesDetailBg,
       child: SafeArea(
         bottom: false,
-        child: Obx(
-          () {
-            final ProOrderModel? order = controller.order.value;
-            if (controller.isLoading.value && order == null) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primaryGreen),
-              );
-            }
-
-            if (order == null) {
-              return const SizedBox.shrink();
-            }
-
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(24.w, 36.h, 24.w, 60.h),
-              child: Column(
-                children: <Widget>[
-                  ProBackHeader(
-                    title: 'Order Summary',
-                    onBackTap: () => Get.back<void>(),
-                  ),
-                  SizedBox(height: 56.h),
-                  const ProHeroIllustration(),
-                  SizedBox(height: 28.h),
-                  Text(
-                    order.headline,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFont.font34.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.primaryGreen,
-                      height: 1.08,
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-                  Text(
-                    order.description,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFont.font18.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.bodyText,
-                      height: 1.5,
-                    ),
-                  ),
-                  SizedBox(height: 48.h),
-                  ProFeatureGrid(features: order.features),
-                  SizedBox(height: 38.h),
-                  ProCurrencyToggle(
-                    selectedCurrency: controller.selectedCurrency.value,
-                    onChanged: controller.setCurrency,
-                  ),
-                  SizedBox(height: 34.h),
-                  ProPlanCard(
-                    plan: order.plan,
-                    currency: controller.selectedCurrency.value,
-                    isCouponApplied: controller.isCouponApplied.value,
-                  ),
-                  SizedBox(height: 32.h),
-                  ProCouponInput(
-                    controller: controller.couponController,
-                    isCouponApplied: controller.isCouponApplied.value,
-                    isLoading: controller.isCouponApplying.value,
-                    onApplyTap: controller.applyCoupon,
-                  ),
-                  SizedBox(height: 42.h),
-                  CustomButton.primary(
-                    text: 'Buy Full Course Now',
-                    icon: Icons.play_arrow_rounded,
-                    onPressed: () => controller.openCheckout(controllerTag),
-                  ),
-                  SizedBox(height: 24.h),
-                  GestureDetector(
-                    onTap: () => Get.back<void>(),
-                    child: Text(
-                      'Maybe later',
-                      style: TextStyle(
-                        fontSize: AppFont.font18.sp,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.bodyText,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 44.h),
-                  TrustedLearnersPill(label: order.trustedLabel),
-                ],
-              ),
+        child: Obx(() {
+          final ProOrderModel? order = controller.order.value;
+          if (controller.isLoading.value && order == null) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
             );
-          },
-        ),
+          }
+
+          if (order == null) {
+            return const SizedBox.shrink();
+          }
+
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 60.h),
+            child: Column(
+              children: <Widget>[
+                ProBackHeader(
+                  title: 'Order Summary',
+                  onBackTap: () => Get.back<void>(),
+                ),
+                SizedBox(height: 10.h),
+                Image.asset('assets/decor_png/order_summary.png'),
+                Text(
+                  order.headline,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font34.sp,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryGreen,
+                    height: 1.08,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  order.description,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font18.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.bodyText,
+                    height: 1.2,
+                  ),
+                ),
+                SizedBox(height: 30.h),
+                ProFeatureGrid(features: order.features),
+                ProCurrencyToggle(
+                  selectedCurrency: controller.selectedCurrency.value,
+                  onChanged: controller.setCurrency,
+                ),
+                SizedBox(height: 30.h),
+                ProPlanCard(
+                  plan: order.plan,
+                  currency: controller.selectedCurrency.value,
+                  isCouponApplied: controller.isCouponApplied.value,
+                ),
+                SizedBox(height: 30.h),
+                ProCouponInput(
+                  controller: controller.couponController,
+                  isCouponApplied: controller.isCouponApplied.value,
+                  isLoading: controller.isCouponApplying.value,
+                  onApplyTap: controller.applyCoupon,
+                ),
+                SizedBox(height: 42.h),
+                CustomButton.primary(
+                  text: 'Buy Full Course Now',
+                  icon: Icons.play_arrow_rounded,
+                  onPressed: () => controller.openCheckout(controllerTag),
+                ),
+                SizedBox(height: 24.h),
+                GestureDetector(
+                  onTap: () => Get.back<void>(),
+                  child: Text(
+                    'Maybe later',
+                    style: TextStyle(
+                      fontSize: AppFont.font16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.bodyText,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 44.h),
+                TrustedLearnersPill(label: order.trustedLabel),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/widgets/custom_button.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../controllers/webinar_controller.dart';
 import '../models/webinar_models.dart';
 import '../widgets/webinar_live_widgets.dart';
+import '../widgets/webinar_stage_widgets.dart';
 
 class WebinarLiveView extends GetView<WebinarController> {
   const WebinarLiveView({super.key});
@@ -25,40 +27,38 @@ class WebinarLiveView extends GetView<WebinarController> {
       child: Scaffold(
         backgroundColor: AppColors.homeBackground,
         body: SafeArea(
-          child: Obx(
-            () {
-              final WebinarModel? data = controller.webinar.value;
-              if (data == null) {
-                return const Center(
-                  child: CircularProgressIndicator(color: AppColors.primaryGreen),
-                );
-              }
-
-              return Stack(
-                children: <Widget>[
-                  SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(
-                      kWebinarHorizontalPadding.w,
-                      20.h,
-                      kWebinarHorizontalPadding.w,
-                      controller.isParticipating.value ? 124.h : 112.h,
-                    ),
-                    child: controller.isParticipating.value
-                        ? _ParticipationBody(data: data, controller: controller)
-                        : _ChatBody(data: data, controller: controller),
-                  ),
-                  if (!controller.isParticipating.value)
-                    Positioned(
-                      left: kWebinarHorizontalPadding.w,
-                      right: kWebinarHorizontalPadding.w,
-                      bottom: 24.h,
-                      child: WebinarChatInput(controller: controller),
-                    ),
-                ],
+          child: Obx(() {
+            final WebinarModel? data = controller.webinar.value;
+            if (data == null) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryGreen),
               );
-            },
-          ),
+            }
+
+            return Stack(
+              children: <Widget>[
+                SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(
+                    kWebinarHorizontalPadding.w,
+                    10.h,
+                    kWebinarHorizontalPadding.w,
+                    controller.isParticipating.value ? 124.h : 112.h,
+                  ),
+                  child: controller.isParticipating.value
+                      ? _ParticipationBody(data: data, controller: controller)
+                      : _ChatBody(data: data, controller: controller),
+                ),
+                if (!controller.isParticipating.value)
+                  Positioned(
+                    left: kWebinarHorizontalPadding.w,
+                    right: kWebinarHorizontalPadding.w,
+                    bottom: 24.h,
+                    child: WebinarChatInput(controller: controller),
+                  ),
+              ],
+            );
+          }),
         ),
       ),
     );
@@ -83,20 +83,20 @@ class _ChatBody extends StatelessWidget {
           alt: controller.isLiveVideoAlt.value,
           showTopHostChip: !controller.isLiveVideoAlt.value,
         ),
-        SizedBox(height: 36.h),
+        SizedBox(height: 20.h),
         if (controller.isChatFocused.value) ...<Widget>[
           WebinarRequestButton(
             text: 'Back To Participation',
             onTap: controller.backToParticipation,
           ),
-          SizedBox(height: 34.h),
+          SizedBox(height: 20.h),
         ] else ...<Widget>[
           WebinarRequestButton(
             text: 'Request To Participate',
             icon: Icons.mic_rounded,
             onTap: controller.requestToParticipate,
           ),
-          SizedBox(height: 34.h),
+          SizedBox(height: 20.h),
         ],
         WebinarLiveChatSection(controller: controller),
       ],
@@ -116,17 +116,21 @@ class _ParticipationBody extends StatelessWidget {
       children: <Widget>[
         WebinarLiveHeader(webinar: data, onBackTap: () => Get.back<void>()),
         SizedBox(height: 24.h),
-        WebinarVideoCard(
-          webinar: data,
-          alt: true,
-          showTopHostChip: false,
-        ),
+        WebinarVideoCard(webinar: data, alt: true, showTopHostChip: false),
         SizedBox(height: 30.h),
         WebinarStageArea(controller: controller),
         SizedBox(height: 32.h),
         WebinarStageControls(controller: controller),
         SizedBox(height: 38.h),
-        WebinarLeaveStageButton(onTap: controller.stopParticipation),
+        CustomButton(
+          onPressed: controller.stopParticipation,
+          text: 'Stop and Leave the Stage',
+          btnColor: AppColors.white,
+          textColor: AppColors.profileRedText,
+          borderColor: AppColors.profileRedText,
+          textSize: 16.sp,
+          icon: Icons.logout,
+        ),
       ],
     );
   }

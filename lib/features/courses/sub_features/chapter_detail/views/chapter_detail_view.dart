@@ -68,64 +68,53 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
             return const SizedBox.shrink();
           }
 
-          return Stack(
-            children: <Widget>[
-              SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(
-                  kChapterHorizontalPadding.w,
-                  34.h,
-                  kChapterHorizontalPadding.w,
-                  160.h,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              kChapterHorizontalPadding.w,
+              34.h,
+              kChapterHorizontalPadding.w,
+              160.h,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _Header(title: detail.title, onBackTap: () => Get.back<void>()),
+                SizedBox(height: 26.h),
+                ChapterVideoCard(detail: detail),
+                SizedBox(height: 38.h),
+                LessonContentCard(lesson: detail.lessonContent),
+                SizedBox(height: 38.h),
+                Row(
                   children: <Widget>[
-                    _Header(
-                      title: detail.title,
-                      onBackTap: () => Get.back<void>(),
+                    Expanded(
+                      child: ChapterResourceCard(
+                        resource: detail.resources.first,
+                      ),
                     ),
-                    SizedBox(height: 26.h),
-                    ChapterVideoCard(detail: detail),
-                    SizedBox(height: 38.h),
-                    LessonContentCard(lesson: detail.lessonContent),
-                    SizedBox(height: 38.h),
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: ChapterResourceCard(
-                            resource: detail.resources.first,
-                          ),
-                        ),
-                        SizedBox(width: 24.w),
-                        Expanded(
-                          child: ChapterResourceCard(
-                            resource: detail.resources.last,
-                            onTap: controller.openVocabulary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 40.h),
-                    ChapterQuizCard(
-                      quiz: detail.quiz,
-                      onStartTap: controller.openQuiz,
+                    SizedBox(width: 24.w),
+                    Expanded(
+                      child: ChapterResourceCard(
+                        resource: detail.resources.last,
+                        onTap: controller.openVocabulary,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              Positioned(
-                left: kChapterHorizontalPadding.w,
-                right: kChapterHorizontalPadding.w,
-                bottom: 24.h,
-                child: _BottomActions(
+                SizedBox(height: 40.h),
+                ChapterQuizCard(
+                  quiz: detail.quiz,
+                  onStartTap: controller.openQuiz,
+                ),
+                SizedBox(height: 40.h),
+                _BottomActions(
                   status: detail.quiz.status,
                   isLoading: controller.isResumeSubmitting.value,
                   onResumeTap: controller.resumeVideo,
                   onQuizTap: controller.openQuiz,
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         }),
       ),
@@ -204,7 +193,7 @@ class _BottomActions extends StatelessWidget {
           textColor: AppColors.homePrimaryText,
           textSize: AppFont.font16.sp,
         ),
-        SizedBox(width: 18.w),
+        SizedBox(width: 12.w),
         Expanded(
           child: CustomButton(
             onPressed: onQuizTap,

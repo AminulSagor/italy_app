@@ -11,7 +11,7 @@ class InitialBindings extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<HomeMockService>(() => HomeMockService());
-    Get.lazyPut<CoursesMockService>(() => CoursesMockService());
+    Get.lazyPut<CoursesMockService>(() => CoursesMockService(), fenix: true);
     Get.lazyPut<CoursesController>(
       () =>
           CoursesController(coursesMockService: Get.find<CoursesMockService>()),

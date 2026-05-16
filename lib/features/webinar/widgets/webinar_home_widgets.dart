@@ -37,17 +37,16 @@ class WebinarLiveHeroCard extends StatelessWidget {
         child: Stack(
           children: <Widget>[
             const Positioned.fill(
-              child: WebinarTeacherImage(alt: true, borderRadius: kWebinarHeroRadius),
+              child: WebinarTeacherImage(
+                alt: true,
+                borderRadius: kWebinarHeroRadius,
+              ),
             ),
-            Positioned(
-              right: 18.w,
-              top: 16.h,
-              child: const WebinarLiveBadge(),
-            ),
+            Positioned(right: 18.w, top: 16.h, child: const WebinarLiveBadge()),
             Align(
               alignment: Alignment.center,
               child: Padding(
-                padding: EdgeInsets.fromLTRB(30.w, 78.h, 30.w, 0),
+                padding: EdgeInsets.fromLTRB(30.w, 75.h, 30.w, 0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
@@ -55,18 +54,18 @@ class WebinarLiveHeroCard extends StatelessWidget {
                       webinar.title,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: AppFont.font28.sp,
-                        fontWeight: FontWeight.w900,
+                        fontSize: AppFont.font20.sp,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.white,
                         height: 1.02,
                       ),
                     ),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
                     Text(
                       'Host: ${webinar.hostName}',
                       style: TextStyle(
-                        fontSize: AppFont.font19.sp,
-                        fontWeight: FontWeight.w700,
+                        fontSize: AppFont.font16.sp,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.limeTextColor,
                         height: 1.1,
                       ),
@@ -75,27 +74,33 @@ class WebinarLiveHeroCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Icon(Icons.group_outlined, size: 16.w, color: AppColors.limeTextColor),
+                        Icon(
+                          Icons.group_outlined,
+                          size: 14.w,
+                          color: AppColors.limeTextColor,
+                        ),
                         SizedBox(width: 4.w),
                         Text(
                           '${webinar.learnersJoined} Learners Joined',
                           style: TextStyle(
-                            fontSize: AppFont.font18.sp,
-                            fontWeight: FontWeight.w700,
+                            fontSize: AppFont.font16.sp,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.limeTextColor,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 18.h),
+                    SizedBox(height: 12.h),
                     GestureDetector(
                       onTap: onJoinTap,
                       child: Container(
-                        height: 58.h,
-                        width: 142.w,
+                        height: 46.h,
+                        width: 140.w,
                         decoration: BoxDecoration(
                           color: AppColors.legacyColorFFD5D5D5,
-                          borderRadius: BorderRadius.circular(kHomePillRadius.r),
+                          borderRadius: BorderRadius.circular(
+                            kHomePillRadius.r,
+                          ),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -103,13 +108,17 @@ class WebinarLiveHeroCard extends StatelessWidget {
                             Text(
                               'Join Now',
                               style: TextStyle(
-                                fontSize: AppFont.font15.sp,
+                                fontSize: AppFont.font14.sp,
                                 fontWeight: FontWeight.w900,
                                 color: AppColors.black,
                               ),
                             ),
-                            SizedBox(width: 10.w),
-                            Icon(Icons.play_arrow_rounded, color: AppColors.primaryGreen, size: 24.w),
+                            SizedBox(width: 6.w),
+                            Icon(
+                              Icons.play_arrow_rounded,
+                              color: AppColors.primaryGreen,
+                              size: 22.w,
+                            ),
                           ],
                         ),
                       ),
@@ -135,8 +144,8 @@ class WebinarSectionHeader extends StatelessWidget {
         Text(
           'Upcoming Sessions',
           style: TextStyle(
-            fontSize: AppFont.font25.sp,
-            fontWeight: FontWeight.w900,
+            fontSize: AppFont.font20.sp,
+            fontWeight: FontWeight.w700,
             color: AppColors.homePrimaryText,
           ),
         ),
@@ -150,8 +159,8 @@ class WebinarSectionHeader extends StatelessWidget {
           child: Text(
             'Free',
             style: TextStyle(
-              fontSize: AppFont.font14.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font12.sp,
+              fontWeight: FontWeight.w600,
               color: AppColors.primaryGreen,
             ),
           ),
@@ -169,11 +178,10 @@ class WebinarSessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kWebinarSessionHeight.h,
-      padding: EdgeInsets.symmetric(horizontal: 28.w),
+      padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
         color: AppColors.webinarSessionBg,
-        borderRadius: BorderRadius.circular(kWebinarHeroRadius.r),
+        borderRadius: BorderRadius.circular(kRadius32.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
@@ -185,8 +193,8 @@ class WebinarSessionCard extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Container(
-            width: kWebinarDateBoxSize.w,
-            height: kWebinarDateBoxSize.w,
+            width: 80.w,
+            height: 80.w,
             decoration: BoxDecoration(
               color: AppColors.webinarDateBg,
               borderRadius: BorderRadius.circular(kRadius24.r),
@@ -197,8 +205,8 @@ class WebinarSessionCard extends StatelessWidget {
                 Text(
                   session.month,
                   style: TextStyle(
-                    fontSize: AppFont.font12.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font10.sp,
+                    fontWeight: FontWeight.w500,
                     letterSpacing: 1.6,
                     color: AppColors.primaryGreen,
                   ),
@@ -206,8 +214,8 @@ class WebinarSessionCard extends StatelessWidget {
                 Text(
                   session.day,
                   style: TextStyle(
-                    fontSize: AppFont.font28.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font24.sp,
+                    fontWeight: FontWeight.w800,
                     color: AppColors.primaryGreen,
                     height: 1,
                   ),
@@ -215,7 +223,7 @@ class WebinarSessionCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 26.w),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -224,8 +232,8 @@ class WebinarSessionCard extends StatelessWidget {
                 Text(
                   session.title,
                   style: TextStyle(
-                    fontSize: AppFont.font22.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize: AppFont.font18.sp,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.homePrimaryText,
                     height: 1.32,
                   ),
@@ -234,8 +242,8 @@ class WebinarSessionCard extends StatelessWidget {
                 Text(
                   '${session.timeLabel}\n• ${session.levelLabel}',
                   style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w400,
                     color: AppColors.bodyText,
                     height: 1.2,
                   ),
@@ -244,13 +252,17 @@ class WebinarSessionCard extends StatelessWidget {
             ),
           ),
           Container(
-            width: 54.w,
-            height: 54.w,
+            width: 46.w,
+            height: 46.w,
             decoration: const BoxDecoration(
               color: AppColors.webinarControlBg,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.notifications_none_rounded, color: AppColors.bodyText, size: 28.w),
+            child: Icon(
+              Icons.notifications_none_rounded,
+              color: AppColors.bodyText,
+              size: 24.w,
+            ),
           ),
         ],
       ),

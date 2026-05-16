@@ -46,10 +46,9 @@ class ChapterQuizCard extends StatelessWidget {
               Text(
                 'COMPLETED',
                 style: TextStyle(
-                  fontSize: AppFont.font13.sp,
-                  fontWeight: FontWeight.w900,
+                  fontSize: AppFont.font12.sp,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.primaryGreen,
-                  letterSpacing: 2,
                 ),
               ),
               SizedBox(height: 6.h),
@@ -129,11 +128,11 @@ class _QuizIcon extends StatelessWidget {
         ),
         if (isCompleted)
           Positioned(
-            right: -3.w,
-            bottom: -2.h,
+            right: -1.w,
+            bottom: -1.h,
             child: Container(
-              width: 26.w,
-              height: 26.w,
+              width: 22.w,
+              height: 22.w,
               decoration: BoxDecoration(
                 color: AppColors.white,
                 shape: BoxShape.circle,
@@ -142,7 +141,7 @@ class _QuizIcon extends StatelessWidget {
               child: Icon(
                 Icons.check_rounded,
                 color: AppColors.primaryGreen,
-                size: 17.w,
+                size: 14.w,
               ),
             ),
           ),

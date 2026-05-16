@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
@@ -21,22 +22,26 @@ class CourseCertificateShareDialog extends StatelessWidget {
       child: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(28.w, 38.h, 28.w, 38.h),
+          padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 40.h),
           child: Column(
             children: <Widget>[
               Row(
                 children: <Widget>[
                   GestureDetector(
                     onTap: () => Get.back<void>(),
-                    child: Icon(Icons.close_rounded, color: AppColors.white, size: 36.w),
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: AppColors.white,
+                      size: 24.w,
+                    ),
                   ),
                   Expanded(
                     child: Text(
                       'Achievement Unlocked',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: AppFont.font32.sp,
-                        fontWeight: FontWeight.w900,
+                        fontSize: AppFont.font18.sp,
+                        fontWeight: FontWeight.w800,
                         color: AppColors.white,
                       ),
                     ),
@@ -47,7 +52,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
               SizedBox(height: 28.h),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.fromLTRB(30.w, 38.h, 30.w, 46.h),
+                padding: EdgeInsets.fromLTRB(30.w, 20.h, 30.w, 30.h),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(kRadius42.r),
@@ -64,20 +69,16 @@ class CourseCertificateShareDialog extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Container(
-                          width: 42.w,
-                          height: 42.w,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primaryGreen,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.verified_rounded, color: AppColors.homeLime, size: 24.w),
+                        SvgPicture.asset(
+                          'assets/icons_svg/app_icon.svg',
+                          width: 25.w,
+                          height: 25.w,
                         ),
                         SizedBox(width: 10.w),
                         Text(
                           'ItalirPothe',
                           style: TextStyle(
-                            fontSize: AppFont.font30.sp,
+                            fontSize: AppFont.font18.sp,
                             fontWeight: FontWeight.w900,
                             color: AppColors.homePrimaryText,
                           ),
@@ -85,85 +86,93 @@ class CourseCertificateShareDialog extends StatelessWidget {
                       ],
                     ),
                     const CourseCertificateHero(compact: true),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 6.h),
                     Text(
                       'Congratulazioni!',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: AppFont.font44.sp,
-                        fontWeight: FontWeight.w900,
+                        fontSize: AppFont.font30.sp,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.primaryGreen,
                       ),
                     ),
-                    SizedBox(height: 8.h),
+                    SizedBox(height: 4.h),
                     Text(
                       "You've reached a new milestone",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: AppFont.font22.sp,
+                        fontSize: AppFont.font16.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.bodyText,
                       ),
                     ),
-                    SizedBox(height: 48.h),
+                    SizedBox(height: 30.h),
                     Text(
                       'THIS CERTIFIES THAT',
                       style: TextStyle(
-                        fontSize: AppFont.font14.sp,
-                        fontWeight: FontWeight.w900,
+                        fontSize: AppFont.font12.sp,
+                        fontWeight: FontWeight.w500,
                         letterSpacing: 2.8,
-                        color: AppColors.quizAnswerShadow,
+                        color: AppColors.bodyText,
                       ),
                     ),
-                    SizedBox(height: 22.h),
+                    SizedBox(height: 10.h),
                     Text(
                       certificate.learnerName,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: AppFont.font42.sp,
-                        fontWeight: FontWeight.w900,
+                        fontSize: AppFont.font30.sp,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.homePrimaryText,
                       ),
                     ),
-                    SizedBox(height: 18.h),
-                    Container(width: 74.w, height: 2.h, color: AppColors.coursesCertificationBorder),
+                    SizedBox(height: 10.h),
+                    Container(
+                      width: 74.w,
+                      height: 2.h,
+                      color: AppColors.coursesCertificationBorder,
+                    ),
                     SizedBox(height: 32.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 16.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24.w,
+                        vertical: 12.h,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.homeSoftGreen.withValues(alpha: 0.42),
                         borderRadius: BorderRadius.circular(kHomePillRadius.r),
-                        border: Border.all(color: AppColors.coursesCertificationBorder),
+                        border: Border.all(
+                          color: AppColors.coursesCertificationBorder,
+                        ),
                       ),
                       child: Text(
                         'Proficiency Level: ${certificate.proficiencyLevel}',
                         style: TextStyle(
-                          fontSize: AppFont.font18.sp,
-                          fontWeight: FontWeight.w900,
+                          fontSize: AppFont.font14.sp,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.primaryGreen,
                         ),
                       ),
                     ),
-                    SizedBox(height: 40.h),
+                    SizedBox(height: 20.h),
                     CustomButton(
                       onPressed: () {},
                       text: 'Join the Italian journey!',
-                      height: 58,
-                      width: 320,
+                      height: 44,
                       showShadow: true,
-                      textSize: AppFont.font17,
+                      textSize: AppFont.font16,
                       textColor: AppColors.limeTextColor,
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 38.h),
+              SizedBox(height: 20.h),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 52.w, vertical: 26.h),
+                padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(kRadius42.r),
+                  borderRadius: BorderRadius.circular(9999.r),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
                       color: AppColors.black.withValues(alpha: 0.16),
@@ -172,25 +181,23 @@ class CourseCertificateShareDialog extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Column(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
+                    _ShareRoundButton(
+                      icon: Icons.download_rounded,
+                      onTap: () {},
+                    ),
                     Text(
                       'SHARE YOUR VICTORY',
                       style: TextStyle(
-                        fontSize: AppFont.font16.sp,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 4,
+                        fontSize: AppFont.font12.sp,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
                         color: AppColors.bodyText,
                       ),
                     ),
-                    SizedBox(height: 28.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        _ShareRoundButton(icon: Icons.download_rounded, onTap: () {}),
-                        _ShareRoundButton(icon: Icons.share_outlined, onTap: () {}),
-                      ],
-                    ),
+                    _ShareRoundButton(icon: Icons.share_outlined, onTap: () {}),
                   ],
                 ),
               ),
@@ -213,14 +220,14 @@ class _ShareRoundButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 82.w,
-        height: 82.w,
+        width: 52.w,
+        height: 52.w,
         decoration: BoxDecoration(
           color: AppColors.white,
           shape: BoxShape.circle,
-          border: Border.all(color: AppColors.primaryGreen, width: 4.w),
+          border: Border.all(color: AppColors.primaryGreen, width: 3.w),
         ),
-        child: Icon(icon, color: AppColors.primaryGreen, size: 38.w),
+        child: Icon(icon, color: AppColors.primaryGreen, size: 24.w),
       ),
     );
   }
