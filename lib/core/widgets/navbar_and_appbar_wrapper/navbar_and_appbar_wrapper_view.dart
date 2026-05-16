@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../features/courses/views/courses_view.dart';
 import '../../../features/home/views/home_view.dart';
 import '../../../features/messages/views/messages_view.dart';
+import '../../../features/service_hub/views/service_hub_view.dart';
 import '../app_home_bottom_navigation_bar.dart';
 import '../app_home_top_bar.dart';
 import 'navbar_and_appbar_wrapper_controller.dart';
@@ -33,7 +34,7 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
         appBar: AppHomeTopBar(
           greeting: 'Buongiorno,',
           userName: 'Arif!',
-          streakLabel: '🔥 5',
+          streakLabel: '5d',
           notificationCount: 3,
           messageCount: 1,
           onNotificationTap: controller.openNotifications,
@@ -101,7 +102,7 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
       case 3:
         return _TabNavigator(id: 3, content: const LeaderboardView());
       case 4:
-        return _TabNavigator(id: 4, content: const CustomPlaceHolder());
+        return _TabNavigator(id: 4, content: const ServiceHubView());
       default:
         return const CustomPlaceHolder();
     }

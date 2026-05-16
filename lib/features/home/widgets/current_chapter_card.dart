@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:italir_pothe/core/widgets/custom_button.dart';
 
 import '../models/home_models.dart';
 
@@ -38,17 +39,44 @@ class CurrentChapterCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(chapter.eyebrow, style: TextStyle(fontSize: AppFont.font11.sp, fontWeight: FontWeight.w900, letterSpacing: 0.9, color: AppColors.homeBarLight)),
+          Text(
+            chapter.eyebrow,
+            style: TextStyle(
+              fontSize: AppFont.font11.sp,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.9,
+              color: AppColors.homeBarLight,
+            ),
+          ),
           SizedBox(height: 14.h),
-          Text(chapter.title, style: TextStyle(fontSize: AppFont.font22.sp, fontWeight: FontWeight.w900, height: 1.12, color: AppColors.homePaleGreen)),
+          Text(
+            chapter.title,
+            style: TextStyle(
+              fontSize: AppFont.font22.sp,
+              fontWeight: FontWeight.w900,
+              height: 1.12,
+              color: AppColors.homePaleGreen,
+            ),
+          ),
           SizedBox(height: 18.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Text(chapter.progressLabel, style: TextStyle(fontSize: AppFont.font12.sp, fontWeight: FontWeight.w800, color: AppColors.homePaleGreen)),
+              Text(
+                chapter.progressLabel,
+                style: TextStyle(
+                  fontSize: AppFont.font12.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.homePaleGreen,
+                ),
+              ),
               Text(
                 '${(chapter.progress * 100).round()}%',
-                style: TextStyle(fontSize: AppFont.font12.sp, fontWeight: FontWeight.w800, color: AppColors.homePaleGreen),
+                style: TextStyle(
+                  fontSize: AppFont.font12.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.homePaleGreen,
+                ),
               ),
             ],
           ),
@@ -65,37 +93,17 @@ class CurrentChapterCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 28.h),
-          SizedBox(
+          CustomButton(
+            onPressed: () => onContinueTap?.call(),
+            text: chapter.buttonLabel,
             width: double.infinity,
-            height: 58.h,
-            child: ElevatedButton(
-              onPressed: onContinueTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.white,
-                foregroundColor: AppColors.primaryGreen,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    kHomePillRadius.r,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    chapter.buttonLabel,
-                    style: TextStyle(fontSize: AppFont.font14.sp, fontWeight: FontWeight.w900, color: AppColors.primaryGreen),
-                  ),
-                  SizedBox(width: 6.w),
-                  Icon(
-                    Icons.play_arrow_rounded,
-                    color: AppColors.primaryGreen,
-                    size: kHomeTopIconSize.w,
-                  ),
-                ],
-              ),
-            ),
+            height: 56.h,
+            icon: Icons.play_arrow_rounded,
+            textColor: AppColors.primaryGreen,
+            btnColor: AppColors.white,
+            borderRadius: kHomePillRadius.r,
+            fontSize: AppFont.font16.sp,
+            fontWeight: FontWeight.w800,
           ),
         ],
       ),

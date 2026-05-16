@@ -41,7 +41,7 @@ class AppDrawer extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.20),
+              color: Colors.black.withOpacity(0.20),
               blurRadius: 28,
               offset: const Offset(8, 0),
             ),
@@ -50,206 +50,195 @@ class AppDrawer extends StatelessWidget {
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 26.w),
-            child: Column(
-              children: [
-                SizedBox(height: 55.h),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 55.h),
 
-                // Avatar
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 80.r,
-                      height: 80.r,
-                      padding: EdgeInsets.all(3.r),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF2DB600),
+                      // Avatar
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 80.r,
+                            height: 80.r,
+                            padding: EdgeInsets.all(3.r),
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFF2DB600),
+                            ),
+                            child: const CircleAvatar(
+                              backgroundColor: Colors.white,
+                              backgroundImage: AssetImage(
+                                'assets/profile_images/Fahid Hasan.png',
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: -2.w,
+                            bottom: 8.h,
+                            child: Container(
+                              width: 23.r,
+                              height: 23.r,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF80ED58),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.check,
+                                size: 14.r,
+                                color: const Color(0xFF187400),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.white,
-                        backgroundImage: const AssetImage(
-                          'assets/profile_images/Fahid Hasan.png',
+
+                      SizedBox(height: 12.h),
+
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 11.w,
+                          vertical: 4.h,
                         ),
-                      ),
-                    ),
-                    Positioned(
-                      right: -2.w,
-                      bottom: 8.h,
-                      child: Container(
-                        width: 23.r,
-                        height: 23.r,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF80ED58),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          color: const Color(0xFF9BEF74),
+                          borderRadius: BorderRadius.circular(100.r),
                         ),
-                        child: Icon(
-                          Icons.check,
-                          size: 14.r,
-                          color: const Color(0xFF187400),
+                        child: Text(
+                          'LEVEL 24',
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w900,
+                            color: const Color(0xFF287C12),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
 
-                SizedBox(height: 12.h),
+                      SizedBox(height: 12.h),
 
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 11.w,
-                    vertical: 4.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF9BEF74),
-                    borderRadius: BorderRadius.circular(100.r),
-                  ),
-                  child: Text(
-                    'LEVEL 24',
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFF287C12),
-                    ),
-                  ),
-                ),
+                      Text(
+                        'Alex Rivera',
+                        style: TextStyle(
+                          fontSize: 22.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF333333),
+                        ),
+                      ),
 
-                SizedBox(height: 12.h),
+                      SizedBox(height: 35.h),
 
-                Text(
-                  'Alex Rivera',
-                  style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF333333),
-                  ),
-                ),
+                      _DrawerItem(
+                        icon: Icons.person,
+                        title: 'Profile',
+                        isSelected: true,
+                        onTap: onProfileTap,
+                      ),
 
-                SizedBox(height: 35.h),
+                      _DrawerItem(
+                        icon: Icons.shopping_bag_outlined,
+                        title: 'Shop',
+                        onTap: onShopTap,
+                      ),
 
-                _DrawerItem(
-                  icon: Icons.person,
-                  title: 'Profile',
-                  isSelected: true,
-                  onTap: onProfileTap,
-                ),
-                _DrawerItem(
-                  icon: Icons.shopping_bag_outlined,
-                  title: 'Shop',
-                  onTap: onShopTap,
-                ),
-                _DrawerItem(
-                  icon: Icons.menu_book_outlined,
-                  title: 'Guide',
-                  onTap:
-                      onGuideTap ??
-                      () {
-                        Get.back();
-                        Get.toNamed(AppRoutes.guide);
-                      },
-                ),
-                _DrawerItem(
-                  icon: Icons.card_giftcard_outlined,
-                  title: 'Reward',
-                  onTap:
-                      onRewardTap ??
-                      () {
-                        Get.back();
-                        Get.toNamed(AppRoutes.rewards);
-                      },
-                ),
-                _DrawerItem(
-                  icon: Icons.help_outline,
-                  title: 'Support',
-                  onTap:
-                      onSupportTap ??
-                      () {
-                        Get.back();
-                        Get.toNamed(AppRoutes.contactSupport);
-                      },
-                ),
-                _DrawerItem(
-                  icon: Icons.translate,
-                  title: 'Language',
-                  onTap: onLanguageTap,
-                ),
-                _DrawerItem(
-                  icon: Icons.settings_outlined,
-                  title: 'Settings',
-                  onTap:
-                      onSettingsTap ??
-                      () {
-                        Get.back();
-                        Get.toNamed(AppRoutes.settings);
-                      },
-                ),
+                      _DrawerItem(
+                        icon: Icons.menu_book_outlined,
+                        title: 'Guide',
+                        onTap:
+                            onGuideTap ??
+                            () {
+                              Get.back();
+                              Get.toNamed(AppRoutes.guide);
+                            },
+                      ),
 
-                const Spacer(),
+                      _DrawerItem(
+                        icon: Icons.card_giftcard_outlined,
+                        title: 'Reward',
+                        onTap:
+                            onRewardTap ??
+                            () {
+                              Get.back();
+                              Get.toNamed(AppRoutes.rewards);
+                            },
+                      ),
 
-                Divider(
-                  color: Colors.grey.withValues(alpha: 0.28),
-                  thickness: 1,
-                ),
+                      _DrawerItem(
+                        icon: Icons.help_outline,
+                        title: 'Support',
+                        onTap:
+                            onSupportTap ??
+                            () {
+                              Get.back();
+                              Get.toNamed(AppRoutes.contactSupport);
+                            },
+                      ),
 
-                SizedBox(height: 24.h),
+                      _DrawerItem(
+                        icon: Icons.translate,
+                        title: 'Language',
+                        onTap: onLanguageTap,
+                      ),
 
-                // InkWell(
-                //   borderRadius: BorderRadius.circular(100.r),
-                //   onTap: onLogoutTap,
-                //   child: Container(
-                //     width: double.infinity,
-                //     height: 56.h,
-                //     decoration: BoxDecoration(
-                //       color: const Color(0xFFFBE8E3),
-                //       borderRadius: BorderRadius.circular(100.r),
-                //     ),
-                //     child: Row(
-                //       mainAxisAlignment: MainAxisAlignment.center,
-                //       children: [
-                //         Icon(
-                //           Icons.logout,
-                //           size: 22.r,
-                //           color: const Color(0xFFD9300D),
-                //         ),
-                //         SizedBox(width: 14.w),
-                //         Text(
-                //           'Log Out',
-                //           style: TextStyle(
-                //             fontSize: 16.sp,
-                //             fontWeight: FontWeight.w800,
-                //             color: const Color(0xFFD9300D),
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                CustomButton(
-                  text: 'Log Out',
-                  height: 56.h,
-                  isLoading: false,
-                  showShadow: false,
-                  prefixIcon: Icons.logout,
-                  btnColor: const Color(0xFFFBE8E3),
-                  borderColor: const Color(0xFFFBE8E3),
-                  textColor: const Color(0xFFD9300D),
-                  onPressed: onLogoutTap ?? () {},
-                ),
-                SizedBox(height: 18.h),
+                      _DrawerItem(
+                        icon: Icons.settings_outlined,
+                        title: 'Settings',
+                        onTap:
+                            onSettingsTap ??
+                            () {
+                              Get.back();
+                              Get.toNamed(AppRoutes.settings);
+                            },
+                      ),
 
-                Text(
-                  'VERSION 1.0.2',
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    letterSpacing: 1.3,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey.withValues(alpha: 0.55),
+                      const Spacer(),
+
+                      Divider(
+                        color: Colors.grey.withOpacity(0.28),
+                        thickness: 1,
+                      ),
+
+                      SizedBox(height: 24.h),
+
+                      CustomButton(
+                        text: 'Log Out',
+                        height: 56.h,
+                        isLoading: false,
+                        showShadow: false,
+                        prefixIcon: Icons.logout,
+                        btnColor: const Color(0xFFFBE8E3),
+                        borderColor: const Color(0xFFFBE8E3),
+                        textColor: const Color(0xFFD9300D),
+                        onPressed: onLogoutTap ?? () {},
+                      ),
+
+                      SizedBox(height: 18.h),
+
+                      Text(
+                        'VERSION 1.0.2',
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          letterSpacing: 1.3,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.withOpacity(0.55),
+                        ),
+                      ),
+
+                      SizedBox(height: 28.h),
+                    ],
                   ),
                 ),
-
-                SizedBox(height: 28.h),
-              ],
+              ),
             ),
           ),
         ),
@@ -296,7 +285,9 @@ class _DrawerItem extends StatelessWidget {
                 size: 22.r,
                 color: isSelected ? Colors.white : inactiveColor,
               ),
+
               SizedBox(width: 18.w),
+
               Text(
                 title,
                 style: TextStyle(

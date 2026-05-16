@@ -61,7 +61,7 @@ class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     SizedBox(height: 3.h),
                     Text(
-                      userName,
+                      'Ciao, $userName',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -119,10 +119,11 @@ class _AvatarBadge extends StatelessWidget {
                 color: AppColors.white,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.person_rounded,
-                size: kHomeTopIconSize.w,
-                color: AppColors.primaryGreen,
+              child: Image.asset(
+                'assets/profile_images/Fahid Hasan.png',
+                fit: BoxFit.cover,
+                width: kHomeTopIconSize.w,
+                height: kHomeTopIconSize.w,
               ),
             ),
           ),

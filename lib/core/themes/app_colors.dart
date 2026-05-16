@@ -201,6 +201,21 @@ class AppColors {
   static const legacyColorFF8C8F93 = Color(0xFF8C8F93);
   static const legacyColorFF2A2F33 = Color(0xFF2A2F33);
   static const legacyColorFF7A7E82 = Color(0xFF7A7E82);
+  static const serviceHubBlueStart = Color(0xFF6D91F8);
+  static const serviceHubBlueEnd = Color(0xFF4437D8);
+  static const serviceHubGreenStart = Color(0xFF276F2D);
+  static const serviceHubGreenEnd = Color(0xFF0E5A0D);
+  static const serviceHubLightGreen = Color(0xFF65F337);
+  static const serviceHubStatsBg = Color(0xFFEFEFEF);
+  static const adminPermitBg = Color(0xFFF1DFFF);
+  static const adminHealthBg = Color(0xFFC6F8EE);
+  static const adminDocumentBg = Color(0xFFD8FBE0);
+  static const adminTaxesBg = Color(0xFFDCEBFF);
+  static const adminEmploymentBg = Color(0xFFFFEED4);
+  static const adminSearchShadow = Color(0x1F000000);
+  static const adminPurple = Color(0xFF7D35B7);
+  static const adminTeal = Color(0xFF00796B);
+  static const adminBrown = Color(0xFF8A560E);
 
   static const coursesCardInactiveBg = Color(0xFFFFFFFF);
   static const coursesCardInactiveBorder = Color(0xFFE4E5E5);

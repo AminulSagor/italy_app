@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import '../models/signup_models.dart';
@@ -36,12 +37,18 @@ class SignupView extends GetView<SignupController> {
                 ],
               ),
               SizedBox(height: 18.h),
-              _buildBrandMark(),
+              SvgPicture.asset(
+                'assets/icons_svg/app_icon.svg',
+                width: 80.w,
+                fit: BoxFit.cover,
+              ),
               SizedBox(height: 14.h),
               Text(
                 'welcome'.tr,
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontSize: AppFont.font40.sp.clamp(AppFont.font28, AppFont.font52).toDouble(),
+                  fontSize: AppFont.font40.sp
+                      .clamp(AppFont.font28, AppFont.font52)
+                      .toDouble(),
                   height: 1,
                 ),
               ),
@@ -205,7 +212,9 @@ class SignupView extends GetView<SignupController> {
                               disabledBackgroundColor: AppColors.primaryGreen
                                   .withValues(alpha: 0.6),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(kRadius34.r),
+                                borderRadius: BorderRadius.circular(
+                                  kRadius34.r,
+                                ),
                               ),
                               elevation: 10,
                               shadowColor: AppColors.primaryGreen.withAlpha(70),
@@ -347,24 +356,6 @@ class SignupView extends GetView<SignupController> {
     );
   }
 
-  Widget _buildBrandMark() {
-    return Container(
-      width: 110.w,
-      height: 110.w,
-      decoration: BoxDecoration(
-        color: AppColors.legacyColorFF7CEE3E,
-        borderRadius: BorderRadius.circular(kRadius38.r),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: AppColors.legacyColor22000000,
-            offset: Offset(0, 8),
-            blurRadius: 12,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEmailPhoneSwitcher() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
@@ -408,7 +399,9 @@ class SignupView extends GetView<SignupController> {
         duration: const Duration(milliseconds: 180),
         padding: EdgeInsets.symmetric(vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.legacyColorFFF0F0F0 : AppColors.transparent,
+          color: isSelected
+              ? AppColors.legacyColorFFF0F0F0
+              : AppColors.transparent,
           borderRadius: BorderRadius.circular(kRadius18.r),
         ),
         alignment: Alignment.center,
@@ -417,7 +410,9 @@ class SignupView extends GetView<SignupController> {
           style: TextStyle(
             fontSize: AppFont.font15.sp,
             fontWeight: FontWeight.w700,
-            color: isSelected ? AppColors.primaryGreen : AppColors.legacyColorFF5A5A5A,
+            color: isSelected
+                ? AppColors.primaryGreen
+                : AppColors.legacyColorFF5A5A5A,
           ),
         ),
       ),
@@ -462,7 +457,11 @@ class SignupView extends GetView<SignupController> {
           color: AppColors.legacyColorFF3E4042,
         ),
         decoration: InputDecoration(
-          prefixIcon: Icon(prefix, color: AppColors.legacyColorFF676767, size: 23.sp),
+          prefixIcon: Icon(
+            prefix,
+            color: AppColors.legacyColorFF676767,
+            size: 23.sp,
+          ),
           suffixIcon: suffix,
           hintText: hint,
           hintStyle: TextStyle(

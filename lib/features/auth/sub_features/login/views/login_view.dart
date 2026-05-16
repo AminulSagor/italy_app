@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import '../../../../../routes/routes.dart';
@@ -27,12 +28,18 @@ class LoginView extends StatelessWidget {
                 SizedBox(height: 8.h),
                 _buildLanguageSwitcher(controller),
                 SizedBox(height: 16.h),
-                _buildBrandMark(),
+                SvgPicture.asset(
+                  'assets/icons_svg/app_icon.svg',
+                  width: 110.w,
+                  fit: BoxFit.cover,
+                ),
                 SizedBox(height: 14.h),
                 Text(
                   'app_name'.tr,
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontSize: AppFont.font40.sp.clamp(AppFont.font24, AppFont.font48).toDouble(),
+                    fontSize: AppFont.font40.sp
+                        .clamp(AppFont.font24, AppFont.font48)
+                        .toDouble(),
                     height: 1,
                   ),
                 ),
@@ -138,7 +145,9 @@ class LoginView extends StatelessWidget {
                                 disabledBackgroundColor: AppColors.primaryGreen
                                     .withValues(alpha: 0.6),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(kRadius34.r),
+                                  borderRadius: BorderRadius.circular(
+                                    kRadius34.r,
+                                  ),
                                 ),
                                 elevation: 0,
                               ),
@@ -154,7 +163,12 @@ class LoginView extends StatelessWidget {
                                   : Text(
                                       'log_in'.tr,
                                       style: TextStyle(
-                                        fontSize: AppFont.font20.sp.clamp(AppFont.font12, AppFont.font32).toDouble(),
+                                        fontSize: AppFont.font20.sp
+                                            .clamp(
+                                              AppFont.font12,
+                                              AppFont.font32,
+                                            )
+                                            .toDouble(),
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
@@ -256,37 +270,6 @@ class LoginView extends StatelessWidget {
     );
   }
 
-  Widget _buildBrandMark() {
-    return SizedBox(
-      height: 138.h,
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          Container(
-            width: 110.w,
-            height: 110.w,
-            decoration: BoxDecoration(
-              color: AppColors.legacyColorFF7CEE3E,
-              borderRadius: BorderRadius.circular(kRadius38.r),
-            ),
-          ),
-          Positioned(
-            right: -12.w,
-            bottom: 0.h,
-            child: SizedBox(
-              width: 55.sp,
-              height: 55.sp,
-              child: Image.asset(
-                'assets/icons_png/Background_login.png',
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEmailPhoneSwitcher(LoginController controller) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
@@ -330,7 +313,9 @@ class LoginView extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: EdgeInsets.symmetric(vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.legacyColorFFF0F0F0 : AppColors.transparent,
+          color: isSelected
+              ? AppColors.legacyColorFFF0F0F0
+              : AppColors.transparent,
           borderRadius: BorderRadius.circular(kRadius18.r),
         ),
         alignment: Alignment.center,
@@ -339,7 +324,9 @@ class LoginView extends StatelessWidget {
           style: TextStyle(
             fontSize: AppFont.font15.sp,
             fontWeight: FontWeight.w700,
-            color: isSelected ? AppColors.primaryGreen : AppColors.legacyColorFF5A5A5A,
+            color: isSelected
+                ? AppColors.primaryGreen
+                : AppColors.legacyColorFF5A5A5A,
           ),
         ),
       ),
@@ -384,7 +371,11 @@ class LoginView extends StatelessWidget {
           color: AppColors.legacyColorFF3E4042,
         ),
         decoration: InputDecoration(
-          prefixIcon: Icon(prefix, color: AppColors.legacyColorFF676767, size: 23.sp),
+          prefixIcon: Icon(
+            prefix,
+            color: AppColors.legacyColorFF676767,
+            size: 23.sp,
+          ),
           suffixIcon: suffix,
           hintText: hint,
           hintStyle: TextStyle(

@@ -52,6 +52,21 @@ import '../features/home/views/home_view.dart';
 import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_mock_service.dart';
 import '../features/notifications/services/notifications_mock_service.dart';
+import '../features/service_hub/ sub_features/cv_builder/controllers/create_cv_contact_controller.dart';
+import '../features/service_hub/ sub_features/cv_builder/controllers/create_cv_education_controller.dart';
+import '../features/service_hub/ sub_features/cv_builder/controllers/create_cv_experience_controller.dart';
+import '../features/service_hub/ sub_features/cv_builder/controllers/create_cv_summary_controller.dart';
+import '../features/service_hub/ sub_features/cv_builder/controllers/cv_ready_controller.dart';
+import '../features/service_hub/ sub_features/cv_builder/controllers/cv_template_controller.dart';
+import '../features/service_hub/ sub_features/cv_builder/views/choose_cv_template_view.dart';
+import '../features/service_hub/ sub_features/cv_builder/views/create_cv_choice_view.dart';
+import '../features/service_hub/ sub_features/cv_builder/views/create_cv_contact_view.dart';
+import '../features/service_hub/ sub_features/cv_builder/views/create_cv_education_view.dart';
+import '../features/service_hub/ sub_features/cv_builder/views/create_cv_experience_view.dart';
+import '../features/service_hub/ sub_features/cv_builder/views/create_cv_summary_view.dart';
+import '../features/service_hub/ sub_features/cv_builder/views/cv_builder_view.dart';
+import '../features/service_hub/ sub_features/cv_builder/views/cv_ready_view.dart';
+import '../features/splash/splash_view.dart';
 import '../features/splash/splash_controller.dart';
 import '../features/splash/splash_view.dart';
 import '../features/webinar/controllers/webinar_controller.dart';
@@ -265,6 +280,28 @@ class AppPages {
         );
       }),
     ),
+
+    GetPage(name: AppRoutes.cvBuilder, page: () => const CvBuilderView()),
+    GetPage(
+      name: AppRoutes.createCvChoice,
+      page: () => const CreateCvChoiceView(),
+    ),
+    GetPage(
+      name: AppRoutes.chooseCvTemplate,
+      page: () => const ChooseCvTemplateView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CvTemplateController>(() => CvTemplateController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.createCvContact,
+      page: () => const CreateCvContactView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CreateCvContactController>(
+          () => CreateCvContactController(),
+        );
+      }),
+    ),
     GetPage(
       name: AppRoutes.chapterDetail,
       page: () {
@@ -316,6 +353,15 @@ class AppPages {
       }),
     ),
     GetPage(
+      name: AppRoutes.createCvExperience,
+      page: () => const CreateCvExperienceView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CreateCvExperienceController>(
+          () => CreateCvExperienceController(),
+        );
+      }),
+    ),
+    GetPage(
       name: AppRoutes.quiz,
       page: () {
         final Object args = Get.arguments as Object;
@@ -343,6 +389,15 @@ class AppPages {
             questionCount: args.questionCount,
           ),
           tag: args.controllerTag,
+        );
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.createCvEducation,
+      page: () => const CreateCvEducationView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CreateCvEducationController>(
+          () => CreateCvEducationController(),
         );
       }),
     ),
@@ -386,6 +441,15 @@ class AppPages {
             ).enablePro,
           ),
           tag: args.controllerTag,
+        );
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.createCvSummary,
+      page: () => const CreateCvSummaryView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CreateCvSummaryController>(
+          () => CreateCvSummaryController(),
         );
       }),
     ),
@@ -795,6 +859,13 @@ class AppPages {
             fenix: true,
           );
         }
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.cvReady,
+      page: () => const CvReadyView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CvReadyController>(() => CvReadyController());
       }),
     ),
   ];

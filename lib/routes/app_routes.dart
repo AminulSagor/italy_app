@@ -67,4 +67,12 @@ class AppRoutes {
   static const String jobDetails = '/practice-hub/job-details';
   static const String jobPhraseDetails = '/practice-hub/job-phrase-details';
   static const String dailyChallenges = '/practice-hub/daily-challenges';
+  static const String cvBuilder = '/cv-builder';
+  static const String createCvChoice = '/create-cv-choice';
+  static const String chooseCvTemplate = '/choose-cv-template';
+  static const String createCvContact = '/create-cv-contact';
+  static const String createCvExperience = '/create-cv-experience';
+  static const String createCvEducation = '/create-cv-education';
+  static const String createCvSummary = '/create-cv-summary';
+  static const String cvReady = '/cv-ready';
 }
