@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/localization/translation_service.dart';
+import '../../../../../core/services/api_error_handler.dart';
+import '../../../../../core/services/auth_service.dart';
 import '../../../../../routes/routes.dart';
 import '../../../models/auth_models.dart';
 import '../models/signup_models.dart';
 
 class SignupController extends GetxController {
   final TranslationService _translationService = Get.find<TranslationService>();
+  final AuthService _authService = Get.find<AuthService>();
+
   final Rx<SignupFormModel> form = SignupFormModel.initial().obs;
   final Rx<SignupOtpUiModel> otpUi = SignupOtpUiModel.initial().obs;
   final Rx<SignupAccountCreatedUiModel> accountCreatedUi =
@@ -72,26 +76,32 @@ class SignupController extends GetxController {
       return;
     }
 
-    if (current.fullName.trim().isEmpty ||
-        current.identifier.trim().isEmpty ||
-        current.password.trim().isEmpty) {
+    final String normalizedFullName = current.fullName.trim();
+    final String normalizedIdentifier = _normalizeIdentifier(
+      identifier: current.identifier,
+      isEmailMode: current.isEmailMode,
+    );
+    final String normalizedPassword = current.password.trim();
+
+    if (normalizedFullName.isEmpty ||
+        normalizedIdentifier.isEmpty ||
+        normalizedPassword.isEmpty) {
       Get.snackbar('snack_missing_info'.tr, 'snack_fill_required'.tr);
       return;
     }
 
-    if (current.isEmailMode && !GetUtils.isEmail(current.identifier.trim())) {
+    if (current.isEmailMode && !GetUtils.isEmail(normalizedIdentifier)) {
       Get.snackbar('snack_invalid_email'.tr, 'snack_enter_valid_email'.tr);
       return;
     }
 
-    if (!current.isEmailMode &&
-        !GetUtils.isPhoneNumber(current.identifier.trim())) {
+    if (!current.isEmailMode && !_isSupportedPhone(normalizedIdentifier)) {
       Get.snackbar('snack_invalid_phone'.tr, 'snack_enter_valid_phone'.tr);
       return;
     }
 
-    if (current.password.trim().length < 8) {
-      Get.snackbar('snack_weak_password'.tr, 'snack_password_min_8'.tr);
+    if (!_isStrongPassword(normalizedPassword)) {
+      Get.snackbar('snack_weak_password'.tr, 'snack_need_upper_number'.tr);
       return;
     }
 
@@ -100,14 +110,9 @@ class SignupController extends GetxController {
       return;
     }
 
-    final String normalizedFullName = current.fullName.trim();
-    final String normalizedIdentifier = current.identifier.trim();
-    final String normalizedPassword = current.password.trim();
-
     final SignupPayloadModel payload = SignupPayloadModel(
       fullName: normalizedFullName,
       password: normalizedPassword,
-      language: current.selectedLanguage,
       email: current.isEmailMode ? normalizedIdentifier : null,
       phone: current.isEmailMode ? null : normalizedIdentifier,
     );
@@ -131,9 +136,33 @@ class SignupController extends GetxController {
     form.value = form.value.copyWith(isLoading: true);
 
     try {
-      // Service integration will consume this payload in the next step.
-      debugPrint('Signup payload ready: ${payload.toJson()}');
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+      final ApiResult<SignupResultModel> result = await ApiErrorHandler.call(
+        () => _authService.signup(payload),
+      );
+
+      if (!result.isSuccess || result.data == null) {
+        return;
+      }
+
+      final SignupResultModel signupResult = result.data!;
+      pendingPayload.value = payload.copyWith(
+        email: current.isEmailMode ? signupResult.identifier : null,
+        phone: current.isEmailMode ? null : signupResult.identifier,
+      );
+      accountCreatedUi.value = accountCreatedUi.value.copyWith(
+        identifier: signupResult.identifier,
+      );
+      otpUi.value = otpUi.value.copyWith(
+        maskedIdentifier: _maskedIdentifier(
+          identifier: signupResult.identifier,
+          isEmailMode: current.isEmailMode,
+        ),
+      );
+
+      if (signupResult.devOtp != null && signupResult.devOtp!.isNotEmpty) {
+        Get.snackbar('OTP', signupResult.devOtp!);
+      }
+
       Get.toNamed(AppRoutes.signupOtp);
     } finally {
       form.value = form.value.copyWith(isLoading: false);
@@ -164,11 +193,31 @@ class SignupController extends GetxController {
       return;
     }
 
+    final SignupPayloadModel? payload = pendingPayload.value;
+    final String identifier = payload?.email ?? payload?.phone ?? '';
+    if (identifier.isEmpty) {
+      Get.snackbar('snack_unable_resend'.tr, 'snack_payload_not_ready'.tr);
+      return;
+    }
+
     otpUi.value = otpUi.value.copyWith(isResending: true);
     try {
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+      final ApiResult<OtpResponseModel> result = await ApiErrorHandler.call(
+        () => _authService.resendOtp(identifier: identifier),
+      );
+
+      if (!result.isSuccess) {
+        return;
+      }
+
       _clearOtpInputs();
-      Get.snackbar('snack_code_resent'.tr, 'snack_fresh_code_sent'.tr);
+      final String? devOtp = result.data?.devOtp;
+      Get.snackbar(
+        'snack_code_resent'.tr,
+        devOtp != null && devOtp.isNotEmpty
+            ? devOtp
+            : 'snack_fresh_code_sent'.tr,
+      );
     } finally {
       otpUi.value = otpUi.value.copyWith(isResending: false);
     }
@@ -195,14 +244,23 @@ class SignupController extends GetxController {
       return;
     }
 
-    pendingOtpVerificationPayload.value = OtpVerificationPayloadModel(
-      code: currentOtpUi.code,
-      identifier: identifier,
-    );
+    final OtpVerificationPayloadModel verifyPayload =
+        OtpVerificationPayloadModel(
+          code: currentOtpUi.code,
+          identifier: identifier,
+        );
+    pendingOtpVerificationPayload.value = verifyPayload;
 
     otpUi.value = otpUi.value.copyWith(isVerifying: true);
     try {
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+      final ApiResult<AuthTokenResultModel> result = await ApiErrorHandler.call(
+        () => _authService.verifyOtp(verifyPayload),
+      );
+
+      if (!result.isSuccess) {
+        return;
+      }
+
       Get.toNamed(AppRoutes.accountCreated);
     } finally {
       otpUi.value = otpUi.value.copyWith(isVerifying: false);
@@ -216,8 +274,7 @@ class SignupController extends GetxController {
 
     accountCreatedUi.value = accountCreatedUi.value.copyWith(isStarting: true);
     try {
-      await Future<void>.delayed(const Duration(milliseconds: 350));
-      Get.offAllNamed(AppRoutes.home);
+      Get.offAllNamed(AppRoutes.wrapper);
     } finally {
       accountCreatedUi.value = accountCreatedUi.value.copyWith(
         isStarting: false,
@@ -246,6 +303,41 @@ class SignupController extends GetxController {
       otpController.clear();
     }
     otpUi.value = otpUi.value.copyWith(codeDigits: <String>['', '', '', '']);
+  }
+
+  String _normalizeIdentifier({
+    required String identifier,
+    required bool isEmailMode,
+  }) {
+    final String normalized = identifier.trim();
+    if (isEmailMode || normalized.startsWith('+')) {
+      return isEmailMode ? normalized.toLowerCase() : normalized;
+    }
+
+    final String digitsOnly = normalized.replaceAll(RegExp(r'\D'), '');
+    if (digitsOnly.startsWith('01') && digitsOnly.length == 11) {
+      return '+88$digitsOnly';
+    }
+
+    if (digitsOnly.startsWith('8801') && digitsOnly.length == 13) {
+      return '+$digitsOnly';
+    }
+
+    if (digitsOnly.startsWith('39') && digitsOnly.length >= 10) {
+      return '+$digitsOnly';
+    }
+
+    return normalized;
+  }
+
+  bool _isSupportedPhone(String phone) {
+    return RegExp(r'^(?:\+8801\d{9}|\+39\d{8,11})$').hasMatch(phone);
+  }
+
+  bool _isStrongPassword(String password) {
+    return RegExp(
+      r'^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$',
+    ).hasMatch(password);
   }
 
   String _maskedIdentifier({

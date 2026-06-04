@@ -8,14 +8,16 @@ import '../models/webinar_models.dart';
 import 'webinar_common_widgets.dart';
 
 class WebinarLiveHeroCard extends StatelessWidget {
-  final WebinarModel webinar;
-  final VoidCallback onJoinTap;
-
   const WebinarLiveHeroCard({
     super.key,
     required this.webinar,
     required this.onJoinTap,
+    required this.isJoining,
   });
+
+  final WebinarItemModel webinar;
+  final VoidCallback onJoinTap;
+  final bool isJoining;
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +38,19 @@ class WebinarLiveHeroCard extends StatelessWidget {
         borderRadius: BorderRadius.circular((kWebinarHeroRadius - 2).r),
         child: Stack(
           children: <Widget>[
-            const Positioned.fill(
-              child: WebinarTeacherImage(
-                alt: true,
-                borderRadius: kWebinarHeroRadius,
+            Positioned.fill(child: WebinarThumbnail(url: webinar.thumbnailImageUrl)),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[
+                      AppColors.transparent,
+                      AppColors.black.withValues(alpha: 0.62),
+                    ],
+                  ),
+                ),
               ),
             ),
             Positioned(right: 18.w, top: 16.h, child: const WebinarLiveBadge()),
@@ -53,6 +64,8 @@ class WebinarLiveHeroCard extends StatelessWidget {
                     Text(
                       webinar.title,
                       textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: AppFont.font20.sp,
                         fontWeight: FontWeight.w700,
@@ -62,64 +75,52 @@ class WebinarLiveHeroCard extends StatelessWidget {
                     ),
                     SizedBox(height: 10.h),
                     Text(
-                      'Host: ${webinar.hostName}',
+                      'Host: ${webinar.hostTeacherName}',
                       style: TextStyle(
                         fontSize: AppFont.font16.sp,
                         fontWeight: FontWeight.w500,
                         color: AppColors.limeTextColor,
-                        height: 1.1,
                       ),
-                    ),
-                    SizedBox(height: 2.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.group_outlined,
-                          size: 14.w,
-                          color: AppColors.limeTextColor,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          '${webinar.learnersJoined} Learners Joined',
-                          style: TextStyle(
-                            fontSize: AppFont.font16.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.limeTextColor,
-                          ),
-                        ),
-                      ],
                     ),
                     SizedBox(height: 12.h),
                     GestureDetector(
-                      onTap: onJoinTap,
+                      onTap: isJoining ? null : onJoinTap,
                       child: Container(
                         height: 46.h,
                         width: 140.w,
                         decoration: BoxDecoration(
                           color: AppColors.legacyColorFFD5D5D5,
-                          borderRadius: BorderRadius.circular(
-                            kHomePillRadius.r,
-                          ),
+                          borderRadius: BorderRadius.circular(kHomePillRadius.r),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              'Join Now',
-                              style: TextStyle(
-                                fontSize: AppFont.font14.sp,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.black,
-                              ),
-                            ),
-                            SizedBox(width: 6.w),
-                            Icon(
-                              Icons.play_arrow_rounded,
-                              color: AppColors.primaryGreen,
-                              size: 22.w,
-                            ),
-                          ],
+                        child: Center(
+                          child: isJoining
+                              ? SizedBox(
+                                  width: 20.w,
+                                  height: 20.w,
+                                  child: const CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primaryGreen,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                      'Join Now',
+                                      style: TextStyle(
+                                        fontSize: AppFont.font14.sp,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppColors.black,
+                                      ),
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    Icon(
+                                      Icons.play_arrow_rounded,
+                                      color: AppColors.primaryGreen,
+                                      size: 22.w,
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
                     ),
@@ -134,49 +135,70 @@ class WebinarLiveHeroCard extends StatelessWidget {
   }
 }
 
+class WebinarThumbnail extends StatelessWidget {
+  const WebinarThumbnail({super.key, required this.url});
+
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    final String imageUrl = url?.trim() ?? '';
+    if (imageUrl.isEmpty) return const _ThumbnailFallback();
+
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => const _ThumbnailFallback(),
+      loadingBuilder: (_, Widget child, ImageChunkEvent? progress) {
+        if (progress == null) return child;
+        return const _ThumbnailFallback();
+      },
+    );
+  }
+}
+
+class _ThumbnailFallback extends StatelessWidget {
+  const _ThumbnailFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.legacyColorFFECEFF0,
+      child: Center(
+        child: Icon(
+          Icons.image_not_supported_outlined,
+          color: AppColors.bodyText,
+          size: 42.w,
+        ),
+      ),
+    );
+  }
+}
+
 class WebinarSectionHeader extends StatelessWidget {
   const WebinarSectionHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Text(
-          'Upcoming Sessions',
-          style: TextStyle(
-            fontSize: AppFont.font20.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.homePrimaryText,
-          ),
-        ),
-        SizedBox(width: 10.w),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-          decoration: BoxDecoration(
-            color: AppColors.homePaleGreen,
-            borderRadius: BorderRadius.circular(kHomePillRadius.r),
-          ),
-          child: Text(
-            'Free',
-            style: TextStyle(
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primaryGreen,
-            ),
-          ),
-        ),
-      ],
+    return Text(
+      'Upcoming Sessions',
+      style: TextStyle(
+        fontSize: AppFont.font20.sp,
+        fontWeight: FontWeight.w700,
+        color: AppColors.homePrimaryText,
+      ),
     );
   }
 }
 
 class WebinarSessionCard extends StatelessWidget {
-  final WebinarSessionModel session;
+  const WebinarSessionCard({super.key, required this.webinar});
 
-  const WebinarSessionCard({super.key, required this.session});
+  final WebinarItemModel webinar;
 
   @override
   Widget build(BuildContext context) {
+    final DateTime? dateTime = webinar.dateTime;
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
@@ -203,7 +225,7 @@ class WebinarSessionCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  session.month,
+                  _monthLabel(dateTime),
                   style: TextStyle(
                     fontSize: AppFont.font10.sp,
                     fontWeight: FontWeight.w500,
@@ -212,7 +234,7 @@ class WebinarSessionCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  session.day,
+                  dateTime?.day.toString().padLeft(2, '0') ?? '--',
                   style: TextStyle(
                     fontSize: AppFont.font24.sp,
                     fontWeight: FontWeight.w800,
@@ -226,11 +248,12 @@ class WebinarSessionCard extends StatelessWidget {
           SizedBox(width: 16.w),
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  session.title,
+                  webinar.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: AppFont.font18.sp,
                     fontWeight: FontWeight.w700,
@@ -240,7 +263,7 @@ class WebinarSessionCard extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '${session.timeLabel}\n• ${session.levelLabel}',
+                  'Starts at ${_timeLabel(dateTime)}\nHost: ${webinar.hostTeacherName}',
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w400,
@@ -251,20 +274,52 @@ class WebinarSessionCard extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            width: 46.w,
-            height: 46.w,
-            decoration: const BoxDecoration(
-              color: AppColors.webinarControlBg,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.notifications_none_rounded,
-              color: AppColors.bodyText,
-              size: 24.w,
-            ),
-          ),
         ],
+      ),
+    );
+  }
+
+  String _monthLabel(DateTime? dateTime) {
+    if (dateTime == null) return 'N/A';
+    const List<String> months = <String>[
+      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+    ];
+    return months[dateTime.month - 1];
+  }
+
+  String _timeLabel(DateTime? dateTime) {
+    if (dateTime == null) return 'Not available';
+    final int hour = dateTime.hour;
+    final int minute = dateTime.minute;
+    final String suffix = hour >= 12 ? 'PM' : 'AM';
+    final int displayHour = hour % 12 == 0 ? 12 : hour % 12;
+    return '$displayHour:${minute.toString().padLeft(2, '0')} $suffix';
+  }
+}
+
+class WebinarEmptyState extends StatelessWidget {
+  const WebinarEmptyState({super.key, required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 34.h),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(kRadius28.r),
+      ),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: AppFont.font15.sp,
+          fontWeight: FontWeight.w500,
+          color: AppColors.bodyText,
+        ),
       ),
     );
   }

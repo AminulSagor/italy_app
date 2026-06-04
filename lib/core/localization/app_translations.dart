@@ -130,7 +130,7 @@ appTranslations = <String, Map<String, String>>{
     'snack_session_expired': 'Session expired',
     'snack_verify_again': 'Please verify your code again.',
     'snack_need_upper_number':
-        'Password needs at least one uppercase letter and one number.',
+        'Password needs uppercase, number, and special character.',
     'snack_mismatch': 'Mismatch',
     'snack_passwords_match': 'Both password fields must match.',
     'snack_could_not_reset': 'Could not reset',
@@ -262,7 +262,7 @@ appTranslations = <String, Map<String, String>>{
     'snack_session_expired': 'সেশন শেষ হয়েছে',
     'snack_verify_again': 'আবার কোড যাচাই করুন।',
     'snack_need_upper_number':
-        'পাসওয়ার্ডে অন্তত একটি বড় হাতের অক্ষর ও একটি সংখ্যা লাগবে।',
+        'পাসওয়ার্ডে বড় হাতের অক্ষর, সংখ্যা এবং বিশেষ চিহ্ন থাকতে হবে।',
     'snack_mismatch': 'মেলেনি',
     'snack_passwords_match': 'দুই পাসওয়ার্ড এক হতে হবে।',
     'snack_could_not_reset': 'রিসেট করা যায়নি',
@@ -399,7 +399,7 @@ appTranslations = <String, Map<String, String>>{
     'snack_session_expired': 'Sessione scaduta',
     'snack_verify_again': 'Verifica di nuovo il codice.',
     'snack_need_upper_number':
-        'La password deve contenere almeno una maiuscola e un numero.',
+        'La password deve contenere maiuscola, numero e carattere speciale.',
     'snack_mismatch': 'Non corrisponde',
     'snack_passwords_match': 'Le due password devono coincidere.',
     'snack_could_not_reset': 'Impossibile reimpostare',

@@ -70,7 +70,10 @@ import '../features/splash/splash_view.dart';
 import '../features/splash/splash_controller.dart';
 import '../features/splash/splash_view.dart';
 import '../features/webinar/controllers/webinar_controller.dart';
-import '../features/webinar/services/webinar_mock_service.dart';
+import '../features/webinar/services/webinar_agora_service.dart';
+import '../features/webinar/services/webinar_api_service.dart';
+import '../features/webinar/services/webinar_socket_service.dart';
+import '../core/services/api_client.dart';
 import '../features/webinar/views/webinar_live_view.dart';
 import '../features/webinar/views/webinar_view.dart';
 import 'app_route_arguments.dart';
@@ -565,14 +568,25 @@ class AppPages {
       name: AppRoutes.webinar,
       page: () => const WebinarView(),
       binding: BindingsBuilder(() {
-        if (!Get.isRegistered<WebinarMockService>()) {
-          Get.lazyPut<WebinarMockService>(() => WebinarMockService());
+        if (!Get.isRegistered<WebinarApiService>()) {
+          Get.lazyPut<WebinarApiService>(
+            () => WebinarApiService(apiClient: Get.find<ApiClient>()),
+          );
+        }
+        if (!Get.isRegistered<WebinarAgoraService>()) {
+          Get.lazyPut<WebinarAgoraService>(() => WebinarAgoraService());
+        }
+        if (!Get.isRegistered<WebinarSocketService>()) {
+          Get.lazyPut<WebinarSocketService>(() => WebinarSocketService());
         }
         if (!Get.isRegistered<WebinarController>()) {
           Get.lazyPut<WebinarController>(
             () => WebinarController(
-              webinarMockService: Get.find<WebinarMockService>(),
+              webinarApiService: Get.find<WebinarApiService>(),
+              webinarAgoraService: Get.find<WebinarAgoraService>(),
+              webinarSocketService: Get.find<WebinarSocketService>(),
             ),
+            fenix: true,
           );
         }
       }),
@@ -710,14 +724,25 @@ class AppPages {
       name: AppRoutes.webinarLive,
       page: () => const WebinarLiveView(),
       binding: BindingsBuilder(() {
-        if (!Get.isRegistered<WebinarMockService>()) {
-          Get.lazyPut<WebinarMockService>(() => WebinarMockService());
+        if (!Get.isRegistered<WebinarApiService>()) {
+          Get.lazyPut<WebinarApiService>(
+            () => WebinarApiService(apiClient: Get.find<ApiClient>()),
+          );
+        }
+        if (!Get.isRegistered<WebinarAgoraService>()) {
+          Get.lazyPut<WebinarAgoraService>(() => WebinarAgoraService());
+        }
+        if (!Get.isRegistered<WebinarSocketService>()) {
+          Get.lazyPut<WebinarSocketService>(() => WebinarSocketService());
         }
         if (!Get.isRegistered<WebinarController>()) {
           Get.lazyPut<WebinarController>(
             () => WebinarController(
-              webinarMockService: Get.find<WebinarMockService>(),
+              webinarApiService: Get.find<WebinarApiService>(),
+              webinarAgoraService: Get.find<WebinarAgoraService>(),
+              webinarSocketService: Get.find<WebinarSocketService>(),
             ),
+            fenix: true,
           );
         }
       }),

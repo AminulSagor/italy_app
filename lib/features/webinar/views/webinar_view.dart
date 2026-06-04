@@ -18,56 +18,89 @@ class WebinarView extends GetView<WebinarController> {
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
         child: Obx(() {
-          final WebinarModel? data = controller.webinar.value;
-          if (controller.isLoading.value && data == null) {
+          if (controller.isLoading.value &&
+              controller.liveWebinars.isEmpty &&
+              controller.upcomingWebinars.isEmpty) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primaryGreen),
             );
           }
 
-          if (data == null) {
-            return const SizedBox.shrink();
-          }
-
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              kWebinarHorizontalPadding.w,
-              10.h,
-              kWebinarHorizontalPadding.w,
-              36.h,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                WebinarPageHeader(
-                  title: 'Live Webinars',
-                  onBackTap: () => Get.back<void>(),
-                ),
-                SizedBox(height: 20.h),
-                WebinarLiveHeroCard(
-                  webinar: data,
-                  onJoinTap: controller.openLiveSession,
-                ),
-                SizedBox(height: 30.h),
-                const WebinarSectionHeader(),
-                SizedBox(height: 24.h),
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: data.upcomingSessions.length,
-                  separatorBuilder: (_, __) => SizedBox(height: 20.h),
-                  itemBuilder: (_, int index) {
-                    return WebinarSessionCard(
-                      session: data.upcomingSessions[index],
-                    );
-                  },
-                ),
-              ],
+          return RefreshIndicator(
+            color: AppColors.primaryGreen,
+            onRefresh: controller.loadWebinars,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: EdgeInsets.fromLTRB(
+                kWebinarHorizontalPadding.w,
+                10.h,
+                kWebinarHorizontalPadding.w,
+                36.h,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  WebinarPageHeader(
+                    title: 'Live Webinars',
+                    onBackTap: () => Get.back<void>(),
+                  ),
+                  SizedBox(height: 20.h),
+                  if (controller.liveWebinars.isEmpty)
+                    const WebinarEmptyState(
+                      message: 'No live webinars are available right now.',
+                    )
+                  else
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: controller.liveWebinars.length,
+                      separatorBuilder: (_, __) => SizedBox(height: 18.h),
+                      itemBuilder: (_, int index) {
+                        final WebinarItemModel webinar =
+                            controller.liveWebinars[index];
+                        return WebinarLiveHeroCard(
+                          webinar: webinar,
+                          isJoining: controller.isJoining.value &&
+                              controller.selectedWebinar.value?.id == webinar.id,
+                          onJoinTap: () => controller.openLiveSession(webinar),
+                        );
+                      },
+                    ),
+                  SizedBox(height: 30.h),
+                  const WebinarSectionHeader(),
+                  SizedBox(height: 24.h),
+                  _UpcomingList(webinars: controller.upcomingWebinars),
+                ],
+              ),
             ),
           );
         }),
       ),
+    );
+  }
+}
+
+class _UpcomingList extends StatelessWidget {
+  const _UpcomingList({required this.webinars});
+
+  final List<WebinarItemModel> webinars;
+
+  @override
+  Widget build(BuildContext context) {
+    if (webinars.isEmpty) {
+      return const WebinarEmptyState(message: 'No upcoming webinars found.');
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: webinars.length,
+      separatorBuilder: (_, __) => SizedBox(height: 20.h),
+      itemBuilder: (_, int index) {
+        return WebinarSessionCard(webinar: webinars[index]);
+      },
     );
   }
 }

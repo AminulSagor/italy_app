@@ -8,11 +8,13 @@ import '../../../features/notifications/controllers/notifications_controller.dar
 import '../../../features/notifications/services/notifications_mock_service.dart';
 import '../../../features/notifications/views/notifications_bottom_sheet.dart';
 import '../../localization/translation_service.dart';
+import '../../services/auth_service.dart';
 import '../../themes/app_colors.dart';
 import '../../../routes/routes.dart';
 
 class NavbarAndAppbarWrapperController extends GetxController {
   final TranslationService _translationService = Get.find<TranslationService>();
+  final AuthService _authService = Get.find<AuthService>();
   final RxInt currentIndex = 0.obs;
   final RxBool isMessagesPageOpen = false.obs;
   final RxSet<int> visitedTabs = <int>{0}.obs;
@@ -119,4 +121,10 @@ class NavbarAndAppbarWrapperController extends GetxController {
   void onShopTap() {
     Get.toNamed(AppRoutes.shop);
   }
+
+  Future<void> onLogoutTap() async {
+    await _authService.logout();
+    Get.offAllNamed(AppRoutes.login);
+  }
 }
+

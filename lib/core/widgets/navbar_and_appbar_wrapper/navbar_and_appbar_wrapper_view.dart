@@ -44,6 +44,7 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
         drawer: AppDrawer(
           onLanguageTap: () => controller.onLanguageTap(context),
           onShopTap: controller.onShopTap,
+          onLogoutTap: controller.onLogoutTap,
         ),
         body: Stack(
           children: <Widget>[

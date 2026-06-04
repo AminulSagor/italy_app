@@ -20,15 +20,13 @@ class WebinarLiveView extends GetView<WebinarController> {
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
         final bool shouldPop = await controller.onWillPopLive();
-        if (shouldPop) {
-          Get.back<void>();
-        }
+        if (shouldPop) Get.back<void>();
       },
       child: Scaffold(
         backgroundColor: AppColors.homeBackground,
         body: SafeArea(
           child: Obx(() {
-            final WebinarModel? data = controller.webinar.value;
+            final WebinarItemModel? data = controller.selectedWebinar.value;
             if (data == null) {
               return const Center(
                 child: CircularProgressIndicator(color: AppColors.primaryGreen),
@@ -66,70 +64,73 @@ class WebinarLiveView extends GetView<WebinarController> {
 }
 
 class _ChatBody extends StatelessWidget {
-  final WebinarModel data;
-  final WebinarController controller;
-
   const _ChatBody({required this.data, required this.controller});
+
+  final WebinarItemModel data;
+  final WebinarController controller;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        WebinarLiveHeader(webinar: data, onBackTap: () => Get.back<void>()),
+        WebinarLiveHeader(webinar: data, controller: controller),
         SizedBox(height: 24.h),
-        WebinarVideoCard(
-          webinar: data,
-          alt: controller.isLiveVideoAlt.value,
-          showTopHostChip: !controller.isLiveVideoAlt.value,
-        ),
+        WebinarVideoCard(webinar: data, controller: controller),
         SizedBox(height: 20.h),
-        if (controller.isChatFocused.value) ...<Widget>[
-          WebinarRequestButton(
-            text: 'Back To Participation',
-            onTap: controller.backToParticipation,
-          ),
-          SizedBox(height: 20.h),
-        ] else ...<Widget>[
-          WebinarRequestButton(
-            text: 'Request To Participate',
+        Obx(
+          () => WebinarRequestButton(
+            text: _requestButtonText(),
             icon: Icons.mic_rounded,
+            isDisabled: controller.isSpeakerPending || controller.isRequesting.value,
             onTap: controller.requestToParticipate,
           ),
-          SizedBox(height: 20.h),
-        ],
+        ),
+        SizedBox(height: 20.h),
         WebinarLiveChatSection(controller: controller),
       ],
     );
   }
+
+  String _requestButtonText() {
+    if (controller.isRequesting.value) return 'Requesting...';
+    if (controller.isSpeakerPending) return 'Pending';
+    if (controller.isSpeakerGranted) return 'Approved';
+    return 'Request To Participate';
+  }
 }
 
 class _ParticipationBody extends StatelessWidget {
-  final WebinarModel data;
-  final WebinarController controller;
-
   const _ParticipationBody({required this.data, required this.controller});
+
+  final WebinarItemModel data;
+  final WebinarController controller;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        WebinarLiveHeader(webinar: data, onBackTap: () => Get.back<void>()),
+        WebinarLiveHeader(webinar: data, controller: controller),
         SizedBox(height: 24.h),
-        WebinarVideoCard(webinar: data, alt: true, showTopHostChip: false),
+        WebinarVideoCard(webinar: data, controller: controller),
         SizedBox(height: 30.h),
         WebinarStageArea(controller: controller),
         SizedBox(height: 32.h),
         WebinarStageControls(controller: controller),
         SizedBox(height: 38.h),
-        CustomButton(
-          onPressed: controller.stopParticipation,
-          text: 'Stop and Leave the Stage',
-          btnColor: AppColors.white,
-          textColor: AppColors.profileRedText,
-          borderColor: AppColors.profileRedText,
-          fontSize: 16.sp,
-          icon: Icons.logout,
+        Obx(
+          () => CustomButton(
+            onPressed: controller.isLeaving.value ? () {} : controller.stopParticipation,
+            isLoading: controller.isLeaving.value,
+            text: controller.isLeaving.value
+                ? 'Leaving Stage...'
+                : 'Stop and Leave the Stage',
+            btnColor: AppColors.white,
+            textColor: AppColors.profileRedText,
+            borderColor: AppColors.profileRedText,
+            fontSize: 16.sp,
+            icon: Icons.logout,
+          ),
         ),
       ],
     );
