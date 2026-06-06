@@ -109,8 +109,9 @@ class WebinarListResponseModel {
 class WebinarParticipantModel {
   const WebinarParticipantModel({
     required this.userId,
+    required this.fullName,
     required this.role,
-    required this.speakingPermission,
+    this.speakingPermission,
     this.profilePhoto,
     this.agoraUid,
     this.joinedAt,
@@ -118,20 +119,23 @@ class WebinarParticipantModel {
   });
 
   final String userId;
+  final String fullName;
   final String role;
-  final String speakingPermission;
+  final String? speakingPermission;
   final String? profilePhoto;
   final int? agoraUid;
   final DateTime? joinedAt;
   final DateTime? leftAt;
 
   bool get canSpeak => speakingPermission == 'granted';
+  bool get isSpeakRequested => speakingPermission == 'requested';
 
   factory WebinarParticipantModel.fromJson(Map<String, dynamic> json) {
     return WebinarParticipantModel(
       userId: json['userId']?.toString() ?? '',
+      fullName: json['fullName']?.toString() ?? 'Not available',
       role: json['role']?.toString() ?? '',
-      speakingPermission: json['speakingPermission']?.toString() ?? 'rejected',
+      speakingPermission: WebinarItemModel._nullableString(json['speakingPermission']),
       profilePhoto: WebinarItemModel._nullableString(json['profilePhoto']),
       agoraUid: _asNullableInt(json['agoraUid']),
       joinedAt: WebinarItemModel._parseDate(json['joinedAt']),
@@ -219,17 +223,95 @@ class WebinarJoinResultModel {
 }
 
 class WebinarLiveChatModel {
+  final String id;
+  final String webinarId;
+  final String senderUserId;
   final String senderName;
+  final String? senderProfilePhoto;
+  final String senderRole;
   final String initials;
   final String message;
   final bool isHost;
+  final DateTime? createdAt;
   final int colorIndex;
 
   const WebinarLiveChatModel({
+    required this.id,
+    required this.webinarId,
+    required this.senderUserId,
     required this.senderName,
-    required this.initials,
     required this.message,
+    required this.initials,
+    this.senderProfilePhoto,
+    this.senderRole = '',
     this.isHost = false,
+    this.createdAt,
     this.colorIndex = 0,
   });
+
+  factory WebinarLiveChatModel.fromJson(Map<String, dynamic> json) {
+    final String senderName =
+        json['senderFullName']?.toString().trim().isNotEmpty == true
+            ? json['senderFullName'].toString().trim()
+            : 'Not available';
+
+    return WebinarLiveChatModel(
+      id: json['id']?.toString() ?? '',
+      webinarId: json['webinarId']?.toString() ?? '',
+      senderUserId: json['senderUserId']?.toString() ?? '',
+      senderName: senderName,
+      senderProfilePhoto: WebinarItemModel._nullableString(
+        json['senderProfilePhoto'],
+      ),
+      senderRole: json['senderRole']?.toString() ?? '',
+      initials: _buildInitials(senderName),
+      message: json['message']?.toString() ?? '',
+      isHost: json['isHost'] == true,
+      createdAt: WebinarItemModel._parseDate(json['createdAt']),
+      colorIndex: json['isHost'] == true ? 1 : 0,
+    );
+  }
+
+  static String _buildInitials(String value) {
+    final List<String> parts = value
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((String item) => item.isNotEmpty)
+        .toList(growable: false);
+
+    if (parts.isEmpty) return 'NA';
+
+    return parts
+        .take(2)
+        .map((String item) => item[0].toUpperCase())
+        .join();
+  }
+}
+
+class WebinarChatMessagesResponseModel {
+  const WebinarChatMessagesResponseModel({
+    required this.webinarId,
+    required this.chatMessages,
+    required this.pagination,
+  });
+
+  final String webinarId;
+  final List<WebinarLiveChatModel> chatMessages;
+  final WebinarPaginationModel pagination;
+
+  factory WebinarChatMessagesResponseModel.fromJson(Map<String, dynamic> json) {
+    final dynamic rawChatMessages = json['chatMessages'];
+    return WebinarChatMessagesResponseModel(
+      webinarId: json['webinarId']?.toString() ?? '',
+      chatMessages: rawChatMessages is List
+          ? rawChatMessages
+              .whereType<Map>()
+              .map((Map item) => WebinarLiveChatModel.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ))
+              .toList(growable: false)
+          : <WebinarLiveChatModel>[],
+      pagination: WebinarPaginationModel.fromJson(_jsonMap(json['pagination'])),
+    );
+  }
 }

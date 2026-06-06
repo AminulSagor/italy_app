@@ -19,7 +19,7 @@ class WebinarStageArea extends StatelessWidget {
     return Obx(() {
       final bool isTalking = controller.isTalking.value;
       return Container(
-        height: kWebinarStagePanelHeight.h,
+        height: double.infinity,
         width: double.infinity,
         padding: EdgeInsets.fromLTRB(22.w, 24.h, 22.w, 22.h),
         decoration: BoxDecoration(
@@ -43,7 +43,12 @@ class WebinarStageArea extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular((kWebinarStageRadius - 8).r),
-          child: _LocalStageVideo(controller: controller),
+          child: Stack(
+            children: <Widget>[
+              Positioned.fill(child: _LocalStageVideo(controller: controller)),
+              Positioned.fill(child: _StageMessagePreview(controller: controller)),
+            ],
+          ),
         ),
       );
     });
@@ -67,7 +72,10 @@ class _LocalStageVideo extends StatelessWidget {
         return AgoraVideoView(
           controller: VideoViewController(
             rtcEngine: engine,
-            canvas: const VideoCanvas(uid: 0),
+            canvas: const VideoCanvas(
+              uid: 0,
+              renderMode: RenderModeType.renderModeFit,
+            ),
           ),
         );
       }
@@ -100,7 +108,17 @@ class _StagePlaceholder extends StatelessWidget {
             ),
           ),
         ),
-        Positioned.fill(child: _StageMessagePreview(controller: controller)),
+        Center(
+          child: Text(
+            'Your video will appear here when camera is on.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: AppFont.font14.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.bodyText,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -115,18 +133,7 @@ class _StageMessagePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final List<WebinarLiveChatModel> messages = controller.latestStageMessages;
-      if (messages.isEmpty) {
-        return Center(
-          child: Text(
-            'Your video will appear here when camera is on.',
-            style: TextStyle(
-              fontSize: AppFont.font14.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.bodyText,
-            ),
-          ),
-        );
-      }
+      if (messages.isEmpty) return const SizedBox.shrink();
 
       return Stack(
         children: List<Widget>.generate(messages.length, (int index) {
@@ -138,9 +145,9 @@ class _StageMessagePreview extends StatelessWidget {
             _ => 0.24,
           };
           return Positioned(
-            left: 42.w + (visualIndex * 16.w),
-            right: 8.w + (visualIndex * 10.w),
-            bottom: 20.h + (visualIndex * 46.h),
+            left: 14.w,
+            right: 14.w,
+            bottom: 16.h + (visualIndex * 42.h),
             child: Opacity(
               opacity: opacity,
               child: _StageMessageChip(message: message),
@@ -162,7 +169,7 @@ class _StageMessageChip extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.88),
+        color: AppColors.black.withValues(alpha: 0.42),
         borderRadius: BorderRadius.circular(kHomePillRadius.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
@@ -192,7 +199,7 @@ class _StageMessageChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: AppFont.font14.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.homePrimaryText,
+                color: AppColors.white,
               ),
             ),
           ),

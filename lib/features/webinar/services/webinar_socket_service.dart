@@ -17,6 +17,8 @@ class WebinarSocketService {
         onSpeakerApproved,
     required void Function(WebinarParticipantModel participant)
         onSpeakerRejected,
+    required void Function(WebinarLiveChatModel chatMessage)
+        onChatMessageCreated,
   }) {
     disconnect();
 
@@ -48,6 +50,11 @@ class WebinarSocketService {
       if (participant != null) onSpeakerRejected(participant);
     });
 
+    _socket?.on('webinar_chat_message_created', (dynamic data) {
+      final WebinarLiveChatModel? chatMessage = _chatMessageFromEvent(data);
+      if (chatMessage != null) onChatMessageCreated(chatMessage);
+    });
+
     _socket?.connect();
   }
 
@@ -60,6 +67,15 @@ class WebinarSocketService {
   void disconnect() {
     _socket?.dispose();
     _socket = null;
+  }
+
+  WebinarLiveChatModel? _chatMessageFromEvent(dynamic data) {
+    if (data is! Map) return null;
+    final dynamic rawChatMessage = data['chatMessage'];
+    if (rawChatMessage is! Map) return null;
+    return WebinarLiveChatModel.fromJson(
+      Map<String, dynamic>.from(rawChatMessage),
+    );
   }
 
   WebinarParticipantModel? _participantFromEvent(dynamic data) {

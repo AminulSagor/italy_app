@@ -33,28 +33,16 @@ class WebinarLiveView extends GetView<WebinarController> {
               );
             }
 
-            return Stack(
-              children: <Widget>[
-                SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(
-                    kWebinarHorizontalPadding.w,
-                    10.h,
-                    kWebinarHorizontalPadding.w,
-                    controller.isParticipating.value ? 124.h : 112.h,
-                  ),
-                  child: controller.isParticipating.value
-                      ? _ParticipationBody(data: data, controller: controller)
-                      : _ChatBody(data: data, controller: controller),
-                ),
-                if (!controller.isParticipating.value)
-                  Positioned(
-                    left: kWebinarHorizontalPadding.w,
-                    right: kWebinarHorizontalPadding.w,
-                    bottom: 24.h,
-                    child: WebinarChatInput(controller: controller),
-                  ),
-              ],
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                kWebinarHorizontalPadding.w,
+                10.h,
+                kWebinarHorizontalPadding.w,
+                20.h,
+              ),
+              child: controller.isParticipating.value
+                  ? _ParticipationBody(data: data, controller: controller)
+                  : _ChatBody(data: data, controller: controller),
             );
           }),
         ),
@@ -75,19 +63,22 @@ class _ChatBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         WebinarLiveHeader(webinar: data, controller: controller),
-        SizedBox(height: 24.h),
-        WebinarVideoCard(webinar: data, controller: controller),
         SizedBox(height: 20.h),
+        WebinarVideoCard(webinar: data, controller: controller),
+        SizedBox(height: 16.h),
         Obx(
           () => WebinarRequestButton(
             text: _requestButtonText(),
             icon: Icons.mic_rounded,
-            isDisabled: controller.isSpeakerPending || controller.isRequesting.value,
+            isDisabled:
+                controller.isSpeakerPending || controller.isRequesting.value,
             onTap: controller.requestToParticipate,
           ),
         ),
-        SizedBox(height: 20.h),
-        WebinarLiveChatSection(controller: controller),
+        SizedBox(height: 16.h),
+        Expanded(child: WebinarLiveChatSection(controller: controller)),
+        SizedBox(height: 14.h),
+        WebinarChatInput(controller: controller),
       ],
     );
   }
@@ -111,16 +102,17 @@ class _ParticipationBody extends StatelessWidget {
     return Column(
       children: <Widget>[
         WebinarLiveHeader(webinar: data, controller: controller),
-        SizedBox(height: 24.h),
+        SizedBox(height: 18.h),
         WebinarVideoCard(webinar: data, controller: controller),
-        SizedBox(height: 30.h),
-        WebinarStageArea(controller: controller),
-        SizedBox(height: 32.h),
+        SizedBox(height: 18.h),
+        Expanded(child: WebinarStageArea(controller: controller)),
+        SizedBox(height: 18.h),
         WebinarStageControls(controller: controller),
-        SizedBox(height: 38.h),
+        SizedBox(height: 18.h),
         Obx(
           () => CustomButton(
-            onPressed: controller.isLeaving.value ? () {} : controller.stopParticipation,
+            onPressed:
+                controller.isLeaving.value ? () {} : controller.stopParticipation,
             isLoading: controller.isLeaving.value,
             text: controller.isLeaving.value
                 ? 'Leaving Stage...'

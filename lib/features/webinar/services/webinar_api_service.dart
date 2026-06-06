@@ -42,6 +42,31 @@ class WebinarApiService {
     return WebinarParticipantsResponseModel.fromJson(_responseMap(response));
   }
 
+
+  Future<WebinarChatMessagesResponseModel> getChatMessages({
+    required String webinarId,
+    int page = 1,
+    int limit = 50,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.get(
+      '/webinars/$webinarId/chat-messages',
+      queryParameters: <String, dynamic>{'page': page, 'limit': limit},
+    );
+    return WebinarChatMessagesResponseModel.fromJson(_responseMap(response));
+  }
+
+  Future<WebinarLiveChatModel> sendChatMessage({
+    required String webinarId,
+    required String message,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '/webinars/$webinarId/chat-messages',
+      data: <String, dynamic>{'message': message},
+    );
+    final Map<String, dynamic> data = _responseMap(response);
+    return WebinarLiveChatModel.fromJson(_jsonMap(data['chatMessage']));
+  }
+
   Future<WebinarJoinResultModel> joinWebinar({
     required String webinarId,
   }) async {

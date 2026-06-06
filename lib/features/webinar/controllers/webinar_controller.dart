@@ -25,6 +25,7 @@ class WebinarController extends GetxController {
   final RxBool isJoining = false.obs;
   final RxBool isRequesting = false.obs;
   final RxBool isLeaving = false.obs;
+  final RxBool isSendingMessage = false.obs;
   final RxBool isParticipating = false.obs;
   final RxBool isChatFocused = false.obs;
   final RxBool isTalking = false.obs;
@@ -40,6 +41,8 @@ class WebinarController extends GetxController {
   final RxString speakerRequestStatus = 'none'.obs;
 
   final TextEditingController chatTextController = TextEditingController();
+  final ScrollController chatScrollController = ScrollController();
+  bool _shouldAutoScrollChat = true;
 
   List<WebinarLiveChatModel> get latestStageMessages {
     if (liveMessages.length <= 3) return liveMessages.toList(growable: false);
@@ -48,19 +51,22 @@ class WebinarController extends GetxController {
         .toList(growable: false);
   }
 
-  bool get isSpeakerPending => speakerRequestStatus.value == 'pending';
+  bool get isSpeakerPending =>
+      speakerRequestStatus.value == 'pending' ||
+      speakerRequestStatus.value == 'requested';
   bool get isSpeakerGranted => speakerRequestStatus.value == 'granted';
 
   @override
   void onInit() {
     super.onInit();
-    _seedChatMessages();
+    chatScrollController.addListener(_handleChatScroll);
     loadWebinars();
   }
 
   @override
   void onClose() {
     chatTextController.dispose();
+    chatScrollController.dispose();
     _webinarSocketService.disconnect();
     agoraService.leaveChannel();
     super.onClose();
@@ -104,12 +110,15 @@ class WebinarController extends GetxController {
       if (!result.isSuccess || result.data == null) return;
 
       currentParticipant.value = result.data!.participant;
-      speakerRequestStatus.value = result.data!.participant.canSpeak
-          ? 'granted'
-          : 'none';
+      speakerRequestStatus.value = _normalizeSpeakingPermission(
+        result.data!.participant.speakingPermission,
+      );
       await agoraService.joinAsAudience(result.data!.token);
       _connectSocket(webinar.id);
-      await loadParticipants(webinar.id);
+      await Future.wait(<Future<void>>[
+        loadParticipants(webinar.id),
+        loadChatMessages(webinar.id),
+      ]);
       Get.toNamed(AppRoutes.webinarLive);
     } finally {
       isJoining.value = false;
@@ -127,6 +136,18 @@ class WebinarController extends GetxController {
     }
   }
 
+  Future<void> loadChatMessages(String webinarId) async {
+    final ApiResult<WebinarChatMessagesResponseModel> result =
+        await ApiErrorHandler.call(
+      () => _webinarApiService.getChatMessages(webinarId: webinarId),
+      showError: false,
+    );
+    if (result.isSuccess && result.data != null) {
+      liveMessages.assignAll(result.data!.chatMessages);
+      _scrollChatToBottom(force: true);
+    }
+  }
+
   Future<void> requestToParticipate() async {
     final WebinarItemModel? webinar = selectedWebinar.value;
     if (webinar == null || isRequesting.value || isSpeakerPending) return;
@@ -137,7 +158,7 @@ class WebinarController extends GetxController {
         () => _webinarApiService.requestToSpeak(webinarId: webinar.id),
       );
       if (result.isSuccess) {
-        speakerRequestStatus.value = 'pending';
+        speakerRequestStatus.value = 'requested';
       }
     } finally {
       isRequesting.value = false;
@@ -197,18 +218,27 @@ class WebinarController extends GetxController {
     isTalking.value = false;
   }
 
-  void sendMessage() {
+  Future<void> sendMessage() async {
+    final WebinarItemModel? webinar = selectedWebinar.value;
     final String text = chatTextController.text.trim();
-    if (text.isEmpty) return;
+    if (webinar == null || text.isEmpty || isSendingMessage.value) return;
 
-    liveMessages.add(
-      WebinarLiveChatModel(
-        senderName: 'You',
-        initials: 'YO',
-        message: text,
-      ),
-    );
-    chatTextController.clear();
+    isSendingMessage.value = true;
+    try {
+      final ApiResult<WebinarLiveChatModel> result =
+          await ApiErrorHandler.call(
+        () => _webinarApiService.sendChatMessage(
+          webinarId: webinar.id,
+          message: text,
+        ),
+      );
+      if (result.isSuccess && result.data != null) {
+        _upsertChatMessage(result.data!);
+        chatTextController.clear();
+      }
+    } finally {
+      isSendingMessage.value = false;
+    }
   }
 
   Future<bool> onWillPopLive() async {
@@ -251,6 +281,7 @@ class WebinarController extends GetxController {
     speakerRequestStatus.value = 'none';
     currentParticipant.value = null;
     selectedWebinar.value = null;
+    liveMessages.clear();
     await loadWebinars();
   }
 
@@ -289,28 +320,72 @@ class WebinarController extends GetxController {
         isParticipating.value = false;
         await agoraService.demoteToAudience();
       },
+      onChatMessageCreated: _upsertChatMessage,
     );
+  }
+
+  void _upsertChatMessage(WebinarLiveChatModel chatMessage) {
+    if (chatMessage.id.isEmpty) return;
+
+    final int existingIndex = liveMessages.indexWhere(
+      (WebinarLiveChatModel item) => item.id == chatMessage.id,
+    );
+
+    if (existingIndex >= 0) {
+      liveMessages[existingIndex] = chatMessage;
+      return;
+    }
+
+    final bool shouldScroll = _shouldAutoScrollChat ||
+        !chatScrollController.hasClients ||
+        liveMessages.isEmpty;
+
+    liveMessages.add(chatMessage);
+    if (liveMessages.length > 50) {
+      liveMessages.removeRange(0, liveMessages.length - 50);
+    }
+
+    if (shouldScroll) _scrollChatToBottom();
+  }
+
+
+  void _handleChatScroll() {
+    if (!chatScrollController.hasClients) return;
+    final ScrollPosition position = chatScrollController.position;
+    _shouldAutoScrollChat =
+        position.maxScrollExtent - position.pixels <= 48;
+  }
+
+  void _scrollChatToBottom({bool force = false}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!chatScrollController.hasClients) return;
+      if (!force && !_shouldAutoScrollChat) return;
+
+      chatScrollController.animateTo(
+        chatScrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   void _updateCurrentParticipant(WebinarParticipantModel participant) {
     if (!_isCurrentUser(participant.userId)) return;
     currentParticipant.value = participant;
-    if (participant.canSpeak) speakerRequestStatus.value = 'granted';
+    speakerRequestStatus.value = _normalizeSpeakingPermission(
+      participant.speakingPermission,
+    );
   }
 
   bool _isCurrentUser(String userId) {
     return currentParticipant.value?.userId == userId;
   }
 
-  void _seedChatMessages() {
-    liveMessages.assignAll(const <WebinarLiveChatModel>[
-      WebinarLiveChatModel(
-        senderName: 'Host',
-        initials: 'HO',
-        message: 'Welcome everyone to the live webinar.',
-        isHost: true,
-        colorIndex: 1,
-      ),
-    ]);
+  String _normalizeSpeakingPermission(String? permission) {
+    if (permission == 'granted') return 'granted';
+    if (permission == 'requested') return 'requested';
+    if (permission == 'pending') return 'pending';
+    return 'none';
   }
+
 }

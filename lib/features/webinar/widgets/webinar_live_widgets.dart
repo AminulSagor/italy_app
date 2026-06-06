@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -103,7 +104,11 @@ class WebinarVideoCard extends StatelessWidget {
           children: <Widget>[
             Positioned.fill(child: _RemoteAgoraVideo(controller: controller)),
             Positioned(left: 24.w, top: 20.h, child: _HostChip(webinar: webinar)),
-            Positioned(left: 26.w, bottom: 28.h, child: _VideoControlIcon()),
+            Positioned(
+              left: 26.w,
+              bottom: 28.h,
+              child: _VideoControlIcon(controller: controller),
+            ),
             Positioned(right: 26.w, bottom: 28.h, child: const WebinarLiveBadge()),
           ],
         ),
@@ -121,7 +126,7 @@ class _RemoteAgoraVideo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final RtcEngine? engine = controller.agoraService.engine;
-      final int? remoteUid = controller.agoraService.remoteHostUid.value;
+      final int? remoteUid = controller.agoraService.activeRemoteVideoUid;
       final String? channelName = controller.agoraService.activeChannelName;
       if (engine == null || remoteUid == null || channelName == null) {
         return const _VideoPlaceholder(text: 'Waiting for host video');
@@ -130,7 +135,10 @@ class _RemoteAgoraVideo extends StatelessWidget {
       return AgoraVideoView(
         controller: VideoViewController.remote(
           rtcEngine: engine,
-          canvas: VideoCanvas(uid: remoteUid),
+          canvas: VideoCanvas(
+            uid: remoteUid,
+            renderMode: RenderModeType.renderModeFit,
+          ),
           connection: RtcConnection(channelId: channelName),
         ),
       );
@@ -187,17 +195,95 @@ class _HostChip extends StatelessWidget {
 }
 
 class _VideoControlIcon extends StatelessWidget {
+  const _VideoControlIcon({required this.controller});
+
+  final WebinarController controller;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 40.w,
-      height: 40.w,
-      decoration: BoxDecoration(
-        color: AppColors.black.withValues(alpha: 0.45),
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.4)),
+    return GestureDetector(
+      onTap: () => Get.to<void>(
+        () => WebinarVideoFullScreenView(controller: controller),
+        transition: Transition.fadeIn,
       ),
-      child: Icon(Icons.fullscreen_rounded, color: AppColors.white, size: 28.w),
+      child: Container(
+        width: 40.w,
+        height: 40.w,
+        decoration: BoxDecoration(
+          color: AppColors.black.withValues(alpha: 0.45),
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.white.withValues(alpha: 0.4)),
+        ),
+        child: Icon(Icons.fullscreen_rounded, color: AppColors.white, size: 28.w),
+      ),
+    );
+  }
+}
+
+class WebinarVideoFullScreenView extends StatefulWidget {
+  const WebinarVideoFullScreenView({super.key, required this.controller});
+
+  final WebinarController controller;
+
+  @override
+  State<WebinarVideoFullScreenView> createState() =>
+      _WebinarVideoFullScreenViewState();
+}
+
+class _WebinarVideoFullScreenViewState extends State<WebinarVideoFullScreenView> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.black,
+      body: SafeArea(
+        child: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: _RemoteAgoraVideo(controller: widget.controller),
+            ),
+            Positioned(
+              top: 16.h,
+              left: 16.w,
+              child: GestureDetector(
+                onTap: () => Get.back<void>(),
+                child: Container(
+                  width: 44.w,
+                  height: 44.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.black.withValues(alpha: 0.55),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.close_fullscreen_rounded,
+                    color: AppColors.white,
+                    size: 24.w,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -246,41 +332,46 @@ class WebinarLiveChatSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Column(
+    return Obx(() {
+      final int itemCount = compact
+          ? math.min(controller.liveMessages.length, 3)
+          : controller.liveMessages.length;
+      final int start = compact
+          ? math.max(0, controller.liveMessages.length - 3)
+          : 0;
+
+      final Widget list = ListView.separated(
+        controller: compact ? null : controller.chatScrollController,
+        shrinkWrap: compact,
+        physics: compact
+            ? const NeverScrollableScrollPhysics()
+            : const BouncingScrollPhysics(),
+        itemCount: itemCount,
+        separatorBuilder: (_, __) => SizedBox(height: compact ? 12.h : 16.h),
+        itemBuilder: (_, int index) => WebinarChatBubble(
+          message: controller.liveMessages[start + index],
+          compact: compact,
+        ),
+      );
+
+      if (compact) return list;
+
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (!compact) ...<Widget>[
-            Text(
-              'Live Chat',
-              style: TextStyle(
-                fontSize: AppFont.font20.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.homePrimaryText,
-              ),
+          Text(
+            'Live Chat',
+            style: TextStyle(
+              fontSize: AppFont.font20.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.homePrimaryText,
             ),
-            SizedBox(height: 22.h),
-          ],
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: compact
-                ? math.min(controller.liveMessages.length, 3)
-                : math.min(controller.liveMessages.length, 8),
-            separatorBuilder: (_, __) => SizedBox(height: compact ? 12.h : 20.h),
-            itemBuilder: (_, int index) {
-              final int start = compact
-                  ? math.max(0, controller.liveMessages.length - 3)
-                  : math.max(0, controller.liveMessages.length - 8);
-              return WebinarChatBubble(
-                message: controller.liveMessages[start + index],
-                compact: compact,
-              );
-            },
           ),
+          SizedBox(height: 14.h),
+          Expanded(child: list),
         ],
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -329,10 +420,10 @@ class WebinarChatBubble extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 20.w),
+        SizedBox(width: 16.w),
         Expanded(
           child: Container(
-            padding: EdgeInsets.all(16.w),
+            padding: EdgeInsets.all(14.w),
             decoration: BoxDecoration(
               color: AppColors.webinarChatBubble.withValues(
                 alpha: compact ? 0.58 : 1,
@@ -342,18 +433,81 @@ class WebinarChatBubble extends StatelessWidget {
                   ? Border.all(color: AppColors.webinarHeroBorder, width: 2.w)
                   : null,
             ),
-            child: Text(
-              message.message,
-              style: TextStyle(
-                fontSize: AppFont.font14.sp,
-                color: AppColors.bodyText,
-                height: 1.28,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    if (message.isHost) ...<Widget>[
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryGreen,
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Text(
+                          'HOST',
+                          style: TextStyle(
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.white,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                    ],
+                    Flexible(
+                      child: Text(
+                        message.senderName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: AppFont.font12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryGreen,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      _formatChatTime(message.createdAt),
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.bodyText,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  message.message,
+                  maxLines: compact ? 1 : null,
+                  overflow: compact ? TextOverflow.ellipsis : null,
+                  style: TextStyle(
+                    fontSize: AppFont.font14.sp,
+                    color: AppColors.bodyText,
+                    height: 1.28,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ],
     );
+  }
+
+  String _formatChatTime(DateTime? value) {
+    if (value == null) return '';
+    final int hour = value.hour;
+    final int minute = value.minute;
+    final String suffix = hour >= 12 ? 'PM' : 'AM';
+    final int displayHour = hour % 12 == 0 ? 12 : hour % 12;
+    return '$displayHour:${minute.toString().padLeft(2, '0')} $suffix';
   }
 }
 
@@ -391,7 +545,7 @@ class WebinarChatInput extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: controller.sendMessage,
+            onTap: () => controller.sendMessage(),
             child: Container(
               width: 48.w,
               height: 48.w,

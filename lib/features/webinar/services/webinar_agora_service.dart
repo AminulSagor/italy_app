@@ -9,6 +9,7 @@ class WebinarAgoraService {
   AgoraTokenModel? _activeToken;
 
   final RxnInt remoteHostUid = RxnInt();
+  final RxList<int> remoteVideoUids = <int>[].obs;
   final RxBool isJoined = false.obs;
   final RxBool isBroadcaster = false.obs;
   final RxBool isMicEnabled = false.obs;
@@ -16,12 +17,15 @@ class WebinarAgoraService {
 
   RtcEngine? get engine => _engine;
   String? get activeChannelName => _activeToken?.channelName;
+  int? get activeRemoteVideoUid =>
+      remoteVideoUids.isEmpty ? null : remoteVideoUids.last;
 
   Future<void> joinAsAudience(AgoraTokenModel token) async {
     await _ensurePermissions();
     await _initializeEngine(token.appId);
     _activeToken = token;
     remoteHostUid.value = null;
+    remoteVideoUids.clear();
 
     await _engine?.setClientRole(role: ClientRoleType.clientRoleAudience);
     await _engine?.joinChannel(
@@ -51,6 +55,8 @@ class WebinarAgoraService {
     await _engine?.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
     await _engine?.enableLocalAudio(true);
     await _engine?.enableLocalVideo(true);
+    await _engine?.muteLocalAudioStream(false);
+    await _engine?.muteLocalVideoStream(false);
     await _engine?.startPreview();
     await _engine?.updateChannelMediaOptions(
       const ChannelMediaOptions(
@@ -93,6 +99,7 @@ class WebinarAgoraService {
   Future<void> toggleMic() async {
     if (!isBroadcaster.value) return;
     final bool nextValue = !isMicEnabled.value;
+    if (nextValue) await _engine?.enableLocalAudio(true);
     await _engine?.muteLocalAudioStream(!nextValue);
     isMicEnabled.value = nextValue;
   }
@@ -100,6 +107,10 @@ class WebinarAgoraService {
   Future<void> toggleCamera() async {
     if (!isBroadcaster.value) return;
     final bool nextValue = !isCameraEnabled.value;
+    if (nextValue) {
+      await _engine?.enableLocalVideo(true);
+      await _engine?.startPreview();
+    }
     await _engine?.muteLocalVideoStream(!nextValue);
     isCameraEnabled.value = nextValue;
   }
@@ -115,6 +126,7 @@ class WebinarAgoraService {
     _engine = null;
     _activeToken = null;
     remoteHostUid.value = null;
+    remoteVideoUids.clear();
     isJoined.value = false;
     isBroadcaster.value = false;
     isMicEnabled.value = false;
@@ -129,22 +141,65 @@ class WebinarAgoraService {
     await engine.setChannelProfile(
       ChannelProfileType.channelProfileLiveBroadcasting,
     );
+    await engine.enableAudio();
+    await engine.enableVideo();
+    await _setSpeakerphoneSafely(engine);
     engine.registerEventHandler(
       RtcEngineEventHandler(
         onJoinChannelSuccess: (_, __) => isJoined.value = true,
         onUserJoined: (_, int remoteUid, __) {
-          remoteHostUid.value = remoteUid;
+          _markRemoteVideoActive(remoteUid);
         },
         onUserOffline: (_, int remoteUid, __) {
-          if (remoteHostUid.value == remoteUid) remoteHostUid.value = null;
+          _removeRemoteVideo(remoteUid);
+        },
+        onRemoteVideoStateChanged: (
+          _,
+          int remoteUid,
+          RemoteVideoState state,
+          __,
+          ___,
+        ) {
+          if (state == RemoteVideoState.remoteVideoStateStarting ||
+              state == RemoteVideoState.remoteVideoStateDecoding) {
+            _markRemoteVideoActive(remoteUid);
+            return;
+          }
+
+          if (state == RemoteVideoState.remoteVideoStateStopped ||
+              state == RemoteVideoState.remoteVideoStateFailed) {
+            _removeRemoteVideo(remoteUid);
+          }
         },
         onLeaveChannel: (_, __) {
           isJoined.value = false;
           remoteHostUid.value = null;
+          remoteVideoUids.clear();
         },
       ),
     );
     _engine = engine;
+  }
+
+  void _markRemoteVideoActive(int remoteUid) {
+    remoteVideoUids.remove(remoteUid);
+    remoteVideoUids.add(remoteUid);
+    remoteHostUid.value = remoteVideoUids.isEmpty ? null : remoteVideoUids.last;
+  }
+
+  void _removeRemoteVideo(int remoteUid) {
+    remoteVideoUids.remove(remoteUid);
+    remoteHostUid.value = remoteVideoUids.isEmpty ? null : remoteVideoUids.last;
+  }
+
+  Future<void> _setSpeakerphoneSafely(RtcEngine engine) async {
+    try {
+      await engine.setEnableSpeakerphone(true);
+    } on AgoraRtcException {
+      // Some Android emulators/devices return -3 for this API even after
+      // audio is enabled. Keep the webinar join flow running because Agora
+      // audio subscription still works without forcing speakerphone here.
+    }
   }
 
   Future<void> _ensurePermissions() async {
