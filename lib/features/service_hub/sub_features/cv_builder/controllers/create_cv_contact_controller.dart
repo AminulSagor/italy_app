@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../routes/app_routes.dart';
+
 class CreateCvContactController extends GetxController {
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -10,7 +12,7 @@ class CreateCvContactController extends GetxController {
   final RxDouble progress = 0.33.obs;
 
   void onContinueTap() {
-    // Next step navigation will be added later.
+    Get.toNamed(AppRoutes.createCvExperience);
   }
 
   void onUploadPhotoTap() {
