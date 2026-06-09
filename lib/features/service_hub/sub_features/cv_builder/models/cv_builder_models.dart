@@ -1,19 +1,58 @@
+class CvTemplateFieldModel {
+  const CvTemplateFieldModel({
+    required this.key,
+    required this.label,
+    required this.type,
+    required this.required,
+    required this.placeholder,
+  });
+
+  final String key;
+  final String label;
+  final String type;
+  final bool required;
+  final String? placeholder;
+
+  factory CvTemplateFieldModel.fromJson(Map<String, dynamic> json) {
+    return CvTemplateFieldModel(
+      key: json['key']?.toString() ?? '',
+      label: json['label']?.toString() ?? '',
+      type: json['type']?.toString() ?? 'text',
+      required: json['required'] == true,
+      placeholder: json['placeholder']?.toString(),
+    );
+  }
+}
+
 class CvTemplateSectionModel {
   const CvTemplateSectionModel({
     required this.key,
     required this.title,
     required this.required,
+    required this.fields,
   });
 
   final String key;
   final String title;
   final bool required;
+  final List<CvTemplateFieldModel> fields;
 
   factory CvTemplateSectionModel.fromJson(Map<String, dynamic> json) {
+    final dynamic rawFields = json['fields'];
     return CvTemplateSectionModel(
       key: json['key']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       required: json['required'] == true,
+      fields: rawFields is List
+          ? rawFields
+              .whereType<Map>()
+              .map(
+                (Map<dynamic, dynamic> item) => CvTemplateFieldModel.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              )
+              .toList()
+          : <CvTemplateFieldModel>[],
     );
   }
 }
@@ -22,16 +61,25 @@ class CvTemplateSchemaModel {
   const CvTemplateSchemaModel({
     required this.sections,
     required this.colorOptions,
+    required this.designJson,
     required this.layout,
   });
 
   final List<CvTemplateSectionModel> sections;
   final List<String> colorOptions;
+  final Map<String, dynamic> designJson;
   final Map<String, dynamic> layout;
 
   factory CvTemplateSchemaModel.fromJson(Map<String, dynamic> json) {
     final dynamic rawSections = json['sections'];
     final dynamic rawColors = json['colorOptions'];
+    final Map<String, dynamic> parsedDesignJson = json['designJson'] is Map
+        ? Map<String, dynamic>.from(json['designJson'] as Map)
+        : <String, dynamic>{};
+    final Map<String, dynamic> parsedLayout = json['layout'] is Map
+        ? Map<String, dynamic>.from(json['layout'] as Map)
+        : parsedDesignJson;
+
     return CvTemplateSchemaModel(
       sections: rawSections is List
           ? rawSections
@@ -46,9 +94,8 @@ class CvTemplateSchemaModel {
       colorOptions: rawColors is List
           ? rawColors.map((dynamic item) => item.toString()).toList()
           : <String>['#006B3F', '#646C7A', '#0B4A7D', '#7B4A2F'],
-      layout: json['layout'] is Map
-          ? Map<String, dynamic>.from(json['layout'] as Map)
-          : <String, dynamic>{},
+      designJson: parsedDesignJson.isNotEmpty ? parsedDesignJson : parsedLayout,
+      layout: parsedLayout,
     );
   }
 }
