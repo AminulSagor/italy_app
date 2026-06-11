@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../core/themes/app_colors.dart';
+import '../../../../../routes/app_route_arguments.dart';
 import '../../../../../routes/app_routes.dart';
 import '../models/cv_builder_models.dart';
 import '../services/cv_builder_api_service.dart';
@@ -74,15 +75,33 @@ class CvTemplateController extends GetxController {
     selectedTemplate.value = templates[index];
   }
 
+  void startWithTemplate(int index) {
+    selectTemplate(index);
+    useSelectedTemplate();
+  }
+
   void selectColor(int index) {
     selectedColorIndex.value = index;
   }
 
   void useSelectedTemplate() {
-    if (selectedTemplate.value == null) {
+    final CvTemplateModel? template = selectedTemplate.value;
+    if (template == null) {
       Get.snackbar('Template', 'Please select a CV template first.');
       return;
     }
-    Get.toNamed(AppRoutes.createCvContact);
+
+    Get.toNamed(
+      AppRoutes.createCvDynamicForm,
+      arguments: CvTemplateFormRouteArguments(
+        template: template,
+        themeColor: _colorToHex(selectedColor),
+      ),
+    );
+  }
+
+  String _colorToHex(Color color) {
+    final int value = color.value;
+    return '#${value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
   }
 }

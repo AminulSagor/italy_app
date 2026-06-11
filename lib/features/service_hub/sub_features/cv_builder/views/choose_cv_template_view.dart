@@ -248,7 +248,7 @@ class _TemplateGrid extends StatelessWidget {
             tag: template.styleType.toUpperCase().replaceAll('_', ' '),
             tagColor: controller.colors[index % controller.colors.length],
             isSelected: controller.selectedTemplateIndex.value == index,
-            onTap: () => controller.selectTemplate(index),
+            onTap: () => controller.startWithTemplate(index),
           );
         }),
       );

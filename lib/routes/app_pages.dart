@@ -53,6 +53,7 @@ import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_mock_service.dart';
 import '../features/notifications/services/notifications_mock_service.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_contact_controller.dart';
+import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_dynamic_form_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_education_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_experience_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_summary_controller.dart';
@@ -63,6 +64,7 @@ import '../core/services/api_client.dart';
 import '../features/service_hub/sub_features/cv_builder/views/choose_cv_template_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart';
+import '../features/service_hub/sub_features/cv_builder/views/create_cv_dynamic_form_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_summary_view.dart';
@@ -310,6 +312,22 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut<CreateCvContactController>(
           () => CreateCvContactController(),
+        );
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.createCvDynamicForm,
+      page: () => const CreateCvDynamicFormView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<CvBuilderApiService>()) {
+          Get.lazyPut<CvBuilderApiService>(
+            () => CvBuilderApiService(apiClient: Get.find<ApiClient>()),
+          );
+        }
+        Get.lazyPut<CreateCvDynamicFormController>(
+          () => CreateCvDynamicFormController(
+            cvBuilderApiService: Get.find<CvBuilderApiService>(),
+          ),
         );
       }),
     ),

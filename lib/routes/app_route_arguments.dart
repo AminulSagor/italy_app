@@ -1,3 +1,4 @@
+import '../features/service_hub/sub_features/cv_builder/models/cv_builder_models.dart';
 import '../features/courses/models/course_models.dart';
 
 class CourseDetailRouteArguments {
@@ -63,4 +64,15 @@ class CourseCertificateRouteArguments {
   final String controllerTag;
 
   const CourseCertificateRouteArguments({required this.controllerTag});
+}
+
+
+class CvTemplateFormRouteArguments {
+  final CvTemplateModel template;
+  final String themeColor;
+
+  const CvTemplateFormRouteArguments({
+    required this.template,
+    required this.themeColor,
+  });
 }
