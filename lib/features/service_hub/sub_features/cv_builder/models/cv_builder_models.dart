@@ -30,19 +30,25 @@ class CvTemplateSectionModel {
     required this.title,
     required this.required,
     required this.fields,
+    required this.designerJson,
   });
 
   final String key;
   final String title;
   final bool required;
   final List<CvTemplateFieldModel> fields;
+  final Map<String, dynamic> designerJson;
 
   factory CvTemplateSectionModel.fromJson(Map<String, dynamic> json) {
     final dynamic rawFields = json['fields'];
+    final Map<String, dynamic> parsedDesignerJson = json['designerJson'] is Map
+        ? Map<String, dynamic>.from(json['designerJson'] as Map)
+        : <String, dynamic>{};
     return CvTemplateSectionModel(
       key: json['key']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       required: json['required'] == true,
+      designerJson: parsedDesignerJson,
       fields: rawFields is List
           ? rawFields
               .whereType<Map>()
