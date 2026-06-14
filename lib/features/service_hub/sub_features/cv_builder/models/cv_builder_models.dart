@@ -5,6 +5,7 @@ class CvTemplateFieldModel {
     required this.type,
     required this.required,
     required this.placeholder,
+    required this.options,
   });
 
   final String key;
@@ -12,14 +13,20 @@ class CvTemplateFieldModel {
   final String type;
   final bool required;
   final String? placeholder;
+  final List<String> options;
 
   factory CvTemplateFieldModel.fromJson(Map<String, dynamic> json) {
+    final dynamic rawOptions = json['options'];
+
     return CvTemplateFieldModel(
       key: json['key']?.toString() ?? '',
       label: json['label']?.toString() ?? '',
       type: json['type']?.toString() ?? 'text',
       required: json['required'] == true,
       placeholder: json['placeholder']?.toString(),
+      options: rawOptions is List
+          ? rawOptions.map((dynamic item) => item.toString()).toList()
+          : <String>[],
     );
   }
 }
@@ -199,5 +206,94 @@ class CvDocumentPayloadModel {
       'themeColor': themeColor,
       'formData': formData,
     };
+  }
+}
+
+class CvDocumentModel {
+  const CvDocumentModel({
+    required this.id,
+    required this.templateId,
+    required this.templateTitle,
+    required this.title,
+    required this.themeColor,
+    required this.formData,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final String id;
+  final String templateId;
+  final String? templateTitle;
+  final String title;
+  final String themeColor;
+  final Map<String, dynamic> formData;
+  final String status;
+  final String? createdAt;
+  final String? updatedAt;
+
+  factory CvDocumentModel.fromJson(Map<String, dynamic> json) {
+    return CvDocumentModel(
+      id: json['id']?.toString() ?? '',
+      templateId: json['templateId']?.toString() ?? '',
+      templateTitle: json['templateTitle']?.toString(),
+      title: json['title']?.toString() ?? 'My CV',
+      themeColor: json['themeColor']?.toString() ?? '#006B3F',
+      formData: json['formData'] is Map
+          ? Map<String, dynamic>.from(json['formData'] as Map)
+          : <String, dynamic>{},
+      status: json['status']?.toString() ?? 'ready',
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
+    );
+  }
+}
+
+class CvDocumentResponseModel {
+  const CvDocumentResponseModel({required this.document});
+
+  final CvDocumentModel document;
+
+  factory CvDocumentResponseModel.fromJson(Map<String, dynamic> json) {
+    final dynamic rawDocument = json['document'];
+    return CvDocumentResponseModel(
+      document: CvDocumentModel.fromJson(
+        rawDocument is Map
+            ? Map<String, dynamic>.from(rawDocument)
+            : <String, dynamic>{},
+      ),
+    );
+  }
+}
+
+class CvSignedUploadUrlModel {
+  const CvSignedUploadUrlModel({
+    required this.storageKey,
+    required this.publicUrl,
+    required this.signedUploadUrl,
+  });
+
+  final String storageKey;
+  final String publicUrl;
+  final String signedUploadUrl;
+
+  factory CvSignedUploadUrlModel.fromJson(Map<String, dynamic> json) {
+    return CvSignedUploadUrlModel(
+      storageKey: json['storageKey']?.toString() ?? '',
+      publicUrl: json['publicUrl']?.toString() ?? '',
+      signedUploadUrl: json['signedUploadUrl']?.toString() ?? '',
+    );
+  }
+}
+
+class CvConfirmUploadResponseModel {
+  const CvConfirmUploadResponseModel({required this.publicUrl});
+
+  final String publicUrl;
+
+  factory CvConfirmUploadResponseModel.fromJson(Map<String, dynamic> json) {
+    return CvConfirmUploadResponseModel(
+      publicUrl: json['publicUrl']?.toString() ?? '',
+    );
   }
 }

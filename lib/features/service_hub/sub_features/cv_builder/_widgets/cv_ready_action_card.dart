@@ -13,6 +13,7 @@ class CvReadyActionCard extends StatelessWidget {
   final Color iconColor;
   final Color titleColor;
   final VoidCallback onTap;
+  final bool isLoading;
 
   const CvReadyActionCard({
     super.key,
@@ -23,6 +24,7 @@ class CvReadyActionCard extends StatelessWidget {
     required this.iconColor,
     required this.titleColor,
     required this.onTap,
+    this.isLoading = false,
   });
 
   @override
@@ -31,7 +33,7 @@ class CvReadyActionCard extends StatelessWidget {
       color: backgroundColor,
       borderRadius: BorderRadius.circular(kRadius26.r),
       child: InkWell(
-        onTap: onTap,
+        onTap: isLoading ? null : onTap,
         borderRadius: BorderRadius.circular(kRadius26.r),
         child: Container(
           height: 118.h,
@@ -49,11 +51,19 @@ class CvReadyActionCard extends StatelessWidget {
                   color: iconBackgroundColor,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: AppFont.font22.sp,
-                ),
+                child: isLoading
+                    ? Padding(
+                        padding: EdgeInsets.all(11.w),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.w,
+                          valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+                        ),
+                      )
+                    : Icon(
+                        icon,
+                        color: iconColor,
+                        size: AppFont.font22.sp,
+                      ),
               ),
               SizedBox(height: 12.h),
               Flexible(

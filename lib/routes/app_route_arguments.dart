@@ -76,3 +76,14 @@ class CvTemplateFormRouteArguments {
     required this.themeColor,
   });
 }
+
+
+class CvReadyRouteArguments {
+  final CvDocumentModel document;
+  final CvTemplateModel template;
+
+  const CvReadyRouteArguments({
+    required this.document,
+    required this.template,
+  });
+}

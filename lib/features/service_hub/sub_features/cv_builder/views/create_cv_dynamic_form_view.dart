@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import '../_widgets/cv_no_template_fields_card.dart';
+import '../_widgets/cv_photo_url_upload_field.dart';
 import '../controllers/create_cv_dynamic_form_controller.dart';
 import '../models/cv_builder_models.dart';
 
@@ -23,8 +25,8 @@ class CreateCvDynamicFormView extends GetView<CreateCvDynamicFormController> {
                 physics: const BouncingScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 28.h),
                 child: Obx(() {
-                  final CvTemplateSectionModel section =
-                      controller.currentSection;
+                  final CvTemplateSectionModel? section =
+                      controller.currentSectionOrNull;
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,42 +43,46 @@ class CreateCvDynamicFormView extends GetView<CreateCvDynamicFormController> {
                         ),
                       ),
                       SizedBox(height: 8.h),
-                      Text(
-                        section.title,
-                        style: TextStyle(
-                          color: AppColors.homePrimaryText,
-                          fontSize: AppFont.font23.sp,
-                          fontWeight: FontWeight.w900,
-                          height: 1,
-                          letterSpacing: -0.7,
+                      if (section == null)
+                        const CvNoTemplateFieldsCard()
+                      else ...<Widget>[
+                        Text(
+                          section.title,
+                          style: TextStyle(
+                            color: AppColors.homePrimaryText,
+                            fontSize: AppFont.font23.sp,
+                            fontWeight: FontWeight.w900,
+                            height: 1,
+                            letterSpacing: -0.7,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 10.h),
-                      Text(
-                        'Step ${controller.currentStepIndex.value + 1} of ${controller.sections.length}',
-                        style: TextStyle(
-                          color: AppColors.homeSecondaryText,
-                          fontSize: AppFont.font11.sp,
-                          fontWeight: FontWeight.w600,
+                        SizedBox(height: 10.h),
+                        Text(
+                          'Step ${controller.currentStepIndex.value + 1} of ${controller.sections.length}',
+                          style: TextStyle(
+                            color: AppColors.homeSecondaryText,
+                            fontSize: AppFont.font11.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 14.h),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20.r),
-                        child: LinearProgressIndicator(
-                          minHeight: 7.h,
-                          value: controller.progress,
-                          backgroundColor: AppColors.white,
-                          color: AppColors.primaryGreen,
+                        SizedBox(height: 14.h),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20.r),
+                          child: LinearProgressIndicator(
+                            minHeight: 7.h,
+                            value: controller.progress,
+                            backgroundColor: AppColors.white,
+                            color: AppColors.primaryGreen,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 22.h),
-                      ...section.fields.map(
-                        (CvTemplateFieldModel field) => Padding(
-                          padding: EdgeInsets.only(bottom: 14.h),
-                          child: _DynamicField(section: section, field: field),
+                        SizedBox(height: 22.h),
+                        ...section.fields.map(
+                          (CvTemplateFieldModel field) => Padding(
+                            padding: EdgeInsets.only(bottom: 14.h),
+                            child: _DynamicField(section: section, field: field),
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   );
                 }),
@@ -89,6 +95,7 @@ class CreateCvDynamicFormView extends GetView<CreateCvDynamicFormController> {
     );
   }
 }
+
 
 class _Header extends StatelessWidget {
   const _Header();
@@ -175,34 +182,43 @@ class _DynamicField extends GetView<CreateCvDynamicFormController> {
             ],
           ),
           SizedBox(height: 10.h),
-          TextField(
-            controller: textController,
-            keyboardType: _keyboardType(type),
-            minLines: isLongInput ? 4 : 1,
-            maxLines: isLongInput ? 7 : 1,
-            textInputAction: isLongInput
-                ? TextInputAction.newline
-                : TextInputAction.next,
-            decoration: InputDecoration(
-              hintText: _hintText(field, type),
-              filled: true,
-              fillColor: AppColors.homeBackground,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 14.w,
-                vertical: 13.h,
+          if (controller.isPhotoField(field))
+            Obx(
+              () => CvPhotoUrlUploadField(
+                textController: textController,
+                isUploading: controller.isPhotoUploading(section, field),
+                onUploadTap: () => controller.pickAndUploadPhoto(section, field),
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
-                borderSide: BorderSide.none,
+            )
+          else
+            TextField(
+              controller: textController,
+              keyboardType: _keyboardType(type),
+              minLines: isLongInput ? 4 : 1,
+              maxLines: isLongInput ? 7 : 1,
+              textInputAction: isLongInput
+                  ? TextInputAction.newline
+                  : TextInputAction.next,
+              decoration: InputDecoration(
+                hintText: _hintText(field, type),
+                filled: true,
+                fillColor: AppColors.homeBackground,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 14.w,
+                  vertical: 13.h,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              style: TextStyle(
+                color: AppColors.homePrimaryText,
+                fontSize: AppFont.font12.sp,
+                fontWeight: FontWeight.w600,
+                height: 1.35,
               ),
             ),
-            style: TextStyle(
-              color: AppColors.homePrimaryText,
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w600,
-              height: 1.35,
-            ),
-          ),
           if (type == 'list') ...<Widget>[
             SizedBox(height: 8.h),
             Text(
@@ -243,7 +259,7 @@ class _DynamicField extends GetView<CreateCvDynamicFormController> {
       return field.placeholder!;
     }
 
-    if (type == 'photo') return 'Paste image URL';
+    if (type == 'photourl' || type == 'imageurl') return 'Select a photo';
     if (type == 'website' || type == 'url') return 'https://example.com';
     if (type == 'list') return 'First item\nSecond item\nThird item';
 
@@ -271,59 +287,82 @@ class _BottomActions extends StatelessWidget {
         ],
       ),
       child: Obx(
-        () => Row(
-          children: <Widget>[
-            Expanded(
-              child: OutlinedButton(
-                onPressed: controller.goBackStep,
-                style: OutlinedButton.styleFrom(
-                  minimumSize: Size.fromHeight(48.h),
-                  side: BorderSide(color: AppColors.primaryGreen, width: 1.w),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
-                  ),
+        () {
+          if (!controller.hasFormFields) {
+            return OutlinedButton(
+              onPressed: controller.goBackStep,
+              style: OutlinedButton.styleFrom(
+                minimumSize: Size.fromHeight(48.h),
+                side: BorderSide(color: AppColors.primaryGreen, width: 1.w),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
                 ),
-                child: Text(
-                  controller.isFirstStep ? 'Back' : 'Previous',
-                  style: TextStyle(
-                    color: AppColors.primaryGreen,
-                    fontSize: AppFont.font12.sp,
-                    fontWeight: FontWeight.w900,
+              ),
+              child: Text(
+                'Back',
+                style: TextStyle(
+                  color: AppColors.primaryGreen,
+                  fontSize: AppFont.font12.sp,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            );
+          }
+
+          return Row(
+            children: <Widget>[
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: controller.goBackStep,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: Size.fromHeight(48.h),
+                    side: BorderSide(color: AppColors.primaryGreen, width: 1.w),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+                    ),
+                  ),
+                  child: Text(
+                    controller.isFirstStep ? 'Back' : 'Previous',
+                    style: TextStyle(
+                      color: AppColors.primaryGreen,
+                      fontSize: AppFont.font12.sp,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: controller.isSaving.value
-                    ? null
-                    : () => controller.goNextStep(),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size.fromHeight(48.h),
-                  backgroundColor: AppColors.primaryGreen,
-                  disabledBackgroundColor: AppColors.homeSecondaryText,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: controller.isSaving.value
+                      ? null
+                      : () => controller.goNextStep(),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size.fromHeight(48.h),
+                    backgroundColor: AppColors.primaryGreen,
+                    disabledBackgroundColor: AppColors.homeSecondaryText,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+                    ),
+                    elevation: 0,
                   ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  controller.isSaving.value
-                      ? 'Saving...'
-                      : controller.isLastStep
-                      ? 'Save CV'
-                      : 'Continue',
-                  style: TextStyle(
-                    color: AppColors.white,
-                    fontSize: AppFont.font12.sp,
-                    fontWeight: FontWeight.w900,
+                  child: Text(
+                    controller.isSaving.value
+                        ? 'Saving...'
+                        : controller.isLastStep
+                            ? 'Save CV'
+                            : 'Continue',
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: AppFont.font12.sp,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }

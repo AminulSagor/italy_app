@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../../../../core/services/api_error_handler.dart';
+import '../../../../../routes/app_route_arguments.dart';
 import '../../../../../routes/app_routes.dart';
 import '../models/cv_builder_models.dart';
 import '../services/cv_builder_api_service.dart';
@@ -50,7 +51,7 @@ class CreateCvSummaryController extends GetxController {
     isSaving.value = true;
     try {
       final CvBuilderApiService service = Get.find<CvBuilderApiService>();
-      final ApiResult<void> result = await ApiErrorHandler.call(
+      final ApiResult<CvDocumentModel> result = await ApiErrorHandler.call(
         () => service.saveCvDocument(
           CvDocumentPayloadModel(
             templateId: template.id,
@@ -60,8 +61,14 @@ class CreateCvSummaryController extends GetxController {
           ),
         ),
       );
-      if (result.isSuccess) {
-        Get.toNamed(AppRoutes.cvReady);
+      if (result.isSuccess && result.data != null) {
+        Get.toNamed(
+          AppRoutes.cvReady,
+          arguments: CvReadyRouteArguments(
+            document: result.data!,
+            template: template,
+          ),
+        );
       }
     } finally {
       isSaving.value = false;

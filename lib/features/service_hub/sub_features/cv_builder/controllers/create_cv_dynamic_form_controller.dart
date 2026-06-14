@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../routes/app_route_arguments.dart';
@@ -13,56 +14,43 @@ class CreateCvDynamicFormController extends GetxController {
       : _cvBuilderApiService = cvBuilderApiService;
 
   final CvBuilderApiService _cvBuilderApiService;
+  final ImagePicker _imagePicker = ImagePicker();
 
   late final CvTemplateModel template;
   late final String themeColor;
 
   final RxBool isSaving = false.obs;
   final RxInt currentStepIndex = 0.obs;
+  final RxMap<String, bool> photoUploadStates = <String, bool>{}.obs;
   final Map<String, TextEditingController> fieldControllers =
       <String, TextEditingController>{};
 
   List<CvTemplateSectionModel> get sections {
-    final List<CvTemplateSectionModel> templateSections =
-        template.schema.sections
-            .where((CvTemplateSectionModel section) => section.fields.isNotEmpty)
-            .toList();
-
-    if (templateSections.isNotEmpty) return templateSections;
-
-    return <CvTemplateSectionModel>[
-      const CvTemplateSectionModel(
-        key: 'personalDetails',
-        title: 'Personal Details',
-        required: false,
-        designerJson: <String, dynamic>{},
-        fields: <CvTemplateFieldModel>[
-          CvTemplateFieldModel(
-            key: 'fullName',
-            label: 'Full Name',
-            type: 'text',
-            required: false,
-            placeholder: 'Enter your full name',
-          ),
-          CvTemplateFieldModel(
-            key: 'email',
-            label: 'Email',
-            type: 'email',
-            required: false,
-            placeholder: 'Enter your email',
-          ),
-        ],
-      ),
-    ];
+    return template.schema.sections
+        .where((CvTemplateSectionModel section) => section.fields.isNotEmpty)
+        .toList(growable: false);
   }
 
-  CvTemplateSectionModel get currentSection => sections[currentStepIndex.value];
+  bool get hasFormFields => sections.isNotEmpty;
+
+  CvTemplateSectionModel? get currentSectionOrNull {
+    if (sections.isEmpty) return null;
+
+    final int safeIndex = currentStepIndex.value.clamp(0, sections.length - 1).toInt();
+    return sections[safeIndex];
+  }
+
+  CvTemplateSectionModel get currentSection => currentSectionOrNull!;
 
   bool get isFirstStep => currentStepIndex.value == 0;
 
-  bool get isLastStep => currentStepIndex.value >= sections.length - 1;
+  bool get isLastStep =>
+      sections.isEmpty || currentStepIndex.value >= sections.length - 1;
 
-  double get progress => (currentStepIndex.value + 1) / sections.length;
+  double get progress {
+    if (sections.isEmpty) return 0;
+    return (currentStepIndex.value + 1) / sections.length;
+  }
 
   @override
   void onInit() {
@@ -130,13 +118,23 @@ class CreateCvDynamicFormController extends GetxController {
   }
 
   bool validateCurrentSection() {
-    for (final CvTemplateFieldModel field in currentSection.fields) {
+    final CvTemplateSectionModel? section = currentSectionOrNull;
+    if (section == null) {
+      Get.snackbar(
+        'CV Template',
+        'No fields are available for this template.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+
+    for (final CvTemplateFieldModel field in section.fields) {
       if (!field.required) continue;
 
-      final String value = controllerFor(currentSection, field).text.trim();
+      final String value = controllerFor(section, field).text.trim();
       if (value.isEmpty) {
         Get.snackbar(
-          currentSection.title,
+          section.title,
           '${field.label} is required.',
           snackPosition: SnackPosition.BOTTOM,
         );
@@ -147,12 +145,60 @@ class CreateCvDynamicFormController extends GetxController {
     return true;
   }
 
+  Future<void> pickAndUploadPhoto(
+    CvTemplateSectionModel section,
+    CvTemplateFieldModel field,
+  ) async {
+    final String uploadKey = _controllerKey(section.key, field.key);
+    if (photoUploadStates[uploadKey] == true) return;
+
+    final XFile? selectedPhoto = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 88,
+    );
+    if (selectedPhoto == null) return;
+
+    photoUploadStates[uploadKey] = true;
+    try {
+      final ApiResult<String> result = await ApiErrorHandler.call(
+        () => _cvBuilderApiService.uploadCvPhoto(selectedPhoto),
+        errorTitle: 'Photo Upload',
+      );
+
+      if (result.isSuccess && result.data != null) {
+        controllerFor(section, field).text = result.data!;
+        Get.snackbar(
+          'Photo Upload',
+          'Photo uploaded successfully.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } finally {
+      photoUploadStates[uploadKey] = false;
+    }
+  }
+
+  bool isPhotoField(CvTemplateFieldModel field) {
+    final String type = field.type.trim().toLowerCase();
+    return type == 'photourl' ||
+        type == 'photo_url' ||
+        type == 'imageurl' ||
+        type == 'photo';
+  }
+
+  bool isPhotoUploading(
+    CvTemplateSectionModel section,
+    CvTemplateFieldModel field,
+  ) {
+    return photoUploadStates[_controllerKey(section.key, field.key)] == true;
+  }
+
   Future<void> saveCvDocument() async {
-    if (isSaving.value) return;
+    if (isSaving.value || !hasFormFields) return;
 
     isSaving.value = true;
     try {
-      final ApiResult<void> result = await ApiErrorHandler.call(
+      final ApiResult<CvDocumentModel> result = await ApiErrorHandler.call(
         () => _cvBuilderApiService.saveCvDocument(
           CvDocumentPayloadModel(
             templateId: template.id,
@@ -163,8 +209,14 @@ class CreateCvDynamicFormController extends GetxController {
         ),
       );
 
-      if (result.isSuccess) {
-        Get.offNamed(AppRoutes.cvReady);
+      if (result.isSuccess && result.data != null) {
+        Get.offNamed(
+          AppRoutes.cvReady,
+          arguments: CvReadyRouteArguments(
+            document: result.data!,
+            template: template,
+          ),
+        );
       }
     } finally {
       isSaving.value = false;
@@ -181,7 +233,7 @@ class CreateCvDynamicFormController extends GetxController {
         final String value = controllerFor(section, field).text.trim();
         if (value.isEmpty) continue;
 
-        if (field.type == 'list') {
+        if (field.type.toLowerCase() == 'list') {
           sectionData[field.key] = value
               .split('\n')
               .map((String item) => item.trim())

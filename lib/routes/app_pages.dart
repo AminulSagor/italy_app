@@ -60,6 +60,7 @@ import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_su
 import '../features/service_hub/sub_features/cv_builder/controllers/cv_ready_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/cv_template_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/services/cv_builder_api_service.dart';
+import '../features/service_hub/sub_features/cv_builder/services/cv_pdf_download_service.dart';
 import '../core/services/api_client.dart';
 import '../features/service_hub/sub_features/cv_builder/views/choose_cv_template_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart';
@@ -921,7 +922,14 @@ class AppPages {
       name: AppRoutes.cvReady,
       page: () => const CvReadyView(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<CvReadyController>(() => CvReadyController());
+        if (!Get.isRegistered<CvPdfDownloadService>()) {
+          Get.lazyPut<CvPdfDownloadService>(() => CvPdfDownloadService());
+        }
+        Get.lazyPut<CvReadyController>(
+          () => CvReadyController(
+            cvPdfDownloadService: Get.find<CvPdfDownloadService>(),
+          ),
+        );
       }),
     ),
   ];
