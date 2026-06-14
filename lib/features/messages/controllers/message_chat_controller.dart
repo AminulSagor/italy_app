@@ -2,6 +2,10 @@ import 'package:get/get.dart';
 
 import '../models/message_models.dart';
 import '../services/messages_mock_service.dart';
+import '../sub-feature/call/  views/message_call_view.dart';
+import '../sub-feature/call/controllers/message_call_controller.dart';
+import '../sub-feature/call/models/ message_call_models.dart';
+import '../sub-feature/call/service/message_call_mock_service.dart';
 import '../views/message_user_info_view.dart';
 import 'message_user_info_controller.dart';
 
@@ -32,9 +36,43 @@ class MessageChatController extends GetxController {
     }
   }
 
+  void openAudioCall() {
+    _openCall(MessageCallType.audio);
+  }
+
+  void openVideoCall() {
+    _openCall(MessageCallType.video);
+  }
+
+  void _openCall(MessageCallType callType) {
+    final MessageChatModel? currentChat = chat.value;
+
+    if (currentChat == null) return;
+
+    Get.to<void>(
+          () => const MessageCallView(),
+      binding: BindingsBuilder(() {
+        Get.put<MessageCallController>(
+          MessageCallController(
+            conversationId: thread.id,
+            callType: callType,
+            participant: MessageCallParticipantModel(
+              id: thread.id,
+              name: currentChat.contactName,
+              avatarUrl: currentChat.contactAvatarUrl,
+              isOnline: currentChat.isOnline,
+            ),
+            messageCallService: MessageCallMockService(),
+          ),
+        );
+      }),
+      transition: Transition.rightToLeft,
+    );
+  }
+
   void openUserInfo() {
     Get.to<void>(
-      () => const MessageUserInfoView(),
+          () => const MessageUserInfoView(),
       binding: BindingsBuilder(() {
         Get.put<MessageUserInfoController>(
           MessageUserInfoController(
