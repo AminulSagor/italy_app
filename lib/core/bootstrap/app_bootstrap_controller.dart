@@ -1,27 +1,58 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:developer' as dev;
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import '../services/storage_service.dart';
-import '../localization/translation_service.dart';
+
 import '../../routes/routes.dart';
+import '../localization/translation_service.dart';
+import '../services/api_client.dart';
+import '../services/auth_service.dart';
+import '../services/storage_service.dart';
+import '../services/token_service.dart';
 
 class AppBootstrapController extends GetxController {
   AppBootstrapController();
+
   static Future<void> init() async {
+    try {
+      await dotenv.load(fileName: '.env');
+    } catch (error) {
+      dev.log('Unable to load .env file', error: error, name: 'AppBootstrap');
+    }
+
     await Get.putAsync<StorageService>(
       () => StorageService().init(),
       permanent: true,
     );
 
-    final translationService = Get.put<TranslationService>(
-      TranslationService(storageService: Get.find<StorageService>()),
-    );
-    Get.put<TranslationService>(translationService, permanent: true);
-  }
+    if (!Get.isRegistered<TokenService>()) {
+      Get.put<TokenService>(TokenService(), permanent: true);
+    }
 
-  @override
-  void onInit() {
-    super.onInit();
-    //_bootstrap();
+    if (!Get.isRegistered<ApiClient>()) {
+      Get.put<ApiClient>(
+        ApiClient(tokenService: Get.find<TokenService>()),
+        permanent: true,
+      );
+    }
+
+    if (!Get.isRegistered<AuthService>()) {
+      Get.put<AuthService>(
+        AuthService(
+          apiClient: Get.find<ApiClient>(),
+          tokenService: Get.find<TokenService>(),
+          storageService: Get.find<StorageService>(),
+        ),
+        permanent: true,
+      );
+    }
+
+    if (!Get.isRegistered<TranslationService>()) {
+      Get.put<TranslationService>(
+        TranslationService(storageService: Get.find<StorageService>()),
+        permanent: true,
+      );
+    }
   }
 
   @override
@@ -33,36 +64,29 @@ class AppBootstrapController extends GetxController {
   Future<void> _bootstrap() async {
     try {
       final StorageService storageService = Get.find<StorageService>();
-      Get.offAllNamed(AppRoutes.splash);
-      return;
-      if (storageService.isLoggedIn) {
-        // Fallback to login if home route is not yet registered.
-        if (_isRouteRegistered(AppRoutes.home)) {
-          Get.offAllNamed(AppRoutes.home);
-        } else {
-          await storageService.clearLoggedInData();
-          Get.offAllNamed(AppRoutes.login);
-        }
+      final TokenService tokenService = Get.find<TokenService>();
+      final bool hasValidLocalSession =
+          storageService.isLoggedIn && await tokenService.hasToken();
+
+      if (hasValidLocalSession) {
+        Get.offAllNamed(AppRoutes.wrapper);
         return;
       }
 
+      if (storageService.isLoggedIn) {
+        await storageService.clearLoggedInData();
+        await tokenService.clearTokens();
+      }
+
       if (storageService.isFirstTimeUser) {
-        //await storageService.setFirstTimeUser(false);
         Get.offAllNamed(AppRoutes.splash);
         return;
       }
 
       Get.offAllNamed(AppRoutes.login);
-    } catch (err) {
-      debugPrint('Bootstrap error: $err');
-      // Never block users on bootstrap if any initialization path fails.
+    } catch (error) {
+      dev.log('Bootstrap failed', error: error, name: 'AppBootstrap');
       Get.offAllNamed(AppRoutes.login);
     }
-  }
-
-  bool _isRouteRegistered(String routeName) {
-    return AppPages.pages.any(
-      (GetPage<dynamic> page) => page.name == routeName,
-    );
   }
 }

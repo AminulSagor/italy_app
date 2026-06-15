@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../routes/app_routes.dart';
+
 class CreateCvEducationController extends GetxController {
   final RxString selectedEducationType = ''.obs;
   final RxString selectedLevel = ''.obs;
@@ -89,7 +91,7 @@ class CreateCvEducationController extends GetxController {
   }
 
   void onContinueTap() {
-    // Navigate to summary later.
+    Get.toNamed(AppRoutes.createCvSummary);
   }
 
   @override

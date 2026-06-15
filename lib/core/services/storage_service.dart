@@ -3,30 +3,34 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService extends GetxService {
   late SharedPreferences _prefs;
+
   Future<StorageService> init() async {
     _prefs = await SharedPreferences.getInstance();
-    // Initialize your storage service here (e.g., SharedPreferences, Hive, etc.)
     return this;
   }
 
-  bool get isFirstTimeUser => _prefs.getBool('isFirstTimeUser') ?? true;
+  static const String _firstTimeUserKey = 'isFirstTimeUser';
+  static const String _isLoggedInKey = 'isLoggedIn';
+  static const String _legacyAuthTokenKey = 'authToken';
+  static const String _appLocaleKey = 'appLocale';
+
+  bool get isFirstTimeUser => _prefs.getBool(_firstTimeUserKey) ?? true;
+
   Future<void> setFirstTimeUser(bool value) async {
-    await _prefs.setBool('isFirstTimeUser', value);
+    await _prefs.setBool(_firstTimeUserKey, value);
   }
 
-  bool get isLoggedIn => _prefs.getBool('isLoggedIn') ?? false;
-  Future<void> setLoggedInData(String token) async {
-    await _prefs.setBool('isLoggedIn', true);
-    await _prefs.setString('authToken', token);
+  bool get isLoggedIn => _prefs.getBool(_isLoggedInKey) ?? false;
+
+  Future<void> setLoggedInData([String? _]) async {
+    await _prefs.setBool(_isLoggedInKey, true);
+    await _prefs.remove(_legacyAuthTokenKey);
   }
 
   Future<void> clearLoggedInData() async {
-    await _prefs.setBool('isLoggedIn', false);
-    await _prefs.remove('authToken');
+    await _prefs.setBool(_isLoggedInKey, false);
+    await _prefs.remove(_legacyAuthTokenKey);
   }
-
-  // app locale data
-  static const String _appLocaleKey = 'appLocale';
 
   String? get savedAppLocale => _prefs.getString(_appLocaleKey);
 

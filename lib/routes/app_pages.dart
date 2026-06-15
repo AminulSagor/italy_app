@@ -52,25 +52,31 @@ import '../features/home/views/home_view.dart';
 import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_mock_service.dart';
 import '../features/notifications/services/notifications_mock_service.dart';
-import '../features/service_hub/ sub_features/cv_builder/controllers/create_cv_contact_controller.dart';
-import '../features/service_hub/ sub_features/cv_builder/controllers/create_cv_education_controller.dart';
-import '../features/service_hub/ sub_features/cv_builder/controllers/create_cv_experience_controller.dart';
-import '../features/service_hub/ sub_features/cv_builder/controllers/create_cv_summary_controller.dart';
-import '../features/service_hub/ sub_features/cv_builder/controllers/cv_ready_controller.dart';
-import '../features/service_hub/ sub_features/cv_builder/controllers/cv_template_controller.dart';
-import '../features/service_hub/ sub_features/cv_builder/views/choose_cv_template_view.dart';
-import '../features/service_hub/ sub_features/cv_builder/views/create_cv_choice_view.dart';
-import '../features/service_hub/ sub_features/cv_builder/views/create_cv_contact_view.dart';
-import '../features/service_hub/ sub_features/cv_builder/views/create_cv_education_view.dart';
-import '../features/service_hub/ sub_features/cv_builder/views/create_cv_experience_view.dart';
-import '../features/service_hub/ sub_features/cv_builder/views/create_cv_summary_view.dart';
-import '../features/service_hub/ sub_features/cv_builder/views/cv_builder_view.dart';
-import '../features/service_hub/ sub_features/cv_builder/views/cv_ready_view.dart';
+import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_contact_controller.dart';
+import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_dynamic_form_controller.dart';
+import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_education_controller.dart';
+import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_experience_controller.dart';
+import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_summary_controller.dart';
+import '../features/service_hub/sub_features/cv_builder/controllers/cv_ready_controller.dart';
+import '../features/service_hub/sub_features/cv_builder/controllers/cv_template_controller.dart';
+import '../features/service_hub/sub_features/cv_builder/services/cv_builder_api_service.dart';
+import '../core/services/api_client.dart';
+import '../features/service_hub/sub_features/cv_builder/views/choose_cv_template_view.dart';
+import '../features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart';
+import '../features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart';
+import '../features/service_hub/sub_features/cv_builder/views/create_cv_dynamic_form_view.dart';
+import '../features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart';
+import '../features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart';
+import '../features/service_hub/sub_features/cv_builder/views/create_cv_summary_view.dart';
+import '../features/service_hub/sub_features/cv_builder/views/cv_builder_view.dart';
+import '../features/service_hub/sub_features/cv_builder/views/cv_ready_view.dart';
 import '../features/splash/splash_view.dart';
 import '../features/splash/splash_controller.dart';
 import '../features/splash/splash_view.dart';
 import '../features/webinar/controllers/webinar_controller.dart';
-import '../features/webinar/services/webinar_mock_service.dart';
+import '../features/webinar/services/webinar_agora_service.dart';
+import '../features/webinar/services/webinar_api_service.dart';
+import '../features/webinar/services/webinar_socket_service.dart';
 import '../features/webinar/views/webinar_live_view.dart';
 import '../features/webinar/views/webinar_view.dart';
 import 'app_route_arguments.dart';
@@ -120,7 +126,7 @@ import '../features/practice_hub/views/daily_challenges/daily_challenges_view.da
 class AppPages {
   AppPages._();
 
-  static const String initial = AppRoutes.bootstrap;
+  static const String initial = AppRoutes.wrapper;
 
   static T _arguments<T>() => Get.arguments as T;
 
@@ -290,7 +296,14 @@ class AppPages {
       name: AppRoutes.chooseCvTemplate,
       page: () => const ChooseCvTemplateView(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<CvTemplateController>(() => CvTemplateController());
+        Get.lazyPut<CvBuilderApiService>(
+          () => CvBuilderApiService(apiClient: Get.find<ApiClient>()),
+        );
+        Get.lazyPut<CvTemplateController>(
+          () => CvTemplateController(
+            cvBuilderApiService: Get.find<CvBuilderApiService>(),
+          ),
+        );
       }),
     ),
     GetPage(
@@ -299,6 +312,22 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut<CreateCvContactController>(
           () => CreateCvContactController(),
+        );
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.createCvDynamicForm,
+      page: () => const CreateCvDynamicFormView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<CvBuilderApiService>()) {
+          Get.lazyPut<CvBuilderApiService>(
+            () => CvBuilderApiService(apiClient: Get.find<ApiClient>()),
+          );
+        }
+        Get.lazyPut<CreateCvDynamicFormController>(
+          () => CreateCvDynamicFormController(
+            cvBuilderApiService: Get.find<CvBuilderApiService>(),
+          ),
         );
       }),
     ),
@@ -448,6 +477,11 @@ class AppPages {
       name: AppRoutes.createCvSummary,
       page: () => const CreateCvSummaryView(),
       binding: BindingsBuilder(() {
+        if (!Get.isRegistered<CvBuilderApiService>()) {
+          Get.lazyPut<CvBuilderApiService>(
+            () => CvBuilderApiService(apiClient: Get.find<ApiClient>()),
+          );
+        }
         Get.lazyPut<CreateCvSummaryController>(
           () => CreateCvSummaryController(),
         );
@@ -565,14 +599,25 @@ class AppPages {
       name: AppRoutes.webinar,
       page: () => const WebinarView(),
       binding: BindingsBuilder(() {
-        if (!Get.isRegistered<WebinarMockService>()) {
-          Get.lazyPut<WebinarMockService>(() => WebinarMockService());
+        if (!Get.isRegistered<WebinarApiService>()) {
+          Get.lazyPut<WebinarApiService>(
+            () => WebinarApiService(apiClient: Get.find<ApiClient>()),
+          );
+        }
+        if (!Get.isRegistered<WebinarAgoraService>()) {
+          Get.lazyPut<WebinarAgoraService>(() => WebinarAgoraService());
+        }
+        if (!Get.isRegistered<WebinarSocketService>()) {
+          Get.lazyPut<WebinarSocketService>(() => WebinarSocketService());
         }
         if (!Get.isRegistered<WebinarController>()) {
           Get.lazyPut<WebinarController>(
             () => WebinarController(
-              webinarMockService: Get.find<WebinarMockService>(),
+              webinarApiService: Get.find<WebinarApiService>(),
+              webinarAgoraService: Get.find<WebinarAgoraService>(),
+              webinarSocketService: Get.find<WebinarSocketService>(),
             ),
+            fenix: true,
           );
         }
       }),
@@ -710,14 +755,25 @@ class AppPages {
       name: AppRoutes.webinarLive,
       page: () => const WebinarLiveView(),
       binding: BindingsBuilder(() {
-        if (!Get.isRegistered<WebinarMockService>()) {
-          Get.lazyPut<WebinarMockService>(() => WebinarMockService());
+        if (!Get.isRegistered<WebinarApiService>()) {
+          Get.lazyPut<WebinarApiService>(
+            () => WebinarApiService(apiClient: Get.find<ApiClient>()),
+          );
+        }
+        if (!Get.isRegistered<WebinarAgoraService>()) {
+          Get.lazyPut<WebinarAgoraService>(() => WebinarAgoraService());
+        }
+        if (!Get.isRegistered<WebinarSocketService>()) {
+          Get.lazyPut<WebinarSocketService>(() => WebinarSocketService());
         }
         if (!Get.isRegistered<WebinarController>()) {
           Get.lazyPut<WebinarController>(
             () => WebinarController(
-              webinarMockService: Get.find<WebinarMockService>(),
+              webinarApiService: Get.find<WebinarApiService>(),
+              webinarAgoraService: Get.find<WebinarAgoraService>(),
+              webinarSocketService: Get.find<WebinarSocketService>(),
             ),
+            fenix: true,
           );
         }
       }),

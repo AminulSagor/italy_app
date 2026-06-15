@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../routes/app_routes.dart';
+
 class CreateCvExperienceController extends GetxController {
   final TextEditingController jobPositionController = TextEditingController();
   final TextEditingController companyNameController = TextEditingController();
@@ -70,7 +72,7 @@ class CreateCvExperienceController extends GetxController {
   }
 
   void onContinueTap() {
-    // Next step navigation will be added later.
+    Get.toNamed(AppRoutes.createCvEducation);
   }
 
   @override

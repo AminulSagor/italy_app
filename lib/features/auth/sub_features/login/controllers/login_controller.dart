@@ -1,14 +1,16 @@
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '../../../../../core/services/storage_service.dart';
+import 'package:get/get.dart';
+
 import '../../../../../core/localization/translation_service.dart';
+import '../../../../../core/services/api_error_handler.dart';
+import '../../../../../core/services/auth_service.dart';
 import '../../../../../routes/routes.dart';
 import '../../../models/auth_models.dart';
 import '../models/login_models.dart';
 
 class LoginController extends GetxController {
-  final StorageService _storageService = Get.find<StorageService>();
   final TranslationService _translationService = Get.find<TranslationService>();
+  final AuthService _authService = Get.find<AuthService>();
 
   final Rx<LoginFormModel> form = LoginFormModel.initial().obs;
   final Rxn<LoginPayloadModel> pendingPayload = Rxn<LoginPayloadModel>();
@@ -30,7 +32,6 @@ class LoginController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    // Re-sync in case locale changed before this route became active.
     _syncSelectedLanguageWithLocale();
   }
 
@@ -54,7 +55,10 @@ class LoginController extends GetxController {
 
   Future<void> onLoginTap() async {
     final LoginFormModel current = form.value;
-    final String normalizedIdentifier = current.identifier.trim();
+    final String normalizedIdentifier = _normalizeIdentifier(
+      identifier: current.identifier,
+      isEmailMode: current.isEmailMode,
+    );
     final String normalizedPassword = current.password.trim();
 
     if (normalizedIdentifier.isEmpty || normalizedPassword.isEmpty) {
@@ -67,7 +71,7 @@ class LoginController extends GetxController {
       return;
     }
 
-    if (!current.isEmailMode && !GetUtils.isPhoneNumber(normalizedIdentifier)) {
+    if (!current.isEmailMode && !_isSupportedPhone(normalizedIdentifier)) {
       Get.snackbar('snack_invalid_phone'.tr, 'snack_enter_valid_phone'.tr);
       return;
     }
@@ -85,13 +89,15 @@ class LoginController extends GetxController {
     pendingPayload.value = payload;
     form.value = form.value.copyWith(isLoading: true);
 
-    // Simulate a login process (replace with actual API call)
     try {
-      await Future.delayed(const Duration(seconds: 2));
-      // For demonstration, we assume the login is always successful and return a dummy token
-      const String dummyToken = 'dummy_auth_token';
-      await _storageService.setLoggedInData(dummyToken);
-      // Navigate to the home screen or dashboard after successful login
+      final ApiResult<AuthTokenResultModel> result = await ApiErrorHandler.call(
+        () => _authService.login(payload),
+      );
+
+      if (!result.isSuccess) {
+        return;
+      }
+
       Get.offAllNamed(AppRoutes.wrapper);
     } finally {
       form.value = form.value.copyWith(isLoading: false);
@@ -109,6 +115,35 @@ class LoginController extends GetxController {
       identifier: identifierController.text,
       password: passwordController.text,
     );
+  }
+
+  String _normalizeIdentifier({
+    required String identifier,
+    required bool isEmailMode,
+  }) {
+    final String normalized = identifier.trim();
+    if (isEmailMode || normalized.startsWith('+')) {
+      return isEmailMode ? normalized.toLowerCase() : normalized;
+    }
+
+    final String digitsOnly = normalized.replaceAll(RegExp(r'\D'), '');
+    if (digitsOnly.startsWith('01') && digitsOnly.length == 11) {
+      return '+88$digitsOnly';
+    }
+
+    if (digitsOnly.startsWith('8801') && digitsOnly.length == 13) {
+      return '+$digitsOnly';
+    }
+
+    if (digitsOnly.startsWith('39') && digitsOnly.length >= 10) {
+      return '+$digitsOnly';
+    }
+
+    return normalized;
+  }
+
+  bool _isSupportedPhone(String phone) {
+    return RegExp(r'^(?:\+8801\d{9}|\+39\d{8,11})$').hasMatch(phone);
   }
 
   @override

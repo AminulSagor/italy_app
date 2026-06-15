@@ -21,6 +21,13 @@ dependencies:
   flutter_svg: ^2.3.0
   material_symbols_icons: ^4.2928.1
   syncfusion_flutter_pdfviewer: ^33.2.6
+  dio: ^5.9.2
+  flutter_secure_storage: ^9.2.4
+  flutter_dotenv: ^6.0.1
+  pretty_dio_logger: ^1.4.0
+  agora_rtc_engine: ^6.5.2
+  socket_io_client: ^3.1.2
+  permission_handler: ^12.0.1
   
 dev_dependencies:
   flutter_test:
@@ -34,6 +41,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - assets/decor_png/
     - assets/icons_png/
     - assets/icons_svg/

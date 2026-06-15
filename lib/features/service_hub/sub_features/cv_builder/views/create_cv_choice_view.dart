@@ -7,6 +7,7 @@ import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../_widgets/cv_choice_option_card.dart';
 import '../_widgets/recent_cv_tile.dart';
+import '../../../../../routes/app_routes.dart';
 
 class CreateCvChoiceView extends StatelessWidget {
   const CreateCvChoiceView({super.key});
@@ -58,7 +59,7 @@ class CreateCvChoiceView extends StatelessWidget {
                 iconColor: AppColors.white,
                 titleColor: AppColors.white,
                 isPrimary: true,
-                onTap: () {},
+                onTap: () => Get.toNamed(AppRoutes.chooseCvTemplate),
               ),
               SizedBox(height: 14.h),
               CvChoiceOptionCard(

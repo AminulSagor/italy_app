@@ -1,3 +1,4 @@
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -9,19 +10,18 @@ import '../controllers/webinar_controller.dart';
 import '../models/webinar_models.dart';
 
 class WebinarStageArea extends StatelessWidget {
-  final WebinarController controller;
-
   const WebinarStageArea({super.key, required this.controller});
+
+  final WebinarController controller;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final bool isTalking = controller.isTalking.value;
-
       return Container(
-        height: kWebinarStagePanelHeight.h,
+        height: double.infinity,
         width: double.infinity,
-        padding: EdgeInsets.fromLTRB(30.w, 32.h, 30.w, 28.h),
+        padding: EdgeInsets.fromLTRB(22.w, 24.h, 22.w, 22.h),
         decoration: BoxDecoration(
           color: AppColors.webinarStagePanelBg,
           borderRadius: BorderRadius.circular(kWebinarStageRadius.r),
@@ -41,56 +41,98 @@ class WebinarStageArea extends StatelessWidget {
                 ]
               : const <BoxShadow>[],
         ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: <Widget>[
-            Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(kWebinarStageRadius.r),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[
-                        AppColors.webinarStagePanelBg.withValues(alpha: 0.10),
-                        AppColors.webinarStagePanelBg.withValues(alpha: 0.05),
-                        AppColors.white.withValues(alpha: 0.50),
-                      ],
-                      stops: const <double>[0.0, 0.52, 1.0],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Icon(
-                Icons.bar_chart_rounded,
-                color: AppColors.webinarHeroBorder,
-                size: 26.w,
-              ),
-            ),
-            Positioned.fill(
-              child: _StageMessagePreview(controller: controller),
-            ),
-          ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular((kWebinarStageRadius - 8).r),
+          child: Stack(
+            children: <Widget>[
+              Positioned.fill(child: _LocalStageVideo(controller: controller)),
+              Positioned.fill(child: _StageMessagePreview(controller: controller)),
+            ],
+          ),
         ),
       );
     });
   }
 }
 
-class _StageMessagePreview extends StatelessWidget {
-  final WebinarController controller;
+class _LocalStageVideo extends StatelessWidget {
+  const _LocalStageVideo({required this.controller});
 
-  const _StageMessagePreview({required this.controller});
+  final WebinarController controller;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final List<WebinarLiveChatModel> messages =
-          controller.latestStageMessages;
+      final RtcEngine? engine = controller.agoraService.engine;
+      final bool canShowVideo = controller.agoraService.isBroadcaster.value &&
+          controller.agoraService.isCameraEnabled.value &&
+          engine != null;
+
+      if (canShowVideo) {
+        return AgoraVideoView(
+          controller: VideoViewController(
+            rtcEngine: engine,
+            canvas: const VideoCanvas(
+              uid: 0,
+              renderMode: RenderModeType.renderModeFit,
+            ),
+          ),
+        );
+      }
+
+      return _StagePlaceholder(controller: controller);
+    });
+  }
+}
+
+class _StagePlaceholder extends StatelessWidget {
+  const _StagePlaceholder({required this.controller});
+
+  final WebinarController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(
+          child: Container(color: AppColors.legacyColorFFECEFF0),
+        ),
+        Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
+            padding: EdgeInsets.all(10.w),
+            child: Icon(
+              Icons.bar_chart_rounded,
+              color: AppColors.webinarHeroBorder,
+              size: 26.w,
+            ),
+          ),
+        ),
+        Center(
+          child: Text(
+            'Your video will appear here when camera is on.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: AppFont.font14.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.bodyText,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StageMessagePreview extends StatelessWidget {
+  const _StageMessagePreview({required this.controller});
+
+  final WebinarController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final List<WebinarLiveChatModel> messages = controller.latestStageMessages;
       if (messages.isEmpty) return const SizedBox.shrink();
 
       return Stack(
@@ -102,22 +144,10 @@ class _StageMessagePreview extends StatelessWidget {
             1 => 0.56,
             _ => 0.24,
           };
-          final double bottom = 22.h + (visualIndex * 52.h);
-          final double left = switch (visualIndex) {
-            0 => 145.w,
-            1 => 130.w,
-            _ => 85.w,
-          };
-          final double right = switch (visualIndex) {
-            0 => 0.w,
-            1 => 8.w,
-            _ => 38.w,
-          };
-
           return Positioned(
-            left: left,
-            right: right,
-            bottom: bottom,
+            left: 14.w,
+            right: 14.w,
+            bottom: 16.h + (visualIndex * 42.h),
             child: Opacity(
               opacity: opacity,
               child: _StageMessageChip(message: message),
@@ -130,16 +160,16 @@ class _StageMessagePreview extends StatelessWidget {
 }
 
 class _StageMessageChip extends StatelessWidget {
-  final WebinarLiveChatModel message;
-
   const _StageMessageChip({required this.message});
+
+  final WebinarLiveChatModel message;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.88),
+        color: AppColors.black.withValues(alpha: 0.42),
         borderRadius: BorderRadius.circular(kHomePillRadius.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
@@ -162,28 +192,14 @@ class _StageMessageChip extends StatelessWidget {
           ),
           SizedBox(width: 12.w),
           Flexible(
-            child: RichText(
+            child: Text(
+              '${message.senderName}  ${message.message}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                children: <InlineSpan>[
-                  TextSpan(
-                    text: '${message.senderName}  ',
-                    style: TextStyle(
-                      fontSize: AppFont.font14.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.homePrimaryText,
-                    ),
-                  ),
-                  TextSpan(
-                    text: message.message,
-                    style: TextStyle(
-                      fontSize: AppFont.font14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.bodyText,
-                    ),
-                  ),
-                ],
+              style: TextStyle(
+                fontSize: AppFont.font14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.white,
               ),
             ),
           ),
@@ -201,40 +217,10 @@ class _StageMessageChip extends StatelessWidget {
   }
 }
 
-class _LiveUserChip extends StatelessWidget {
-  const _LiveUserChip();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(kHomePillRadius.r),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AppColors.homeNeutralShadow,
-            blurRadius: 14.r,
-            offset: Offset(0, 6.h),
-          ),
-        ],
-      ),
-      child: Text(
-        'Tu (In Diretta)',
-        style: TextStyle(
-          fontSize: AppFont.font20.sp,
-          fontWeight: FontWeight.w900,
-          color: AppColors.black,
-        ),
-      ),
-    );
-  }
-}
-
 class WebinarStageControls extends StatelessWidget {
-  final WebinarController controller;
-
   const WebinarStageControls({super.key, required this.controller});
+
+  final WebinarController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -247,24 +233,28 @@ class WebinarStageControls extends StatelessWidget {
             onLongPressEnd: (_) => controller.stopTalking(),
             onTap: controller.toggleMic,
             child: _RoundControl(
-              icon: controller.isMicEnabled.value
+              icon: controller.agoraService.isMicEnabled.value
                   ? Icons.mic_rounded
                   : Icons.mic_off_rounded,
-              isActive: controller.isMicEnabled.value,
+              isActive: controller.agoraService.isMicEnabled.value,
             ),
           ),
-          SizedBox(width: 26.w),
+          SizedBox(width: 22.w),
           GestureDetector(
             onTap: controller.toggleCamera,
             child: _RoundControl(
-              icon: controller.isCameraEnabled.value
+              icon: controller.agoraService.isCameraEnabled.value
                   ? Icons.videocam_rounded
                   : Icons.videocam_off_rounded,
+              isActive: controller.agoraService.isCameraEnabled.value,
             ),
           ),
-          SizedBox(width: 26.w),
-          const _RoundControl(icon: Icons.flip_camera_ios_rounded),
-          SizedBox(width: 26.w),
+          SizedBox(width: 22.w),
+          GestureDetector(
+            onTap: controller.switchCamera,
+            child: const _RoundControl(icon: Icons.flip_camera_ios_rounded),
+          ),
+          SizedBox(width: 22.w),
           GestureDetector(
             onTap: controller.openChatMode,
             child: const _RoundControl(icon: Icons.chat_bubble_outline_rounded),
@@ -276,10 +266,10 @@ class WebinarStageControls extends StatelessWidget {
 }
 
 class _RoundControl extends StatelessWidget {
+  const _RoundControl({required this.icon, this.isActive = false});
+
   final IconData icon;
   final bool isActive;
-
-  const _RoundControl({required this.icon, this.isActive = false});
 
   @override
   Widget build(BuildContext context) {

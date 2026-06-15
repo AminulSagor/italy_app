@@ -142,9 +142,15 @@ class _ChatHeader extends GetView<MessageChatController> {
               ),
             ),
           ),
-          _HeaderAction(icon: Icons.call_outlined),
+          _HeaderAction(
+            icon: Icons.call_outlined,
+            onTap: controller.openAudioCall,
+          ),
           SizedBox(width: 20.w),
-          _HeaderAction(icon: Icons.videocam_outlined),
+          _HeaderAction(
+            icon: Icons.videocam_outlined,
+            onTap: controller.openVideoCall,
+          ),
           SizedBox(width: 20.w),
           _HeaderAction(
             icon: Icons.info_outline_rounded,
