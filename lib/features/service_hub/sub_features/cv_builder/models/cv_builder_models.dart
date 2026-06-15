@@ -220,6 +220,7 @@ class CvDocumentModel {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    required this.template,
   });
 
   final String id;
@@ -231,6 +232,7 @@ class CvDocumentModel {
   final String status;
   final String? createdAt;
   final String? updatedAt;
+  final CvTemplateModel? template;
 
   factory CvDocumentModel.fromJson(Map<String, dynamic> json) {
     return CvDocumentModel(
@@ -245,6 +247,11 @@ class CvDocumentModel {
       status: json['status']?.toString() ?? 'ready',
       createdAt: json['createdAt']?.toString(),
       updatedAt: json['updatedAt']?.toString(),
+      template: json['template'] is Map
+          ? CvTemplateModel.fromJson(
+              Map<String, dynamic>.from(json['template'] as Map),
+            )
+          : null,
     );
   }
 }

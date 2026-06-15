@@ -214,7 +214,7 @@ class CreateCvDynamicFormController extends GetxController {
           AppRoutes.cvReady,
           arguments: CvReadyRouteArguments(
             document: result.data!,
-            template: template,
+            template: result.data!.template ?? template,
           ),
         );
       }

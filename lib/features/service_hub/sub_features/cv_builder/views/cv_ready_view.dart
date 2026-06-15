@@ -51,8 +51,12 @@ class CvReadyView extends GetView<CvReadyController> {
                       ),
                     ),
                     SizedBox(height: 28.h),
-                    CvReadyPreviewCard(
-                      onTap: controller.onPreviewTap,
+                    Obx(
+                      () => CvReadyPreviewCard(
+                        onTap: controller.onPreviewTap,
+                        pdfBytes: controller.pdfBytes.value,
+                        isLoading: controller.isPreparingPdf.value,
+                      ),
                     ),
                     SizedBox(height: 24.h),
                     Row(
