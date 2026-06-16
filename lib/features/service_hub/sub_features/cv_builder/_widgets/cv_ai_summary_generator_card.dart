@@ -10,10 +10,7 @@ import '../controllers/create_cv_summary_controller.dart';
 class CvAiSummaryGeneratorCard extends StatelessWidget {
   final CreateCvSummaryController controller;
 
-  const CvAiSummaryGeneratorCard({
-    super.key,
-    required this.controller,
-  });
+  const CvAiSummaryGeneratorCard({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +20,10 @@ class CvAiSummaryGeneratorCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primaryGreen,
         borderRadius: BorderRadius.circular(kRadius26.r),
-        border: Border.all(
-          color: AppColors.homeBlueIcon,
-          width: 2.w,
-        ),
+        border: Border.all(color: AppColors.homeBlueIcon, width: 2.w),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppColors.homeBlueIcon.withOpacity(0.30),
+            color: AppColors.homeBlueIcon.withValues(alpha: 0.30),
             blurRadius: 18.r,
             offset: Offset(0, 10.h),
           ),
@@ -74,10 +68,10 @@ class CvAiSummaryGeneratorCard extends StatelessWidget {
             alignment: Alignment.center,
             padding: EdgeInsets.symmetric(horizontal: 18.w),
             decoration: BoxDecoration(
-              color: AppColors.primaryGreen.withOpacity(0.25),
+              color: AppColors.primaryGreen.withValues(alpha: 0.25),
               borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
               border: Border.all(
-                color: AppColors.white.withOpacity(0.12),
+                color: AppColors.white.withValues(alpha: 0.12),
                 width: 1.w,
               ),
             ),
@@ -85,7 +79,7 @@ class CvAiSummaryGeneratorCard extends StatelessWidget {
               '"Tell us what types of job\nyou are looking for..."',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.white.withOpacity(0.64),
+                color: AppColors.white.withValues(alpha: 0.64),
                 fontSize: AppFont.font11.sp,
                 fontStyle: FontStyle.italic,
                 fontWeight: FontWeight.w500,
@@ -95,7 +89,7 @@ class CvAiSummaryGeneratorCard extends StatelessWidget {
           ),
           SizedBox(height: 18.h),
           Obx(
-                () => Material(
+            () => Material(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
               child: InkWell(
@@ -109,33 +103,33 @@ class CvAiSummaryGeneratorCard extends StatelessWidget {
                   alignment: Alignment.center,
                   child: controller.isGenerating.value
                       ? SizedBox(
-                    width: 18.w,
-                    height: 18.w,
-                    child: const CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primaryGreen,
-                    ),
-                  )
+                          width: 18.w,
+                          height: 18.w,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryGreen,
+                          ),
+                        )
                       : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(
-                        Icons.auto_awesome_rounded,
-                        color: AppColors.primaryGreen,
-                        size: AppFont.font18.sp,
-                      ),
-                      SizedBox(width: 10.w),
-                      Text(
-                        'Generate Summary',
-                        style: TextStyle(
-                          color: AppColors.primaryGreen,
-                          fontSize: AppFont.font12.sp,
-                          fontWeight: FontWeight.w900,
-                          height: 1,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.auto_awesome_rounded,
+                              color: AppColors.primaryGreen,
+                              size: AppFont.font18.sp,
+                            ),
+                            SizedBox(width: 10.w),
+                            Text(
+                              'Generate Summary',
+                              style: TextStyle(
+                                color: AppColors.primaryGreen,
+                                fontSize: AppFont.font12.sp,
+                                fontWeight: FontWeight.w900,
+                                height: 1,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ),

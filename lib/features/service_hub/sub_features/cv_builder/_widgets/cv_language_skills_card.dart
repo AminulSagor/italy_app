@@ -11,10 +11,7 @@ import 'cv_selectable_chip.dart';
 class CvLanguageSkillsCard extends StatelessWidget {
   final CreateCvEducationController controller;
 
-  const CvLanguageSkillsCard({
-    super.key,
-    required this.controller,
-  });
+  const CvLanguageSkillsCard({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -35,12 +32,12 @@ class CvLanguageSkillsCard extends StatelessWidget {
               children: languages
                   .map(
                     (String item) => CvSelectableChip(
-                  title: item,
-                  isSelected: true,
-                  showCloseIcon: true,
-                  onTap: () => controller.removeNativeLanguage(item),
-                ),
-              )
+                      title: item,
+                      isSelected: true,
+                      showCloseIcon: true,
+                      onTap: () => controller.removeNativeLanguage(item),
+                    ),
+                  )
                   .toList(),
             );
           }),
@@ -62,12 +59,12 @@ class CvLanguageSkillsCard extends StatelessWidget {
               children: languages
                   .map(
                     (String item) => CvSelectableChip(
-                  title: item,
-                  isSelected: true,
-                  showCloseIcon: true,
-                  onTap: () => controller.removeOtherLanguage(item),
-                ),
-              )
+                      title: item,
+                      isSelected: true,
+                      showCloseIcon: true,
+                      onTap: () => controller.removeOtherLanguage(item),
+                    ),
+                  )
                   .toList(),
             );
           }),
@@ -210,7 +207,7 @@ class _AddInput extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: TextStyle(
-                  color: AppColors.homeSecondaryText.withOpacity(0.55),
+                  color: AppColors.homeSecondaryText.withValues(alpha: 0.55),
                   fontSize: AppFont.font8.sp,
                   fontWeight: FontWeight.w600,
                 ),

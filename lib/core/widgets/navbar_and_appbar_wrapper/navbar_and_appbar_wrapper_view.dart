@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../features/courses/views/courses_view.dart';
 import '../../../features/home/views/home_view.dart';
 import '../../../features/messages/views/messages_view.dart';
 import '../../../features/service_hub/views/service_hub_view.dart';

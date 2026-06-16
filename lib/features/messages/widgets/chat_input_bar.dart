@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
+import '../controllers/message_chat_controller.dart';
 
 class ChatInputBar extends StatelessWidget {
   const ChatInputBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<MessageChatController>();
+
     return Container(
       padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 26.h),
       decoration: BoxDecoration(
@@ -33,6 +37,8 @@ class ChatInputBar extends StatelessWidget {
                 ),
                 child: TextField(
                   cursorColor: AppColors.primaryGreen,
+                  controller: controller.chatTextController,
+                  onSubmitted: (_) => controller.sendMessage(),
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(
@@ -69,11 +75,19 @@ class ChatInputBar extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(
-                Icons.send_rounded,
-                color: AppColors.limeTextColor,
-                size: 26.w,
-              ),
+              child: Obx(() {
+                final bool sending = controller.isSending.value;
+                return GestureDetector(
+                  onTap: sending ? null : controller.sendMessage,
+                  child: sending
+                      ? const Center(child: CircularProgressIndicator())
+                      : Icon(
+                          Icons.send_rounded,
+                          color: AppColors.limeTextColor,
+                          size: 26.w,
+                        ),
+                );
+              }),
             ),
           ],
         ),

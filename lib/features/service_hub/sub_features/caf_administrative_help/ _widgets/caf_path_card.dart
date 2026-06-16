@@ -44,7 +44,7 @@ class CafPathCard extends StatelessWidget {
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: gradientColors.last.withOpacity(0.24),
+            color: gradientColors.last.withValues(alpha: 0.24),
             blurRadius: 22.r,
             offset: Offset(0, 14.h),
           ),
@@ -79,7 +79,7 @@ class CafPathCard extends StatelessWidget {
             maxLines: descriptionMaxLines,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: AppColors.white.withOpacity(0.78),
+              color: AppColors.white.withValues(alpha: 0.78),
               fontSize: AppFont.font14.sp,
               fontWeight: FontWeight.w500,
               height: 1.18,
@@ -101,9 +101,7 @@ class CafPathCard extends StatelessWidget {
 class _IconCircle extends StatelessWidget {
   final IconData icon;
 
-  const _IconCircle({
-    required this.icon,
-  });
+  const _IconCircle({required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +109,7 @@ class _IconCircle extends StatelessWidget {
       width: 38.w,
       height: 38.w,
       decoration: BoxDecoration(
-        color: AppColors.white.withOpacity(0.16),
+        color: AppColors.white.withValues(alpha: 0.16),
         shape: BoxShape.circle,
       ),
       child: Icon(

@@ -100,11 +100,11 @@ class StatusPageBackground extends StatelessWidget {
               width: 42.r,
               height: 42.r,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.42),
+                color: Colors.white.withValues(alpha: 0.42),
                 shape: BoxShape.circle,
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     blurRadius: 22.r,
                   ),
                 ],
@@ -159,10 +159,10 @@ class BlurGlow extends StatelessWidget {
       height: size.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color.withOpacity(0.45),
+        color: color.withValues(alpha: 0.45),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: color.withOpacity(0.75),
+            color: color.withValues(alpha: 0.75),
             blurRadius: blur.r,
             spreadRadius: 32.r,
           ),
@@ -266,7 +266,7 @@ class ThinOutlineButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withOpacity(0.36),
+      color: Colors.white.withValues(alpha: 0.36),
       borderRadius: BorderRadius.circular(radius),
       child: InkWell(
         onTap: onTap,
@@ -326,7 +326,7 @@ class BrightGreenButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(35.r),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: const Color(0xFF72F236).withOpacity(0.34),
+              color: const Color(0xFF72F236).withValues(alpha: 0.34),
               blurRadius: 28.r,
               offset: Offset(0, 13.h),
             ),
@@ -521,7 +521,7 @@ class AssetOrNoInternetPlaceholder extends StatelessWidget {
       width: width,
       height: height,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) {
+      errorBuilder: (_, _, _) {
         return Container(
           width: width,
           height: height,
@@ -569,7 +569,7 @@ class AssetOrNoResultPlaceholder extends StatelessWidget {
       width: width,
       height: height,
       fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) {
+      errorBuilder: (_, _, _) {
         return SizedBox(
           width: width,
           height: height,
@@ -630,7 +630,7 @@ class AssetOrKeyboardPlaceholder extends StatelessWidget {
       width: width,
       height: height,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) {
+      errorBuilder: (_, _, _) {
         return Container(
           width: width,
           height: height,
@@ -699,7 +699,7 @@ class AssetOrKeyboardPlaceholder extends StatelessWidget {
                       borderRadius: BorderRadius.circular(22.r),
                       boxShadow: <BoxShadow>[
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.13),
+                          color: Colors.black.withValues(alpha: 0.13),
                           blurRadius: 12.r,
                           offset: Offset(0, 5.h),
                         ),
@@ -748,7 +748,7 @@ class AccentKey extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withOpacity(selected ? 0.13 : 0.09),
+            color: Colors.black.withValues(alpha: selected ? 0.13 : 0.09),
             blurRadius: 12.r,
             offset: Offset(0, 7.h),
           ),

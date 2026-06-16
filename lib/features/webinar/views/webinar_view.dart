@@ -56,14 +56,16 @@ class WebinarView extends GetView<WebinarController> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: controller.liveWebinars.length,
-                      separatorBuilder: (_, __) => SizedBox(height: 18.h),
+                      separatorBuilder: (_, _) => SizedBox(height: 18.h),
                       itemBuilder: (_, int index) {
                         final WebinarItemModel webinar =
                             controller.liveWebinars[index];
                         return WebinarLiveHeroCard(
                           webinar: webinar,
-                          isJoining: controller.isJoining.value &&
-                              controller.selectedWebinar.value?.id == webinar.id,
+                          isJoining:
+                              controller.isJoining.value &&
+                              controller.selectedWebinar.value?.id ==
+                                  webinar.id,
                           onJoinTap: () => controller.openLiveSession(webinar),
                         );
                       },
@@ -97,7 +99,7 @@ class _UpcomingList extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: webinars.length,
-      separatorBuilder: (_, __) => SizedBox(height: 20.h),
+      separatorBuilder: (_, _) => SizedBox(height: 20.h),
       itemBuilder: (_, int index) {
         return WebinarSessionCard(webinar: webinars[index]);
       },

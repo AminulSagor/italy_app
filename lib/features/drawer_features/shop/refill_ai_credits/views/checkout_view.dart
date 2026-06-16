@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:italir_pothe/core/themes/app_colors.dart';
-import 'package:italir_pothe/core/widgets/custom_button.dart';
 import 'package:italir_pothe/core/widgets/widgets.dart';
 import '../../shop_controller.dart';
 

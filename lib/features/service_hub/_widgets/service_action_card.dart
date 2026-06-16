@@ -44,7 +44,7 @@ class ServiceActionCard extends StatelessWidget {
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: gradientColors.last.withOpacity(0.26),
+            color: gradientColors.last.withValues(alpha: 0.26),
             blurRadius: 18.r,
             offset: Offset(0, 9.h),
           ),
@@ -93,7 +93,7 @@ class ServiceActionCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: AppColors.white.withOpacity(0.82),
+                          color: AppColors.white.withValues(alpha: 0.82),
                           fontSize: AppFont.font9.sp,
                           height: 1,
                           fontWeight: FontWeight.w500,

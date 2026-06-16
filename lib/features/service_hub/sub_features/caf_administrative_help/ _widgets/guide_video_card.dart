@@ -27,8 +27,8 @@ class GuideVideoCard extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: <Color>[
-                  AppColors.homePrimaryText.withOpacity(0.45),
-                  AppColors.black.withOpacity(0.75),
+                  AppColors.homePrimaryText.withValues(alpha: 0.45),
+                  AppColors.black.withValues(alpha: 0.75),
                 ],
               ),
             ),
@@ -38,7 +38,7 @@ class GuideVideoCard extends StatelessWidget {
               width: 52.w,
               height: 52.w,
               decoration: BoxDecoration(
-                color: AppColors.white.withOpacity(0.32),
+                color: AppColors.white.withValues(alpha: 0.32),
                 shape: BoxShape.circle,
               ),
               child: Icon(

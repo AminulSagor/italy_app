@@ -4,6 +4,9 @@ import 'package:get/get.dart';
 import '../../../features/drawer_features/language/language_switch_dialogue.dart';
 import '../../../features/messages/controllers/messages_controller.dart';
 import '../../../features/messages/services/messages_mock_service.dart';
+import '../../../features/messages/services/chat_socket_service.dart';
+import '../../services/api_client.dart';
+import '../../services/token_service.dart';
 import '../../../features/notifications/controllers/notifications_controller.dart';
 import '../../../features/notifications/services/notifications_mock_service.dart';
 import '../../../features/notifications/views/notifications_bottom_sheet.dart';
@@ -61,7 +64,19 @@ class NavbarAndAppbarWrapperController extends GetxController {
 
   void openMessages() {
     if (!Get.isRegistered<MessagesMockService>()) {
-      Get.lazyPut<MessagesMockService>(() => MessagesMockService());
+      if (!Get.isRegistered<ChatSocketService>()) {
+        Get.lazyPut<ChatSocketService>(
+          () => ChatSocketService(tokenService: Get.find<TokenService>()),
+        );
+      }
+
+      Get.lazyPut<MessagesMockService>(
+        () => MessagesMockService(
+          apiClient: Get.find<ApiClient>(),
+          tokenService: Get.find<TokenService>(),
+          chatSocketService: Get.find<ChatSocketService>(),
+        ),
+      );
     }
 
     if (!Get.isRegistered<MessagesController>()) {
@@ -127,4 +142,3 @@ class NavbarAndAppbarWrapperController extends GetxController {
     Get.offAllNamed(AppRoutes.login);
   }
 }
-

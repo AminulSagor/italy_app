@@ -426,7 +426,7 @@ class _PodiumUserCard extends StatelessWidget {
               ),
               SizedBox(height: 2.h),
               Text(
-                '${rank}${_rankSuffix(rank)}',
+                '$rank${_rankSuffix(rank)}',
                 style: TextStyle(
                   fontSize: AppFont.font15.sp,
                   fontWeight: FontWeight.w900,
@@ -745,7 +745,7 @@ class _LeaderboardList extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverList.separated(
       itemCount: users.length,
-      separatorBuilder: (_, __) => SizedBox(height: 14.h),
+      separatorBuilder: (_, _) => SizedBox(height: 14.h),
       itemBuilder: (BuildContext context, int index) {
         final Map<String, dynamic> user = users[index];
 

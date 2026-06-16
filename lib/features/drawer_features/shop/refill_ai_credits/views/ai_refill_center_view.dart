@@ -114,7 +114,7 @@ class AiRefillCenterPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.13),
+            color: Colors.black.withValues(alpha: .13),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -173,7 +173,7 @@ class AiRefillCenterPage extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: green.withOpacity(.25),
+            color: green.withValues(alpha: .25),
             blurRadius: 24,
             offset: const Offset(0, 14),
           ),
@@ -216,7 +216,7 @@ class AiRefillCenterPage extends StatelessWidget {
             child: Icon(
               Icons.forum_rounded,
               size: 126,
-              color: Colors.white.withOpacity(.24),
+              color: Colors.white.withValues(alpha: .24),
             ),
           ),
         ],
@@ -257,7 +257,7 @@ class AiRefillCenterPage extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(.10),
+                        color: Colors.black.withValues(alpha: .10),
                         blurRadius: 14,
                         offset: const Offset(0, 8),
                       ),
@@ -366,7 +366,7 @@ class AiRefillCenterPage extends StatelessWidget {
         boxShadow: shadow
             ? [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.17),
+                  color: Colors.black.withValues(alpha: .17),
                   blurRadius: 0,
                   offset: const Offset(0, 4),
                 ),
@@ -395,7 +395,7 @@ class AiRefillCenterPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(34),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.04),
+            color: Colors.black.withValues(alpha: .04),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),

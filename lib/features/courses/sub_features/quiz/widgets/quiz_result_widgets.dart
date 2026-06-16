@@ -26,7 +26,7 @@ class QuizCorrectAnswerSheet extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
         child: Container(
-          color: AppColors.black.withOpacity(0.20),
+          color: AppColors.black.withValues(alpha: 0.20),
           alignment: Alignment.bottomCenter,
           child: Container(
             width: double.infinity,

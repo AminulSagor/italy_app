@@ -38,7 +38,9 @@ class WebinarLiveHeroCard extends StatelessWidget {
         borderRadius: BorderRadius.circular((kWebinarHeroRadius - 2).r),
         child: Stack(
           children: <Widget>[
-            Positioned.fill(child: WebinarThumbnail(url: webinar.thumbnailImageUrl)),
+            Positioned.fill(
+              child: WebinarThumbnail(url: webinar.thumbnailImageUrl),
+            ),
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -90,7 +92,9 @@ class WebinarLiveHeroCard extends StatelessWidget {
                         width: 140.w,
                         decoration: BoxDecoration(
                           color: AppColors.legacyColorFFD5D5D5,
-                          borderRadius: BorderRadius.circular(kHomePillRadius.r),
+                          borderRadius: BorderRadius.circular(
+                            kHomePillRadius.r,
+                          ),
                         ),
                         child: Center(
                           child: isJoining
@@ -148,7 +152,7 @@ class WebinarThumbnail extends StatelessWidget {
     return Image.network(
       imageUrl,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => const _ThumbnailFallback(),
+      errorBuilder: (_, _, _) => const _ThumbnailFallback(),
       loadingBuilder: (_, Widget child, ImageChunkEvent? progress) {
         if (progress == null) return child;
         return const _ThumbnailFallback();
@@ -282,8 +286,18 @@ class WebinarSessionCard extends StatelessWidget {
   String _monthLabel(DateTime? dateTime) {
     if (dateTime == null) return 'N/A';
     const List<String> months = <String>[
-      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+      'JAN',
+      'FEB',
+      'MAR',
+      'APR',
+      'MAY',
+      'JUN',
+      'JUL',
+      'AUG',
+      'SEP',
+      'OCT',
+      'NOV',
+      'DEC',
     ];
     return months[dateTime.month - 1];
   }

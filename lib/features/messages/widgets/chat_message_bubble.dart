@@ -14,7 +14,8 @@ class ChatMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CrossAxisAlignment alignment = message.isMine
+    final bool alignRight = message.isMine || message.isSystem;
+    final CrossAxisAlignment alignment = alignRight
         ? CrossAxisAlignment.end
         : CrossAxisAlignment.start;
 
@@ -30,9 +31,11 @@ class ChatMessageBubble extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.all(20.w),
               decoration: BoxDecoration(
-                color: message.isMine
-                    ? AppColors.primaryGreen
-                    : AppColors.chatIncomingBubbleBg,
+                color: message.isSystem
+                    ? AppColors.chatDateChipBg
+                    : (message.isMine
+                          ? AppColors.primaryGreen
+                          : AppColors.chatIncomingBubbleBg),
                 borderRadius: BorderRadius.circular(kChatBubbleRadius.r),
               ),
               child: Text(
@@ -41,9 +44,11 @@ class ChatMessageBubble extends StatelessWidget {
                   fontSize: AppFont.font16.sp,
                   fontWeight: FontWeight.w400,
                   height: 1.42,
-                  color: message.isMine
-                      ? AppColors.limeTextColor
-                      : AppColors.homePrimaryText,
+                  color: message.isSystem
+                      ? AppColors.homePrimaryText
+                      : (message.isMine
+                            ? AppColors.limeTextColor
+                            : AppColors.homePrimaryText),
                 ),
               ),
             ),

@@ -31,7 +31,7 @@ class ItalianKeyboardWarningView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(42.r),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.07),
+                      color: Colors.black.withValues(alpha: 0.07),
                       blurRadius: 45.r,
                       offset: Offset(0, 25.h),
                     ),
@@ -113,7 +113,7 @@ class ItalianKeyboardWarningView extends StatelessWidget {
                               ),
                               boxShadow: <BoxShadow>[
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.035),
+                                  color: Colors.black.withValues(alpha: 0.035),
                                   blurRadius: 25.r,
                                   offset: Offset(0, 12.h),
                                 ),

@@ -10,7 +10,6 @@ import '../../../../../core/themes/app_font.dart';
 import '../controllers/message_call_controller.dart';
 import '../models/ message_call_models.dart';
 
-
 class MessageCallView extends GetView<MessageCallController> {
   const MessageCallView({super.key});
 
@@ -83,8 +82,9 @@ class _MessageCallTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color textColor =
-    callType.isVideo ? AppColors.white : AppColors.homePrimaryText;
+    final Color textColor = callType.isVideo
+        ? AppColors.white
+        : AppColors.homePrimaryText;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(24.w, 18.h, 24.w, 8.h),

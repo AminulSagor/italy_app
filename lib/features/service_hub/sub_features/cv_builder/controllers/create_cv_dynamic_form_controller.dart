@@ -9,8 +9,9 @@ import '../services/cv_builder_api_service.dart';
 import 'cv_template_controller.dart';
 
 class CreateCvDynamicFormController extends GetxController {
-  CreateCvDynamicFormController({required CvBuilderApiService cvBuilderApiService})
-      : _cvBuilderApiService = cvBuilderApiService;
+  CreateCvDynamicFormController({
+    required CvBuilderApiService cvBuilderApiService,
+  }) : _cvBuilderApiService = cvBuilderApiService;
 
   final CvBuilderApiService _cvBuilderApiService;
 
@@ -23,10 +24,11 @@ class CreateCvDynamicFormController extends GetxController {
       <String, TextEditingController>{};
 
   List<CvTemplateSectionModel> get sections {
-    final List<CvTemplateSectionModel> templateSections =
-        template.schema.sections
-            .where((CvTemplateSectionModel section) => section.fields.isNotEmpty)
-            .toList();
+    final List<CvTemplateSectionModel> templateSections = template
+        .schema
+        .sections
+        .where((CvTemplateSectionModel section) => section.fields.isNotEmpty)
+        .toList();
 
     if (templateSections.isNotEmpty) return templateSections;
 
@@ -81,8 +83,10 @@ class CreateCvDynamicFormController extends GetxController {
     }
 
     if (Get.isRegistered<CvTemplateController>()) {
-      final CvTemplateController templateController = Get.find<CvTemplateController>();
-      final CvTemplateModel? selectedTemplate = templateController.selectedTemplate.value;
+      final CvTemplateController templateController =
+          Get.find<CvTemplateController>();
+      final CvTemplateModel? selectedTemplate =
+          templateController.selectedTemplate.value;
       if (selectedTemplate != null) {
         template = selectedTemplate;
         themeColor = _colorToHex(templateController.selectedColor);
@@ -219,7 +223,7 @@ class CreateCvDynamicFormController extends GetxController {
   }
 
   String _colorToHex(Color color) {
-    final int value = color.value;
+    final int value = color.toARGB32();
     return '#${value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
   }
 

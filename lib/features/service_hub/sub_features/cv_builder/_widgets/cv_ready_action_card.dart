@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 
@@ -49,11 +48,7 @@ class CvReadyActionCard extends StatelessWidget {
                   color: iconBackgroundColor,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: AppFont.font22.sp,
-                ),
+                child: Icon(icon, color: iconColor, size: AppFont.font22.sp),
               ),
               SizedBox(height: 12.h),
               Flexible(
