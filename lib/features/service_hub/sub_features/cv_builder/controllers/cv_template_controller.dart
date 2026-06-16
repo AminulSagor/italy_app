@@ -95,7 +95,7 @@ class CvTemplateController extends GetxController {
       AppRoutes.createCvDynamicForm,
       arguments: CvTemplateFormRouteArguments(
         template: template,
-        themeColor: _colorToHex(selectedColor),
+        themeColor: template.primaryColor,
       ),
     );
   }

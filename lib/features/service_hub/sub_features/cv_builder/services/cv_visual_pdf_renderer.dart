@@ -57,15 +57,20 @@ class CvVisualPdfRenderer {
       paintBackground(0);
     } else {
       for (final Map<String, dynamic> element in _sortedElements(elements)) {
-        final double y = _asDouble(element['y'], 0);
-        final int pageIndex = (y / sourceHeight).floor().clamp(0, 9999).toInt();
-        final Rect rect = _elementRect(
+        final double elementY = _asDouble(element['y'], 0);
+        final double elementHeight = _renderHeightForTopLevelElement(
           element: element,
-          sourceHeight: sourceHeight,
-          pageIndex: pageIndex,
-          scaleX: scaleX,
-          scaleY: scaleY,
+          document: document,
+          template: template,
         );
+        final int pageIndex = (elementY / sourceHeight).floor().clamp(0, 9999).toInt();
+        final Rect rect = Rect.fromLTWH(
+          _asDouble(element['x'], 0) * scaleX,
+          (elementY - pageIndex * sourceHeight) * scaleY,
+          _effectiveWidth(element) * scaleX,
+          elementHeight * scaleY,
+        );
+
         paintBackground(pageIndex);
         await _drawLayoutElement(
           page: pageAt(pageIndex),
@@ -93,9 +98,14 @@ class CvVisualPdfRenderer {
     required CvTemplateModel template,
     required String? parentSectionKey,
     required double fontScale,
+    Map<String, dynamic>? dynamicItemData,
   }) async {
     final String type = element['type']?.toString() ?? 'text';
-    final Map<String, dynamic> style = _asMap(element['style']);
+    final Map<String, dynamic> style = _themedStyle(
+      _asMap(element['style']),
+      document: document,
+      template: template,
+    );
 
     if (type == 'section') {
       await _drawSectionElement(
@@ -119,6 +129,7 @@ class CvVisualPdfRenderer {
       document: document,
       template: template,
       parentSectionKey: parentSectionKey,
+      dynamicItemData: dynamicItemData,
     );
     final bool isPhoto = _isPhotoElement(type, element, template);
 
@@ -136,6 +147,18 @@ class CvVisualPdfRenderer {
 
     if (type == 'icon') {
       _drawIcon(page: page, element: element, rect: rect, style: style, fontScale: fontScale);
+      return;
+    }
+
+    if (type == 'list') {
+      _drawList(
+        page: page,
+        element: element,
+        rect: rect,
+        style: style,
+        value: value,
+        fontScale: fontScale,
+      );
       return;
     }
 
@@ -181,7 +204,70 @@ class CvVisualPdfRenderer {
     final double canvasWidth = _asDouble(canvas['width'], rect.width);
     final double canvasHeight = _asDouble(canvas['height'], rect.height);
     final double scaleX = rect.width / canvasWidth;
-    final double scaleY = rect.height / canvasHeight;
+    final CvTemplateFieldModel? dynamicField = _dynamicItemsFieldForSection(section);
+    final List<Map<String, dynamic>> dynamicItems = _dynamicItemValuesForSection(
+      document: document,
+      section: section,
+      dynamicField: dynamicField,
+    );
+
+    if (dynamicField != null && dynamicItems.isNotEmpty) {
+      final double gap = math.max(0, dynamicField.repeatGap) * scaleX;
+      final double itemHeight = math.max(
+        1,
+        (rect.height - gap * math.max(0, dynamicItems.length - 1)) /
+            dynamicItems.length,
+      );
+      for (int index = 0; index < dynamicItems.length; index += 1) {
+        final Rect itemRect = Rect.fromLTWH(
+          rect.left,
+          rect.top + index * (itemHeight + gap),
+          rect.width,
+          itemHeight,
+        );
+        await _drawSectionChildren(
+          page: page,
+          rect: itemRect,
+          children: children,
+          canvasWidth: canvasWidth,
+          canvasHeight: canvasHeight,
+          document: document,
+          template: template,
+          parentSectionKey: sectionKey,
+          fontScale: fontScale,
+          dynamicItemData: dynamicItems[index],
+        );
+      }
+      return;
+    }
+
+    await _drawSectionChildren(
+      page: page,
+      rect: rect,
+      children: children,
+      canvasWidth: canvasWidth,
+      canvasHeight: canvasHeight,
+      document: document,
+      template: template,
+      parentSectionKey: sectionKey,
+      fontScale: fontScale,
+    );
+  }
+
+  Future<void> _drawSectionChildren({
+    required PdfPage page,
+    required Rect rect,
+    required List<Map<String, dynamic>> children,
+    required double canvasWidth,
+    required double canvasHeight,
+    required CvDocumentModel document,
+    required CvTemplateModel template,
+    required String parentSectionKey,
+    required double fontScale,
+    Map<String, dynamic>? dynamicItemData,
+  }) async {
+    final double scaleX = rect.width / math.max(1, canvasWidth);
+    final double scaleY = rect.height / math.max(1, canvasHeight);
     final double childFontScale = fontScale * math.min(scaleX, scaleY);
 
     for (final Map<String, dynamic> child in _sortedElements(children)) {
@@ -189,19 +275,32 @@ class CvVisualPdfRenderer {
         element: child,
         document: document,
         template: template,
-        parentSectionKey: sectionKey,
+        parentSectionKey: parentSectionKey,
+        dynamicItemData: dynamicItemData,
       );
       if (child['isField'] == true &&
           childValue.trim().isEmpty &&
-          _asMap(child['contentFlow'])['collapseWhenEmpty'] == true) {
+          _shouldCollapseWhenEmpty(child)) {
         continue;
       }
+
+      final double childOriginalHeight = _effectiveHeight(child);
+      final double neededChildHeight = _renderHeightForChildElement(
+        element: child,
+        document: document,
+        template: template,
+        parentSectionKey: parentSectionKey,
+        scaleX: scaleX,
+        scaleY: scaleY,
+        canvasHeight: canvasHeight,
+        dynamicItemData: dynamicItemData,
+      ).clamp(childOriginalHeight, canvasHeight * 4).toDouble();
 
       final Rect childRect = Rect.fromLTWH(
         rect.left + _asDouble(child['x'], 0) * scaleX,
         rect.top + _asDouble(child['y'], 0) * scaleY,
         _effectiveWidth(child) * scaleX,
-        _effectiveHeight(child) * scaleY,
+        neededChildHeight * scaleY,
       );
       await _drawLayoutElement(
         page: page,
@@ -209,8 +308,9 @@ class CvVisualPdfRenderer {
         rect: childRect,
         document: document,
         template: template,
-        parentSectionKey: sectionKey,
+        parentSectionKey: parentSectionKey,
         fontScale: childFontScale,
+        dynamicItemData: dynamicItemData,
       );
     }
   }
@@ -226,7 +326,7 @@ class CvVisualPdfRenderer {
     double nextY = rect.top;
     final PdfFont titleFont = _fontFor(weight: 800, size: 13 * fontScale);
     final PdfFont valueFont = _fontFor(weight: 400, size: 10 * fontScale);
-    final PdfBrush titleBrush = PdfSolidBrush(PdfColor(0, 107, 63));
+    final PdfBrush titleBrush = _brush(document.themeColor) ?? PdfSolidBrush(PdfColor(0, 107, 63));
     final PdfBrush valueBrush = PdfBrushes.black;
     page.graphics.drawString(
       section.title,
@@ -332,6 +432,39 @@ class CvVisualPdfRenderer {
     );
   }
 
+  void _drawList({
+    required PdfPage page,
+    required Map<String, dynamic> element,
+    required Rect rect,
+    required Map<String, dynamic> style,
+    required String value,
+    required double fontScale,
+  }) {
+    final List<String> items = _cleanText(value)
+        .split('\n')
+        .map((String item) => item.replaceFirst(RegExp(r'^[•\-\d\.\)]+\s*'), '').trim())
+        .where((String item) => item.isNotEmpty)
+        .toList(growable: false);
+    if (items.isEmpty) return;
+
+    final bool numbered = element['listStyle']?.toString() == 'number';
+    final String text = items
+        .asMap()
+        .entries
+        .map((MapEntry<int, String> entry) =>
+            numbered ? '${entry.key + 1}. ${entry.value}' : '• ${entry.value}')
+        .join('\n');
+
+    _drawText(
+      page: page,
+      element: element,
+      rect: rect,
+      style: style,
+      value: text,
+      fontScale: fontScale,
+    );
+  }
+
   void _drawIcon({
     required PdfPage page,
     required Map<String, dynamic> element,
@@ -365,6 +498,240 @@ class CvVisualPdfRenderer {
     if (template.schema.layout.isNotEmpty) return template.schema.layout;
     if (template.schema.designJson.isNotEmpty) return template.schema.designJson;
     return <String, dynamic>{};
+  }
+
+  Map<String, dynamic> _themedStyle(
+    Map<String, dynamic> style, {
+    required CvDocumentModel document,
+    required CvTemplateModel template,
+  }) {
+    if (style.isEmpty) return style;
+
+    final Map<String, dynamic> themedStyle = Map<String, dynamic>.from(style);
+    themedStyle['color'] = _resolveThemeColor(
+      value: themedStyle['color'],
+      role: themedStyle['colorRole'],
+      document: document,
+      template: template,
+    );
+    themedStyle['backgroundColor'] = _resolveThemeColor(
+      value: themedStyle['backgroundColor'],
+      role: themedStyle['backgroundColorRole'],
+      document: document,
+      template: template,
+    );
+    themedStyle['borderColor'] = _resolveThemeColor(
+      value: themedStyle['borderColor'],
+      role: themedStyle['borderColorRole'],
+      document: document,
+      template: template,
+    );
+    return themedStyle;
+  }
+
+  String? _resolveThemeColor({
+    required dynamic value,
+    required dynamic role,
+    required CvDocumentModel document,
+    required CvTemplateModel template,
+  }) {
+    final String roleText = role?.toString().trim().toLowerCase() ?? '';
+    if (roleText == 'primary') return document.themeColor;
+    if (roleText == 'accent') return document.accentColor;
+
+    final String? color = _nonEmptyString(value);
+    if (color == null) return null;
+    if (_sameHex(color, template.primaryColor)) return document.themeColor;
+    if (_sameHex(color, template.accentColor)) return document.accentColor;
+    return color;
+  }
+
+  bool _sameHex(String first, String second) =>
+      first.replaceAll('#', '').trim().toLowerCase() ==
+      second.replaceAll('#', '').trim().toLowerCase();
+
+  double _renderHeightForTopLevelElement({
+    required Map<String, dynamic> element,
+    required CvDocumentModel document,
+    required CvTemplateModel template,
+  }) {
+    final double originalHeight = _effectiveHeight(element);
+    if (element['type']?.toString() == 'section') {
+      final String sectionKey =
+          _asMap(element['contentBinding'])['sectionKey']?.toString() ?? '';
+      final CvTemplateSectionModel? section = _sectionByKey(template, sectionKey);
+      final CvTemplateFieldModel? dynamicField = _dynamicItemsFieldForSection(section);
+      final List<Map<String, dynamic>> dynamicItems = _dynamicItemValuesForSection(
+        document: document,
+        section: section,
+        dynamicField: dynamicField,
+      );
+      if (dynamicField != null && dynamicItems.length > 1) {
+        return _estimatedElementHeight(
+          element: element,
+          document: document,
+          template: template,
+          parentSectionKey: null,
+          availableWidth: _effectiveWidth(element),
+          fontScale: 1,
+        ).clamp(originalHeight, originalHeight * 20).toDouble();
+      }
+      return originalHeight;
+    }
+    if (!_canAutoGrow(element)) return originalHeight;
+
+    return _estimatedElementHeight(
+      element: element,
+      document: document,
+      template: template,
+      parentSectionKey: null,
+      availableWidth: _effectiveWidth(element),
+      fontScale: 1,
+    ).clamp(originalHeight, originalHeight * 4).toDouble();
+  }
+
+  double _renderHeightForChildElement({
+    required Map<String, dynamic> element,
+    required CvDocumentModel document,
+    required CvTemplateModel template,
+    required String parentSectionKey,
+    required double scaleX,
+    required double scaleY,
+    required double canvasHeight,
+    Map<String, dynamic>? dynamicItemData,
+  }) {
+    final double originalHeight = _effectiveHeight(element);
+    if (!_canAutoGrow(element)) return originalHeight;
+
+    return _estimatedElementHeight(
+      element: element,
+      document: document,
+      template: template,
+      parentSectionKey: parentSectionKey,
+      availableWidth: _effectiveWidth(element),
+      fontScale: math.max(0.1, math.min(scaleX, scaleY)),
+      dynamicItemData: dynamicItemData,
+    ).clamp(originalHeight, canvasHeight * 4).toDouble();
+  }
+
+  bool _canAutoGrow(Map<String, dynamic> element) {
+    final Map<String, dynamic> binding = _asMap(element['contentBinding']);
+    final Map<String, dynamic> flow = _asMap(element['contentFlow']);
+    return binding['autoHeight'] == true ||
+        flow['autoHeight'] == true ||
+        element['autoHeight'] == true ||
+        element['type']?.toString() == 'dynamicItems';
+  }
+
+  bool _shouldCollapseWhenEmpty(Map<String, dynamic> element) {
+    final Map<String, dynamic> binding = _asMap(element['contentBinding']);
+    final Map<String, dynamic> flow = _asMap(element['contentFlow']);
+    return binding['collapseWhenEmpty'] == true ||
+        flow['collapseWhenEmpty'] == true ||
+        element['collapseWhenEmpty'] == true;
+  }
+
+  bool _shouldReflowFollowing(Map<String, dynamic> element) {
+    final Map<String, dynamic> binding = _asMap(element['contentBinding']);
+    final Map<String, dynamic> flow = _asMap(element['contentFlow']);
+    return binding['reflowSiblings'] == true ||
+        binding['autoHeight'] == true ||
+        flow['moveFollowingElements'] == true ||
+        flow['autoHeight'] == true ||
+        element['type']?.toString() == 'section' ||
+        element['type']?.toString() == 'dynamicItems';
+  }
+
+  bool _shouldAvoidOverlap(Map<String, dynamic> element) {
+    final String type = element['type']?.toString() ?? '';
+    return type == 'section' || _shouldReflowFollowing(element);
+  }
+
+  double _sectionGap(CvTemplateModel template) {
+    final Map<String, dynamic> layout = _layoutFromTemplate(template);
+    final Map<String, dynamic> contentFlow = _asMap(layout['contentFlow']);
+    return _asDouble(contentFlow['sectionGap'], 16);
+  }
+
+  double _estimatedElementHeight({
+    required Map<String, dynamic> element,
+    required CvDocumentModel document,
+    required CvTemplateModel template,
+    required String? parentSectionKey,
+    required double availableWidth,
+    required double fontScale,
+    Map<String, dynamic>? dynamicItemData,
+  }) {
+    final String type = element['type']?.toString() ?? 'text';
+    final double originalHeight = _effectiveHeight(element);
+    if (type == 'rectangle' || type == 'circle' || _isLine(type) || type == 'icon') {
+      return originalHeight;
+    }
+
+    if (type == 'section') {
+      final String sectionKey =
+          _asMap(element['contentBinding'])['sectionKey']?.toString() ?? '';
+      final CvTemplateSectionModel? section = _sectionByKey(template, sectionKey);
+      final Map<String, dynamic> designerJson = _asMap(
+        element['sectionDesignerJson'] ?? section?.designerJson,
+      );
+      final Map<String, dynamic> canvas = _asMap(designerJson['canvas']);
+      final List<Map<String, dynamic>> children = _asListOfMaps(designerJson['elements']);
+      if (children.isEmpty) return originalHeight;
+      final CvTemplateFieldModel? dynamicField = _dynamicItemsFieldForSection(section);
+      final List<Map<String, dynamic>> dynamicItems = _dynamicItemValuesForSection(
+        document: document,
+        section: section,
+        dynamicField: dynamicField,
+      );
+      if (dynamicField != null && dynamicItems.length > 1) {
+        return originalHeight * dynamicItems.length +
+            math.max(0, dynamicField.repeatGap) * (dynamicItems.length - 1);
+      }
+
+      final double canvasWidth = _asDouble(canvas['width'], availableWidth);
+      final double scale = availableWidth / math.max(1, canvasWidth);
+      double bottom = 0;
+      double offset = 0;
+      for (final Map<String, dynamic> child in _flowSortedElements(children)) {
+        final double childY = _asDouble(child['y'], 0) + offset;
+        final double childHeight = _estimatedElementHeight(
+          element: child,
+          document: document,
+          template: template,
+          parentSectionKey: sectionKey,
+          availableWidth: _effectiveWidth(child),
+          fontScale: scale,
+          dynamicItemData: dynamicItemData,
+        );
+        bottom = math.max(bottom, childY + childHeight);
+        final double growth = math.max(0, childHeight - _effectiveHeight(child)).toDouble();
+        if (_shouldReflowFollowing(child)) offset += growth;
+      }
+      return math.max(originalHeight, bottom * scale);
+    }
+
+    final String value = _elementValue(
+      element: element,
+      document: document,
+      template: template,
+      parentSectionKey: parentSectionKey,
+      dynamicItemData: dynamicItemData,
+    );
+    if (value.trim().isEmpty) return originalHeight;
+
+    final double fontSize = _asDouble(_asMap(element['style'])['fontSize'], 12);
+    final double lineHeight = _asDouble(_asMap(element['style'])['lineHeight'], 1.25);
+    final double usableWidth = math.max(24, availableWidth).toDouble();
+    final int charsPerLine = math.max(8, (usableWidth / math.max(4, fontSize * 0.52)).floor());
+    final List<String> rawLines = _cleanText(value).split('\n');
+    int lineCount = 0;
+    for (final String rawLine in rawLines) {
+      final int length = rawLine.trim().isEmpty ? 1 : rawLine.trim().length;
+      lineCount += math.max(1, (length / charsPerLine).ceil());
+    }
+    final double estimated = lineCount * fontSize * lineHeight + 8;
+    return math.max(originalHeight, estimated);
   }
 
   Rect _elementRect({
@@ -401,6 +768,7 @@ class CvVisualPdfRenderer {
     required CvDocumentModel document,
     required CvTemplateModel template,
     required String? parentSectionKey,
+    Map<String, dynamic>? dynamicItemData,
   }) {
     final Map<String, dynamic> binding = _asMap(element['contentBinding']);
     final String bindingMode = binding['mode']?.toString() ?? '';
@@ -412,6 +780,15 @@ class CvVisualPdfRenderer {
     final bool isDynamicInput = bindingMode == 'dynamic' || isField;
 
     if (!isDynamicInput || fieldKey == null) {
+      return _staticElementValue(element);
+    }
+
+    if (dynamicItemData != null) {
+      final dynamic itemValue = _valueByCandidateKeys(dynamicItemData, <String>[
+        fieldKey,
+        if (_nonEmptyString(element['label']) != null) _nonEmptyString(element['label'])!,
+      ]);
+      if (itemValue != null) return _displayValue(itemValue, null);
       return _staticElementValue(element);
     }
 
@@ -520,6 +897,13 @@ class CvVisualPdfRenderer {
             (elementLabel.isNotEmpty && _sameKey(field.label, elementLabel))) {
           return true;
         }
+        for (final CvTemplateDynamicItemFieldModel itemField in field.itemFields) {
+          if (_sameKey(itemField.key, fieldKey) ||
+              _sameKey(itemField.label, fieldKey) ||
+              (elementLabel.isNotEmpty && _sameKey(itemField.label, elementLabel))) {
+            return true;
+          }
+        }
       }
     }
     return false;
@@ -590,6 +974,46 @@ class CvVisualPdfRenderer {
       if (_sameKey(section.key, key)) return section;
     }
     return null;
+  }
+
+  bool _isDynamicItemsType(String value) {
+    final String type = value.trim().toLowerCase();
+    return type == 'dynamicitems' ||
+        type == 'dynamic_items' ||
+        type == 'repeatable' ||
+        type == 'repeatableitems';
+  }
+
+  CvTemplateFieldModel? _dynamicItemsFieldForSection(
+    CvTemplateSectionModel? section,
+  ) {
+    if (section == null) return null;
+    for (final CvTemplateFieldModel field in section.fields) {
+      if (_isDynamicItemsType(field.type)) return field;
+    }
+    return null;
+  }
+
+  List<Map<String, dynamic>> _dynamicItemValuesForSection({
+    required CvDocumentModel document,
+    required CvTemplateSectionModel? section,
+    required CvTemplateFieldModel? dynamicField,
+  }) {
+    if (section == null || dynamicField == null) return <Map<String, dynamic>>[];
+    final Map<String, dynamic> sectionData = _sectionData(document.formData, section.key);
+    dynamic rawItems = sectionData[dynamicField.key];
+    rawItems ??= sectionData[section.key];
+    rawItems ??= _valueByCandidateKeys(sectionData, <String>[
+      dynamicField.key,
+      dynamicField.label,
+      section.key,
+      section.title,
+    ]);
+    if (rawItems is! List) return <Map<String, dynamic>>[];
+    return rawItems
+        .map(_asMap)
+        .where((Map<String, dynamic> item) => item.isNotEmpty)
+        .toList(growable: false);
   }
 
   Map<String, dynamic> _sectionData(Map<String, dynamic> formData, String sectionKey) {
@@ -707,8 +1131,35 @@ class CvVisualPdfRenderer {
       : const Size(_a4Width, _a4Height);
 
   List<Map<String, dynamic>> _sortedElements(List<Map<String, dynamic>> items) {
+    final List<MapEntry<int, Map<String, dynamic>>> indexedItems =
+        <MapEntry<int, Map<String, dynamic>>>[
+      for (int index = 0; index < items.length; index += 1)
+        MapEntry<int, Map<String, dynamic>>(index, items[index]),
+    ];
+
+    indexedItems.sort(
+      (MapEntry<int, Map<String, dynamic>> first,
+          MapEntry<int, Map<String, dynamic>> second) {
+        final int zIndexCompare = _asDouble(first.value['zIndex'], 0)
+            .compareTo(_asDouble(second.value['zIndex'], 0));
+        return zIndexCompare != 0
+            ? zIndexCompare
+            : first.key.compareTo(second.key);
+      },
+    );
+
+    return indexedItems
+        .map((MapEntry<int, Map<String, dynamic>> entry) => entry.value)
+        .toList(growable: false);
+  }
+
+  List<Map<String, dynamic>> _flowSortedElements(List<Map<String, dynamic>> items) {
     return items.toList()
       ..sort((Map<String, dynamic> first, Map<String, dynamic> second) {
+        final int yCompare = _asDouble(first['y'], 0).compareTo(_asDouble(second['y'], 0));
+        if (yCompare != 0) return yCompare;
+        final int xCompare = _asDouble(first['x'], 0).compareTo(_asDouble(second['x'], 0));
+        if (xCompare != 0) return xCompare;
         return _asDouble(first['zIndex'], 0).compareTo(_asDouble(second['zIndex'], 0));
       });
   }

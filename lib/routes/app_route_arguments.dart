@@ -78,6 +78,23 @@ class CvTemplateFormRouteArguments {
 }
 
 
+class CvThemeRouteArguments {
+  final CvTemplateModel template;
+  final String documentTitle;
+  final String primaryColor;
+  final String accentColor;
+  final Map<String, dynamic> formData;
+
+  const CvThemeRouteArguments({
+    required this.template,
+    required this.documentTitle,
+    required this.primaryColor,
+    required this.accentColor,
+    required this.formData,
+  });
+}
+
+
 class CvReadyRouteArguments {
   final CvDocumentModel document;
   final CvTemplateModel template;

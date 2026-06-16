@@ -135,11 +135,13 @@ class _DynamicField extends GetView<CreateCvDynamicFormController> {
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController textController = controller.controllerFor(
-      section,
-      field,
-    );
     final String type = field.type.toLowerCase();
+    final TextEditingController? textController = controller.isDynamicItemsField(field)
+        ? null
+        : controller.controllerFor(
+            section,
+            field,
+          );
     final bool isLongInput = type == 'textarea' || type == 'list';
 
     return Container(
@@ -182,10 +184,12 @@ class _DynamicField extends GetView<CreateCvDynamicFormController> {
             ],
           ),
           SizedBox(height: 10.h),
-          if (controller.isPhotoField(field))
+          if (controller.isDynamicItemsField(field))
+            _DynamicItemsField(section: section, field: field)
+          else if (controller.isPhotoField(field))
             Obx(
               () => CvPhotoUrlUploadField(
-                textController: textController,
+                textController: textController!,
                 isUploading: controller.isPhotoUploading(section, field),
                 onUploadTap: () => controller.pickAndUploadPhoto(section, field),
               ),
@@ -264,6 +268,137 @@ class _DynamicField extends GetView<CreateCvDynamicFormController> {
     if (type == 'list') return 'First item\nSecond item\nThird item';
 
     return 'Enter ${field.label.toLowerCase()}';
+  }
+}
+
+
+class _DynamicItemsField extends GetView<CreateCvDynamicFormController> {
+  const _DynamicItemsField({required this.section, required this.field});
+
+  final CvTemplateSectionModel section;
+  final CvTemplateFieldModel field;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () {
+        final List<Map<String, TextEditingController>> items =
+            controller.dynamicItemsFor(section, field);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            ...items.asMap().entries.map(
+              (MapEntry<int, Map<String, TextEditingController>> entry) {
+                final int index = entry.key;
+                final Map<String, TextEditingController> itemControllers =
+                    entry.value;
+
+                return Container(
+                  margin: EdgeInsets.only(bottom: 12.h),
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.homeBackground,
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(
+                      color: AppColors.black.withOpacity(0.05),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
+                              '${field.label} ${index + 1}',
+                              style: TextStyle(
+                                color: AppColors.homePrimaryText,
+                                fontSize: AppFont.font11.sp,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                          if (items.length > 1)
+                            GestureDetector(
+                              onTap: () => controller.removeDynamicItem(
+                                section,
+                                field,
+                                index,
+                              ),
+                              child: Icon(
+                                Icons.close_rounded,
+                                size: AppFont.font17.sp,
+                                color: AppColors.homeSecondaryText,
+                              ),
+                            ),
+                        ],
+                      ),
+                      SizedBox(height: 10.h),
+                      ...field.itemFields.map(
+                        (CvTemplateDynamicItemFieldModel itemField) {
+                          final bool isLongInput =
+                              itemField.type.toLowerCase() == 'textarea';
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 10.h),
+                            child: TextField(
+                              controller: itemControllers[itemField.key],
+                              minLines: isLongInput ? 3 : 1,
+                              maxLines: isLongInput ? 6 : 1,
+                              textInputAction: isLongInput
+                                  ? TextInputAction.newline
+                                  : TextInputAction.next,
+                              keyboardType: isLongInput
+                                  ? TextInputType.multiline
+                                  : TextInputType.text,
+                              decoration: InputDecoration(
+                                labelText: itemField.label,
+                                hintText: itemField.placeholder ??
+                                    'Enter ${itemField.label.toLowerCase()}',
+                                filled: true,
+                                fillColor: AppColors.white,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 14.w,
+                                  vertical: 13.h,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    kButtonDefaultRadius.r,
+                                  ),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              style: TextStyle(
+                                color: AppColors.homePrimaryText,
+                                fontSize: AppFont.font12.sp,
+                                fontWeight: FontWeight.w600,
+                                height: 1.35,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            OutlinedButton.icon(
+              onPressed: () => controller.addDynamicItem(section, field),
+              icon: Icon(Icons.add_rounded, size: AppFont.font17.sp),
+              label: Text('Add ${field.label}'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primaryGreen,
+                side: BorderSide(color: AppColors.primaryGreen, width: 1.w),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -350,7 +485,7 @@ class _BottomActions extends StatelessWidget {
                     controller.isSaving.value
                         ? 'Saving...'
                         : controller.isLastStep
-                            ? 'Save CV'
+                            ? 'Choose Theme'
                             : 'Continue',
                     style: TextStyle(
                       color: AppColors.white,

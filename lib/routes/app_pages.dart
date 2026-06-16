@@ -54,6 +54,7 @@ import '../features/messages/services/messages_mock_service.dart';
 import '../features/notifications/services/notifications_mock_service.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_contact_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_dynamic_form_controller.dart';
+import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_theme_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_education_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_experience_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_summary_controller.dart';
@@ -66,6 +67,7 @@ import '../features/service_hub/sub_features/cv_builder/views/choose_cv_template
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_dynamic_form_view.dart';
+import '../features/service_hub/sub_features/cv_builder/views/create_cv_theme_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_summary_view.dart';
@@ -327,6 +329,22 @@ class AppPages {
         }
         Get.lazyPut<CreateCvDynamicFormController>(
           () => CreateCvDynamicFormController(
+            cvBuilderApiService: Get.find<CvBuilderApiService>(),
+          ),
+        );
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.createCvTheme,
+      page: () => const CreateCvThemeView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<CvBuilderApiService>()) {
+          Get.lazyPut<CvBuilderApiService>(
+            () => CvBuilderApiService(apiClient: Get.find<ApiClient>()),
+          );
+        }
+        Get.lazyPut<CreateCvThemeController>(
+          () => CreateCvThemeController(
             cvBuilderApiService: Get.find<CvBuilderApiService>(),
           ),
         );

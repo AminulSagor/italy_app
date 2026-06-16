@@ -24,6 +24,9 @@ class CreateCvDynamicFormController extends GetxController {
   final RxMap<String, bool> photoUploadStates = <String, bool>{}.obs;
   final Map<String, TextEditingController> fieldControllers =
       <String, TextEditingController>{};
+  final RxMap<String, List<Map<String, TextEditingController>>>
+      dynamicItemControllers =
+      <String, List<Map<String, TextEditingController>>>{}.obs;
 
   List<CvTemplateSectionModel> get sections {
     return template.schema.sections
@@ -84,6 +87,14 @@ class CreateCvDynamicFormController extends GetxController {
   void _createFieldControllers() {
     for (final CvTemplateSectionModel section in sections) {
       for (final CvTemplateFieldModel field in section.fields) {
+        if (isDynamicItemsField(field)) {
+          dynamicItemControllers[_controllerKey(section.key, field.key)] =
+              <Map<String, TextEditingController>>[
+            _createDynamicItemControllerMap(field),
+          ];
+          continue;
+        }
+
         fieldControllers[_controllerKey(section.key, field.key)] =
             TextEditingController();
       }
@@ -114,7 +125,7 @@ class CreateCvDynamicFormController extends GetxController {
       return;
     }
 
-    await saveCvDocument();
+    goToThemeSelection();
   }
 
   bool validateCurrentSection() {
@@ -130,6 +141,23 @@ class CreateCvDynamicFormController extends GetxController {
 
     for (final CvTemplateFieldModel field in section.fields) {
       if (!field.required) continue;
+
+      if (isDynamicItemsField(field)) {
+        final bool hasAnyItem = _dynamicItemsFor(section, field).any(
+          (Map<String, TextEditingController> item) => item.values.any(
+            (TextEditingController controller) => controller.text.trim().isNotEmpty,
+          ),
+        );
+        if (!hasAnyItem) {
+          Get.snackbar(
+            section.title,
+            '${field.label} is required.',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return false;
+        }
+        continue;
+      }
 
       final String value = controllerFor(section, field).text.trim();
       if (value.isEmpty) {
@@ -178,6 +206,71 @@ class CreateCvDynamicFormController extends GetxController {
     }
   }
 
+  bool isDynamicItemsField(CvTemplateFieldModel field) {
+    final String type = field.type.trim().toLowerCase();
+    return type == 'dynamicitems' ||
+        type == 'dynamic_items' ||
+        type == 'repeatable' ||
+        type == 'repeatableitems';
+  }
+
+  List<Map<String, TextEditingController>> dynamicItemsFor(
+    CvTemplateSectionModel section,
+    CvTemplateFieldModel field,
+  ) {
+    final String key = _controllerKey(section.key, field.key);
+    return dynamicItemControllers[key] ?? <Map<String, TextEditingController>>[];
+  }
+
+  void addDynamicItem(
+    CvTemplateSectionModel section,
+    CvTemplateFieldModel field,
+  ) {
+    final String key = _controllerKey(section.key, field.key);
+    final List<Map<String, TextEditingController>> current =
+        List<Map<String, TextEditingController>>.from(
+      dynamicItemControllers[key] ?? <Map<String, TextEditingController>>[],
+    );
+    current.add(_createDynamicItemControllerMap(field));
+    dynamicItemControllers[key] = current;
+  }
+
+  void removeDynamicItem(
+    CvTemplateSectionModel section,
+    CvTemplateFieldModel field,
+    int index,
+  ) {
+    final String key = _controllerKey(section.key, field.key);
+    final List<Map<String, TextEditingController>> current =
+        List<Map<String, TextEditingController>>.from(
+      dynamicItemControllers[key] ?? <Map<String, TextEditingController>>[],
+    );
+    if (current.length <= 1 || index < 0 || index >= current.length) return;
+
+    final Map<String, TextEditingController> removed = current.removeAt(index);
+    for (final TextEditingController controller in removed.values) {
+      controller.dispose();
+    }
+    dynamicItemControllers[key] = current;
+  }
+
+  List<Map<String, TextEditingController>> _dynamicItemsFor(
+    CvTemplateSectionModel section,
+    CvTemplateFieldModel field,
+  ) {
+    final String key = _controllerKey(section.key, field.key);
+    return dynamicItemControllers[key] ?? <Map<String, TextEditingController>>[];
+  }
+
+  Map<String, TextEditingController> _createDynamicItemControllerMap(
+    CvTemplateFieldModel field,
+  ) {
+    return <String, TextEditingController>{
+      for (final CvTemplateDynamicItemFieldModel itemField in field.itemFields)
+        itemField.key: TextEditingController(),
+    };
+  }
+
   bool isPhotoField(CvTemplateFieldModel field) {
     final String type = field.type.trim().toLowerCase();
     return type == 'photourl' ||
@@ -193,6 +286,21 @@ class CreateCvDynamicFormController extends GetxController {
     return photoUploadStates[_controllerKey(section.key, field.key)] == true;
   }
 
+  void goToThemeSelection() {
+    if (!hasFormFields) return;
+
+    Get.toNamed(
+      AppRoutes.createCvTheme,
+      arguments: CvThemeRouteArguments(
+        template: template,
+        documentTitle: _documentTitle(),
+        primaryColor: themeColor,
+        accentColor: template.accentColor,
+        formData: buildFormData(),
+      ),
+    );
+  }
+
   Future<void> saveCvDocument() async {
     if (isSaving.value || !hasFormFields) return;
 
@@ -204,6 +312,7 @@ class CreateCvDynamicFormController extends GetxController {
             templateId: template.id,
             title: _documentTitle(),
             themeColor: themeColor,
+            accentColor: template.accentColor,
             formData: buildFormData(),
           ),
         ),
@@ -230,6 +339,23 @@ class CreateCvDynamicFormController extends GetxController {
       final Map<String, dynamic> sectionData = <String, dynamic>{};
 
       for (final CvTemplateFieldModel field in section.fields) {
+        if (isDynamicItemsField(field)) {
+          final List<Map<String, dynamic>> items = _dynamicItemsFor(section, field)
+              .map((Map<String, TextEditingController> itemControllers) {
+            final Map<String, dynamic> itemData = <String, dynamic>{};
+            for (final CvTemplateDynamicItemFieldModel itemField
+                in field.itemFields) {
+              final String value =
+                  itemControllers[itemField.key]?.text.trim() ?? '';
+              if (value.isNotEmpty) itemData[itemField.key] = value;
+            }
+            return itemData;
+          }).where((Map<String, dynamic> item) => item.isNotEmpty).toList();
+
+          if (items.isNotEmpty) sectionData[field.key] = items;
+          continue;
+        }
+
         final String value = controllerFor(section, field).text.trim();
         if (value.isEmpty) continue;
 
@@ -256,7 +382,8 @@ class CreateCvDynamicFormController extends GetxController {
     for (final CvTemplateSectionModel section in sections) {
       for (final CvTemplateFieldModel field in section.fields) {
         final String normalizedKey = field.key.toLowerCase();
-        if (normalizedKey == 'fullname' || normalizedKey == 'name') {
+        if ((normalizedKey == 'fullname' || normalizedKey == 'name') &&
+            !isDynamicItemsField(field)) {
           final String fullName = controllerFor(section, field).text.trim();
           if (fullName.isNotEmpty) return '$fullName CV';
         }
@@ -279,6 +406,14 @@ class CreateCvDynamicFormController extends GetxController {
   void onClose() {
     for (final TextEditingController controller in fieldControllers.values) {
       controller.dispose();
+    }
+    for (final List<Map<String, TextEditingController>> itemList
+        in dynamicItemControllers.values) {
+      for (final Map<String, TextEditingController> item in itemList) {
+        for (final TextEditingController controller in item.values) {
+          controller.dispose();
+        }
+      }
     }
     super.onClose();
   }
