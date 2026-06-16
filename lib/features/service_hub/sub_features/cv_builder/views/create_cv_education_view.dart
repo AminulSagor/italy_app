@@ -107,9 +107,7 @@ class _Header extends StatelessWidget {
 class _EducationProfileCard extends StatelessWidget {
   final CreateCvEducationController controller;
 
-  const _EducationProfileCard({
-    required this.controller,
-  });
+  const _EducationProfileCard({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +150,7 @@ class _EducationProfileCard extends StatelessWidget {
           ),
           SizedBox(height: 18.h),
           Obx(
-                () => CvEducationDropdownField(
+            () => CvEducationDropdownField(
               label: 'TYPE OF EDUCATION',
               hintText: 'Select type...',
               value: controller.selectedEducationType.value.isEmpty
@@ -164,7 +162,7 @@ class _EducationProfileCard extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           Obx(
-                () => CvEducationDropdownField(
+            () => CvEducationDropdownField(
               label: 'LEVEL',
               hintText: 'Select level...',
               value: controller.selectedLevel.value.isEmpty
@@ -185,9 +183,7 @@ class _EducationProfileCard extends StatelessWidget {
 class _SchoolField extends StatelessWidget {
   final TextEditingController controller;
 
-  const _SchoolField({
-    required this.controller,
-  });
+  const _SchoolField({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +206,7 @@ class _SchoolField extends StatelessWidget {
             Text(
               'Optional',
               style: TextStyle(
-                color: AppColors.homeSecondaryText.withOpacity(0.7),
+                color: AppColors.homeSecondaryText.withValues(alpha: 0.7),
                 fontSize: AppFont.font8.sp,
                 fontWeight: FontWeight.w600,
                 height: 1,
@@ -237,7 +233,7 @@ class _SchoolField extends StatelessWidget {
             decoration: InputDecoration(
               hintText: 'e.g. Politecnico di Milano',
               hintStyle: TextStyle(
-                color: AppColors.homeSecondaryText.withOpacity(0.55),
+                color: AppColors.homeSecondaryText.withValues(alpha: 0.55),
                 fontSize: AppFont.font9.sp,
                 fontWeight: FontWeight.w600,
               ),
@@ -255,9 +251,7 @@ class _SchoolField extends StatelessWidget {
 class _SectionTitle extends StatelessWidget {
   final String title;
 
-  const _SectionTitle({
-    required this.title,
-  });
+  const _SectionTitle({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -290,10 +284,7 @@ class _BottomButton extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-  const _BottomButton({
-    required this.title,
-    required this.onTap,
-  });
+  const _BottomButton({required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

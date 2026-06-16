@@ -9,6 +9,7 @@ import '../services/api_client.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
 import '../services/token_service.dart';
+import '../../features/home/services/home_mock_service.dart';
 
 class AppBootstrapController extends GetxController {
   AppBootstrapController();
@@ -45,6 +46,11 @@ class AppBootstrapController extends GetxController {
         ),
         permanent: true,
       );
+    }
+
+    // Ensure HomeMockService is available early to avoid Get.find errors
+    if (!Get.isRegistered<HomeMockService>()) {
+      Get.put<HomeMockService>(HomeMockService(), permanent: true);
     }
 
     if (!Get.isRegistered<TranslationService>()) {

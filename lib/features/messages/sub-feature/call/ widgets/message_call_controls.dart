@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-
 import '../models/ message_call_models.dart';
 import 'message_call_control_button.dart';
 
@@ -44,7 +43,9 @@ class MessageCallControls extends StatelessWidget {
             onTap: onMuteTap,
           ),
           MessageCallControlButton(
-            icon: isSpeakerOn ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+            icon: isSpeakerOn
+                ? Icons.volume_up_rounded
+                : Icons.volume_off_rounded,
             isActive: isSpeakerOn,
             onTap: onSpeakerTap,
           ),
@@ -62,7 +63,9 @@ class MessageCallControls extends StatelessWidget {
             ),
           ],
           MessageCallControlButton(
-            icon: isEnding ? Icons.hourglass_bottom_rounded : Icons.call_end_rounded,
+            icon: isEnding
+                ? Icons.hourglass_bottom_rounded
+                : Icons.call_end_rounded,
             isDanger: true,
             onTap: onEndTap,
           ),

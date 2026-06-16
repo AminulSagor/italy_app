@@ -47,18 +47,15 @@ class CvChoiceOptionCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(kRadius26.r),
             border: borderColor == null
                 ? null
-                : Border.all(
-              color: borderColor!,
-              width: 1.4.w,
-            ),
+                : Border.all(color: borderColor!, width: 1.4.w),
             boxShadow: isPrimary
                 ? <BoxShadow>[
-              BoxShadow(
-                color: AppColors.primaryGreen.withOpacity(0.22),
-                blurRadius: 20.r,
-                offset: Offset(0, 10.h),
-              ),
-            ]
+                    BoxShadow(
+                      color: AppColors.primaryGreen.withValues(alpha: 0.22),
+                      blurRadius: 20.r,
+                      offset: Offset(0, 10.h),
+                    ),
+                  ]
                 : null,
           ),
           child: Column(
@@ -72,21 +69,17 @@ class CvChoiceOptionCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: isPrimary
                       ? <BoxShadow>[
-                    BoxShadow(
-                      color: AppColors.serviceHubLightGreen.withOpacity(
-                        0.32,
-                      ),
-                      blurRadius: 22.r,
-                      spreadRadius: 4.r,
-                    ),
-                  ]
+                          BoxShadow(
+                            color: AppColors.serviceHubLightGreen.withValues(
+                              alpha: 0.32,
+                            ),
+                            blurRadius: 22.r,
+                            spreadRadius: 4.r,
+                          ),
+                        ]
                       : null,
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: AppFont.font22.sp,
-                ),
+                child: Icon(icon, color: iconColor, size: AppFont.font22.sp),
               ),
               SizedBox(height: 16.h),
               Text(

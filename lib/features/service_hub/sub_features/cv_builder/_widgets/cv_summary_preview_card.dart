@@ -34,7 +34,7 @@ class CvSummaryPreviewCard extends StatelessWidget {
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 22.w),
           decoration: BoxDecoration(
-            color: AppColors.white.withOpacity(0.55),
+            color: AppColors.white.withValues(alpha: 0.55),
             borderRadius: BorderRadius.circular(kRadius26.r),
           ),
           child: Column(
@@ -172,10 +172,7 @@ class _SummaryActionButton extends StatelessWidget {
             height: 36.h,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
-              border: Border.all(
-                color: AppColors.primaryGreen,
-                width: 1.w,
-              ),
+              border: Border.all(color: AppColors.primaryGreen, width: 1.w),
             ),
             alignment: Alignment.center,
             child: Row(
@@ -209,10 +206,7 @@ class _DashedBorderPainter extends CustomPainter {
   final Color color;
   final double radius;
 
-  const _DashedBorderPainter({
-    required this.color,
-    required this.radius,
-  });
+  const _DashedBorderPainter({required this.color, required this.radius});
 
   @override
   void paint(Canvas canvas, Size size) {

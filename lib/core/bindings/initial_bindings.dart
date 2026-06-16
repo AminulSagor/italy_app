@@ -5,6 +5,9 @@ import '../../features/home/controllers/home_controller.dart';
 import '../../features/home/services/home_mock_service.dart';
 import '../../features/messages/controllers/messages_controller.dart';
 import '../../features/messages/services/messages_mock_service.dart';
+import '../../features/messages/services/chat_socket_service.dart';
+import '../services/api_client.dart';
+import '../services/token_service.dart';
 import '../../features/notifications/services/notifications_mock_service.dart';
 import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
@@ -23,7 +26,19 @@ class InitialBindings extends Bindings {
       () => HomeController(homeMockService: Get.find<HomeMockService>()),
       fenix: true,
     );
-    Get.lazyPut<MessagesMockService>(() => MessagesMockService());
+    if (!Get.isRegistered<ChatSocketService>()) {
+      Get.lazyPut<ChatSocketService>(
+        () => ChatSocketService(tokenService: Get.find<TokenService>()),
+      );
+    }
+
+    Get.lazyPut<MessagesMockService>(
+      () => MessagesMockService(
+        apiClient: Get.find<ApiClient>(),
+        tokenService: Get.find<TokenService>(),
+        chatSocketService: Get.find<ChatSocketService>(),
+      ),
+    );
     Get.lazyPut<MessagesController>(
       () => MessagesController(
         messagesMockService: Get.find<MessagesMockService>(),

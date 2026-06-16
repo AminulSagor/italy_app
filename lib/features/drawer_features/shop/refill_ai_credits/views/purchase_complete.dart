@@ -175,7 +175,7 @@ class PurchaseCompletedPage extends StatelessWidget {
         border: Border.all(color: const Color(0xFF69EA3A), width: 3.5.w),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF69EA3A).withOpacity(.28),
+            color: const Color(0xFF69EA3A).withValues(alpha: .28),
             blurRadius: 42.r,
             spreadRadius: 10.r,
           ),
@@ -238,7 +238,7 @@ class PurchaseCompletedPage extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: textColor.withOpacity(.78),
+              color: textColor.withValues(alpha: .78),
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),

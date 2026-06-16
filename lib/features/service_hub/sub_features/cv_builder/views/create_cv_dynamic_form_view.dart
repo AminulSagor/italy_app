@@ -142,7 +142,7 @@ class _DynamicField extends GetView<CreateCvDynamicFormController> {
         borderRadius: BorderRadius.circular(kRadius20.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppColors.black.withOpacity(0.04),
+            color: AppColors.black.withValues(alpha: 0.04),
             blurRadius: 14,
             offset: Offset(0, 8.h),
           ),
@@ -264,7 +264,7 @@ class _BottomActions extends StatelessWidget {
         color: AppColors.homeBackground,
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppColors.black.withOpacity(0.05),
+            color: AppColors.black.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: Offset(0, -4.h),
           ),

@@ -54,7 +54,7 @@ class CvExperienceTextField extends StatelessWidget {
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: TextStyle(
-                color: AppColors.homePrimaryText.withOpacity(0.45),
+                color: AppColors.homePrimaryText.withValues(alpha: 0.45),
                 fontSize: AppFont.font10.sp,
                 fontWeight: FontWeight.w600,
               ),

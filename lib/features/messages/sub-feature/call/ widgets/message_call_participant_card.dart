@@ -6,7 +6,6 @@ import '../../../../../core/themes/app_font.dart';
 import '../../../widgets/message_avatar.dart';
 import '../models/ message_call_models.dart';
 
-
 class MessageCallParticipantCard extends StatelessWidget {
   final MessageCallParticipantModel participant;
   final String durationLabel;
@@ -21,11 +20,13 @@ class MessageCallParticipantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color textColor =
-    isVideoCall ? AppColors.white : AppColors.homePrimaryText;
+    final Color textColor = isVideoCall
+        ? AppColors.white
+        : AppColors.homePrimaryText;
 
-    final Color subtitleColor =
-    isVideoCall ? AppColors.white.withValues(alpha: 0.72) : AppColors.bodyText;
+    final Color subtitleColor = isVideoCall
+        ? AppColors.white.withValues(alpha: 0.72)
+        : AppColors.bodyText;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

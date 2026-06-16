@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
-import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../_widgets/cv_choice_option_card.dart';
 import '../_widgets/recent_cv_tile.dart';

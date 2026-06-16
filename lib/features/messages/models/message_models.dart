@@ -80,6 +80,7 @@ class MessageChatItemModel {
   final String timeLabel;
   final String statusLabel;
   final bool isMine;
+  final bool isSystem;
 
   const MessageChatItemModel({
     required this.id,
@@ -87,6 +88,7 @@ class MessageChatItemModel {
     required this.timeLabel,
     required this.statusLabel,
     required this.isMine,
+    this.isSystem = false,
   });
 
   factory MessageChatItemModel.fromJson(Map<String, dynamic> json) {
@@ -96,6 +98,7 @@ class MessageChatItemModel {
       timeLabel: json['timeLabel'] as String,
       statusLabel: json['statusLabel'] as String,
       isMine: json['isMine'] as bool,
+      isSystem: json['isSystem'] as bool? ?? false,
     );
   }
 
@@ -106,6 +109,7 @@ class MessageChatItemModel {
       'timeLabel': timeLabel,
       'statusLabel': statusLabel,
       'isMine': isMine,
+      'isSystem': isSystem,
     };
   }
 
@@ -115,6 +119,7 @@ class MessageChatItemModel {
     String? timeLabel,
     String? statusLabel,
     bool? isMine,
+    bool? isSystem,
   }) {
     return MessageChatItemModel(
       id: id ?? this.id,
@@ -122,6 +127,7 @@ class MessageChatItemModel {
       timeLabel: timeLabel ?? this.timeLabel,
       statusLabel: statusLabel ?? this.statusLabel,
       isMine: isMine ?? this.isMine,
+      isSystem: isSystem ?? this.isSystem,
     );
   }
 }
@@ -149,9 +155,8 @@ class MessageChatModel {
       isOnline: json['isOnline'] as bool,
       messages: (json['messages'] as List<dynamic>)
           .map(
-            (dynamic item) => MessageChatItemModel.fromJson(
-              item as Map<String, dynamic>,
-            ),
+            (dynamic item) =>
+                MessageChatItemModel.fromJson(item as Map<String, dynamic>),
           )
           .toList(),
     );
@@ -349,9 +354,8 @@ class MessagesResponseModel {
       currentUserAvatarUrl: json['currentUserAvatarUrl'] as String,
       threads: (json['threads'] as List<dynamic>)
           .map(
-            (dynamic item) => MessageThreadModel.fromJson(
-              item as Map<String, dynamic>,
-            ),
+            (dynamic item) =>
+                MessageThreadModel.fromJson(item as Map<String, dynamic>),
           )
           .toList(),
     );

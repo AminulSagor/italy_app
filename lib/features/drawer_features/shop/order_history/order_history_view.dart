@@ -101,7 +101,7 @@ class _FilterTabs extends GetView<ShopController> {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: controller.orderHistoryFilters.length,
-        separatorBuilder: (_, __) => SizedBox(width: 12.w),
+        separatorBuilder: (_, _) => SizedBox(width: 12.w),
         itemBuilder: (context, index) {
           final String title = controller.orderHistoryFilters[index];
 

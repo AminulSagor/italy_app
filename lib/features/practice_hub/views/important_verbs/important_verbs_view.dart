@@ -348,7 +348,7 @@ class SavedVerbPreviewSection extends GetView<PracticeHubController> {
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 itemCount: controller.savedVerbPreviewItems.length,
-                separatorBuilder: (_, __) => SizedBox(width: 16.w),
+                separatorBuilder: (_, _) => SizedBox(width: 16.w),
                 itemBuilder: (BuildContext context, int index) {
                   final Map<String, dynamic> verb =
                       controller.savedVerbPreviewItems[index];
@@ -470,7 +470,7 @@ class VerbFilterChips extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: filters.length,
-        separatorBuilder: (_, __) => SizedBox(width: 8.w),
+        separatorBuilder: (_, _) => SizedBox(width: 8.w),
         itemBuilder: (BuildContext context, int index) {
           final String filter = filters[index];
           final bool isSelected = filter == selectedFilter;
@@ -545,7 +545,7 @@ class VerbLibraryList extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: EdgeInsets.zero,
-      separatorBuilder: (_, __) => SizedBox(height: 14.h),
+      separatorBuilder: (_, _) => SizedBox(height: 14.h),
       itemBuilder: (BuildContext context, int index) {
         return VerbLibraryCard(verb: verbs[index]);
       },

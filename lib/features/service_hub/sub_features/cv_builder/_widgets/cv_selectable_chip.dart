@@ -56,22 +56,19 @@ class CvSelectableChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
           border: Border.all(
             color: isOutline
-                ? AppColors.homeSecondaryText.withOpacity(0.22)
+                ? AppColors.homeSecondaryText.withValues(alpha: 0.22)
                 : AppColors.transparent,
             width: 1.w,
           ),
         ),
         child: Row(
           mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
-          mainAxisAlignment:
-          fullWidth ? MainAxisAlignment.center : MainAxisAlignment.start,
+          mainAxisAlignment: fullWidth
+              ? MainAxisAlignment.center
+              : MainAxisAlignment.start,
           children: <Widget>[
             if (icon != null) ...<Widget>[
-              Icon(
-                icon,
-                size: AppFont.font13.sp,
-                color: textColor,
-              ),
+              Icon(icon, size: AppFont.font13.sp, color: textColor),
               SizedBox(width: 7.w),
             ],
             Text(
@@ -104,7 +101,7 @@ class CvSelectableChip extends StatelessWidget {
 
     return CustomPaint(
       painter: _DashedBorderPainter(
-        color: AppColors.homeSecondaryText.withOpacity(0.22),
+        color: AppColors.homeSecondaryText.withValues(alpha: 0.22),
         radius: kButtonDefaultRadius.r,
       ),
       child: child,
@@ -116,10 +113,7 @@ class _DashedBorderPainter extends CustomPainter {
   final Color color;
   final double radius;
 
-  const _DashedBorderPainter({
-    required this.color,
-    required this.radius,
-  });
+  const _DashedBorderPainter({required this.color, required this.radius});
 
   @override
   void paint(Canvas canvas, Size size) {

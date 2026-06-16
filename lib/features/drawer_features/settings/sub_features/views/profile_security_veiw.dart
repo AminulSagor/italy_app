@@ -114,7 +114,7 @@ class _ProfileAvatar extends StatelessWidget {
               child: Image.asset(
                 'assets/profile_images/Fahid Hasan.png',
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   color: const Color(0xFF1B242D),
                   child: Icon(
                     Icons.person_rounded,

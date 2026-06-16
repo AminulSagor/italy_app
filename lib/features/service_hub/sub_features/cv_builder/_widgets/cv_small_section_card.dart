@@ -86,7 +86,9 @@ class CvSmallSectionCard extends StatelessWidget {
                     decoration: InputDecoration(
                       hintText: hintText,
                       hintStyle: TextStyle(
-                        color: AppColors.homeSecondaryText.withOpacity(0.55),
+                        color: AppColors.homeSecondaryText.withValues(
+                          alpha: 0.55,
+                        ),
                         fontSize: AppFont.font9.sp,
                         fontWeight: FontWeight.w600,
                       ),

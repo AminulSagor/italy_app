@@ -50,7 +50,7 @@ class NotificationsBottomSheet extends GetView<NotificationsController> {
                     physics: const BouncingScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 34.h),
                     itemCount: notifications.length,
-                    separatorBuilder: (_, __) => SizedBox(height: 24.h),
+                    separatorBuilder: (_, _) => SizedBox(height: 24.h),
                     itemBuilder: (BuildContext context, int index) {
                       return NotificationCard(
                         notification: notifications[index],
@@ -161,7 +161,7 @@ class _FilterList extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 32.w),
           scrollDirection: Axis.horizontal,
           itemCount: controller.filters.length,
-          separatorBuilder: (_, __) => SizedBox(width: 12.w),
+          separatorBuilder: (_, _) => SizedBox(width: 12.w),
           itemBuilder: (BuildContext context, int index) {
             final NotificationFilterModel filter = controller.filters[index];
             return Obx(() {

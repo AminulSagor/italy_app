@@ -129,7 +129,7 @@ class AdministrativeServiceCard extends StatelessWidget {
           Text(
             trailingText!,
             style: TextStyle(
-              color: AppColors.homeSecondaryText.withOpacity(0.18),
+              color: AppColors.homeSecondaryText.withValues(alpha: 0.18),
               fontSize: AppFont.font9.sp,
               fontWeight: FontWeight.w800,
             ),
@@ -155,15 +155,8 @@ class _IconBox extends StatelessWidget {
     return Container(
       width: 31.w,
       height: 31.w,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        icon,
-        color: iconColor,
-        size: AppFont.font16.sp,
-      ),
+      decoration: BoxDecoration(color: backgroundColor, shape: BoxShape.circle),
+      child: Icon(icon, color: iconColor, size: AppFont.font16.sp),
     );
   }
 }

@@ -66,7 +66,7 @@ class GuideInfoCard extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
           Divider(
-            color: AppColors.homeSecondaryText.withOpacity(0.18),
+            color: AppColors.homeSecondaryText.withValues(alpha: 0.18),
             height: 1.h,
           ),
           SizedBox(height: 14.h),
@@ -88,7 +88,8 @@ class GuideInfoCard extends StatelessWidget {
           SizedBox(height: 10.h),
           const GuideStepTile(
             number: '2',
-            text: 'সঠিকভাবে ফরম পূরণ করুন এবং\nপ্রয়োজনীয় কাগজপত্র জমা সংযুক্ত করুন।',
+            text:
+                'সঠিকভাবে ফরম পূরণ করুন এবং\nপ্রয়োজনীয় কাগজপত্র জমা সংযুক্ত করুন।',
           ),
         ],
       ),
@@ -100,10 +101,7 @@ class _RequirementItem extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const _RequirementItem({
-    required this.title,
-    required this.subtitle,
-  });
+  const _RequirementItem({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {

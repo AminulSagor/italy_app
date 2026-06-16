@@ -10,7 +10,7 @@ import '../services/cv_builder_api_service.dart';
 
 class CvTemplateController extends GetxController {
   CvTemplateController({required CvBuilderApiService cvBuilderApiService})
-      : _cvBuilderApiService = cvBuilderApiService;
+    : _cvBuilderApiService = cvBuilderApiService;
 
   final CvBuilderApiService _cvBuilderApiService;
 
@@ -22,12 +22,7 @@ class CvTemplateController extends GetxController {
   final RxList<CvTemplateModel> templates = <CvTemplateModel>[].obs;
   final Rxn<CvTemplateModel> selectedTemplate = Rxn<CvTemplateModel>();
 
-  final List<String> categories = <String>[
-    'All',
-    'ATS',
-    'Modern',
-    'Classic',
-  ];
+  final List<String> categories = <String>['All', 'ATS', 'Modern', 'Classic'];
 
   final List<Color> colors = <Color>[
     AppColors.primaryGreen,
@@ -50,9 +45,7 @@ class CvTemplateController extends GetxController {
     isLoading.value = true;
     try {
       final ApiResult<CvTemplateListResponseModel> result =
-          await ApiErrorHandler.call(
-        () => _cvBuilderApiService.getTemplates(),
-      );
+          await ApiErrorHandler.call(() => _cvBuilderApiService.getTemplates());
       if (result.isSuccess && result.data != null) {
         templates.assignAll(result.data!.templates);
         if (templates.isNotEmpty) {
@@ -101,7 +94,7 @@ class CvTemplateController extends GetxController {
   }
 
   String _colorToHex(Color color) {
-    final int value = color.value;
+    final int value = color.toARGB32();
     return '#${value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
   }
 }

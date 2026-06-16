@@ -171,7 +171,7 @@ class _CourseCarousel extends GetView<PracticeHubController> {
             bottom: 10.h,
           ),
           itemCount: controller.courses.length,
-          separatorBuilder: (_, __) => SizedBox(width: 16.w),
+          separatorBuilder: (_, _) => SizedBox(width: 16.w),
           itemBuilder: (BuildContext context, int index) {
             final Map<String, dynamic> course = controller.courses[index];
 

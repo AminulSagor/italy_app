@@ -8,10 +8,7 @@ import '../../../../../core/themes/app_font.dart';
 class CvCreateCard extends StatelessWidget {
   final VoidCallback onTap;
 
-  const CvCreateCard({
-    super.key,
-    required this.onTap,
-  });
+  const CvCreateCard({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +28,7 @@ class CvCreateCard extends StatelessWidget {
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppColors.primaryGreen.withOpacity(0.24),
+            color: AppColors.primaryGreen.withValues(alpha: 0.24),
             blurRadius: 22.r,
             offset: Offset(0, 10.h),
           ),
@@ -48,9 +45,7 @@ class CvCreateCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
               child: Container(
                 height: 44.h,
-                constraints: BoxConstraints(
-                  minWidth: 170.w,
-                ),
+                constraints: BoxConstraints(minWidth: 170.w),
                 padding: EdgeInsets.symmetric(horizontal: 18.w),
                 alignment: Alignment.center,
                 child: Row(
@@ -86,7 +81,7 @@ class CvCreateCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: AppColors.white.withOpacity(0.82),
+              color: AppColors.white.withValues(alpha: 0.82),
               fontSize: AppFont.font9.sp,
               fontWeight: FontWeight.w600,
               height: 1.25,

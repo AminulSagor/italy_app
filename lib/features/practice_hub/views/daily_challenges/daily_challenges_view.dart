@@ -477,7 +477,7 @@ class _DailyChestCard extends GetView<PracticeHubController> {
                 width: 112.w,
                 height: 94.h,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) {
+                errorBuilder: (_, _, _) {
                   return Icon(
                     Icons.inventory_2_rounded,
                     size: 96.r,

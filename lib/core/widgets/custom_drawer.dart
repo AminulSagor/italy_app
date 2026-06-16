@@ -41,7 +41,7 @@ class AppDrawer extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.20),
+              color: Colors.black.withValues(alpha: 0.20),
               blurRadius: 28,
               offset: const Offset(8, 0),
             ),
@@ -204,7 +204,7 @@ class AppDrawer extends StatelessWidget {
                       const Spacer(),
 
                       Divider(
-                        color: Colors.grey.withOpacity(0.28),
+                        color: Colors.grey.withValues(alpha: 0.28),
                         thickness: 1,
                       ),
 
@@ -230,7 +230,7 @@ class AppDrawer extends StatelessWidget {
                           fontSize: 10.sp,
                           letterSpacing: 1.3,
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey.withOpacity(0.55),
+                          color: Colors.grey.withValues(alpha: 0.55),
                         ),
                       ),
 

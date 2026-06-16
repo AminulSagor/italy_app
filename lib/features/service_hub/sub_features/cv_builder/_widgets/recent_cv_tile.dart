@@ -38,9 +38,9 @@ class RecentCvTile extends StatelessWidget {
             border: isCompleted
                 ? null
                 : Border.all(
-              color: AppColors.homeSecondaryText.withOpacity(0.18),
-              width: 1.w,
-            ),
+                    color: AppColors.homeSecondaryText.withValues(alpha: 0.18),
+                    width: 1.w,
+                  ),
           ),
           child: Row(
             children: <Widget>[

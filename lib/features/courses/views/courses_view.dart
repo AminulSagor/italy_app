@@ -21,9 +21,12 @@ class CoursesView extends GetView<CoursesController> {
         color: AppColors.homeBackground,
         child: SafeArea(
           top: false,
-          child: controller.isLoading.value && controller.dashboard.value == null
+          child:
+              controller.isLoading.value && controller.dashboard.value == null
               ? const Center(
-                  child: CircularProgressIndicator(color: AppColors.primaryGreen),
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryGreen,
+                  ),
                 )
               : _CoursesLoadedBody(dashboard: controller.dashboard.value),
         ),
@@ -49,7 +52,9 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
         children: <Widget>[
           SizedBox(height: 22.h),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: kCoursesHorizontalPadding.w),
+            padding: EdgeInsets.symmetric(
+              horizontal: kCoursesHorizontalPadding.w,
+            ),
             child: Row(
               children: <Widget>[
                 Expanded(
@@ -83,9 +88,11 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: kCoursesHorizontalPadding.w),
+              padding: EdgeInsets.symmetric(
+                horizontal: kCoursesHorizontalPadding.w,
+              ),
               itemCount: data.courses.length,
-              separatorBuilder: (_, __) => SizedBox(width: 18.w),
+              separatorBuilder: (_, _) => SizedBox(width: 18.w),
               itemBuilder: (BuildContext context, int index) {
                 final CourseCardModel course = data.courses[index];
                 return CourseLevelCard(
@@ -99,7 +106,9 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
           _SectionTitle(title: 'Skill Builders'),
           SizedBox(height: 26.h),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: kCoursesHorizontalPadding.w),
+            padding: EdgeInsets.symmetric(
+              horizontal: kCoursesHorizontalPadding.w,
+            ),
             child: GridView.builder(
               itemCount: data.skillBuilders.length,
               shrinkWrap: true,
@@ -119,7 +128,9 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
           _SectionTitle(title: 'Specialized Learning'),
           SizedBox(height: 28.h),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: kCoursesHorizontalPadding.w),
+            padding: EdgeInsets.symmetric(
+              horizontal: kCoursesHorizontalPadding.w,
+            ),
             child: SpecializedLearningCard(item: data.specializedLearning),
           ),
         ],

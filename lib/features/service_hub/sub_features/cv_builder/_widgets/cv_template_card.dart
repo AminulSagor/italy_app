@@ -46,7 +46,7 @@ class CvTemplateCard extends StatelessWidget {
                   border: Border.all(
                     color: isSelected
                         ? AppColors.primaryGreen
-                        : AppColors.homeSecondaryText.withOpacity(0.12),
+                        : AppColors.homeSecondaryText.withValues(alpha: 0.12),
                     width: isSelected ? 2.4.w : 1.w,
                   ),
                 ),
@@ -67,12 +67,9 @@ class CvTemplateCard extends StatelessWidget {
               if (tag != null) ...<Widget>[
                 SizedBox(height: 4.h),
                 Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 6.w,
-                    vertical: 3.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
                   decoration: BoxDecoration(
-                    color: tagColor!.withOpacity(0.12),
+                    color: tagColor!.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
                   ),
                   child: Text(
@@ -128,7 +125,7 @@ class CvTemplateCard extends StatelessWidget {
           child: Column(
             children: List<Widget>.generate(
               3,
-                  (int index) => Container(
+              (int index) => Container(
                 margin: EdgeInsets.only(bottom: 7.h),
                 height: 3.h,
                 decoration: BoxDecoration(

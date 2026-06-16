@@ -5,8 +5,6 @@ import 'package:get/get.dart';
 import '../models/ message_call_models.dart';
 import '../service/message_call_mock_service.dart';
 
-
-
 class MessageCallController extends GetxController {
   final String conversationId;
   final MessageCallType callType;
@@ -27,7 +25,8 @@ class MessageCallController extends GetxController {
   final RxBool isCameraOff = false.obs;
   final RxBool isFrontCamera = true.obs;
   final RxString durationLabel = '00:00'.obs;
-  final Rxn<MessageCallSessionModel> callSession = Rxn<MessageCallSessionModel>();
+  final Rxn<MessageCallSessionModel> callSession =
+      Rxn<MessageCallSessionModel>();
 
   Timer? _durationTimer;
   DateTime? _startedAt;
@@ -42,12 +41,12 @@ class MessageCallController extends GetxController {
     isLoading.value = true;
 
     try {
-      final MessageCallSessionModel session =
-      await _messageCallService.startCall(
-        conversationId: conversationId,
-        callType: callType,
-        participant: participant,
-      );
+      final MessageCallSessionModel session = await _messageCallService
+          .startCall(
+            conversationId: conversationId,
+            callType: callType,
+            participant: participant,
+          );
 
       callSession.value = session;
       _startedAt = session.startedAt;
@@ -99,7 +98,7 @@ class MessageCallController extends GetxController {
 
     _durationTimer = Timer.periodic(
       const Duration(seconds: 1),
-          (_) => _updateDurationLabel(),
+      (_) => _updateDurationLabel(),
     );
   }
 
