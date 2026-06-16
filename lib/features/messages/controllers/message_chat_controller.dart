@@ -30,6 +30,7 @@ class MessageChatController extends GetxController {
   bool _shouldAutoScrollChat = true;
   String? _currentUserId;
   ChatSocketService? _socketService;
+  final List<Map<String, String>> _pendingSends = <Map<String, String>>[];
   final RxBool isSending = false.obs;
   final RxBool isLoadingMore = false.obs;
   int _currentPage = 1;
@@ -85,10 +86,13 @@ class MessageChatController extends GetxController {
         } catch (_) {}
       },
       onCallIncoming: (Map<String, dynamic> data) {},
+      onConnect: () {
+        try {
+          _socketService?.joinConversation(thread.id);
+        } catch (_) {}
+        _flushPendingSends();
+      },
     );
-
-    // join conversation when socket connected
-    _socketService?.joinConversation(thread.id);
   }
 
   String? _extractUserIdFromToken(String? token) {
@@ -165,34 +169,59 @@ class MessageChatController extends GetxController {
 
   void _handleServerMessage(Map<String, dynamic> msg) {
     try {
-      final String id = msg['id']?.toString() ?? '';
-      final String content = msg['content']?.toString() ?? '';
+      // Support multiple server payload shapes: prefer `messageId`, fallback to `id`.
+      final String messageId =
+          msg['messageId']?.toString() ?? msg['id']?.toString() ?? '';
+      final String content =
+          msg['content']?.toString() ?? msg['text']?.toString() ?? '';
       final String createdAt =
-          msg['createdAt']?.toString() ?? DateTime.now().toIso8601String();
-      final String senderId = msg['senderId']?.toString() ?? '';
+          msg['createdAt']?.toString() ??
+          msg['created_at']?.toString() ??
+          DateTime.now().toIso8601String();
+      final String senderId =
+          msg['senderId']?.toString() ?? msg['userId']?.toString() ?? '';
+      final String clientMessageId =
+          msg['clientMessageId']?.toString() ??
+          msg['client_msg_id']?.toString() ??
+          '';
+      final String statusFromServer = msg['status']?.toString() ?? '';
 
       final MessageChatItemModel item = MessageChatItemModel(
-        id: id,
+        id: messageId.isNotEmpty
+            ? messageId
+            : (clientMessageId.isNotEmpty
+                  ? clientMessageId
+                  : DateTime.now().millisecondsSinceEpoch.toString()),
         text: content,
         timeLabel: _formatTimeLabel(createdAt),
-        statusLabel: senderId == _currentUserId ? 'Delivered' : '',
+        statusLabel: senderId == _currentUserId
+            ? (statusFromServer.isNotEmpty ? statusFromServer : 'Delivered')
+            : '',
         isMine: senderId == _currentUserId,
       );
 
       final MessageChatModel? current = chat.value;
       if (current == null) return;
 
-      final int existingIndex = current.messages.indexWhere(
-        (MessageChatItemModel m) =>
-            m.id == item.id || m.id == msg['clientMessageId']?.toString(),
-      );
+      // Find existing by server id or by clientMessageId (optimistic id)
+      final int existingIndex = current.messages.indexWhere((
+        MessageChatItemModel m,
+      ) {
+        final String mid = m.id;
+        return (messageId.isNotEmpty && mid == messageId) ||
+            (clientMessageId.isNotEmpty && mid == clientMessageId);
+      });
+
       final List<MessageChatItemModel> updated =
           List<MessageChatItemModel>.from(current.messages);
       if (existingIndex >= 0) {
+        // Replace optimistic message with server-backed message (preserve ordering)
         updated[existingIndex] = item;
       } else {
         updated.add(item);
       }
+
+      // keep original ordering (new messages appended)
 
       // keep size limit
       if (updated.length > 200) {
@@ -239,6 +268,23 @@ class MessageChatController extends GetxController {
         content: text,
       );
     } catch (_) {
+      // If socket isn't connected, queue the message for later
+      if (_socketService == null || !_socketService!.isConnected) {
+        _pendingSends.add(<String, String>{
+          'clientMessageId': clientMessageId,
+          'content': text,
+        });
+        // update optimistic status to Queued
+        final int idx = updated.indexWhere(
+          (MessageChatItemModel m) => m.id == clientMessageId,
+        );
+        if (idx >= 0) {
+          updated[idx] = updated[idx].copyWith(statusLabel: 'Queued');
+          chat.value = current.copyWith(messages: updated);
+        }
+        isSending.value = false;
+        return;
+      }
       final int idx = updated.indexWhere(
         (MessageChatItemModel m) => m.id == clientMessageId,
       );
@@ -248,6 +294,41 @@ class MessageChatController extends GetxController {
       }
     } finally {
       isSending.value = false;
+    }
+  }
+
+  void _flushPendingSends() {
+    if (_pendingSends.isEmpty) return;
+    final MessageChatModel? current = chat.value;
+    if (current == null) return;
+
+    for (final Map<String, String> p in List<Map<String, String>>.from(
+      _pendingSends,
+    )) {
+      final String clientId = p['clientMessageId'] ?? '';
+      final String content = p['content'] ?? '';
+      try {
+        _messagesMockService.sendMessageViaSocket(
+          conversationId: thread.id,
+          clientMessageId: clientId,
+          content: content,
+        );
+
+        // update message status from Queued -> Sending
+        final int idx = current.messages.indexWhere(
+          (MessageChatItemModel m) => m.id == clientId,
+        );
+        if (idx >= 0) {
+          final List<MessageChatItemModel> updated =
+              List<MessageChatItemModel>.from(current.messages);
+          updated[idx] = updated[idx].copyWith(statusLabel: 'Sending');
+          chat.value = current.copyWith(messages: updated);
+        }
+      } catch (_) {
+        // keep queued for retry later
+        continue;
+      }
+      _pendingSends.remove(p);
     }
   }
 
