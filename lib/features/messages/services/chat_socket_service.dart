@@ -18,14 +18,14 @@ class ChatSocketService {
     void Function(Map<String, dynamic>)? onNewMessage,
     void Function(Map<String, dynamic>)? onPresenceChange,
     void Function(Map<String, dynamic>)? onCallIncoming,
+    void Function()? onConnect,
   }) async {
     await disconnect();
 
     final String? token = await _tokenService.getAccessToken();
-    final String tokenType = await _tokenService.getTokenType();
-    final String authToken = token != null && token.isNotEmpty
-        ? '$tokenType $token'
-        : '';
+    // Send the raw access token as a query parameter (e.g. /chat?token=<token>)
+    // Backend will accept either raw token or a Bearer-prefixed value.
+    final String authToken = token != null && token.isNotEmpty ? token : '';
 
     final Uri base = Uri.parse(_socketUrl);
     final String url = authToken.isNotEmpty
@@ -44,6 +44,9 @@ class ChatSocketService {
 
     _socket?.onConnect((_) {
       // connected
+      try {
+        if (onConnect != null) onConnect();
+      } catch (_) {}
     });
 
     _socket?.on('message', (dynamic data) {
