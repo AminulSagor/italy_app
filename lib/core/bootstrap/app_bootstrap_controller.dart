@@ -3,13 +3,14 @@ import 'dart:developer' as dev;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 
+import '../../features/home/services/home_mock_service.dart';
 import '../../routes/routes.dart';
 import '../localization/translation_service.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
+import '../services/device_push_token_service.dart';
 import '../services/storage_service.dart';
 import '../services/token_service.dart';
-import '../../features/home/services/home_mock_service.dart';
 
 class AppBootstrapController extends GetxController {
   AppBootstrapController();
@@ -22,7 +23,7 @@ class AppBootstrapController extends GetxController {
     }
 
     await Get.putAsync<StorageService>(
-      () => StorageService().init(),
+          () => StorageService().init(),
       permanent: true,
     );
 
@@ -48,7 +49,22 @@ class AppBootstrapController extends GetxController {
       );
     }
 
-    // Ensure HomeMockService is available early to avoid Get.find errors
+    if (!Get.isRegistered<DevicePushTokenService>()) {
+      final DevicePushTokenService devicePushTokenService =
+      DevicePushTokenService(
+        apiClient: Get.find<ApiClient>(),
+        storageService: Get.find<StorageService>(),
+      );
+
+      devicePushTokenService.listenForTokenRefresh();
+
+      Get.put<DevicePushTokenService>(
+        devicePushTokenService,
+        permanent: true,
+      );
+    }
+
+    // Ensure HomeMockService is available early to avoid Get.find errors.
     if (!Get.isRegistered<HomeMockService>()) {
       Get.put<HomeMockService>(HomeMockService(), permanent: true);
     }
@@ -71,10 +87,12 @@ class AppBootstrapController extends GetxController {
     try {
       final StorageService storageService = Get.find<StorageService>();
       final TokenService tokenService = Get.find<TokenService>();
+
       final bool hasValidLocalSession =
           storageService.isLoggedIn && await tokenService.hasToken();
 
       if (hasValidLocalSession) {
+        await _registerFcmTokenSafely();
         Get.offAllNamed(AppRoutes.wrapper);
         return;
       }
@@ -90,9 +108,31 @@ class AppBootstrapController extends GetxController {
       }
 
       Get.offAllNamed(AppRoutes.login);
-    } catch (error) {
-      dev.log('Bootstrap failed', error: error, name: 'AppBootstrap');
+    } catch (error, stackTrace) {
+      dev.log(
+        'Bootstrap failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'AppBootstrap',
+      );
       Get.offAllNamed(AppRoutes.login);
+    }
+  }
+
+  Future<void> _registerFcmTokenSafely() async {
+    try {
+      if (!Get.isRegistered<DevicePushTokenService>()) {
+        return;
+      }
+
+      await Get.find<DevicePushTokenService>().registerCurrentDevice();
+    } catch (error, stackTrace) {
+      dev.log(
+        'FCM token registration during bootstrap failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'AppBootstrap',
+      );
     }
   }
 }
