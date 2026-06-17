@@ -1,3 +1,5 @@
+import 'package:image_picker/image_picker.dart';
+
 import '../features/service_hub/sub_features/cv_builder/models/cv_builder_models.dart';
 import '../features/courses/models/course_models.dart';
 
@@ -84,6 +86,7 @@ class CvThemeRouteArguments {
   final String primaryColor;
   final String accentColor;
   final Map<String, dynamic> formData;
+  final Map<String, XFile> pendingPhotoFiles;
 
   const CvThemeRouteArguments({
     required this.template,
@@ -91,6 +94,7 @@ class CvThemeRouteArguments {
     required this.primaryColor,
     required this.accentColor,
     required this.formData,
+    this.pendingPhotoFiles = const <String, XFile>{},
   });
 }
 

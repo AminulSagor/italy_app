@@ -14,10 +14,24 @@ class CvBuilderApiService {
   Future<CvTemplateListResponseModel> getTemplates({
     int page = 1,
     int limit = 20,
+    String? styleType,
+    String? search,
   }) async {
+    final Map<String, dynamic> queryParameters = <String, dynamic>{
+      'page': page,
+      'limit': limit,
+    };
+
+    if (styleType != null && styleType.trim().isNotEmpty) {
+      queryParameters['styleType'] = styleType.trim();
+    }
+    if (search != null && search.trim().isNotEmpty) {
+      queryParameters['search'] = search.trim();
+    }
+
     final Response<dynamic> response = await _apiClient.dio.get(
       '/cv-templates',
-      queryParameters: <String, dynamic>{'page': page, 'limit': limit},
+      queryParameters: queryParameters,
     );
     return CvTemplateListResponseModel.fromJson(_responseMap(response));
   }

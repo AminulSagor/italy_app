@@ -1,3 +1,4 @@
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -76,7 +77,7 @@ class CreateCvThemeView extends GetView<CreateCvThemeController> {
             ),
             Obx(
               () => CvBottomButton(
-                title: controller.isSaving.value ? 'Saving...' : 'Create CV',
+                title: controller.isSaving.value ? 'Creating...' : 'Create CV',
                 onTap: controller.isSaving.value
                     ? () {}
                     : controller.saveCvDocument,
@@ -231,46 +232,121 @@ class _ColorSelector extends GetView<CreateCvThemeController> {
             () => Wrap(
               spacing: 14.w,
               runSpacing: 14.h,
-              children: controller.colorOptions.map((String colorHex) {
-                final bool isSelected = selectedHex.value == colorHex;
-                final Color color = controller.colorFromHex(colorHex);
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                ...controller.colorOptions.map((String colorHex) {
+                  final bool isSelected = selectedHex.value == colorHex;
+                  final Color color = controller.colorFromHex(colorHex);
 
-                return GestureDetector(
-                  onTap: () => onSelected(colorHex),
+                  return GestureDetector(
+                    onTap: () => onSelected(colorHex),
+                    child: _ColorDot(color: color, isSelected: isSelected),
+                  );
+                }),
+                GestureDetector(
+                  onTap: () => _showCustomColorPicker(context),
                   child: Container(
-                    width: 36.w,
                     height: 36.w,
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
                     decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
+                      color: AppColors.homeBackground,
+                      borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
                       border: Border.all(
-                        color: isSelected
-                            ? AppColors.homePrimaryText
-                            : AppColors.white,
-                        width: isSelected ? 3.w : 1.w,
+                        color: AppColors.primaryGreen.withOpacity(0.25),
                       ),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: color.withOpacity(0.22),
-                          blurRadius: 9.r,
-                          spreadRadius: 1.r,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(
+                          Icons.palette_outlined,
+                          color: AppColors.primaryGreen,
+                          size: AppFont.font15.sp,
+                        ),
+                        SizedBox(width: 6.w),
+                        Text(
+                          'Custom',
+                          style: TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontSize: AppFont.font10.sp,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ],
                     ),
-                    child: isSelected
-                        ? Icon(
-                            Icons.check_rounded,
-                            color: AppColors.white,
-                            size: AppFont.font17.sp,
-                          )
-                        : null,
                   ),
-                );
-              }).toList(growable: false),
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _showCustomColorPicker(BuildContext context) async {
+    Color pickerColor = controller.colorFromHex(selectedHex.value);
+
+    final bool selected = await ColorPicker(
+      color: pickerColor,
+      onColorChanged: (Color color) => pickerColor = color,
+      width: 38.w,
+      height: 38.w,
+      borderRadius: 18.r,
+      pickersEnabled: const <ColorPickerType, bool>{
+        ColorPickerType.wheel: true,
+        ColorPickerType.primary: true,
+        ColorPickerType.accent: true,
+      },
+      enableShadesSelection: true,
+      showColorCode: true,
+    ).showPickerDialog(
+      context,
+      constraints: BoxConstraints(
+        minHeight: 420.h,
+        maxWidth: 360.w,
+      ),
+    );
+
+    if (selected) {
+      onSelected(controller.hexFromColor(pickerColor));
+    }
+  }
+}
+
+class _ColorDot extends StatelessWidget {
+  const _ColorDot({required this.color, required this.isSelected});
+
+  final Color color;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 36.w,
+      height: 36.w,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isSelected ? AppColors.homePrimaryText : AppColors.white,
+          width: isSelected ? 3.w : 1.w,
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: color.withOpacity(0.22),
+            blurRadius: 9.r,
+            spreadRadius: 1.r,
+          ),
+        ],
+      ),
+      child: isSelected
+          ? Icon(
+              Icons.check_rounded,
+              color: AppColors.white,
+              size: AppFont.font17.sp,
+            )
+          : null,
     );
   }
 }

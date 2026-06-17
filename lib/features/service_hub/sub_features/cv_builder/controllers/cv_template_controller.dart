@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -15,18 +17,19 @@ class CvTemplateController extends GetxController {
   final CvBuilderApiService _cvBuilderApiService;
 
   final RxBool isLoading = false.obs;
+  final RxBool isLoadingMore = false.obs;
   final RxBool isSaving = false.obs;
   final RxInt selectedCategoryIndex = 0.obs;
-  final RxInt selectedTemplateIndex = 0.obs;
+  final RxInt selectedTemplateIndex = (-1).obs;
   final RxInt selectedColorIndex = 0.obs;
+  final RxString searchQuery = ''.obs;
   final RxList<CvTemplateModel> templates = <CvTemplateModel>[].obs;
   final Rxn<CvTemplateModel> selectedTemplate = Rxn<CvTemplateModel>();
 
   final List<String> categories = <String>[
     'All',
-    'ATS',
-    'Modern',
     'Classic',
+    'Modern Column',
   ];
 
   final List<Color> colors = <Color>[
@@ -38,35 +41,82 @@ class CvTemplateController extends GetxController {
 
   Color get selectedColor => colors[selectedColorIndex.value];
 
+  static const int _pageLimit = 10;
+  int _currentPage = 1;
+  int _totalPages = 1;
+  Worker? _searchDebounce;
+
+  bool get hasMoreTemplates => _currentPage < _totalPages;
+
   @override
   void onInit() {
     super.onInit();
-    loadTemplates();
+    _searchDebounce = debounce<String>(
+      searchQuery,
+      (_) => loadTemplates(refresh: true),
+      time: const Duration(milliseconds: 350),
+    );
+    loadTemplates(refresh: true);
   }
 
-  Future<void> loadTemplates() async {
-    if (isLoading.value) return;
+  Future<void> loadTemplates({bool refresh = true}) async {
+    if (refresh) {
+      if (isLoading.value) return;
+      isLoading.value = true;
+      _currentPage = 1;
+    } else {
+      if (isLoadingMore.value || !hasMoreTemplates) return;
+      isLoadingMore.value = true;
+      _currentPage += 1;
+    }
 
-    isLoading.value = true;
     try {
       final ApiResult<CvTemplateListResponseModel> result =
           await ApiErrorHandler.call(
-        () => _cvBuilderApiService.getTemplates(),
+        () => _cvBuilderApiService.getTemplates(
+          page: _currentPage,
+          limit: _pageLimit,
+          styleType: _selectedStyleTypeQuery(),
+          search: searchQuery.value,
+        ),
       );
+
       if (result.isSuccess && result.data != null) {
-        templates.assignAll(result.data!.templates);
-        if (templates.isNotEmpty) {
-          selectedTemplateIndex.value = 0;
-          selectedTemplate.value = templates.first;
+        final CvTemplateListResponseModel data = result.data!;
+        _totalPages = data.pagination.totalPages <= 0
+            ? 1
+            : data.pagination.totalPages;
+
+        if (refresh) {
+          templates.assignAll(data.templates);
+          selectedTemplateIndex.value = -1;
+          selectedTemplate.value = null;
+        } else {
+          templates.addAll(data.templates);
         }
       }
     } finally {
-      isLoading.value = false;
+      if (refresh) {
+        isLoading.value = false;
+      } else {
+        isLoadingMore.value = false;
+      }
     }
   }
 
+  Future<void> refreshTemplates() => loadTemplates(refresh: true);
+
+  Future<void> loadMoreTemplates() => loadTemplates(refresh: false);
+
   void selectCategory(int index) {
+    if (index < 0 || index >= categories.length) return;
+    if (selectedCategoryIndex.value == index) return;
     selectedCategoryIndex.value = index;
+    loadTemplates(refresh: true);
+  }
+
+  void updateSearchQuery(String value) {
+    searchQuery.value = value;
   }
 
   void selectTemplate(int index) {
@@ -75,12 +125,8 @@ class CvTemplateController extends GetxController {
     selectedTemplate.value = templates[index];
   }
 
-  void startWithTemplate(int index) {
-    selectTemplate(index);
-    useSelectedTemplate();
-  }
-
   void selectColor(int index) {
+    if (index < 0 || index >= colors.length) return;
     selectedColorIndex.value = index;
   }
 
@@ -100,8 +146,20 @@ class CvTemplateController extends GetxController {
     );
   }
 
-  String _colorToHex(Color color) {
-    final int value = color.value;
-    return '#${value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+  String? _selectedStyleTypeQuery() {
+    switch (selectedCategoryIndex.value) {
+      case 1:
+        return 'classic';
+      case 2:
+        return 'modern_column';
+      default:
+        return 'all';
+    }
+  }
+
+  @override
+  void onClose() {
+    _searchDebounce?.dispose();
+    super.onClose();
   }
 }

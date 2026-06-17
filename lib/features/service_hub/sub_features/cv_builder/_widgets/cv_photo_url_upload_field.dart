@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -11,11 +13,13 @@ class CvPhotoUrlUploadField extends StatelessWidget {
     required this.textController,
     required this.isUploading,
     required this.onUploadTap,
+    this.localPreviewPath,
   });
 
   final TextEditingController textController;
   final bool isUploading;
   final VoidCallback onUploadTap;
+  final String? localPreviewPath;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +27,9 @@ class CvPhotoUrlUploadField extends StatelessWidget {
       valueListenable: textController,
       builder: (BuildContext context, TextEditingValue value, Widget? child) {
         final String photoUrl = value.text.trim();
-        final bool hasPhoto = photoUrl.isNotEmpty;
+        final String? previewPath = localPreviewPath?.trim();
+        final bool hasPhoto = photoUrl.isNotEmpty ||
+            (previewPath != null && previewPath.isNotEmpty);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,17 +39,15 @@ class CvPhotoUrlUploadField extends StatelessWidget {
               height: 150.h,
               decoration: BoxDecoration(
                 color: AppColors.homeBackground,
-                borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+                borderRadius: BorderRadius.circular(kRadius20.r),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+                borderRadius: BorderRadius.circular(kRadius20.r),
                 child: hasPhoto
-                    ? Image.network(
-                        photoUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _Placeholder(
-                          isUploading: isUploading,
-                        ),
+                    ? _PreviewImage(
+                        url: photoUrl,
+                        localPath: previewPath,
+                        isUploading: isUploading,
                       )
                     : _Placeholder(isUploading: isUploading),
               ),
@@ -96,7 +100,7 @@ class CvPhotoUrlUploadField extends StatelessWidget {
             if (hasPhoto) ...<Widget>[
               SizedBox(height: 8.h),
               Text(
-                'Photo uploaded and ready for this CV.',
+                'Photo selected. It will upload when you create the CV.',
                 style: TextStyle(
                   color: AppColors.primaryGreen,
                   fontSize: AppFont.font9.sp,
@@ -107,6 +111,36 @@ class CvPhotoUrlUploadField extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _PreviewImage extends StatelessWidget {
+  const _PreviewImage({
+    required this.url,
+    required this.localPath,
+    required this.isUploading,
+  });
+
+  final String url;
+  final String? localPath;
+  final bool isUploading;
+
+  @override
+  Widget build(BuildContext context) {
+    final String? safeLocalPath = localPath?.trim();
+    if (safeLocalPath != null && safeLocalPath.isNotEmpty) {
+      return Image.file(
+        File(safeLocalPath),
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _Placeholder(isUploading: isUploading),
+      );
+    }
+
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _Placeholder(isUploading: isUploading),
     );
   }
 }

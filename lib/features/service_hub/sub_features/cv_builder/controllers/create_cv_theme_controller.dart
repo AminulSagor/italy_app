@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../routes/app_route_arguments.dart';
@@ -16,6 +17,7 @@ class CreateCvThemeController extends GetxController {
   late final CvTemplateModel template;
   late final String documentTitle;
   late final Map<String, dynamic> formData;
+  late final Map<String, XFile> pendingPhotoFiles;
 
   final RxBool isSaving = false.obs;
   final RxString selectedPrimaryColor = '#006B3F'.obs;
@@ -57,6 +59,7 @@ class CreateCvThemeController extends GetxController {
     template = rawArguments.template;
     documentTitle = rawArguments.documentTitle;
     formData = rawArguments.formData;
+    pendingPhotoFiles = rawArguments.pendingPhotoFiles;
     selectedPrimaryColor.value = _normalizeHex(rawArguments.primaryColor).isEmpty
         ? _normalizeHex(template.primaryColor)
         : _normalizeHex(rawArguments.primaryColor);
@@ -72,6 +75,11 @@ class CreateCvThemeController extends GetxController {
     return Color(0xFF000000 | (parsed ?? 0x006B3F));
   }
 
+
+  String hexFromColor(Color color) {
+    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+  }
+
   void selectPrimaryColor(String value) {
     selectedPrimaryColor.value = _normalizeHex(value);
   }
@@ -85,6 +93,8 @@ class CreateCvThemeController extends GetxController {
 
     isSaving.value = true;
     try {
+      final Map<String, dynamic> nextFormData =
+          await _formDataWithUploadedPhotos();
       final ApiResult<CvDocumentModel> result = await ApiErrorHandler.call(
         () => _cvBuilderApiService.saveCvDocument(
           CvDocumentPayloadModel(
@@ -92,7 +102,7 @@ class CreateCvThemeController extends GetxController {
             title: documentTitle,
             themeColor: selectedPrimaryColor.value,
             accentColor: selectedAccentColor.value,
-            formData: formData,
+            formData: nextFormData,
           ),
         ),
       );
@@ -109,6 +119,35 @@ class CreateCvThemeController extends GetxController {
     } finally {
       isSaving.value = false;
     }
+  }
+
+  Future<Map<String, dynamic>> _formDataWithUploadedPhotos() async {
+    final Map<String, dynamic> nextFormData = <String, dynamic>{
+      for (final MapEntry<String, dynamic> entry in formData.entries)
+        entry.key: entry.value is Map
+            ? Map<String, dynamic>.from(entry.value as Map)
+            : entry.value,
+    };
+
+    for (final MapEntry<String, XFile> entry in pendingPhotoFiles.entries) {
+      final List<String> parts = entry.key.split('.');
+      if (parts.length != 2) continue;
+
+      final String sectionKey = parts.first;
+      final String fieldKey = parts.last;
+      final String uploadedUrl = await _cvBuilderApiService.uploadCvPhoto(
+        entry.value,
+      );
+
+      final Map<String, dynamic> sectionData =
+          nextFormData[sectionKey] is Map
+              ? Map<String, dynamic>.from(nextFormData[sectionKey] as Map)
+              : <String, dynamic>{};
+      sectionData[fieldKey] = uploadedUrl;
+      nextFormData[sectionKey] = sectionData;
+    }
+
+    return nextFormData;
   }
 
   String _normalizeHex(String value) {

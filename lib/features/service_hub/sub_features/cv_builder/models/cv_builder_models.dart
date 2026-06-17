@@ -265,13 +265,47 @@ class CvTemplateModel {
   }
 }
 
+class CvPaginationModel {
+  const CvPaginationModel({
+    required this.page,
+    required this.limit,
+    required this.totalPages,
+    required this.totalItems,
+  });
+
+  final int page;
+  final int limit;
+  final int totalPages;
+  final int totalItems;
+
+  factory CvPaginationModel.fromJson(Map<String, dynamic> json) {
+    int readInt(String key, int fallback) {
+      final dynamic value = json[key];
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '') ?? fallback;
+    }
+
+    return CvPaginationModel(
+      page: readInt('page', 1),
+      limit: readInt('limit', 20),
+      totalPages: readInt('totalPages', 1),
+      totalItems: readInt('totalItems', 0),
+    );
+  }
+}
+
 class CvTemplateListResponseModel {
-  const CvTemplateListResponseModel({required this.templates});
+  const CvTemplateListResponseModel({
+    required this.templates,
+    required this.pagination,
+  });
 
   final List<CvTemplateModel> templates;
+  final CvPaginationModel pagination;
 
   factory CvTemplateListResponseModel.fromJson(Map<String, dynamic> json) {
     final dynamic rawTemplates = json['templates'];
+    final dynamic rawPagination = json['pagination'];
     return CvTemplateListResponseModel(
       templates: rawTemplates is List
           ? rawTemplates
@@ -283,6 +317,11 @@ class CvTemplateListResponseModel {
               )
               .toList()
           : <CvTemplateModel>[],
+      pagination: CvPaginationModel.fromJson(
+        rawPagination is Map
+            ? Map<String, dynamic>.from(rawPagination)
+            : <String, dynamic>{},
+      ),
     );
   }
 }
