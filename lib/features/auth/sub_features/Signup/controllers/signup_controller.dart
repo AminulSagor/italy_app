@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../../core/localization/translation_service.dart';
 import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../core/services/auth_service.dart';
+import '../../../../../core/services/device_push_token_service.dart';
 import '../../../../../routes/routes.dart';
 import '../../../models/auth_models.dart';
 import '../models/signup_models.dart';
@@ -260,7 +261,7 @@ class SignupController extends GetxController {
       if (!result.isSuccess) {
         return;
       }
-
+      await Get.find<DevicePushTokenService>().registerCurrentDevice();
       Get.toNamed(AppRoutes.accountCreated);
     } finally {
       otpUi.value = otpUi.value.copyWith(isVerifying: false);
