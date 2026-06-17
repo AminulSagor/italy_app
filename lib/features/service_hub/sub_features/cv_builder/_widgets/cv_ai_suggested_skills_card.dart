@@ -10,10 +10,7 @@ import 'cv_selectable_chip.dart';
 class CvAiSuggestedSkillsCard extends StatelessWidget {
   final CreateCvEducationController controller;
 
-  const CvAiSuggestedSkillsCard({
-    super.key,
-    required this.controller,
-  });
+  const CvAiSuggestedSkillsCard({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -61,12 +58,12 @@ class CvAiSuggestedSkillsCard extends StatelessWidget {
             children: controller.aiSuggestedSkills
                 .map(
                   (String item) => CvSelectableChip(
-                title: item,
-                isSelected: false,
-                isAiSuggested: true,
-                onTap: () => controller.addSuggestedSkill(item),
-              ),
-            )
+                    title: item,
+                    isSelected: false,
+                    isAiSuggested: true,
+                    onTap: () => controller.addSuggestedSkill(item),
+                  ),
+                )
                 .toList(),
           ),
           SizedBox(height: 12.h),
@@ -93,7 +90,7 @@ class CvAiSuggestedSkillsCard extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Type skill here...',
                   hintStyle: TextStyle(
-                    color: AppColors.homeSecondaryText.withOpacity(0.55),
+                    color: AppColors.homeSecondaryText.withValues(alpha: 0.55),
                     fontSize: AppFont.font8.sp,
                     fontWeight: FontWeight.w600,
                     height: 1,
@@ -103,9 +100,7 @@ class CvAiSuggestedSkillsCard extends StatelessWidget {
                   focusedBorder: InputBorder.none,
                   disabledBorder: InputBorder.none,
                   isDense: true,
-                  contentPadding: EdgeInsets.only(
-                    bottom: 1.h,
-                  ),
+                  contentPadding: EdgeInsets.only(bottom: 1.h),
                 ),
               ),
             ),

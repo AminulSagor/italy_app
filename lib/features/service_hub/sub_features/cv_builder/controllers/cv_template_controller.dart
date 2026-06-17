@@ -12,7 +12,7 @@ import '../services/cv_builder_api_service.dart';
 
 class CvTemplateController extends GetxController {
   CvTemplateController({required CvBuilderApiService cvBuilderApiService})
-      : _cvBuilderApiService = cvBuilderApiService;
+    : _cvBuilderApiService = cvBuilderApiService;
 
   final CvBuilderApiService _cvBuilderApiService;
 
@@ -26,11 +26,7 @@ class CvTemplateController extends GetxController {
   final RxList<CvTemplateModel> templates = <CvTemplateModel>[].obs;
   final Rxn<CvTemplateModel> selectedTemplate = Rxn<CvTemplateModel>();
 
-  final List<String> categories = <String>[
-    'All',
-    'Classic',
-    'Modern Column',
-  ];
+  final List<String> categories = <String>['All', 'Classic', 'Modern Column'];
 
   final List<Color> colors = <Color>[
     AppColors.primaryGreen,
@@ -73,13 +69,13 @@ class CvTemplateController extends GetxController {
     try {
       final ApiResult<CvTemplateListResponseModel> result =
           await ApiErrorHandler.call(
-        () => _cvBuilderApiService.getTemplates(
-          page: _currentPage,
-          limit: _pageLimit,
-          styleType: _selectedStyleTypeQuery(),
-          search: searchQuery.value,
-        ),
-      );
+            () => _cvBuilderApiService.getTemplates(
+              page: _currentPage,
+              limit: _pageLimit,
+              styleType: _selectedStyleTypeQuery(),
+              search: searchQuery.value,
+            ),
+          );
 
       if (result.isSuccess && result.data != null) {
         final CvTemplateListResponseModel data = result.data!;

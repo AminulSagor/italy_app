@@ -31,7 +31,7 @@ class NoInternetStatusView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(45.r),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
+                      color: Colors.black.withValues(alpha: 0.06),
                       blurRadius: 55.r,
                       offset: Offset(0, 30.h),
                     ),

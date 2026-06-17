@@ -5,8 +5,12 @@ class SimpleAppbar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onBackTap;
   final String? title;
   final IconData? icon;
-  const SimpleAppbar({required this.onBackTap, this.title, this.icon, Key? key})
-    : super(key: key);
+  const SimpleAppbar({
+    required this.onBackTap,
+    this.title,
+    this.icon,
+    super.key,
+  });
 
   @override
   Size get preferredSize => Size.fromHeight(76.h);

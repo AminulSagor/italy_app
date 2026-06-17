@@ -56,7 +56,7 @@ class CvEducationDropdownField extends StatelessWidget {
               hint: Text(
                 hintText,
                 style: TextStyle(
-                  color: AppColors.homeSecondaryText.withOpacity(0.55),
+                  color: AppColors.homeSecondaryText.withValues(alpha: 0.55),
                   fontSize: AppFont.font10.sp,
                   fontWeight: FontWeight.w600,
                 ),
@@ -64,17 +64,17 @@ class CvEducationDropdownField extends StatelessWidget {
               items: items
                   .map(
                     (String item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    style: TextStyle(
-                      color: AppColors.homePrimaryText,
-                      fontSize: AppFont.font10.sp,
-                      fontWeight: FontWeight.w700,
+                      value: item,
+                      child: Text(
+                        item,
+                        style: TextStyle(
+                          color: AppColors.homePrimaryText,
+                          fontSize: AppFont.font10.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              )
+                  )
                   .toList(),
               onChanged: onChanged,
             ),

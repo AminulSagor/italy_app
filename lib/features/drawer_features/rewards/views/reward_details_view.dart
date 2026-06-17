@@ -48,7 +48,7 @@ class RewardDetailsView extends StatelessWidget {
                       child: Image.asset(
                         'assets/rewards/headphones.png',
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Icon(
+                        errorBuilder: (_, _, _) => Icon(
                           Icons.headphones_rounded,
                           size: 136.r,
                           color: const Color(0xFFD71920),

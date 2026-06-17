@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
-import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../../../../../core/widgets/custom_button.dart';
 import '../controllers/pro_checkout_controller.dart';

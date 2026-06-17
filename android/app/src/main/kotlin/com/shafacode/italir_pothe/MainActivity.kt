@@ -1,4 +1,4 @@
-package com.example.italir_pothe
+package com.shafacode.italir_pothe
 
 import android.content.ContentValues
 import android.content.Intent

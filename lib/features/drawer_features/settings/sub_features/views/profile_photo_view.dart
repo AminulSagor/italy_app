@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:italir_pothe/features/drawer_features/settings/widgets/settings_ui_widgets.dart';
 
 class ProfilePhotoView extends StatelessWidget {

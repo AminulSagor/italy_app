@@ -103,13 +103,21 @@ class WebinarVideoCard extends StatelessWidget {
         child: Stack(
           children: <Widget>[
             Positioned.fill(child: _RemoteAgoraVideo(controller: controller)),
-            Positioned(left: 24.w, top: 20.h, child: _HostChip(webinar: webinar)),
+            Positioned(
+              left: 24.w,
+              top: 20.h,
+              child: _HostChip(webinar: webinar),
+            ),
             Positioned(
               left: 26.w,
               bottom: 28.h,
               child: _VideoControlIcon(controller: controller),
             ),
-            Positioned(right: 26.w, bottom: 28.h, child: const WebinarLiveBadge()),
+            Positioned(
+              right: 26.w,
+              bottom: 28.h,
+              child: const WebinarLiveBadge(),
+            ),
           ],
         ),
       ),
@@ -214,7 +222,11 @@ class _VideoControlIcon extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(color: AppColors.white.withValues(alpha: 0.4)),
         ),
-        child: Icon(Icons.fullscreen_rounded, color: AppColors.white, size: 28.w),
+        child: Icon(
+          Icons.fullscreen_rounded,
+          color: AppColors.white,
+          size: 28.w,
+        ),
       ),
     );
   }
@@ -230,7 +242,8 @@ class WebinarVideoFullScreenView extends StatefulWidget {
       _WebinarVideoFullScreenViewState();
 }
 
-class _WebinarVideoFullScreenViewState extends State<WebinarVideoFullScreenView> {
+class _WebinarVideoFullScreenViewState
+    extends State<WebinarVideoFullScreenView> {
   @override
   void initState() {
     super.initState();
@@ -347,7 +360,7 @@ class WebinarLiveChatSection extends StatelessWidget {
             ? const NeverScrollableScrollPhysics()
             : const BouncingScrollPhysics(),
         itemCount: itemCount,
-        separatorBuilder: (_, __) => SizedBox(height: compact ? 12.h : 16.h),
+        separatorBuilder: (_, _) => SizedBox(height: compact ? 12.h : 16.h),
         itemBuilder: (_, int index) => WebinarChatBubble(
           message: controller.liveMessages[start + index],
           compact: compact,
@@ -540,7 +553,10 @@ class WebinarChatInput extends StatelessWidget {
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Write a message...',
-                hintStyle: TextStyle(color: AppColors.bodyText, fontSize: 14.sp),
+                hintStyle: TextStyle(
+                  color: AppColors.bodyText,
+                  fontSize: 14.sp,
+                ),
               ),
             ),
           ),

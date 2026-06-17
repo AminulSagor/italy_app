@@ -63,6 +63,8 @@ import '../features/service_hub/sub_features/cv_builder/controllers/cv_template_
 import '../features/service_hub/sub_features/cv_builder/services/cv_builder_api_service.dart';
 import '../features/service_hub/sub_features/cv_builder/services/cv_pdf_download_service.dart';
 import '../core/services/api_client.dart';
+import '../core/services/token_service.dart';
+import '../features/messages/services/chat_socket_service.dart';
 import '../features/service_hub/sub_features/cv_builder/views/choose_cv_template_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart';
@@ -75,7 +77,6 @@ import '../features/service_hub/sub_features/cv_builder/views/cv_builder_view.da
 import '../features/service_hub/sub_features/cv_builder/views/cv_ready_view.dart';
 import '../features/splash/splash_view.dart';
 import '../features/splash/splash_controller.dart';
-import '../features/splash/splash_view.dart';
 import '../features/webinar/controllers/webinar_controller.dart';
 import '../features/webinar/services/webinar_agora_service.dart';
 import '../features/webinar/services/webinar_api_service.dart';
@@ -84,11 +85,6 @@ import '../features/webinar/views/webinar_live_view.dart';
 import '../features/webinar/views/webinar_view.dart';
 import 'app_route_arguments.dart';
 import 'app_routes.dart';
-import '../core/bootstrap/app_bootstrap_view.dart';
-import '../core/bootstrap/app_bootstrap_controller.dart';
-import '../features/auth/sub_features/login/controllers/login_controller.dart';
-import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
-import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_view.dart';
 import '../features/drawer_features/shop/shop_view.dart';
 import '../features/drawer_features/shop/shop_controller.dart';
 import '../features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart';
@@ -129,7 +125,7 @@ import '../features/practice_hub/views/daily_challenges/daily_challenges_view.da
 class AppPages {
   AppPages._();
 
-  static const String initial = AppRoutes.bootstrap;
+  static const String initial = AppRoutes.login;
 
   static T _arguments<T>() => Get.arguments as T;
 
@@ -249,7 +245,19 @@ class AppPages {
           );
         }
         if (!Get.isRegistered<MessagesMockService>()) {
-          Get.lazyPut<MessagesMockService>(() => MessagesMockService());
+          if (!Get.isRegistered<ChatSocketService>()) {
+            Get.lazyPut<ChatSocketService>(
+              () => ChatSocketService(tokenService: Get.find<TokenService>()),
+            );
+          }
+
+          Get.lazyPut<MessagesMockService>(
+            () => MessagesMockService(
+              apiClient: Get.find<ApiClient>(),
+              tokenService: Get.find<TokenService>(),
+              chatSocketService: Get.find<ChatSocketService>(),
+            ),
+          );
         }
         if (!Get.isRegistered<MessagesController>()) {
           Get.lazyPut<MessagesController>(

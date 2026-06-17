@@ -29,7 +29,7 @@ class DailyChestUnlockedView extends GetView<PracticeHubController> {
                 width: double.infinity,
                 height: 390.h,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) {
+                errorBuilder: (_, _, _) {
                   return Container(
                     width: double.infinity,
                     height: 390.h,

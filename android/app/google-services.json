@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "578212275082",
+    "project_id": "italir-pothe",
+    "storage_bucket": "italir-pothe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578212275082:android:67d0320f9fe3f60a1f1e73",
+        "android_client_info": {
+          "package_name": "com.shafacode.italir_pothe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-7tyxJkdMPHC8BBKkriCa2mR0zl9Ht4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

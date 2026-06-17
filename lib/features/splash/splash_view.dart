@@ -522,12 +522,9 @@ class _ServiceChip extends StatelessWidget {
   final bool active;
   final Color? iconColor;
 
-  const _ServiceChip({
-    required this.icon,
-    required this.label,
-    this.active = false,
-    this.iconColor,
-  });
+  const _ServiceChip({required this.icon, required this.label})
+    : active = false,
+      iconColor = null;
 
   @override
   Widget build(BuildContext context) {

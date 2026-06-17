@@ -431,7 +431,9 @@ class CreateCvDynamicFormController extends GetxController {
   }
 
   bool _isListFieldType(String value) {
-    final String normalizedType = _normalizeFieldType(value).replaceAll('_', '');
+    final String normalizedType = _normalizeFieldType(
+      value,
+    ).replaceAll('_', '');
     return normalizedType == 'list' ||
         normalizedType == 'bulletlist' ||
         normalizedType == 'numberlist' ||

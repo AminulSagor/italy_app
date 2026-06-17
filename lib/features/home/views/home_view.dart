@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/widgets/app_home_top_bar.dart';
 import '../controllers/home_controller.dart';
 import '../models/home_models.dart';
 import '../widgets/current_chapter_card.dart';
@@ -88,7 +87,10 @@ class _HomeLoadedBody extends StatelessWidget {
           SizedBox(height: 26.h),
           SupportCommunityCard(support: data.support),
           SizedBox(height: 26.h),
-          WebinarCard(webinar: data.webinar, onJoinTap: Get.find<HomeController>().openWebinars),
+          WebinarCard(
+            webinar: data.webinar,
+            onJoinTap: Get.find<HomeController>().openWebinars,
+          ),
           SizedBox(height: 26.h),
           CulturalTipCard(tip: data.culturalTip),
           SizedBox(height: 28.h),

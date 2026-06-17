@@ -18,7 +18,7 @@ class OfficialChecklistCard extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
         border: Border.all(
-          color: AppColors.homeSecondaryText.withOpacity(0.35),
+          color: AppColors.homeSecondaryText.withValues(alpha: 0.35),
           width: 1.w,
         ),
       ),

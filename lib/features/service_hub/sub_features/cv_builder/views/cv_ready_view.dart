@@ -83,8 +83,9 @@ class CvReadyView extends GetView<CvReadyController> {
                             title: 'Share to\nWhatsApp',
                             icon: Icons.chat_rounded,
                             backgroundColor: AppColors.messageOnlineGreen,
-                            iconBackgroundColor:
-                            AppColors.white.withOpacity(0.22),
+                            iconBackgroundColor: AppColors.white.withValues(
+                              alpha: 0.22,
+                            ),
                             iconColor: AppColors.white,
                             titleColor: AppColors.white,
                             onTap: controller.onShareWhatsAppTap,
@@ -143,10 +144,7 @@ class _BottomButton extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-  const _BottomButton({
-    required this.title,
-    required this.onTap,
-  });
+  const _BottomButton({required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

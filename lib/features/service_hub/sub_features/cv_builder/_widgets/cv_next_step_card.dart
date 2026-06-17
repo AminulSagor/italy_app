@@ -11,16 +11,14 @@ class CvNextStepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(
-        minHeight: 86.h,
-      ),
+      constraints: BoxConstraints(minHeight: 86.h),
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
       decoration: BoxDecoration(
         color: AppColors.safetyBlockedBg,
         borderRadius: BorderRadius.circular(kRadius26.r),
         border: Border.all(
-          color: AppColors.primaryGreen.withOpacity(0.08),
+          color: AppColors.primaryGreen.withValues(alpha: 0.08),
           width: 1.w,
         ),
       ),

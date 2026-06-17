@@ -181,7 +181,7 @@ class _CategoryChips extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           itemCount: controller.categories.length,
-          separatorBuilder: (_, __) => SizedBox(width: 10.w),
+          separatorBuilder: (_, _) => SizedBox(width: 10.w),
           itemBuilder: (_, int index) {
             final bool isSelected = selectedIndex == index;
 
@@ -238,8 +238,9 @@ class _TemplateGrid extends StatelessWidget {
           Wrap(
             spacing: 12.w,
             runSpacing: 18.h,
-            children:
-                List<Widget>.generate(controller.templates.length, (int index) {
+            children: List<Widget>.generate(controller.templates.length, (
+              int index,
+            ) {
               final CvTemplateModel template = controller.templates[index];
               final Color tagColor = _tagColor(template.styleType);
               return CvTemplateCard(

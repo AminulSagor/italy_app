@@ -1,118 +1,164 @@
+import 'package:dio/dio.dart';
+
+import '../../../core/services/api_client.dart';
+import '../../../core/services/token_service.dart';
+import 'chat_socket_service.dart';
 import '../models/message_models.dart';
 
 class MessagesMockService {
+  MessagesMockService({
+    required ApiClient apiClient,
+    required TokenService tokenService,
+    required ChatSocketService chatSocketService,
+  }) : _apiClient = apiClient,
+       _tokenService = tokenService,
+       _chatSocketService = chatSocketService;
+
+  final ApiClient _apiClient;
+  // token service is kept for potential auth needs in requests
+  // ignore: unused_field
+  final TokenService _tokenService;
+  final ChatSocketService _chatSocketService;
+
   final Set<String> _blockedThreadIds = <String>{};
 
   Future<MessagesResponseModel> fetchMessages() async {
-    await Future<void>.delayed(const Duration(milliseconds: 550));
+    try {
+      final Response<dynamic> response = await _apiClient.dio.get(
+        '/chat/conversations',
+      );
+      final dynamic data = response.data;
 
+      if (data is List) {
+        final List<MessageThreadModel> threads = data
+            .map<MessageThreadModel>((dynamic conv) {
+              final Map<String, dynamic> c = conv is Map
+                  ? Map<String, dynamic>.from(conv)
+                  : <String, dynamic>{};
+              final dynamic lastMsg = c['lastMessage'];
+              final String lastMessageText = lastMsg is Map
+                  ? (lastMsg['content']?.toString() ?? '')
+                  : (lastMsg?.toString() ?? '');
+              final String timeLabel = _formatTimeLabel(
+                c['lastMessageAt']?.toString(),
+              );
+
+              String learnerName = 'Conversation';
+              String avatarUrl = '';
+              final dynamic members =
+                  c['members'] ?? c['participants'] ?? c['members'];
+              if (members is List && members.isNotEmpty) {
+                final dynamic first = members.first;
+                if (first is Map && first['user'] is Map) {
+                  learnerName =
+                      first['user']['fullName']?.toString() ?? learnerName;
+                  avatarUrl = first['user']['avatarUrl']?.toString() ?? '';
+                } else if (first is Map && first['fullName'] != null) {
+                  learnerName = first['fullName'].toString();
+                  avatarUrl = first['avatarUrl']?.toString() ?? '';
+                }
+              }
+
+              return MessageThreadModel(
+                id: c['id']?.toString() ?? '',
+                learnerName: learnerName,
+                lastMessage: lastMessageText,
+                timeLabel: timeLabel,
+                unreadCount: 0,
+                isOnline: false,
+                isHighlighted: false,
+                isDelivered: true,
+                avatarUrl: avatarUrl.isNotEmpty
+                    ? avatarUrl
+                    : 'https://i.pravatar.cc/120?img=12',
+              );
+            })
+            .toList(growable: false);
+
+        return MessagesResponseModel(
+          currentUserName: '',
+          currentUserAvatarUrl: '',
+          threads: threads,
+        );
+      }
+    } catch (err) {
+      // expose error for debugging
+      try {
+        // ignore: avoid_print
+        print('fetchMessages error: $err');
+      } catch (_) {}
+    }
+
+    // Fallback mock
+    await Future<void>.delayed(const Duration(milliseconds: 250));
     return const MessagesResponseModel(
       currentUserName: 'Alex Rivera',
       currentUserAvatarUrl: 'https://i.pravatar.cc/120?img=11',
-      threads: <MessageThreadModel>[
-        MessageThreadModel(
-          id: 'luca-rossi',
-          learnerName: 'Luca Rossi',
-          lastMessage: "Hai finito l'esercizio di ieri?",
-          timeLabel: '10:45 AM',
-          unreadCount: 2,
-          isOnline: true,
-          isHighlighted: true,
-          isDelivered: false,
-          avatarUrl: 'https://i.pravatar.cc/120?img=47',
-        ),
-        MessageThreadModel(
-          id: 'giulia-bianchi',
-          learnerName: 'Giulia Bianchi',
-          lastMessage: 'La pizza è incredibile!',
-          timeLabel: '9:12 AM',
-          unreadCount: 0,
-          isOnline: true,
-          isHighlighted: false,
-          isDelivered: true,
-          avatarUrl: 'https://i.pravatar.cc/120?img=32',
-        ),
-        MessageThreadModel(
-          id: 'marco-galli-1',
-          learnerName: 'Marco Galli',
-          lastMessage: 'Can we practice the past tense?',
-          timeLabel: 'YESTERDAY',
-          unreadCount: 0,
-          isOnline: false,
-          isHighlighted: false,
-          isDelivered: false,
-          avatarUrl: 'https://i.pravatar.cc/120?img=59',
-        ),
-        MessageThreadModel(
-          id: 'sofia-conti',
-          learnerName: 'Sofia Conti',
-          lastMessage: 'Ti ho inviato i nuovi appunti',
-          timeLabel: 'TUE',
-          unreadCount: 1,
-          isOnline: true,
-          isHighlighted: true,
-          isDelivered: false,
-          avatarUrl: 'https://i.pravatar.cc/120?img=45',
-        ),
-        MessageThreadModel(
-          id: 'marco-galli-2',
-          learnerName: 'Marco Galli',
-          lastMessage: 'Can we practice the past tense?',
-          timeLabel: 'YESTERDAY',
-          unreadCount: 0,
-          isOnline: false,
-          isHighlighted: false,
-          isDelivered: false,
-          avatarUrl: 'https://i.pravatar.cc/120?img=59',
-        ),
-      ],
+      threads: <MessageThreadModel>[],
     );
   }
 
   Future<MessageChatModel> fetchChat(MessageThreadModel thread) async {
-    await Future<void>.delayed(const Duration(milliseconds: 420));
+    try {
+      final Response<dynamic> response = await _apiClient.dio.get(
+        '/chat/conversations/${thread.id}/messages',
+      );
+      final dynamic data = response.data;
+      if (data is List) {
+        final List<MessageChatItemModel> messages = data
+            .map<MessageChatItemModel>((dynamic msg) {
+              final Map<String, dynamic> m = msg is Map
+                  ? Map<String, dynamic>.from(msg)
+                  : <String, dynamic>{};
+              final String text = m['content']?.toString() ?? '';
+              final String id = m['id']?.toString() ?? '';
+              final String timeLabel = _formatTimeLabel(
+                m['createdAt']?.toString(),
+              );
+              final bool isMine = false;
+              return MessageChatItemModel(
+                id: id,
+                text: text,
+                timeLabel: timeLabel,
+                statusLabel: '',
+                isMine: isMine,
+              );
+            })
+            .toList(growable: false);
+
+        return MessageChatModel(
+          contactName: thread.learnerName,
+          contactStatus: thread.isOnline ? 'Online' : 'Offline',
+          contactAvatarUrl: thread.avatarUrl,
+          isOnline: thread.isOnline,
+          messages: messages,
+        );
+      }
+    } catch (err) {
+      // fallback to mock
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 120));
 
     return MessageChatModel(
-      contactName: thread.learnerName == 'Luca Rossi'
-          ? 'Elena'
-          : thread.learnerName,
+      contactName: thread.learnerName,
       contactStatus: thread.isOnline ? 'Online' : 'Offline',
-      contactAvatarUrl: thread.learnerName == 'Luca Rossi'
-          ? 'https://i.pravatar.cc/160?img=48'
-          : thread.avatarUrl,
+      contactAvatarUrl: thread.avatarUrl,
       isOnline: thread.isOnline,
       messages: const <MessageChatItemModel>[
         MessageChatItemModel(
           id: 'm1',
-          text:
-              'Ciao! How is your Italian practice going today? Pronta per la lezione di oggi?',
+          text: 'Hello! This is a fallback message.',
           timeLabel: '10:24 AM',
           statusLabel: '',
           isMine: false,
-        ),
-        MessageChatItemModel(
-          id: 'm2',
-          text:
-              "Ciao Elena! Sì, sono pronta. I've been practicing the past tense all morning! 🇮🇹",
-          timeLabel: '10:30 AM',
-          statusLabel: 'Seen',
-          isMine: true,
-        ),
-        MessageChatItemModel(
-          id: 'm3',
-          text:
-              "Perfect! That really helps with the rolling 'R' sound. Grazie mille!",
-          timeLabel: '10:30 AM',
-          statusLabel: 'Delivered',
-          isMine: true,
         ),
       ],
     );
   }
 
   Future<MessageUserProfileModel> fetchUserProfile(String threadId) async {
-    await Future<void>.delayed(const Duration(milliseconds: 380));
-
+    await Future<void>.delayed(const Duration(milliseconds: 120));
     return MessageUserProfileModel(
       name: 'Alex Rivera',
       statusLabel: 'ONLINE',
@@ -124,13 +170,13 @@ class MessagesMockService {
   }
 
   Future<MessageUserProfileModel> blockUser(String threadId) async {
-    await Future<void>.delayed(const Duration(milliseconds: 420));
+    await Future<void>.delayed(const Duration(milliseconds: 120));
     _blockedThreadIds.add(threadId);
     return fetchUserProfile(threadId);
   }
 
   Future<MessageUserProfileModel> unblockUser(String threadId) async {
-    await Future<void>.delayed(const Duration(milliseconds: 420));
+    await Future<void>.delayed(const Duration(milliseconds: 120));
     _blockedThreadIds.remove(threadId);
     return fetchUserProfile(threadId);
   }
@@ -138,8 +184,7 @@ class MessagesMockService {
   Future<MessageReportResultModel> submitReport(
     MessageReportRequestModel request,
   ) async {
-    await Future<void>.delayed(const Duration(milliseconds: 620));
-
+    await Future<void>.delayed(const Duration(milliseconds: 250));
     return const MessageReportResultModel(
       referenceId: '#SHK-REP-4922',
       statusLabel: 'Under Review',
@@ -149,5 +194,275 @@ class MessagesMockService {
         'You will be notified once a decision is made',
       ],
     );
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPeers() async {
+    try {
+      final Response<dynamic> response = await _apiClient.dio.get(
+        '/chat/peers',
+      );
+      final dynamic data = response.data;
+      if (data is List) {
+        return data
+            .map<Map<String, dynamic>>((dynamic u) {
+              return u is Map
+                  ? Map<String, dynamic>.from(u)
+                  : <String, dynamic>{};
+            })
+            .toList(growable: false);
+      }
+    } catch (_) {}
+
+    return <Map<String, dynamic>>[];
+  }
+
+  /// Search users by full name (paginated).
+  /// Calls `/users/search/name?q=...&page=...&perPage=...` and returns a
+  /// Map matching the API contract: items, total, page, perPage, totalPages.
+  Future<Map<String, dynamic>> searchUsersByName({
+    required String q,
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    final String query = q.trim();
+    if (query.isEmpty) {
+      throw ArgumentError('q is required and must not be empty');
+    }
+
+    final int enforcedPerPage = perPage.clamp(1, 100);
+
+    try {
+      final Response<dynamic> response = await _apiClient.dio.get(
+        '/users/search/name',
+        queryParameters: <String, dynamic>{
+          'q': query,
+          'page': page,
+          'perPage': enforcedPerPage,
+        },
+      );
+
+      final dynamic data = response.data;
+      if (data is Map<String, dynamic>) {
+        return Map<String, dynamic>.from(data);
+      }
+
+      if (data is List) {
+        final List<Map<String, dynamic>> items = data
+            .map<Map<String, dynamic>>(
+              (dynamic u) =>
+                  u is Map ? Map<String, dynamic>.from(u) : <String, dynamic>{},
+            )
+            .toList(growable: false);
+
+        return <String, dynamic>{
+          'items': items,
+          'total': items.length,
+          'page': page,
+          'perPage': enforcedPerPage,
+          'totalPages': 1,
+        };
+      }
+    } catch (_) {
+      // fall through to mock generation below
+    }
+
+    // Fallback mock generation (client-side). This simulates a server that
+    // returns paginated results and presence info.
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+
+    final List<Map<String, dynamic>> all = List<Map<String, dynamic>>.generate(
+      60,
+      (int i) {
+        final int idx = i + 1;
+        final String name = <String>[
+          'Anna',
+          'Alex',
+          'Antonio',
+          'Maria',
+          'Marco',
+          'Giulia',
+          'Luca',
+          'Sofia',
+          'Francesco',
+          'Chiara',
+        ][i % 10];
+        return <String, dynamic>{
+          'id': 'u$idx',
+          'fullName': '$name $idx',
+          'email': '${name.toLowerCase()}$idx@example.com',
+          'phone': (idx % 3 == 0) ? '+1234567$idx' : null,
+          'role': (idx % 5 == 0) ? 'admin' : 'user',
+          'isVerified': idx % 2 == 0,
+          'isOnline': idx % 7 == 0,
+          'lastSeenAt': (idx % 7 == 0)
+              ? null
+              : DateTime.now()
+                    .subtract(Duration(minutes: idx * 3))
+                    .toIso8601String(),
+        };
+      },
+    );
+
+    final String lc = query.toLowerCase();
+    final List<Map<String, dynamic>> filtered = all
+        .where(
+          (Map<String, dynamic> u) =>
+              (u['fullName'] as String).toLowerCase().contains(lc),
+        )
+        .toList(growable: false);
+
+    final int total = filtered.length;
+    final int totalPages = (total / enforcedPerPage).ceil();
+    final int start = (page - 1) * enforcedPerPage;
+    final List<Map<String, dynamic>> pageItems = start < total
+        ? filtered.skip(start).take(enforcedPerPage).toList(growable: false)
+        : <Map<String, dynamic>>[];
+
+    return <String, dynamic>{
+      'items': pageItems,
+      'total': total,
+      'page': page,
+      'perPage': enforcedPerPage,
+      'totalPages': totalPages,
+    };
+  }
+
+  /// Create or get a direct conversation with another user.
+  /// POST /chat/direct { otherUserId }
+  Future<String?> createDirectConversation({
+    required String otherUserId,
+  }) async {
+    if (otherUserId.trim().isEmpty) {
+      throw ArgumentError('otherUserId is required');
+    }
+
+    try {
+      final Response<dynamic> response = await _apiClient.dio.post(
+        '/chat/direct',
+        data: <String, dynamic>{'otherUserId': otherUserId},
+      );
+      final dynamic data = response.data;
+      if (data is Map<String, dynamic> && data.containsKey('conversationId')) {
+        return data['conversationId']?.toString();
+      }
+    } catch (_) {
+      // fall through to fallback
+    }
+
+    // Fallback: return null to indicate not created
+    return null;
+  }
+
+  /// Sync messages since an ISO datetime string. Returns list of raw messages.
+  /// GET /chat/sync?since=...
+  Future<List<Map<String, dynamic>>> syncMessages({String? since}) async {
+    try {
+      final Response<dynamic> response = await _apiClient.dio.get(
+        '/chat/sync',
+        queryParameters: <String, dynamic>{'since': since},
+      );
+      final dynamic data = response.data;
+      if (data is List) {
+        return data
+            .map<Map<String, dynamic>>(
+              (dynamic m) =>
+                  m is Map ? Map<String, dynamic>.from(m) : <String, dynamic>{},
+            )
+            .toList(growable: false);
+      }
+    } catch (_) {}
+
+    return <Map<String, dynamic>>[];
+  }
+
+  void sendMessageViaSocket({
+    required String conversationId,
+    String? clientMessageId,
+    String? content,
+  }) {
+    _chatSocketService.sendMessage(
+      conversationId: conversationId,
+      clientMessageId: clientMessageId,
+      content: content,
+    );
+  }
+
+  Future<List<MessageChatItemModel>> fetchChatPage(
+    MessageThreadModel thread, {
+    int page = 1,
+    int limit = 20,
+  }) async {
+    try {
+      final Response<dynamic> response = await _apiClient.dio.get(
+        '/chat/conversations/${thread.id}/messages',
+        queryParameters: <String, dynamic>{'page': page, 'limit': limit},
+      );
+      final dynamic data = response.data;
+      if (data is List) {
+        final List<MessageChatItemModel> messages = data
+            .map<MessageChatItemModel>((dynamic msg) {
+              final Map<String, dynamic> m = msg is Map
+                  ? Map<String, dynamic>.from(msg)
+                  : <String, dynamic>{};
+              final String text = m['content']?.toString() ?? '';
+              final String id = m['id']?.toString() ?? '';
+              final String timeLabel = _formatTimeLabel(
+                m['createdAt']?.toString(),
+              );
+              final bool isMine = false;
+              return MessageChatItemModel(
+                id: id,
+                text: text,
+                timeLabel: timeLabel,
+                statusLabel: '',
+                isMine: isMine,
+                isSystem: m['isSystem'] as bool? ?? false,
+              );
+            })
+            .toList(growable: false);
+
+        return messages;
+      }
+    } catch (err) {
+      // fallback to generated mock messages
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+
+    final List<MessageChatItemModel> generated = <MessageChatItemModel>[];
+    final int start = (page - 1) * limit + 1;
+    for (int i = 0; i < limit; i++) {
+      final int idx = start + i;
+      generated.add(
+        MessageChatItemModel(
+          id: 'old-${thread.id}-p$page-$idx',
+          text: 'Older message #$idx',
+          timeLabel: _formatTimeLabel(
+            DateTime.now()
+                .subtract(Duration(minutes: idx * 5))
+                .toIso8601String(),
+          ),
+          statusLabel: '',
+          isMine: false,
+        ),
+      );
+    }
+
+    return generated;
+  }
+
+  String _formatTimeLabel(String? iso) {
+    if (iso == null) return '';
+    try {
+      final DateTime dt = DateTime.parse(iso).toLocal();
+      final int hour = dt.hour == 0
+          ? 12
+          : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
+      final String ampm = dt.hour >= 12 ? 'PM' : 'AM';
+      final String minute = dt.minute.toString().padLeft(2, '0');
+      return '$hour:$minute $ampm';
+    } catch (_) {
+      return '';
+    }
   }
 }

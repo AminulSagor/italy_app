@@ -331,7 +331,7 @@ class OrderSummaryPage extends StatelessWidget {
               onChanged: controller.onCouponChanged,
               readOnly: true,
               fillColor: const Color(0xFFF1F4F0),
-              borderColor: green.withOpacity(.25),
+              borderColor: green.withValues(alpha: .25),
             ),
           ),
           SizedBox(width: 10.w),

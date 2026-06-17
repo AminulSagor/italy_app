@@ -23,7 +23,7 @@ class MessageChatView extends GetView<MessageChatController> {
         final MessageChatModel? chat = controller.chat.value;
 
         if (controller.isLoading.value && chat == null) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(color: AppColors.primaryGreen),
           );
         }
@@ -36,44 +36,63 @@ class MessageChatView extends GetView<MessageChatController> {
           children: <Widget>[
             SafeArea(
               bottom: false,
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: <Widget>[
-                  SliverToBoxAdapter(child: _ChatHeader(chat: chat)),
-                  SliverToBoxAdapter(child: SizedBox(height: 32.h)),
-                  const SliverToBoxAdapter(child: _DateChip()),
-                  SliverToBoxAdapter(child: SizedBox(height: 32.h)),
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      kChatMessageHorizontalPadding.w,
-                      0,
-                      kChatMessageHorizontalPadding.w,
-                      170.h,
+              child: RefreshIndicator(
+                onRefresh: controller.refreshChat,
+                child: CustomScrollView(
+                  controller: controller.chatScrollController,
+                  physics: const BouncingScrollPhysics(),
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(child: _ChatHeader(chat: chat)),
+                    SliverToBoxAdapter(child: SizedBox(height: 32.h)),
+                    Obx(
+                      () => controller.isLoadingMore.value
+                          ? SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  top: 12.h,
+                                  bottom: 8.h,
+                                ),
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 20.w,
+                                    height: 20.w,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : const SliverToBoxAdapter(child: _DateChip()),
                     ),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate((
-                        BuildContext context,
-                        int index,
-                      ) {
-                        if (index.isOdd) {
-                          return SizedBox(height: 32.h);
-                        }
+                    SliverToBoxAdapter(child: SizedBox(height: 32.h)),
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        kChatMessageHorizontalPadding.w,
+                        0,
+                        kChatMessageHorizontalPadding.w,
+                        170.h,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((
+                          BuildContext context,
+                          int index,
+                        ) {
+                          if (index.isOdd) {
+                            return SizedBox(height: 32.h);
+                          }
 
-                        return ChatMessageBubble(
-                          message: chat.messages[index ~/ 2],
-                        );
-                      }, childCount: (chat.messages.length * 2) - 1),
+                          return ChatMessageBubble(
+                            message: chat.messages[index ~/ 2],
+                          );
+                        }, childCount: (chat.messages.length * 2) - 1),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            const Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: ChatInputBar(),
-            ),
+            Positioned(left: 0, right: 0, bottom: 0, child: ChatInputBar()),
           ],
         );
       }),
@@ -142,9 +161,15 @@ class _ChatHeader extends GetView<MessageChatController> {
               ),
             ),
           ),
-          _HeaderAction(icon: Icons.call_outlined),
+          _HeaderAction(
+            icon: Icons.call_outlined,
+            onTap: controller.openAudioCall,
+          ),
           SizedBox(width: 20.w),
-          _HeaderAction(icon: Icons.videocam_outlined),
+          _HeaderAction(
+            icon: Icons.videocam_outlined,
+            onTap: controller.openVideoCall,
+          ),
           SizedBox(width: 20.w),
           _HeaderAction(
             icon: Icons.info_outline_rounded,

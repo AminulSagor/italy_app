@@ -146,32 +146,27 @@ class WebinarAgoraService {
     await _setSpeakerphoneSafely(engine);
     engine.registerEventHandler(
       RtcEngineEventHandler(
-        onJoinChannelSuccess: (_, __) => isJoined.value = true,
-        onUserJoined: (_, int remoteUid, __) {
+        onJoinChannelSuccess: (_, _) => isJoined.value = true,
+        onUserJoined: (_, int remoteUid, _) {
           _markRemoteVideoActive(remoteUid);
         },
-        onUserOffline: (_, int remoteUid, __) {
+        onUserOffline: (_, int remoteUid, _) {
           _removeRemoteVideo(remoteUid);
         },
-        onRemoteVideoStateChanged: (
-          _,
-          int remoteUid,
-          RemoteVideoState state,
-          __,
-          ___,
-        ) {
-          if (state == RemoteVideoState.remoteVideoStateStarting ||
-              state == RemoteVideoState.remoteVideoStateDecoding) {
-            _markRemoteVideoActive(remoteUid);
-            return;
-          }
+        onRemoteVideoStateChanged:
+            (_, int remoteUid, RemoteVideoState state, _, _) {
+              if (state == RemoteVideoState.remoteVideoStateStarting ||
+                  state == RemoteVideoState.remoteVideoStateDecoding) {
+                _markRemoteVideoActive(remoteUid);
+                return;
+              }
 
-          if (state == RemoteVideoState.remoteVideoStateStopped ||
-              state == RemoteVideoState.remoteVideoStateFailed) {
-            _removeRemoteVideo(remoteUid);
-          }
-        },
-        onLeaveChannel: (_, __) {
+              if (state == RemoteVideoState.remoteVideoStateStopped ||
+                  state == RemoteVideoState.remoteVideoStateFailed) {
+                _removeRemoteVideo(remoteUid);
+              }
+            },
+        onLeaveChannel: (_, _) {
           isJoined.value = false;
           remoteHostUid.value = null;
           remoteVideoUids.clear();
