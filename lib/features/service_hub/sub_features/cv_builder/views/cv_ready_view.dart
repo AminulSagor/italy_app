@@ -51,19 +51,30 @@ class CvReadyView extends GetView<CvReadyController> {
                       ),
                     ),
                     SizedBox(height: 28.h),
-                    CvReadyPreviewCard(onTap: controller.onPreviewTap),
+                    Obx(
+                      () => CvReadyPreviewCard(
+                        onTap: controller.onPreviewTap,
+                        pdfBytes: controller.pdfBytes.value,
+                        isLoading: controller.isPreparingPdf.value,
+                      ),
+                    ),
                     SizedBox(height: 24.h),
                     Row(
                       children: <Widget>[
                         Expanded(
-                          child: CvReadyActionCard(
-                            title: 'Download PDF',
-                            icon: Icons.download_rounded,
-                            backgroundColor: AppColors.homePaleGreen,
-                            iconBackgroundColor: AppColors.safetyBlockedBg,
-                            iconColor: AppColors.primaryGreen,
-                            titleColor: AppColors.primaryGreen,
-                            onTap: controller.onDownloadPdfTap,
+                          child: Obx(
+                            () => CvReadyActionCard(
+                              title: controller.isDownloading.value
+                                  ? 'Downloading...'
+                                  : 'Download PDF',
+                              icon: Icons.download_rounded,
+                              backgroundColor: AppColors.homePaleGreen,
+                              iconBackgroundColor: AppColors.safetyBlockedBg,
+                              iconColor: AppColors.primaryGreen,
+                              titleColor: AppColors.primaryGreen,
+                              onTap: controller.onDownloadPdfTap,
+                              isLoading: controller.isDownloading.value,
+                            ),
                           ),
                         ),
                         SizedBox(width: 14.w),

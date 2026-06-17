@@ -6,7 +6,7 @@ import '../sub_features/caf_administrative_help/views/caf_administrative_help_vi
 import '../sub_features/cv_builder/views/cv_builder_view.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
-import '../_widgets/ expert_contact_card.dart';
+import '../_widgets/expert_contact_card.dart';
 import '../_widgets/service_action_card.dart';
 import '../_widgets/students_assisted_card.dart';
 
