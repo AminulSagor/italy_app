@@ -106,8 +106,8 @@ class QuizView extends GetView<QuizController> {
     );
   }
 
-  void _handleCheckAnswer() {
-    final bool isCorrect = controller.checkAnswer();
+  Future<void> _handleCheckAnswer() async {
+    final bool isCorrect = await controller.checkAnswer();
     if (!isCorrect) {
       return;
     }

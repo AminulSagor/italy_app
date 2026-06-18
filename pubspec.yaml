@@ -18,6 +18,8 @@ dependencies:
   shared_preferences: ^2.5.5
   image_picker: ^1.2.2
   audio_waveforms: ^1.3.0
+  video_player: ^2.11.1
+  just_audio: ^0.10.5
   flutter_svg: ^2.3.0
   material_symbols_icons: ^4.2928.1
   syncfusion_flutter_pdfviewer: ^33.2.6

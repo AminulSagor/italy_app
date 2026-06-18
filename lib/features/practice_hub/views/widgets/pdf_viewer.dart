@@ -7,6 +7,7 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
+import '../../../courses/services/courses_api_service.dart';
 import '../../controllers/practice_hub_controller.dart';
 
 class PracticeHubPdfViewer extends StatefulWidget {
@@ -24,7 +25,9 @@ class _PracticeHubPdfViewerState extends State<PracticeHubPdfViewer> {
       return Get.find<PracticeHubController>();
     }
 
-    return Get.put<PracticeHubController>(PracticeHubController());
+    return Get.put<PracticeHubController>(
+      PracticeHubController(coursesApiService: Get.find<CoursesApiService>()),
+    );
   }
 
   @override

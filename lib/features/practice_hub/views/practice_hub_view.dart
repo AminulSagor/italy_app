@@ -6,6 +6,8 @@ import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../courses/models/course_models.dart';
+import '../../courses/services/courses_api_service.dart';
 import '../controllers/practice_hub_controller.dart';
 import 'widgets/final_exam_gateway_dialog_locked.dart';
 import 'widgets/final_exam_gateway_dialog_unlocked.dart';
@@ -18,7 +20,9 @@ class PracticeHubView extends GetView<PracticeHubController> {
     if (Get.isRegistered<PracticeHubController>()) {
       return Get.find<PracticeHubController>();
     }
-    return Get.put<PracticeHubController>(PracticeHubController());
+    return Get.put<PracticeHubController>(
+      PracticeHubController(coursesApiService: Get.find<CoursesApiService>()),
+    );
   }
 
   @override
@@ -160,8 +164,21 @@ class _CourseCarousel extends GetView<PracticeHubController> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 252.h,
-      child: Obx(
-        () => ListView.separated(
+      child: Obx(() {
+        if (controller.isCoursesLoading.value && controller.courses.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primaryGreen),
+          );
+        }
+
+        if (controller.courses.isEmpty) {
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding.w),
+            child: const _EmptyCoursesCard(),
+          );
+        }
+
+        return ListView.separated(
           clipBehavior: Clip.none,
           physics: const BouncingScrollPhysics(),
           scrollDirection: Axis.horizontal,
@@ -173,19 +190,48 @@ class _CourseCarousel extends GetView<PracticeHubController> {
           itemCount: controller.courses.length,
           separatorBuilder: (_, _) => SizedBox(width: 16.w),
           itemBuilder: (BuildContext context, int index) {
-            final Map<String, dynamic> course = controller.courses[index];
+            final CourseCardModel course = controller.courses[index];
+            final bool isActive = course.state == CourseCardState.active;
 
             return _CourseCard(
-              title: course['title'] as String,
-              subtitle: course['subtitle'] as String,
-              status: course['status'] as String,
-              progress: course['progress'] as double,
-              icon: course['icon'] as IconData,
-              isActive: course['isActive'] as bool,
-              isLocked: course['isLocked'] as bool,
+              title: course.title,
+              subtitle: course.subtitle,
+              status: course.statusLabel,
+              progress: course.progress,
+              icon: Icons.menu_book_rounded,
+              isActive: isActive,
+              isLocked: course.state == CourseCardState.locked,
               onTap: () => controller.onCourseTap(index),
             );
           },
+        );
+      }),
+    );
+  }
+}
+
+class _EmptyCoursesCard extends StatelessWidget {
+  const _EmptyCoursesCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 238.h,
+      alignment: Alignment.center,
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(38.r),
+        border: Border.all(color: const Color(0xFFE4E4E4), width: 1.2.w),
+      ),
+      child: Text(
+        'No active courses found.',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: AppFont.font16.sp,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF6B6D70),
         ),
       ),
     );

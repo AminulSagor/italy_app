@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import '../../features/courses/controllers/courses_controller.dart';
-import '../../features/courses/services/courses_mock_service.dart';
+import '../../features/courses/services/courses_api_service.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/home/services/home_mock_service.dart';
 import '../../features/messages/controllers/messages_controller.dart';
@@ -16,10 +16,13 @@ class InitialBindings extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<HomeMockService>(() => HomeMockService());
-    Get.lazyPut<CoursesMockService>(() => CoursesMockService(), fenix: true);
+    Get.lazyPut<CoursesApiService>(
+      () => CoursesApiService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
     Get.lazyPut<CoursesController>(
       () =>
-          CoursesController(coursesMockService: Get.find<CoursesMockService>()),
+          CoursesController(coursesApiService: Get.find<CoursesApiService>()),
       fenix: true,
     );
     Get.lazyPut<HomeController>(
@@ -47,7 +50,9 @@ class InitialBindings extends Bindings {
     Get.lazyPut<NotificationsMockService>(() => NotificationsMockService());
     Get.lazyPut<LeaderboardController>(() => LeaderboardController());
     Get.lazyPut<PracticeHubController>(
-      () => PracticeHubController(),
+      () => PracticeHubController(
+        coursesApiService: Get.find<CoursesApiService>(),
+      ),
       fenix: true,
     );
   }

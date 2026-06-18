@@ -1,21 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/services/api_error_handler.dart';
 import '../models/quiz_models.dart';
+import '../services/quiz_api_service.dart';
 import '../services/quiz_mock_service.dart';
 
 class QuizController extends GetxController {
   final QuizMockService _quizMockService;
+  final QuizApiService _quizApiService;
+  final String? lessonId;
+  final String? courseId;
+  final String? chapterTitle;
   final bool isExamMode;
   final int questionCount;
 
   QuizController({
     required QuizMockService quizMockService,
+    required QuizApiService quizApiService,
+    this.lessonId,
+    this.courseId,
+    this.chapterTitle,
     this.isExamMode = false,
     this.questionCount = 15,
-  }) : _quizMockService = quizMockService;
+  })  : _quizMockService = quizMockService,
+        _quizApiService = quizApiService;
 
   final RxBool isLoading = false.obs;
+  final RxBool isSubmittingAnswer = false.obs;
   final RxBool isCompleting = false.obs;
   final RxBool hasCheckedAnswer = false.obs;
   final RxBool isAnswerCorrect = false.obs;
@@ -33,14 +45,23 @@ class QuizController extends GetxController {
 
   final TextEditingController writingAnswerController = TextEditingController();
 
+  String? _activeSessionId;
+  QuizApiCheckResult? _lastCheckResult;
+
   int get totalQuestions => questions.length;
   int get correctAnswerCount =>
       answerReviews.where((QuizAnswerReviewModel item) => item.isCorrect).length;
   bool get showWrongResult => hasCheckedAnswer.value && !isAnswerCorrect.value;
+  bool get hasApiLessonQuiz => lessonId?.trim().isNotEmpty ?? false;
   QuizQuestionModel? get currentQuestion =>
       questions.isEmpty ? null : questions[currentIndex.value];
 
   String get currentCorrectAnswer {
+    final String apiAnswer = _lastCheckResult?.correctAnswer ?? '';
+    if (apiAnswer.isNotEmpty) {
+      return apiAnswer;
+    }
+
     final QuizQuestionModel? question = currentQuestion;
     if (question == null) {
       return '';
@@ -63,6 +84,11 @@ class QuizController extends GetxController {
   }
 
   String get currentCorrectMeaning {
+    final String apiMeaning = _lastCheckResult?.meaning ?? '';
+    if (apiMeaning.isNotEmpty) {
+      return apiMeaning;
+    }
+
     final String meaning = currentQuestion?.correctMeaning ?? '';
     if (meaning.isNotEmpty) {
       return meaning;
@@ -89,9 +115,25 @@ class QuizController extends GetxController {
 
     isLoading.value = true;
     try {
-      questions.assignAll(
-        await _quizMockService.fetchQuestions(questionCount: questionCount),
-      );
+      if (hasApiLessonQuiz) {
+        final ApiResult<QuizApiSessionModel> result =
+            await ApiErrorHandler.call<QuizApiSessionModel>(
+          () => _quizApiService.startLessonQuiz(lessonId: lessonId!.trim()),
+          errorTitle: 'Quiz',
+        );
+
+        if (!result.isSuccess || result.data == null) {
+          return;
+        }
+
+        _activeSessionId = result.data!.sessionId;
+        questions.assignAll(result.data!.questions);
+      } else {
+        questions.assignAll(
+          await _quizMockService.fetchQuestions(questionCount: questionCount),
+        );
+      }
+
       answerReviews.clear();
       lessonComplete.value = null;
       currentIndex.value = 0;
@@ -108,6 +150,22 @@ class QuizController extends GetxController {
 
     isCompleting.value = true;
     try {
+      if (_activeSessionId != null) {
+        final ApiResult<QuizLessonCompleteModel> result =
+            await ApiErrorHandler.call<QuizLessonCompleteModel>(
+          () => _quizApiService.completeSession(
+            sessionId: _activeSessionId!,
+            chapterTitle: chapterTitle ?? 'Chapter Complete',
+          ),
+          errorTitle: 'Quiz Complete',
+        );
+
+        if (result.isSuccess && result.data != null) {
+          lessonComplete.value = result.data;
+        }
+        return;
+      }
+
       lessonComplete.value = await _quizMockService.fetchLessonComplete();
     } finally {
       isCompleting.value = false;
@@ -175,11 +233,55 @@ class QuizController extends GetxController {
     selectedRightPairIndex.value = index;
   }
 
-  bool checkAnswer() {
-    hasCheckedAnswer.value = true;
-    isAnswerCorrect.value = _isCurrentAnswerCorrect();
-    _saveCurrentReview(isAnswerCorrect.value);
-    return isAnswerCorrect.value;
+  Future<bool> checkAnswer() async {
+    if (isSubmittingAnswer.value || hasCheckedAnswer.value) {
+      return isAnswerCorrect.value;
+    }
+
+    final QuizQuestionModel? question = currentQuestion;
+    if (question == null) {
+      return false;
+    }
+
+    if (_activeSessionId == null) {
+      hasCheckedAnswer.value = true;
+      isAnswerCorrect.value = _isCurrentAnswerCorrect();
+      _saveCurrentReview(isAnswerCorrect.value);
+      return isAnswerCorrect.value;
+    }
+
+    isSubmittingAnswer.value = true;
+    try {
+      final ApiResult<QuizApiCheckResult> result =
+          await ApiErrorHandler.call<QuizApiCheckResult>(
+        () => _quizApiService.checkAnswer(
+          sessionId: _activeSessionId!,
+          question: question,
+          selectedOptionIndex: selectedOptionIndex.value,
+          selectedLeftPairIndex: selectedLeftPairIndex.value,
+          selectedRightPairIndex: selectedRightPairIndex.value,
+          sentenceSelectedWords: sentenceSelectedWords.toList(),
+          listeningSelectedWords: listeningSelectedWords.toList(),
+          writtenAnswer: writingAnswerController.text.trim(),
+        ),
+        errorTitle: 'Check Answer',
+      );
+
+      if (!result.isSuccess || result.data == null) {
+        return false;
+      }
+
+      _lastCheckResult = result.data;
+      hasCheckedAnswer.value = true;
+      isAnswerCorrect.value = result.data!.isCorrect;
+      _saveCurrentReview(
+        isAnswerCorrect.value,
+        correctAnswer: result.data!.correctAnswer,
+      );
+      return isAnswerCorrect.value;
+    } finally {
+      isSubmittingAnswer.value = false;
+    }
   }
 
   bool goNext() {
@@ -197,6 +299,7 @@ class QuizController extends GetxController {
   }
 
   void _resetInteractionState() {
+    _lastCheckResult = null;
     hasCheckedAnswer.value = false;
     isAnswerCorrect.value = false;
     selectedOptionIndex.value = -1;
@@ -217,7 +320,7 @@ class QuizController extends GetxController {
     );
   }
 
-  void _saveCurrentReview(bool isCorrect) {
+  void _saveCurrentReview(bool isCorrect, {String? correctAnswer}) {
     final QuizQuestionModel? question = currentQuestion;
     if (question == null) {
       return;
@@ -229,7 +332,9 @@ class QuizController extends GetxController {
       title: question.title,
       subtitle: question.subtitle,
       selectedAnswer: _selectedAnswerText(question),
-      correctAnswer: currentCorrectAnswer,
+      correctAnswer: correctAnswer?.trim().isNotEmpty == true
+          ? correctAnswer!.trim()
+          : currentCorrectAnswer,
       selectedWords: _selectedWords(question),
       correctWords: question.correctWords,
       selectedOptionIndex: selectedOptionIndex.value,

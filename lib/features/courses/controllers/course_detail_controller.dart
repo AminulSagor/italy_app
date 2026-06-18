@@ -1,20 +1,21 @@
 import 'package:get/get.dart';
 
+import '../../../core/services/api_error_handler.dart';
 import '../../../routes/app_route_arguments.dart';
 import '../../../routes/app_routes.dart';
 import '../models/course_models.dart';
-import '../services/courses_mock_service.dart';
+import '../services/courses_api_service.dart';
 
 class CourseDetailController extends GetxController {
   final String controllerTag;
   final CourseCardModel course;
-  final CoursesMockService _coursesMockService;
+  final CoursesApiService _coursesApiService;
 
   CourseDetailController({
     required this.controllerTag,
     required this.course,
-    required CoursesMockService coursesMockService,
-  }) : _coursesMockService = coursesMockService;
+    required CoursesApiService coursesApiService,
+  }) : _coursesApiService = coursesApiService;
 
   final RxBool isLoading = false.obs;
   final RxBool isProSubmitting = false.obs;
@@ -34,10 +35,20 @@ class CourseDetailController extends GetxController {
 
     isLoading.value = true;
     try {
-      detail.value = await _coursesMockService.fetchCourseDetail(
-        courseId: course.id,
-        isProEnabled: isProEnabled.value,
+      final ApiResult<CourseDetailModel> result =
+          await ApiErrorHandler.call<CourseDetailModel>(
+        () => _coursesApiService.fetchCourseDetail(
+          courseId: course.id,
+          isProEnabled: isProEnabled.value,
+        ),
+        errorTitle: 'Course Details',
       );
+
+      if (!result.isSuccess || result.data == null) {
+        return;
+      }
+
+      detail.value = result.data;
     } finally {
       isLoading.value = false;
     }
@@ -50,7 +61,18 @@ class CourseDetailController extends GetxController {
 
     isProSubmitting.value = true;
     try {
-      await _coursesMockService.enableProAccess();
+      final ApiResult<Object?> result = await ApiErrorHandler.call<Object?>(
+        () async {
+          await _coursesApiService.enableProAccess();
+          return null;
+        },
+        errorTitle: 'Pro Access',
+      );
+
+      if (!result.isSuccess) {
+        return;
+      }
+
       isProEnabled.value = true;
       await loadDetail();
     } finally {
@@ -71,6 +93,11 @@ class CourseDetailController extends GetxController {
   }
 
   Future<void> openFinalExam() async {
+    final CourseDetailModel? currentDetail = detail.value;
+    if (currentDetail == null || !currentDetail.finalExam.canStart) {
+      return;
+    }
+
     final String tag = 'final_exam_${course.id}_${DateTime.now().millisecondsSinceEpoch}';
 
     await Get.toNamed(

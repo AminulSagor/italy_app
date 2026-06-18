@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/services/api_error_handler.dart';
 import '../../courses/models/course_models.dart';
+import '../../courses/services/courses_api_service.dart';
 import '../views/important_verbs/important_verbs_view.dart';
 import '../views/important_verbs/saved_verbs_view.dart';
 import 'package:italir_pothe/routes/routes.dart';
@@ -8,41 +10,63 @@ import 'package:italir_pothe/core/themes/app_colors.dart';
 import '../views/daily_challenges/daily_chest_unlocked_view.dart';
 
 class PracticeHubController extends GetxController {
-  final RxInt selectedCourseIndex = 0.obs;
+  final CoursesApiService _coursesApiService;
 
-  /// Keep false to match the first screenshot.
-  /// Set true to preview the "Ready for final exam" state.
+  PracticeHubController({required CoursesApiService coursesApiService})
+    : _coursesApiService = coursesApiService;
+
+  final RxInt selectedCourseIndex = 0.obs;
+  final RxBool isCoursesLoading = false.obs;
+
+  /// Synced with the currently selected course progress.
   final RxBool isFinalExamReady = false.obs;
 
-  final RxList<Map<String, dynamic>> courses = <Map<String, dynamic>>[
-    {
-      'title': 'Level A1',
-      'subtitle': 'Foundations of Italian',
-      'status': 'ACTIVE',
-      'progress': 0.60,
-      'isActive': true,
-      'isLocked': false,
-      'icon': Icons.menu_book_rounded,
-    },
-    {
-      'title': 'Level A2',
-      'subtitle': 'Intermediate Daily Use',
-      'status': 'Upcoming',
-      'progress': 0.0,
-      'isActive': false,
-      'isLocked': true,
-      'icon': Icons.article_outlined,
-    },
-    {
-      'title': 'Facile Facile A1',
-      'subtitle': 'Intermediate Daily Use',
-      'status': 'Upcoming',
-      'progress': 0.0,
-      'isActive': false,
-      'isLocked': true,
-      'icon': Icons.article_outlined,
-    },
-  ].obs;
+  final RxList<CourseCardModel> courses = <CourseCardModel>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadCourses();
+  }
+
+  Future<void> loadCourses() async {
+    if (isCoursesLoading.value) {
+      return;
+    }
+
+    isCoursesLoading.value = true;
+    try {
+      final ApiResult<CoursesDashboardModel> result =
+          await ApiErrorHandler.call<CoursesDashboardModel>(
+        () => _coursesApiService.fetchDashboard(),
+        showError: false,
+      );
+
+      if (!result.isSuccess || result.data == null) {
+        return;
+      }
+
+      courses.assignAll(result.data!.courses);
+
+      if (selectedCourseIndex.value >= courses.length) {
+        selectedCourseIndex.value = 0;
+      }
+
+      _syncFinalExamState();
+    } finally {
+      isCoursesLoading.value = false;
+    }
+  }
+
+  void _syncFinalExamState() {
+    if (courses.isEmpty) {
+      isFinalExamReady.value = false;
+      return;
+    }
+
+    isFinalExamReady.value =
+        courses[selectedCourseIndex.value].progress >= 0.8;
+  }
 
   final RxList<Map<String, dynamic>> skillBuilders = <Map<String, dynamic>>[
     {
@@ -80,38 +104,32 @@ class PracticeHubController extends GetxController {
   ].obs;
 
   void onViewAllCoursesTap() {
-    Get.snackbar(
-      'Courses',
-      'All practice courses will be shown here.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.white,
-      colorText: Colors.black87,
-    );
+    loadCourses();
   }
 
-  void onCourseTap(int index) async {
-    selectedCourseIndex.value = index;
+  Future<void> onCourseTap(int index) async {
+    if (index < 0 || index >= courses.length) {
+      return;
+    }
 
-    final Map<String, dynamic> course = courses[index];
-    final bool isLocked = course['isLocked'] as bool? ?? false;
+    selectedCourseIndex.value = index;
+    _syncFinalExamState();
+
+    final CourseCardModel course = courses[index];
+    if (course.state == CourseCardState.locked) {
+      return;
+    }
 
     final String tag =
-        'course_${courses[index]}_${DateTime.now().millisecondsSinceEpoch}';
+        'course_${course.id}_${DateTime.now().millisecondsSinceEpoch}';
 
-    final CourseDetailRouteArguments arguments = CourseDetailRouteArguments(
-      course: CourseCardModel(
-        id: 'level-a1',
-        title: 'Level A1',
-        subtitle: 'Foundations of Italian',
-        progressLabel: '60%',
-        progress: 0.6,
-        statusLabel: 'ACTIVE',
-        state: isLocked ? CourseCardState.locked : CourseCardState.active,
+    await Get.toNamed(
+      AppRoutes.courseDetail,
+      arguments: CourseDetailRouteArguments(
+        course: course,
+        controllerTag: tag,
       ),
-      controllerTag: tag,
     );
-
-    await Get.toNamed(AppRoutes.courseDetail, arguments: arguments);
   }
 
   void onSkillBuilderTap(String title) {
@@ -164,13 +182,26 @@ class PracticeHubController extends GetxController {
   }
 
   Future<void> openFinalExam() async {
-    final String tag = 'final_exam_a1_${DateTime.now().millisecondsSinceEpoch}';
+    if (courses.isEmpty) {
+      Get.snackbar(
+        'Final Exam',
+        'No active course found for final exam.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.white,
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    final CourseCardModel course = courses[selectedCourseIndex.value];
+    final String tag =
+        'final_exam_${course.id}_${DateTime.now().millisecondsSinceEpoch}';
 
     await Get.toNamed(
       AppRoutes.finalExamOverview,
       arguments: FinalExamRouteArguments(
         controllerTag: tag,
-        courseId: 'level-a1',
+        courseId: course.id,
       ),
     );
   }

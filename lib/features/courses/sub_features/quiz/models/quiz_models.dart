@@ -17,6 +17,9 @@ class QuizQuestionModel {
   final String title;
   final String subtitle;
   final List<String> options;
+  final List<String> optionIds;
+  final List<String> matchingLeftPairIds;
+  final List<String> matchingRightTexts;
   final List<String> selectedWords;
   final List<String> disabledWords;
   final List<String> correctWords;
@@ -34,6 +37,9 @@ class QuizQuestionModel {
     required this.title,
     required this.subtitle,
     required this.options,
+    this.optionIds = const <String>[],
+    this.matchingLeftPairIds = const <String>[],
+    this.matchingRightTexts = const <String>[],
     required this.selectedWords,
     required this.disabledWords,
     required this.correctWords,
@@ -58,6 +64,17 @@ class QuizQuestionModel {
       options: ((json['options'] as List<dynamic>?) ?? <dynamic>[])
           .map((dynamic item) => item as String)
           .toList(),
+      optionIds: ((json['optionIds'] as List<dynamic>?) ?? <dynamic>[])
+          .map((dynamic item) => item as String)
+          .toList(),
+      matchingLeftPairIds:
+          ((json['matchingLeftPairIds'] as List<dynamic>?) ?? <dynamic>[])
+              .map((dynamic item) => item as String)
+              .toList(),
+      matchingRightTexts:
+          ((json['matchingRightTexts'] as List<dynamic>?) ?? <dynamic>[])
+              .map((dynamic item) => item as String)
+              .toList(),
       selectedWords: ((json['selectedWords'] as List<dynamic>?) ?? <dynamic>[])
           .map((dynamic item) => item as String)
           .toList(),
@@ -84,6 +101,9 @@ class QuizQuestionModel {
       'title': title,
       'subtitle': subtitle,
       'options': options,
+      'optionIds': optionIds,
+      'matchingLeftPairIds': matchingLeftPairIds,
+      'matchingRightTexts': matchingRightTexts,
       'selectedWords': selectedWords,
       'disabledWords': disabledWords,
       'correctWords': correctWords,

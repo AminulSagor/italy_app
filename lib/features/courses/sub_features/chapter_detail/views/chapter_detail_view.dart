@@ -81,38 +81,59 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
               children: <Widget>[
                 _Header(title: detail.title, onBackTap: () => Get.back<void>()),
                 SizedBox(height: 26.h),
-                ChapterVideoCard(detail: detail),
-                SizedBox(height: 38.h),
-                LessonContentCard(lesson: detail.lessonContent),
-                SizedBox(height: 38.h),
+                if (detail.hasVideo) ...<Widget>[
+                  ChapterVideoCard(
+                    detail: detail,
+                    playCommand: controller.videoPlayCommand.value,
+                    onProgressChanged: (Duration position, Duration duration) {
+                      controller.recordVideoProgress(
+                        position: position,
+                        duration: duration,
+                      );
+                    },
+                  ),
+                  SizedBox(height: 38.h),
+                ],
+                if (detail.hasLessonContent) ...<Widget>[
+                  LessonContentCard(
+                    lesson: detail.lessonContent!,
+                    audio: detail.audio,
+                    onAudioStarted: controller.recordAudioListened,
+                  ),
+                  SizedBox(height: 38.h),
+                ],
                 Row(
                   children: <Widget>[
                     Expanded(
                       child: ChapterResourceCard(
-                        resource: detail.resources.first,
+                        resource: detail.theoryBook,
+                        onTap: controller.openTheoryBook,
                       ),
                     ),
                     SizedBox(width: 24.w),
                     Expanded(
                       child: ChapterResourceCard(
-                        resource: detail.resources.last,
+                        resource: detail.vocabulary,
                         onTap: controller.openVocabulary,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 40.h),
-                ChapterQuizCard(
-                  quiz: detail.quiz,
-                  onStartTap: controller.openQuiz,
-                ),
-                SizedBox(height: 40.h),
-                _BottomActions(
-                  status: detail.quiz.status,
-                  isLoading: controller.isResumeSubmitting.value,
-                  onResumeTap: controller.resumeVideo,
-                  onQuizTap: controller.openQuiz,
-                ),
+                if (detail.quiz != null) ...<Widget>[
+                  SizedBox(height: 40.h),
+                  ChapterQuizCard(
+                    quiz: detail.quiz!,
+                    onStartTap: controller.openQuiz,
+                  ),
+                  SizedBox(height: 40.h),
+                  _BottomActions(
+                    status: detail.quiz!.status,
+                    hasVideo: detail.hasVideo,
+                    isLoading: controller.isResumeSubmitting.value,
+                    onResumeTap: controller.resumeVideo,
+                    onQuizTap: controller.openQuiz,
+                  ),
+                ],
               ],
             ),
           );
@@ -159,12 +180,14 @@ class _Header extends StatelessWidget {
 class _BottomActions extends StatelessWidget {
   final ChapterQuizStatus status;
   final bool isLoading;
+  final bool hasVideo;
   final VoidCallback onResumeTap;
   final VoidCallback onQuizTap;
 
   const _BottomActions({
     required this.status,
     required this.isLoading,
+    required this.hasVideo,
     required this.onResumeTap,
     required this.onQuizTap,
   });
@@ -173,18 +196,18 @@ class _BottomActions extends StatelessWidget {
   Widget build(BuildContext context) {
     if (status == ChapterQuizStatus.disabled) {
       return CustomButton.primary(
-        onPressed: onResumeTap,
-        text: 'Resume Video',
+        onPressed: hasVideo ? onResumeTap : () {},
+        text: hasVideo ? 'Resume Video' : 'Video Not Given',
         isLoading: isLoading,
-        icon: Icons.play_arrow_rounded,
+        icon: hasVideo ? Icons.play_arrow_rounded : Icons.lock_outline_rounded,
       );
     }
 
     return Row(
       children: <Widget>[
         CustomButton(
-          onPressed: onResumeTap,
-          text: '▶  Resume',
+          onPressed: hasVideo ? onResumeTap : () {},
+          text: hasVideo ? '▶  Resume' : 'Video Not Given',
           height: kChapterBottomButtonHeight,
           showShadow: true,
           btnColor: AppColors.white,

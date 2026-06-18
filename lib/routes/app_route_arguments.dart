@@ -29,17 +29,33 @@ class ControllerTagRouteArguments {
   const ControllerTagRouteArguments({required this.controllerTag});
 }
 
+class VocabularyRouteArguments extends ControllerTagRouteArguments {
+  final String? lessonId;
+
+  const VocabularyRouteArguments({
+    required super.controllerTag,
+    this.lessonId,
+  });
+}
+
 class QuizRouteArguments {
   final String controllerTag;
   final bool isExamMode;
   final int questionCount;
+  final String? lessonId;
+  final String? courseId;
+  final String? chapterTitle;
 
   const QuizRouteArguments({
     required this.controllerTag,
     this.isExamMode = false,
     this.questionCount = 15,
+    this.lessonId,
+    this.courseId,
+    this.chapterTitle,
   });
 }
+
 
 class FinalExamRouteArguments {
   final String controllerTag;

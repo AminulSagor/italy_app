@@ -1,82 +1,178 @@
 enum ChapterQuizStatus { disabled, enabled, completed }
 
+enum ChapterMediaType { video, audio, pdf }
+
 class ChapterDetailModel {
   final String id;
+  final String courseId;
   final String title;
   final String videoProgressLabel;
   final String watchedTimeLabel;
   final String totalTimeLabel;
   final double videoProgress;
-  final LessonContentModel lessonContent;
-  final List<ChapterResourceModel> resources;
-  final ChapterQuizModel quiz;
+  final LessonContentModel? lessonContent;
+  final ChapterMediaModel? video;
+  final ChapterMediaModel? audio;
+  final ChapterResourceModel theoryBook;
+  final ChapterResourceModel vocabulary;
+  final ChapterQuizModel? quiz;
+  final LessonProgressModel progress;
 
   const ChapterDetailModel({
     required this.id,
+    required this.courseId,
     required this.title,
     required this.videoProgressLabel,
     required this.watchedTimeLabel,
     required this.totalTimeLabel,
     required this.videoProgress,
-    required this.lessonContent,
-    required this.resources,
-    required this.quiz,
+    required this.theoryBook,
+    required this.vocabulary,
+    required this.progress,
+    this.lessonContent,
+    this.video,
+    this.audio,
+    this.quiz,
   });
 
   factory ChapterDetailModel.fromJson(Map<String, dynamic> json) {
+    final List<ChapterResourceModel> resources = _jsonList(json['resources'])
+        .map(ChapterResourceModel.fromJson)
+        .toList(growable: false);
+
     return ChapterDetailModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      videoProgressLabel: json['videoProgressLabel'] as String,
-      watchedTimeLabel: json['watchedTimeLabel'] as String,
-      totalTimeLabel: json['totalTimeLabel'] as String,
-      videoProgress: (json['videoProgress'] as num).toDouble(),
-      lessonContent: LessonContentModel.fromJson(
-        json['lessonContent'] as Map<String, dynamic>,
-      ),
-      resources: (json['resources'] as List<dynamic>)
-          .map((dynamic item) => ChapterResourceModel.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      quiz: ChapterQuizModel.fromJson(json['quiz'] as Map<String, dynamic>),
+      id: _stringValue(json['id']),
+      courseId: _stringValue(json['courseId']),
+      title: _fallbackString(json['title'], 'Lesson Details'),
+      videoProgressLabel: _stringValue(json['videoProgressLabel']),
+      watchedTimeLabel: _stringValue(json['watchedTimeLabel']),
+      totalTimeLabel: _stringValue(json['totalTimeLabel']),
+      videoProgress: _doubleValue(json['videoProgress']),
+      lessonContent: json['lessonContent'] is Map
+          ? LessonContentModel.fromJson(_jsonMap(json['lessonContent']))
+          : null,
+      video: json['video'] is Map
+          ? ChapterMediaModel.fromJson(_jsonMap(json['video']))
+          : null,
+      audio: json['audio'] is Map
+          ? ChapterMediaModel.fromJson(_jsonMap(json['audio']))
+          : null,
+      theoryBook: json['theoryBook'] is Map
+          ? ChapterResourceModel.fromJson(_jsonMap(json['theoryBook']))
+          : resources.isNotEmpty
+              ? resources.first
+              : ChapterResourceModel.notGiven(
+                  title: 'Theory Book',
+                  iconName: 'book',
+                ),
+      vocabulary: json['vocabulary'] is Map
+          ? ChapterResourceModel.fromJson(_jsonMap(json['vocabulary']))
+          : resources.length > 1
+              ? resources.last
+              : ChapterResourceModel.notGiven(
+                  title: 'Vocabulary',
+                  iconName: 'cards',
+                ),
+      quiz: json['quiz'] is Map
+          ? ChapterQuizModel.fromJson(_jsonMap(json['quiz']))
+          : null,
+      progress: json['progress'] is Map
+          ? LessonProgressModel.fromJson(_jsonMap(json['progress']))
+          : const LessonProgressModel.empty(),
     );
   }
+
+  bool get hasVideo => video?.url.isNotEmpty == true;
+  bool get hasAudio => audio?.url.isNotEmpty == true;
+  bool get hasLessonContent => lessonContent != null;
+  bool get hasQuiz => quiz != null;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,
+      'courseId': courseId,
       'title': title,
       'videoProgressLabel': videoProgressLabel,
       'watchedTimeLabel': watchedTimeLabel,
       'totalTimeLabel': totalTimeLabel,
       'videoProgress': videoProgress,
-      'lessonContent': lessonContent.toJson(),
-      'resources': resources.map((ChapterResourceModel item) => item.toJson()).toList(),
-      'quiz': quiz.toJson(),
+      'lessonContent': lessonContent?.toJson(),
+      'video': video?.toJson(),
+      'audio': audio?.toJson(),
+      'theoryBook': theoryBook.toJson(),
+      'vocabulary': vocabulary.toJson(),
+      'quiz': quiz?.toJson(),
+      'progress': progress.toJson(),
     };
   }
 
   ChapterDetailModel copyWith({
-    String? id,
-    String? title,
     String? videoProgressLabel,
     String? watchedTimeLabel,
     String? totalTimeLabel,
     double? videoProgress,
-    LessonContentModel? lessonContent,
-    List<ChapterResourceModel>? resources,
     ChapterQuizModel? quiz,
+    LessonProgressModel? progress,
   }) {
     return ChapterDetailModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
+      id: id,
+      courseId: courseId,
+      title: title,
       videoProgressLabel: videoProgressLabel ?? this.videoProgressLabel,
       watchedTimeLabel: watchedTimeLabel ?? this.watchedTimeLabel,
       totalTimeLabel: totalTimeLabel ?? this.totalTimeLabel,
       videoProgress: videoProgress ?? this.videoProgress,
-      lessonContent: lessonContent ?? this.lessonContent,
-      resources: resources ?? this.resources,
+      lessonContent: lessonContent,
+      video: video,
+      audio: audio,
+      theoryBook: theoryBook,
+      vocabulary: vocabulary,
       quiz: quiz ?? this.quiz,
+      progress: progress ?? this.progress,
     );
+  }
+}
+
+class ChapterMediaModel {
+  final String fileId;
+  final String url;
+  final String title;
+  final String mimeType;
+  final int durationSeconds;
+  final ChapterMediaType type;
+
+  const ChapterMediaModel({
+    required this.fileId,
+    required this.url,
+    required this.title,
+    required this.mimeType,
+    required this.durationSeconds,
+    required this.type,
+  });
+
+  factory ChapterMediaModel.fromJson(Map<String, dynamic> json) {
+    return ChapterMediaModel(
+      fileId: _stringValue(json['fileId']),
+      url: _stringValue(json['url']),
+      title: _stringValue(json['title']),
+      mimeType: _stringValue(json['mimeType']),
+      durationSeconds: _intValue(json['durationSeconds']),
+      type: ChapterMediaType.values.firstWhere(
+        (ChapterMediaType item) => item.name == _stringValue(json['type']),
+        orElse: () => ChapterMediaType.video,
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'fileId': fileId,
+      'url': url,
+      'title': title,
+      'mimeType': mimeType,
+      'durationSeconds': durationSeconds,
+      'type': type.name,
+    };
   }
 }
 
@@ -101,14 +197,22 @@ class LessonContentModel {
 
   factory LessonContentModel.fromJson(Map<String, dynamic> json) {
     return LessonContentModel(
-      title: json['title'] as String,
-      italianText: json['italianText'] as String,
-      italianHighlightText: json['italianHighlightText'] as String,
-      italianMissingText: json['italianMissingText'] as String,
-      translationLabel: json['translationLabel'] as String,
-      banglaText: json['banglaText'] as String,
-      banglaHighlightText: json['banglaHighlightText'] as String,
+      title: _fallbackString(json['title'], 'Lesson Theory'),
+      italianText: _stringValue(json['italianText']),
+      italianHighlightText: _stringValue(json['italianHighlightText']),
+      italianMissingText: _stringValue(json['italianMissingText']),
+      translationLabel: _fallbackString(json['translationLabel'], 'বাংলা অনুবাদ'),
+      banglaText: _stringValue(json['banglaText']),
+      banglaHighlightText: _stringValue(json['banglaHighlightText']),
     );
+  }
+
+  bool get hasContent {
+    return italianText.isNotEmpty ||
+        italianHighlightText.isNotEmpty ||
+        italianMissingText.isNotEmpty ||
+        banglaText.isNotEmpty ||
+        banglaHighlightText.isNotEmpty;
   }
 
   Map<String, dynamic> toJson() {
@@ -128,18 +232,39 @@ class ChapterResourceModel {
   final String title;
   final String subtitle;
   final String iconName;
+  final String? fileUrl;
+  final bool isAvailable;
+  final int count;
 
   const ChapterResourceModel({
     required this.title,
     required this.subtitle,
     required this.iconName,
+    required this.isAvailable,
+    this.fileUrl,
+    this.count = 0,
   });
+
+  factory ChapterResourceModel.notGiven({
+    required String title,
+    required String iconName,
+  }) {
+    return ChapterResourceModel(
+      title: title,
+      subtitle: 'Not given',
+      iconName: iconName,
+      isAvailable: false,
+    );
+  }
 
   factory ChapterResourceModel.fromJson(Map<String, dynamic> json) {
     return ChapterResourceModel(
-      title: json['title'] as String,
-      subtitle: json['subtitle'] as String,
-      iconName: json['iconName'] as String,
+      title: _stringValue(json['title']),
+      subtitle: _fallbackString(json['subtitle'], 'Not given'),
+      iconName: _stringValue(json['iconName']),
+      fileUrl: _emptyToNull(json['fileUrl']),
+      isAvailable: _boolValue(json['isAvailable'], fallback: true),
+      count: _intValue(json['count']),
     );
   }
 
@@ -148,6 +273,9 @@ class ChapterResourceModel {
       'title': title,
       'subtitle': subtitle,
       'iconName': iconName,
+      'fileUrl': fileUrl,
+      'isAvailable': isAvailable,
+      'count': count,
     };
   }
 }
@@ -160,6 +288,8 @@ class ChapterQuizModel {
   final String scoreLabel;
   final String xpLabel;
   final String timeLabel;
+  final String quizId;
+  final int totalQuestions;
 
   const ChapterQuizModel({
     required this.title,
@@ -169,20 +299,24 @@ class ChapterQuizModel {
     required this.scoreLabel,
     required this.xpLabel,
     required this.timeLabel,
+    required this.quizId,
+    required this.totalQuestions,
   });
 
   factory ChapterQuizModel.fromJson(Map<String, dynamic> json) {
     return ChapterQuizModel(
-      title: json['title'] as String,
-      subtitle: json['subtitle'] as String,
+      title: _fallbackString(json['title'], 'Chapter Quiz'),
+      subtitle: _fallbackString(json['subtitle'], 'Test your knowledge of this chapter'),
       status: ChapterQuizStatus.values.firstWhere(
-        (ChapterQuizStatus item) => item.name == json['status'],
+        (ChapterQuizStatus item) => item.name == _stringValue(json['status']),
         orElse: () => ChapterQuizStatus.disabled,
       ),
-      actionLabel: json['actionLabel'] as String,
-      scoreLabel: json['scoreLabel'] as String,
-      xpLabel: json['xpLabel'] as String,
-      timeLabel: json['timeLabel'] as String,
+      actionLabel: _stringValue(json['actionLabel']),
+      scoreLabel: _stringValue(json['scoreLabel']),
+      xpLabel: _stringValue(json['xpLabel']),
+      timeLabel: _stringValue(json['timeLabel']),
+      quizId: _stringValue(json['quizId']),
+      totalQuestions: _intValue(json['totalQuestions']),
     );
   }
 
@@ -195,6 +329,8 @@ class ChapterQuizModel {
       'scoreLabel': scoreLabel,
       'xpLabel': xpLabel,
       'timeLabel': timeLabel,
+      'quizId': quizId,
+      'totalQuestions': totalQuestions,
     };
   }
 
@@ -213,6 +349,86 @@ class ChapterQuizModel {
       scoreLabel: scoreLabel ?? this.scoreLabel,
       xpLabel: xpLabel ?? this.xpLabel,
       timeLabel: timeLabel ?? this.timeLabel,
+      quizId: quizId,
+      totalQuestions: totalQuestions,
     );
   }
+}
+
+class LessonProgressModel {
+  final int videoWatchPercent;
+  final bool isTheoryRead;
+  final bool isCompleted;
+
+  const LessonProgressModel({
+    required this.videoWatchPercent,
+    required this.isTheoryRead,
+    required this.isCompleted,
+  });
+
+  const LessonProgressModel.empty()
+      : videoWatchPercent = 0,
+        isTheoryRead = false,
+        isCompleted = false;
+
+  factory LessonProgressModel.fromJson(Map<String, dynamic> json) {
+    return LessonProgressModel(
+      videoWatchPercent: _intValue(json['videoWatchPercent']),
+      isTheoryRead: _boolValue(json['isTheoryRead'], fallback: false),
+      isCompleted: _boolValue(json['isCompleted'], fallback: false),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'videoWatchPercent': videoWatchPercent,
+      'isTheoryRead': isTheoryRead,
+      'isCompleted': isCompleted,
+    };
+  }
+}
+
+Map<String, dynamic> _jsonMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return <String, dynamic>{};
+}
+
+List<Map<String, dynamic>> _jsonList(dynamic value) {
+  if (value is List) {
+    return value
+        .whereType<Map>()
+        .map((Map<dynamic, dynamic> item) => Map<String, dynamic>.from(item))
+        .toList(growable: false);
+  }
+  return <Map<String, dynamic>>[];
+}
+
+String _fallbackString(dynamic value, String fallback) {
+  final String text = _stringValue(value);
+  return text.isEmpty ? fallback : text;
+}
+
+String _stringValue(dynamic value) => value?.toString().trim() ?? '';
+
+String? _emptyToNull(dynamic value) {
+  final String text = _stringValue(value);
+  return text.isEmpty ? null : text;
+}
+
+int _intValue(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+double _doubleValue(dynamic value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+bool _boolValue(dynamic value, {required bool fallback}) {
+  if (value is bool) return value;
+  if (value is String) return value.toLowerCase() == 'true';
+  return fallback;
 }
