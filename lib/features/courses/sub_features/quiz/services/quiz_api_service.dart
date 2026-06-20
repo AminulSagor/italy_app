@@ -35,9 +35,16 @@ class QuizApiService {
       '/quiz-sessions/lessons/$lessonId/start',
     );
     final Map<String, dynamic> data = _responseMap(response);
-    final List<QuizQuestionModel> questions = _jsonList(data['questions'])
-        .map(_questionFromApi)
-        .toList(growable: false);
+    final Map<String, Future<_QuizMediaInfo?>> mediaRequests =
+        <String, Future<_QuizMediaInfo?>>{};
+    final List<QuizQuestionModel> questions = await Future.wait(
+      _jsonList(data['questions']).map(
+        (Map<String, dynamic> item) => _questionFromApi(
+          item,
+          mediaRequests: mediaRequests,
+        ),
+      ),
+    );
 
     return QuizApiSessionModel(
       sessionId: _stringValue(data['id']),
@@ -114,6 +121,20 @@ class QuizApiService {
     });
   }
 
+  Future<void> markLessonCompleted({
+    required String courseId,
+    required String lessonId,
+  }) async {
+    await _apiClient.dio.post(
+      '/learning-progress/lessons/complete',
+      data: <String, dynamic>{
+        'courseId': courseId,
+        'lessonId': lessonId,
+        'clientActivityDate': DateTime.now().toIso8601String(),
+      },
+    );
+  }
+
   Map<String, dynamic> _answerPayload({
     required QuizQuestionModel question,
     required int selectedOptionIndex,
@@ -165,25 +186,57 @@ class QuizApiService {
     return payload;
   }
 
-  QuizQuestionModel _questionFromApi(Map<String, dynamic> item) {
-    final QuizQuestionType type = _typeFromApi(_stringValue(item['questionType']));
+  Future<QuizQuestionModel> _questionFromApi(
+    Map<String, dynamic> item, {
+    required Map<String, Future<_QuizMediaInfo?>> mediaRequests,
+  }) async {
+    final QuizQuestionType type = _typeFromApi(
+      _stringValue(item['questionType']),
+    );
     final List<Map<String, dynamic>> options = _jsonList(item['options']);
-    final List<Map<String, dynamic>> sequenceItems = _jsonList(item['sequenceItems']);
-    final Map<String, dynamic> matchingItems = _jsonMap(item['matchingItems']);
-    final List<Map<String, dynamic>> leftItems = _jsonList(matchingItems['leftItems']);
-    final List<Map<String, dynamic>> rightItems = _jsonList(matchingItems['rightItems']);
+    final List<Map<String, dynamic>> sequenceItems = _jsonList(
+      item['sequenceItems'],
+    );
+    final Map<String, dynamic> matchingItems = _jsonMap(
+      item['matchingItems'],
+    );
+    final List<Map<String, dynamic>> leftItems = _jsonList(
+      matchingItems['leftItems'],
+    );
+    final List<Map<String, dynamic>> rightItems = _jsonList(
+      matchingItems['rightItems'],
+    );
+    final String mediaFileId = _stringValue(item['mediaFileId']);
+    final _QuizMediaInfo? media = mediaFileId.isEmpty
+        ? null
+        : await mediaRequests.putIfAbsent(
+            mediaFileId,
+            () => _fetchMediaInfo(mediaFileId),
+          );
 
     return QuizQuestionModel.fromJson(<String, dynamic>{
       'id': _stringValue(item['id']),
       'type': type.name,
       'eyebrow': _eyebrowForType(type),
       'title': _titleForType(type, item),
-      'subtitle': _subtitleForType(type, item),
+      'subtitle': _stringValue(item['helperText']),
       'prompt': _stringValue(item['promptText']),
-      'options': _optionsForType(type, options, sequenceItems, leftItems, rightItems),
-      'optionIds': options.map((Map<String, dynamic> option) => _stringValue(option['id'])).toList(),
-      'matchingLeftPairIds': leftItems.map((Map<String, dynamic> item) => _stringValue(item['pairId'])).toList(),
-      'matchingRightTexts': rightItems.map((Map<String, dynamic> item) => _stringValue(item['rightText'])).toList(),
+      'options': _optionsForType(
+        type,
+        options,
+        sequenceItems,
+        leftItems,
+        rightItems,
+      ),
+      'optionIds': options
+          .map((Map<String, dynamic> option) => _stringValue(option['id']))
+          .toList(),
+      'matchingLeftPairIds': leftItems
+          .map((Map<String, dynamic> item) => _stringValue(item['pairId']))
+          .toList(),
+      'matchingRightTexts': rightItems
+          .map((Map<String, dynamic> item) => _stringValue(item['rightText']))
+          .toList(),
       'selectedWords': <String>[],
       'disabledWords': <String>[],
       'correctWords': <String>[],
@@ -192,7 +245,35 @@ class QuizApiService {
       'correctAnswer': '',
       'correctMeaning': _stringValue(item['translationText']),
       'objectLabel': _stringValue(item['promptText']),
+      'mediaFileId': mediaFileId,
+      'mediaUrl': media?.url ?? '',
+      'mediaMimeType': media?.mimeType ?? '',
+      'generatedAudioText': _stringValue(item['generatedAudioText']),
     });
+  }
+
+  Future<_QuizMediaInfo?> _fetchMediaInfo(String fileId) async {
+    try {
+      final Response<dynamic> response = await _apiClient.dio.get(
+        '/files/$fileId/signed-read-url',
+      );
+      final Map<String, dynamic> data = _responseMap(response);
+      final Map<String, dynamic> file = _jsonMap(data['file']);
+      final String url = _fallbackString(
+        data['signedReadUrl'],
+        data['publicUrl'],
+      );
+      if (url.isEmpty) {
+        return null;
+      }
+
+      return _QuizMediaInfo(
+        url: url,
+        mimeType: _stringValue(file['mimeType']),
+      );
+    } on DioException {
+      return null;
+    }
   }
 
   List<String> _optionsForType(
@@ -266,14 +347,6 @@ class QuizApiService {
     return _fallbackString(item['promptText'], 'Answer the question');
   }
 
-  String _subtitleForType(QuizQuestionType type, Map<String, dynamic> item) {
-    final String helper = _stringValue(item['helperText']);
-    if (helper.isNotEmpty) return helper;
-    if (type == QuizQuestionType.fillBlank) {
-      return 'Select the correct option to fill the blank.';
-    }
-    return _stringValue(item['translationText']);
-  }
 
   String _eyebrowForType(QuizQuestionType type) {
     switch (type) {
@@ -373,4 +446,11 @@ class QuizApiService {
     if (value is String) return value.toLowerCase() == 'true';
     return false;
   }
+}
+
+class _QuizMediaInfo {
+  const _QuizMediaInfo({required this.url, required this.mimeType});
+
+  final String url;
+  final String mimeType;
 }

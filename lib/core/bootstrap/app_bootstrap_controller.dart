@@ -33,7 +33,10 @@ class AppBootstrapController extends GetxController {
 
     if (!Get.isRegistered<ApiClient>()) {
       Get.put<ApiClient>(
-        ApiClient(tokenService: Get.find<TokenService>()),
+        ApiClient(
+          tokenService: Get.find<TokenService>(),
+          storageService: Get.find<StorageService>(),
+        ),
         permanent: true,
       );
     }
@@ -87,19 +90,25 @@ class AppBootstrapController extends GetxController {
     try {
       final StorageService storageService = Get.find<StorageService>();
       final TokenService tokenService = Get.find<TokenService>();
+      final AuthService authService = Get.find<AuthService>();
 
-      final bool hasValidLocalSession =
-          storageService.isLoggedIn && await tokenService.hasToken();
+      if (await tokenService.hasToken()) {
+        final bool isSessionValid = await authService.validateStoredSession();
+        if (isSessionValid) {
+          await _registerFcmTokenSafely();
+          if (await tokenService.hasToken()) {
+            Get.offAllNamed(AppRoutes.wrapper);
+          } else {
+            Get.offAllNamed(AppRoutes.login);
+          }
+          return;
+        }
 
-      if (hasValidLocalSession) {
-        await _registerFcmTokenSafely();
-        Get.offAllNamed(AppRoutes.wrapper);
+        await authService.logout();
+        Get.offAllNamed(AppRoutes.login);
         return;
-      }
-
-      if (storageService.isLoggedIn) {
+      } else if (storageService.isLoggedIn) {
         await storageService.clearLoggedInData();
-        await tokenService.clearTokens();
       }
 
       if (storageService.isFirstTimeUser) {

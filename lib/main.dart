@@ -12,7 +12,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await AppBootstrapController.init();
-  runApp(ItalyApp(initialRoute: AppPages.initial));
+  runApp(ItalyApp(initialRoute: AppRoutes.bootstrap));
 }
 
 class ItalyApp extends StatelessWidget {

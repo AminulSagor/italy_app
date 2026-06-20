@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
 import '../../../../../core/services/api_error_handler.dart';
@@ -31,6 +33,11 @@ class ChapterDetailController extends GetxController {
   final Rxn<ChapterDetailModel> detail = Rxn<ChapterDetailModel>();
 
   int _lastRecordedVideoPercent = 0;
+  bool _isLessonCompletionSubmitted = false;
+  Future<String?>? _videoUrlFuture;
+  Future<String?>? _audioUrlFuture;
+  Future<ChapterMediaModel?>? _pdfMediaFuture;
+  Future<int>? _pdfPageCountFuture;
 
   @override
   void onInit() {
@@ -66,10 +73,181 @@ class ChapterDetailController extends GetxController {
 
       detail.value = result.data;
       quizStatus.value = result.data!.quiz?.status ?? ChapterQuizStatus.disabled;
+      _preloadChapterResources();
       _lastRecordedVideoPercent = result.data!.progress.videoWatchPercent;
+      _isLessonCompletionSubmitted = result.data!.progress.isCompleted;
+
+      if (result.data!.isQuizAvailabilityKnown &&
+          result.data!.quiz == null &&
+          result.data!.hasVideo &&
+          result.data!.progress.videoWatchPercent >= 100) {
+        _markLessonCompletedIfNeeded();
+      }
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<String?> loadVideoUrl() {
+    final Future<String?>? cachedFuture = _videoUrlFuture;
+    if (cachedFuture != null) {
+      return cachedFuture;
+    }
+
+    final Future<String?> future = _loadMediaUrl(
+      media: detail.value?.video,
+      type: ChapterMediaType.video,
+      errorTitle: 'Video',
+    );
+    _videoUrlFuture = future;
+    return future.then((String? url) {
+      if (url == null || url.isEmpty) {
+        _videoUrlFuture = null;
+      }
+      return url;
+    });
+  }
+
+  Future<String?> loadAudioUrl() {
+    final Future<String?>? cachedFuture = _audioUrlFuture;
+    if (cachedFuture != null) {
+      return cachedFuture;
+    }
+
+    final Future<String?> future = _loadMediaUrl(
+      media: detail.value?.audio,
+      type: ChapterMediaType.audio,
+      errorTitle: 'Audio',
+    );
+    _audioUrlFuture = future;
+    return future.then((String? url) {
+      if (url == null || url.isEmpty) {
+        _audioUrlFuture = null;
+      }
+      return url;
+    });
+  }
+
+  Future<String?> _loadMediaUrl({
+    required ChapterMediaModel? media,
+    required ChapterMediaType type,
+    required String errorTitle,
+  }) async {
+    if (media == null || media.fileId.isEmpty) {
+      return null;
+    }
+    if (media.url.isNotEmpty) {
+      return media.url;
+    }
+
+    final ApiResult<ChapterMediaModel?> result =
+        await ApiErrorHandler.call<ChapterMediaModel?>(
+      () => _chapterDetailApiService.fetchMedia(
+        fileId: media.fileId,
+        type: type,
+      ),
+      showError: false,
+      errorTitle: errorTitle,
+    );
+
+    return result.isSuccess ? result.data?.url : null;
+  }
+
+  void _preloadChapterResources() {
+    final ChapterDetailModel? current = detail.value;
+    if (current == null) {
+      return;
+    }
+
+    if (current.hasVideo) {
+      unawaited(loadVideoUrl());
+    }
+    if (current.hasAudio) {
+      unawaited(loadAudioUrl());
+    }
+    if (current.theoryBook.isAvailable) {
+      unawaited(_preloadTheoryBookDetails());
+    }
+  }
+
+  Future<ChapterMediaModel?> _loadPdfMedia() {
+    final Future<ChapterMediaModel?>? cachedFuture = _pdfMediaFuture;
+    if (cachedFuture != null) {
+      return cachedFuture;
+    }
+
+    final String fileId = detail.value?.theoryBook.fileId ?? '';
+    if (fileId.isEmpty) {
+      return Future<ChapterMediaModel?>.value(null);
+    }
+
+    final Future<ChapterMediaModel?> future =
+        _chapterDetailApiService.fetchMedia(
+      fileId: fileId,
+      type: ChapterMediaType.pdf,
+    );
+    _pdfMediaFuture = future;
+    return future.then((ChapterMediaModel? media) {
+      if (media == null || media.url.isEmpty) {
+        _pdfMediaFuture = null;
+      }
+      return media;
+    });
+  }
+
+  Future<void> _preloadTheoryBookDetails() async {
+    final ChapterDetailModel? current = detail.value;
+    final ChapterResourceModel? theoryBook = current?.theoryBook;
+    if (current == null ||
+        theoryBook == null ||
+        !theoryBook.isAvailable ||
+        theoryBook.fileId?.isNotEmpty != true) {
+      return;
+    }
+
+    final ChapterMediaModel? media = await _loadPdfMedia();
+    final ChapterDetailModel? afterMedia = detail.value;
+    if (media == null ||
+        afterMedia == null ||
+        afterMedia.id != current.id ||
+        afterMedia.theoryBook.fileId != theoryBook.fileId) {
+      if (afterMedia != null && afterMedia.id == current.id) {
+        detail.value = afterMedia.copyWith(
+          theoryBook: afterMedia.theoryBook.copyWith(
+            subtitle: 'Pages unavailable',
+          ),
+        );
+      }
+      return;
+    }
+
+    detail.value = afterMedia.copyWith(
+      theoryBook: afterMedia.theoryBook.copyWith(
+        fileUrl: media.url,
+        subtitle: '...',
+      ),
+    );
+
+    final Future<int> pageCountFuture = _pdfPageCountFuture ??=
+        _chapterDetailApiService.fetchPdfPageCount(pdfUrl: media.url);
+    final int pageCount = await pageCountFuture;
+
+    final ChapterDetailModel? latest = detail.value;
+    if (latest == null ||
+        latest.id != current.id ||
+        latest.theoryBook.fileId != theoryBook.fileId) {
+      return;
+    }
+
+    detail.value = latest.copyWith(
+      theoryBook: latest.theoryBook.copyWith(
+        fileUrl: media.url,
+        count: pageCount,
+        subtitle: pageCount > 0
+            ? '$pageCount ${pageCount == 1 ? 'Page' : 'Pages'}'
+            : 'Pages unavailable',
+      ),
+    );
   }
 
   Future<void> resumeVideo() async {
@@ -98,14 +276,20 @@ class ChapterDetailController extends GetxController {
         .clamp(0, 100)
         .toInt();
 
-    if (percent < 5 || percent < _lastRecordedVideoPercent + 5) {
+    final bool reachedQuizThreshold =
+        _lastRecordedVideoPercent < 80 && percent >= 80;
+    if (percent < 5 ||
+        percent <= _lastRecordedVideoPercent ||
+        (!reachedQuizThreshold &&
+            percent < 100 &&
+            percent < _lastRecordedVideoPercent + 5)) {
       return;
     }
 
     _lastRecordedVideoPercent = percent;
     _updateLocalVideoProgress(percent: percent, duration: duration);
 
-    await ApiErrorHandler.call<Object?>(
+    final ApiResult<Object?> result = await ApiErrorHandler.call<Object?>(
       () async {
         await _chapterDetailApiService.recordVideoProgress(
           courseId: current.courseId,
@@ -118,9 +302,16 @@ class ChapterDetailController extends GetxController {
       showError: false,
       errorTitle: 'Video Progress',
     );
+
+    if (result.isSuccess &&
+        percent >= 100 &&
+        current.isQuizAvailabilityKnown &&
+        current.quiz == null) {
+      await _markLessonCompletedIfNeeded();
+    }
   }
 
-  Future<void> recordAudioListened() async {
+  Future<void> recordAudioCompleted() async {
     if (isAudioProgressRecorded.value) {
       return;
     }
@@ -132,7 +323,7 @@ class ChapterDetailController extends GetxController {
     }
 
     isAudioProgressRecorded.value = true;
-    await ApiErrorHandler.call<Object?>(
+    final ApiResult<Object?> result = await ApiErrorHandler.call<Object?>(
       () async {
         await _chapterDetailApiService.recordAudioListened(
           courseId: current.courseId,
@@ -144,6 +335,17 @@ class ChapterDetailController extends GetxController {
       showError: false,
       errorTitle: 'Audio Progress',
     );
+
+    if (!result.isSuccess) {
+      isAudioProgressRecorded.value = false;
+      return;
+    }
+
+    if (current.isQuizAvailabilityKnown &&
+        current.quiz == null &&
+        !current.hasVideo) {
+      await _markLessonCompletedIfNeeded();
+    }
   }
 
   Future<void> openTheoryBook() async {
@@ -152,6 +354,17 @@ class ChapterDetailController extends GetxController {
 
     if (current == null || theoryBook == null || !theoryBook.isAvailable) {
       Get.snackbar('Theory Book', 'Theory book not given for this lesson.');
+      return;
+    }
+
+    String pdfUrl = theoryBook.fileUrl ?? '';
+    if (pdfUrl.isEmpty && theoryBook.fileId?.isNotEmpty == true) {
+      final ChapterMediaModel? media = await _loadPdfMedia();
+      pdfUrl = media?.url ?? '';
+    }
+
+    if (pdfUrl.isEmpty) {
+      Get.snackbar('Theory Book', 'Theory book could not be loaded.');
       return;
     }
 
@@ -170,7 +383,7 @@ class ChapterDetailController extends GetxController {
     Get.to<void>(
       () => ChapterPdfViewer(
         title: theoryBook.title,
-        pdfUrl: theoryBook.fileUrl ?? '',
+        pdfUrl: pdfUrl,
       ),
     );
   }
@@ -199,17 +412,7 @@ class ChapterDetailController extends GetxController {
 
     if (routeResult == true) {
       quizStatus.value = ChapterQuizStatus.completed;
-      await ApiErrorHandler.call<Object?>(
-        () async {
-          await _chapterDetailApiService.markLessonCompleted(
-            courseId: current.courseId,
-            lessonId: current.id,
-          );
-          return null;
-        },
-        showError: false,
-        errorTitle: 'Lesson Progress',
-      );
+      await _markLessonCompletedIfNeeded();
       await loadDetail();
     }
 
@@ -250,6 +453,46 @@ class ChapterDetailController extends GetxController {
     if (Get.isRegistered<VocabularyMockService>(tag: tag)) {
       Get.delete<VocabularyMockService>(tag: tag, force: true);
     }
+  }
+
+  Future<void> _markLessonCompletedIfNeeded() async {
+    final ChapterDetailModel? current = detail.value;
+    if (current == null ||
+        current.progress.isCompleted ||
+        _isLessonCompletionSubmitted) {
+      return;
+    }
+
+    _isLessonCompletionSubmitted = true;
+    final ApiResult<Object?> result = await ApiErrorHandler.call<Object?>(
+      () async {
+        await _chapterDetailApiService.markLessonCompleted(
+          courseId: current.courseId,
+          lessonId: current.id,
+        );
+        return null;
+      },
+      showError: false,
+      errorTitle: 'Lesson Progress',
+    );
+
+    if (!result.isSuccess) {
+      _isLessonCompletionSubmitted = false;
+      return;
+    }
+
+    final ChapterDetailModel? latest = detail.value;
+    if (latest == null) {
+      return;
+    }
+
+    detail.value = latest.copyWith(
+      progress: LessonProgressModel(
+        videoWatchPercent: latest.progress.videoWatchPercent,
+        isTheoryRead: latest.progress.isTheoryRead,
+        isCompleted: true,
+      ),
+    );
   }
 
   void _updateLocalVideoProgress({

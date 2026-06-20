@@ -117,6 +117,7 @@ import '../features/drawer_features/settings/sub_features/views/verify_contact_v
 import '../features/drawer_features/settings/sub_features/views/settings_success_view.dart';
 import '../features/drawer_features/settings/sub_features/views/delete_account_confirm_view.dart';
 import '../features/practice_hub/controllers/practice_hub_controller.dart';
+import '../features/practice_hub/services/practice_hub_api_service.dart';
 import '../features/practice_hub/views/important_verbs/verb_details.dart';
 import '../features/practice_hub/views/survival_italian/survival_italian_view.dart';
 import '../features/practice_hub/views/widgets/pdf_viewer.dart';
@@ -877,6 +878,7 @@ class AppPages {
           Get.lazyPut<PracticeHubController>(
             () => PracticeHubController(
               coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
             ),
             fenix: true,
           );
@@ -902,10 +904,14 @@ class AppPages {
           Get.lazyPut<PracticeHubController>(
             () => PracticeHubController(
               coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
             ),
             fenix: true,
           );
         }
+        Get.find<PracticeHubController>().loadSurvivalItalian(
+          showError: false,
+        );
       }),
     ),
 
@@ -917,6 +923,7 @@ class AppPages {
           Get.lazyPut<PracticeHubController>(
             () => PracticeHubController(
               coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
             ),
             fenix: true,
           );
@@ -932,6 +939,7 @@ class AppPages {
           Get.lazyPut<PracticeHubController>(
             () => PracticeHubController(
               coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
             ),
             fenix: true,
           );
@@ -947,6 +955,7 @@ class AppPages {
           Get.lazyPut<PracticeHubController>(
             () => PracticeHubController(
               coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
             ),
             fenix: true,
           );
@@ -962,6 +971,7 @@ class AppPages {
           Get.lazyPut<PracticeHubController>(
             () => PracticeHubController(
               coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
             ),
             fenix: true,
           );
@@ -977,10 +987,14 @@ class AppPages {
           Get.lazyPut<PracticeHubController>(
             () => PracticeHubController(
               coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
             ),
             fenix: true,
           );
         }
+        Get.find<PracticeHubController>().loadDailyChallenges(
+          showError: false,
+        );
       }),
     ),
     GetPage(

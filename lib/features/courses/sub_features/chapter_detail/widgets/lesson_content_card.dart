@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:just_audio/just_audio.dart';
@@ -10,13 +12,15 @@ import '../models/chapter_detail_models.dart';
 class LessonContentCard extends StatelessWidget {
   final LessonContentModel lesson;
   final ChapterMediaModel? audio;
-  final VoidCallback onAudioStarted;
+  final Future<String?> Function() loadAudioUrl;
+  final VoidCallback onAudioCompleted;
 
   const LessonContentCard({
     super.key,
     required this.lesson,
     required this.audio,
-    required this.onAudioStarted,
+    required this.loadAudioUrl,
+    required this.onAudioCompleted,
   });
 
   @override
@@ -46,11 +50,12 @@ class LessonContentCard extends StatelessWidget {
               color: AppColors.homePrimaryText,
             ),
           ),
-          if (audio?.url.isNotEmpty == true) ...<Widget>[
+          if (audio?.fileId.isNotEmpty == true) ...<Widget>[
             SizedBox(height: 24.h),
             _AudioPlayerControls(
               audioUrl: audio!.url,
-              onAudioStarted: onAudioStarted,
+              loadAudioUrl: loadAudioUrl,
+              onAudioCompleted: onAudioCompleted,
             ),
           ],
           if (lesson.italianText.isNotEmpty ||
@@ -72,11 +77,13 @@ class LessonContentCard extends StatelessWidget {
 
 class _AudioPlayerControls extends StatefulWidget {
   final String audioUrl;
-  final VoidCallback onAudioStarted;
+  final Future<String?> Function() loadAudioUrl;
+  final VoidCallback onAudioCompleted;
 
   const _AudioPlayerControls({
     required this.audioUrl,
-    required this.onAudioStarted,
+    required this.loadAudioUrl,
+    required this.onAudioCompleted,
   });
 
   @override
@@ -85,28 +92,107 @@ class _AudioPlayerControls extends StatefulWidget {
 
 class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
   late final AudioPlayer _audioPlayer;
+  StreamSubscription<PlayerState>? _playerStateSubscription;
+
   double _speed = 1;
-  bool _hasRecordedListen = false;
+  bool _isMuted = false;
+  bool _isPreparing = false;
+  bool _isPrepared = false;
+  bool _hasReportedCompletion = false;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
-    _audioPlayer.setUrl(widget.audioUrl);
+    _playerStateSubscription = _audioPlayer.playerStateStream.listen(
+      _handlePlayerState,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        unawaited(_prepareAudio());
+      }
+    });
   }
 
   @override
   void didUpdateWidget(covariant _AudioPlayerControls oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.audioUrl != widget.audioUrl) {
-      _audioPlayer.setUrl(widget.audioUrl);
+      _resetSource();
     }
   }
 
   @override
   void dispose() {
+    _playerStateSubscription?.cancel();
     _audioPlayer.dispose();
     super.dispose();
+  }
+
+  Future<void> _resetSource() async {
+    await _audioPlayer.stop();
+    if (!mounted) return;
+
+    setState(() {
+      _isPreparing = false;
+      _isPrepared = false;
+      _hasReportedCompletion = false;
+      _errorMessage = null;
+    });
+  }
+
+  void _handlePlayerState(PlayerState state) {
+    if (state.processingState != ProcessingState.completed ||
+        _hasReportedCompletion) {
+      return;
+    }
+
+    _hasReportedCompletion = true;
+    widget.onAudioCompleted();
+  }
+
+  Future<bool> _prepareAudio() async {
+    if (_isPrepared) {
+      return true;
+    }
+    if (_isPreparing) {
+      return false;
+    }
+
+    setState(() {
+      _isPreparing = true;
+      _errorMessage = null;
+    });
+
+    try {
+      String audioUrl = widget.audioUrl;
+      if (audioUrl.isEmpty) {
+        audioUrl = await widget.loadAudioUrl() ?? '';
+      }
+      if (audioUrl.isEmpty) {
+        throw StateError('Audio URL is not available');
+      }
+
+      await _audioPlayer.setUrl(audioUrl);
+      await _audioPlayer.setSpeed(_speed);
+      await _audioPlayer.setVolume(_isMuted ? 0 : 1);
+
+      if (!mounted) return false;
+      setState(() {
+        _isPreparing = false;
+        _isPrepared = true;
+      });
+      return true;
+    } catch (_) {
+      if (!mounted) return false;
+      setState(() {
+        _isPreparing = false;
+        _isPrepared = false;
+        _errorMessage = 'Audio could not be loaded. Tap play to retry.';
+      });
+      return false;
+    }
   }
 
   Future<void> _togglePlay() async {
@@ -115,16 +201,28 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
       return;
     }
 
-    if (!_hasRecordedListen) {
-      _hasRecordedListen = true;
-      widget.onAudioStarted();
+    final bool isReady = await _prepareAudio();
+    if (!isReady) {
+      return;
+    }
+
+    if (_audioPlayer.processingState == ProcessingState.completed) {
+      await _audioPlayer.seek(Duration.zero);
     }
     await _audioPlayer.play();
   }
 
   Future<void> _setSpeed(double speed) async {
     setState(() => _speed = speed);
-    await _audioPlayer.setSpeed(speed);
+    if (_isPrepared) {
+      await _audioPlayer.setSpeed(speed);
+    }
+  }
+
+  Future<void> _toggleMute() async {
+    final bool nextMutedState = !_isMuted;
+    setState(() => _isMuted = nextMutedState);
+    await _audioPlayer.setVolume(nextMutedState ? 0 : 1);
   }
 
   @override
@@ -157,7 +255,7 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
                     value: max <= 0 ? 0 : value,
                     min: 0,
                     max: max <= 0 ? 1 : max,
-                    onChanged: max <= 0
+                    onChanged: !_isPrepared || max <= 0
                         ? null
                         : (double newValue) {
                             _audioPlayer.seek(
@@ -169,25 +267,36 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text(
-                      _durationLabel(position),
-                      style: _durationStyle(),
-                    ),
-                    Text(
-                      _durationLabel(duration),
-                      style: _durationStyle(),
-                    ),
+                    Text(_durationLabel(position), style: _durationStyle()),
+                    Text(_durationLabel(duration), style: _durationStyle()),
                   ],
                 ),
               ],
             );
           },
         ),
+        if (_errorMessage != null) ...<Widget>[
+          SizedBox(height: 8.h),
+          Text(
+            _errorMessage!,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: AppFont.font11.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.blockDangerRed,
+            ),
+          ),
+        ],
         SizedBox(height: 20.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            _CircleIcon(icon: Icons.volume_up_rounded, onTap: () {}),
+            _CircleIcon(
+              icon: _isMuted
+                  ? Icons.volume_off_rounded
+                  : Icons.volume_up_rounded,
+              onTap: _toggleMute,
+            ),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
               decoration: BoxDecoration(
@@ -216,13 +325,21 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
                 ],
               ),
             ),
-            StreamBuilder<bool>(
-              stream: _audioPlayer.playingStream,
-              builder: (_, AsyncSnapshot<bool> snapshot) {
-                final bool isPlaying = snapshot.data ?? false;
+            StreamBuilder<PlayerState>(
+              stream: _audioPlayer.playerStateStream,
+              builder: (_, AsyncSnapshot<PlayerState> snapshot) {
+                final PlayerState? state = snapshot.data;
+                final bool isBuffering = _isPreparing ||
+                    state?.processingState == ProcessingState.loading ||
+                    state?.processingState == ProcessingState.buffering;
+                final bool isPlaying = state?.playing ?? false;
+
                 return _CircleIcon(
-                  icon: isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  onTap: _togglePlay,
+                  icon: isPlaying
+                      ? Icons.pause_rounded
+                      : Icons.play_arrow_rounded,
+                  isLoading: isBuffering,
+                  onTap: isBuffering ? null : _togglePlay,
                 );
               },
             ),
@@ -387,9 +504,14 @@ class _SpeedPill extends StatelessWidget {
 
 class _CircleIcon extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final bool isLoading;
 
-  const _CircleIcon({required this.icon, required this.onTap});
+  const _CircleIcon({
+    required this.icon,
+    required this.onTap,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -402,7 +524,18 @@ class _CircleIcon extends StatelessWidget {
           color: AppColors.white,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: AppColors.primaryGreen, size: 25.w),
+        child: Center(
+          child: isLoading
+              ? SizedBox(
+                  width: 22.w,
+                  height: 22.w,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: AppColors.primaryGreen,
+                  ),
+                )
+              : Icon(icon, color: AppColors.primaryGreen, size: 25.w),
+        ),
       ),
     );
   }

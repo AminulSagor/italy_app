@@ -9,6 +9,7 @@ import 'quiz_common_widgets.dart';
 
 part 'quiz_panel_parts.dart';
 part 'quiz_panel_more_parts.dart';
+part 'quiz_panel_shared_parts.dart';
 
 class QuizQuestionPanel extends StatelessWidget {
   final QuizQuestionModel question;

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -6,9 +8,16 @@ import '../models/chapter_detail_models.dart';
 
 class ChapterDetailApiService {
   ChapterDetailApiService({required ApiClient apiClient})
-      : _apiClient = apiClient;
+    : _apiClient = apiClient;
 
   final ApiClient _apiClient;
+  final Dio _fileClient = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 30),
+      headers: const <String, String>{'Accept': 'application/pdf'},
+    ),
+  );
 
   Future<ChapterDetailModel> fetchChapterDetail({
     required String lessonId,
@@ -16,37 +25,48 @@ class ChapterDetailApiService {
     required String fallbackTitle,
     required double initialVideoProgress,
   }) async {
-    final Response<dynamic> lessonResponse = await _apiClient.dio.get(
-      '/lessons/$lessonId',
-    );
-    final Map<String, dynamic> lesson = _responseMap(lessonResponse);
+    late Map<String, dynamic> lesson;
+    late LessonProgressModel progress;
+    Map<String, dynamic>? quiz;
+
+    await Future.wait<void>(<Future<void>>[
+      () async {
+        final Response<dynamic> response = await _apiClient.dio.get(
+          '/lessons/$lessonId',
+        );
+        lesson = _responseMap(response);
+      }(),
+      () async {
+        progress = await _safeFetchLessonProgress(
+          lessonId: lessonId,
+          fallbackProgress: initialVideoProgress,
+        );
+      }(),
+      () async {
+        quiz = await _safeFetchQuizAvailability(lessonId: lessonId);
+      }(),
+    ]);
+
     final String courseId = _fallbackString(
       lesson['courseId'],
       fallbackCourseId,
     );
-
-    final LessonProgressModel progress = await _safeFetchLessonProgress(
-      lessonId: lessonId,
-      fallbackProgress: initialVideoProgress,
+    final String videoFileId = _stringValue(lesson['videoFileId']);
+    final String audioFileId = _stringValue(lesson['theoryAudioFileId']);
+    final String pdfFileId = _stringValue(
+      lesson['supplementaryMaterialFileId'],
     );
-    final ChapterMediaModel? video = await _mediaFromFileId(
-      fileId: _stringValue(lesson['videoFileId']),
+
+    final ChapterMediaModel? video = _mediaReference(
+      fileId: videoFileId,
       type: ChapterMediaType.video,
     );
-    final ChapterMediaModel? audio = await _mediaFromFileId(
-      fileId: _stringValue(lesson['theoryAudioFileId']),
+    final ChapterMediaModel? audio = _mediaReference(
+      fileId: audioFileId,
       type: ChapterMediaType.audio,
     );
-    final ChapterMediaModel? pdf = await _mediaFromFileId(
-      fileId: _stringValue(lesson['supplementaryMaterialFileId']),
-      type: ChapterMediaType.pdf,
-    );
-    final int pdfPages = pdf == null ? 0 : await _safeFetchPdfPageCount(pdf.url);
     final int vocabularyCount = _jsonList(lesson['vocabularyItems']).length;
-    final Map<String, dynamic>? quiz = await _safeFetchQuizAvailability(
-      lessonId: lessonId,
-    );
-    final bool hasVideo = video?.url.isNotEmpty == true;
+    final bool hasVideo = videoFileId.isNotEmpty;
     final bool canStartQuiz = !hasVideo || progress.videoWatchPercent >= 80;
 
     return ChapterDetailModel(
@@ -66,49 +86,52 @@ class ChapterDetailApiService {
           .toDouble(),
       lessonContent: _lessonContentFromLesson(
         lesson,
-        hasAudio: audio?.url.isNotEmpty == true,
+        hasAudio: audioFileId.isNotEmpty,
       ),
       video: video,
       audio: audio,
-      theoryBook: pdf == null
+      theoryBook: pdfFileId.isEmpty
           ? ChapterResourceModel.notGiven(
               title: 'Theory Book',
               iconName: 'book',
             )
           : ChapterResourceModel(
               title: 'Theory Book',
-              subtitle: pdfPages > 0 ? '$pdfPages Pages' : 'PDF ready',
+              subtitle: '...',
               iconName: 'book',
-              fileUrl: pdf.url,
+              fileId: pdfFileId,
               isAvailable: true,
-              count: pdfPages,
+              count: 0,
             ),
       vocabulary: ChapterResourceModel(
         title: 'Vocabulary',
-        subtitle: vocabularyCount > 0 ? '$vocabularyCount Flashcards' : 'Not given',
+        subtitle: vocabularyCount > 0
+            ? '$vocabularyCount Flashcards'
+            : 'Not given',
         iconName: 'cards',
         isAvailable: vocabularyCount > 0,
         count: vocabularyCount,
       ),
-      quiz: quiz == null || !_boolValue(quiz['hasQuiz'], fallback: false)
+      isQuizAvailabilityKnown: quiz != null,
+      quiz: quiz == null || !_boolValue(quiz!['hasQuiz'], fallback: false)
           ? null
           : ChapterQuizModel(
-              title: _fallbackString(quiz['title'], 'Chapter Quiz'),
+              title: _fallbackString(quiz!['title'], 'Chapter Quiz'),
               subtitle: _fallbackString(
-                quiz['description'],
+                quiz!['description'],
                 'Test your knowledge of this chapter',
               ),
               status: progress.isCompleted
                   ? ChapterQuizStatus.completed
                   : canStartQuiz
-                      ? ChapterQuizStatus.enabled
-                      : ChapterQuizStatus.disabled,
+                  ? ChapterQuizStatus.enabled
+                  : ChapterQuizStatus.disabled,
               actionLabel: canStartQuiz ? 'Start Quiz →' : 'REQUIRES 80% VIDEO',
               scoreLabel: '',
               xpLabel: '',
               timeLabel: '',
-              quizId: _stringValue(quiz['quizId']),
-              totalQuestions: _intValue(quiz['totalQuestions']),
+              quizId: _stringValue(quiz!['quizId']),
+              totalQuestions: _intValue(quiz!['totalQuestions']),
             ),
       progress: progress,
     );
@@ -210,7 +233,25 @@ class ChapterDetailApiService {
     }
   }
 
-  Future<ChapterMediaModel?> _mediaFromFileId({
+  ChapterMediaModel? _mediaReference({
+    required String fileId,
+    required ChapterMediaType type,
+  }) {
+    if (fileId.isEmpty) {
+      return null;
+    }
+
+    return ChapterMediaModel(
+      fileId: fileId,
+      url: '',
+      title: '',
+      mimeType: '',
+      durationSeconds: 0,
+      type: type,
+    );
+  }
+
+  Future<ChapterMediaModel?> fetchMedia({
     required String fileId,
     required ChapterMediaType type,
   }) async {
@@ -222,7 +263,10 @@ class ChapterDetailApiService {
       );
       final Map<String, dynamic> data = _responseMap(response);
       final Map<String, dynamic> file = _jsonMap(data['file']);
-      final String url = _fallbackString(data['signedReadUrl'], data['publicUrl']);
+      final String url = _fallbackString(
+        data['signedReadUrl'],
+        data['publicUrl'],
+      );
 
       if (url.isEmpty) return null;
 
@@ -239,19 +283,31 @@ class ChapterDetailApiService {
     }
   }
 
-  Future<int> _safeFetchPdfPageCount(String url) async {
+  Future<int> fetchPdfPageCount({required String pdfUrl}) async {
+    if (pdfUrl.isEmpty) {
+      return 0;
+    }
+
     try {
-      final Response<List<int>> response = await Dio().get<List<int>>(
-        url,
+      final Response<List<int>> response = await _fileClient.get<List<int>>(
+        pdfUrl,
         options: Options(responseType: ResponseType.bytes),
       );
-      final List<int>? bytes = response.data;
-      if (bytes == null || bytes.isEmpty) return 0;
+      final List<int> bytes = response.data ?? <int>[];
+      if (bytes.isEmpty) {
+        return 0;
+      }
 
-      final PdfDocument document = PdfDocument(inputBytes: bytes);
-      final int pageCount = document.pages.count;
-      document.dispose();
-      return pageCount;
+      final PdfDocument document = PdfDocument(
+        inputBytes: Uint8List.fromList(bytes),
+      );
+      try {
+        return document.pages.count;
+      } finally {
+        document.dispose();
+      }
+    } on DioException {
+      return 0;
     } catch (_) {
       return 0;
     }
@@ -289,8 +345,8 @@ class ChapterDetailApiService {
     required int durationSeconds,
   }) {
     if (durationSeconds <= 0) return '0:00';
-    final int seconds = (durationSeconds * (percent.clamp(0, 100).toInt() / 100))
-        .round();
+    final int seconds =
+        (durationSeconds * (percent.clamp(0, 100).toInt() / 100)).round();
     return _durationLabel(seconds);
   }
 
@@ -302,7 +358,8 @@ class ChapterDetailApiService {
     final int hours = duration.inHours;
 
     if (hours > 0) {
-      return '$hours:${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+      return '$hours:${minutes.toString().padLeft(2, '0')}:'
+          '${remainingSeconds.toString().padLeft(2, '0')}';
     }
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }

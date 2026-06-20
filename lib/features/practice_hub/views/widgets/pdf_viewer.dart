@@ -6,9 +6,11 @@ import 'package:get/get.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../../../../core/themes/app_colors.dart';
-import '../../../../../core/themes/app_font.dart';
+import '../../../../core/themes/app_font.dart';
 import '../../../courses/services/courses_api_service.dart';
 import '../../controllers/practice_hub_controller.dart';
+import '../../models/practice_hub_pdf_model.dart';
+import '../../services/practice_hub_api_service.dart';
 
 class PracticeHubPdfViewer extends StatefulWidget {
   const PracticeHubPdfViewer({super.key});
@@ -26,7 +28,10 @@ class _PracticeHubPdfViewerState extends State<PracticeHubPdfViewer> {
     }
 
     return Get.put<PracticeHubController>(
-      PracticeHubController(coursesApiService: Get.find<CoursesApiService>()),
+      PracticeHubController(
+        coursesApiService: Get.find<CoursesApiService>(),
+        practiceHubApiService: Get.find<PracticeHubApiService>(),
+      ),
     );
   }
 
@@ -56,9 +61,25 @@ class _PracticeHubPdfViewerState extends State<PracticeHubPdfViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> pdf = controller.currentSurvivalPdf;
-    final String pdfAsset = pdf['pdfAsset'] as String;
-    final String title = pdf['viewerTitle'] as String? ?? 'Lesson';
+    final PracticeHubPdfDocumentModel? document = controller.currentPracticePdf;
+
+    if (document == null || document.source.trim().isEmpty) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF10201B),
+        body: SafeArea(
+          child: Center(
+            child: Text(
+              'PDF resource is unavailable.',
+              style: TextStyle(
+                fontSize: AppFont.font16.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.white,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFF10201B),
@@ -71,13 +92,13 @@ class _PracticeHubPdfViewerState extends State<PracticeHubPdfViewer> {
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
               child: Column(
                 children: <Widget>[
-                  _PdfViewerTopBar(title: title),
+                  _PdfViewerTopBar(title: document.title),
 
                   SizedBox(height: 21.h),
 
                   Expanded(
                     child: _PdfContentCard(
-                      pdfAsset: pdfAsset,
+                      document: document,
                       pdfController: _pdfController,
                       onDocumentLoaded: controller.onSurvivalPdfDocumentLoaded,
                       onPageChanged: controller.onSurvivalPdfPageChanged,
@@ -211,20 +232,56 @@ class _PdfViewerTopBar extends GetView<PracticeHubController> {
 }
 
 class _PdfContentCard extends StatelessWidget {
-  final String pdfAsset;
-  final PdfViewerController pdfController;
-  final ValueChanged<int> onDocumentLoaded;
-  final ValueChanged<int> onPageChanged;
-
   const _PdfContentCard({
-    required this.pdfAsset,
+    required this.document,
     required this.pdfController,
     required this.onDocumentLoaded,
     required this.onPageChanged,
   });
 
+  final PracticeHubPdfDocumentModel document;
+  final PdfViewerController pdfController;
+  final ValueChanged<int> onDocumentLoaded;
+  final ValueChanged<int> onPageChanged;
+
   @override
   Widget build(BuildContext context) {
+    final Key viewerKey = ValueKey<String>(document.source);
+    final void Function(PdfDocumentLoadedDetails) handleLoaded =
+        (PdfDocumentLoadedDetails details) {
+          onDocumentLoaded(details.document.pages.count);
+        };
+    final void Function(PdfPageChangedDetails) handlePageChanged =
+        (PdfPageChangedDetails details) {
+          onPageChanged(details.newPageNumber);
+        };
+
+    final Widget viewer = document.sourceType == PracticeHubPdfSourceType.network
+        ? SfPdfViewer.network(
+            document.source,
+            key: viewerKey,
+            controller: pdfController,
+            pageLayoutMode: PdfPageLayoutMode.single,
+            scrollDirection: PdfScrollDirection.vertical,
+            canShowScrollHead: false,
+            canShowScrollStatus: false,
+            canShowPaginationDialog: false,
+            onDocumentLoaded: handleLoaded,
+            onPageChanged: handlePageChanged,
+          )
+        : SfPdfViewer.asset(
+            document.source,
+            key: viewerKey,
+            controller: pdfController,
+            pageLayoutMode: PdfPageLayoutMode.single,
+            scrollDirection: PdfScrollDirection.vertical,
+            canShowScrollHead: false,
+            canShowScrollStatus: false,
+            canShowPaginationDialog: false,
+            onDocumentLoaded: handleLoaded,
+            onPageChanged: handlePageChanged,
+          );
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(48.r),
       child: Container(
@@ -233,22 +290,7 @@ class _PdfContentCard extends StatelessWidget {
           color: AppColors.white,
           borderRadius: BorderRadius.circular(48.r),
         ),
-        child: SfPdfViewer.asset(
-          pdfAsset,
-          key: ValueKey<String>(pdfAsset),
-          controller: pdfController,
-          pageLayoutMode: PdfPageLayoutMode.single,
-          scrollDirection: PdfScrollDirection.vertical,
-          canShowScrollHead: false,
-          canShowScrollStatus: false,
-          canShowPaginationDialog: false,
-          onDocumentLoaded: (PdfDocumentLoadedDetails details) {
-            onDocumentLoaded(details.document.pages.count);
-          },
-          onPageChanged: (PdfPageChangedDetails details) {
-            onPageChanged(details.newPageNumber);
-          },
-        ),
+        child: viewer,
       ),
     );
   }

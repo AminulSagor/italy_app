@@ -162,6 +162,7 @@ class QuizController extends GetxController {
 
         if (result.isSuccess && result.data != null) {
           lessonComplete.value = result.data;
+          await _markLessonCompletedAfterQuiz();
         }
         return;
       }
@@ -170,6 +171,26 @@ class QuizController extends GetxController {
     } finally {
       isCompleting.value = false;
     }
+  }
+
+  Future<void> _markLessonCompletedAfterQuiz() async {
+    final String resolvedCourseId = courseId?.trim() ?? '';
+    final String resolvedLessonId = lessonId?.trim() ?? '';
+    if (resolvedCourseId.isEmpty || resolvedLessonId.isEmpty) {
+      return;
+    }
+
+    await ApiErrorHandler.call<Object?>(
+      () async {
+        await _quizApiService.markLessonCompleted(
+          courseId: resolvedCourseId,
+          lessonId: resolvedLessonId,
+        );
+        return null;
+      },
+      showError: false,
+      errorTitle: 'Lesson Progress',
+    );
   }
 
   void selectOption(int index) {

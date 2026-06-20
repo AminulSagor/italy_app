@@ -11,6 +11,7 @@ import '../services/token_service.dart';
 import '../../features/notifications/services/notifications_mock_service.dart';
 import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
+import '../../features/practice_hub/services/practice_hub_api_service.dart';
 
 class InitialBindings extends Bindings {
   @override
@@ -49,9 +50,14 @@ class InitialBindings extends Bindings {
     );
     Get.lazyPut<NotificationsMockService>(() => NotificationsMockService());
     Get.lazyPut<LeaderboardController>(() => LeaderboardController());
+    Get.lazyPut<PracticeHubApiService>(
+      () => PracticeHubApiService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
     Get.lazyPut<PracticeHubController>(
       () => PracticeHubController(
         coursesApiService: Get.find<CoursesApiService>(),
+        practiceHubApiService: Get.find<PracticeHubApiService>(),
       ),
       fenix: true,
     );

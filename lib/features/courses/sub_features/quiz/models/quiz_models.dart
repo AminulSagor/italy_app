@@ -29,6 +29,10 @@ class QuizQuestionModel {
   final String correctMeaning;
   final String? prompt;
   final String? objectLabel;
+  final String mediaFileId;
+  final String mediaUrl;
+  final String mediaMimeType;
+  final String generatedAudioText;
 
   const QuizQuestionModel({
     required this.id,
@@ -49,7 +53,25 @@ class QuizQuestionModel {
     required this.correctMeaning,
     this.prompt,
     this.objectLabel,
+    this.mediaFileId = '',
+    this.mediaUrl = '',
+    this.mediaMimeType = '',
+    this.generatedAudioText = '',
   });
+
+  bool get hasAudioMedia {
+    if (mediaUrl.isEmpty) return false;
+    return mediaMimeType.toLowerCase().startsWith('audio/') ||
+        type == QuizQuestionType.listening ||
+        type == QuizQuestionType.listeningAssembly;
+  }
+
+  bool get hasImageMedia {
+    if (mediaUrl.isEmpty) return false;
+    return mediaMimeType.toLowerCase().startsWith('image/') ||
+        type == QuizQuestionType.writingWordTranslation ||
+        type == QuizQuestionType.identifyImage;
+  }
 
   factory QuizQuestionModel.fromJson(Map<String, dynamic> json) {
     return QuizQuestionModel(
@@ -90,6 +112,10 @@ class QuizQuestionModel {
       correctMeaning: json['correctMeaning'] as String? ?? '',
       prompt: json['prompt'] as String?,
       objectLabel: json['objectLabel'] as String?,
+      mediaFileId: json['mediaFileId'] as String? ?? '',
+      mediaUrl: json['mediaUrl'] as String? ?? '',
+      mediaMimeType: json['mediaMimeType'] as String? ?? '',
+      generatedAudioText: json['generatedAudioText'] as String? ?? '',
     );
   }
 
@@ -113,6 +139,10 @@ class QuizQuestionModel {
       'correctMeaning': correctMeaning,
       'prompt': prompt,
       'objectLabel': objectLabel,
+      'mediaFileId': mediaFileId,
+      'mediaUrl': mediaUrl,
+      'mediaMimeType': mediaMimeType,
+      'generatedAudioText': generatedAudioText,
     };
   }
 }

@@ -16,6 +16,7 @@ class ChapterDetailModel {
   final ChapterResourceModel theoryBook;
   final ChapterResourceModel vocabulary;
   final ChapterQuizModel? quiz;
+  final bool isQuizAvailabilityKnown;
   final LessonProgressModel progress;
 
   const ChapterDetailModel({
@@ -33,6 +34,7 @@ class ChapterDetailModel {
     this.video,
     this.audio,
     this.quiz,
+    this.isQuizAvailabilityKnown = true,
   });
 
   factory ChapterDetailModel.fromJson(Map<String, dynamic> json) {
@@ -76,14 +78,18 @@ class ChapterDetailModel {
       quiz: json['quiz'] is Map
           ? ChapterQuizModel.fromJson(_jsonMap(json['quiz']))
           : null,
+      isQuizAvailabilityKnown: _boolValue(
+        json['isQuizAvailabilityKnown'],
+        fallback: true,
+      ),
       progress: json['progress'] is Map
           ? LessonProgressModel.fromJson(_jsonMap(json['progress']))
           : const LessonProgressModel.empty(),
     );
   }
 
-  bool get hasVideo => video?.url.isNotEmpty == true;
-  bool get hasAudio => audio?.url.isNotEmpty == true;
+  bool get hasVideo => video?.fileId.isNotEmpty == true;
+  bool get hasAudio => audio?.fileId.isNotEmpty == true;
   bool get hasLessonContent => lessonContent != null;
   bool get hasQuiz => quiz != null;
 
@@ -102,6 +108,7 @@ class ChapterDetailModel {
       'theoryBook': theoryBook.toJson(),
       'vocabulary': vocabulary.toJson(),
       'quiz': quiz?.toJson(),
+      'isQuizAvailabilityKnown': isQuizAvailabilityKnown,
       'progress': progress.toJson(),
     };
   }
@@ -111,6 +118,9 @@ class ChapterDetailModel {
     String? watchedTimeLabel,
     String? totalTimeLabel,
     double? videoProgress,
+    ChapterMediaModel? video,
+    ChapterMediaModel? audio,
+    ChapterResourceModel? theoryBook,
     ChapterQuizModel? quiz,
     LessonProgressModel? progress,
   }) {
@@ -123,11 +133,12 @@ class ChapterDetailModel {
       totalTimeLabel: totalTimeLabel ?? this.totalTimeLabel,
       videoProgress: videoProgress ?? this.videoProgress,
       lessonContent: lessonContent,
-      video: video,
-      audio: audio,
-      theoryBook: theoryBook,
+      video: video ?? this.video,
+      audio: audio ?? this.audio,
+      theoryBook: theoryBook ?? this.theoryBook,
       vocabulary: vocabulary,
       quiz: quiz ?? this.quiz,
+      isQuizAvailabilityKnown: isQuizAvailabilityKnown,
       progress: progress ?? this.progress,
     );
   }
@@ -232,6 +243,7 @@ class ChapterResourceModel {
   final String title;
   final String subtitle;
   final String iconName;
+  final String? fileId;
   final String? fileUrl;
   final bool isAvailable;
   final int count;
@@ -241,6 +253,7 @@ class ChapterResourceModel {
     required this.subtitle,
     required this.iconName,
     required this.isAvailable,
+    this.fileId,
     this.fileUrl,
     this.count = 0,
   });
@@ -262,6 +275,7 @@ class ChapterResourceModel {
       title: _stringValue(json['title']),
       subtitle: _fallbackString(json['subtitle'], 'Not given'),
       iconName: _stringValue(json['iconName']),
+      fileId: _emptyToNull(json['fileId']),
       fileUrl: _emptyToNull(json['fileUrl']),
       isAvailable: _boolValue(json['isAvailable'], fallback: true),
       count: _intValue(json['count']),
@@ -273,10 +287,31 @@ class ChapterResourceModel {
       'title': title,
       'subtitle': subtitle,
       'iconName': iconName,
+      'fileId': fileId,
       'fileUrl': fileUrl,
       'isAvailable': isAvailable,
       'count': count,
     };
+  }
+
+  ChapterResourceModel copyWith({
+    String? title,
+    String? subtitle,
+    String? iconName,
+    String? fileId,
+    String? fileUrl,
+    bool? isAvailable,
+    int? count,
+  }) {
+    return ChapterResourceModel(
+      title: title ?? this.title,
+      subtitle: subtitle ?? this.subtitle,
+      iconName: iconName ?? this.iconName,
+      fileId: fileId ?? this.fileId,
+      fileUrl: fileUrl ?? this.fileUrl,
+      isAvailable: isAvailable ?? this.isAvailable,
+      count: count ?? this.count,
+    );
   }
 }
 

@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 import '../../controllers/practice_hub_controller.dart';
+import '../../models/daily_challenge_models.dart';
 import '../../../../core/widgets/custom_button.dart';
 
 class DailyChestUnlockedView extends GetView<PracticeHubController> {
@@ -133,75 +134,101 @@ class _ChestUnlockedHeader extends GetView<PracticeHubController> {
   }
 }
 
-class XpBoostButton extends StatelessWidget {
+class XpBoostButton extends GetView<PracticeHubController> {
   const XpBoostButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 64.h,
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(17.w, 8.h, 24.w, 8.h),
-      decoration: BoxDecoration(
-        color: AppColors.primaryGreen,
-        borderRadius: BorderRadius.circular(999.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Container(
-            width: 55.r,
-            height: 39.r,
-            decoration: BoxDecoration(
-              color: Color(0xFF8DFF4A),
-              borderRadius: BorderRadius.circular(999.r),
-              //shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                '2×',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF1F6E00),
+    return Obx(() {
+      final DailyChallengeXpBoostModel? boost =
+          controller.dailyChallengeDashboard.value?.xpBoost;
+      final double multiplier = boost?.multiplier ?? 1;
+      final int seconds = boost?.remainingSeconds ?? 0;
+      final String remaining = _formatDuration(seconds);
+
+      return Container(
+        height: 64.h,
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(17.w, 8.h, 24.w, 8.h),
+        decoration: BoxDecoration(
+          color: AppColors.primaryGreen,
+          borderRadius: BorderRadius.circular(999.r),
+        ),
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 55.r,
+              height: 39.r,
+              decoration: BoxDecoration(
+                color: const Color(0xFF8DFF4A),
+                borderRadius: BorderRadius.circular(999.r),
+              ),
+              child: Center(
+                child: Text(
+                  '${_formatMultiplier(multiplier)}×',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    height: 1,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF1F6E00),
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(width: 16.w),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Boost Active:',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  height: 1,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white.withValues(alpha: 0.82),
-                ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    boost?.isActive == true ? 'Boost Active:' : 'XP Boost:',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      height: 1,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white.withValues(alpha: 0.82),
+                    ),
+                  ),
+                  SizedBox(height: 5.h),
+                  Text(
+                    boost?.isActive == true
+                        ? '$remaining remaining'
+                        : 'No active boost',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: 5.h),
-              Text(
-                '47:59:59 remaining',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  String _formatDuration(int seconds) {
+    final Duration duration = Duration(seconds: seconds.clamp(0, 864000).toInt());
+    final String hours = duration.inHours.toString().padLeft(2, '0');
+    final String minutes =
+        duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final String remainingSeconds =
+        duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$hours:$minutes:$remainingSeconds';
+  }
+
+  String _formatMultiplier(double value) {
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toStringAsFixed(1);
   }
 }
 
-class _XpRewardCard extends StatelessWidget {
+class _XpRewardCard extends GetView<PracticeHubController> {
   const _XpRewardCard();
 
   @override
@@ -239,13 +266,15 @@ class _XpRewardCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 10.h),
-          Text(
-            '+50 XP',
-            style: TextStyle(
-              fontSize: AppFont.font22.sp,
-              height: 1,
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF4C2B05),
+          Obx(
+            () => Text(
+              '+${controller.lastDailyChestReward.value?.totalXpAwarded ?? 0} XP',
+              style: TextStyle(
+                fontSize: AppFont.font22.sp,
+                height: 1,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF4C2B05),
+              ),
             ),
           ),
         ],
@@ -254,7 +283,7 @@ class _XpRewardCard extends StatelessWidget {
   }
 }
 
-class _FreezeRewardCard extends StatelessWidget {
+class _FreezeRewardCard extends GetView<PracticeHubController> {
   const _FreezeRewardCard();
 
   @override
@@ -283,7 +312,7 @@ class _FreezeRewardCard extends StatelessWidget {
           ),
           SizedBox(height: 20.h),
           Text(
-            'NEW ITEM',
+            'STREAK FREEZE',
             style: TextStyle(
               fontSize: AppFont.font11.sp,
               height: 1,
@@ -292,15 +321,17 @@ class _FreezeRewardCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 10.h),
-          Text(
-            '1× Streak\nFreeze',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: AppFont.font24.sp,
-              height: 1.28,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.8,
-              color: const Color(0xFF005A91),
+          Obx(
+            () => Text(
+              '${controller.lastDailyChestReward.value?.streakFreezeCount ?? 0}× Awarded',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: AppFont.font20.sp,
+                height: 1.2,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.6,
+                color: const Color(0xFF005A91),
+              ),
             ),
           ),
         ],
@@ -340,7 +371,7 @@ class _StreakIncreasePill extends GetView<PracticeHubController> {
           Expanded(
             child: Obx(
               () => Text(
-                'Your streak increases to ${controller.dailyStreakDays.value + 1} Days!',
+                'Your streak is ${controller.dailyStreakDays} Days!',
                 style: TextStyle(
                   fontSize: AppFont.font13.sp,
                   height: 1,

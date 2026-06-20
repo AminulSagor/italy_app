@@ -123,5 +123,7 @@ class CourseDetailController extends GetxController {
         controllerTag: tag,
       ),
     );
+
+    await loadDetail();
   }
 }

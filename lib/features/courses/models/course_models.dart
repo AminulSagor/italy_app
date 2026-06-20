@@ -465,6 +465,87 @@ class CourseProgressModel {
       completionPercent: _doubleValue(json['completionPercent']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'courseId': courseId,
+      'completedLessons': completedLessons,
+      'totalLessons': totalLessons,
+      'completionPercent': completionPercent,
+    };
+  }
+
+  CourseProgressModel copyWith({
+    String? courseId,
+    int? completedLessons,
+    int? totalLessons,
+    double? completionPercent,
+  }) {
+    return CourseProgressModel(
+      courseId: courseId ?? this.courseId,
+      completedLessons: completedLessons ?? this.completedLessons,
+      totalLessons: totalLessons ?? this.totalLessons,
+      completionPercent: completionPercent ?? this.completionPercent,
+    );
+  }
+}
+
+class CourseLessonProgressModel {
+  final String lessonId;
+  final int videoWatchPercent;
+  final bool isTheoryRead;
+  final bool isCompleted;
+
+  const CourseLessonProgressModel({
+    required this.lessonId,
+    required this.videoWatchPercent,
+    required this.isTheoryRead,
+    required this.isCompleted,
+  });
+
+  const CourseLessonProgressModel.empty({required this.lessonId})
+      : videoWatchPercent = 0,
+        isTheoryRead = false,
+        isCompleted = false;
+
+  factory CourseLessonProgressModel.fromJson(Map<String, dynamic> json) {
+    return CourseLessonProgressModel(
+      lessonId: json['lessonId']?.toString() ?? '',
+      videoWatchPercent: _intValue(json['videoWatchPercent'])
+          .clamp(0, 100)
+          .toInt(),
+      isTheoryRead: _boolValue(json['isTheoryRead']),
+      isCompleted: _boolValue(json['isCompleted']),
+    );
+  }
+
+  double get progress {
+    if (isCompleted) return 1;
+    return (videoWatchPercent / 100).clamp(0.0, 1.0).toDouble();
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'lessonId': lessonId,
+      'videoWatchPercent': videoWatchPercent,
+      'isTheoryRead': isTheoryRead,
+      'isCompleted': isCompleted,
+    };
+  }
+
+  CourseLessonProgressModel copyWith({
+    String? lessonId,
+    int? videoWatchPercent,
+    bool? isTheoryRead,
+    bool? isCompleted,
+  }) {
+    return CourseLessonProgressModel(
+      lessonId: lessonId ?? this.lessonId,
+      videoWatchPercent: videoWatchPercent ?? this.videoWatchPercent,
+      isTheoryRead: isTheoryRead ?? this.isTheoryRead,
+      isCompleted: isCompleted ?? this.isCompleted,
+    );
+  }
 }
 
 int _intValue(dynamic value) {
@@ -476,4 +557,9 @@ int _intValue(dynamic value) {
 double _doubleValue(dynamic value) {
   if (value is num) return value.toDouble();
   return double.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+bool _boolValue(dynamic value) {
+  if (value is bool) return value;
+  return value?.toString().toLowerCase() == 'true';
 }

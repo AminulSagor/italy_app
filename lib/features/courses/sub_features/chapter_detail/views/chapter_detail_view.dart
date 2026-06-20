@@ -85,6 +85,7 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                   ChapterVideoCard(
                     detail: detail,
                     playCommand: controller.videoPlayCommand.value,
+                    loadVideoUrl: controller.loadVideoUrl,
                     onProgressChanged: (Duration position, Duration duration) {
                       controller.recordVideoProgress(
                         position: position,
@@ -98,7 +99,8 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                   LessonContentCard(
                     lesson: detail.lessonContent!,
                     audio: detail.audio,
-                    onAudioStarted: controller.recordAudioListened,
+                    loadAudioUrl: controller.loadAudioUrl,
+                    onAudioCompleted: controller.recordAudioCompleted,
                   ),
                   SizedBox(height: 38.h),
                 ],

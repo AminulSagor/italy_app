@@ -39,14 +39,19 @@ class CoursesApiService {
           _apiClient.dio.get('/courses/$courseId/syllabus'),
         ]);
 
-    final CourseProgressModel? progress = await _safeFetchCourseProgress(
+    final Map<String, dynamic> course = _responseMap(responses.first);
+    final Map<String, dynamic> syllabus = _responseMap(responses.last);
+    final CourseProgressModel? courseProgress = await _safeFetchCourseProgress(
       courseId: courseId,
     );
+    final Map<String, CourseLessonProgressModel> lessonProgressById =
+        await _safeFetchLessonProgressById(syllabus);
 
     return _courseDetailFromApi(
-      course: _responseMap(responses.first),
-      syllabus: _responseMap(responses.last),
-      progress: progress,
+      course: course,
+      syllabus: syllabus,
+      courseProgress: courseProgress,
+      lessonProgressById: lessonProgressById,
       isProEnabled: isProEnabled,
     );
   }
@@ -71,6 +76,49 @@ class CoursesApiService {
     }
   }
 
+  Future<Map<String, CourseLessonProgressModel>>
+      _safeFetchLessonProgressById(Map<String, dynamic> syllabus) async {
+    final List<String> lessonIds = _jsonList(syllabus['chapters'])
+        .expand(
+          (Map<String, dynamic> chapter) => _jsonList(chapter['lessons']),
+        )
+        .map((Map<String, dynamic> lesson) => _stringValue(lesson['id']))
+        .where((String lessonId) => lessonId.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+
+    final List<MapEntry<String, CourseLessonProgressModel>> entries =
+        await Future.wait(
+          lessonIds.map((String lessonId) async {
+            final CourseLessonProgressModel progress =
+                await _safeFetchLessonProgress(lessonId: lessonId);
+            return MapEntry<String, CourseLessonProgressModel>(
+              lessonId,
+              progress,
+            );
+          }),
+        );
+
+    return Map<String, CourseLessonProgressModel>.fromEntries(entries);
+  }
+
+  Future<CourseLessonProgressModel> _safeFetchLessonProgress({
+    required String lessonId,
+  }) async {
+    try {
+      final Response<dynamic> response = await _apiClient.dio.get(
+        '/learning-progress/lessons/$lessonId',
+      );
+      final CourseLessonProgressModel progress =
+          CourseLessonProgressModel.fromJson(_responseMap(response));
+      return progress.lessonId.isEmpty
+          ? progress.copyWith(lessonId: lessonId)
+          : progress;
+    } on DioException {
+      return CourseLessonProgressModel.empty(lessonId: lessonId);
+    }
+  }
+
   CourseCardModel _courseCardFromApi(
     Map<String, dynamic> json, {
     CourseProgressModel? progress,
@@ -79,10 +127,11 @@ class CoursesApiService {
     final String subtitle = _stringValue(json['subtitle']).isNotEmpty
         ? _stringValue(json['subtitle'])
         : _stringValue(json['description']);
+    final String id = _stringValue(json['id']);
 
     return CourseCardModel(
-      id: _stringValue(json['id']),
-      courseId: _stringValue(json['courseId']),
+      id: id,
+      courseId: _fallbackString(json['courseId'], id),
       chapterId: _stringValue(json['chapterId']),
       title: _fallbackString(json['title'], 'Untitled Course'),
       subtitle: subtitle,
@@ -97,7 +146,8 @@ class CoursesApiService {
     required Map<String, dynamic> course,
     required Map<String, dynamic> syllabus,
     required bool isProEnabled,
-    CourseProgressModel? progress,
+    required Map<String, CourseLessonProgressModel> lessonProgressById,
+    CourseProgressModel? courseProgress,
   }) {
     final Map<String, dynamic> sourceCourse = _jsonMapOr(
       syllabus['course'],
@@ -107,11 +157,21 @@ class CoursesApiService {
       sourceCourse['isFree'],
       fallback: true,
     );
-    final int percent = (progress?.completionPercent ?? 0).round();
+    final int lessonCount = _publishedLessonCount(syllabus);
+    final int completedLessonCount = lessonProgressById.values
+        .where((CourseLessonProgressModel progress) => progress.isCompleted)
+        .length;
+    final int percent = lessonCount > 0
+        ? ((completedLessonCount / lessonCount) * 100).round()
+        : (courseProgress?.completionPercent ?? 0).round();
+    final String sourceCourseId = _fallbackString(
+      sourceCourse['id'],
+      course['id'],
+    );
 
     return CourseDetailModel(
-      id: _stringValue(sourceCourse['id']),
-      courseId: _stringValue(sourceCourse['courseId']),
+      id: sourceCourseId,
+      courseId: _fallbackString(sourceCourse['courseId'], sourceCourseId),
       chapterId: _stringValue(sourceCourse['chapterId']),
       title: _fallbackString(sourceCourse['title'], 'Course Details'),
       progressLabel: '$percent%',
@@ -119,9 +179,10 @@ class CoursesApiService {
       isExamFinished: false,
       chapters: _learningItemsFromSyllabus(
         syllabus: syllabus,
+        courseId: sourceCourseId,
         courseIsFree: courseIsFree,
         isProEnabled: isProEnabled,
-        completedLessons: progress?.completedLessons ?? 0,
+        lessonProgressById: lessonProgressById,
       ),
       finalExam: _finalExamFromCourse(sourceCourse, completionPercent: percent),
     );
@@ -129,81 +190,137 @@ class CoursesApiService {
 
   List<CourseChapterModel> _learningItemsFromSyllabus({
     required Map<String, dynamic> syllabus,
+    required String courseId,
     required bool courseIsFree,
     required bool isProEnabled,
-    required int completedLessons,
+    required Map<String, CourseLessonProgressModel> lessonProgressById,
   }) {
     final List<CourseChapterModel> items = <CourseChapterModel>[];
     final List<Map<String, dynamic>> chapters = _jsonList(syllabus['chapters']);
+    final List<_CourseLessonEntry> lessonEntries = <_CourseLessonEntry>[];
+
+    for (final Map<String, dynamic> chapter in chapters) {
+      for (final Map<String, dynamic> lesson in _jsonList(chapter['lessons'])) {
+        final bool lessonIsFree = _boolValue(
+          lesson['isFree'],
+          fallback: true,
+        );
+        lessonEntries.add(
+          _CourseLessonEntry(
+            lesson: lesson,
+            isAccessible: courseIsFree || lessonIsFree || isProEnabled,
+          ),
+        );
+      }
+    }
+
+    final int currentLessonIndex = _currentLessonIndex(
+      lessonEntries: lessonEntries,
+      lessonProgressById: lessonProgressById,
+    );
+    int lessonIndex = 0;
 
     for (final Map<String, dynamic> chapter in chapters) {
       final String chapterTitle = _stringValue(chapter['title']);
       final List<Map<String, dynamic>> lessons = _jsonList(chapter['lessons']);
 
       if (lessons.isEmpty) {
-        items.add(
-          _chapterPlaceholderFromApi(
-            chapter: chapter,
-            index: items.length,
-            completedLessons: completedLessons,
-          ),
-        );
+        items.add(_chapterPlaceholderFromApi(chapter: chapter));
         continue;
       }
 
       for (final Map<String, dynamic> lesson in lessons) {
+        final String lessonId = _stringValue(lesson['id']);
+        final CourseLessonProgressModel lessonProgress =
+            lessonProgressById[lessonId] ??
+            CourseLessonProgressModel.empty(lessonId: lessonId);
+
         items.add(
           _lessonCardFromApi(
             lesson: lesson,
+            fallbackCourseId: courseId,
             chapterTitle: chapterTitle,
             chapterId: _stringValue(chapter['id']),
             courseIsFree: courseIsFree,
             isProEnabled: isProEnabled,
-            index: items.length,
-            completedLessons: completedLessons,
+            isCurrent: lessonIndex == currentLessonIndex,
+            progress: lessonProgress,
           ),
         );
+        lessonIndex++;
       }
     }
 
     return items;
   }
 
+  int _currentLessonIndex({
+    required List<_CourseLessonEntry> lessonEntries,
+    required Map<String, CourseLessonProgressModel> lessonProgressById,
+  }) {
+    for (int index = 0; index < lessonEntries.length; index++) {
+      final _CourseLessonEntry entry = lessonEntries[index];
+      final String lessonId = _stringValue(entry.lesson['id']);
+      final CourseLessonProgressModel progress =
+          lessonProgressById[lessonId] ??
+          CourseLessonProgressModel.empty(lessonId: lessonId);
+
+      if (entry.isAccessible &&
+          !progress.isCompleted &&
+          (progress.videoWatchPercent > 0 || progress.isTheoryRead)) {
+        return index;
+      }
+    }
+
+    for (int index = 0; index < lessonEntries.length; index++) {
+      final _CourseLessonEntry entry = lessonEntries[index];
+      final String lessonId = _stringValue(entry.lesson['id']);
+      final CourseLessonProgressModel progress =
+          lessonProgressById[lessonId] ??
+          CourseLessonProgressModel.empty(lessonId: lessonId);
+
+      if (entry.isAccessible && !progress.isCompleted) {
+        return index;
+      }
+    }
+
+    return -1;
+  }
+
   CourseChapterModel _lessonCardFromApi({
     required Map<String, dynamic> lesson,
+    required String fallbackCourseId,
     required String chapterTitle,
     required String chapterId,
     required bool courseIsFree,
     required bool isProEnabled,
-    required int index,
-    required int completedLessons,
+    required bool isCurrent,
+    required CourseLessonProgressModel progress,
   }) {
     final bool lessonIsFree = _boolValue(lesson['isFree'], fallback: true);
     final bool isAccessible = courseIsFree || lessonIsFree || isProEnabled;
     final CourseChapterState state = _learningItemState(
-      index: index,
-      completedLessons: completedLessons,
       isAccessible: isAccessible,
       lessonIsFree: lessonIsFree,
+      isCurrent: isCurrent,
+      progress: progress,
     );
 
     return CourseChapterModel(
       id: _stringValue(lesson['id']),
-      courseId: _stringValue(lesson['courseId']),
+      courseId: _fallbackString(lesson['courseId'], fallbackCourseId),
       chapterId: chapterId,
       title: _fallbackString(lesson['title'], 'Untitled Lesson'),
       subtitle: chapterTitle.isEmpty ? 'Course lesson' : chapterTitle,
-      statusLabel: _statusLabelForState(state),
+      statusLabel: _statusLabelForState(state, progress: progress),
       tagLabel: isAccessible ? (lessonIsFree ? 'FREE' : null) : 'PRO',
-      progress: _progressForState(state),
+      progress: progress.progress,
       state: state,
     );
   }
 
   CourseChapterModel _chapterPlaceholderFromApi({
     required Map<String, dynamic> chapter,
-    required int index,
-    required int completedLessons,
   }) {
     return CourseChapterModel(
       id: _stringValue(chapter['id']),
@@ -242,29 +359,37 @@ class CoursesApiService {
   }
 
   CourseChapterState _learningItemState({
-    required int index,
-    required int completedLessons,
     required bool isAccessible,
     required bool lessonIsFree,
+    required bool isCurrent,
+    required CourseLessonProgressModel progress,
   }) {
-    if (index < completedLessons) return CourseChapterState.completed;
+    if (progress.isCompleted) return CourseChapterState.completed;
     if (!isAccessible) return CourseChapterState.locked;
-    if (index == completedLessons) return CourseChapterState.current;
+    if (isCurrent) return CourseChapterState.current;
     return lessonIsFree
         ? CourseChapterState.free
         : CourseChapterState.available;
   }
 
-  String? _statusLabelForState(CourseChapterState state) {
+  String? _statusLabelForState(
+    CourseChapterState state, {
+    required CourseLessonProgressModel progress,
+  }) {
     if (state == CourseChapterState.completed) return 'COMPLETED';
     if (state == CourseChapterState.current) return 'CURRENT STUDY';
+    if (progress.videoWatchPercent > 0) {
+      return '${progress.videoWatchPercent}% WATCHED';
+    }
     return null;
   }
 
-  double _progressForState(CourseChapterState state) {
-    if (state == CourseChapterState.completed) return 1;
-    if (state == CourseChapterState.current) return 0.6;
-    return 0;
+  int _publishedLessonCount(Map<String, dynamic> syllabus) {
+    return _jsonList(syllabus['chapters']).fold<int>(
+      0,
+      (int total, Map<String, dynamic> chapter) =>
+          total + _jsonList(chapter['lessons']).length,
+    );
   }
 
   Map<String, dynamic> _responseMap(Response<dynamic> response) {
@@ -367,4 +492,14 @@ class CoursesApiService {
         requirementLabel: '80% Required',
         lockedLabel: 'Locked',
       );
+}
+
+class _CourseLessonEntry {
+  final Map<String, dynamic> lesson;
+  final bool isAccessible;
+
+  const _CourseLessonEntry({
+    required this.lesson,
+    required this.isAccessible,
+  });
 }
