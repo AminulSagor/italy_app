@@ -72,6 +72,44 @@ class _PromptText extends StatelessWidget {
   }
 }
 
+class _QuotedPromptText extends StatelessWidget {
+  const _QuotedPromptText({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final RegExpMatch? match = RegExp(r'"([^"]+)"').firstMatch(text);
+    final TextStyle baseStyle = TextStyle(
+      fontSize: AppFont.font28.sp,
+      fontWeight: FontWeight.w900,
+      color: AppColors.homePrimaryText,
+      height: 1.35,
+    );
+
+    if (match == null) {
+      return Text(
+        '"$text"',
+        style: baseStyle.copyWith(color: AppColors.primaryGreen),
+      );
+    }
+
+    return Text.rich(
+      TextSpan(
+        style: baseStyle,
+        children: <InlineSpan>[
+          TextSpan(text: text.substring(0, match.start)),
+          TextSpan(
+            text: text.substring(match.start, match.end),
+            style: baseStyle.copyWith(color: AppColors.primaryGreen),
+          ),
+          TextSpan(text: text.substring(match.end)),
+        ],
+      ),
+    );
+  }
+}
+
 class _Eyebrow extends StatelessWidget {
   final String text;
 
@@ -208,14 +246,22 @@ class _WordBank extends StatelessWidget {
         alignment: WrapAlignment.center,
         spacing: 18.w,
         runSpacing: 22.h,
-        children: words.map((String word) {
-          final bool isDisabled = selected.contains(word);
+        children: List<Widget>.generate(words.length, (int index) {
+          final String word = words[index];
+          final int occurrence = words
+              .take(index + 1)
+              .where((String item) => item == word)
+              .length;
+          final int selectedCount = selected
+              .where((String item) => item == word)
+              .length;
+          final bool isDisabled = occurrence <= selectedCount;
           return _WordChip(
             word: hideDisabledText && isDisabled ? '' : word,
             isDisabled: isDisabled,
             onTap: isDisabled ? null : () => onWordTap(word),
           );
-        }).toList(),
+        }),
       ),
     );
   }
@@ -339,18 +385,19 @@ class _ImagePlaceholder extends StatelessWidget {
           child: Image.network(
             imageUrl,
             fit: BoxFit.contain,
-            loadingBuilder: (
-              BuildContext context,
-              Widget child,
-              ImageChunkEvent? loadingProgress,
-            ) {
-              if (loadingProgress == null) return child;
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primaryGreen,
-                ),
-              );
-            },
+            loadingBuilder:
+                (
+                  BuildContext context,
+                  Widget child,
+                  ImageChunkEvent? loadingProgress,
+                ) {
+                  if (loadingProgress == null) return child;
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryGreen,
+                    ),
+                  );
+                },
             errorBuilder: (_, __, ___) => Center(
               child: Icon(
                 Icons.broken_image_outlined,
@@ -364,4 +411,3 @@ class _ImagePlaceholder extends StatelessWidget {
     );
   }
 }
-

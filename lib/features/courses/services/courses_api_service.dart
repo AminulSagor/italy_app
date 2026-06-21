@@ -46,12 +46,18 @@ class CoursesApiService {
     );
     final Map<String, CourseLessonProgressModel> lessonProgressById =
         await _safeFetchLessonProgressById(syllabus);
+    final Map<String, dynamic>? finalExamGateway =
+        await _safeFetchFinalExamGateway(
+      courseId: courseId,
+      hasLinkedExam: _stringValue(course['finalExamTemplateId']).isNotEmpty,
+    );
 
     return _courseDetailFromApi(
       course: course,
       syllabus: syllabus,
       courseProgress: courseProgress,
       lessonProgressById: lessonProgressById,
+      finalExamGateway: finalExamGateway,
       isProEnabled: isProEnabled,
     );
   }
@@ -71,6 +77,22 @@ class CoursesApiService {
         '/learning-progress/courses/$courseId',
       );
       return CourseProgressModel.fromJson(_responseMap(response));
+    } on DioException {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _safeFetchFinalExamGateway({
+    required String courseId,
+    required bool hasLinkedExam,
+  }) async {
+    if (!hasLinkedExam || courseId.trim().isEmpty) return null;
+
+    try {
+      final Response<dynamic> response = await _apiClient.dio.get(
+        '/final-exams/courses/$courseId/gateway',
+      );
+      return _responseMap(response);
     } on DioException {
       return null;
     }
@@ -147,6 +169,7 @@ class CoursesApiService {
     required Map<String, dynamic> syllabus,
     required bool isProEnabled,
     required Map<String, CourseLessonProgressModel> lessonProgressById,
+    required Map<String, dynamic>? finalExamGateway,
     CourseProgressModel? courseProgress,
   }) {
     final Map<String, dynamic> sourceCourse = _jsonMapOr(
@@ -184,7 +207,11 @@ class CoursesApiService {
         isProEnabled: isProEnabled,
         lessonProgressById: lessonProgressById,
       ),
-      finalExam: _finalExamFromCourse(sourceCourse, completionPercent: percent),
+      finalExam: _finalExamFromCourse(
+        sourceCourse,
+        gateway: finalExamGateway,
+        completionPercent: percent,
+      ),
     );
   }
 
@@ -336,25 +363,62 @@ class CoursesApiService {
 
   CourseFinalExamModel _finalExamFromCourse(
     Map<String, dynamic> course, {
+    required Map<String, dynamic>? gateway,
     required int completionPercent,
   }) {
-    final bool hasTemplate = _stringValue(
+    final bool hasLinkedExam = _stringValue(
       course['finalExamTemplateId'],
     ).isNotEmpty;
-    final bool canStart = hasTemplate && completionPercent >= 80;
-    final int remainingPercent = (80 - completionPercent).clamp(0, 80).toInt();
+    final Map<String, dynamic> exam = gateway == null
+        ? <String, dynamic>{}
+        : _jsonMapOr(gateway['exam'], <String, dynamic>{});
+    final bool hasPublishedExam = _stringValue(exam['id']).isNotEmpty;
+    final int unlockPercent = _intValue(exam['unlockCompletionPercent']);
+    final String backendProgressValue = gateway == null
+        ? ''
+        : _stringValue(gateway['courseProgressPercent']);
+    final int backendProgressPercent = backendProgressValue.isEmpty
+        ? completionPercent
+        : _intValue(backendProgressValue);
+    final bool thresholdReached =
+        hasPublishedExam && backendProgressPercent >= unlockPercent;
+    final bool gatewayUnlocked = gateway != null &&
+        (_boolValue(gateway['isUnlocked'], fallback: thresholdReached) ||
+            thresholdReached);
+    final bool canStart =
+        hasLinkedExam && hasPublishedExam && gatewayUnlocked;
+    final String gatewayMessage = gateway == null
+        ? ''
+        : _stringValue(gateway['message']);
+
+    String helperLabel;
+    if (!hasLinkedExam) {
+      helperLabel = 'Final exam not configured';
+    } else if (!hasPublishedExam) {
+      helperLabel = 'Final exam is not published yet';
+    } else if (!gatewayUnlocked) {
+      helperLabel = gatewayMessage.isNotEmpty
+          ? gatewayMessage
+          : 'Reach $unlockPercent% course completion to unlock the final exam';
+    } else {
+      helperLabel = gatewayMessage.isNotEmpty
+          ? gatewayMessage
+          : 'Ready to start';
+    }
 
     return CourseFinalExamModel(
-      title: 'Final Exam',
-      description:
-          'Unlock after completing the course to prove your Italian mastery & earn certificate.',
+      examId: _stringValue(exam['id']),
+      title: _fallbackString(exam['title'], 'Final Exam'),
+      description: _fallbackString(
+        exam['description'],
+        'Complete the final exam to earn your course certificate.',
+      ),
       actionLabel: canStart ? 'START FINAL EXAM' : 'NOT YET ELIGIBLE',
-      helperLabel: hasTemplate
-          ? canStart
-                ? 'Ready to start'
-                : 'Requires $remainingPercent% more progress'
-          : 'Final exam not configured',
+      helperLabel: helperLabel,
+      isConfigured: hasLinkedExam,
       canStart: canStart,
+      courseProgressPercent: backendProgressPercent.clamp(0, 100).toInt(),
+      unlockCompletionPercent: unlockPercent,
     );
   }
 
@@ -442,6 +506,11 @@ class CoursesApiService {
   }
 
   String _stringValue(dynamic value) => value?.toString().trim() ?? '';
+
+  int _intValue(dynamic value) {
+    if (value is num) return value.toInt();
+    return int.tryParse(_stringValue(value)) ?? 0;
+  }
 
   bool _boolValue(dynamic value, {required bool fallback}) {
     if (value is bool) return value;

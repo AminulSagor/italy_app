@@ -409,37 +409,53 @@ class CourseChapterModel {
 }
 
 class CourseFinalExamModel {
+  final String examId;
   final String title;
   final String description;
   final String actionLabel;
   final String helperLabel;
+  final bool isConfigured;
   final bool canStart;
+  final int courseProgressPercent;
+  final int unlockCompletionPercent;
 
   const CourseFinalExamModel({
+    required this.examId,
     required this.title,
     required this.description,
     required this.actionLabel,
     required this.helperLabel,
+    required this.isConfigured,
     required this.canStart,
+    required this.courseProgressPercent,
+    required this.unlockCompletionPercent,
   });
 
   factory CourseFinalExamModel.fromJson(Map<String, dynamic> json) {
     return CourseFinalExamModel(
-      title: json['title'] as String,
-      description: json['description'] as String,
-      actionLabel: json['actionLabel'] as String,
-      helperLabel: json['helperLabel'] as String,
-      canStart: json['canStart'] as bool,
+      examId: json['examId']?.toString() ?? '',
+      title: json['title']?.toString() ?? 'Final Exam',
+      description: json['description']?.toString() ?? '',
+      actionLabel: json['actionLabel']?.toString() ?? '',
+      helperLabel: json['helperLabel']?.toString() ?? '',
+      isConfigured: json['isConfigured'] as bool? ?? false,
+      canStart: json['canStart'] as bool? ?? false,
+      courseProgressPercent: _intValue(json['courseProgressPercent']),
+      unlockCompletionPercent: _intValue(json['unlockCompletionPercent']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      'examId': examId,
       'title': title,
       'description': description,
       'actionLabel': actionLabel,
       'helperLabel': helperLabel,
+      'isConfigured': isConfigured,
       'canStart': canStart,
+      'courseProgressPercent': courseProgressPercent,
+      'unlockCompletionPercent': unlockCompletionPercent,
     };
   }
 }

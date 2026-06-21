@@ -19,7 +19,9 @@ class QuizQuestionModel {
   final List<String> options;
   final List<String> optionIds;
   final List<String> matchingLeftPairIds;
+  final List<String> matchingLeftTexts;
   final List<String> matchingRightTexts;
+  final List<String> matchingRightPairIds;
   final List<String> selectedWords;
   final List<String> disabledWords;
   final List<String> correctWords;
@@ -43,7 +45,9 @@ class QuizQuestionModel {
     required this.options,
     this.optionIds = const <String>[],
     this.matchingLeftPairIds = const <String>[],
+    this.matchingLeftTexts = const <String>[],
     this.matchingRightTexts = const <String>[],
+    this.matchingRightPairIds = const <String>[],
     required this.selectedWords,
     required this.disabledWords,
     required this.correctWords,
@@ -93,8 +97,16 @@ class QuizQuestionModel {
           ((json['matchingLeftPairIds'] as List<dynamic>?) ?? <dynamic>[])
               .map((dynamic item) => item as String)
               .toList(),
+      matchingLeftTexts:
+          ((json['matchingLeftTexts'] as List<dynamic>?) ?? <dynamic>[])
+              .map((dynamic item) => item as String)
+              .toList(),
       matchingRightTexts:
           ((json['matchingRightTexts'] as List<dynamic>?) ?? <dynamic>[])
+              .map((dynamic item) => item as String)
+              .toList(),
+      matchingRightPairIds:
+          ((json['matchingRightPairIds'] as List<dynamic>?) ?? <dynamic>[])
               .map((dynamic item) => item as String)
               .toList(),
       selectedWords: ((json['selectedWords'] as List<dynamic>?) ?? <dynamic>[])
@@ -129,7 +141,9 @@ class QuizQuestionModel {
       'options': options,
       'optionIds': optionIds,
       'matchingLeftPairIds': matchingLeftPairIds,
+      'matchingLeftTexts': matchingLeftTexts,
       'matchingRightTexts': matchingRightTexts,
+      'matchingRightPairIds': matchingRightPairIds,
       'selectedWords': selectedWords,
       'disabledWords': disabledWords,
       'correctWords': correctWords,
@@ -284,4 +298,43 @@ class QuizLessonCompleteModel {
       'boostRemaining': boostRemaining,
     };
   }
+}
+
+typedef QuizExternalAnswerHandler = Future<QuizExternalAnswerResult> Function(
+  QuizQuestionModel question,
+  QuizAnswerInput input,
+);
+
+class QuizAnswerInput {
+  final int selectedOptionIndex;
+  final int selectedLeftPairIndex;
+  final int selectedRightPairIndex;
+  final List<String> sentenceSelectedWords;
+  final List<String> listeningSelectedWords;
+  final List<String> matchingRightOrder;
+  final List<String> matchingRightPairIdOrder;
+  final String writtenAnswer;
+
+  const QuizAnswerInput({
+    required this.selectedOptionIndex,
+    required this.selectedLeftPairIndex,
+    required this.selectedRightPairIndex,
+    required this.sentenceSelectedWords,
+    required this.listeningSelectedWords,
+    required this.matchingRightOrder,
+    required this.matchingRightPairIdOrder,
+    required this.writtenAnswer,
+  });
+}
+
+class QuizExternalAnswerResult {
+  final bool isCorrect;
+  final String correctAnswer;
+  final String meaning;
+
+  const QuizExternalAnswerResult({
+    required this.isCorrect,
+    this.correctAnswer = '',
+    this.meaning = '',
+  });
 }

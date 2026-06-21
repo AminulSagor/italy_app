@@ -68,10 +68,10 @@ class QuizView extends GetView<QuizController> {
                           .toList(),
                       listeningSelectedWords: controller.listeningSelectedWords
                           .toList(),
-                      selectedLeftPairIndex:
-                          controller.selectedLeftPairIndex.value,
-                      selectedRightPairIndex:
-                          controller.selectedRightPairIndex.value,
+                      matchingRightOrder:
+                          controller.matchingRightOrder.toList(),
+                      matchingRightKeys:
+                          controller.matchingRightPairIdOrder.toList(),
                       writingAnswerController:
                           controller.writingAnswerController,
                       onOptionTap: controller.selectOption,
@@ -80,8 +80,8 @@ class QuizView extends GetView<QuizController> {
                       onListeningWordTap: controller.addListeningWord,
                       onListeningSelectedWordTap:
                           controller.removeListeningWord,
-                      onLeftPairTap: controller.selectLeftPair,
-                      onRightPairTap: controller.selectRightPair,
+                      onMatchingRightReorder:
+                          controller.reorderMatchingRight,
                     ),
                   ],
                 ),
@@ -92,6 +92,7 @@ class QuizView extends GetView<QuizController> {
                 bottom: 0,
                 child: QuizBottomAction(
                   showWrongResult: showWrongResult,
+                  isLoading: controller.isSubmittingAnswer.value,
                   feedback: QuizWrongAnswerFeedback(
                     correctAnswer: controller.currentCorrectAnswer,
                   ),

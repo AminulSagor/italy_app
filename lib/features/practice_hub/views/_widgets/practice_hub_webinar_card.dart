@@ -25,9 +25,7 @@ class PracticeHubWebinarCard extends GetView<PracticeHubController> {
             color: AppColors.white,
             borderRadius: BorderRadius.circular(30.r),
           ),
-          child: const CircularProgressIndicator(
-            color: AppColors.primaryGreen,
-          ),
+          child: const CircularProgressIndicator(color: AppColors.primaryGreen),
         );
       }
 
@@ -96,19 +94,19 @@ class PracticeHubWebinarCard extends GetView<PracticeHubController> {
               fontSize: AppFont.font16,
               fontWeight: FontWeight.w500,
             ),
-            SizedBox(height: 15.h),
-            CustomButton(
-              onPressed: controller.onNotifyMeTap,
-              text: 'Notify Me',
-              prefixIcon: Icons.notifications_none_rounded,
-              height: 45,
-              width: double.infinity,
-              btnColor: AppColors.white,
-              borderColor: const Color(0xFFDCDDDE),
-              textColor: const Color(0xFF707477),
-              fontSize: AppFont.font16,
-              fontWeight: FontWeight.w500,
-            ),
+            // SizedBox(height: 15.h),
+            // CustomButton(
+            //   onPressed: controller.onNotifyMeTap,
+            //   text: 'Notify Me',
+            //   prefixIcon: Icons.notifications_none_rounded,
+            //   height: 45,
+            //   width: double.infinity,
+            //   btnColor: AppColors.white,
+            //   borderColor: const Color(0xFFDCDDDE),
+            //   textColor: const Color(0xFF707477),
+            //   fontSize: AppFont.font16,
+            //   fontWeight: FontWeight.w500,
+            // ),
           ],
         ),
       );
@@ -155,9 +153,7 @@ class _WebinarStatusPill extends StatelessWidget {
             width: 7.r,
             height: 7.r,
             decoration: BoxDecoration(
-              color: isLive
-                  ? AppColors.primaryGreen
-                  : const Color(0xFF416C9D),
+              color: isLive ? AppColors.primaryGreen : const Color(0xFF416C9D),
               shape: BoxShape.circle,
             ),
           ),
@@ -168,9 +164,7 @@ class _WebinarStatusPill extends StatelessWidget {
               fontSize: AppFont.font15.sp,
               height: 1,
               fontWeight: FontWeight.w600,
-              color: isLive
-                  ? AppColors.primaryGreen
-                  : const Color(0xFF416C9D),
+              color: isLive ? AppColors.primaryGreen : const Color(0xFF416C9D),
             ),
           ),
         ],

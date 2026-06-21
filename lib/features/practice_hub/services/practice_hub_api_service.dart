@@ -115,7 +115,24 @@ class PracticeHubApiService {
     final Response<dynamic> response = await _apiClient.dio.get(
       '/daily-challenges/today',
     );
-    return DailyChallengeDashboardModel.fromJson(_responseMap(response));
+    DailyChallengeDashboardModel dashboard =
+        DailyChallengeDashboardModel.fromJson(_responseMap(response));
+
+    final List<DailyChallengeTaskModel> claimableTasks = dashboard.tasks
+        .where((DailyChallengeTaskModel task) => task.canClaim)
+        .toList(growable: false);
+    for (final DailyChallengeTaskModel task in claimableTasks) {
+      try {
+        dashboard = await claimDailyChallengeTask(
+          taskKey: task.taskKey,
+          challengeDate: dashboard.challengeDate,
+        );
+      } on DioException {
+        // Keep the dashboard usable if a claim races with another request.
+      }
+    }
+
+    return dashboard;
   }
 
   Future<DailyChallengeDashboardModel> claimDailyChallengeTask({

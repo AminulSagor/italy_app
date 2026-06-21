@@ -17,10 +17,10 @@ class FinalExamComponentModel {
 
   factory FinalExamComponentModel.fromJson(Map<String, dynamic> json) {
     return FinalExamComponentModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      subtitle: json['subtitle'] as String,
-      iconName: json['iconName'] as String,
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      subtitle: json['subtitle']?.toString() ?? '',
+      iconName: json['iconName']?.toString() ?? '',
       tone: FinalExamComponentTone.values.firstWhere(
         (FinalExamComponentTone item) => item.name == json['tone'],
         orElse: () => FinalExamComponentTone.green,
@@ -46,6 +46,8 @@ class FinalExamOverviewModel {
   final List<FinalExamComponentModel> components;
   final String noteBangla;
   final String noteEnglish;
+  final bool canStart;
+  final String startMessage;
 
   const FinalExamOverviewModel({
     required this.title,
@@ -54,124 +56,115 @@ class FinalExamOverviewModel {
     required this.components,
     required this.noteBangla,
     required this.noteEnglish,
+    required this.canStart,
+    required this.startMessage,
   });
 
   factory FinalExamOverviewModel.fromJson(Map<String, dynamic> json) {
     return FinalExamOverviewModel(
-      title: json['title'] as String,
-      heroTitle: json['heroTitle'] as String,
-      heroSubtitle: json['heroSubtitle'] as String,
-      components: (json['components'] as List<dynamic>)
-          .map((dynamic item) => FinalExamComponentModel.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      noteBangla: json['noteBangla'] as String,
-      noteEnglish: json['noteEnglish'] as String,
+      title: json['title']?.toString() ?? '',
+      heroTitle: json['heroTitle']?.toString() ?? '',
+      heroSubtitle: json['heroSubtitle']?.toString() ?? '',
+      components: ((json['components'] as List<dynamic>?) ?? <dynamic>[])
+          .whereType<Map>()
+          .map(
+            (Map<dynamic, dynamic> item) => FinalExamComponentModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ),
+          )
+          .toList(growable: false),
+      noteBangla: json['noteBangla']?.toString() ?? '',
+      noteEnglish: json['noteEnglish']?.toString() ?? '',
+      canStart: json['canStart'] as bool? ?? false,
+      startMessage: json['startMessage']?.toString() ?? '',
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'title': title,
-      'heroTitle': heroTitle,
-      'heroSubtitle': heroSubtitle,
-      'components': components.map((FinalExamComponentModel item) => item.toJson()).toList(),
-      'noteBangla': noteBangla,
-      'noteEnglish': noteEnglish,
-    };
   }
 }
 
 class FinalExamListeningModel {
+  final String sectionId;
+  final String questionId;
   final String title;
   final String clipTitle;
   final String questionTag;
   final String question;
   final List<String> options;
-  final int correctIndex;
+  final List<String> optionIds;
   final String tip;
+  final String audioUrl;
+  final bool playbackLocked;
 
   const FinalExamListeningModel({
+    required this.sectionId,
+    required this.questionId,
     required this.title,
     required this.clipTitle,
     required this.questionTag,
     required this.question,
     required this.options,
-    required this.correctIndex,
+    required this.optionIds,
     required this.tip,
+    required this.audioUrl,
+    required this.playbackLocked,
   });
-
-  factory FinalExamListeningModel.fromJson(Map<String, dynamic> json) {
-    return FinalExamListeningModel(
-      title: json['title'] as String,
-      clipTitle: json['clipTitle'] as String,
-      questionTag: json['questionTag'] as String,
-      question: json['question'] as String,
-      options: (json['options'] as List<dynamic>).map((dynamic item) => item as String).toList(),
-      correctIndex: json['correctIndex'] as int,
-      tip: json['tip'] as String,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'title': title,
-      'clipTitle': clipTitle,
-      'questionTag': questionTag,
-      'question': question,
-      'options': options,
-      'correctIndex': correctIndex,
-      'tip': tip,
-    };
-  }
 }
 
 class FinalExamWritingModel {
+  final String sectionId;
+  final String questionId;
   final String title;
   final String taskTitle;
   final String instruction;
   final String banglaInstruction;
+  final int minWords;
+  final int maxWords;
 
   const FinalExamWritingModel({
+    required this.sectionId,
+    required this.questionId,
     required this.title,
     required this.taskTitle,
     required this.instruction,
     required this.banglaInstruction,
+    required this.minWords,
+    required this.maxWords,
   });
-
-  factory FinalExamWritingModel.fromJson(Map<String, dynamic> json) {
-    return FinalExamWritingModel(
-      title: json['title'] as String,
-      taskTitle: json['taskTitle'] as String,
-      instruction: json['instruction'] as String,
-      banglaInstruction: json['banglaInstruction'] as String,
-    );
-  }
 }
 
 class FinalExamSpeakingModel {
+  final String sectionId;
+  final String questionId;
   final String title;
   final String taskTitle;
   final String instruction;
   final String banglaInstruction;
   final String tip;
+  final int maxDurationSeconds;
+  final bool unlimitedRerecords;
 
   const FinalExamSpeakingModel({
+    required this.sectionId,
+    required this.questionId,
     required this.title,
     required this.taskTitle,
     required this.instruction,
     required this.banglaInstruction,
     required this.tip,
+    required this.maxDurationSeconds,
+    required this.unlimitedRerecords,
   });
+}
 
-  factory FinalExamSpeakingModel.fromJson(Map<String, dynamic> json) {
-    return FinalExamSpeakingModel(
-      title: json['title'] as String,
-      taskTitle: json['taskTitle'] as String,
-      instruction: json['instruction'] as String,
-      banglaInstruction: json['banglaInstruction'] as String,
-      tip: json['tip'] as String,
-    );
-  }
+class FinalExamResultStatModel {
+  final String label;
+  final String value;
+  final String iconName;
+
+  const FinalExamResultStatModel({
+    required this.label,
+    required this.value,
+    required this.iconName,
+  });
 }
 
 class FinalExamResultModel {
@@ -181,6 +174,8 @@ class FinalExamResultModel {
   final int xpAwarded;
   final String teacherComment;
   final String teacherCommentBangla;
+  final String verdict;
+  final List<FinalExamResultStatModel> stats;
 
   const FinalExamResultModel({
     required this.markPercent,
@@ -189,16 +184,71 @@ class FinalExamResultModel {
     required this.xpAwarded,
     required this.teacherComment,
     required this.teacherCommentBangla,
+    required this.verdict,
+    required this.stats,
   });
 
-  factory FinalExamResultModel.fromJson(Map<String, dynamic> json) {
+  factory FinalExamResultModel.fromReview(Map<String, dynamic> review) {
+    final double average = _doubleValue(review['finalAverageScore']);
+    final String verdict = review['verdict']?.toString() ?? '';
+    final String strength = review['keyStrength']?.toString().trim() ?? '';
+    final String gap = review['criticalGap']?.toString().trim() ?? '';
+
     return FinalExamResultModel(
-      markPercent: json['markPercent'] as int,
-      title: json['title'] as String,
-      subtitle: json['subtitle'] as String,
-      xpAwarded: json['xpAwarded'] as int,
-      teacherComment: json['teacherComment'] as String,
-      teacherCommentBangla: json['teacherCommentBangla'] as String,
+      markPercent: average.round().clamp(0, 100).toInt(),
+      title: verdict == 'passed'
+          ? 'Risultato Finale: Passed!'
+          : verdict == 'retake_required'
+              ? 'Retake Required'
+              : 'Final Exam Result',
+      subtitle: strength.isNotEmpty
+          ? strength
+          : gap.isNotEmpty
+              ? gap
+              : 'Your final evaluation is ready.',
+      xpAwarded: 0,
+      teacherComment: review['teacherComment']?.toString() ?? '',
+      teacherCommentBangla: review['teacherCommentBn']?.toString() ?? '',
+      verdict: verdict,
+      stats: <FinalExamResultStatModel>[
+        FinalExamResultStatModel(
+          label: 'Vocabulary',
+          value: '${_intValue(review['vocabularyUsageScore'])}',
+          iconName: 'quiz',
+        ),
+        FinalExamResultStatModel(
+          label: 'Grammar',
+          value: '${_intValue(review['grammarAccuracyScore'])}',
+          iconName: 'listening',
+        ),
+        FinalExamResultStatModel(
+          label: 'Writing',
+          value: _scoreLabel(review['writingScore']),
+          iconName: 'writing',
+        ),
+        FinalExamResultStatModel(
+          label: 'Speaking',
+          value: _scoreLabel(review['speakingScore']),
+          iconName: 'speaking',
+        ),
+      ],
     );
   }
+}
+
+int _intValue(dynamic value) {
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+double _doubleValue(dynamic value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+String _scoreLabel(dynamic value) {
+  final double score = _doubleValue(value);
+  return score == score.roundToDouble()
+      ? score.round().toString()
+      : score.toStringAsFixed(1);
 }

@@ -72,6 +72,7 @@ class QuizTopBar extends StatelessWidget {
 
 class QuizBottomAction extends StatelessWidget {
   final bool showWrongResult;
+  final bool isLoading;
   final Widget? feedback;
   final VoidCallback onCheckTap;
   final VoidCallback onNextTap;
@@ -79,6 +80,7 @@ class QuizBottomAction extends StatelessWidget {
   const QuizBottomAction({
     super.key,
     required this.showWrongResult,
+    required this.isLoading,
     required this.onCheckTap,
     required this.onNextTap,
     this.feedback,
@@ -118,7 +120,11 @@ class QuizBottomAction extends StatelessWidget {
                   ),
                 ],
               )
-            : CustomButton.primary(text: 'Check Answer', onPressed: onCheckTap),
+            : CustomButton.primary(
+                text: 'Check Answer',
+                isLoading: isLoading,
+                onPressed: onCheckTap,
+              ),
       ),
     );
   }

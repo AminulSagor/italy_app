@@ -5,6 +5,7 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 import '../../controllers/practice_hub_controller.dart';
 import '../../models/daily_challenge_models.dart';
+import '_widgets/claimed_xp_chip.dart';
 class DailyChallengesView extends GetView<PracticeHubController> {
   const DailyChallengesView({super.key});
   @override
@@ -459,14 +460,7 @@ class _ClaimedTaskCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 7.h),
-                Text(
-                  'CLAIMED +${task.rewardXp} XP',
-                  style: TextStyle(
-                    fontSize: AppFont.font11.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.primaryGreen,
-                  ),
-                ),
+                ClaimedXpChip(rewardXp: task.rewardXp),
               ],
             ),
           ),

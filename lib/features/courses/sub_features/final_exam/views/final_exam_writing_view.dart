@@ -21,9 +21,12 @@ class FinalExamWritingView extends GetView<FinalExamController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.coursesDetailBg,
-      bottomNavigationBar: FinalExamBottomButton(
-        label: 'Submit Answer',
-        onTap: controller.submitWritingAnswer,
+      bottomNavigationBar: Obx(
+        () => FinalExamBottomButton(
+          label: 'Submit Answer',
+          onTap: controller.submitWritingAnswer,
+          isLoading: controller.isSubmitting.value,
+        ),
       ),
       body: SafeArea(
         bottom: false,

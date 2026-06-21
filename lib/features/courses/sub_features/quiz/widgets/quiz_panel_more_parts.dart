@@ -46,34 +46,36 @@ class _ListeningAssemblyPanel extends StatelessWidget {
 }
 
 class _MatchingPairsPanel extends StatelessWidget {
-  final QuizQuestionModel question;
-  final int selectedLeftIndex;
-  final int selectedRightIndex;
-  final bool showWrongResult;
-  final ValueChanged<int> onLeftTap;
-  final ValueChanged<int> onRightTap;
-
   const _MatchingPairsPanel({
     required this.question,
-    required this.selectedLeftIndex,
-    required this.selectedRightIndex,
+    required this.rightOptions,
+    required this.rightKeys,
+    required this.isLocked,
     required this.showWrongResult,
-    required this.onLeftTap,
-    required this.onRightTap,
+    required this.onReorder,
   });
+
+  final QuizQuestionModel question;
+  final List<String> rightOptions;
+  final List<String> rightKeys;
+  final bool isLocked;
+  final bool showWrongResult;
+  final void Function(int oldIndex, int newIndex) onReorder;
 
   @override
   Widget build(BuildContext context) {
-    final List<String> leftOptions = <String>[];
-    final List<String> rightOptions = <String>[];
-
-    for (int index = 0; index < question.options.length; index++) {
-      if (index.isEven) {
-        leftOptions.add(question.options[index]);
-      } else {
-        rightOptions.add(question.options[index]);
-      }
-    }
+    final List<String> leftOptions = question.matchingLeftTexts.isNotEmpty
+        ? question.matchingLeftTexts
+        : <String>[
+            for (int index = 0; index < question.options.length; index++)
+              if (index.isEven) question.options[index],
+          ];
+    final List<String> resolvedRightOptions = rightOptions.isNotEmpty
+        ? rightOptions
+        : <String>[
+            for (int index = 0; index < question.options.length; index++)
+              if (index.isOdd) question.options[index],
+          ];
 
     return Column(
       children: <Widget>[
@@ -90,21 +92,15 @@ class _MatchingPairsPanel extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Expanded(
-              child: _PairColumn(
-                words: leftOptions,
-                selectedIndex: selectedLeftIndex,
-                showWrongResult: showWrongResult,
-                onTap: onLeftTap,
-              ),
-            ),
+            Expanded(child: _StaticPairColumn(words: leftOptions)),
             SizedBox(width: 20.w),
             Expanded(
-              child: _PairColumn(
-                words: rightOptions,
-                selectedIndex: selectedRightIndex,
+              child: _ReorderablePairColumn(
+                words: resolvedRightOptions,
+                itemKeys: rightKeys,
+                isLocked: isLocked,
                 showWrongResult: showWrongResult,
-                onTap: onRightTap,
+                onReorder: onReorder,
               ),
             ),
           ],
@@ -114,34 +110,85 @@ class _MatchingPairsPanel extends StatelessWidget {
   }
 }
 
-class _PairColumn extends StatelessWidget {
-  final List<String> words;
-  final int selectedIndex;
-  final bool showWrongResult;
-  final ValueChanged<int> onTap;
+class _StaticPairColumn extends StatelessWidget {
+  const _StaticPairColumn({required this.words});
 
-  const _PairColumn({
-    required this.words,
-    required this.selectedIndex,
-    required this.showWrongResult,
-    required this.onTap,
-  });
+  final List<String> words;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: List<Widget>.generate(words.length, (int index) {
+      children: words
+          .map(
+            (String word) => Padding(
+              padding: EdgeInsets.only(bottom: 30.h),
+              child: CustomQuizButton(
+                label: word,
+                onTap: () {},
+                height: kQuizPairButtonHeight,
+              ),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class _ReorderablePairColumn extends StatelessWidget {
+  const _ReorderablePairColumn({
+    required this.words,
+    required this.itemKeys,
+    required this.isLocked,
+    required this.showWrongResult,
+    required this.onReorder,
+  });
+
+  final List<String> words;
+  final List<String> itemKeys;
+  final bool isLocked;
+  final bool showWrongResult;
+  final void Function(int oldIndex, int newIndex) onReorder;
+
+  @override
+  Widget build(BuildContext context) {
+    return ReorderableListView.builder(
+      shrinkWrap: true,
+      buildDefaultDragHandles: false,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: words.length,
+      onReorder: isLocked ? (_, _) {} : onReorder,
+      proxyDecorator: (
+        Widget child,
+        int index,
+        Animation<double> animation,
+      ) {
+        return Material(
+          color: AppColors.transparent,
+          elevation: 6,
+          borderRadius: BorderRadius.circular(kRadius30.r),
+          child: child,
+        );
+      },
+      itemBuilder: (BuildContext context, int index) {
         return Padding(
+          key: ValueKey<String>(
+            index < itemKeys.length && itemKeys[index].isNotEmpty
+                ? itemKeys[index]
+                : '${words[index]}-$index',
+          ),
           padding: EdgeInsets.only(bottom: 30.h),
-          child: CustomQuizButton(
-            label: words[index],
-            isSelected: !showWrongResult && selectedIndex == index,
-            isWrong: showWrongResult && selectedIndex == index,
-            onTap: () => onTap(index),
-            height: kQuizPairButtonHeight,
+          child: ReorderableDragStartListener(
+            index: index,
+            enabled: !isLocked,
+            child: CustomQuizButton(
+              label: words[index],
+              isWrong: showWrongResult,
+              onTap: () {},
+              height: kQuizPairButtonHeight,
+            ),
           ),
         );
-      }),
+      },
     );
   }
 }

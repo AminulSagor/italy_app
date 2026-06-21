@@ -19,10 +19,7 @@ class QuizApiSessionModel {
   final String sessionId;
   final List<QuizQuestionModel> questions;
 
-  const QuizApiSessionModel({
-    required this.sessionId,
-    required this.questions,
-  });
+  const QuizApiSessionModel({required this.sessionId, required this.questions});
 }
 
 class QuizApiService {
@@ -30,19 +27,22 @@ class QuizApiService {
 
   final ApiClient _apiClient;
 
-  Future<QuizApiSessionModel> startLessonQuiz({required String lessonId}) async {
+  Future<QuizApiSessionModel> startLessonQuiz({
+    required String lessonId,
+  }) async {
     final Response<dynamic> response = await _apiClient.dio.post(
       '/quiz-sessions/lessons/$lessonId/start',
+      data: <String, dynamic>{
+        'clientActivityDate': DateTime.now().toUtc().toIso8601String(),
+      },
     );
     final Map<String, dynamic> data = _responseMap(response);
     final Map<String, Future<_QuizMediaInfo?>> mediaRequests =
         <String, Future<_QuizMediaInfo?>>{};
     final List<QuizQuestionModel> questions = await Future.wait(
       _jsonList(data['questions']).map(
-        (Map<String, dynamic> item) => _questionFromApi(
-          item,
-          mediaRequests: mediaRequests,
-        ),
+        (Map<String, dynamic> item) =>
+            _questionFromApi(item, mediaRequests: mediaRequests),
       ),
     );
 
@@ -56,10 +56,9 @@ class QuizApiService {
     required String sessionId,
     required QuizQuestionModel question,
     required int selectedOptionIndex,
-    required int selectedLeftPairIndex,
-    required int selectedRightPairIndex,
     required List<String> sentenceSelectedWords,
     required List<String> listeningSelectedWords,
+    required List<String> matchingRightOrder,
     required String writtenAnswer,
   }) async {
     final Response<dynamic> response = await _apiClient.dio.post(
@@ -67,10 +66,9 @@ class QuizApiService {
       data: _answerPayload(
         question: question,
         selectedOptionIndex: selectedOptionIndex,
-        selectedLeftPairIndex: selectedLeftPairIndex,
-        selectedRightPairIndex: selectedRightPairIndex,
         sentenceSelectedWords: sentenceSelectedWords,
         listeningSelectedWords: listeningSelectedWords,
+        matchingRightOrder: matchingRightOrder,
         writtenAnswer: writtenAnswer,
       ),
     );
@@ -90,7 +88,7 @@ class QuizApiService {
     final Response<dynamic> response = await _apiClient.dio.post(
       '/quiz-sessions/$sessionId/complete',
       data: <String, dynamic>{
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': DateTime.now().toUtc().toIso8601String(),
       },
     );
     final Map<String, dynamic> data = _responseMap(response);
@@ -138,10 +136,9 @@ class QuizApiService {
   Map<String, dynamic> _answerPayload({
     required QuizQuestionModel question,
     required int selectedOptionIndex,
-    required int selectedLeftPairIndex,
-    required int selectedRightPairIndex,
     required List<String> sentenceSelectedWords,
     required List<String> listeningSelectedWords,
+    required List<String> matchingRightOrder,
     required String writtenAnswer,
   }) {
     final Map<String, dynamic> payload = <String, dynamic>{
@@ -166,17 +163,17 @@ class QuizApiService {
         payload['sequenceAnswerTexts'] = listeningSelectedWords;
         break;
       case QuizQuestionType.matchingPairs:
-        if (selectedLeftPairIndex >= 0 &&
-            selectedLeftPairIndex < question.matchingLeftPairIds.length &&
-            selectedRightPairIndex >= 0 &&
-            selectedRightPairIndex < question.matchingRightTexts.length) {
-          payload['matchingAnswers'] = <Map<String, dynamic>>[
-            <String, dynamic>{
-              'pairId': question.matchingLeftPairIds[selectedLeftPairIndex],
-              'matchedText': question.matchingRightTexts[selectedRightPairIndex],
-            },
-          ];
-        }
+        final int pairCount =
+            question.matchingLeftPairIds.length < matchingRightOrder.length
+            ? question.matchingLeftPairIds.length
+            : matchingRightOrder.length;
+        payload['matchingAnswers'] = List<Map<String, dynamic>>.generate(
+          pairCount,
+          (int index) => <String, dynamic>{
+            'pairId': question.matchingLeftPairIds[index],
+            'matchedText': matchingRightOrder[index],
+          },
+        );
         break;
       case QuizQuestionType.writingWordTranslation:
         payload['writtenAnswer'] = writtenAnswer;
@@ -197,9 +194,7 @@ class QuizApiService {
     final List<Map<String, dynamic>> sequenceItems = _jsonList(
       item['sequenceItems'],
     );
-    final Map<String, dynamic> matchingItems = _jsonMap(
-      item['matchingItems'],
-    );
+    final Map<String, dynamic> matchingItems = _jsonMap(item['matchingItems']);
     final List<Map<String, dynamic>> leftItems = _jsonList(
       matchingItems['leftItems'],
     );
@@ -234,8 +229,14 @@ class QuizApiService {
       'matchingLeftPairIds': leftItems
           .map((Map<String, dynamic> item) => _stringValue(item['pairId']))
           .toList(),
+      'matchingLeftTexts': leftItems
+          .map((Map<String, dynamic> item) => _stringValue(item['leftText']))
+          .toList(),
       'matchingRightTexts': rightItems
           .map((Map<String, dynamic> item) => _stringValue(item['rightText']))
+          .toList(),
+      'matchingRightPairIds': rightItems
+          .map((Map<String, dynamic> item) => _stringValue(item['pairId']))
           .toList(),
       'selectedWords': <String>[],
       'disabledWords': <String>[],
@@ -267,10 +268,7 @@ class QuizApiService {
         return null;
       }
 
-      return _QuizMediaInfo(
-        url: url,
-        mimeType: _stringValue(file['mimeType']),
-      );
+      return _QuizMediaInfo(url: url, mimeType: _stringValue(file['mimeType']));
     } on DioException {
       return null;
     }
@@ -347,7 +345,6 @@ class QuizApiService {
     return _fallbackString(item['promptText'], 'Answer the question');
   }
 
-
   String _eyebrowForType(QuizQuestionType type) {
     switch (type) {
       case QuizQuestionType.wordTranslation:
@@ -361,7 +358,11 @@ class QuizApiService {
     }
   }
 
-  int _requiredSequenceCount(List<Map<String, dynamic>> items) => items.length;
+  int _requiredSequenceCount(List<Map<String, dynamic>> items) {
+    return items.where((Map<String, dynamic> item) {
+      return item['isRequired'] != false;
+    }).length;
+  }
 
   String _correctAnswerText(Map<String, dynamic> correctAnswer) {
     final String optionText = _stringValue(correctAnswer['optionText']);
@@ -376,7 +377,10 @@ class QuizApiService {
     final List<Map<String, dynamic>> pairs = _jsonList(correctAnswer['pairs']);
     if (pairs.isNotEmpty) {
       return pairs
-          .map((Map<String, dynamic> pair) => '${_stringValue(pair['leftText'])} = ${_stringValue(pair['rightText'])}')
+          .map(
+            (Map<String, dynamic> pair) =>
+                '${_stringValue(pair['leftText'])} = ${_stringValue(pair['rightText'])}',
+          )
           .join(', ');
     }
     return '';

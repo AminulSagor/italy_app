@@ -24,7 +24,7 @@ import '../features/courses/sub_features/chapter_detail/controllers/chapter_deta
 import '../features/courses/sub_features/chapter_detail/services/chapter_detail_api_service.dart';
 import '../features/courses/sub_features/chapter_detail/views/chapter_detail_view.dart';
 import '../features/courses/sub_features/final_exam/controllers/final_exam_controller.dart';
-import '../features/courses/sub_features/final_exam/services/final_exam_mock_service.dart';
+import '../features/courses/sub_features/final_exam/services/final_exam_api_service.dart';
 import '../features/courses/sub_features/final_exam/views/final_exam_listening_view.dart';
 import '../features/courses/sub_features/final_exam/views/final_exam_overview_view.dart';
 import '../features/courses/sub_features/final_exam/views/final_exam_result_view.dart';
@@ -469,6 +469,8 @@ class AppPages {
             chapterTitle: args.chapterTitle,
             isExamMode: args.isExamMode,
             questionCount: args.questionCount,
+            initialQuestions: args.initialQuestions,
+            externalAnswerHandler: args.externalAnswerHandler,
           ),
           tag: args.controllerTag,
         );
@@ -592,14 +594,15 @@ class AppPages {
       binding: BindingsBuilder(() {
         final FinalExamRouteArguments args =
             _arguments<FinalExamRouteArguments>();
-        Get.lazyPut<FinalExamMockService>(
-          () => FinalExamMockService(),
+        Get.lazyPut<FinalExamApiService>(
+          () => FinalExamApiService(apiClient: Get.find<ApiClient>()),
           tag: args.controllerTag,
         );
         Get.lazyPut<FinalExamController>(
           () => FinalExamController(
             controllerTag: args.controllerTag,
-            finalExamMockService: Get.find<FinalExamMockService>(
+            courseId: args.courseId,
+            finalExamApiService: Get.find<FinalExamApiService>(
               tag: args.controllerTag,
             ),
           ),

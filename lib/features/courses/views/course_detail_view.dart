@@ -139,22 +139,23 @@ class CourseDetailView extends GetView<CourseDetailController> {
                         ),
                       ),
               ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(
-                  kCoursesHorizontalPadding.w,
-                  30.h,
-                  kCoursesHorizontalPadding.w,
-                  130.h,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: CourseFinalExamCard(
-                    finalExam: detail.finalExam,
-                    onTap: () {
-                      controller.openFinalExam();
-                    },
+              if (detail.finalExam.isConfigured)
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    kCoursesHorizontalPadding.w,
+                    30.h,
+                    kCoursesHorizontalPadding.w,
+                    130.h,
                   ),
-                ),
-              ),
+                  sliver: SliverToBoxAdapter(
+                    child: CourseFinalExamCard(
+                      finalExam: detail.finalExam,
+                      onTap: controller.openFinalExam,
+                    ),
+                  ),
+                )
+              else
+                SliverToBoxAdapter(child: SizedBox(height: 130.h)),
             ],
           );
         }),

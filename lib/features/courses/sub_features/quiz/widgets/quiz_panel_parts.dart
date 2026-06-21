@@ -66,7 +66,7 @@ class _WordTranslationPanel extends StatelessWidget {
         _TitleBlock(title: question.title, subtitle: question.subtitle),
         if ((question.prompt ?? '').isNotEmpty) ...<Widget>[
           SizedBox(height: 24.h),
-          _PromptText(text: question.prompt!, prominent: true),
+          _QuotedPromptText(text: question.prompt!),
         ],
         SizedBox(height: 30.h),
         ...List<Widget>.generate(question.options.length, (int index) {
@@ -149,7 +149,7 @@ class _SentenceTranslationPanel extends StatelessWidget {
           ],
         ),
         SizedBox(height: 74.h),
-        _WordDropArea(
+        _AssemblyLines(
           selectedWords: selectedWords,
           slotCount: question.answerWordCount,
           isWrong: showWrongResult,
@@ -159,7 +159,6 @@ class _SentenceTranslationPanel extends StatelessWidget {
         _WordBank(
           words: question.options,
           selected: selectedWords,
-          hideDisabledText: true,
           onWordTap: onWordTap,
         ),
       ],

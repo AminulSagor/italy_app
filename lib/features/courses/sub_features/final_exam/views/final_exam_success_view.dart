@@ -140,6 +140,7 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                 _TimelineCard(
                   teacherDone: controller.teacherReviewComplete.value,
                   resultDone: controller.resultComplete.value,
+                  estimatedResult: controller.estimatedResult.value,
                   onViewResultTap: controller.openResult,
                 ),
                 SizedBox(height: 34.h),
@@ -199,11 +200,13 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
 class _TimelineCard extends StatelessWidget {
   final bool teacherDone;
   final bool resultDone;
+  final String estimatedResult;
   final VoidCallback onViewResultTap;
 
   const _TimelineCard({
     required this.teacherDone,
     required this.resultDone,
+    required this.estimatedResult,
     required this.onViewResultTap,
   });
 
@@ -302,7 +305,9 @@ class _TimelineCard extends StatelessWidget {
                   SizedBox(width: 10.w),
                   Expanded(
                     child: Text(
-                      'Estimated Result: 24 - 48 Hours',
+                      estimatedResult.isEmpty
+                          ? 'Estimated result time is not available'
+                          : 'Estimated Result: $estimatedResult',
                       style: TextStyle(
                         fontSize: AppFont.font16.sp,
                         fontWeight: FontWeight.w900,

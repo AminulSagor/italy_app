@@ -39,6 +39,13 @@ class _PracticeHubPdfViewerState extends State<PracticeHubPdfViewer> {
   void initState() {
     super.initState();
     _pdfController = PdfViewerController();
+
+    final Object? arguments = Get.arguments;
+    if (arguments is PracticeHubPdfDocumentModel) {
+      controller.selectedPracticePdf.value = arguments;
+      controller.currentSurvivalPdfPage.value = 1;
+      controller.currentSurvivalPdfTotalPages.value = 1;
+    }
   }
 
   @override
@@ -61,7 +68,11 @@ class _PracticeHubPdfViewerState extends State<PracticeHubPdfViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final PracticeHubPdfDocumentModel? document = controller.currentPracticePdf;
+    final Object? arguments = Get.arguments;
+    final PracticeHubPdfDocumentModel? document =
+        arguments is PracticeHubPdfDocumentModel
+        ? arguments
+        : controller.currentPracticePdf;
 
     if (document == null || document.source.trim().isEmpty) {
       return Scaffold(

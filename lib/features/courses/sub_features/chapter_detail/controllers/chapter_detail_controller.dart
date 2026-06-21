@@ -81,7 +81,12 @@ class ChapterDetailController extends GetxController {
           result.data!.quiz == null &&
           result.data!.hasVideo &&
           result.data!.progress.videoWatchPercent >= 100) {
-        _markLessonCompletedIfNeeded();
+        await _markLessonCompletedIfNeeded();
+      } else if (result.data!.isQuizAvailabilityKnown &&
+          result.data!.quiz == null &&
+          !result.data!.hasVideo &&
+          !result.data!.hasAudio) {
+        await _markLessonCompletedIfNeeded();
       }
     } finally {
       isLoading.value = false;

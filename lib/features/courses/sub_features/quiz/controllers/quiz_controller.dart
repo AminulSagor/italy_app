@@ -14,6 +14,8 @@ class QuizController extends GetxController {
   final String? chapterTitle;
   final bool isExamMode;
   final int questionCount;
+  final List<QuizQuestionModel> initialQuestions;
+  final QuizExternalAnswerHandler? externalAnswerHandler;
 
   QuizController({
     required QuizMockService quizMockService,
@@ -23,6 +25,8 @@ class QuizController extends GetxController {
     this.chapterTitle,
     this.isExamMode = false,
     this.questionCount = 15,
+    this.initialQuestions = const <QuizQuestionModel>[],
+    this.externalAnswerHandler,
   })  : _quizMockService = quizMockService,
         _quizApiService = quizApiService;
 
@@ -35,6 +39,8 @@ class QuizController extends GetxController {
   final RxInt selectedOptionIndex = (-1).obs;
   final RxInt selectedLeftPairIndex = (-1).obs;
   final RxInt selectedRightPairIndex = (-1).obs;
+  final RxList<String> matchingRightOrder = <String>[].obs;
+  final RxList<String> matchingRightPairIdOrder = <String>[].obs;
   final RxList<String> sentenceSelectedWords = <String>[].obs;
   final RxList<String> listeningSelectedWords = <String>[].obs;
   final RxList<QuizQuestionModel> questions = <QuizQuestionModel>[].obs;
@@ -47,6 +53,7 @@ class QuizController extends GetxController {
 
   String? _activeSessionId;
   QuizApiCheckResult? _lastCheckResult;
+  String _externalCorrectMeaning = '';
 
   int get totalQuestions => questions.length;
   int get correctAnswerCount =>
@@ -84,6 +91,10 @@ class QuizController extends GetxController {
   }
 
   String get currentCorrectMeaning {
+    if (_externalCorrectMeaning.isNotEmpty) {
+      return _externalCorrectMeaning;
+    }
+
     final String apiMeaning = _lastCheckResult?.meaning ?? '';
     if (apiMeaning.isNotEmpty) {
       return apiMeaning;
@@ -115,7 +126,9 @@ class QuizController extends GetxController {
 
     isLoading.value = true;
     try {
-      if (hasApiLessonQuiz) {
+      if (initialQuestions.isNotEmpty) {
+        questions.assignAll(initialQuestions);
+      } else if (hasApiLessonQuiz) {
         final ApiResult<QuizApiSessionModel> result =
             await ApiErrorHandler.call<QuizApiSessionModel>(
           () => _quizApiService.startLessonQuiz(lessonId: lessonId!.trim()),
@@ -201,16 +214,9 @@ class QuizController extends GetxController {
   }
 
   void addSentenceWord(String word) {
-    if (hasCheckedAnswer.value || sentenceSelectedWords.contains(word)) {
-      return;
+    if (_canAddSequenceWord(sentenceSelectedWords, word)) {
+      sentenceSelectedWords.add(word);
     }
-
-    final int slotCount = currentQuestion?.answerWordCount ?? 0;
-    if (slotCount > 0 && sentenceSelectedWords.length >= slotCount) {
-      return;
-    }
-
-    sentenceSelectedWords.add(word);
   }
 
   void removeSentenceWord(String word) {
@@ -221,16 +227,9 @@ class QuizController extends GetxController {
   }
 
   void addListeningWord(String word) {
-    if (hasCheckedAnswer.value || listeningSelectedWords.contains(word)) {
-      return;
+    if (_canAddSequenceWord(listeningSelectedWords, word)) {
+      listeningSelectedWords.add(word);
     }
-
-    final int slotCount = currentQuestion?.answerWordCount ?? 0;
-    if (slotCount > 0 && listeningSelectedWords.length >= slotCount) {
-      return;
-    }
-
-    listeningSelectedWords.add(word);
   }
 
   void removeListeningWord(String word) {
@@ -238,6 +237,26 @@ class QuizController extends GetxController {
       return;
     }
     listeningSelectedWords.remove(word);
+  }
+
+
+  bool _canAddSequenceWord(RxList<String> selectedWords, String word) {
+    if (hasCheckedAnswer.value) return false;
+
+    final QuizQuestionModel? question = currentQuestion;
+    if (question == null ||
+        (question.answerWordCount > 0 &&
+            selectedWords.length >= question.answerWordCount)) {
+      return false;
+    }
+
+    final int availableCount = question.options
+        .where((String option) => option == word)
+        .length;
+    final int selectedCount = selectedWords
+        .where((String selected) => selected == word)
+        .length;
+    return selectedCount < availableCount;
   }
 
   void selectLeftPair(int index) {
@@ -248,10 +267,28 @@ class QuizController extends GetxController {
   }
 
   void selectRightPair(int index) {
-    if (hasCheckedAnswer.value) {
+    if (hasCheckedAnswer.value) return;
+    selectedRightPairIndex.value = index;
+  }
+
+  void reorderMatchingRight(int oldIndex, int newIndex) {
+    if (hasCheckedAnswer.value ||
+        oldIndex < 0 ||
+        oldIndex >= matchingRightOrder.length) {
       return;
     }
-    selectedRightPairIndex.value = index;
+
+    int targetIndex = newIndex;
+    if (targetIndex > oldIndex) targetIndex -= 1;
+    if (targetIndex < 0 || targetIndex >= matchingRightOrder.length) return;
+
+    final String movedText = matchingRightOrder.removeAt(oldIndex);
+    matchingRightOrder.insert(targetIndex, movedText);
+
+    if (matchingRightPairIdOrder.length == matchingRightOrder.length) {
+      final String movedId = matchingRightPairIdOrder.removeAt(oldIndex);
+      matchingRightPairIdOrder.insert(targetIndex, movedId);
+    }
   }
 
   Future<bool> checkAnswer() async {
@@ -262,6 +299,39 @@ class QuizController extends GetxController {
     final QuizQuestionModel? question = currentQuestion;
     if (question == null) {
       return false;
+    }
+
+    if (externalAnswerHandler != null) {
+      isSubmittingAnswer.value = true;
+      try {
+        final QuizExternalAnswerResult externalResult =
+            await externalAnswerHandler!(
+          question,
+          QuizAnswerInput(
+            selectedOptionIndex: selectedOptionIndex.value,
+            selectedLeftPairIndex: selectedLeftPairIndex.value,
+            selectedRightPairIndex: selectedRightPairIndex.value,
+            sentenceSelectedWords: sentenceSelectedWords.toList(),
+            listeningSelectedWords: listeningSelectedWords.toList(),
+            matchingRightOrder: matchingRightOrder.toList(),
+            matchingRightPairIdOrder: matchingRightPairIdOrder.toList(),
+            writtenAnswer: writingAnswerController.text.trim(),
+          ),
+        );
+
+        hasCheckedAnswer.value = true;
+        isAnswerCorrect.value = externalResult.isCorrect;
+        _externalCorrectMeaning = externalResult.meaning;
+        _saveCurrentReview(
+          externalResult.isCorrect,
+          correctAnswer: externalResult.correctAnswer,
+        );
+        return externalResult.isCorrect;
+      } catch (_) {
+        return false;
+      } finally {
+        isSubmittingAnswer.value = false;
+      }
     }
 
     if (_activeSessionId == null) {
@@ -279,10 +349,9 @@ class QuizController extends GetxController {
           sessionId: _activeSessionId!,
           question: question,
           selectedOptionIndex: selectedOptionIndex.value,
-          selectedLeftPairIndex: selectedLeftPairIndex.value,
-          selectedRightPairIndex: selectedRightPairIndex.value,
           sentenceSelectedWords: sentenceSelectedWords.toList(),
           listeningSelectedWords: listeningSelectedWords.toList(),
+          matchingRightOrder: matchingRightOrder.toList(),
           writtenAnswer: writingAnswerController.text.trim(),
         ),
         errorTitle: 'Check Answer',
@@ -321,6 +390,7 @@ class QuizController extends GetxController {
 
   void _resetInteractionState() {
     _lastCheckResult = null;
+    _externalCorrectMeaning = '';
     hasCheckedAnswer.value = false;
     isAnswerCorrect.value = false;
     selectedOptionIndex.value = -1;
@@ -329,6 +399,10 @@ class QuizController extends GetxController {
     writingAnswerController.clear();
 
     final QuizQuestionModel? question = currentQuestion;
+    matchingRightOrder.assignAll(question?.matchingRightTexts ?? <String>[]);
+    matchingRightPairIdOrder.assignAll(
+      question?.matchingRightPairIds ?? <String>[],
+    );
     sentenceSelectedWords.assignAll(
       question?.type == QuizQuestionType.sentenceTranslation
           ? question!.selectedWords
@@ -411,30 +485,24 @@ class QuizController extends GetxController {
   }
 
   String _selectedPairText(QuizQuestionModel question) {
-    final List<String> leftOptions = <String>[];
-    final List<String> rightOptions = <String>[];
+    final List<String> leftOptions = question.matchingLeftTexts.isNotEmpty
+        ? question.matchingLeftTexts
+        : _alternatingOptions(question.options, even: true);
+    final int count = leftOptions.length < matchingRightOrder.length
+        ? leftOptions.length
+        : matchingRightOrder.length;
 
-    for (int index = 0; index < question.options.length; index++) {
-      if (index.isEven) {
-        leftOptions.add(question.options[index]);
-      } else {
-        rightOptions.add(question.options[index]);
-      }
-    }
+    return List<String>.generate(
+      count,
+      (int index) => '${leftOptions[index]} = ${matchingRightOrder[index]}',
+    ).join(', ');
+  }
 
-    final String left = selectedLeftPairIndex.value >= 0 &&
-            selectedLeftPairIndex.value < leftOptions.length
-        ? leftOptions[selectedLeftPairIndex.value]
-        : '';
-    final String right = selectedRightPairIndex.value >= 0 &&
-            selectedRightPairIndex.value < rightOptions.length
-        ? rightOptions[selectedRightPairIndex.value]
-        : '';
-
-    if (left.isEmpty && right.isEmpty) {
-      return '';
-    }
-    return '$left = $right';
+  List<String> _alternatingOptions(List<String> options, {required bool even}) {
+    return <String>[
+      for (int index = 0; index < options.length; index++)
+        if (index.isEven == even) options[index],
+    ];
   }
 
   bool _isCurrentAnswerCorrect() {
@@ -455,9 +523,18 @@ class QuizController extends GetxController {
       case QuizQuestionType.listeningAssembly:
         return _areWordListsSame(listeningSelectedWords, question.correctWords);
       case QuizQuestionType.matchingPairs:
-        return selectedLeftPairIndex.value >= 0 &&
-            selectedRightPairIndex.value >= 0 &&
-            selectedLeftPairIndex.value == selectedRightPairIndex.value;
+        if (question.matchingRightPairIds.isNotEmpty &&
+            matchingRightPairIdOrder.length ==
+                question.matchingLeftPairIds.length) {
+          return _areWordListsSame(
+            matchingRightPairIdOrder,
+            question.matchingLeftPairIds,
+          );
+        }
+        return _areWordListsSame(
+          matchingRightOrder,
+          question.matchingRightTexts,
+        );
       case QuizQuestionType.writingWordTranslation:
         return _normalize(writingAnswerController.text) ==
             _normalize(question.correctAnswer);

@@ -10,7 +10,12 @@ import '../services/api_client.dart';
 import '../services/token_service.dart';
 import '../../features/notifications/services/notifications_mock_service.dart';
 import '../../features/leaderboard/controllers/leaderboard_controller.dart';
+import '../../features/practice_hub/controllers/job_sentences_controller.dart';
+import '../../features/practice_hub/controllers/important_verbs_controller.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
+import '../../features/practice_hub/services/job_sentences_api_service.dart';
+import '../../features/practice_hub/services/important_verbs_api_service.dart';
+import '../../features/practice_hub/services/italian_tts_service.dart';
 import '../../features/practice_hub/services/practice_hub_api_service.dart';
 
 class InitialBindings extends Bindings {
@@ -52,6 +57,31 @@ class InitialBindings extends Bindings {
     Get.lazyPut<LeaderboardController>(() => LeaderboardController());
     Get.lazyPut<PracticeHubApiService>(
       () => PracticeHubApiService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
+    Get.lazyPut<JobSentencesApiService>(
+      () => JobSentencesApiService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
+    Get.lazyPut<JobSentencesController>(
+      () => JobSentencesController(
+        apiService: Get.find<JobSentencesApiService>(),
+      ),
+      fenix: true,
+    );
+    Get.lazyPut<ImportantVerbsApiService>(
+      () => ImportantVerbsApiService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
+    Get.lazyPut<ItalianTtsService>(
+      () => ItalianTtsService(),
+      fenix: true,
+    );
+    Get.lazyPut<ImportantVerbsController>(
+      () => ImportantVerbsController(
+        apiService: Get.find<ImportantVerbsApiService>(),
+        ttsService: Get.find<ItalianTtsService>(),
+      ),
       fenix: true,
     );
     Get.lazyPut<PracticeHubController>(
