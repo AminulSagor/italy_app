@@ -18,7 +18,7 @@ class DevicePushTokenService {
   final StorageService _storageService;
 
   static const String _deviceIdStorageKey = 'device_id';
-  static const String _registerEndpoint = '/chat/devices/register';
+  static const String _registerEndpoint = '/devices/register';
 
   Future<void> registerCurrentDevice() async {
     try {
