@@ -80,7 +80,7 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
         bottom: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(40.w, 27.h, 40.w, 70.h),
+          padding: EdgeInsets.fromLTRB(30.w, 27.h, 30.w, 70.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -193,7 +193,7 @@ class _TopicCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 21.sp,
+                      fontSize: 20.sp,
                       height: 1.18,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -0.7,

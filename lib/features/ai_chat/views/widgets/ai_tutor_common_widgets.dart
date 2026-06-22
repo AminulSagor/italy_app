@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -8,11 +10,15 @@ import '../../../../core/themes/app_font.dart';
 class AiTutorHeader extends StatelessWidget {
   final String title;
   final bool lightBackground;
+  final VoidCallback? onBackTap;
+  final bool backEnabled;
 
   const AiTutorHeader({
     super.key,
     this.title = 'AI Tutor',
     this.lightBackground = false,
+    this.onBackTap,
+    this.backEnabled = true,
   });
 
   @override
@@ -29,11 +35,15 @@ class AiTutorHeader extends StatelessWidget {
             child: Row(
               children: <Widget>[
                 GestureDetector(
-                  onTap: Get.back<void>,
-                  child: Icon(
-                    Icons.arrow_back_rounded,
-                    size: 22.r,
-                    color: AppColors.primaryGreen,
+                  onTap: backEnabled ? (onBackTap ?? Get.back<void>) : null,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 160),
+                    opacity: backEnabled ? 1 : .35,
+                    child: Icon(
+                      Icons.arrow_back_rounded,
+                      size: 22.r,
+                      color: AppColors.primaryGreen,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -136,12 +146,13 @@ class AiTutorDateChip extends StatelessWidget {
   }
 }
 
-class AiTutorWaveform extends StatelessWidget {
+class AiTutorWaveform extends StatefulWidget {
   final Color activeColor;
   final Color inactiveColor;
   final double width;
   final double height;
   final bool dense;
+  final bool animate;
 
   const AiTutorWaveform({
     super.key,
@@ -150,11 +161,54 @@ class AiTutorWaveform extends StatelessWidget {
     this.width = 70,
     this.height = 28,
     this.dense = false,
+    this.animate = false,
   });
 
   @override
+  State<AiTutorWaveform> createState() => _AiTutorWaveformState();
+}
+
+class _AiTutorWaveformState extends State<AiTutorWaveform>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 950),
+    );
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant AiTutorWaveform oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animate != widget.animate) {
+      _syncAnimation();
+    }
+  }
+
+  void _syncAnimation() {
+    if (widget.animate) {
+      _animationController.repeat();
+    } else {
+      _animationController
+        ..stop()
+        ..value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final List<double> bars = dense
+    final List<double> bars = widget.dense
         ? <double>[.25, .55, .36, .8, .5, .92, .65, .35, .75, .48]
         : <double>[
             .20,
@@ -174,23 +228,41 @@ class AiTutorWaveform extends StatelessWidget {
           ];
 
     return SizedBox(
-      width: width.w,
-      height: height.h,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: List<Widget>.generate(bars.length, (int index) {
-          final bool active = index < bars.length * .72;
-          return Container(
-            width: dense ? 2.2.w : 2.6.w,
-            height: (height * bars[index]).h,
-            margin: EdgeInsets.symmetric(horizontal: dense ? 1.2.w : 1.6.w),
-            decoration: BoxDecoration(
-              color: active ? activeColor : inactiveColor,
-              borderRadius: BorderRadius.circular(999.r),
-            ),
+      width: widget.width.w,
+      height: widget.height.h,
+      child: AnimatedBuilder(
+        animation: _animationController,
+        builder: (BuildContext context, Widget? child) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: List<Widget>.generate(bars.length, (int index) {
+              final bool active = index < bars.length * .72;
+              final double phase =
+                  (_animationController.value * math.pi * 2) + (index * .72);
+              final double normalizedWave = (math.sin(phase) + 1) / 2;
+              final double wave = widget.animate
+                  ? .68 + (.32 * normalizedWave)
+                  : 1.0;
+              final double barHeight = (widget.height * bars[index] * wave)
+                  .clamp(4, widget.height)
+                  .toDouble();
+
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 90),
+                width: widget.dense ? 2.2.w : 2.6.w,
+                height: barHeight.h,
+                margin: EdgeInsets.symmetric(
+                  horizontal: widget.dense ? 1.2.w : 1.6.w,
+                ),
+                decoration: BoxDecoration(
+                  color: active ? widget.activeColor : widget.inactiveColor,
+                  borderRadius: BorderRadius.circular(999.r),
+                ),
+              );
+            }),
           );
-        }),
+        },
       ),
     );
   }
@@ -201,8 +273,8 @@ class AiTutorInputBar extends StatelessWidget {
   final String inputText;
   final ValueChanged<String> onChanged;
   final VoidCallback onSendTap;
-  final VoidCallback onMicTap;
-  final VoidCallback onEqTap;
+  final VoidCallback? onVoiceTap;
+  final bool showVoiceAction;
   final String hint;
 
   const AiTutorInputBar({
@@ -211,15 +283,13 @@ class AiTutorInputBar extends StatelessWidget {
     required this.inputText,
     required this.onChanged,
     required this.onSendTap,
-    required this.onMicTap,
-    required this.onEqTap,
+    this.onVoiceTap,
+    this.showVoiceAction = true,
     this.hint = 'Type or speak a phrase...',
   });
 
   @override
   Widget build(BuildContext context) {
-    final bool hasText = inputText.trim().isNotEmpty;
-
     return Container(
       height: 58.h,
       padding: EdgeInsets.fromLTRB(18.w, 0, 7.w, 0),
@@ -240,6 +310,8 @@ class AiTutorInputBar extends StatelessWidget {
             child: TextField(
               controller: controller,
               onChanged: onChanged,
+              onSubmitted: (_) => onSendTap(),
+              textInputAction: TextInputAction.send,
               minLines: 1,
               maxLines: 1,
               style: TextStyle(
@@ -259,17 +331,19 @@ class AiTutorInputBar extends StatelessWidget {
               ),
             ),
           ),
-          GestureDetector(
-            onTap: onEqTap,
-            child: Icon(
-              Icons.graphic_eq_rounded,
-              size: 18.r,
-              color: const Color(0xFF50605A),
+          if (showVoiceAction && onVoiceTap != null) ...<Widget>[
+            GestureDetector(
+              onTap: onVoiceTap,
+              child: Icon(
+                Icons.graphic_eq_rounded,
+                size: 18.r,
+                color: const Color(0xFF50605A),
+              ),
             ),
-          ),
-          SizedBox(width: 8.w),
+            SizedBox(width: 8.w),
+          ],
           GestureDetector(
-            onTap: hasText ? onSendTap : onMicTap,
+            onTap: onSendTap,
             child: Container(
               width: 42.r,
               height: 42.r,
@@ -278,8 +352,8 @@ class AiTutorInputBar extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                hasText ? Icons.send_rounded : Icons.mic_rounded,
-                size: hasText ? 20.r : 22.r,
+                Icons.send_rounded,
+                size: 20.r,
                 color: AppColors.white,
               ),
             ),

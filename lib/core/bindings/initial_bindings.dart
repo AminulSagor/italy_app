@@ -1,4 +1,9 @@
 import 'package:get/get.dart';
+
+import '../../features/ai_chat/controllers/ai_chat_controller.dart';
+import '../../features/ai_chat/services/ai_tutor_api_service.dart';
+import '../../features/ai_chat/services/ai_tutor_tts_service.dart';
+import '../../features/ai_chat/services/ai_tutor_voice_service.dart';
 import '../../features/courses/controllers/courses_controller.dart';
 import '../../features/courses/services/courses_api_service.dart';
 import '../../features/home/controllers/home_controller.dart';
@@ -21,6 +26,26 @@ import '../../features/practice_hub/services/practice_hub_api_service.dart';
 class InitialBindings extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut<AiTutorApiService>(
+      () => AiTutorApiService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
+    Get.lazyPut<AiTutorVoiceService>(
+      () => AiTutorVoiceService(),
+      fenix: true,
+    );
+    Get.lazyPut<AiTutorTtsService>(
+      () => AiTutorTtsService(),
+      fenix: true,
+    );
+    Get.lazyPut<AiChatController>(
+      () => AiChatController(
+        apiService: Get.find<AiTutorApiService>(),
+        voiceService: Get.find<AiTutorVoiceService>(),
+        ttsService: Get.find<AiTutorTtsService>(),
+      ),
+      fenix: true,
+    );
     Get.lazyPut<HomeMockService>(() => HomeMockService());
     Get.lazyPut<CoursesApiService>(
       () => CoursesApiService(apiClient: Get.find<ApiClient>()),

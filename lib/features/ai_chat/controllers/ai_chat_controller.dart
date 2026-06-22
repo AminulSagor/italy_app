@@ -1,139 +1,93 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../views/ai_tutor_chat_view.dart';
+import '../../../core/services/api_error_handler.dart';
+import '../models/ai_tutor_models.dart';
+import '../services/ai_tutor_api_service.dart';
+import '../services/ai_tutor_tts_service.dart';
+import '../services/ai_tutor_voice_service.dart';
+import '../views/ai_level_test_view.dart';
 import '../views/ai_tutor_discovery_view.dart';
 import '../views/ai_tutor_live_voice_view.dart';
 import '../views/guided_learning_level_selection_view.dart';
 import '../views/guided_learning_topics_view.dart';
-import '../views/ai_level_test_view.dart';
 
 class AiChatController extends GetxController {
+  AiChatController({
+    AiTutorApiService? apiService,
+    AiTutorVoiceService? voiceService,
+    AiTutorTtsService? ttsService,
+  }) : _apiService = apiService ?? Get.find<AiTutorApiService>(),
+       voiceService = voiceService ?? Get.find<AiTutorVoiceService>(),
+       _ttsService = ttsService ?? Get.find<AiTutorTtsService>();
+
+  final AiTutorApiService _apiService;
+  final AiTutorTtsService _ttsService;
+  final AiTutorVoiceService voiceService;
+
   final TextEditingController inputController = TextEditingController();
-
   final RxString inputText = ''.obs;
-  final RxString chatMode = 'voice'.obs;
-  final RxBool isRecording = false.obs;
+  final RxBool isTextConversationActive = false.obs;
+  final RxBool isSendingMessage = false.obs;
+  final RxBool isStartingVoiceSession = false.obs;
+  final RxnString speakingMessageId = RxnString();
+  final RxList<String> expandedTranslationIds = <String>[].obs;
+  final RxList<AiTutorStarterModel> visibleStarters =
+      <AiTutorStarterModel>[].obs;
+  final RxList<AiTutorMessageModel> textMessages =
+      <AiTutorMessageModel>[].obs;
+  final RxnString conversationId = RxnString();
 
-  final RxList<int> expandedTranscriptIds = <int>[].obs;
-  final RxList<int> expandedTranslationIds = <int>[].obs;
+  AiTutorVoiceSessionModel? _activeVoiceSession;
+  String? _activeVoiceTopic;
+  int _textSessionVersion = 0;
 
-  final RxList<Map<String, dynamic>> visibleStarters =
-      <Map<String, dynamic>>[].obs;
+  final List<AiTutorStarterModel> _allStarters =
+      const <AiTutorStarterModel>[
+        AiTutorStarterModel(
+          title: 'Practice ordering food',
+          subtitle: 'Al ristorante',
+          prompt: 'Practice ordering food at an Italian restaurant.',
+          isVoice: true,
+          icon: Icons.restaurant_rounded,
+        ),
+        AiTutorStarterModel(
+          title: 'Talk about my day',
+          subtitle: 'La mia giornata',
+          prompt: 'Help me talk about my day in Italian.',
+          isVoice: false,
+          icon: Icons.wb_sunny_rounded,
+        ),
+        AiTutorStarterModel(
+          title: 'Review basic greetings',
+          subtitle: 'I saluti base',
+          prompt: 'Teach me basic Italian greetings.',
+          isVoice: false,
+          icon: Icons.school_rounded,
+        ),
+        AiTutorStarterModel(
+          title: 'Ask for directions',
+          subtitle: 'Chiedere indicazioni',
+          prompt: 'Practice asking for directions in Italian.',
+          isVoice: false,
+          icon: Icons.near_me_rounded,
+        ),
+        AiTutorStarterModel(
+          title: 'Coffee shop phrases',
+          subtitle: 'Al bar',
+          prompt: 'Practice Italian coffee shop phrases with me.',
+          isVoice: true,
+          icon: Icons.local_cafe_rounded,
+        ),
+      ];
 
-  final List<Map<String, dynamic>> _allStarters = <Map<String, dynamic>>[
-    {
-      'title': 'Practice ordering food',
-      'subtitle': 'Al ristorante',
-      'prompt': 'How do I order a coffee?',
-      'mode': 'voice',
-      'icon': Icons.restaurant_rounded,
-    },
-    {
-      'title': 'Talk about my day',
-      'subtitle': 'La mia giornata',
-      'prompt': 'I want to talk about my day',
-      'mode': 'text',
-      'icon': Icons.wb_sunny_rounded,
-    },
-    {
-      'title': 'Review basic greetings',
-      'subtitle': 'I saluti base',
-      'prompt': 'Teach me basic Italian greetings',
-      'mode': 'text',
-      'icon': Icons.school_rounded,
-    },
-    {
-      'title': 'Ask for directions',
-      'subtitle': 'Chiedere indicazioni',
-      'prompt': 'How do I ask for directions?',
-      'mode': 'text',
-      'icon': Icons.near_me_rounded,
-    },
-    {
-      'title': 'Coffee shop phrases',
-      'subtitle': 'Al bar',
-      'prompt': 'Teach me coffee shop phrases',
-      'mode': 'voice',
-      'icon': Icons.local_cafe_rounded,
-    },
-  ];
-
-  final RxList<Map<String, dynamic>> voiceMessages = <Map<String, dynamic>>[
-    {
-      'id': 1,
-      'sender': 'user',
-      'type': 'voice',
-      'duration': '0:12',
-      'time': '10:40 AM',
-    },
-    {
-      'id': 2,
-      'sender': 'ai',
-      'type': 'voice',
-      'duration': '0:15',
-      'time': '10:41 AM',
-      'transcriptOriginal':
-          '"Ciao! Sto bene, grazie. Certo, iniziamo con i saluti formali."',
-      'transcriptBangla':
-          'হ্যালো! আমি ভালো আছি, ধন্যবাদ। অবশ্যই, আমরা আনুষ্ঠানিক অভিবাদন দিয়ে শুরু করি।',
-    },
-    {
-      'id': 3,
-      'sender': 'user',
-      'type': 'voice',
-      'duration': '0:08',
-      'time': '10:42 AM',
-    },
-    {
-      'id': 4,
-      'sender': 'ai',
-      'type': 'voice',
-      'duration': '0:10',
-      'time': '10:43 AM',
-      'transcriptOriginal':
-          '"Perfetto! Ripeti dopo di me: Buongiorno, piacere di conoscerti."',
-      'transcriptBangla':
-          'চমৎকার! আমার পরে বলুন: শুভ সকাল, আপনার সাথে পরিচিত হয়ে ভালো লাগলো।',
-    },
-  ].obs;
-
-  final RxList<Map<String, dynamic>> textMessages = <Map<String, dynamic>>[
-    {
-      'id': 101,
-      'sender': 'user',
-      'type': 'text',
-      'primary': 'How do I order a coffee?',
-      'time': '10:47 AM',
-    },
-    {
-      'id': 102,
-      'sender': 'ai',
-      'type': 'text',
-      'primary': 'Un caffè, per favore.',
-      'english': 'A coffee, please.',
-      'bangla': 'একটি কফি, দয়া করে।',
-      'time': '10:42 AM',
-    },
-    {
-      'id': 103,
-      'sender': 'user',
-      'type': 'text',
-      'primary': 'What about asking for the bill?',
-      'time': '10:45 AM',
-    },
-    {
-      'id': 104,
-      'sender': 'ai',
-      'type': 'text',
-      'primary': 'Il conto, per favore.',
-      'english': 'The bill, please.',
-      'bangla': 'বিলটি, দয়া করে।',
-      'time': '10:45 AM',
-    },
-  ].obs;
+  bool get isLiveVoiceConnecting =>
+      isStartingVoiceSession.value ||
+      voiceService.connectionState.value ==
+          AiTutorVoiceConnectionState.connecting;
 
   @override
   void onInit() {
@@ -142,17 +96,21 @@ class AiChatController extends GetxController {
   }
 
   void onEnterLabTap() {
-    refreshStarters();
+    prepareDiscoverySession();
     Get.to<void>(
       () => const AiTutorDiscoveryView(),
       transition: Transition.rightToLeft,
     );
   }
 
+  void prepareDiscoverySession() {
+    resetTextConversation();
+    refreshStarters();
+  }
+
   void refreshStarters() {
-    final List<Map<String, dynamic>> shuffled = List<Map<String, dynamic>>.from(
-      _allStarters,
-    )..shuffle(Random());
+    final List<AiTutorStarterModel> shuffled =
+        List<AiTutorStarterModel>.from(_allStarters)..shuffle(Random());
     visibleStarters.assignAll(shuffled.take(3));
   }
 
@@ -160,121 +118,88 @@ class AiChatController extends GetxController {
     inputText.value = value;
   }
 
-  void onStarterTap(Map<String, dynamic> starter) {
-    final String mode = starter['mode'] as String? ?? 'text';
-
-    if (mode == 'voice') {
-      startVoiceConversation();
+  void onStarterTap(AiTutorStarterModel starter) {
+    if (starter.isVoice) {
+      openLiveVoiceSession(topic: starter.prompt);
       return;
     }
-
-    startTextConversation(starter['prompt'] as String? ?? '');
-  }
-
-  void startVoiceConversation() {
-    chatMode.value = 'voice';
-    isRecording.value = false;
-    expandedTranscriptIds.clear();
-
-    Get.to<void>(
-      () => const AiTutorChatView(),
-      transition: Transition.rightToLeft,
-    );
-  }
-
-  void startTextConversation(String prompt) {
-    chatMode.value = 'text';
-    isRecording.value = false;
-    expandedTranslationIds.clear();
-
-    if (prompt.trim().isNotEmpty) {
-      textMessages.assignAll(<Map<String, dynamic>>[
-        {
-          'id': 101,
-          'sender': 'user',
-          'type': 'text',
-          'primary': prompt.trim(),
-          'time': '10:47 AM',
-        },
-        {
-          'id': 102,
-          'sender': 'ai',
-          'type': 'text',
-          'primary': 'Un caffè, per favore.',
-          'english': 'A coffee, please.',
-          'bangla': 'একটি কফি, দয়া করে।',
-          'time': '10:42 AM',
-        },
-        {
-          'id': 103,
-          'sender': 'user',
-          'type': 'text',
-          'primary': 'What about asking for the bill?',
-          'time': '10:45 AM',
-        },
-        {
-          'id': 104,
-          'sender': 'ai',
-          'type': 'text',
-          'primary': 'Il conto, per favore.',
-          'english': 'The bill, please.',
-          'bangla': 'বিলটি, দয়া করে।',
-          'time': '10:45 AM',
-        },
-      ]);
-    }
-
-    inputController.clear();
-    inputText.value = '';
-
-    Get.to<void>(
-      () => const AiTutorChatView(),
-      transition: Transition.rightToLeft,
-    );
+    startTextConversation(starter.prompt);
   }
 
   void sendTextFromDiscovery() {
     final String value = inputController.text.trim();
-    if (value.isEmpty) return;
+    if (value.isEmpty) {
+      return;
+    }
     startTextConversation(value);
+  }
+
+  void startTextConversation(String prompt) {
+    _textSessionVersion++;
+    conversationId.value = null;
+    textMessages.clear();
+    expandedTranslationIds.clear();
+    inputController.clear();
+    inputText.value = '';
+    isTextConversationActive.value = true;
+    isSendingMessage.value = false;
+    unawaited(_ttsService.stop());
+    speakingMessageId.value = null;
+
+    final String cleanPrompt = prompt.trim();
+    if (cleanPrompt.isNotEmpty) {
+      unawaited(_sendMessage(cleanPrompt));
+    }
   }
 
   void sendTextFromChat() {
     final String value = inputController.text.trim();
-    if (value.isEmpty) return;
-
-    final int userId = DateTime.now().millisecondsSinceEpoch;
-    textMessages.add({
-      'id': userId,
-      'sender': 'user',
-      'type': 'text',
-      'primary': value,
-      'time': '10:49 AM',
-    });
-
-    textMessages.add({
-      'id': userId + 1,
-      'sender': 'ai',
-      'type': 'text',
-      'primary': 'Posso aiutarti con questa frase.',
-      'english': 'I can help you with this sentence.',
-      'bangla': 'আমি আপনাকে এই বাক্যটি নিয়ে সাহায্য করতে পারি।',
-      'time': '10:49 AM',
-    });
+    if (value.isEmpty || isSendingMessage.value) {
+      return;
+    }
 
     inputController.clear();
     inputText.value = '';
+    unawaited(_sendMessage(value));
   }
 
-  void toggleTranscript(int id) {
-    if (expandedTranscriptIds.contains(id)) {
-      expandedTranscriptIds.remove(id);
-    } else {
-      expandedTranscriptIds.add(id);
+  Future<void> _sendMessage(String text) async {
+    if (isSendingMessage.value) {
+      return;
+    }
+
+    final int sessionVersion = _textSessionVersion;
+    final List<AiTutorMessageModel> history =
+        List<AiTutorMessageModel>.from(textMessages);
+    textMessages.add(AiTutorMessageModel.user(text));
+    isSendingMessage.value = true;
+
+    try {
+      final ApiResult<AiTutorChatResponseModel> result =
+          await ApiErrorHandler.call<AiTutorChatResponseModel>(
+            () => _apiService.sendMessage(
+              message: text,
+              history: history,
+              conversationId: conversationId.value,
+            ),
+          );
+      if (!result.isSuccess ||
+          result.data == null ||
+          sessionVersion != _textSessionVersion ||
+          !isTextConversationActive.value) {
+        return;
+      }
+
+      conversationId.value = result.data!.conversationId;
+      textMessages.add(result.data!.message);
+    } finally {
+      if (sessionVersion == _textSessionVersion) {
+        isSendingMessage.value = false;
+      }
     }
   }
 
-  void toggleTranslations(int id) {
+  void toggleTranslations(String id) {
     if (expandedTranslationIds.contains(id)) {
       expandedTranslationIds.remove(id);
     } else {
@@ -282,49 +207,142 @@ class AiChatController extends GetxController {
     }
   }
 
-  void startRecording() {
-    isRecording.value = true;
+  Future<void> toggleItalianSpeech(AiTutorMessageModel message) async {
+    if (message.isUser || message.primary.trim().isEmpty) {
+      return;
+    }
+
+    if (speakingMessageId.value == message.id) {
+      await _ttsService.stop();
+      speakingMessageId.value = null;
+      return;
+    }
+
+    await _ttsService.stop();
+    speakingMessageId.value = message.id;
+    try {
+      await _ttsService.speakItalian(message.primary);
+    } catch (_) {
+      Get.snackbar(
+        'Italian voice unavailable',
+        'Install or enable an Italian text-to-speech voice on this device.',
+      );
+    } finally {
+      if (speakingMessageId.value == message.id) {
+        speakingMessageId.value = null;
+      }
+    }
   }
 
-  void cancelRecording() {
-    isRecording.value = false;
+  void resetTextConversation() {
+    _textSessionVersion++;
+    conversationId.value = null;
+    textMessages.clear();
+    expandedTranslationIds.clear();
+    inputController.clear();
+    inputText.value = '';
+    isTextConversationActive.value = false;
+    isSendingMessage.value = false;
+    speakingMessageId.value = null;
+    unawaited(_ttsService.stop());
   }
 
-  void sendRecording() {
-    final int id = DateTime.now().millisecondsSinceEpoch;
-
-    voiceMessages.add({
-      'id': id,
-      'sender': 'user',
-      'type': 'voice',
-      'duration': '0:04',
-      'time': '10:46 AM',
-    });
-
-    voiceMessages.add({
-      'id': id + 1,
-      'sender': 'ai',
-      'type': 'voice',
-      'duration': '0:11',
-      'time': '10:46 AM',
-      'transcriptOriginal': '"Molto bene! La tua pronuncia sta migliorando."',
-      'transcriptBangla': 'খুব ভালো! আপনার উচ্চারণ উন্নত হচ্ছে।',
-    });
-
-    isRecording.value = false;
-  }
-
-  void openLiveVoiceSession() {
+  void openLiveVoiceSession({String? topic}) {
+    _activeVoiceTopic = topic?.trim();
     Get.to<void>(
       () => const AiTutorLiveVoiceView(),
       transition: Transition.rightToLeft,
     );
   }
 
-  @override
-  void onClose() {
-    inputController.dispose();
-    super.onClose();
+  Future<void> ensureLiveVoiceConnected() async {
+    if (isStartingVoiceSession.value || voiceService.isConnected) {
+      return;
+    }
+
+    isStartingVoiceSession.value = true;
+    AiTutorVoiceSessionModel? createdSession;
+    try {
+      final ApiResult<AiTutorVoiceSessionModel> result =
+          await ApiErrorHandler.call<AiTutorVoiceSessionModel>(
+            () => _apiService.startVoiceSession(topic: _activeVoiceTopic),
+          );
+      if (!result.isSuccess || result.data == null) {
+        voiceService.connectionState.value = AiTutorVoiceConnectionState.error;
+        voiceService.status.value = 'Unable to start voice session';
+        return;
+      }
+
+      createdSession = result.data!;
+      _activeVoiceSession = createdSession;
+      await voiceService.connect(createdSession);
+    } catch (_) {
+      if (createdSession != null) {
+        await ApiErrorHandler.call<void>(
+          () => _apiService.endVoiceSession(createdSession!.sessionId),
+          showError: false,
+        );
+      }
+      _activeVoiceSession = null;
+    } finally {
+      isStartingVoiceSession.value = false;
+    }
+  }
+
+  Future<void> retryLiveVoice() async {
+    await endLiveVoiceSession();
+    await ensureLiveVoiceConnected();
+  }
+
+  Future<void> toggleLiveVoiceMute() async {
+    await voiceService.toggleMute();
+  }
+
+  Future<void> endLiveVoiceSession() async {
+    final AiTutorVoiceSessionModel? session = _activeVoiceSession;
+    _activeVoiceSession = null;
+    await voiceService.disconnect();
+
+    if (session != null) {
+      await ApiErrorHandler.call<void>(
+        () => _apiService.endVoiceSession(session.sessionId),
+        showError: false,
+      );
+    }
+  }
+
+  Future<bool> handleLiveVoiceSystemBack() async {
+    if (isLiveVoiceConnecting) {
+      return false;
+    }
+    await endLiveVoiceSession();
+    return true;
+  }
+
+  Future<void> closeLiveVoicePage() async {
+    if (isLiveVoiceConnecting) {
+      return;
+    }
+    await endLiveVoiceSession();
+    if (Get.key.currentState?.canPop() ?? false) {
+      Get.back<void>();
+    }
+  }
+
+  Future<void> switchLiveVoiceToText() async {
+    if (isLiveVoiceConnecting) {
+      return;
+    }
+
+    final String prompt = _activeVoiceTopic?.trim().isNotEmpty == true
+        ? _activeVoiceTopic!.trim()
+        : 'Continue helping me practice Italian.';
+    await endLiveVoiceSession();
+    if (Get.key.currentState?.canPop() ?? false) {
+      Get.back<void>();
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    startTextConversation(prompt);
   }
 
   void onGuidedLearningTap() {
@@ -341,33 +359,14 @@ class AiChatController extends GetxController {
     );
   }
 
-  void onGuidedTopicTap(String topicTitle) {
-    chatMode.value = 'text';
-    expandedTranslationIds.clear();
-
-    textMessages.assignAll(<Map<String, dynamic>>[
-      {
-        'id': 201,
-        'sender': 'user',
-        'type': 'text',
-        'primary': 'Let us practice: $topicTitle',
-        'time': '10:50 AM',
-      },
-      {
-        'id': 202,
-        'sender': 'ai',
-        'type': 'text',
-        'primary': 'Certo! Iniziamo questa conversazione insieme.',
-        'english': 'Sure! Let us start this conversation together.',
-        'bangla': 'অবশ্যই! চলুন এই কথোপকথনটি একসাথে শুরু করি।',
-        'time': '10:50 AM',
-      },
-    ]);
-
-    Get.to<void>(
-      () => const AiTutorChatView(),
-      transition: Transition.rightToLeft,
-    );
+  Future<void> onGuidedTopicTap(String topicTitle) async {
+    for (int index = 0; index < 2; index++) {
+      if (Get.key.currentState?.canPop() ?? false) {
+        Get.back<void>();
+        await Future<void>.delayed(const Duration(milliseconds: 90));
+      }
+    }
+    startTextConversation('Let us practice: $topicTitle');
   }
 
   void onLevelTestTap() {
@@ -392,22 +391,18 @@ class AiChatController extends GetxController {
   }
 
   void onWritingHelpTap() {
-    Get.snackbar(
-      'Writing Help',
-      'This feature is coming soon! Stay tuned for updates.',
-      backgroundColor: Colors.white,
-      colorText: Colors.black87,
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    Get.snackbar('Writing Help', 'This feature is coming soon.');
   }
 
   void onRecentSessionTap() {
-    Get.snackbar(
-      'Recent Sessions',
-      'This feature is coming soon! Stay tuned for updates.',
-      backgroundColor: Colors.white,
-      colorText: Colors.black87,
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    Get.snackbar('Recent Sessions', 'This feature is coming soon.');
+  }
+
+  @override
+  void onClose() {
+    unawaited(endLiveVoiceSession());
+    unawaited(_ttsService.dispose());
+    inputController.dispose();
+    super.onClose();
   }
 }
