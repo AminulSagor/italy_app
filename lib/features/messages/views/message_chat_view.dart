@@ -19,6 +19,23 @@ class MessageChatView extends GetView<MessageChatController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
+      floatingActionButton: Obx(() {
+        if (controller.showScrollToBottom.value) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: 100.h),
+            child: FloatingActionButton(
+              backgroundColor: AppColors.white,
+              mini: true,
+              onPressed: controller.scrollToBottom,
+              child: Icon(
+                Icons.keyboard_arrow_down,
+                color: AppColors.primaryGreen,
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      }),
       body: Obx(() {
         final MessageChatModel? chat = controller.chat.value;
 
@@ -36,66 +53,170 @@ class MessageChatView extends GetView<MessageChatController> {
           children: <Widget>[
             SafeArea(
               bottom: false,
-              child: RefreshIndicator(
-                onRefresh: controller.refreshChat,
-                child: CustomScrollView(
-                  controller: controller.chatScrollController,
-                  physics: const BouncingScrollPhysics(),
-                  slivers: <Widget>[
-                    SliverToBoxAdapter(child: _ChatHeader(chat: chat)),
-                    SliverToBoxAdapter(child: SizedBox(height: 32.h)),
-                    Obx(
-                      () => controller.isLoadingMore.value
-                          ? SliverToBoxAdapter(
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                  top: 12.h,
-                                  bottom: 8.h,
-                                ),
-                                child: Center(
-                                  child: SizedBox(
-                                    width: 20.w,
-                                    height: 20.w,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
+              child: Column(
+                children: <Widget>[
+                  _ChatHeader(chat: chat),
+                  SizedBox(height: 32.h),
+                  Expanded(
+                    child: CustomScrollView(
+                      controller: controller.chatScrollController,
+                      physics: const BouncingScrollPhysics(),
+                      slivers: <Widget>[
+                        Obx(
+                          () => controller.isLoadingMore.value
+                              ? SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      top: 12.h,
+                                      bottom: 8.h,
+                                    ),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 20.w,
+                                        height: 20.w,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
                                     ),
                                   ),
+                                )
+                              : const SliverToBoxAdapter(
+                                  child: SizedBox.shrink(),
                                 ),
-                              ),
-                            )
-                          : const SliverToBoxAdapter(child: _DateChip()),
-                    ),
-                    SliverToBoxAdapter(child: SizedBox(height: 32.h)),
-                    SliverPadding(
-                      padding: EdgeInsets.fromLTRB(
-                        kChatMessageHorizontalPadding.w,
-                        0,
-                        kChatMessageHorizontalPadding.w,
-                        170.h,
-                      ),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((
-                          BuildContext context,
-                          int index,
-                        ) {
-                          if (index.isOdd) {
-                            return SizedBox(height: 32.h);
-                          }
+                        ),
+                        SliverToBoxAdapter(child: SizedBox(height: 32.h)),
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(
+                            kChatMessageHorizontalPadding.w,
+                            0,
+                            kChatMessageHorizontalPadding.w,
+                            170.h,
+                          ),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate((
+                              BuildContext context,
+                              int index,
+                            ) {
+                              final int i = index;
+                              final MessageChatItemModel item =
+                                  chat.messages[i];
 
-                          return ChatMessageBubble(
-                            message: chat.messages[index ~/ 2],
-                          );
-                        }, childCount: (chat.messages.length * 2) - 1),
-                      ),
+                              // determine if we need a date chip before this message
+                              final bool showDate =
+                                  i == 0 ||
+                                  !_isSameDay(
+                                    chat.messages[i - 1].createdAtIso,
+                                    item.createdAtIso,
+                                  );
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: <Widget>[
+                                  if (showDate) ...<Widget>[
+                                    SizedBox(height: 12.h),
+                                    _DateChipLabel(
+                                      iso:
+                                          item.createdAtIso ??
+                                          DateTime.now().toIso8601String(),
+                                    ),
+                                    SizedBox(height: 12.h),
+                                  ],
+                                  ChatMessageBubble(message: item),
+                                  SizedBox(height: 12.h),
+                                ],
+                              );
+                            }, childCount: chat.messages.length),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             Positioned(left: 0, right: 0, bottom: 0, child: ChatInputBar()),
           ],
         );
       }),
+    );
+  }
+}
+
+bool _isSameDay(String? aIso, String? bIso) {
+  try {
+    if (aIso == null || bIso == null) return false;
+    final DateTime a = DateTime.parse(aIso).toLocal();
+    final DateTime b = DateTime.parse(bIso).toLocal();
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  } catch (_) {
+    return false;
+  }
+}
+
+class _DateChipLabel extends StatelessWidget {
+  final String iso;
+
+  const _DateChipLabel({required this.iso});
+
+  String _labelForIso(String iso) {
+    try {
+      final DateTime dt = DateTime.parse(iso).toLocal();
+      final DateTime now = DateTime.now();
+      final Duration diff = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).difference(DateTime(dt.year, dt.month, dt.day));
+      final int days = -diff.inDays;
+      if (days == 0) return 'TODAY';
+      if (days == 1) return 'YESTERDAY';
+      return '${dt.day} ${_monthName(dt.month)} ${dt.year}';
+    } catch (_) {
+      return 'TODAY';
+    }
+  }
+
+  String _monthName(int m) {
+    const List<String> names = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return names[(m - 1).clamp(0, 11)];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String label = _labelForIso(iso);
+    return Center(
+      child: Container(
+        width: 120.w,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.chatDateChipBg,
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: AppFont.font10.sp,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+            color: AppColors.bodyText,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -161,16 +282,24 @@ class _ChatHeader extends GetView<MessageChatController> {
               ),
             ),
           ),
-          _HeaderAction(
-            icon: Icons.call_outlined,
-            onTap: controller.openAudioCall,
-          ),
-          SizedBox(width: 20.w),
-          _HeaderAction(
-            icon: Icons.videocam_outlined,
-            onTap: controller.openVideoCall,
-          ),
-          SizedBox(width: 20.w),
+          Obx(() {
+            final bool blocked = controller.blockStatus.value != 'none';
+            if (blocked) return const SizedBox.shrink();
+            return Row(
+              children: <Widget>[
+                _HeaderAction(
+                  icon: Icons.call_outlined,
+                  onTap: controller.openAudioCall,
+                ),
+                SizedBox(width: 20.w),
+                _HeaderAction(
+                  icon: Icons.videocam_outlined,
+                  onTap: controller.openVideoCall,
+                ),
+                SizedBox(width: 20.w),
+              ],
+            );
+          }),
           _HeaderAction(
             icon: Icons.info_outline_rounded,
             onTap: controller.openUserInfo,
@@ -192,34 +321,6 @@ class _HeaderAction extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Icon(icon, color: AppColors.primaryGreen, size: 26.w),
-    );
-  }
-}
-
-class _DateChip extends StatelessWidget {
-  const _DateChip();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 72.w,
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.chatDateChipBg,
-          borderRadius: BorderRadius.circular(kHomePillRadius.r),
-        ),
-        child: Text(
-          'TODAY',
-          style: TextStyle(
-            fontSize: AppFont.font10.sp,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.4,
-            color: AppColors.bodyText,
-          ),
-        ),
-      ),
     );
   }
 }

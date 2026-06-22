@@ -23,7 +23,7 @@ class MessageUserInfoView extends GetView<MessageUserInfoController> {
           final MessageUserProfileModel? profile = controller.profile.value;
 
           if (controller.isLoading.value && profile == null) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppColors.primaryGreen),
             );
           }
@@ -38,7 +38,7 @@ class MessageUserInfoView extends GetView<MessageUserInfoController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _InfoHeader(),
+                const _InfoHeader(),
                 SizedBox(height: 24.h),
                 Center(child: _ProfileHero(profile: profile)),
                 SizedBox(height: 32.h),
@@ -54,7 +54,7 @@ class MessageUserInfoView extends GetView<MessageUserInfoController> {
                   ),
                 ),
                 SizedBox(height: 16.h),
-                _SafetyActions(profile: profile),
+                _SafetyActions(),
               ],
             ),
           );
@@ -65,6 +65,8 @@ class MessageUserInfoView extends GetView<MessageUserInfoController> {
 }
 
 class _InfoHeader extends StatelessWidget {
+  const _InfoHeader();
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -122,8 +124,8 @@ class _ProfileHero extends StatelessWidget {
     return Column(
       children: <Widget>[
         SizedBox(
-          width: (kProfileAvatarSize).w,
-          height: (kProfileAvatarSize).w,
+          width: kProfileAvatarSize.w,
+          height: kProfileAvatarSize.w,
           child: Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
@@ -131,7 +133,7 @@ class _ProfileHero extends StatelessWidget {
                 width: kProfileAvatarSize.w,
                 height: kProfileAvatarSize.w,
                 padding: EdgeInsets.all(4.w),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.homeLime,
                   shape: BoxShape.circle,
                 ),
@@ -139,34 +141,35 @@ class _ProfileHero extends StatelessWidget {
                   child: Image.network(
                     profile.avatarUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const Icon(
+                    errorBuilder: (_, _, _) => Icon(
                       Icons.person_rounded,
                       color: AppColors.primaryGreen,
                     ),
                   ),
                 ),
               ),
-              Positioned(
-                right: 0,
-                bottom: 2.h,
-                child: Container(
-                  width: 24.w,
-                  height: 24.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.homeLime,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.homeBackground,
-                      width: 3.w,
+              if (profile.statusLabel == 'ONLINE')
+                Positioned(
+                  right: 0,
+                  bottom: 2.h,
+                  child: Container(
+                    width: 24.w,
+                    height: 24.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.homeLime,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.homeBackground,
+                        width: 3.w,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.check_rounded,
+                      color: AppColors.primaryGreen,
+                      size: 14.w,
                     ),
                   ),
-                  child: Icon(
-                    Icons.check_rounded,
-                    color: AppColors.primaryGreen,
-                    size: 14.w,
-                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -187,7 +190,9 @@ class _ProfileHero extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: AppColors.homeLime,
+            color: profile.statusLabel == 'ONLINE'
+                ? AppColors.homeLime
+                : AppColors.chatInputBg,
             borderRadius: BorderRadius.circular(kHomePillRadius.r),
           ),
           child: Text(
@@ -196,7 +201,9 @@ class _ProfileHero extends StatelessWidget {
               fontSize: AppFont.font12.sp,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.5,
-              color: AppColors.primaryGreen,
+              color: profile.statusLabel == 'ONLINE'
+                  ? AppColors.primaryGreen
+                  : AppColors.bodyText,
             ),
           ),
         ),
@@ -241,36 +248,38 @@ class _StatsSection extends StatelessWidget {
 }
 
 class _SafetyActions extends GetView<MessageUserInfoController> {
-  final MessageUserProfileModel profile;
-
-  const _SafetyActions({required this.profile});
+  const _SafetyActions();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: ProfileSafetyActionCard(
-            icon: profile.isBlocked ? Icons.block_rounded : Icons.block_rounded,
-            title: profile.isBlocked ? 'Unblock User' : 'Block User',
-            subtitle: 'Stop contact',
-            isBlockedAction: profile.isBlocked,
-            onTap: profile.isBlocked
-                ? controller.openUnblockUserSheet
-                : controller.openBlockUserSheet,
+    return Obx(() {
+      final bool isBlocked = controller.blockStatus.value == 'blocked_by_me' ||
+          controller.blockStatus.value == 'both_blocked';
+      return Row(
+        children: <Widget>[
+          Expanded(
+            child: ProfileSafetyActionCard(
+              icon: Icons.block_rounded,
+              title: isBlocked ? 'Unblock User' : 'Block User',
+              subtitle: 'Stop contact',
+              isBlockedAction: isBlocked,
+              onTap: isBlocked
+                  ? controller.openUnblockUserSheet
+                  : controller.openBlockUserSheet,
+            ),
           ),
-        ),
-        SizedBox(width: 24.w),
-        Expanded(
-          child: ProfileSafetyActionCard(
-            icon: Icons.warning_amber_rounded,
-            title: 'Report Profile',
-            subtitle: 'Notify Admin',
-            isDashed: true,
-            onTap: controller.openReportUser,
+          SizedBox(width: 24.w),
+          Expanded(
+            child: ProfileSafetyActionCard(
+              icon: Icons.warning_amber_rounded,
+              title: 'Report Profile',
+              subtitle: 'Notify Admin',
+              isDashed: true,
+              onTap: controller.openReportUser,
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }

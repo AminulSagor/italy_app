@@ -5,9 +5,11 @@ class MessageThreadModel {
   final String timeLabel;
   final int unreadCount;
   final bool isOnline;
+  final String blockStatus;
   final bool isHighlighted;
   final bool isDelivered;
   final String avatarUrl;
+  final String? contactId;
 
   const MessageThreadModel({
     required this.id,
@@ -16,9 +18,11 @@ class MessageThreadModel {
     required this.timeLabel,
     required this.unreadCount,
     required this.isOnline,
+    this.blockStatus = 'none',
     required this.isHighlighted,
     required this.isDelivered,
     required this.avatarUrl,
+    this.contactId,
   });
 
   factory MessageThreadModel.fromJson(Map<String, dynamic> json) {
@@ -29,9 +33,11 @@ class MessageThreadModel {
       timeLabel: json['timeLabel'] as String,
       unreadCount: json['unreadCount'] as int,
       isOnline: json['isOnline'] as bool,
+      blockStatus: json['blockStatus']?.toString() ?? 'none',
       isHighlighted: json['isHighlighted'] as bool,
       isDelivered: json['isDelivered'] as bool,
       avatarUrl: json['avatarUrl'] as String,
+      contactId: json['contactId'] as String?,
     );
   }
 
@@ -43,9 +49,11 @@ class MessageThreadModel {
       'timeLabel': timeLabel,
       'unreadCount': unreadCount,
       'isOnline': isOnline,
+      'blockStatus': blockStatus,
       'isHighlighted': isHighlighted,
       'isDelivered': isDelivered,
       'avatarUrl': avatarUrl,
+      'contactId': contactId,
     };
   }
 
@@ -59,6 +67,8 @@ class MessageThreadModel {
     bool? isHighlighted,
     bool? isDelivered,
     String? avatarUrl,
+    String? contactId,
+    String? blockStatus,
   }) {
     return MessageThreadModel(
       id: id ?? this.id,
@@ -67,9 +77,11 @@ class MessageThreadModel {
       timeLabel: timeLabel ?? this.timeLabel,
       unreadCount: unreadCount ?? this.unreadCount,
       isOnline: isOnline ?? this.isOnline,
+      blockStatus: blockStatus ?? this.blockStatus,
       isHighlighted: isHighlighted ?? this.isHighlighted,
       isDelivered: isDelivered ?? this.isDelivered,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      contactId: contactId ?? this.contactId,
     );
   }
 }
@@ -80,12 +92,14 @@ class MessageChatItemModel {
   final String timeLabel;
   final String statusLabel;
   final bool isMine;
+  final String? createdAtIso;
   final bool isSystem;
 
   const MessageChatItemModel({
     required this.id,
     required this.text,
     required this.timeLabel,
+    this.createdAtIso,
     required this.statusLabel,
     required this.isMine,
     this.isSystem = false,
@@ -96,6 +110,7 @@ class MessageChatItemModel {
       id: json['id'] as String,
       text: json['text'] as String,
       timeLabel: json['timeLabel'] as String,
+      createdAtIso: json['createdAtIso'] as String?,
       statusLabel: json['statusLabel'] as String,
       isMine: json['isMine'] as bool,
       isSystem: json['isSystem'] as bool? ?? false,
@@ -107,6 +122,7 @@ class MessageChatItemModel {
       'id': id,
       'text': text,
       'timeLabel': timeLabel,
+      'createdAtIso': createdAtIso,
       'statusLabel': statusLabel,
       'isMine': isMine,
       'isSystem': isSystem,
@@ -119,12 +135,14 @@ class MessageChatItemModel {
     String? timeLabel,
     String? statusLabel,
     bool? isMine,
+    String? createdAtIso,
     bool? isSystem,
   }) {
     return MessageChatItemModel(
       id: id ?? this.id,
       text: text ?? this.text,
       timeLabel: timeLabel ?? this.timeLabel,
+      createdAtIso: createdAtIso ?? this.createdAtIso,
       statusLabel: statusLabel ?? this.statusLabel,
       isMine: isMine ?? this.isMine,
       isSystem: isSystem ?? this.isSystem,
@@ -137,6 +155,7 @@ class MessageChatModel {
   final String contactStatus;
   final String contactAvatarUrl;
   final bool isOnline;
+  final String? contactId;
   final List<MessageChatItemModel> messages;
 
   const MessageChatModel({
@@ -144,6 +163,7 @@ class MessageChatModel {
     required this.contactStatus,
     required this.contactAvatarUrl,
     required this.isOnline,
+    this.contactId,
     required this.messages,
   });
 
@@ -152,6 +172,7 @@ class MessageChatModel {
       contactName: json['contactName'] as String,
       contactStatus: json['contactStatus'] as String,
       contactAvatarUrl: json['contactAvatarUrl'] as String,
+      contactId: json['contactId'] as String?,
       isOnline: json['isOnline'] as bool,
       messages: (json['messages'] as List<dynamic>)
           .map(
@@ -250,47 +271,59 @@ class MessageUserProfileModel {
 }
 
 class MessageReportRequestModel {
-  final String threadId;
-  final String reason;
+  final String reportedUserId;
+  final String reasonId;
   final String description;
   final String? evidencePath;
+  final String? evidenceFileId;
+  final String? clientReportId;
 
   const MessageReportRequestModel({
-    required this.threadId,
-    required this.reason,
+    required this.reportedUserId,
+    required this.reasonId,
     required this.description,
     this.evidencePath,
+    this.evidenceFileId,
+    this.clientReportId,
   });
 
   factory MessageReportRequestModel.fromJson(Map<String, dynamic> json) {
     return MessageReportRequestModel(
-      threadId: json['threadId'] as String,
-      reason: json['reason'] as String,
+      reportedUserId: json['reportedUserId'] as String,
+      reasonId: json['reasonId'] as String,
       description: json['description'] as String,
       evidencePath: json['evidencePath'] as String?,
+      evidenceFileId: json['evidenceFileId'] as String?,
+      clientReportId: json['clientReportId'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'threadId': threadId,
-      'reason': reason,
+      'reportedUserId': reportedUserId,
+      'reasonId': reasonId,
       'description': description,
       'evidencePath': evidencePath,
+      'evidenceFileId': evidenceFileId,
+      'clientReportId': clientReportId,
     };
   }
 
   MessageReportRequestModel copyWith({
-    String? threadId,
-    String? reason,
+    String? reportedUserId,
+    String? reasonId,
     String? description,
     String? evidencePath,
+    String? evidenceFileId,
+    String? clientReportId,
   }) {
     return MessageReportRequestModel(
-      threadId: threadId ?? this.threadId,
-      reason: reason ?? this.reason,
+      reportedUserId: reportedUserId ?? this.reportedUserId,
+      reasonId: reasonId ?? this.reasonId,
       description: description ?? this.description,
       evidencePath: evidencePath ?? this.evidencePath,
+      evidenceFileId: evidenceFileId ?? this.evidenceFileId,
+      clientReportId: clientReportId ?? this.clientReportId,
     );
   }
 }

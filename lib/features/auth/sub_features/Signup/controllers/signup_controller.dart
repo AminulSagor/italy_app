@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../../core/localization/translation_service.dart';
 import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../core/services/auth_service.dart';
+import '../../../../../features/messages/services/chat_socket_service.dart';
 import '../../../../../routes/routes.dart';
 import '../../../models/auth_models.dart';
 import '../models/signup_models.dart';
@@ -261,6 +262,16 @@ class SignupController extends GetxController {
         return;
       }
 
+      // Refresh socket connection with the new token after successful verification
+      try {
+        if (Get.isRegistered<ChatSocketService>()) {
+          final ChatSocketService socketService = Get.find<ChatSocketService>();
+          await socketService.refreshConnectionAfterLogin();
+        }
+      } catch (_) {
+        // Socket refresh failure should not prevent navigation
+      }
+
       Get.toNamed(AppRoutes.accountCreated);
     } finally {
       otpUi.value = otpUi.value.copyWith(isVerifying: false);
@@ -274,6 +285,16 @@ class SignupController extends GetxController {
 
     accountCreatedUi.value = accountCreatedUi.value.copyWith(isStarting: true);
     try {
+      // Ensure socket is connected with the latest token before navigating to wrapper
+      try {
+        if (Get.isRegistered<ChatSocketService>()) {
+          final ChatSocketService socketService = Get.find<ChatSocketService>();
+          await socketService.refreshConnectionAfterLogin();
+        }
+      } catch (_) {
+        // Socket refresh failure should not prevent navigation
+      }
+
       Get.offAllNamed(AppRoutes.wrapper);
     } finally {
       accountCreatedUi.value = accountCreatedUi.value.copyWith(

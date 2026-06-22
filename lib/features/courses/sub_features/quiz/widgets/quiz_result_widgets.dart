@@ -7,7 +7,6 @@ import 'package:italir_pothe/core/widgets/custom_button.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
-import 'quiz_common_widgets.dart';
 
 class QuizCorrectAnswerSheet extends StatelessWidget {
   final String meaning;
