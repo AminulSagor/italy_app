@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../models/message_models.dart';
 
@@ -28,27 +30,39 @@ class ChatMessageBubble extends StatelessWidget {
               : Alignment.centerLeft,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: 0.76.sw),
-            child: Container(
-              padding: EdgeInsets.all(20.w),
-              decoration: BoxDecoration(
-                color: message.isSystem
-                    ? AppColors.chatDateChipBg
-                    : (message.isMine
-                          ? AppColors.primaryGreen
-                          : AppColors.chatIncomingBubbleBg),
-                borderRadius: BorderRadius.circular(kChatBubbleRadius.r),
-              ),
-              child: Text(
-                message.text,
-                style: TextStyle(
-                  fontSize: AppFont.font16.sp,
-                  fontWeight: FontWeight.w400,
-                  height: 1.42,
+            child: GestureDetector(
+              onLongPress: () {
+                Clipboard.setData(ClipboardData(text: message.text));
+                Get.snackbar(
+                  'Copied',
+                  'Message copied to clipboard',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: AppColors.homeBackground,
+                  colorText: AppColors.homePrimaryText,
+                );
+              },
+              child: Container(
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
                   color: message.isSystem
-                      ? AppColors.homePrimaryText
+                      ? AppColors.chatDateChipBg
                       : (message.isMine
-                            ? AppColors.limeTextColor
-                            : AppColors.homePrimaryText),
+                            ? AppColors.primaryGreen
+                            : AppColors.chatIncomingBubbleBg),
+                  borderRadius: BorderRadius.circular(kChatBubbleRadius.r),
+                ),
+                child: Text(
+                  message.text,
+                  style: TextStyle(
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w400,
+                    height: 1.42,
+                    color: message.isSystem
+                        ? AppColors.homePrimaryText
+                        : (message.isMine
+                              ? AppColors.limeTextColor
+                              : AppColors.homePrimaryText),
+                  ),
                 ),
               ),
             ),

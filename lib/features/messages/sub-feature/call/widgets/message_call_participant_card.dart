@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../../../widgets/message_avatar.dart';
-import '../models/ message_call_models.dart';
+import '../models/message_call_models.dart';
 
 class MessageCallParticipantCard extends StatelessWidget {
   final MessageCallParticipantModel participant;

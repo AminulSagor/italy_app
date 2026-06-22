@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../ widgets/message_call_controls.dart';
-import '../ widgets/message_call_participant_card.dart';
-import '../ widgets/message_video_placeholder.dart';
+import '../widgets/message_call_controls.dart';
+import '../widgets/message_call_participant_card.dart';
+import '../widgets/message_video_placeholder.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../controllers/message_call_controller.dart';
-import '../models/ message_call_models.dart';
+import '../models/message_call_models.dart';
 
 class MessageCallView extends GetView<MessageCallController> {
   const MessageCallView({super.key});

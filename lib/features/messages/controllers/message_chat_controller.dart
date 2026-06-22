@@ -4,15 +4,19 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../models/message_models.dart';
+import '../models/presence_model.dart';
+import '../sub-feature/user-block/service/user_block_api_service.dart';
 import '../services/messages_mock_service.dart';
 import '../services/chat_socket_service.dart';
 import '../../../core/services/token_service.dart';
-import '../sub-feature/call/  views/message_call_view.dart';
+import '../sub-feature/call/views/message_call_view.dart';
 import '../sub-feature/call/controllers/message_call_controller.dart';
-import '../sub-feature/call/models/ message_call_models.dart';
+import '../sub-feature/call/models/message_call_models.dart';
 import '../sub-feature/call/service/message_call_mock_service.dart';
 import '../views/message_user_info_view.dart';
 import 'message_user_info_controller.dart';
+import 'messages_controller.dart';
+import '../services/presence_service.dart';
 
 class MessageChatController extends GetxController {
   final MessageThreadModel thread;
@@ -33,20 +37,195 @@ class MessageChatController extends GetxController {
   final List<Map<String, String>> _pendingSends = <Map<String, String>>[];
   final RxBool isSending = false.obs;
   final RxBool isLoadingMore = false.obs;
+  final RxString blockStatus = 'none'.obs;
   int _currentPage = 1;
 
   @override
   void onInit() {
     super.onInit();
     loadChat();
+    checkBlockStatus();
     chatScrollController.addListener(_handleChatScroll);
     _initSocket();
+    _initPresenceSync();
+  }
+
+  void _initPresenceSync() {
+    try {
+      if (Get.isRegistered<PresenceService>()) {
+        final PresenceService ps = Get.find<PresenceService>();
+        ever(ps.presenceMap, (Map<String, MessagePresenceModel> map) {
+          final String otherUserId =
+              chat.value?.contactId ?? thread.contactId ?? thread.id;
+          final MessagePresenceModel? p = map[otherUserId];
+          if (p != null) {
+            final current = chat.value;
+            if (current != null && current.isOnline != p.isOnline) {
+              chat.value = current.copyWith(
+                isOnline: p.isOnline,
+                contactStatus: p.isOnline ? 'Online' : 'Offline',
+              );
+            }
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  @override
+  void onClose() {
+    chatTextController.dispose();
+    chatScrollController.dispose();
+    try {
+      if (chat.value != null) {
+        _socketService?.leaveConversation(thread.id);
+      }
+    } catch (_) {}
+    super.onClose();
+  }
+
+  Future<void> checkBlockStatus() async {
+    try {
+      if (!Get.isRegistered<UserBlockApiService>()) {
+        Get.lazyPut<UserBlockApiService>(
+          () => UserBlockApiService(apiClient: Get.find()),
+        );
+      }
+      final UserBlockApiService api = Get.find<UserBlockApiService>();
+      final String otherUserId =
+          chat.value?.contactId ?? thread.contactId ?? thread.id;
+      final res = await api.getBlockStatus(otherUserId);
+      if (res.success && res.data != null) {
+        blockStatus.value = res.data!.status;
+      }
+    } catch (_) {}
+  }
+
+  Future<void> unblockUser() async {
+    try {
+      final UserBlockApiService api = Get.find<UserBlockApiService>();
+      final String otherUserId =
+          chat.value?.contactId ?? thread.contactId ?? thread.id;
+      final res = await api.unblockUser(otherUserId);
+      if (res.success) {
+        blockStatus.value = 'none';
+        Get.snackbar(
+          'Unblocked',
+          'You can now message this user.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          'Failed',
+          'Could not unblock user. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (_) {
+      Get.snackbar(
+        'Error',
+        'Something went wrong. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   Future<void> loadChat() async {
     isLoading.value = true;
     try {
-      chat.value = await _messagesMockService.fetchChat(thread);
+      final MessageChatModel fetched = await _messagesMockService.fetchChat(
+        thread,
+      );
+
+      // Merge fetched messages with any messages that may have arrived via
+      // socket or been created optimistically to avoid wiping them out.
+      final MessageChatModel? current = chat.value;
+      if (current == null || current.messages.isEmpty) {
+        chat.value = fetched;
+      } else {
+        final List<MessageChatItemModel> serverMsgs =
+            List<MessageChatItemModel>.from(fetched.messages);
+        final Set<String> serverIds = serverMsgs.map((e) => e.id).toSet();
+
+        // Append any local-only messages
+        final List<MessageChatItemModel> merged =
+            List<MessageChatItemModel>.from(serverMsgs);
+        for (final MessageChatItemModel m in current.messages) {
+          if (!serverIds.contains(m.id)) merged.add(m);
+        }
+
+        // Ensure chronological ordering (oldest -> newest)
+        merged.sort((MessageChatItemModel a, MessageChatItemModel b) {
+          try {
+            final DateTime da = DateTime.parse(
+              a.createdAtIso ?? DateTime.now().toIso8601String(),
+            );
+            final DateTime db = DateTime.parse(
+              b.createdAtIso ?? DateTime.now().toIso8601String(),
+            );
+            return da.compareTo(db);
+          } catch (_) {
+            return 0;
+          }
+        });
+
+        chat.value = fetched.copyWith(messages: merged);
+      }
+
+      // If we have a presence entry, keep it. Otherwise prefer the
+      // `/users/:id` profile endpoint for a definitive online state so
+      // the header status matches the user info screen.
+      final String otherUserId =
+          chat.value?.contactId ?? thread.contactId ?? thread.id;
+
+      try {
+        if (Get.isRegistered<PresenceService>()) {
+          final PresenceService ps = Get.find<PresenceService>();
+          final MessagePresenceModel? p = ps.presenceMap[otherUserId];
+          if (p != null && chat.value != null) {
+            chat.value = chat.value!.copyWith(
+              isOnline: p.isOnline,
+              contactStatus: p.isOnline ? 'Online' : 'Offline',
+            );
+          }
+        }
+      } catch (_) {}
+
+      // Always attempt to fetch the user's profile to get authoritative
+      // info, but prioritize PresenceService for online/offline state to avoid
+      // stale data overwriting real-time socket events.
+      try {
+        final profile = await _messagesMockService.fetchUserProfile(
+          otherUserId,
+          fallbackName: chat.value?.contactName ?? thread.learnerName,
+          fallbackAvatarUrl: chat.value?.contactAvatarUrl ?? thread.avatarUrl,
+        );
+        if (chat.value != null) {
+          bool isOnline = profile.statusLabel == 'ONLINE';
+
+          // Use presence service as SSOT if it has a record
+          if (Get.isRegistered<PresenceService>()) {
+            final p = Get.find<PresenceService>().presenceMap[otherUserId];
+            if (p != null) {
+              isOnline = p.isOnline;
+            }
+          }
+
+          chat.value = chat.value!.copyWith(
+            isOnline: isOnline,
+            contactStatus: isOnline ? 'Online' : 'Offline',
+            contactAvatarUrl: profile.avatarUrl,
+            contactName: profile.name,
+          );
+        }
+      } catch (_) {}
+
+      // Scroll to bottom to show latest messages after chat loads
+      _autoScrollToBottom();
+      // Persist read state on server (non-blocking)
+      try {
+        _messagesMockService.markConversationRead(thread.id);
+      } catch (_) {}
     } finally {
       isLoading.value = false;
     }
@@ -67,20 +246,50 @@ class MessageChatController extends GetxController {
       _currentUserId = null;
     }
 
+    // Tell PresenceService we're using socket now
+    String? deviceId;
+    try {
+      if (Get.isRegistered<PresenceService>()) {
+        final PresenceService ps = Get.find<PresenceService>();
+        deviceId = ps.deviceId.isNotEmpty ? ps.deviceId : null;
+      }
+    } catch (_) {}
+
     await _socketService?.connect(
+      deviceId: deviceId,
+      conversationId: thread.id,
       onMessage: (Map<String, dynamic> data) => _handleServerMessage(data),
       onNewMessage: (Map<String, dynamic> data) => _handleServerMessage(data),
       onReceiveMessage: (Map<String, dynamic> data) =>
           _handleServerMessage(data),
-      onPresenceChange: (Map<String, dynamic> data) {
+      onBlockChange: (Map<String, dynamic> data) {
         try {
-          final String userId = data['userId']?.toString() ?? '';
-          final bool isOnline = data['isOnline'] == true;
+          final String userId =
+              data['userId']?.toString() ??
+              data['blockedUserId']?.toString() ??
+              '';
+          final String status =
+              data['status']?.toString() ??
+              data['blockStatus']?.toString() ??
+              '';
           final MessageChatModel? current = chat.value;
           if (current != null) {
-            // If presence change targets this conversation's participant, update online status
-            if (userId == thread.id) {
-              chat.value = current.copyWith(isOnline: isOnline);
+            if (userId == thread.id || userId == (thread.contactId ?? '')) {
+              // Update local chat controller blockStatus so UI reflects change immediately
+              if (status.isNotEmpty) {
+                blockStatus.value = status;
+              }
+
+              // Update chat model contact status
+              try {
+                chat.value = current.copyWith(
+                  contactStatus: status == 'none'
+                      ? (current.contactStatus)
+                      : (status == 'blocked_by_me'
+                            ? 'You blocked this user'
+                            : 'You cannot message this user.'),
+                );
+              } catch (_) {}
             }
           }
         } catch (_) {}
@@ -111,15 +320,42 @@ class MessageChatController extends GetxController {
     }
   }
 
+  final RxBool showScrollToBottom = false.obs;
+
   void _handleChatScroll() {
     if (!chatScrollController.hasClients) return;
     final ScrollPosition position = chatScrollController.position;
     _shouldAutoScrollChat = position.maxScrollExtent - position.pixels <= 48;
+    showScrollToBottom.value = position.maxScrollExtent - position.pixels > 150;
     // If scrolled to top, attempt to load older messages
     if (position.pixels <= position.minScrollExtent + 48 &&
         !isLoadingMore.value) {
       _loadMore();
     }
+  }
+
+  void scrollToBottom() {
+    if (chatScrollController.hasClients) {
+      chatScrollController.animateTo(
+        chatScrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  void _autoScrollToBottom() {
+    try {
+      if (chatScrollController.hasClients) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (chatScrollController.hasClients) {
+            chatScrollController.jumpTo(
+              chatScrollController.position.maxScrollExtent,
+            );
+          }
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadMore() async {
@@ -132,8 +368,16 @@ class MessageChatController extends GetxController {
       if (older.isNotEmpty) {
         final MessageChatModel? current = chat.value;
         if (current != null) {
+          final Set<String> existingIds = current.messages
+              .map((e) => e.id)
+              .toSet();
+          final List<MessageChatItemModel> uniqueOlder = older
+              .where((e) => !existingIds.contains(e.id))
+              .toList();
+
           final List<MessageChatItemModel> updated =
-              List<MessageChatItemModel>.from(older)..addAll(current.messages);
+              List<MessageChatItemModel>.from(uniqueOlder)
+                ..addAll(current.messages);
           chat.value = current.copyWith(messages: updated);
           _currentPage = nextPage;
         }
@@ -194,6 +438,7 @@ class MessageChatController extends GetxController {
                   : DateTime.now().millisecondsSinceEpoch.toString()),
         text: content,
         timeLabel: _formatTimeLabel(createdAt),
+        createdAtIso: createdAt,
         statusLabel: senderId == _currentUserId
             ? (statusFromServer.isNotEmpty ? statusFromServer : 'Delivered')
             : '',
@@ -230,15 +475,36 @@ class MessageChatController extends GetxController {
 
       chat.value = current.copyWith(messages: updated);
 
+      // Update conversation preview in messages list
+      try {
+        if (Get.isRegistered<MessagesController>()) {
+          final MessagesController mc = Get.find<MessagesController>();
+          mc.updateThreadPreview(
+            threadId: thread.id,
+            lastMessage: item.text,
+            isoTime: createdAt,
+            isMine: item.isMine,
+          );
+        }
+      } catch (_) {}
+
       if (_shouldAutoScrollChat) {
-        // attempt to scroll — view will handle actual scroll; we don't force here
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (chatScrollController.hasClients) {
+            chatScrollController.animateTo(
+              chatScrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
       }
     } catch (_) {}
   }
 
   Future<void> sendMessage() async {
     final String text = chatTextController.text.trim();
-    if (text.isEmpty || isSending.value) return;
+    if (text.isEmpty || isSending.value || blockStatus.value != 'none') return;
 
     final MessageChatModel? current = chat.value;
     if (current == null) return;
@@ -251,6 +517,7 @@ class MessageChatController extends GetxController {
       id: clientMessageId,
       text: text,
       timeLabel: _formatTimeLabel(DateTime.now().toIso8601String()),
+      createdAtIso: DateTime.now().toIso8601String(),
       statusLabel: 'Sending',
       isMine: true,
     );
@@ -260,6 +527,19 @@ class MessageChatController extends GetxController {
     )..add(optimistic);
     chat.value = current.copyWith(messages: updated);
     chatTextController.clear();
+
+    // update conversation preview immediately with optimistic text
+    try {
+      if (Get.isRegistered<MessagesController>()) {
+        final MessagesController mc = Get.find<MessagesController>();
+        mc.updateThreadPreview(
+          threadId: thread.id,
+          lastMessage: optimistic.text,
+          isoTime: DateTime.now().toIso8601String(),
+          isMine: true,
+        );
+      }
+    } catch (_) {}
 
     try {
       _messagesMockService.sendMessageViaSocket(
@@ -356,6 +636,11 @@ class MessageChatController extends GetxController {
   }
 
   void _openCall(MessageCallType callType) {
+    if (blockStatus.value != 'none') {
+      Get.snackbar('Blocked', "You cannot call this user.");
+      return;
+    }
+
     final MessageChatModel? currentChat = chat.value;
 
     if (currentChat == null) return;
@@ -385,10 +670,18 @@ class MessageChatController extends GetxController {
     Get.to<void>(
       () => const MessageUserInfoView(),
       binding: BindingsBuilder(() {
+        if (!Get.isRegistered<UserBlockApiService>()) {
+          Get.lazyPut<UserBlockApiService>(
+            () => UserBlockApiService(apiClient: Get.find()),
+          );
+        }
         Get.put<MessageUserInfoController>(
           MessageUserInfoController(
-            threadId: thread.id,
+            threadId: chat.value?.contactId ?? thread.contactId ?? thread.id,
+            fallbackName: chat.value?.contactName ?? thread.learnerName,
+            fallbackAvatarUrl: chat.value?.contactAvatarUrl ?? thread.avatarUrl,
             messagesMockService: _messagesMockService,
+            userBlockApiService: Get.find<UserBlockApiService>(),
           ),
         );
       }),

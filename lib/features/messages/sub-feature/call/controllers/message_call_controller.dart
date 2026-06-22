@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 
-import '../models/ message_call_models.dart';
+import '../models/message_call_models.dart';
 import '../service/message_call_mock_service.dart';
 
 class MessageCallController extends GetxController {
