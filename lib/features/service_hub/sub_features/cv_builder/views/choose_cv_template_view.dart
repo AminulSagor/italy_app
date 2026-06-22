@@ -6,8 +6,6 @@ import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../_widgets/cv_bottom_button.dart';
-import '../_widgets/cv_color_bottom_sheet.dart';
-import '../_widgets/cv_color_picker_card.dart';
 import '../_widgets/cv_template_card.dart';
 import '../controllers/cv_template_controller.dart';
 import '../models/cv_builder_models.dart';
@@ -26,7 +24,7 @@ class ChooseCvTemplateView extends GetView<CvTemplateController> {
           children: <Widget>[
             Expanded(
               child: RefreshIndicator(
-                onRefresh: controller.loadTemplates,
+                onRefresh: controller.refreshTemplates,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(
                     parent: BouncingScrollPhysics(),
@@ -49,37 +47,22 @@ class ChooseCvTemplateView extends GetView<CvTemplateController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'Pick an admin-approved template and customize its color.',
+                        'Pick an active CV template. You can customize colors before creating the final CV.',
                         style: TextStyle(
                           color: AppColors.homeSecondaryText,
                           fontSize: AppFont.font11.sp,
                           fontWeight: FontWeight.w500,
-                          height: 1,
+                          height: 1.3,
                         ),
                       ),
                       SizedBox(height: 22.h),
-                      const _SearchBox(),
+                      _SearchBox(controller: controller),
                       SizedBox(height: 18.h),
                       _CategoryChips(controller: controller),
                       SizedBox(height: 18.h),
                       _TemplateGrid(
                         controller: controller,
                         cardWidth: cardWidth,
-                      ),
-                      SizedBox(height: 24.h),
-                      Text(
-                        'Choose Color',
-                        style: TextStyle(
-                          color: AppColors.homePrimaryText,
-                          fontSize: AppFont.font12.sp,
-                          fontWeight: FontWeight.w700,
-                          height: 1,
-                        ),
-                      ),
-                      SizedBox(height: 12.h),
-                      CvColorPickerCard(
-                        controller: controller,
-                        onCustomTap: () => showCvColorBottomSheet(context),
                       ),
                     ],
                   ),
@@ -134,7 +117,9 @@ class _Header extends StatelessWidget {
 }
 
 class _SearchBox extends StatelessWidget {
-  const _SearchBox();
+  const _SearchBox({required this.controller});
+
+  final CvTemplateController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -154,12 +139,23 @@ class _SearchBox extends StatelessWidget {
           ),
           SizedBox(width: 12.w),
           Expanded(
-            child: Text(
-              'Search hospitality templates...',
+            child: TextField(
+              onChanged: controller.updateSearchQuery,
+              cursorColor: AppColors.primaryGreen,
               style: TextStyle(
-                color: AppColors.homeSecondaryText.withValues(alpha: 0.65),
+                color: AppColors.homePrimaryText,
                 fontSize: AppFont.font11.sp,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
+              ),
+              decoration: InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                hintText: 'Search template name...',
+                hintStyle: TextStyle(
+                  color: AppColors.homeSecondaryText.withOpacity(0.42),
+                  fontSize: AppFont.font11.sp,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
@@ -233,28 +229,68 @@ class _TemplateGrid extends StatelessWidget {
 
       if (controller.templates.isEmpty) {
         return const _TemplateMessage(
-          message: 'No CV templates are active yet. Please try again later.',
+          message: 'No active CV templates match your filter yet.',
         );
       }
 
-      return Wrap(
-        spacing: 12.w,
-        runSpacing: 18.h,
-        children: List<Widget>.generate(controller.templates.length, (
-          int index,
-        ) {
-          final CvTemplateModel template = controller.templates[index];
-          return CvTemplateCard(
-            width: cardWidth,
-            title: template.title,
-            tag: template.styleType.toUpperCase().replaceAll('_', ' '),
-            tagColor: controller.colors[index % controller.colors.length],
-            isSelected: controller.selectedTemplateIndex.value == index,
-            onTap: () => controller.startWithTemplate(index),
-          );
-        }),
+      return Column(
+        children: <Widget>[
+          Wrap(
+            spacing: 12.w,
+            runSpacing: 18.h,
+            children: List<Widget>.generate(controller.templates.length, (
+              int index,
+            ) {
+              final CvTemplateModel template = controller.templates[index];
+              final Color tagColor = _tagColor(template.styleType);
+              return CvTemplateCard(
+                width: cardWidth,
+                title: template.title,
+                tag: template.styleType.toUpperCase().replaceAll('_', ' '),
+                tagColor: tagColor,
+                previewImageUrl: template.previewImageUrl,
+                isSelected: controller.selectedTemplateIndex.value == index,
+                onTap: () => controller.selectTemplate(index),
+              );
+            }),
+          ),
+          if (controller.hasMoreTemplates) ...<Widget>[
+            SizedBox(height: 20.h),
+            GestureDetector(
+              onTap: controller.isLoadingMore.value
+                  ? null
+                  : controller.loadMoreTemplates,
+              child: Container(
+                height: 44.h,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(kRadius20.r),
+                  border: Border.all(
+                    color: AppColors.primaryGreen.withOpacity(0.18),
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  controller.isLoadingMore.value ? 'Loading...' : 'Load More',
+                  style: TextStyle(
+                    color: AppColors.primaryGreen,
+                    fontSize: AppFont.font11.sp,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
       );
     });
+  }
+
+  Color _tagColor(String styleType) {
+    if (styleType == 'classic') return AppColors.legacyColorFF0B4A7D;
+    if (styleType == 'modern_column') return AppColors.primaryGreen;
+    return AppColors.legacyColorFF646C7A;
   }
 }
 

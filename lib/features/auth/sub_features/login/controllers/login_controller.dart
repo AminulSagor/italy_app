@@ -5,6 +5,7 @@ import '../../../../../core/localization/translation_service.dart';
 import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../core/services/auth_service.dart';
 import '../../../../../features/messages/services/chat_socket_service.dart';
+import '../../../../../core/services/device_push_token_service.dart';
 import '../../../../../routes/routes.dart';
 import '../../../models/auth_models.dart';
 import '../models/login_models.dart';
@@ -109,6 +110,7 @@ class LoginController extends GetxController {
         // Socket refresh failure should not prevent navigation
       }
 
+      await Get.find<DevicePushTokenService>().registerCurrentDevice();
       Get.offAllNamed(AppRoutes.wrapper);
     } finally {
       form.value = form.value.copyWith(isLoading: false);

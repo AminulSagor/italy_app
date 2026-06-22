@@ -72,6 +72,7 @@ class AppRoutes {
   static const String chooseCvTemplate = '/choose-cv-template';
   static const String createCvContact = '/create-cv-contact';
   static const String createCvDynamicForm = '/create-cv-dynamic-form';
+  static const String createCvTheme = '/create-cv-theme';
   static const String createCvExperience = '/create-cv-experience';
   static const String createCvEducation = '/create-cv-education';
   static const String createCvSummary = '/create-cv-summary';

@@ -10,6 +10,7 @@ class CvTemplateCard extends StatelessWidget {
   final String title;
   final String? tag;
   final Color? tagColor;
+  final String? previewImageUrl;
   final bool isSelected;
   final bool isComingSoon;
   final VoidCallback onTap;
@@ -20,6 +21,7 @@ class CvTemplateCard extends StatelessWidget {
     required this.title,
     this.tag,
     this.tagColor,
+    this.previewImageUrl,
     required this.isSelected,
     this.isComingSoon = false,
     required this.onTap,
@@ -37,9 +39,9 @@ class CvTemplateCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
-                height: 124.h,
+                height: 196.h,
                 width: width,
-                padding: EdgeInsets.all(9.r),
+                clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(kRadius24.r),
@@ -64,7 +66,7 @@ class CvTemplateCard extends StatelessWidget {
                   height: 1,
                 ),
               ),
-              if (tag != null) ...<Widget>[
+              if (tag != null && tagColor != null) ...<Widget>[
                 SizedBox(height: 4.h),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
@@ -91,95 +93,106 @@ class CvTemplateCard extends StatelessWidget {
   }
 
   Widget _templatePreview() {
+    final String? imageUrl = previewImageUrl?.trim();
     return Stack(
+      fit: StackFit.expand,
       children: <Widget>[
+        if (imageUrl != null && imageUrl.isNotEmpty)
+          Image.network(
+            imageUrl,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => _fallbackPreview(),
+          )
+        else
+          _fallbackPreview(),
         Positioned(
-          left: 0,
-          top: 0,
-          child: CircleAvatar(
-            radius: 11.r,
-            backgroundColor: AppColors.legacyColorFFD4DEE8,
-            child: Icon(
-              Icons.person_rounded,
-              size: AppFont.font12.sp,
-              color: AppColors.primaryGreen,
-            ),
-          ),
-        ),
-        Positioned(
-          left: 28.w,
-          top: 6.h,
+          right: 7.w,
+          top: 7.h,
           child: Container(
-            width: 34.w,
-            height: 4.h,
+            width: 22.w,
+            height: 22.w,
             decoration: BoxDecoration(
-              color: AppColors.homeSecondaryText,
-              borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+              color: isSelected
+                  ? AppColors.primaryGreen
+                  : AppColors.legacyColorFFE0E1E1,
+              shape: BoxShape.circle,
             ),
+            child: isSelected
+                ? Icon(
+                    Icons.check_rounded,
+                    color: AppColors.white,
+                    size: AppFont.font14.sp,
+                  )
+                : null,
           ),
         ),
-        Positioned(
-          left: 0,
-          top: 34.h,
-          right: 18.w,
-          child: Column(
-            children: List<Widget>.generate(
-              3,
-              (int index) => Container(
-                margin: EdgeInsets.only(bottom: 7.h),
-                height: 3.h,
-                decoration: BoxDecoration(
-                  color: AppColors.legacyColorFFE0E1E1,
-                  borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+      ],
+    );
+  }
+
+  Widget _fallbackPreview() {
+    return Container(
+      padding: EdgeInsets.all(9.r),
+      color: AppColors.white,
+      child: Stack(
+        children: <Widget>[
+          Positioned(
+            left: 0,
+            top: 0,
+            child: CircleAvatar(
+              radius: 11.r,
+              backgroundColor: AppColors.legacyColorFFD4DEE8,
+              child: Icon(
+                Icons.person_rounded,
+                size: AppFont.font12.sp,
+                color: AppColors.primaryGreen,
+              ),
+            ),
+          ),
+          Positioned(
+            left: 28.w,
+            top: 6.h,
+            child: Container(
+              width: 34.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: AppColors.homeSecondaryText,
+                borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            top: 34.h,
+            right: 18.w,
+            child: Column(
+              children: List<Widget>.generate(
+                3,
+                (int index) => Container(
+                  margin: EdgeInsets.only(bottom: 7.h),
+                  height: 3.h,
+                  decoration: BoxDecoration(
+                    color: AppColors.legacyColorFFE0E1E1,
+                    borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        Positioned(
-          left: 0,
-          bottom: 2.h,
-          child: Container(
-            width: 54.w,
-            height: 4.h,
-            decoration: BoxDecoration(
-              color: AppColors.homePaleGreen,
-              borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
-            ),
-          ),
-        ),
-        if (isSelected)
           Positioned(
-            right: 0,
-            top: 0,
+            left: 0,
+            bottom: 2.h,
             child: Container(
-              width: 22.w,
-              height: 22.w,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryGreen,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.check_rounded,
-                color: AppColors.white,
-                size: AppFont.font14.sp,
-              ),
-            ),
-          ),
-        if (!isSelected)
-          Positioned(
-            right: 4.w,
-            top: 4.h,
-            child: Container(
-              width: 12.w,
-              height: 12.w,
+              width: 54.w,
+              height: 4.h,
               decoration: BoxDecoration(
-                color: AppColors.legacyColorFFE0E1E1,
-                shape: BoxShape.circle,
+                color: AppColors.homePaleGreen,
+                borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
               ),
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 

@@ -1,9 +1,8 @@
 import 'package:get/get.dart';
 
-import '../../../../../core/services/api_error_handler.dart';
+import '../../../../../routes/app_route_arguments.dart';
 import '../../../../../routes/app_routes.dart';
 import '../models/cv_builder_models.dart';
-import '../services/cv_builder_api_service.dart';
 import 'create_cv_contact_controller.dart';
 import 'create_cv_education_controller.dart';
 import 'create_cv_experience_controller.dart';
@@ -49,20 +48,16 @@ class CreateCvSummaryController extends GetxController {
 
     isSaving.value = true;
     try {
-      final CvBuilderApiService service = Get.find<CvBuilderApiService>();
-      final ApiResult<void> result = await ApiErrorHandler.call(
-        () => service.saveCvDocument(
-          CvDocumentPayloadModel(
-            templateId: template.id,
-            title: _documentTitle(template.title),
-            themeColor: _colorToHex(templateController.selectedColor),
-            formData: _buildFormData(),
-          ),
+      Get.toNamed(
+        AppRoutes.createCvTheme,
+        arguments: CvThemeRouteArguments(
+          template: template,
+          documentTitle: _documentTitle(template.title),
+          primaryColor: _colorToHex(templateController.selectedColor),
+          accentColor: template.accentColor,
+          formData: _buildFormData(),
         ),
       );
-      if (result.isSuccess) {
-        Get.toNamed(AppRoutes.cvReady);
-      }
     } finally {
       isSaving.value = false;
     }
