@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 enum AiTutorMessageRole { user, assistant }
 
 class AiTutorStarterModel {
@@ -34,6 +35,55 @@ class AiTutorStarterModel {
   }
 }
 
+class AiTutorCorrectionModel {
+  const AiTutorCorrectionModel({
+    required this.original,
+    required this.corrected,
+    required this.explanation,
+    this.rule,
+  });
+
+  final String original;
+  final String corrected;
+  final String explanation;
+  final String? rule;
+
+  factory AiTutorCorrectionModel.fromJson(Map<String, dynamic> json) {
+    return AiTutorCorrectionModel(
+      original: json['original']?.toString().trim() ?? '',
+      corrected: json['corrected']?.toString().trim() ?? '',
+      explanation: json['explanation']?.toString().trim() ?? '',
+      rule: _optionalText(json['rule']),
+    );
+  }
+
+  bool get isValid =>
+      original.isNotEmpty && corrected.isNotEmpty && explanation.isNotEmpty;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'original': original,
+      'corrected': corrected,
+      'explanation': explanation,
+      'rule': rule,
+    };
+  }
+
+  AiTutorCorrectionModel copyWith({
+    String? original,
+    String? corrected,
+    String? explanation,
+    String? rule,
+  }) {
+    return AiTutorCorrectionModel(
+      original: original ?? this.original,
+      corrected: corrected ?? this.corrected,
+      explanation: explanation ?? this.explanation,
+      rule: rule ?? this.rule,
+    );
+  }
+}
+
 class AiTutorMessageModel {
   const AiTutorMessageModel({
     required this.id,
@@ -42,6 +92,8 @@ class AiTutorMessageModel {
     required this.createdAt,
     this.english,
     this.bangla,
+    this.italianSpeechText,
+    this.correction,
     this.isPartial = false,
   });
 
@@ -50,6 +102,8 @@ class AiTutorMessageModel {
   final String primary;
   final String? english;
   final String? bangla;
+  final String? italianSpeechText;
+  final AiTutorCorrectionModel? correction;
   final DateTime createdAt;
   final bool isPartial;
 
@@ -57,6 +111,9 @@ class AiTutorMessageModel {
 
   factory AiTutorMessageModel.fromJson(Map<String, dynamic> json) {
     final String roleValue = json['role']?.toString().trim().toLowerCase() ?? '';
+    final AiTutorCorrectionModel? correction = _correctionFromJson(
+      json['correction'],
+    );
     return AiTutorMessageModel(
       id: json['id']?.toString() ??
           DateTime.now().microsecondsSinceEpoch.toString(),
@@ -66,6 +123,8 @@ class AiTutorMessageModel {
       primary: (json['primary'] ?? json['text'] ?? '').toString().trim(),
       english: _optionalText(json['english']),
       bangla: _optionalText(json['bangla']),
+      italianSpeechText: _optionalText(json['italianSpeechText']),
+      correction: correction,
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
           DateTime.now(),
       isPartial: json['isPartial'] == true || json['final'] == false,
@@ -104,6 +163,8 @@ class AiTutorMessageModel {
       'primary': primary,
       'english': english,
       'bangla': bangla,
+      'italianSpeechText': italianSpeechText,
+      'correction': correction?.toJson(),
       'createdAt': createdAt.toUtc().toIso8601String(),
       'isPartial': isPartial,
     };
@@ -122,6 +183,8 @@ class AiTutorMessageModel {
     String? primary,
     String? english,
     String? bangla,
+    String? italianSpeechText,
+    AiTutorCorrectionModel? correction,
     DateTime? createdAt,
     bool? isPartial,
   }) {
@@ -131,14 +194,11 @@ class AiTutorMessageModel {
       primary: primary ?? this.primary,
       english: english ?? this.english,
       bangla: bangla ?? this.bangla,
+      italianSpeechText: italianSpeechText ?? this.italianSpeechText,
+      correction: correction ?? this.correction,
       createdAt: createdAt ?? this.createdAt,
       isPartial: isPartial ?? this.isPartial,
     );
-  }
-
-  static String? _optionalText(dynamic value) {
-    final String text = value?.toString().trim() ?? '';
-    return text.isEmpty ? null : text;
   }
 }
 
@@ -146,10 +206,14 @@ class AiTutorChatResponseModel {
   const AiTutorChatResponseModel({
     required this.conversationId,
     required this.message,
+    required this.memoryFacts,
+    required this.recentMistakeTags,
   });
 
   final String conversationId;
   final AiTutorMessageModel message;
+  final List<String> memoryFacts;
+  final List<String> recentMistakeTags;
 
   factory AiTutorChatResponseModel.fromJson(Map<String, dynamic> json) {
     final dynamic rawMessage = json['message'];
@@ -161,6 +225,11 @@ class AiTutorChatResponseModel {
     return AiTutorChatResponseModel(
       conversationId: json['conversationId']?.toString() ?? '',
       message: AiTutorMessageModel.fromJson(messageJson),
+      memoryFacts: _stringList(json['memoryFacts'], maxItems: 10),
+      recentMistakeTags: _stringList(
+        json['recentMistakeTags'],
+        maxItems: 6,
+      ),
     );
   }
 
@@ -168,16 +237,22 @@ class AiTutorChatResponseModel {
     return <String, dynamic>{
       'conversationId': conversationId,
       'message': message.toJson(),
+      'memoryFacts': memoryFacts,
+      'recentMistakeTags': recentMistakeTags,
     };
   }
 
   AiTutorChatResponseModel copyWith({
     String? conversationId,
     AiTutorMessageModel? message,
+    List<String>? memoryFacts,
+    List<String>? recentMistakeTags,
   }) {
     return AiTutorChatResponseModel(
       conversationId: conversationId ?? this.conversationId,
       message: message ?? this.message,
+      memoryFacts: memoryFacts ?? this.memoryFacts,
+      recentMistakeTags: recentMistakeTags ?? this.recentMistakeTags,
     );
   }
 }
@@ -237,5 +312,102 @@ class AiTutorVoiceSessionModel {
       token: token ?? this.token,
       ttlSeconds: ttlSeconds ?? this.ttlSeconds,
     );
+  }
+}
+
+class AiTutorVoiceSessionRequestModel {
+  const AiTutorVoiceSessionRequestModel({
+    this.topic,
+    this.ttlSeconds = 900,
+    this.memoryFacts = const <String>[],
+    this.recentMistakeTags = const <String>[],
+    this.guidedMode,
+    this.guidedLevel,
+  });
+
+  final String? topic;
+  final int ttlSeconds;
+  final List<String> memoryFacts;
+  final List<String> recentMistakeTags;
+  final String? guidedMode;
+  final String? guidedLevel;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      if (topic?.trim().isNotEmpty == true) 'topic': topic!.trim(),
+      'ttlSeconds': ttlSeconds,
+      'memoryFacts': memoryFacts,
+      'recentMistakeTags': recentMistakeTags,
+      if (guidedMode?.trim().isNotEmpty == true)
+        'guidedMode': guidedMode!.trim(),
+      if (guidedLevel?.trim().isNotEmpty == true)
+        'guidedLevel': guidedLevel!.trim().toUpperCase(),
+    };
+  }
+}
+
+class AiTutorChatRequestModel {
+  const AiTutorChatRequestModel({
+    required this.message,
+    required this.history,
+    this.conversationId,
+    this.memoryFacts = const <String>[],
+    this.recentMistakeTags = const <String>[],
+  });
+
+  final String message;
+  final List<AiTutorMessageModel> history;
+  final String? conversationId;
+  final List<String> memoryFacts;
+  final List<String> recentMistakeTags;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'message': message.trim(),
+      if (conversationId?.trim().isNotEmpty == true)
+        'conversationId': conversationId!.trim(),
+      'history': history
+          .takeLast(20)
+          .map((AiTutorMessageModel item) => item.toHistoryJson())
+          .toList(growable: false),
+      'memoryFacts': memoryFacts,
+      'recentMistakeTags': recentMistakeTags,
+    };
+  }
+}
+
+AiTutorCorrectionModel? _correctionFromJson(dynamic value) {
+  if (value is! Map) {
+    return null;
+  }
+  final AiTutorCorrectionModel correction = AiTutorCorrectionModel.fromJson(
+    Map<String, dynamic>.from(value),
+  );
+  return correction.isValid ? correction : null;
+}
+
+String? _optionalText(dynamic value) {
+  final String text = value?.toString().trim() ?? '';
+  return text.isEmpty ? null : text;
+}
+
+List<String> _stringList(dynamic value, {required int maxItems}) {
+  if (value is! List) {
+    return <String>[];
+  }
+  return value
+      .map((dynamic item) => item?.toString().trim() ?? '')
+      .where((String item) => item.isNotEmpty)
+      .take(maxItems)
+      .toList(growable: false);
+}
+
+extension IterableTakeLast<T> on Iterable<T> {
+  Iterable<T> takeLast(int count) {
+    final List<T> values = toList(growable: false);
+    if (values.length <= count) {
+      return values;
+    }
+    return values.skip(values.length - count);
   }
 }

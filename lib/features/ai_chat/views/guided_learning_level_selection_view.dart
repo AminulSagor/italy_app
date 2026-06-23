@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_font.dart';
 import '../controllers/ai_chat_controller.dart';
+import '../models/ai_tutor_guided_learning_models.dart';
 
 class GuidedLearningLevelSelectionView extends GetView<AiChatController> {
   const GuidedLearningLevelSelectionView({super.key});
@@ -25,7 +26,7 @@ class GuidedLearningLevelSelectionView extends GetView<AiChatController> {
         bottom: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(30.w, 27.h, 30.w, 56.h),
+          padding: EdgeInsets.fromLTRB(24.w, 27.h, 24.w, 56.h),
           child: Column(
             children: <Widget>[
               const _GuidedHeader(title: 'Guided AI Tour'),
@@ -57,9 +58,12 @@ class GuidedLearningLevelSelectionView extends GetView<AiChatController> {
                 title: 'Level A1',
                 levelLabel: '(Beginner)',
                 description:
-                    '10 Topics available. Basics like\nordering food and buying tickets.',
+                    '10 topics. Listen to short Italian phrases\nand repeat them exactly.',
                 buttonText: 'Explore A1 Topics',
-                onTap: () => controller.openGuidedTopics('A1'),
+                onTap: () => controller.openGuidedTopics(
+                  level: 'A1',
+                  mode: AiTutorGuidedMode.guided,
+                ),
               ),
               SizedBox(height: 24.h),
               _LevelCard(
@@ -67,18 +71,24 @@ class GuidedLearningLevelSelectionView extends GetView<AiChatController> {
                 title: 'Level A2',
                 levelLabel: '(Intermediate)',
                 description:
-                    '15 Topics available. Doctor visits,\njob interviews, and daily life.',
+                    'Answer topic questions in Italian with\nguidance and simple corrections.',
                 buttonText: 'Explore A2 Topics',
-                onTap: () => controller.openGuidedTopics('A2'),
+                onTap: () => controller.openGuidedTopics(
+                  level: 'A2',
+                  mode: AiTutorGuidedMode.assisted,
+                ),
               ),
               SizedBox(height: 24.h),
               _LevelCard(
                 icon: Icons.chat_bubble_rounded,
                 title: 'Level B1',
                 levelLabel: '(Advanced)',
-                description: 'Complex conversations and open\ndebates.',
+                description: 'Natural role-play conversations in\nreal-life Italian situations.',
                 buttonText: 'Explore B1 Topics',
-                onTap: () => controller.openGuidedTopics('B1'),
+                onTap: () => controller.openGuidedTopics(
+                  level: 'B1',
+                  mode: AiTutorGuidedMode.free,
+                ),
               ),
             ],
           ),

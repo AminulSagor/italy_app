@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
 
 import '../../features/ai_chat/controllers/ai_chat_controller.dart';
+import '../../features/ai_chat/controllers/ai_tutor_level_test_controller.dart';
 import '../../features/ai_chat/services/ai_tutor_api_service.dart';
+import '../../features/ai_chat/services/ai_tutor_preferences_service.dart';
 import '../../features/ai_chat/services/ai_tutor_tts_service.dart';
 import '../../features/ai_chat/services/ai_tutor_voice_service.dart';
 import '../../features/courses/controllers/courses_controller.dart';
@@ -30,6 +32,10 @@ class InitialBindings extends Bindings {
       () => AiTutorApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,
     );
+    Get.lazyPut<AiTutorPreferencesService>(
+      () => AiTutorPreferencesService(),
+      fenix: true,
+    );
     Get.lazyPut<AiTutorVoiceService>(
       () => AiTutorVoiceService(),
       fenix: true,
@@ -43,6 +49,14 @@ class InitialBindings extends Bindings {
         apiService: Get.find<AiTutorApiService>(),
         voiceService: Get.find<AiTutorVoiceService>(),
         ttsService: Get.find<AiTutorTtsService>(),
+        preferencesService: Get.find<AiTutorPreferencesService>(),
+      ),
+      fenix: true,
+    );
+    Get.lazyPut<AiTutorLevelTestController>(
+      () => AiTutorLevelTestController(
+        apiService: Get.find<AiTutorApiService>(),
+        preferencesService: Get.find<AiTutorPreferencesService>(),
       ),
       fenix: true,
     );

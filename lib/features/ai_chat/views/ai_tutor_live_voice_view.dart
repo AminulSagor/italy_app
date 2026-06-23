@@ -286,7 +286,7 @@ class _LiveVoiceControls extends GetView<AiChatController> {
             _SmallControlButton(
               icon: Icons.keyboard_alt_outlined,
               color: const Color(0xFF77807C),
-              enabled: !busy,
+              enabled: !busy && !controller.isGuidedVoiceSession,
               onTap: controller.switchLiveVoiceToText,
             ),
             GestureDetector(

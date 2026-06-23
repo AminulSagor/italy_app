@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/api_error_handler.dart';
+import '../models/ai_tutor_guided_learning_models.dart';
+import '../models/ai_tutor_level_test_models.dart';
 import '../models/ai_tutor_models.dart';
 import '../services/ai_tutor_api_service.dart';
+import '../services/ai_tutor_preferences_service.dart';
 import '../services/ai_tutor_tts_service.dart';
 import '../services/ai_tutor_voice_service.dart';
 import '../views/ai_level_test_view.dart';
@@ -20,12 +23,16 @@ class AiChatController extends GetxController {
     AiTutorApiService? apiService,
     AiTutorVoiceService? voiceService,
     AiTutorTtsService? ttsService,
+    AiTutorPreferencesService? preferencesService,
   }) : _apiService = apiService ?? Get.find<AiTutorApiService>(),
        voiceService = voiceService ?? Get.find<AiTutorVoiceService>(),
-       _ttsService = ttsService ?? Get.find<AiTutorTtsService>();
+       _ttsService = ttsService ?? Get.find<AiTutorTtsService>(),
+       _preferencesService = preferencesService ??
+           Get.find<AiTutorPreferencesService>();
 
   final AiTutorApiService _apiService;
   final AiTutorTtsService _ttsService;
+  final AiTutorPreferencesService _preferencesService;
   final AiTutorVoiceService voiceService;
 
   final TextEditingController inputController = TextEditingController();
@@ -40,9 +47,28 @@ class AiChatController extends GetxController {
   final RxList<AiTutorMessageModel> textMessages =
       <AiTutorMessageModel>[].obs;
   final RxnString conversationId = RxnString();
+  final RxList<String> conversationMemoryFacts = <String>[].obs;
+  final RxList<String> recentMistakeTags = <String>[].obs;
+
+  Rxn<AiTutorLearnerProfileModel> get learnerProfile =>
+      _preferencesService.learnerProfile;
+
+  String get levelTestSubtitle {
+    final AiTutorLearnerProfileModel? profile = learnerProfile.value;
+    return profile == null ? 'লেভেল টেস্ট' : 'Current: ${profile.finalLevel}';
+  }
+
+  String get adaptiveModeLabel {
+    final AiTutorLearnerProfileModel? profile = learnerProfile.value;
+    if (recentMistakeTags.isNotEmpty) {
+      return 'Simplified correction mode';
+    }
+    return profile?.adaptiveLabel ?? 'Adaptive level detection';
+  }
 
   AiTutorVoiceSessionModel? _activeVoiceSession;
   String? _activeVoiceTopic;
+  AiTutorGuidedSessionContext? _activeGuidedSession;
   int _textSessionVersion = 0;
 
   final List<AiTutorStarterModel> _allStarters =
@@ -84,6 +110,8 @@ class AiChatController extends GetxController {
         ),
       ];
 
+  bool get isGuidedVoiceSession => _activeGuidedSession != null;
+
   bool get isLiveVoiceConnecting =>
       isStartingVoiceSession.value ||
       voiceService.connectionState.value ==
@@ -93,6 +121,25 @@ class AiChatController extends GetxController {
   void onInit() {
     super.onInit();
     refreshStarters();
+    unawaited(refreshLearnerProfile());
+  }
+
+  Future<void> refreshLearnerProfile() async {
+    final ApiResult<AiTutorLevelProfileResponseModel> result =
+        await ApiErrorHandler.call<AiTutorLevelProfileResponseModel>(
+      _apiService.getLevelTestProfile,
+      showError: false,
+    );
+    if (!result.isSuccess || result.data == null) {
+      return;
+    }
+
+    final AiTutorLearnerProfileModel? profile = result.data!.profile;
+    if (profile == null) {
+      _preferencesService.clearProfile();
+      return;
+    }
+    _preferencesService.setProfile(profile);
   }
 
   void onEnterLabTap() {
@@ -139,6 +186,8 @@ class AiChatController extends GetxController {
     conversationId.value = null;
     textMessages.clear();
     expandedTranslationIds.clear();
+    conversationMemoryFacts.clear();
+    recentMistakeTags.clear();
     inputController.clear();
     inputText.value = '';
     isTextConversationActive.value = true;
@@ -181,6 +230,8 @@ class AiChatController extends GetxController {
               message: text,
               history: history,
               conversationId: conversationId.value,
+              memoryFacts: conversationMemoryFacts,
+              recentMistakeTags: recentMistakeTags,
             ),
           );
       if (!result.isSuccess ||
@@ -191,6 +242,8 @@ class AiChatController extends GetxController {
       }
 
       conversationId.value = result.data!.conversationId;
+      conversationMemoryFacts.assignAll(result.data!.memoryFacts);
+      recentMistakeTags.assignAll(result.data!.recentMistakeTags);
       textMessages.add(result.data!.message);
     } finally {
       if (sessionVersion == _textSessionVersion) {
@@ -239,6 +292,8 @@ class AiChatController extends GetxController {
     conversationId.value = null;
     textMessages.clear();
     expandedTranslationIds.clear();
+    conversationMemoryFacts.clear();
+    recentMistakeTags.clear();
     inputController.clear();
     inputText.value = '';
     isTextConversationActive.value = false;
@@ -247,8 +302,12 @@ class AiChatController extends GetxController {
     unawaited(_ttsService.stop());
   }
 
-  void openLiveVoiceSession({String? topic}) {
+  void openLiveVoiceSession({
+    String? topic,
+    AiTutorGuidedSessionContext? guidedSession,
+  }) {
     _activeVoiceTopic = topic?.trim();
+    _activeGuidedSession = guidedSession;
     Get.to<void>(
       () => const AiTutorLiveVoiceView(),
       transition: Transition.rightToLeft,
@@ -265,7 +324,13 @@ class AiChatController extends GetxController {
     try {
       final ApiResult<AiTutorVoiceSessionModel> result =
           await ApiErrorHandler.call<AiTutorVoiceSessionModel>(
-            () => _apiService.startVoiceSession(topic: _activeVoiceTopic),
+            () => _apiService.startVoiceSession(
+              topic: _activeVoiceTopic,
+              memoryFacts: conversationMemoryFacts,
+              recentMistakeTags: recentMistakeTags,
+              guidedMode: _activeGuidedSession?.mode.apiValue,
+              guidedLevel: _activeGuidedSession?.level,
+            ),
           );
       if (!result.isSuccess || result.data == null) {
         voiceService.connectionState.value = AiTutorVoiceConnectionState.error;
@@ -316,6 +381,8 @@ class AiChatController extends GetxController {
       return false;
     }
     await endLiveVoiceSession();
+    _activeGuidedSession = null;
+    _activeVoiceTopic = null;
     return true;
   }
 
@@ -324,13 +391,15 @@ class AiChatController extends GetxController {
       return;
     }
     await endLiveVoiceSession();
+    _activeGuidedSession = null;
+    _activeVoiceTopic = null;
     if (Get.key.currentState?.canPop() ?? false) {
       Get.back<void>();
     }
   }
 
   Future<void> switchLiveVoiceToText() async {
-    if (isLiveVoiceConnecting) {
+    if (isLiveVoiceConnecting || isGuidedVoiceSession) {
       return;
     }
 
@@ -338,6 +407,8 @@ class AiChatController extends GetxController {
         ? _activeVoiceTopic!.trim()
         : 'Continue helping me practice Italian.';
     await endLiveVoiceSession();
+    _activeGuidedSession = null;
+    _activeVoiceTopic = null;
     if (Get.key.currentState?.canPop() ?? false) {
       Get.back<void>();
     }
@@ -352,40 +423,36 @@ class AiChatController extends GetxController {
     );
   }
 
-  void openGuidedTopics(String level) {
+  void openGuidedTopics({
+    required String level,
+    required AiTutorGuidedMode mode,
+  }) {
     Get.to<void>(
-      () => GuidedLearningTopicsView(level: level),
+      () => GuidedLearningTopicsView(level: level, mode: mode),
       transition: Transition.rightToLeft,
     );
   }
 
-  Future<void> onGuidedTopicTap(String topicTitle) async {
-    for (int index = 0; index < 2; index++) {
-      if (Get.key.currentState?.canPop() ?? false) {
-        Get.back<void>();
-        await Future<void>.delayed(const Duration(milliseconds: 90));
-      }
-    }
-    startTextConversation('Let us practice: $topicTitle');
+  void onGuidedTopicTap({
+    required String level,
+    required AiTutorGuidedMode mode,
+    required String topicTitle,
+  }) {
+    final AiTutorGuidedSessionContext guidedSession =
+        AiTutorGuidedSessionContext(
+      level: level.trim().toUpperCase(),
+      mode: mode,
+      topic: topicTitle.trim(),
+    );
+    openLiveVoiceSession(
+      topic: guidedSession.topic,
+      guidedSession: guidedSession,
+    );
   }
 
   void onLevelTestTap() {
     Get.to<void>(
       () => const AiLevelTestView(),
-      transition: Transition.rightToLeft,
-    );
-  }
-
-  void startLevelTest() {
-    Get.to<void>(
-      () => const AiLevelTestResultView(),
-      transition: Transition.rightToLeft,
-    );
-  }
-
-  void continueAfterLevelTest() {
-    Get.off<void>(
-      () => const AiTutorDiscoveryView(),
       transition: Transition.rightToLeft,
     );
   }
