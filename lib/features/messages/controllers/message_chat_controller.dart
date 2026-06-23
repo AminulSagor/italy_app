@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 
 import '../models/message_models.dart';
 import '../models/presence_model.dart';
+import '../sub-feature/call/service/call_agora_service.dart';
+import '../sub-feature/call/service/call_socket_service.dart';
 import '../sub-feature/user-block/service/user_block_api_service.dart';
 import '../services/messages_mock_service.dart';
 import '../services/chat_socket_service.dart';
@@ -12,7 +14,7 @@ import '../../../core/services/token_service.dart';
 import '../sub-feature/call/views/message_call_view.dart';
 import '../sub-feature/call/controllers/message_call_controller.dart';
 import '../sub-feature/call/models/message_call_models.dart';
-import '../sub-feature/call/service/message_call_mock_service.dart';
+
 import '../views/message_user_info_view.dart';
 import 'message_user_info_controller.dart';
 import 'messages_controller.dart';
@@ -637,28 +639,50 @@ class MessageChatController extends GetxController {
 
   void _openCall(MessageCallType callType) {
     if (blockStatus.value != 'none') {
-      Get.snackbar('Blocked', "You cannot call this user.");
+      Get.snackbar(
+        'Blocked',
+        'You cannot call this user.',
+      );
       return;
     }
 
     final MessageChatModel? currentChat = chat.value;
 
-    if (currentChat == null) return;
+    if (currentChat == null) {
+      return;
+    }
+
+    if (!Get.isRegistered<CallSocketService>()) {
+      Get.snackbar(
+        'Call unavailable',
+        'The call service is not initialized.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final String participantId =
+        currentChat.contactId ?? thread.contactId ?? '';
 
     Get.to<void>(
-      () => const MessageCallView(),
+          () => const MessageCallView(),
       binding: BindingsBuilder(() {
         Get.put<MessageCallController>(
           MessageCallController(
             conversationId: thread.id,
             callType: callType,
-            participant: MessageCallParticipantModel(
-              id: thread.id,
+            participant:
+            MessageCallParticipantModel(
+              id: participantId,
               name: currentChat.contactName,
-              avatarUrl: currentChat.contactAvatarUrl,
+              avatarUrl:
+              currentChat.contactAvatarUrl,
               isOnline: currentChat.isOnline,
             ),
-            messageCallService: MessageCallMockService(),
+            callSocketService:
+            Get.find<CallSocketService>(),
+            callAgoraService:
+            CallAgoraService(),
           ),
         );
       }),
