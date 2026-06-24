@@ -46,7 +46,9 @@ class ApiErrorHandler {
       return ApiResult<T>.success(data);
     } catch (error) {
       final String message = getErrorMessage(error);
-      if (showError) {
+      final bool isUnauthorized =
+          error is DioException && error.response?.statusCode == 401;
+      if (showError && !isUnauthorized) {
         _showErrorSnackbar(errorTitle, message);
       }
       return ApiResult<T>.failure(message);

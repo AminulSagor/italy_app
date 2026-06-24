@@ -174,48 +174,61 @@ class FinalExamResultView extends GetView<FinalExamController> {
                   ),
                 ),
                 SizedBox(height: 44.h),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 24.w,
-                  mainAxisSpacing: 24.h,
-                  childAspectRatio: 0.84,
-                  children: const <Widget>[
-                    _ResultStatCard(
-                      icon: Icons.description_outlined,
-                      label: 'Quiz &\nGrammar',
-                      value: '28/30',
-                      color: AppColors.primaryGreen,
-                    ),
-                    _ResultStatCard(
-                      icon: Icons.headphones_rounded,
-                      label: 'Listening',
-                      value: '9/10',
-                      color: AppColors.coursesChapterBlue,
-                    ),
-                    _ResultStatCard(
-                      icon: Icons.edit_note_rounded,
-                      label: 'Writing',
-                      value: '8.5/10',
-                      color: AppColors.vocabularyOrangeShadow,
-                    ),
-                    _ResultStatCard(
-                      icon: Icons.record_voice_over_rounded,
-                      label: 'Fluency &\nSpeaking',
-                      value: '9/10',
-                      color: AppColors.primaryGreen,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 44.h),
-                _TeacherCommentCard(result: result),
+                if (result.stats.isNotEmpty)
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 24.w,
+                    mainAxisSpacing: 24.h,
+                    childAspectRatio: 0.84,
+                    children: result.stats.map((FinalExamResultStatModel stat) {
+                      return _ResultStatCard(
+                        icon: _statIcon(stat.iconName),
+                        label: stat.label,
+                        value: stat.value,
+                        color: _statColor(stat.iconName),
+                      );
+                    }).toList(growable: false),
+                  ),
+                if (result.teacherComment.isNotEmpty ||
+                    result.teacherCommentBangla.isNotEmpty) ...<Widget>[
+                  SizedBox(height: 44.h),
+                  _TeacherCommentCard(result: result),
+                ],
               ],
             ),
           );
         }),
       ),
     );
+  }
+}
+
+IconData _statIcon(String iconName) {
+  switch (iconName) {
+    case 'listening':
+      return Icons.headphones_rounded;
+    case 'writing':
+      return Icons.edit_note_rounded;
+    case 'speaking':
+      return Icons.record_voice_over_rounded;
+    case 'quiz':
+    default:
+      return Icons.description_outlined;
+  }
+}
+
+Color _statColor(String iconName) {
+  switch (iconName) {
+    case 'listening':
+      return AppColors.coursesChapterBlue;
+    case 'writing':
+      return AppColors.vocabularyOrangeShadow;
+    case 'speaking':
+    case 'quiz':
+    default:
+      return AppColors.primaryGreen;
   }
 }
 

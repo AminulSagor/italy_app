@@ -1,15 +1,16 @@
 import 'package:get/get.dart';
 
+import '../../../core/services/api_error_handler.dart';
 import '../../../routes/app_route_arguments.dart';
 import '../../../routes/app_routes.dart';
 import '../models/course_models.dart';
-import '../services/courses_mock_service.dart';
+import '../services/courses_api_service.dart';
 
 class CoursesController extends GetxController {
-  final CoursesMockService _coursesMockService;
+  final CoursesApiService _coursesApiService;
 
-  CoursesController({required CoursesMockService coursesMockService})
-    : _coursesMockService = coursesMockService;
+  CoursesController({required CoursesApiService coursesApiService})
+    : _coursesApiService = coursesApiService;
 
   final RxBool isLoading = false.obs;
   final Rxn<CoursesDashboardModel> dashboard = Rxn<CoursesDashboardModel>();
@@ -27,7 +28,17 @@ class CoursesController extends GetxController {
 
     isLoading.value = true;
     try {
-      dashboard.value = await _coursesMockService.fetchDashboard();
+      final ApiResult<CoursesDashboardModel> result =
+          await ApiErrorHandler.call<CoursesDashboardModel>(
+        () => _coursesApiService.fetchDashboard(),
+        errorTitle: 'Courses',
+      );
+
+      if (!result.isSuccess || result.data == null) {
+        return;
+      }
+
+      dashboard.value = result.data;
     } finally {
       isLoading.value = false;
     }

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:italir_pothe/core/widgets/custom_button.dart';
+import 'package:just_audio/just_audio.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -69,6 +72,7 @@ class QuizTopBar extends StatelessWidget {
 
 class QuizBottomAction extends StatelessWidget {
   final bool showWrongResult;
+  final bool isLoading;
   final Widget? feedback;
   final VoidCallback onCheckTap;
   final VoidCallback onNextTap;
@@ -76,6 +80,7 @@ class QuizBottomAction extends StatelessWidget {
   const QuizBottomAction({
     super.key,
     required this.showWrongResult,
+    required this.isLoading,
     required this.onCheckTap,
     required this.onNextTap,
     this.feedback,
@@ -115,7 +120,11 @@ class QuizBottomAction extends StatelessWidget {
                   ),
                 ],
               )
-            : CustomButton.primary(text: 'Check Answer', onPressed: onCheckTap),
+            : CustomButton.primary(
+                text: 'Check Answer',
+                isLoading: isLoading,
+                onPressed: onCheckTap,
+              ),
       ),
     );
   }
@@ -186,15 +195,138 @@ class CustomQuizButton extends StatelessWidget {
   }
 }
 
-class AudioPromptCard extends StatelessWidget {
+class AudioPromptCard extends StatefulWidget {
+  const AudioPromptCard({
+    super.key,
+    required this.audioUrl,
+    this.compact = false,
+  });
+
+  final String audioUrl;
   final bool compact;
 
-  const AudioPromptCard({super.key, this.compact = false});
+  @override
+  State<AudioPromptCard> createState() => _AudioPromptCardState();
+}
+
+class _AudioPromptCardState extends State<AudioPromptCard> {
+  static const List<double> _speeds = <double>[
+    0.5,
+    0.75,
+    1,
+    1.25,
+    1.5,
+    2,
+  ];
+
+  final AudioPlayer _player = AudioPlayer();
+  StreamSubscription<PlayerState>? _playerStateSubscription;
+  bool _isLoading = false;
+  bool _hasError = false;
+  bool _isPlaying = false;
+  int _speedIndex = 2;
+
+  double get _speed => _speeds[_speedIndex];
+
+  @override
+  void initState() {
+    super.initState();
+    _playerStateSubscription = _player.playerStateStream.listen(
+      (PlayerState state) {
+        if (!mounted) return;
+        setState(() {
+          _isPlaying = state.playing;
+          _isLoading = state.processingState == ProcessingState.loading ||
+              state.processingState == ProcessingState.buffering;
+        });
+      },
+    );
+    _loadAudio();
+  }
+
+  @override
+  void didUpdateWidget(covariant AudioPromptCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.audioUrl != widget.audioUrl) {
+      _loadAudio();
+    }
+  }
+
+  Future<void> _loadAudio() async {
+    await _player.stop();
+    if (!mounted) return;
+
+    if (widget.audioUrl.trim().isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+        _isPlaying = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+      _isPlaying = false;
+    });
+
+    try {
+      await _player.setUrl(widget.audioUrl.trim());
+      await _player.setSpeed(_speed);
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+    }
+  }
+
+  Future<void> _togglePlayback() async {
+    if (_isLoading || _hasError) return;
+
+    if (_player.processingState == ProcessingState.completed) {
+      await _player.seek(Duration.zero);
+    }
+
+    if (_player.playing) {
+      await _player.pause();
+    } else {
+      await _player.play();
+    }
+  }
+
+  Future<void> _cycleSpeed() async {
+    if (_isLoading || _hasError) return;
+
+    final int nextIndex = (_speedIndex + 1) % _speeds.length;
+    await _player.setSpeed(_speeds[nextIndex]);
+    if (!mounted) return;
+    setState(() => _speedIndex = nextIndex);
+  }
+
+  Future<void> _restartAudio() async {
+    if (_isLoading || _hasError) return;
+    await _player.seek(Duration.zero);
+    await _player.play();
+  }
+
+  @override
+  void dispose() {
+    _playerStateSubscription?.cancel();
+    _player.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final double cardHeight = widget.compact ? 230.h : 280.h;
+
     return Container(
-      height: 280.h,
+      height: cardHeight,
       width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -211,72 +343,103 @@ class AudioPromptCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
-            padding: EdgeInsets.all(24.w),
+            padding: EdgeInsets.all(widget.compact ? 18.w : 24.w),
             decoration: const BoxDecoration(
               color: AppColors.homeLime,
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.volume_up_rounded,
+              _hasError ? Icons.audio_file_rounded : Icons.volume_up_rounded,
               color: AppColors.primaryGreen,
-              size: 50.w,
+              size: widget.compact ? 40.w : 50.w,
             ),
           ),
-          SizedBox(height: 46.h),
+          SizedBox(height: widget.compact ? 30.h : 46.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              _RoundAudioButton(label: '1X'),
+              _RoundAudioButton(
+                label: '${_formatSpeed(_speed)}x',
+                onTap: _cycleSpeed,
+              ),
               SizedBox(width: 48.w),
-              Container(
-                width: 64.w,
-                height: 64.w,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryGreen,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.play_arrow_rounded,
-                  color: AppColors.white,
-                  size: 32.w,
+              GestureDetector(
+                onTap: _togglePlayback,
+                child: Container(
+                  width: 64.w,
+                  height: 64.w,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryGreen,
+                    shape: BoxShape.circle,
+                  ),
+                  child: _isLoading
+                      ? SizedBox(
+                          width: 24.w,
+                          height: 24.w,
+                          child: const CircularProgressIndicator(
+                            color: AppColors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : Icon(
+                          _isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          color: AppColors.white,
+                          size: 32.w,
+                        ),
                 ),
               ),
               SizedBox(width: 48.w),
-              _RoundAudioButton(icon: Icons.replay_rounded),
+              _RoundAudioButton(
+                icon: Icons.replay_rounded,
+                onTap: _restartAudio,
+              ),
             ],
           ),
         ],
       ),
     );
   }
+
+  String _formatSpeed(double value) {
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toString();
+  }
 }
 
 class _RoundAudioButton extends StatelessWidget {
+  const _RoundAudioButton({this.label, this.icon, required this.onTap});
+
   final String? label;
   final IconData? icon;
-
-  const _RoundAudioButton({this.label, this.icon});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 48.w,
-      height: 48.w,
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        color: AppColors.legacyColorFFF1F2F2,
-        shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 48.w,
+        height: 48.w,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          color: AppColors.legacyColorFFF1F2F2,
+          shape: BoxShape.circle,
+        ),
+        child: icon == null
+            ? Text(
+                label ?? '',
+                style: TextStyle(
+                  fontSize: AppFont.font14.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.bodyText,
+                ),
+              )
+            : Icon(icon, color: AppColors.bodyText, size: 20.w),
       ),
-      child: icon == null
-          ? Text(
-              label!,
-              style: TextStyle(
-                fontSize: AppFont.font14.sp,
-                fontWeight: FontWeight.w900,
-                color: AppColors.bodyText,
-              ),
-            )
-          : Icon(icon, color: AppColors.bodyText, size: 20.w),
     );
   }
 }

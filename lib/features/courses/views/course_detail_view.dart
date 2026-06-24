@@ -119,43 +119,65 @@ class CourseDetailView extends GetView<CourseDetailController> {
                   kCoursesHorizontalPadding.w,
                   0,
                 ),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (_, int index) {
-                      if (index.isOdd) {
-                        return SizedBox(height: 18.h);
-                      }
+                sliver: detail.chapters.isEmpty
+                    ? const SliverToBoxAdapter(child: _EmptyLessonsCard())
+                    : SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (_, int index) {
+                            if (index.isOdd) {
+                              return SizedBox(height: 18.h);
+                            }
 
-                      final CourseChapterModel chapter =
-                          detail.chapters[index ~/ 2];
-                      return CourseChapterCard(
-                        chapter: chapter,
-                        onTap: () => controller.openChapter(chapter),
-                      );
-                    },
-                    childCount: detail.chapters.isEmpty
-                        ? 0
-                        : (detail.chapters.length * 2) - 1,
-                  ),
-                ),
+                            final CourseChapterModel chapter =
+                                detail.chapters[index ~/ 2];
+                            return CourseChapterCard(
+                              chapter: chapter,
+                              onTap: () => controller.openChapter(chapter),
+                            );
+                          },
+                          childCount: (detail.chapters.length * 2) - 1,
+                        ),
+                      ),
               ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(
-                  kCoursesHorizontalPadding.w,
-                  30.h,
-                  kCoursesHorizontalPadding.w,
-                  130.h,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: CourseFinalExamCard(
-                    finalExam: detail.finalExam,
-                    onTap: controller.openFinalExam,
+              if (detail.finalExam.isConfigured)
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    kCoursesHorizontalPadding.w,
+                    30.h,
+                    kCoursesHorizontalPadding.w,
+                    130.h,
                   ),
-                ),
-              ),
+                  sliver: SliverToBoxAdapter(
+                    child: CourseFinalExamCard(
+                      finalExam: detail.finalExam,
+                      onTap: controller.openFinalExam,
+                    ),
+                  ),
+                )
+              else
+                SliverToBoxAdapter(child: SizedBox(height: 130.h)),
             ],
           );
         }),
+      ),
+    );
+  }
+}
+class _EmptyLessonsCard extends StatelessWidget {
+  const _EmptyLessonsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
+      ),
+      child: const Text(
+        'No published lessons found for this course yet.',
+        textAlign: TextAlign.center,
       ),
     );
   }

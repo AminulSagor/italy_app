@@ -1,11 +1,6 @@
 part of 'quiz_panels.dart';
 
 class _ListeningPanel extends StatelessWidget {
-  final QuizQuestionModel question;
-  final int selectedIndex;
-  final bool showWrongResult;
-  final ValueChanged<int> onOptionTap;
-
   const _ListeningPanel({
     required this.question,
     required this.selectedIndex,
@@ -13,17 +8,26 @@ class _ListeningPanel extends StatelessWidget {
     required this.onOptionTap,
   });
 
+  final QuizQuestionModel question;
+  final int selectedIndex;
+  final bool showWrongResult;
+  final ValueChanged<int> onOptionTap;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        const AudioPromptCard(),
-        SizedBox(height: 56.h),
         _TitleBlock(
           title: question.title,
           subtitle: question.subtitle,
           center: true,
         ),
+        if ((question.prompt ?? '').isNotEmpty) ...<Widget>[
+          SizedBox(height: 18.h),
+          _PromptText(text: question.prompt!, center: true),
+        ],
+        SizedBox(height: 30.h),
+        AudioPromptCard(audioUrl: question.mediaUrl),
         SizedBox(height: 46.h),
         ...List<Widget>.generate(question.options.length, (int index) {
           return Padding(
@@ -42,11 +46,6 @@ class _ListeningPanel extends StatelessWidget {
 }
 
 class _WordTranslationPanel extends StatelessWidget {
-  final QuizQuestionModel question;
-  final int selectedIndex;
-  final bool showWrongResult;
-  final ValueChanged<int> onOptionTap;
-
   const _WordTranslationPanel({
     required this.question,
     required this.selectedIndex,
@@ -54,31 +53,21 @@ class _WordTranslationPanel extends StatelessWidget {
     required this.onOptionTap,
   });
 
+  final QuizQuestionModel question;
+  final int selectedIndex;
+  final bool showWrongResult;
+  final ValueChanged<int> onOptionTap;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        _Eyebrow(question.eyebrow),
-        SizedBox(height: 20.h),
-        RichText(
-          text: TextSpan(
-            style: TextStyle(
-              fontSize: AppFont.font34.sp,
-              fontWeight: FontWeight.w900,
-              color: AppColors.homePrimaryText,
-              height: 1.22,
-            ),
-            children: const <TextSpan>[
-              TextSpan(text: 'How do you say\n'),
-              TextSpan(
-                text: '"Hello"',
-                style: TextStyle(color: AppColors.primaryGreen),
-              ),
-              TextSpan(text: ' in Italian?'),
-            ],
-          ),
-        ),
+        _TitleBlock(title: question.title, subtitle: question.subtitle),
+        if ((question.prompt ?? '').isNotEmpty) ...<Widget>[
+          SizedBox(height: 24.h),
+          _QuotedPromptText(text: question.prompt!),
+        ],
         SizedBox(height: 30.h),
         ...List<Widget>.generate(question.options.length, (int index) {
           return Padding(
@@ -97,12 +86,6 @@ class _WordTranslationPanel extends StatelessWidget {
 }
 
 class _SentenceTranslationPanel extends StatelessWidget {
-  final QuizQuestionModel question;
-  final List<String> selectedWords;
-  final bool showWrongResult;
-  final ValueChanged<String> onWordTap;
-  final ValueChanged<String> onSelectedWordTap;
-
   const _SentenceTranslationPanel({
     required this.question,
     required this.selectedWords,
@@ -111,12 +94,18 @@ class _SentenceTranslationPanel extends StatelessWidget {
     required this.onSelectedWordTap,
   });
 
+  final QuizQuestionModel question;
+  final List<String> selectedWords;
+  final bool showWrongResult;
+  final ValueChanged<String> onWordTap;
+  final ValueChanged<String> onSelectedWordTap;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        _Eyebrow(question.eyebrow),
+        _TitleBlock(title: question.title, subtitle: question.subtitle),
         SizedBox(height: 22.h),
         Row(
           children: <Widget>[
@@ -137,9 +126,7 @@ class _SentenceTranslationPanel extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 26.h),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(
-                    kCourseDetailCardRadius.r,
-                  ),
+                  borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
                       color: AppColors.homeNeutralShadow,
@@ -149,7 +136,7 @@ class _SentenceTranslationPanel extends StatelessWidget {
                   ],
                 ),
                 child: Text(
-                  question.title,
+                  question.prompt ?? '',
                   style: TextStyle(
                     fontSize: AppFont.font22.sp,
                     fontWeight: FontWeight.w800,
@@ -162,7 +149,7 @@ class _SentenceTranslationPanel extends StatelessWidget {
           ],
         ),
         SizedBox(height: 74.h),
-        _WordDropArea(
+        _AssemblyLines(
           selectedWords: selectedWords,
           slotCount: question.answerWordCount,
           isWrong: showWrongResult,
@@ -172,7 +159,6 @@ class _SentenceTranslationPanel extends StatelessWidget {
         _WordBank(
           words: question.options,
           selected: selectedWords,
-          hideDisabledText: true,
           onWordTap: onWordTap,
         ),
       ],
@@ -181,11 +167,6 @@ class _SentenceTranslationPanel extends StatelessWidget {
 }
 
 class _TrueFalsePanel extends StatelessWidget {
-  final QuizQuestionModel question;
-  final int selectedIndex;
-  final bool showWrongResult;
-  final ValueChanged<int> onOptionTap;
-
   const _TrueFalsePanel({
     required this.question,
     required this.selectedIndex,
@@ -193,12 +174,17 @@ class _TrueFalsePanel extends StatelessWidget {
     required this.onOptionTap,
   });
 
+  final QuizQuestionModel question;
+  final int selectedIndex;
+  final bool showWrongResult;
+  final ValueChanged<int> onOptionTap;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        _Eyebrow(question.eyebrow),
+        _TitleBlock(title: question.title, subtitle: question.subtitle),
         SizedBox(height: 28.h),
         Container(
           width: double.infinity,
@@ -217,7 +203,7 @@ class _TrueFalsePanel extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Text(
-                question.title,
+                question.prompt ?? '',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font24.sp,
@@ -226,17 +212,19 @@ class _TrueFalsePanel extends StatelessWidget {
                   height: 1.3,
                 ),
               ),
-              SizedBox(height: 55.h),
-              Text(
-                question.subtitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: AppFont.font16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.bodyText,
-                  height: 1.35,
+              if (question.correctMeaning.isNotEmpty) ...<Widget>[
+                SizedBox(height: 30.h),
+                Text(
+                  question.correctMeaning,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.bodyText,
+                    height: 1.35,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
@@ -245,7 +233,9 @@ class _TrueFalsePanel extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: CustomQuizButton(
-                label: '✓\nTrue',
+                label: question.options.isNotEmpty
+                    ? question.options[0]
+                    : 'True',
                 height: kQuizTrueFalseButtonHeight,
                 isSelected: !showWrongResult && selectedIndex == 0,
                 isWrong: showWrongResult && selectedIndex == 0,
@@ -255,7 +245,9 @@ class _TrueFalsePanel extends StatelessWidget {
             SizedBox(width: 32.w),
             Expanded(
               child: CustomQuizButton(
-                label: '✕\nFalse',
+                label: question.options.length > 1
+                    ? question.options[1]
+                    : 'False',
                 height: kQuizTrueFalseButtonHeight,
                 isSelected: !showWrongResult && selectedIndex == 1,
                 isWrong: showWrongResult && selectedIndex == 1,
@@ -270,11 +262,6 @@ class _TrueFalsePanel extends StatelessWidget {
 }
 
 class _FillBlankPanel extends StatelessWidget {
-  final QuizQuestionModel question;
-  final int selectedIndex;
-  final bool showWrongResult;
-  final ValueChanged<int> onOptionTap;
-
   const _FillBlankPanel({
     required this.question,
     required this.selectedIndex,
@@ -282,13 +269,22 @@ class _FillBlankPanel extends StatelessWidget {
     required this.onOptionTap,
   });
 
+  final QuizQuestionModel question;
+  final int selectedIndex;
+  final bool showWrongResult;
+  final ValueChanged<int> onOptionTap;
+
   @override
   Widget build(BuildContext context) {
     final bool hasSelection =
         selectedIndex >= 0 && selectedIndex < question.options.length;
     final String selectedText = hasSelection
         ? question.options[selectedIndex]
-        : '';
+        : '_____';
+    final String prompt = (question.prompt ?? '').replaceFirst(
+      RegExp(r'\[[^\]]+\]'),
+      selectedText,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,64 +295,30 @@ class _FillBlankPanel extends StatelessWidget {
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 34.w, vertical: 32.h),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: showWrongResult && hasSelection
+                ? AppColors.quizWrongLightBg
+                : AppColors.white,
             borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
+            border: Border.all(
+              color: showWrongResult && hasSelection
+                  ? AppColors.quizWrongBorder
+                  : AppColors.modalBorderGrey,
+              width: 2.w,
+            ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Io',
-                style: TextStyle(
-                  fontSize: AppFont.font22.sp,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.homePrimaryText,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: showWrongResult && hasSelection
-                      ? AppColors.quizWrongLightBg
-                      : hasSelection
-                      ? AppColors.white
-                      : AppColors.legacyColorFFF1F2F2,
-                  borderRadius: BorderRadius.circular(kRadius22.r),
-                  border: Border.all(
-                    color: showWrongResult && hasSelection
-                        ? AppColors.quizWrongBorder
-                        : hasSelection
-                        ? AppColors.homeLime
-                        : AppColors.quizBlankBorder,
-                    width: 2.w,
-                  ),
-                ),
-                child: Text(
-                  selectedText,
-                  style: TextStyle(
-                    fontSize: AppFont.font20.sp,
-                    fontWeight: FontWeight.w900,
-                    color: showWrongResult
-                        ? AppColors.quizWrongBorder
-                        : AppColors.primaryGreen,
-                  ),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Text(
-                'un caffé.',
-                style: TextStyle(
-                  fontSize: AppFont.font22.sp,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.homePrimaryText,
-                ),
-              ),
-            ],
+          child: Text(
+            prompt,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: AppFont.font22.sp,
+              fontWeight: FontWeight.w800,
+              color: showWrongResult
+                  ? AppColors.quizWrongBorder
+                  : AppColors.homePrimaryText,
+            ),
           ),
         ),
-        SizedBox(height: 150.h),
+        SizedBox(height: 70.h),
         GridView.builder(
           itemCount: question.options.length,
           shrinkWrap: true,

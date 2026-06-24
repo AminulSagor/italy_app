@@ -4,9 +4,10 @@ import 'package:get/get.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
-import '../../controllers/practice_hub_controller.dart';
+import '../../controllers/job_sentences_controller.dart';
+import '../../models/job_track_models.dart';
 
-class JobSentencesView extends GetView<PracticeHubController> {
+class JobSentencesView extends GetView<JobSentencesController> {
   const JobSentencesView({super.key});
 
   @override
@@ -15,54 +16,46 @@ class JobSentencesView extends GetView<PracticeHubController> {
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 48.h),
-          child: Column(
-            children: <Widget>[
-              const _JobSentencesTopBar(),
-              SizedBox(height: 28.h),
-              Text(
-                'Career Tracks',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 35.sp,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1.1,
-                  color: const Color(0xFF2D3236),
+        child: RefreshIndicator(
+          color: AppColors.primaryGreen,
+          onRefresh: controller.refreshCareerTracks,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 48.h),
+            child: Column(
+              children: <Widget>[
+                const _JobSentencesTopBar(),
+                SizedBox(height: 28.h),
+                Text(
+                  'Career Tracks',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 35.sp,
+                    height: 1,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1.1,
+                    color: const Color(0xFF2D3236),
+                  ),
                 ),
-              ),
-              SizedBox(height: 10.h),
-              Text(
-                'ইতালিতে আপনার পছন্দের কর্মজীবন শুরু করুন',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  height: 1,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF8A8E92),
+                SizedBox(height: 10.h),
+                Text(
+                  'ইতালিতে আপনার পছন্দের কর্মজীবন শুরু করুন',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    height: 1,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF8A8E92),
+                  ),
                 ),
-              ),
-              SizedBox(height: 40.h),
-
-              Obx(
-                () => Column(
-                  children: controller.jobTracks
-                      .map(
-                        (Map<String, dynamic> item) => Padding(
-                          padding: EdgeInsets.only(bottom: 24.h),
-                          child: _CareerTrackCard(item: item),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ),
-
-              SizedBox(height: 8.h),
-
-              const _JobTipCard(),
-            ],
+                SizedBox(height: 40.h),
+                const _CareerTrackList(),
+                SizedBox(height: 8.h),
+                const _JobTipCard(),
+              ],
+            ),
           ),
         ),
       ),
@@ -70,7 +63,7 @@ class JobSentencesView extends GetView<PracticeHubController> {
   }
 }
 
-class _JobSentencesTopBar extends GetView<PracticeHubController> {
+class _JobSentencesTopBar extends GetView<JobSentencesController> {
   const _JobSentencesTopBar();
 
   @override
@@ -78,7 +71,7 @@ class _JobSentencesTopBar extends GetView<PracticeHubController> {
     return Row(
       children: <Widget>[
         GestureDetector(
-          onTap: controller.onJobSentencesBackTap,
+          onTap: controller.onBackTap,
           child: Container(
             width: 48.r,
             height: 48.r,
@@ -105,23 +98,61 @@ class _JobSentencesTopBar extends GetView<PracticeHubController> {
   }
 }
 
-class _CareerTrackCard extends GetView<PracticeHubController> {
-  final Map<String, dynamic> item;
-
-  const _CareerTrackCard({required this.item});
+class _CareerTrackList extends GetView<JobSentencesController> {
+  const _CareerTrackList();
 
   @override
   Widget build(BuildContext context) {
-    final Color background = item['background'] as Color;
-    //final Color iconBackground = item['iconBackground'] as Color;
-    final Color color = item['color'] as Color;
+    return Obx(() {
+      if (controller.isTracksLoading.value && controller.careerTracks.isEmpty) {
+        return const _LoadingState();
+      }
+
+      if (controller.tracksError.value.isNotEmpty &&
+          controller.careerTracks.isEmpty) {
+        return _MessageState(
+          message: controller.tracksError.value,
+          onRetry: () => controller.loadCareerTracks(),
+        );
+      }
+
+      if (controller.careerTracks.isEmpty) {
+        return const _MessageState(message: 'No career tracks are available.');
+      }
+
+      return Column(
+        children: controller.careerTracks
+            .map(
+              (JobCareerTrackModel item) => Padding(
+                padding: EdgeInsets.only(bottom: 24.h),
+                child: _CareerTrackCard(item: item),
+              ),
+            )
+            .toList(growable: false),
+      );
+    });
+  }
+}
+
+class _CareerTrackCard extends GetView<JobSentencesController> {
+  const _CareerTrackCard({required this.item});
+
+  final JobCareerTrackModel item;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = _parseCardColor(
+      item.cardColor,
+      const Color(0xFF1768A5),
+    );
+    final Color background = Color.lerp(color, AppColors.white, 0.82)!;
 
     return GestureDetector(
-      onTap: () => controller.openJobTrackDetails(item),
+      onTap: () => controller.openCareerTrack(item),
       child: Container(
         width: double.infinity,
-        height: 136.h,
-        padding: EdgeInsets.fromLTRB(25.w, 24.h, 20.w, 24.h),
+        constraints: BoxConstraints(minHeight: 136.h),
+        padding: EdgeInsets.fromLTRB(25.w, 22.h, 20.w, 22.h),
         decoration: BoxDecoration(
           color: background,
           borderRadius: BorderRadius.circular(42.r),
@@ -132,41 +163,56 @@ class _CareerTrackCard extends GetView<PracticeHubController> {
               width: 87.r,
               height: 87.r,
               decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.58),
+                color: AppColors.white.withValues(alpha: 0.66),
                 shape: BoxShape.circle,
               ),
               child: Center(
-                child: Icon(item['icon'] as IconData, size: 38.r, color: color),
+                child: Icon(
+                  _careerTrackIcon(item.iconKey),
+                  size: 38.r,
+                  color: color,
+                ),
               ),
             ),
-            SizedBox(width: 39.w),
+            SizedBox(width: 30.w),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    item['title'] as String,
+                    item.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: AppFont.font24.sp,
+                      fontSize: AppFont.font22.sp,
                       height: 1.16,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -0.7,
                       color: const Color(0xFF33383C),
                     ),
                   ),
-                  SizedBox(height: 7.h),
+                  if (item.subtitleBn.isNotEmpty) ...<Widget>[
+                    SizedBox(height: 7.h),
+                    Text(
+                      item.subtitleBn,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: AppFont.font14.sp,
+                        height: 1,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF8A8E92),
+                      ),
+                    ),
+                  ],
+                  SizedBox(height: 9.h),
                   Text(
-                    item['bangla'] as String,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    '${item.learnedSentenceCount}/${item.sentenceCount} sentences learned',
                     style: TextStyle(
-                      fontSize: AppFont.font14.sp,
-                      height: 1,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF8A8E92),
+                      fontSize: AppFont.font11.sp,
+                      fontWeight: FontWeight.w800,
+                      color: color,
                     ),
                   ),
                 ],
@@ -180,6 +226,60 @@ class _CareerTrackCard extends GetView<PracticeHubController> {
   }
 }
 
+class _LoadingState extends StatelessWidget {
+  const _LoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 80.h),
+      child: const Center(
+        child: CircularProgressIndicator(color: AppColors.primaryGreen),
+      ),
+    );
+  }
+}
+
+class _MessageState extends StatelessWidget {
+  const _MessageState({required this.message, this.onRetry});
+
+  final String message;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 24.h),
+      padding: EdgeInsets.all(24.r),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(30.r),
+      ),
+      child: Column(
+        children: <Widget>[
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: AppFont.font14.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF6D7276),
+            ),
+          ),
+          if (onRetry != null) ...<Widget>[
+            SizedBox(height: 10.h),
+            TextButton(
+              onPressed: onRetry,
+              child: const Text('Retry'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _JobTipCard extends StatelessWidget {
   const _JobTipCard();
 
@@ -187,82 +287,78 @@ class _JobTipCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 250.h,
+      constraints: BoxConstraints(minHeight: 230.h),
+      padding: EdgeInsets.fromLTRB(32.w, 28.h, 32.w, 30.h),
       decoration: BoxDecoration(
         color: const Color(0xFFB2D4FF),
         borderRadius: BorderRadius.circular(42.r),
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Positioned(
-            right: -40.w,
-            bottom: -30.h,
-            child: Container(
-              width: 126.r,
-              height: 126.r,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFF79A9DE).withValues(alpha: 0.52),
-                  width: 14.w,
+          Container(
+            height: 22.h,
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            decoration: BoxDecoration(
+              color: const Color(0xFF005A91),
+              borderRadius: BorderRadius.circular(999.r),
+            ),
+            child: Center(
+              widthFactor: 1,
+              child: Text(
+                'TIP OF THE DAY',
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  height: 1,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1,
+                  color: AppColors.white,
                 ),
               ),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(32.w, 28.h, 32.w, 30.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  height: 22.h,
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF005A91),
-                    borderRadius: BorderRadius.circular(999.r),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'TIP OF THE DAY',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        height: 1,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1,
-                        color: AppColors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 19.h),
-                Text(
-                  'Speak Like a Local',
-                  style: TextStyle(
-                    fontSize: 24.sp,
-                    height: 1,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.6,
-                    color: const Color(0xFF075B92),
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                SizedBox(
-                  width: 258.w,
-                  child: Text(
-                    'Master common workplace phrases used in Italian kitchens and hospitality to stand out during interviews.',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      height: 1.62,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF2D6DA4),
-                    ),
-                  ),
-                ),
-              ],
+          SizedBox(height: 19.h),
+          Text(
+            'Speak Like a Local',
+            style: TextStyle(
+              fontSize: 24.sp,
+              height: 1,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF075B92),
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'Practice workplace phrases and replay their native audio before your interview or first day at work.',
+            style: TextStyle(
+              fontSize: 16.sp,
+              height: 1.55,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF2D6DA4),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+Color _parseCardColor(String value, Color fallback) {
+  String normalized = value.trim().replaceAll('#', '');
+  if (normalized.length == 6) normalized = 'FF$normalized';
+  final int? colorValue = int.tryParse(normalized, radix: 16);
+  return colorValue == null ? fallback : Color(colorValue);
+}
+
+IconData _careerTrackIcon(String iconKey) {
+  return switch (iconKey.trim().toLowerCase()) {
+    'fork_knife' || 'restaurant' => Icons.restaurant_rounded,
+    'kitchen' => Icons.soup_kitchen_rounded,
+    'supermarket' || 'store' => Icons.storefront_rounded,
+    'logistics' => Icons.local_shipping_rounded,
+    'warehouse' => Icons.warehouse_rounded,
+    'hotel' => Icons.hotel_rounded,
+    'healthcare' => Icons.medical_services_rounded,
+    _ => Icons.work_rounded,
+  };
 }

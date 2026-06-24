@@ -1,147 +1,166 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/services/api_error_handler.dart';
 import '../../courses/models/course_models.dart';
+import '../../courses/services/courses_api_service.dart';
 import '../views/important_verbs/important_verbs_view.dart';
 import '../views/important_verbs/saved_verbs_view.dart';
 import 'package:italir_pothe/routes/routes.dart';
 import 'package:italir_pothe/core/themes/app_colors.dart';
 import '../views/daily_challenges/daily_chest_unlocked_view.dart';
+import '../models/daily_challenge_models.dart';
+import '../models/practice_hub_models.dart';
+import '../models/practice_hub_pdf_model.dart';
+import '../models/survival_italian_models.dart';
+import '../services/practice_hub_api_service.dart';
 
 class PracticeHubController extends GetxController {
-  final RxInt selectedCourseIndex = 0.obs;
+  PracticeHubController({
+    required CoursesApiService coursesApiService,
+    required PracticeHubApiService practiceHubApiService,
+  }) : _coursesApiService = coursesApiService,
+       _practiceHubApiService = practiceHubApiService;
 
-  /// Keep false to match the first screenshot.
-  /// Set true to preview the "Ready for final exam" state.
+  final CoursesApiService _coursesApiService;
+  final PracticeHubApiService _practiceHubApiService;
+
+  final RxInt selectedCourseIndex = 0.obs;
+  final RxBool isCoursesLoading = false.obs;
+
+  /// Synced with the currently selected course progress.
   final RxBool isFinalExamReady = false.obs;
 
-  final RxList<Map<String, dynamic>> courses = <Map<String, dynamic>>[
-    {
-      'title': 'Level A1',
-      'subtitle': 'Foundations of Italian',
-      'status': 'ACTIVE',
-      'progress': 0.60,
-      'isActive': true,
-      'isLocked': false,
-      'icon': Icons.menu_book_rounded,
-    },
-    {
-      'title': 'Level A2',
-      'subtitle': 'Intermediate Daily Use',
-      'status': 'Upcoming',
-      'progress': 0.0,
-      'isActive': false,
-      'isLocked': true,
-      'icon': Icons.article_outlined,
-    },
-    {
-      'title': 'Facile Facile A1',
-      'subtitle': 'Intermediate Daily Use',
-      'status': 'Upcoming',
-      'progress': 0.0,
-      'isActive': false,
-      'isLocked': true,
-      'icon': Icons.article_outlined,
-    },
-  ].obs;
+  final RxList<CourseCardModel> courses = <CourseCardModel>[].obs;
 
-  final RxList<Map<String, dynamic>> skillBuilders = <Map<String, dynamic>>[
-    {
-      'title': 'Important Verbs',
-      'icon': Icons.bolt_rounded,
-      'background': const Color(0xFFD9FFE8),
-      'accent': const Color(0xFFB4F8D0),
-      'iconColor': const Color(0xFF006532),
-      'textColor': const Color(0xFF006532),
-    },
-    {
-      'title': 'Survival Italian',
-      'icon': Icons.work_rounded,
-      'background': const Color(0xFFFFF9C9),
-      'accent': const Color(0xFFFFD930),
-      'iconColor': const Color(0xFF875000),
-      'textColor': const Color(0xFF875000),
-    },
-    {
-      'title': 'Job Sentences',
-      'icon': Icons.desktop_windows_rounded,
-      'background': const Color(0xFFDDF3FF),
-      'accent': const Color(0xFFB8E7FF),
-      'iconColor': const Color(0xFF00618C),
-      'textColor': const Color(0xFF00618C),
-    },
-    {
-      'title': 'Daily Challenges',
-      'icon': Icons.gps_fixed_rounded,
-      'background': const Color(0xFFFFE2F3),
-      'accent': const Color(0xFFFFB9DE),
-      'iconColor': const Color(0xFFAF1555),
-      'textColor': const Color(0xFFAF1555),
-    },
-  ].obs;
+  @override
+  void onInit() {
+    super.onInit();
+    loadCourses();
+    loadPracticeHubOverview();
+  }
+
+  Future<void> loadCourses() async {
+    if (isCoursesLoading.value) {
+      return;
+    }
+
+    isCoursesLoading.value = true;
+    try {
+      final ApiResult<CoursesDashboardModel> result =
+          await ApiErrorHandler.call<CoursesDashboardModel>(
+        () => _coursesApiService.fetchDashboard(),
+        showError: false,
+      );
+
+      if (!result.isSuccess || result.data == null) {
+        return;
+      }
+
+      courses.assignAll(result.data!.courses);
+
+      if (selectedCourseIndex.value >= courses.length) {
+        selectedCourseIndex.value = 0;
+      }
+
+      _syncFinalExamState();
+    } finally {
+      isCoursesLoading.value = false;
+    }
+  }
+
+  void _syncFinalExamState() {
+    if (courses.isEmpty) {
+      isFinalExamReady.value = false;
+      return;
+    }
+
+    isFinalExamReady.value =
+        courses[selectedCourseIndex.value].progress >= 0.8;
+  }
+
+  final RxBool isPracticeHubOverviewLoading = false.obs;
+  final RxString practiceHubOverviewError = ''.obs;
+  final RxList<PracticeHubSkillBuilderModel> skillBuilders =
+      <PracticeHubSkillBuilderModel>[].obs;
+  final Rxn<PracticeHubWebinarModel> featuredWebinar =
+      Rxn<PracticeHubWebinarModel>();
+
+  Future<void> loadPracticeHubOverview({bool showError = false}) async {
+    if (isPracticeHubOverviewLoading.value) return;
+
+    isPracticeHubOverviewLoading.value = true;
+    practiceHubOverviewError.value = '';
+    try {
+      final ApiResult<PracticeHubOverviewModel> result =
+          await ApiErrorHandler.call<PracticeHubOverviewModel>(
+        () => _practiceHubApiService.fetchOverview(),
+        showError: showError,
+      );
+
+      if (!result.isSuccess || result.data == null) {
+        practiceHubOverviewError.value =
+            result.error ?? 'Unable to load Practice Hub information.';
+        return;
+      }
+
+      skillBuilders.assignAll(result.data!.skillBuilders);
+      featuredWebinar.value = result.data!.featuredWebinar;
+    } finally {
+      isPracticeHubOverviewLoading.value = false;
+    }
+  }
+
+  Future<void> refreshPracticeHub() async {
+    await Future.wait<void>(<Future<void>>[
+      loadCourses(),
+      loadPracticeHubOverview(showError: true),
+    ]);
+  }
 
   void onViewAllCoursesTap() {
-    Get.snackbar(
-      'Courses',
-      'All practice courses will be shown here.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.white,
-      colorText: Colors.black87,
-    );
+    loadCourses();
   }
 
-  void onCourseTap(int index) async {
-    selectedCourseIndex.value = index;
+  Future<void> onCourseTap(int index) async {
+    if (index < 0 || index >= courses.length) {
+      return;
+    }
 
-    final Map<String, dynamic> course = courses[index];
-    final bool isLocked = course['isLocked'] as bool? ?? false;
+    selectedCourseIndex.value = index;
+    _syncFinalExamState();
+
+    final CourseCardModel course = courses[index];
+    if (course.state == CourseCardState.locked) {
+      return;
+    }
 
     final String tag =
-        'course_${courses[index]}_${DateTime.now().millisecondsSinceEpoch}';
+        'course_${course.id}_${DateTime.now().millisecondsSinceEpoch}';
 
-    final CourseDetailRouteArguments arguments = CourseDetailRouteArguments(
-      course: CourseCardModel(
-        id: 'level-a1',
-        title: 'Level A1',
-        subtitle: 'Foundations of Italian',
-        progressLabel: '60%',
-        progress: 0.6,
-        statusLabel: 'ACTIVE',
-        state: isLocked ? CourseCardState.locked : CourseCardState.active,
+    await Get.toNamed(
+      AppRoutes.courseDetail,
+      arguments: CourseDetailRouteArguments(
+        course: course,
+        controllerTag: tag,
       ),
-      controllerTag: tag,
     );
-
-    await Get.toNamed(AppRoutes.courseDetail, arguments: arguments);
   }
 
-  void onSkillBuilderTap(String title) {
-    if (title == 'Important Verbs') {
-      onImportantVerbsTap();
-      return;
+  void onSkillBuilderTap(PracticeHubSkillBuilderType type) {
+    switch (type) {
+      case PracticeHubSkillBuilderType.importantVerbs:
+        onImportantVerbsTap();
+        return;
+      case PracticeHubSkillBuilderType.survivalItalian:
+        onSurvivalItalianTap();
+        return;
+      case PracticeHubSkillBuilderType.jobSentences:
+        onJobSentencesTap();
+        return;
+      case PracticeHubSkillBuilderType.dailyChallenges:
+        onDailyChallengesTap();
+        return;
     }
-
-    if (title == 'Survival Italian') {
-      onSurvivalItalianTap();
-      return;
-    }
-
-    if (title == 'Job Sentences') {
-      onJobSentencesTap();
-      return;
-    }
-
-    if (title == 'Daily Challenges') {
-      onDailyChallengesTap();
-      return;
-    }
-
-    Get.snackbar(
-      title,
-      'Opening $title practice...',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.white,
-      colorText: Colors.black87,
-    );
   }
 
   void onFinalExamCardTap() {
@@ -164,25 +183,32 @@ class PracticeHubController extends GetxController {
   }
 
   Future<void> openFinalExam() async {
-    final String tag = 'final_exam_a1_${DateTime.now().millisecondsSinceEpoch}';
+    if (courses.isEmpty) {
+      Get.snackbar(
+        'Final Exam',
+        'No active course found for final exam.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.white,
+        colorText: Colors.black87,
+      );
+      return;
+    }
+
+    final CourseCardModel course = courses[selectedCourseIndex.value];
+    final String tag =
+        'final_exam_${course.id}_${DateTime.now().millisecondsSinceEpoch}';
 
     await Get.toNamed(
       AppRoutes.finalExamOverview,
       arguments: FinalExamRouteArguments(
         controllerTag: tag,
-        courseId: 'level-a1',
+        courseId: course.id,
       ),
     );
   }
 
   void onViewAllSessionsTap() {
-    Get.snackbar(
-      'Webinars',
-      'Opening webinar sessions...',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.white,
-      colorText: Colors.black87,
-    );
+    Get.toNamed(AppRoutes.webinar);
   }
 
   void onNotifyMeTap() {
@@ -195,32 +221,14 @@ class PracticeHubController extends GetxController {
     );
   }
 
-  void toggleFinalExamMockState() {
-    isFinalExamReady.toggle();
-  }
-
-  void unlockFinalExamMock() {
-    if (isFinalExamReady.value) {
-      return;
-    }
-
-    isFinalExamReady.value = true;
-
-    Get.snackbar(
-      'Final Exam Unlocked',
-      'Mock state updated. The final exam is now unlocked.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.white,
-      colorText: Colors.black87,
-    );
-  }
-
   void onWatchMoreLessonsFromGateway() {
     if (Get.isDialogOpen ?? false) {
       Get.back();
     }
 
-    unlockFinalExamMock();
+    if (courses.isNotEmpty) {
+      onCourseTap(selectedCourseIndex.value);
+    }
   }
 
   void onBackToChapterFromGateway() {
@@ -837,156 +845,98 @@ class PracticeHubController extends GetxController {
     );
   }
 
-  final RxMap<String, dynamic> selectedSurvivalPdf = <String, dynamic>{}.obs;
-
+  final RxBool isSurvivalLoading = false.obs;
+  final RxBool isOpeningSurvivalPdf = false.obs;
+  final RxString survivalError = ''.obs;
+  final RxList<SurvivalSituationModel> survivalItalianItems =
+      <SurvivalSituationModel>[].obs;
+  final Rxn<SurvivalProgressSummaryModel> survivalProgress =
+      Rxn<SurvivalProgressSummaryModel>();
+  final Rxn<PracticeHubPdfDocumentModel> selectedPracticePdf =
+      Rxn<PracticeHubPdfDocumentModel>();
   final RxInt currentSurvivalPdfPage = 1.obs;
-  final RxInt currentSurvivalPdfTotalPages = 12.obs;
+  final RxInt currentSurvivalPdfTotalPages = 1.obs;
+  final Set<String> _survivalCompletionRequests = <String>{};
 
-  final RxList<Map<String, dynamic>> survivalItalianItems =
-      <Map<String, dynamic>>[
-        {
-          'id': 'first_24_hours',
-          'title': 'First 24 Hours',
-          'subtitle': 'Everything you need to survive Day 1',
-          'bangla': 'প্রথম ২৪ ঘণ্টা',
-          'icon': Icons.work_outline_rounded,
-          'pdfAsset': 'assets/pdfs/survival_italian/first_24_hours.pdf',
-          'viewerTitle': 'Lesson: Italian for Beginners',
-          'totalPages': 12,
-          'isLearned': true,
-          'isWide': false,
-        },
-        {
-          'id': 'bus_tickets',
-          'title': 'Bus &\nTickets',
-          'subtitle': 'Transport basics',
-          'bangla': '(বাস এবং মেট্রো)',
-          'icon': Icons.directions_bus_rounded,
-          'background': const Color(0xFFDDEBFF),
-          'iconBackground': const Color(0xFFAFD4FF),
-          'color': const Color(0xFF0B5B94),
-          'pdfAsset': 'assets/pdfs/survival_italian/bus_tickets.pdf',
-          'viewerTitle': 'Lesson: Bus & Tickets',
-          'totalPages': 12,
-          'isLearned': true,
-          'isWide': false,
-        },
-        {
-          'id': 'permesso_police',
-          'title': 'Permesso /\nPolice',
-          'subtitle': 'Police and immigration',
-          'bangla': '(পুলিশ ও ইমিগ্রেশন)',
-          'icon': Icons.admin_panel_settings_rounded,
-          'background': const Color(0xFFF0E4FF),
-          'iconBackground': const Color(0xFFDDBDFF),
-          'color': const Color(0xFF6B1DA8),
-          'pdfAsset': 'assets/pdfs/survival_italian/permesso_police.pdf',
-          'viewerTitle': 'Lesson: Permesso / Police',
-          'totalPages': 12,
-          'isLearned': false,
-          'isWide': false,
-        },
-        {
-          'id': 'sim_card',
-          'title': 'Buying a SIM\nCard',
-          'subtitle': 'SIM card buying guide',
-          'bangla': '(সিম কার্ড কেনা)',
-          'icon': Icons.sim_card_rounded,
-          'background': const Color(0xFFFFF1E1),
-          'iconBackground': const Color(0xFFFFC983),
-          'color': const Color(0xFF933115),
-          'pdfAsset': 'assets/pdfs/survival_italian/buying_sim_card.pdf',
-          'viewerTitle': 'Lesson: Buying a SIM Card',
-          'totalPages': 12,
-          'isLearned': false,
-          'isWide': false,
-        },
-        {
-          'id': 'market_cafe',
-          'title': 'Market &\nCafe',
-          'subtitle': 'Daily shopping words',
-          'bangla': '(বাজার এবং কাফে)',
-          'icon': Icons.shopping_basket_rounded,
-          'background': const Color(0xFFE3F8E9),
-          'iconBackground': const Color(0xFFAAF2C3),
-          'color': const Color(0xFF125E35),
-          'pdfAsset': 'assets/pdfs/survival_italian/market_cafe.pdf',
-          'viewerTitle': 'Lesson: Market & Cafe',
-          'totalPages': 12,
-          'isLearned': false,
-          'isWide': false,
-        },
-        {
-          'id': 'hospital_help',
-          'title': 'Hospital / Help',
-          'subtitle': 'Emergency help words',
-          'bangla': '(হাসপাতাল ও সাহায্য)',
-          'icon': Icons.medical_services_outlined,
-          'background': const Color(0xFFF8D3CD),
-          'iconBackground': const Color(0xFFFF5638),
-          'color': const Color(0xFFD43119),
-          'pdfAsset': 'assets/pdfs/survival_italian/hospital_help.pdf',
-          'viewerTitle': 'Lesson: Hospital / Help',
-          'totalPages': 12,
-          'isLearned': false,
-          'isWide': true,
-        },
-      ].obs;
+  SurvivalSituationModel? get survivalHeroItem {
+    if (survivalItalianItems.isEmpty) return null;
 
-  Map<String, dynamic> get survivalHeroItem {
-    return Map<String, dynamic>.from(survivalItalianItems.first);
-  }
-
-  List<Map<String, dynamic>> get survivalSmallCards {
-    return survivalItalianItems
-        .skip(1)
-        .where((Map<String, dynamic> item) => item['isWide'] != true)
-        .map((Map<String, dynamic> item) => Map<String, dynamic>.from(item))
-        .toList();
-  }
-
-  Map<String, dynamic> get survivalWideItem {
-    return Map<String, dynamic>.from(
-      survivalItalianItems.firstWhere(
-        (Map<String, dynamic> item) => item['isWide'] == true,
-        orElse: () => survivalItalianItems.last,
-      ),
+    return survivalItalianItems.firstWhere(
+      (SurvivalSituationModel item) =>
+          item.cardVariant == SurvivalCardVariant.hero,
+      orElse: () => survivalItalianItems.first,
     );
   }
 
-  int get survivalTotalSituations {
-    return survivalItalianItems.length;
-  }
-
-  int get survivalSituationsLearned {
+  List<SurvivalSituationModel> get survivalNormalItems {
+    final String? heroId = survivalHeroItem?.id;
     return survivalItalianItems
-        .where((Map<String, dynamic> item) => item['isLearned'] == true)
-        .length;
+        .where(
+          (SurvivalSituationModel item) =>
+              item.id != heroId &&
+              item.cardVariant != SurvivalCardVariant.wide,
+        )
+        .toList(growable: false);
   }
 
-  double get survivalLearningProgress {
-    if (survivalTotalSituations == 0) return 0;
-
-    return survivalSituationsLearned / survivalTotalSituations;
+  List<SurvivalSituationModel> get survivalWideItems {
+    final String? heroId = survivalHeroItem?.id;
+    return survivalItalianItems
+        .where(
+          (SurvivalSituationModel item) =>
+              item.id != heroId && item.cardVariant == SurvivalCardVariant.wide,
+        )
+        .toList(growable: false);
   }
 
-  Map<String, dynamic> get currentSurvivalPdf {
-    if (selectedSurvivalPdf.isNotEmpty) {
-      return Map<String, dynamic>.from(selectedSurvivalPdf);
+  int get survivalTotalSituations =>
+      survivalProgress.value?.totalCount ?? survivalItalianItems.length;
+
+  int get survivalSituationsLearned =>
+      survivalProgress.value?.completedCount ??
+      survivalItalianItems
+          .where((SurvivalSituationModel item) => item.isCompleted)
+          .length;
+
+  double get survivalLearningProgress =>
+      survivalProgress.value?.completionRate ?? 0;
+
+  PracticeHubPdfDocumentModel? get currentPracticePdf =>
+      selectedPracticePdf.value;
+
+  bool get canGoPreviousSurvivalPdfPage =>
+      currentSurvivalPdfPage.value > 1;
+
+  bool get canGoNextSurvivalPdfPage =>
+      currentSurvivalPdfPage.value < currentSurvivalPdfTotalPages.value;
+
+  Future<void> loadSurvivalItalian({bool showError = true}) async {
+    if (isSurvivalLoading.value) return;
+
+    isSurvivalLoading.value = true;
+    survivalError.value = '';
+    try {
+      final ApiResult<SurvivalSituationsResponseModel> result =
+          await ApiErrorHandler.call<SurvivalSituationsResponseModel>(
+        () => _practiceHubApiService.fetchSurvivalSituations(),
+        showError: showError,
+      );
+
+      if (!result.isSuccess || result.data == null) {
+        survivalError.value =
+            result.error ?? 'Unable to load Survival Italian situations.';
+        return;
+      }
+
+      survivalItalianItems.assignAll(result.data!.items);
+      survivalProgress.value = result.data!.progress;
+    } finally {
+      isSurvivalLoading.value = false;
     }
-
-    return survivalHeroItem;
-  }
-
-  bool get canGoPreviousSurvivalPdfPage {
-    return currentSurvivalPdfPage.value > 1;
-  }
-
-  bool get canGoNextSurvivalPdfPage {
-    return currentSurvivalPdfPage.value < currentSurvivalPdfTotalPages.value;
   }
 
   void onSurvivalItalianTap() {
+    loadSurvivalItalian(showError: false);
     Get.toNamed(AppRoutes.survivalItalian);
   }
 
@@ -994,50 +944,110 @@ class PracticeHubController extends GetxController {
     Get.back<void>();
   }
 
-  void openSurvivalPdf(Map<String, dynamic> item) {
-    selectedSurvivalPdf
-      ..clear()
-      ..addAll(Map<String, dynamic>.from(item));
+  Future<void> openSurvivalPdf(SurvivalSituationModel item) async {
+    if (isOpeningSurvivalPdf.value) return;
 
-    currentSurvivalPdfPage.value = 1;
-    currentSurvivalPdfTotalPages.value = item['totalPages'] as int? ?? 12;
+    isOpeningSurvivalPdf.value = true;
+    try {
+      final ApiResult<SurvivalSituationDetailModel> result =
+          await ApiErrorHandler.call<SurvivalSituationDetailModel>(
+        () => _practiceHubApiService.fetchSurvivalSituationDetails(
+          situationId: item.id,
+        ),
+      );
 
-    Get.toNamed(AppRoutes.practiceHubPdfViewer);
+      final SurvivalResourceModel? resource = result.data?.resource;
+      if (!result.isSuccess || resource == null || resource.signedReadUrl.isEmpty) {
+        Get.snackbar(
+          'Resource unavailable',
+          'No PDF resource has been provided for this situation.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white,
+          colorText: Colors.black87,
+        );
+        return;
+      }
+
+      selectedPracticePdf.value = PracticeHubPdfDocumentModel(
+        title: result.data!.situation.title,
+        source: resource.signedReadUrl,
+        sourceType: PracticeHubPdfSourceType.network,
+        situationId: result.data!.situation.id,
+        isSituationCompleted: result.data!.situation.isCompleted,
+      );
+      currentSurvivalPdfPage.value = 1;
+      currentSurvivalPdfTotalPages.value = 1;
+
+      await Get.toNamed(AppRoutes.practiceHubPdfViewer);
+    } finally {
+      isOpeningSurvivalPdf.value = false;
+    }
   }
 
   void onSurvivalPdfDocumentLoaded(int totalPages) {
     currentSurvivalPdfPage.value = 1;
-
-    if (totalPages > 0) {
-      currentSurvivalPdfTotalPages.value = totalPages;
-    }
+    currentSurvivalPdfTotalPages.value = totalPages > 0 ? totalPages : 1;
+    _completeCurrentSurvivalSituationIfNeeded();
   }
 
   void onSurvivalPdfPageChanged(int pageNumber) {
     currentSurvivalPdfPage.value = pageNumber;
+    _completeCurrentSurvivalSituationIfNeeded();
   }
 
   void onPdfViewerCloseTap() {
     Get.back<void>();
   }
 
-  void markCurrentSurvivalPdfAsLearned() {
-    final String id = currentSurvivalPdf['id'] as String? ?? '';
+  Future<void> _completeCurrentSurvivalSituationIfNeeded() async {
+    final PracticeHubPdfDocumentModel? document = currentPracticePdf;
+    final String? situationId = document?.situationId;
 
-    if (id.isEmpty) return;
+    if (document == null ||
+        situationId == null ||
+        document.isSituationCompleted ||
+        currentSurvivalPdfPage.value < currentSurvivalPdfTotalPages.value ||
+        _survivalCompletionRequests.contains(situationId)) {
+      return;
+    }
 
-    final int index = survivalItalianItems.indexWhere(
-      (Map<String, dynamic> item) => item['id'] == id,
-    );
+    _survivalCompletionRequests.add(situationId);
+    try {
+      final ApiResult<void> result = await ApiErrorHandler.call<void>(
+        () => _practiceHubApiService.completeSurvivalSituation(
+          situationId: situationId,
+        ),
+        showError: false,
+      );
+      if (!result.isSuccess) return;
 
-    if (index == -1) return;
-
-    survivalItalianItems[index] = <String, dynamic>{
-      ...survivalItalianItems[index],
-      'isLearned': true,
-    };
-
-    survivalItalianItems.refresh();
+      selectedPracticePdf.value = document.copyWith(
+        isSituationCompleted: true,
+      );
+      final int index = survivalItalianItems.indexWhere(
+        (SurvivalSituationModel item) => item.id == situationId,
+      );
+      if (index >= 0 && !survivalItalianItems[index].isCompleted) {
+        survivalItalianItems[index] = survivalItalianItems[index].copyWith(
+          isCompleted: true,
+        );
+        final SurvivalProgressSummaryModel current =
+            survivalProgress.value ??
+            SurvivalProgressSummaryModel(
+              completedCount: 0,
+              totalCount: survivalItalianItems.length,
+            );
+        survivalProgress.value = current.copyWith(
+          completedCount: (current.completedCount + 1)
+              .clamp(0, current.totalCount)
+              .toInt(),
+        );
+        survivalItalianItems.refresh();
+        loadPracticeHubOverview();
+      }
+    } finally {
+      _survivalCompletionRequests.remove(situationId);
+    }
   }
 
   final TextEditingController jobPhraseSearchController =
@@ -1341,58 +1351,73 @@ class PracticeHubController extends GetxController {
   void openJobTheoryBook() {
     final Map<String, dynamic> job = currentJobTrack;
 
-    selectedSurvivalPdf
-      ..clear()
-      ..addAll(<String, dynamic>{
-        'id': '${job['id']}_theory',
-        'pdfAsset': job['theoryPdfAsset'] as String,
-        'viewerTitle': 'Lesson: ${job['detailsTitle']} Basics',
-        'totalPages': 12,
-      });
-
+    selectedPracticePdf.value = PracticeHubPdfDocumentModel(
+      title: 'Lesson: ${job['detailsTitle']} Basics',
+      source: job['theoryPdfAsset'] as String,
+      sourceType: PracticeHubPdfSourceType.asset,
+    );
     currentSurvivalPdfPage.value = 1;
-    currentSurvivalPdfTotalPages.value = 12;
+    currentSurvivalPdfTotalPages.value = 1;
 
     Get.toNamed(AppRoutes.practiceHubPdfViewer);
   }
 
-  final RxInt dailyChallengeXp = 1240.obs;
-  final RxInt dailyStreakDays = 21.obs;
-  final RxString dailyChallengeLevelLabel = 'Level 12 Explorer'.obs;
-  final RxInt dailyChestSlideIndex = 0.obs;
+  final RxBool isDailyChallengesLoading = false.obs;
+  final RxBool isClaimingDailyTask = false.obs;
+  final RxBool isOpeningDailyChest = false.obs;
+  final RxString dailyChallengesError = ''.obs;
+  final Rxn<DailyChallengeDashboardModel> dailyChallengeDashboard =
+      Rxn<DailyChallengeDashboardModel>();
+  final RxList<DailyChallengeTaskModel> dailyChallengeTasks =
+      <DailyChallengeTaskModel>[].obs;
+  final Rxn<DailyChestRewardModel> lastDailyChestReward =
+      Rxn<DailyChestRewardModel>();
 
-  final RxList<Map<String, dynamic>> dailyChallengeTasks =
-      <Map<String, dynamic>>[
-        {
-          'id': 'learn_15_min',
-          'title': 'Spend 15 minutes actively\nlearning in the app',
-          'current': 0,
-          'target': 15,
-          'unit': ' min',
-          'xp': 15,
-          'isClaimed': false,
-        },
-        {
-          'id': 'review_words',
-          'title': 'Review 20 Vocabulary\nWords total',
-          'current': 0,
-          'target': 20,
-          'unit': '',
-          'xp': 20,
-          'isClaimed': false,
-        },
-        {
-          'id': 'earn_100_xp',
-          'title': 'Earn a total of 100 XP today\nto climb the Leaderboard',
-          'current': 100,
-          'target': 100,
-          'unit': ' XP',
-          'xp': 50,
-          'isClaimed': true,
-        },
-      ].obs;
+  int get dailyChallengeXp => dailyChallengeDashboard.value?.totalXp ?? 0;
+  int get dailyStreakDays =>
+      dailyChallengeDashboard.value?.streak.currentDays ?? 0;
+  String get dailyChallengeLevelLabel =>
+      dailyChallengeDashboard.value?.levelLabel ?? 'Level 1 Explorer';
+  int get dailyCompletedTaskCount =>
+      dailyChallengeDashboard.value?.completedTaskCount ?? 0;
+  bool get isDailyChestUnlocked =>
+      dailyChallengeDashboard.value?.chest.isUnlocked ?? false;
+  bool get isDailyChestOpened =>
+      dailyChallengeDashboard.value?.chest.isOpened ?? false;
+
+  Future<void> loadDailyChallenges({bool showError = true}) async {
+    if (isDailyChallengesLoading.value) return;
+
+    isDailyChallengesLoading.value = true;
+    dailyChallengesError.value = '';
+    try {
+      final ApiResult<DailyChallengeDashboardModel> result =
+          await ApiErrorHandler.call<DailyChallengeDashboardModel>(
+        () => _practiceHubApiService.fetchDailyChallenges(),
+        showError: showError,
+      );
+      if (!result.isSuccess || result.data == null) {
+        dailyChallengesError.value =
+            result.error ?? 'Unable to load daily challenges.';
+        return;
+      }
+
+      _applyDailyChallengeDashboard(result.data!);
+    } finally {
+      isDailyChallengesLoading.value = false;
+    }
+  }
+
+  void _applyDailyChallengeDashboard(DailyChallengeDashboardModel dashboard) {
+    dailyChallengeDashboard.value = dashboard;
+    dailyChallengeTasks.assignAll(dashboard.tasks);
+    if (dashboard.chest.reward != null) {
+      lastDailyChestReward.value = dashboard.chest.reward;
+    }
+  }
 
   void onDailyChallengesTap() {
+    loadDailyChallenges(showError: false);
     Get.toNamed(AppRoutes.dailyChallenges);
   }
 
@@ -1400,18 +1425,10 @@ class PracticeHubController extends GetxController {
     Get.back<void>();
   }
 
-  void claimDailyChallengeTask(String id) {
-    final int index = dailyChallengeTasks.indexWhere(
-      (Map<String, dynamic> task) => task['id'] == id,
-    );
+  Future<void> claimDailyChallengeTask(DailyChallengeTaskModel task) async {
+    if (isClaimingDailyTask.value || task.isClaimed) return;
 
-    if (index == -1) return;
-
-    final Map<String, dynamic> task = dailyChallengeTasks[index];
-    final bool isCompleted =
-        (task['current'] as int) >= (task['target'] as int);
-
-    if (!isCompleted) {
+    if (!task.canClaim) {
       Get.snackbar(
         'Challenge not completed',
         'Finish this task first to claim XP.',
@@ -1422,26 +1439,37 @@ class PracticeHubController extends GetxController {
       return;
     }
 
-    if (task['isClaimed'] == true) return;
+    final DailyChallengeDashboardModel? dashboard =
+        dailyChallengeDashboard.value;
+    if (dashboard == null) return;
 
-    dailyChallengeTasks[index] = <String, dynamic>{...task, 'isClaimed': true};
+    isClaimingDailyTask.value = true;
+    try {
+      final ApiResult<DailyChallengeDashboardModel> result =
+          await ApiErrorHandler.call<DailyChallengeDashboardModel>(
+        () => _practiceHubApiService.claimDailyChallengeTask(
+          taskKey: task.taskKey,
+          challengeDate: dashboard.challengeDate,
+        ),
+      );
+      if (!result.isSuccess || result.data == null) return;
 
-    dailyChallengeXp.value += task['xp'] as int;
-    dailyChallengeTasks.refresh();
+      _applyDailyChallengeDashboard(result.data!);
+      loadPracticeHubOverview();
+    } finally {
+      isClaimingDailyTask.value = false;
+    }
   }
 
-  void onDailyChestTap() {
-    Get.to(const DailyChestUnlockedView());
-    final int completedTasks = dailyChallengeTasks.where((
-      Map<String, dynamic> task,
-    ) {
-      return (task['current'] as int) >= (task['target'] as int);
-    }).length;
+  Future<void> onDailyChestTap() async {
+    final DailyChallengeDashboardModel? dashboard =
+        dailyChallengeDashboard.value;
+    if (dashboard == null || isOpeningDailyChest.value) return;
 
-    if (completedTasks < dailyChallengeTasks.length) {
+    if (!dashboard.chest.isUnlocked) {
       Get.snackbar(
         'Chest Locked',
-        'Complete all 3 daily tasks to open the chest.',
+        'Complete all daily tasks before opening the chest.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: Colors.black87,
@@ -1449,16 +1477,35 @@ class PracticeHubController extends GetxController {
       return;
     }
 
-    Get.snackbar(
-      'Daily Chest',
-      'Opening your daily reward chest...',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.white,
-      colorText: Colors.black87,
-    );
+    if (dashboard.chest.isOpened && dashboard.chest.reward != null) {
+      lastDailyChestReward.value = dashboard.chest.reward;
+      Get.to<void>(() => const DailyChestUnlockedView());
+      return;
+    }
+
+    isOpeningDailyChest.value = true;
+    try {
+      final ApiResult<DailyChestRewardModel> result =
+          await ApiErrorHandler.call<DailyChestRewardModel>(
+        () => _practiceHubApiService.openDailyChest(
+          challengeDate: dashboard.challengeDate,
+        ),
+      );
+      if (!result.isSuccess || result.data == null) return;
+
+      lastDailyChestReward.value = result.data;
+      await loadDailyChallenges(showError: false);
+      Get.to<void>(() => const DailyChestUnlockedView());
+    } finally {
+      isOpeningDailyChest.value = false;
+    }
+  }
+  @override
+  void onClose() {
+    importantVerbSearchController.dispose();
+    savedVerbSearchController.dispose();
+    jobPhraseSearchController.dispose();
+    super.onClose();
   }
 
-  void changeDailyChestSlide(int index) {
-    dailyChestSlideIndex.value = index;
-  }
 }

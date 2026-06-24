@@ -18,7 +18,7 @@ Future<void> main() async {
   LocalNotificationService.instance.listenToForegroundMessages();
 
   await AppBootstrapController.init();
-  runApp(ItalyApp(initialRoute: AppPages.initial));
+  runApp(ItalyApp(initialRoute: AppRoutes.bootstrap));
 }
 
 class ItalyApp extends StatelessWidget {
