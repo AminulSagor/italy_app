@@ -67,6 +67,7 @@ import '../features/service_hub/sub_features/cv_builder/services/cv_pdf_download
 import '../core/services/api_client.dart';
 import '../core/services/token_service.dart';
 import '../features/messages/services/chat_socket_service.dart';
+import '../features/messages/services/presence_service.dart';
 import '../features/service_hub/sub_features/cv_builder/views/choose_cv_template_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart';
 import '../features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart';
@@ -255,6 +256,9 @@ class AppPages {
             Get.lazyPut<ChatSocketService>(
               () => ChatSocketService(tokenService: Get.find<TokenService>()),
             );
+          }
+          if (!Get.isRegistered<PresenceService>()) {
+            Get.put<PresenceService>(PresenceService());
           }
 
           Get.lazyPut<MessagesMockService>(

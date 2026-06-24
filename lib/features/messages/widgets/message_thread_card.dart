@@ -21,7 +21,7 @@ class MessageThreadCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(24.w),
         decoration: BoxDecoration(
-          color: thread.isHighlighted
+          color: (thread.isHighlighted || thread.unreadCount > 0)
               ? AppColors.messageTileActiveBg
               : AppColors.messageTileInactiveBg,
           borderRadius: BorderRadius.circular(kMessageTileRadius.r),
@@ -48,8 +48,12 @@ class MessageThreadCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: AppFont.font20.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primaryGreen,
+                            fontWeight: thread.unreadCount > 0
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            color: thread.unreadCount > 0
+                                ? AppColors.homePrimaryText
+                                : AppColors.primaryGreen,
                           ),
                         ),
                       ),
@@ -60,9 +64,13 @@ class MessageThreadCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: AppFont.font12.sp,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: thread.unreadCount > 0
+                              ? FontWeight.w800
+                              : FontWeight.w500,
                           letterSpacing: 0.7,
-                          color: AppColors.bodyText,
+                          color: thread.unreadCount > 0
+                              ? AppColors.homePrimaryText
+                              : AppColors.bodyText,
                         ),
                       ),
                     ],
@@ -77,9 +85,13 @@ class MessageThreadCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: AppFont.font16.sp,
-                            fontWeight: FontWeight.w400,
+                            fontWeight: thread.unreadCount > 0
+                                ? FontWeight.w700
+                                : FontWeight.w400,
                             height: 1.25,
-                            color: AppColors.bodyText,
+                            color: thread.unreadCount > 0
+                                ? AppColors.homePrimaryText
+                                : AppColors.bodyText,
                           ),
                         ),
                       ),
@@ -104,22 +116,13 @@ class _TrailingStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (thread.unreadCount > 0) {
+    if (thread.unreadCount > 0 || thread.isHighlighted) {
       return Container(
-        width: 24.w,
-        height: 24.w,
-        alignment: Alignment.center,
+        width: 12.w,
+        height: 12.w,
         decoration: const BoxDecoration(
-          color: AppColors.homeLime,
+          color: AppColors.primaryGreen,
           shape: BoxShape.circle,
-        ),
-        child: Text(
-          thread.unreadCount.toString(),
-          style: TextStyle(
-            fontSize: AppFont.font10.sp,
-            fontWeight: FontWeight.w900,
-            color: AppColors.primaryGreen,
-          ),
         ),
       );
     }

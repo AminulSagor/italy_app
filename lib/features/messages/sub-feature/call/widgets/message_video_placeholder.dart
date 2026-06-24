@@ -6,47 +6,30 @@ import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 
 class MessageVideoPlaceholder extends StatelessWidget {
-  final bool isCameraOff;
-  final bool isFrontCamera;
-
   const MessageVideoPlaceholder({
     super.key,
     required this.isCameraOff,
     required this.isFrontCamera,
   });
 
+  final bool isCameraOff;
+  final bool isFrontCamera;
+
   @override
   Widget build(BuildContext context) {
-    if (!isCameraOff) {
-      return Container(
-        width: double.infinity,
-        height: double.infinity,
-        alignment: Alignment.center,
-        color: AppColors.black,
-        child: Text(
-          isFrontCamera ? 'Front Camera Preview' : 'Back Camera Preview',
-          style: TextStyle(
-            fontSize: AppFont.font18.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.white,
-          ),
-        ),
-      );
-    }
-
     return Container(
       width: double.infinity,
       height: double.infinity,
       alignment: Alignment.center,
-      color: AppColors.homePrimaryText,
+      color: AppColors.black,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 14.h),
         decoration: BoxDecoration(
-          color: AppColors.black.withValues(alpha: 0.35),
+          color: AppColors.black.withValues(alpha: 0.45),
           borderRadius: BorderRadius.circular(kRadius24.r),
         ),
         child: Text(
-          'Camera Off',
+          isCameraOff ? 'Camera off' : 'Waiting for video...',
           style: TextStyle(
             fontSize: AppFont.font16.sp,
             fontWeight: FontWeight.w700,

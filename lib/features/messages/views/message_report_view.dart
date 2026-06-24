@@ -132,21 +132,68 @@ class _ReasonSelector extends GetView<MessageReportController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Wrap(
+    return Obx(() {
+      if (controller.isLoadingReasons.value) {
+        return SizedBox(
+          height: 80.h,
+          child: const Center(
+            child: CircularProgressIndicator(color: AppColors.primaryGreen),
+          ),
+        );
+      }
+
+      // Error state: backend returned nothing or non-UUID ids.
+      if (controller.hasReasonsError.value || controller.reportReasons.isEmpty) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Could not load report reasons. Please check your connection and try again.',
+              style: TextStyle(
+                fontSize: AppFont.font16.sp,
+                color: AppColors.bodyText,
+              ),
+            ),
+            SizedBox(height: 14.h),
+            GestureDetector(
+              onTap: controller.retryLoadReasons,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryGreen,
+                  borderRadius: BorderRadius.circular(30.r),
+                ),
+                child: Text(
+                  'Reload reasons',
+                  style: TextStyle(
+                    fontSize: AppFont.font16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+
+      return Wrap(
         spacing: 18.w,
         runSpacing: 18.h,
-        children: MessageReportController.reportReasons
+        children: controller.reportReasons
             .map(
-              (String reason) => ReportReasonChip(
-                label: reason,
-                isSelected: controller.selectedReason.value == reason,
-                onTap: () => controller.selectReason(reason),
+              (Map<String, dynamic> r) => ReportReasonChip(
+                label:
+                    r['title']?.toString() ?? r['name']?.toString() ?? 'Reason',
+                isSelected:
+                    controller.selectedReasonId.value ==
+                    (r['id']?.toString() ?? ''),
+                onTap: () => controller.selectReason(r['id']?.toString() ?? ''),
               ),
             )
             .toList(),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -183,7 +230,8 @@ class _DescriptionField extends GetView<MessageReportController> {
         ),
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: "Describe what happened... (e.g.,\n'This user is sending spam links').",
+          hintText:
+              "Describe what happened... (e.g.,\n'This user is sending spam links').",
           hintStyle: TextStyle(
             fontSize: AppFont.font20.sp,
             fontWeight: FontWeight.w500,

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'core/bindings/initial_bindings.dart';
 import 'core/localization/translation_service.dart';
+import 'core/services/local_notification_service.dart';
 import 'core/themes/app_theme.dart';
 import 'routes/routes.dart';
 import 'core/bootstrap/app_bootstrap_controller.dart';
@@ -11,6 +12,11 @@ import 'core/bootstrap/app_bootstrap_controller.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+
+  await LocalNotificationService.instance.initialize();
+  LocalNotificationService.instance.listenToForegroundMessages();
+
   await AppBootstrapController.init();
   runApp(ItalyApp(initialRoute: AppRoutes.bootstrap));
 }

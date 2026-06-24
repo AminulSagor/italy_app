@@ -10,16 +10,18 @@ import '../../features/courses/controllers/courses_controller.dart';
 import '../../features/courses/services/courses_api_service.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/home/services/home_mock_service.dart';
+import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/messages/controllers/messages_controller.dart';
-import '../../features/messages/services/messages_mock_service.dart';
 import '../../features/messages/services/chat_socket_service.dart';
+import '../../features/messages/services/messages_mock_service.dart';
+import '../../features/messages/sub-feature/call/service/call_socket_service.dart';
+import '../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
+import '../../features/notifications/services/notifications_mock_service.dart';
+import '../../features/practice_hub/controllers/practice_hub_controller.dart';
 import '../services/api_client.dart';
 import '../services/token_service.dart';
-import '../../features/notifications/services/notifications_mock_service.dart';
-import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/practice_hub/controllers/job_sentences_controller.dart';
 import '../../features/practice_hub/controllers/important_verbs_controller.dart';
-import '../../features/practice_hub/controllers/practice_hub_controller.dart';
 import '../../features/practice_hub/services/job_sentences_api_service.dart';
 import '../../features/practice_hub/services/important_verbs_api_service.dart';
 import '../../features/practice_hub/services/italian_tts_service.dart';
@@ -36,14 +38,8 @@ class InitialBindings extends Bindings {
       () => AiTutorPreferencesService(),
       fenix: true,
     );
-    Get.lazyPut<AiTutorVoiceService>(
-      () => AiTutorVoiceService(),
-      fenix: true,
-    );
-    Get.lazyPut<AiTutorTtsService>(
-      () => AiTutorTtsService(),
-      fenix: true,
-    );
+    Get.lazyPut<AiTutorVoiceService>(() => AiTutorVoiceService(), fenix: true);
+    Get.lazyPut<AiTutorTtsService>(() => AiTutorTtsService(), fenix: true);
     Get.lazyPut<AiChatController>(
       () => AiChatController(
         apiService: Get.find<AiTutorApiService>(),
@@ -66,17 +62,44 @@ class InitialBindings extends Bindings {
       fenix: true,
     );
     Get.lazyPut<CoursesController>(
-      () =>
-          CoursesController(coursesApiService: Get.find<CoursesApiService>()),
+      () => CoursesController(coursesApiService: Get.find<CoursesApiService>()),
       fenix: true,
     );
+
     Get.lazyPut<HomeController>(
       () => HomeController(homeMockService: Get.find<HomeMockService>()),
       fenix: true,
     );
+
     if (!Get.isRegistered<ChatSocketService>()) {
       Get.lazyPut<ChatSocketService>(
         () => ChatSocketService(tokenService: Get.find<TokenService>()),
+        fenix: true,
+      );
+    }
+
+    /*
+     * Keep the call socket alive globally.
+     * It must be connected on the receiver phone
+     * before an incoming call can be received.
+     */
+    if (!Get.isRegistered<CallSocketService>()) {
+      Get.put<CallSocketService>(
+        CallSocketService(tokenService: Get.find<TokenService>()),
+        permanent: true,
+      );
+    }
+
+    /*
+     * Registers the global call:incoming listener
+     * and opens MessageIncomingCallView.
+     */
+    if (!Get.isRegistered<IncomingCallCoordinator>()) {
+      Get.put<IncomingCallCoordinator>(
+        IncomingCallCoordinator(
+          callSocketService: Get.find<CallSocketService>(),
+        ),
+        permanent: true,
       );
     }
 
@@ -87,6 +110,7 @@ class InitialBindings extends Bindings {
         chatSocketService: Get.find<ChatSocketService>(),
       ),
     );
+
     Get.lazyPut<MessagesController>(
       () => MessagesController(
         messagesMockService: Get.find<MessagesMockService>(),
@@ -112,10 +136,7 @@ class InitialBindings extends Bindings {
       () => ImportantVerbsApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,
     );
-    Get.lazyPut<ItalianTtsService>(
-      () => ItalianTtsService(),
-      fenix: true,
-    );
+    Get.lazyPut<ItalianTtsService>(() => ItalianTtsService(), fenix: true);
     Get.lazyPut<ImportantVerbsController>(
       () => ImportantVerbsController(
         apiService: Get.find<ImportantVerbsApiService>(),
@@ -128,7 +149,6 @@ class InitialBindings extends Bindings {
         coursesApiService: Get.find<CoursesApiService>(),
         practiceHubApiService: Get.find<PracticeHubApiService>(),
       ),
-      fenix: true,
     );
   }
 }

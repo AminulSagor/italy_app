@@ -6,6 +6,7 @@ import '../../../../core/themes/app_font.dart';
 import '../../controllers/practice_hub_controller.dart';
 import '../../models/daily_challenge_models.dart';
 import '_widgets/claimed_xp_chip.dart';
+
 class DailyChallengesView extends GetView<PracticeHubController> {
   const DailyChallengesView({super.key});
   @override
@@ -27,8 +28,7 @@ class DailyChallengesView extends GetView<PracticeHubController> {
                 message: controller.dailyChallengesError.value.isEmpty
                     ? 'Daily challenges are not available right now.'
                     : controller.dailyChallengesError.value,
-                onRetry: () =>
-                    controller.loadDailyChallenges(showError: true),
+                onRetry: () => controller.loadDailyChallenges(showError: true),
               );
             }
             return SingleChildScrollView(
@@ -61,7 +61,9 @@ class DailyChallengesView extends GetView<PracticeHubController> {
     );
   }
 }
-class _DailyChallengesLoadingView extends StatelessWidget { const _DailyChallengesLoadingView();
+
+class _DailyChallengesLoadingView extends StatelessWidget {
+  const _DailyChallengesLoadingView();
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -89,8 +91,14 @@ class _DailyChallengesLoadingView extends StatelessWidget { const _DailyChalleng
     );
   }
 }
+
 class _DailyChallengesEmptyView extends StatelessWidget {
-  const _DailyChallengesEmptyView({required this.message, required this.onRetry}); final String message; final VoidCallback onRetry;
+  const _DailyChallengesEmptyView({
+    required this.message,
+    required this.onRetry,
+  });
+  final String message;
+  final VoidCallback onRetry;
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -130,6 +138,7 @@ class _DailyChallengesEmptyView extends StatelessWidget {
     );
   }
 }
+
 class _DailyChallengeHeader extends GetView<PracticeHubController> {
   const _DailyChallengeHeader();
   @override
@@ -199,6 +208,7 @@ class _DailyChallengeHeader extends GetView<PracticeHubController> {
     );
   }
 }
+
 class _StreakHeroCard extends GetView<PracticeHubController> {
   const _StreakHeroCard();
   @override
@@ -287,8 +297,10 @@ class _StreakHeroCard extends GetView<PracticeHubController> {
     );
   }
 }
+
 class _DailyTaskCard extends GetView<PracticeHubController> {
-  const _DailyTaskCard({required this.task}); final DailyChallengeTaskModel task;
+  const _DailyTaskCard({required this.task});
+  final DailyChallengeTaskModel task;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -369,8 +381,10 @@ class _DailyTaskCard extends GetView<PracticeHubController> {
     );
   }
 }
+
 class _TaskRewardButton extends GetView<PracticeHubController> {
-  const _TaskRewardButton({required this.task}); final DailyChallengeTaskModel task;
+  const _TaskRewardButton({required this.task});
+  final DailyChallengeTaskModel task;
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -402,7 +416,9 @@ class _TaskRewardButton extends GetView<PracticeHubController> {
                     child: const CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text(
-                    task.canClaim ? 'Claim +${task.rewardXp} XP' : '+${task.rewardXp} XP',
+                    task.canClaim
+                        ? 'Claim +${task.rewardXp} XP'
+                        : '+${task.rewardXp} XP',
                     style: TextStyle(
                       fontSize: AppFont.font11.sp,
                       fontWeight: FontWeight.w900,
@@ -417,8 +433,10 @@ class _TaskRewardButton extends GetView<PracticeHubController> {
     });
   }
 }
+
 class _ClaimedTaskCard extends StatelessWidget {
-  const _ClaimedTaskCard({required this.task}); final DailyChallengeTaskModel task;
+  const _ClaimedTaskCard({required this.task});
+  final DailyChallengeTaskModel task;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -469,13 +487,17 @@ class _ClaimedTaskCard extends StatelessWidget {
     );
   }
 }
-class _DailyChestCard extends GetView<PracticeHubController> { const _DailyChestCard();
+
+class _DailyChestCard extends GetView<PracticeHubController> {
+  const _DailyChestCard();
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final bool unlocked = controller.isDailyChestUnlocked; final bool opened = controller.isDailyChestOpened;
+      final bool unlocked = controller.isDailyChestUnlocked;
+      final bool opened = controller.isDailyChestOpened;
       final bool loading = controller.isOpeningDailyChest.value;
-      final int taskCount = controller.dailyChallengeTasks.length; final int completed = controller.dailyCompletedTaskCount;
+      final int taskCount = controller.dailyChallengeTasks.length;
+      final int completed = controller.dailyCompletedTaskCount;
       return GestureDetector(
         onTap: loading ? null : controller.onDailyChestTap,
         child: Container(
@@ -582,6 +604,7 @@ class _DailyChestCard extends GetView<PracticeHubController> { const _DailyChest
     });
   }
 }
+
 IconData _taskIcon(String taskKey) => taskKey.contains('minute')
     ? Icons.schedule_rounded
     : taskKey.contains('xp')
