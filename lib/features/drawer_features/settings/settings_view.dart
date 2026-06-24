@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'settings_controller.dart';
+import 'widgets/settings_profile_summary_card.dart';
+import 'widgets/settings_ui_widgets.dart';
 
 class SettingsView extends GetView<SettingsController> {
   const SettingsView({super.key});
 
   static const Color _bg = Color(0xFFF7F7F7);
-  static const Color _green = Color(0xFF267A05);
-  static const Color _text = Color(0xFF24272A);
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +21,11 @@ class SettingsView extends GetView<SettingsController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const _SettingsTopBar(),
+              const SettingsTopBar(title: 'Settings'),
 
               SizedBox(height: 18.h),
 
-              const _ProfileCard(),
+              const SettingsProfileSummaryCard(),
 
               SizedBox(height: 32.h),
 
@@ -45,7 +45,12 @@ class SettingsView extends GetView<SettingsController> {
 
               SizedBox(height: 20.h),
 
-              _ProfileSecurityCard(onTap: controller.openProfileSecurity),
+              Obx(
+                () => _ProfileSecurityCard(
+                  contactLabel: controller.primaryContact,
+                  onTap: controller.openProfileSecurity,
+                ),
+              ),
 
               SizedBox(height: 18.h),
 
@@ -118,154 +123,6 @@ class SettingsView extends GetView<SettingsController> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SettingsTopBar extends StatelessWidget {
-  const _SettingsTopBar();
-
-  static const Color _green = Color(0xFF267A05);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 46.r,
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: Get.back,
-              child: Container(
-                width: 46.r,
-                height: 46.r,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.045),
-                      blurRadius: 12.r,
-                      offset: Offset(0, 5.h),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.arrow_back_rounded,
-                  size: 25.r,
-                  color: _green,
-                ),
-              ),
-            ),
-          ),
-          Text(
-            'Settings',
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w900,
-              color: _green,
-              letterSpacing: -0.35,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileCard extends StatelessWidget {
-  const _ProfileCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 127.h,
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(25.w, 16.h, 24.w, 16.h),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE4E7EF),
-        borderRadius: BorderRadius.circular(38.r),
-      ),
-      child: Row(
-        children: <Widget>[
-          Stack(
-            clipBehavior: Clip.none,
-            children: <Widget>[
-              Container(
-                width: 80.r,
-                height: 80.r,
-                padding: EdgeInsets.all(2.r),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF49E900),
-                  shape: BoxShape.circle,
-                ),
-                child: ClipOval(
-                  child: Image.asset(
-                    'assets/profile_images/Fahid Hasan.png',
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
-                      color: const Color(0xFF173D45),
-                      child: Icon(
-                        Icons.person_rounded,
-                        size: 54.r,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: -2.w,
-                bottom: 6.h,
-                child: Container(
-                  width: 24.r,
-                  height: 24.r,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF79F535),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2.w),
-                  ),
-                  child: Icon(
-                    Icons.check_rounded,
-                    size: 15.r,
-                    color: const Color(0xFF267A05),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 25.w),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Alex Rivera',
-                  style: TextStyle(
-                    fontSize: 24.sp,
-                    height: 1.1,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF24272A),
-                    letterSpacing: -0.7,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  'Pro Scholar • Level 42',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF4E5358),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -436,9 +293,13 @@ class _HapticsTile extends GetView<SettingsController> {
 }
 
 class _ProfileSecurityCard extends StatelessWidget {
-  final VoidCallback onTap;
+  const _ProfileSecurityCard({
+    required this.contactLabel,
+    required this.onTap,
+  });
 
-  const _ProfileSecurityCard({required this.onTap});
+  final String contactLabel;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -497,7 +358,7 @@ class _ProfileSecurityCard extends StatelessWidget {
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  '+39 320...',
+                  contactLabel,
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w900,

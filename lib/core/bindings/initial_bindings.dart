@@ -10,6 +10,7 @@ import '../../features/courses/controllers/courses_controller.dart';
 import '../../features/courses/services/courses_api_service.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/home/services/home_mock_service.dart';
+import '../../features/drawer_features/settings/services/user_settings_service.dart';
 import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/messages/controllers/messages_controller.dart';
 import '../../features/messages/services/chat_socket_service.dart';
@@ -30,6 +31,10 @@ import '../../features/practice_hub/services/practice_hub_api_service.dart';
 class InitialBindings extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut<UserSettingsService>(
+      () => UserSettingsService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
     Get.lazyPut<AiTutorApiService>(
       () => AiTutorApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,

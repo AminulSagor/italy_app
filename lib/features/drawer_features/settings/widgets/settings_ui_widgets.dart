@@ -80,6 +80,8 @@ class SettingsPrimaryButton extends StatelessWidget {
   final Color color;
   final Color shadowColor;
   final double height;
+  final bool enabled;
+  final bool isLoading;
 
   const SettingsPrimaryButton({
     super.key,
@@ -89,44 +91,60 @@ class SettingsPrimaryButton extends StatelessWidget {
     this.color = SettingsUi.green,
     this.shadowColor = SettingsUi.darkGreen,
     this.height = 72,
+    this.enabled = true,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: height.h,
-        width: double.infinity,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(100.r),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: shadowColor,
-              blurRadius: 0,
-              offset: Offset(0, 7.h),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            if (icon != null) ...[
-              Icon(icon, size: 22.r, color: Colors.white),
-              SizedBox(width: 12.w),
-            ],
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: 1.3,
+      onTap: enabled && !isLoading ? onTap : null,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: enabled ? 1 : 0.55,
+        child: Container(
+          height: height.h,
+          width: double.infinity,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(100.r),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: shadowColor,
+                blurRadius: 0,
+                offset: Offset(0, 7.h),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (icon != null) ...[
+                Icon(icon, size: 22.r, color: Colors.white),
+                SizedBox(width: 12.w),
+              ],
+              if (isLoading)
+                SizedBox(
+                  width: 24.r,
+                  height: 24.r,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              else
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 1.3,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -141,6 +159,10 @@ class SettingsPillField extends StatelessWidget {
   final bool obscureText;
   final TextInputType? keyboardType;
   final ValueChanged<String>? onChanged;
+  final TextEditingController? controller;
+  final VoidCallback? onSuffixTap;
+  final bool readOnly;
+  final bool enabled;
 
   const SettingsPillField({
     super.key,
@@ -151,6 +173,10 @@ class SettingsPillField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType,
     this.onChanged,
+    this.controller,
+    this.onSuffixTap,
+    this.readOnly = false,
+    this.enabled = true,
   });
 
   @override
@@ -178,9 +204,12 @@ class SettingsPillField extends StatelessWidget {
             borderRadius: BorderRadius.circular(100.r),
           ),
           child: TextField(
+            controller: controller,
             obscureText: obscureText,
             keyboardType: keyboardType,
             onChanged: onChanged,
+            readOnly: readOnly,
+            enabled: enabled,
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
@@ -191,10 +220,13 @@ class SettingsPillField extends StatelessWidget {
               icon: Icon(icon, size: 22.r, color: const Color(0xFF777777)),
               suffixIcon: suffixIcon == null
                   ? null
-                  : Icon(
-                      suffixIcon,
-                      size: 22.r,
-                      color: const Color(0xFF777777),
+                  : IconButton(
+                      onPressed: onSuffixTap,
+                      icon: Icon(
+                        suffixIcon,
+                        size: 22.r,
+                        color: const Color(0xFF777777),
+                      ),
                     ),
               hintText: hint,
               hintStyle: TextStyle(

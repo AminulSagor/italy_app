@@ -111,6 +111,7 @@ import '../features/drawer_features/contact/contact_controller.dart';
 import '../features/drawer_features/contact/contact_support_view.dart';
 import '../features/drawer_features/settings/settings_controller.dart';
 import '../features/drawer_features/settings/settings_view.dart';
+import '../features/drawer_features/settings/services/user_settings_service.dart';
 import '../features/drawer_features/settings/sub_features/views/profile_security_veiw.dart';
 import '../features/drawer_features/settings/sub_features/views/profile_photo_view.dart';
 import '../features/drawer_features/settings/sub_features/views/change_password_view.dart';
@@ -794,7 +795,9 @@ class AppPages {
       page: () => const SettingsView(),
       binding: BindingsBuilder(() {
         Get.lazyPut<SettingsController>(
-          () => SettingsController(),
+          () => SettingsController(
+            userSettingsService: Get.find<UserSettingsService>(),
+          ),
           fenix: true,
         );
       }),
@@ -805,7 +808,9 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<SettingsController>()) {
           Get.lazyPut<SettingsController>(
-            () => SettingsController(),
+            () => SettingsController(
+              userSettingsService: Get.find<UserSettingsService>(),
+            ),
             fenix: true,
           );
         }
@@ -845,14 +850,29 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<SettingsController>()) {
           Get.lazyPut<SettingsController>(
-            () => SettingsController(),
+            () => SettingsController(
+              userSettingsService: Get.find<UserSettingsService>(),
+            ),
             fenix: true,
           );
         }
       }),
     ),
 
-    GetPage(name: AppRoutes.profilePhoto, page: () => const ProfilePhotoView()),
+    GetPage(
+      name: AppRoutes.profilePhoto,
+      page: () => const ProfilePhotoView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.lazyPut<SettingsController>(
+            () => SettingsController(
+              userSettingsService: Get.find<UserSettingsService>(),
+            ),
+            fenix: true,
+          );
+        }
+      }),
+    ),
 
     GetPage(
       name: AppRoutes.verifyContact,
@@ -870,7 +890,9 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<SettingsController>()) {
           Get.lazyPut<SettingsController>(
-            () => SettingsController(),
+            () => SettingsController(
+              userSettingsService: Get.find<UserSettingsService>(),
+            ),
             fenix: true,
           );
         }
