@@ -15,6 +15,7 @@ import '../services/ai_tutor_voice_service.dart';
 import '../views/ai_level_test_view.dart';
 import '../views/ai_tutor_discovery_view.dart';
 import '../views/ai_tutor_live_voice_view.dart';
+import '../views/ai_tutor_writing_help_view.dart';
 import '../views/guided_learning_level_selection_view.dart';
 import '../views/guided_learning_topics_view.dart';
 
@@ -49,6 +50,9 @@ class AiChatController extends GetxController {
   final RxnString conversationId = RxnString();
   final RxList<String> conversationMemoryFacts = <String>[].obs;
   final RxList<String> recentMistakeTags = <String>[].obs;
+  final Rx<AiTutorChatMode> textChatMode = AiTutorChatMode.general.obs;
+  final Rxn<AiTutorWritingSourceLanguage> writingSourceLanguage =
+      Rxn<AiTutorWritingSourceLanguage>();
 
   Rxn<AiTutorLearnerProfileModel> get learnerProfile =>
       _preferencesService.learnerProfile;
@@ -64,6 +68,24 @@ class AiChatController extends GetxController {
       return 'Simplified correction mode';
     }
     return profile?.adaptiveLabel ?? 'Adaptive level detection';
+  }
+
+  bool get isWritingHelpSession =>
+      textChatMode.value == AiTutorChatMode.writingHelp &&
+      writingSourceLanguage.value != null;
+
+  String get writingHelpLanguageLabel =>
+      writingSourceLanguage.value?.displayName ?? 'Italian Writing Help';
+
+  String get writingHelpInputHint {
+    switch (writingSourceLanguage.value) {
+      case AiTutorWritingSourceLanguage.bangla:
+        return 'শব্দ, বাক্য বা ইতালীয় খসড়া লিখুন...';
+      case AiTutorWritingSourceLanguage.english:
+        return 'Enter a word, sentence, or Italian draft...';
+      case null:
+        return 'Write what you need help with...';
+    }
   }
 
   AiTutorVoiceSessionModel? _activeVoiceSession;
@@ -182,6 +204,8 @@ class AiChatController extends GetxController {
   }
 
   void startTextConversation(String prompt) {
+    textChatMode.value = AiTutorChatMode.general;
+    writingSourceLanguage.value = null;
     _textSessionVersion++;
     conversationId.value = null;
     textMessages.clear();
@@ -232,6 +256,8 @@ class AiChatController extends GetxController {
               conversationId: conversationId.value,
               memoryFacts: conversationMemoryFacts,
               recentMistakeTags: recentMistakeTags,
+              chatMode: textChatMode.value,
+              writingSourceLanguage: writingSourceLanguage.value,
             ),
           );
       if (!result.isSuccess ||
@@ -244,7 +270,15 @@ class AiChatController extends GetxController {
       conversationId.value = result.data!.conversationId;
       conversationMemoryFacts.assignAll(result.data!.memoryFacts);
       recentMistakeTags.assignAll(result.data!.recentMistakeTags);
-      textMessages.add(result.data!.message);
+
+      final AiTutorMessageModel responseMessage = result.data!.message;
+      if (!_hasUsableAssistantText(responseMessage.primary)) {
+        textMessages.add(
+          AiTutorMessageModel.assistant(_invalidAssistantResponseMessage()),
+        );
+        return;
+      }
+      textMessages.add(responseMessage);
     } finally {
       if (sessionVersion == _textSessionVersion) {
         isSendingMessage.value = false;
@@ -271,10 +305,15 @@ class AiChatController extends GetxController {
       return;
     }
 
+    final String speechText = isWritingHelpSession &&
+            message.italianSpeechText?.trim().isNotEmpty == true
+        ? message.italianSpeechText!.trim()
+        : message.primary.trim();
+
     await _ttsService.stop();
     speakingMessageId.value = message.id;
     try {
-      await _ttsService.speakItalian(message.primary);
+      await _ttsService.speakItalian(speechText);
     } catch (_) {
       Get.snackbar(
         'Italian voice unavailable',
@@ -296,6 +335,8 @@ class AiChatController extends GetxController {
     recentMistakeTags.clear();
     inputController.clear();
     inputText.value = '';
+    textChatMode.value = AiTutorChatMode.general;
+    writingSourceLanguage.value = null;
     isTextConversationActive.value = false;
     isSendingMessage.value = false;
     speakingMessageId.value = null;
@@ -457,8 +498,64 @@ class AiChatController extends GetxController {
     );
   }
 
-  void onWritingHelpTap() {
-    Get.snackbar('Writing Help', 'This feature is coming soon.');
+  void openWritingHelp(AiTutorWritingSourceLanguage sourceLanguage) {
+    resetTextConversation();
+    textChatMode.value = AiTutorChatMode.writingHelp;
+    writingSourceLanguage.value = sourceLanguage;
+    isTextConversationActive.value = true;
+    textMessages.add(
+      AiTutorMessageModel.assistant(_writingHelpWelcome(sourceLanguage)),
+    );
+    Get.to<void>(
+      () => const AiTutorWritingHelpView(),
+      transition: Transition.rightToLeft,
+    );
+  }
+
+  Future<bool> handleWritingHelpSystemBack() async {
+    resetTextConversation();
+    return true;
+  }
+
+  void closeWritingHelpPage() {
+    resetTextConversation();
+    if (Get.key.currentState?.canPop() ?? false) {
+      Get.back<void>();
+    }
+  }
+
+  String _writingHelpWelcome(AiTutorWritingSourceLanguage sourceLanguage) {
+    switch (sourceLanguage) {
+      case AiTutorWritingSourceLanguage.english:
+        return 'Send a word, sentence, or Italian draft. I will show the '
+            'natural Italian writing and explain the main point briefly in English.';
+      case AiTutorWritingSourceLanguage.bangla:
+        return 'একটি শব্দ, বাক্য বা ইতালীয় খসড়া লিখুন। আমি স্বাভাবিক '
+            'ইতালীয় লেখাটি দেখাব এবং মূল বিষয়টি বাংলায় সংক্ষেপে বুঝিয়ে দেব।';
+    }
+  }
+
+  bool _hasUsableAssistantText(String value) {
+    final String text = value.trim();
+    if (text.isEmpty) {
+      return false;
+    }
+    return !(text.startsWith('{') &&
+        text.endsWith('}') &&
+        text.contains('"primary"'));
+  }
+
+  String _invalidAssistantResponseMessage() {
+    if (!isWritingHelpSession) {
+      return 'I could not prepare a response. Please try again.';
+    }
+    switch (writingSourceLanguage.value) {
+      case AiTutorWritingSourceLanguage.bangla:
+        return 'লেখার উত্তরটি তৈরি করা যায়নি। শব্দ বা বাক্যটি আবার পাঠান।';
+      case AiTutorWritingSourceLanguage.english:
+      case null:
+        return 'I could not prepare the writing answer. Please send the word or sentence again.';
+    }
   }
 
   void onRecentSessionTap() {

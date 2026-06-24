@@ -1,7 +1,43 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
-
 enum AiTutorMessageRole { user, assistant }
+
+enum AiTutorChatMode { general, writingHelp }
+
+enum AiTutorWritingSourceLanguage { english, bangla }
+
+extension AiTutorChatModeX on AiTutorChatMode {
+  String get apiValue {
+    switch (this) {
+      case AiTutorChatMode.general:
+        return 'general';
+      case AiTutorChatMode.writingHelp:
+        return 'writing_help';
+    }
+  }
+}
+
+extension AiTutorWritingSourceLanguageX on AiTutorWritingSourceLanguage {
+  String get apiValue {
+    switch (this) {
+      case AiTutorWritingSourceLanguage.english:
+        return 'english';
+      case AiTutorWritingSourceLanguage.bangla:
+        return 'bangla';
+    }
+  }
+
+  String get displayName {
+    switch (this) {
+      case AiTutorWritingSourceLanguage.english:
+        return 'English → Italian';
+      case AiTutorWritingSourceLanguage.bangla:
+        return 'Bangla → Italian';
+    }
+  }
+}
 
 class AiTutorStarterModel {
   const AiTutorStarterModel({
@@ -110,24 +146,34 @@ class AiTutorMessageModel {
   bool get isUser => role == AiTutorMessageRole.user;
 
   factory AiTutorMessageModel.fromJson(Map<String, dynamic> json) {
-    final String roleValue = json['role']?.toString().trim().toLowerCase() ?? '';
+    final Map<String, dynamic> normalizedJson = _normalizeMessageJson(json);
+    final String roleValue =
+        normalizedJson['role']?.toString().trim().toLowerCase() ?? '';
     final AiTutorCorrectionModel? correction = _correctionFromJson(
-      json['correction'],
+      normalizedJson['correction'],
     );
     return AiTutorMessageModel(
-      id: json['id']?.toString() ??
+      id: normalizedJson['id']?.toString() ??
           DateTime.now().microsecondsSinceEpoch.toString(),
       role: roleValue == 'user'
           ? AiTutorMessageRole.user
           : AiTutorMessageRole.assistant,
-      primary: (json['primary'] ?? json['text'] ?? '').toString().trim(),
-      english: _optionalText(json['english']),
-      bangla: _optionalText(json['bangla']),
-      italianSpeechText: _optionalText(json['italianSpeechText']),
+      primary: _optionalText(
+            normalizedJson['primary'] ?? normalizedJson['text'],
+          ) ??
+          '',
+      english: _optionalText(normalizedJson['english']),
+      bangla: _optionalText(normalizedJson['bangla']),
+      italianSpeechText: _optionalText(
+        normalizedJson['italianSpeechText'] ??
+            normalizedJson['italian_speech_text'],
+      ),
       correction: correction,
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
-          DateTime.now(),
-      isPartial: json['isPartial'] == true || json['final'] == false,
+      createdAt:
+          DateTime.tryParse(normalizedJson['createdAt']?.toString() ?? '') ??
+              DateTime.now(),
+      isPartial: normalizedJson['isPartial'] == true ||
+          normalizedJson['final'] == false,
     );
   }
 
@@ -135,6 +181,15 @@ class AiTutorMessageModel {
     return AiTutorMessageModel(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       role: AiTutorMessageRole.user,
+      primary: text.trim(),
+      createdAt: DateTime.now(),
+    );
+  }
+
+  factory AiTutorMessageModel.assistant(String text) {
+    return AiTutorMessageModel(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      role: AiTutorMessageRole.assistant,
       primary: text.trim(),
       createdAt: DateTime.now(),
     );
@@ -216,12 +271,7 @@ class AiTutorChatResponseModel {
   final List<String> recentMistakeTags;
 
   factory AiTutorChatResponseModel.fromJson(Map<String, dynamic> json) {
-    final dynamic rawMessage = json['message'];
-    final Map<String, dynamic> messageJson = rawMessage is Map<String, dynamic>
-        ? rawMessage
-        : rawMessage is Map
-            ? Map<String, dynamic>.from(rawMessage)
-            : <String, dynamic>{};
+    final Map<String, dynamic> messageJson = _asJsonMap(json['message']);
     return AiTutorChatResponseModel(
       conversationId: json['conversationId']?.toString() ?? '',
       message: AiTutorMessageModel.fromJson(messageJson),
@@ -353,6 +403,8 @@ class AiTutorChatRequestModel {
     this.conversationId,
     this.memoryFacts = const <String>[],
     this.recentMistakeTags = const <String>[],
+    this.chatMode = AiTutorChatMode.general,
+    this.writingSourceLanguage,
   });
 
   final String message;
@@ -360,6 +412,8 @@ class AiTutorChatRequestModel {
   final String? conversationId;
   final List<String> memoryFacts;
   final List<String> recentMistakeTags;
+  final AiTutorChatMode chatMode;
+  final AiTutorWritingSourceLanguage? writingSourceLanguage;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -372,8 +426,60 @@ class AiTutorChatRequestModel {
           .toList(growable: false),
       'memoryFacts': memoryFacts,
       'recentMistakeTags': recentMistakeTags,
+      'chatMode': chatMode.apiValue,
+      if (chatMode == AiTutorChatMode.writingHelp &&
+          writingSourceLanguage != null)
+        'sourceLanguage': writingSourceLanguage!.apiValue,
     };
   }
+}
+
+Map<String, dynamic> _normalizeMessageJson(Map<String, dynamic> json) {
+  final Map<String, dynamic> normalized = Map<String, dynamic>.from(json);
+  final Map<String, dynamic> nested = _asJsonMap(normalized['primary']);
+  if (nested.isEmpty ||
+      (!nested.containsKey('primary') && !nested.containsKey('text'))) {
+    return normalized;
+  }
+
+  return <String, dynamic>{
+    ...normalized,
+    ...nested,
+    if (normalized.containsKey('id')) 'id': normalized['id'],
+    if (normalized.containsKey('role')) 'role': normalized['role'],
+    if (normalized.containsKey('createdAt'))
+      'createdAt': normalized['createdAt'],
+  };
+}
+
+Map<String, dynamic> _asJsonMap(dynamic value) {
+  dynamic candidate = value;
+  for (int attempt = 0; attempt < 2; attempt++) {
+    if (candidate is Map<String, dynamic>) {
+      return Map<String, dynamic>.from(candidate);
+    }
+    if (candidate is Map) {
+      return Map<String, dynamic>.from(candidate);
+    }
+    if (candidate is! String) {
+      return <String, dynamic>{};
+    }
+
+    String encoded = candidate.trim();
+    if (encoded.startsWith('```') && encoded.endsWith('```')) {
+      final List<String> lines = encoded.split('\n');
+      if (lines.length >= 3) {
+        encoded = lines.sublist(1, lines.length - 1).join('\n').trim();
+      }
+    }
+
+    try {
+      candidate = jsonDecode(encoded);
+    } on FormatException {
+      return <String, dynamic>{};
+    }
+  }
+  return <String, dynamic>{};
 }
 
 AiTutorCorrectionModel? _correctionFromJson(dynamic value) {

@@ -25,6 +25,9 @@ class AiTutorMessageBubble extends GetView<AiChatController> {
       final bool hasTranslations =
           (message.english?.isNotEmpty ?? false) ||
           (message.bangla?.isNotEmpty ?? false);
+      final bool canPlayItalianSpeech = !message.isUser &&
+          (!controller.isWritingHelpSession ||
+              message.italianSpeechText?.trim().isNotEmpty == true);
 
       return Align(
         alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -75,7 +78,7 @@ class AiTutorMessageBubble extends GetView<AiChatController> {
                             ),
                           ),
                         ),
-                        if (!message.isUser) ...<Widget>[
+                        if (canPlayItalianSpeech) ...<Widget>[
                           SizedBox(width: 8.w),
                           _ItalianSpeechButton(
                             isSpeaking:

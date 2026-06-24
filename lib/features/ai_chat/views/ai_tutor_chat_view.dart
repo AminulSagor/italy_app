@@ -9,7 +9,12 @@ import 'widgets/ai_tutor_common_widgets.dart';
 import 'widgets/ai_tutor_message_bubble.dart';
 
 class AiTutorChatContent extends StatefulWidget {
-  const AiTutorChatContent({super.key});
+  const AiTutorChatContent({
+    super.key,
+    this.showWritingHelpStatus = false,
+  });
+
+  final bool showWritingHelpStatus;
 
   @override
   State<AiTutorChatContent> createState() => _AiTutorChatContentState();
@@ -79,7 +84,10 @@ class _AiTutorChatContentState extends State<AiTutorChatContent> {
                 children: <Widget>[
                   const AiTutorDateChip(),
                   SizedBox(height: 12.h),
-                  _AdaptiveTutorStatusCard(controller: _controller),
+                  if (widget.showWritingHelpStatus)
+                    _WritingHelpStatusCard(controller: _controller)
+                  else
+                    _AdaptiveTutorStatusCard(controller: _controller),
                 ],
               ),
             );
@@ -94,6 +102,78 @@ class _AiTutorChatContentState extends State<AiTutorChatContent> {
         },
       );
     });
+  }
+}
+
+
+class _WritingHelpStatusCard extends StatelessWidget {
+  const _WritingHelpStatusCard({required this.controller});
+
+  final AiChatController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isBangla = controller.writingSourceLanguage.value ==
+        AiTutorWritingSourceLanguage.bangla;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEAFBF4),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: const Color(0xFF08C99B).withValues(alpha: .18),
+          width: 1.w,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            width: 34.r,
+            height: 34.r,
+            decoration: const BoxDecoration(
+              color: Color(0xFFD5F7EA),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.edit_note_rounded,
+              size: 21.r,
+              color: const Color(0xFF08785E),
+            ),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  controller.writingHelpLanguageLabel,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF26312E),
+                  ),
+                ),
+                SizedBox(height: 3.h),
+                Text(
+                  isBangla
+                      ? 'বাংলায় ব্যাখ্যা পেয়ে স্বাভাবিক ইতালীয় লেখা তৈরি করুন।'
+                      : 'Get English guidance while creating natural Italian writing.',
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF68736E),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

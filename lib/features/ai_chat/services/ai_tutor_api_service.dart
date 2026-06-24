@@ -47,6 +47,8 @@ class AiTutorApiService {
     String? conversationId,
     List<String> memoryFacts = const <String>[],
     List<String> recentMistakeTags = const <String>[],
+    AiTutorChatMode chatMode = AiTutorChatMode.general,
+    AiTutorWritingSourceLanguage? writingSourceLanguage,
   }) async {
     final AiTutorChatRequestModel request = AiTutorChatRequestModel(
       message: message,
@@ -54,6 +56,8 @@ class AiTutorApiService {
       conversationId: conversationId,
       memoryFacts: memoryFacts,
       recentMistakeTags: recentMistakeTags,
+      chatMode: chatMode,
+      writingSourceLanguage: writingSourceLanguage,
     );
     final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '/ai-tutor/chat',

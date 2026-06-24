@@ -5,10 +5,27 @@ import 'package:get/get.dart';
 import '../../core/themes/app_colors.dart';
 import '../../core/themes/app_constants.dart';
 import 'controllers/ai_chat_controller.dart';
+import 'models/ai_tutor_models.dart';
 import 'views/widgets/ai_chat_home_widgets.dart';
+import 'views/widgets/ai_tutor_writing_language_sheet.dart';
 
 class AiChatView extends GetView<AiChatController> {
   const AiChatView({super.key});
+
+  Future<void> _openWritingHelp(BuildContext context) async {
+    final AiTutorWritingSourceLanguage? sourceLanguage =
+        await showDialog<AiTutorWritingSourceLanguage>(
+          context: context,
+          barrierColor: Colors.black.withValues(alpha: .35),
+          builder: (BuildContext context) {
+            return const AiTutorWritingLanguageDialog();
+          },
+        );
+
+    if (sourceLanguage != null) {
+      controller.openWritingHelp(sourceLanguage);
+    }
+  }
 
   @override
   AiChatController get controller {
@@ -38,7 +55,12 @@ class AiChatView extends GetView<AiChatController> {
             AiSpeakingLabCard(onTap: controller.onEnterLabTap),
             SizedBox(height: 24.h),
             AiGuidedLearningCard(onTap: controller.onGuidedLearningTap),
-            SizedBox(height: 48.h),
+            SizedBox(height: 24.h),
+            Text(
+              'AI Zone Tools',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            ),
+            SizedBox(height: 24.h),
             Row(
               children: <Widget>[
                 Expanded(
@@ -49,7 +71,7 @@ class AiChatView extends GetView<AiChatController> {
                     backgroundColor: const Color(0xFFE9FFF4),
                     iconColor: const Color(0xFF08C99B),
                     textColor: const Color(0xFF0D674F),
-                    onTap: controller.onWritingHelpTap,
+                    onTap: () => _openWritingHelp(context),
                   ),
                 ),
                 SizedBox(width: 16.w),
@@ -69,7 +91,7 @@ class AiChatView extends GetView<AiChatController> {
               ],
             ),
             SizedBox(height: 24.h),
-            AiRecentSessionCard(onTap: controller.onRecentSessionTap),
+            // AiRecentSessionCard(onTap: controller.onRecentSessionTap),
             SizedBox(height: 25.h),
             const AiProTipCard(),
           ],
