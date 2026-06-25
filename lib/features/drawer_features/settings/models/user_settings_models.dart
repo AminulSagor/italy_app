@@ -6,6 +6,8 @@ class UserSettingsProfileModel {
     required this.isPhoneVerified,
     required this.canChangeEmail,
     required this.canChangePhone,
+    required this.streakFreezeCount,
+    required this.learnerLevel,
     this.email,
     this.phone,
     this.profilePhotoFileId,
@@ -22,6 +24,8 @@ class UserSettingsProfileModel {
   final String? avatarUrl;
   final bool canChangeEmail;
   final bool canChangePhone;
+  final int streakFreezeCount;
+  final String learnerLevel;
 
   factory UserSettingsProfileModel.fromJson(Map<String, dynamic> json) {
     return UserSettingsProfileModel(
@@ -33,8 +37,10 @@ class UserSettingsProfileModel {
       isPhoneVerified: json['isPhoneVerified'] == true,
       profilePhotoFileId: _nullableString(json['profilePhotoFileId']),
       avatarUrl: _nullableString(json['avatarUrl']),
-      canChangeEmail: json['canChangeEmail'] == true,
-      canChangePhone: json['canChangePhone'] == true,
+      canChangeEmail: json['canChangeEmail'] != false,
+      canChangePhone: json['canChangePhone'] != false,
+      streakFreezeCount: _asInt(json['streakFreezeCount']),
+      learnerLevel: _stringOrDefault(json['learnerLevel'], 'A1'),
     );
   }
 
@@ -50,6 +56,8 @@ class UserSettingsProfileModel {
       'avatarUrl': avatarUrl,
       'canChangeEmail': canChangeEmail,
       'canChangePhone': canChangePhone,
+      'streakFreezeCount': streakFreezeCount,
+      'learnerLevel': learnerLevel,
     };
   }
 
@@ -64,6 +72,8 @@ class UserSettingsProfileModel {
     String? avatarUrl,
     bool? canChangeEmail,
     bool? canChangePhone,
+    int? streakFreezeCount,
+    String? learnerLevel,
   }) {
     return UserSettingsProfileModel(
       id: id ?? this.id,
@@ -76,12 +86,24 @@ class UserSettingsProfileModel {
       avatarUrl: avatarUrl ?? this.avatarUrl,
       canChangeEmail: canChangeEmail ?? this.canChangeEmail,
       canChangePhone: canChangePhone ?? this.canChangePhone,
+      streakFreezeCount: streakFreezeCount ?? this.streakFreezeCount,
+      learnerLevel: learnerLevel ?? this.learnerLevel,
     );
   }
 
   static String? _nullableString(dynamic value) {
     final String text = value?.toString().trim() ?? '';
     return text.isEmpty ? null : text;
+  }
+
+  static int _asInt(dynamic value) {
+    if (value is int) return value;
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static String _stringOrDefault(dynamic value, String fallback) {
+    final String text = value?.toString().trim() ?? '';
+    return text.isEmpty ? fallback : text;
   }
 }
 
@@ -113,6 +135,34 @@ class UserSettingsProfileResponseModel {
       if (message != null) 'message': message,
       'profile': profile.toJson(),
     };
+  }
+}
+
+class ContactOtpResponseModel {
+  const ContactOtpResponseModel({
+    required this.message,
+    required this.contactType,
+    required this.destination,
+    this.devOtp,
+  });
+
+  final String message;
+  final String contactType;
+  final String destination;
+  final String? devOtp;
+
+  factory ContactOtpResponseModel.fromJson(Map<String, dynamic> json) {
+    return ContactOtpResponseModel(
+      message: json['message']?.toString() ?? 'Verification code sent.',
+      contactType: json['contactType']?.toString() ?? '',
+      destination: json['destination']?.toString() ?? '',
+      devOtp: _nullableString(json['devOtp']),
+    );
+  }
+
+  static String? _nullableString(dynamic value) {
+    final String text = value?.toString().trim() ?? '';
+    return text.isEmpty ? null : text;
   }
 }
 

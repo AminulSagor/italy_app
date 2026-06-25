@@ -3,15 +3,23 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/api_error_handler.dart';
+import '../../../core/services/auth_service.dart';
+import '../../../core/widgets/app_drawer_controller.dart';
 import '../../../routes/routes.dart';
 import 'models/user_settings_models.dart';
 import 'services/user_settings_service.dart';
 
+enum ProfileSaveResult { failed, saved, verificationStarted, noChanges }
+
 class SettingsController extends GetxController {
-  SettingsController({required UserSettingsService userSettingsService})
-    : _userSettingsService = userSettingsService;
+  SettingsController({
+    required UserSettingsService userSettingsService,
+    required AuthService authService,
+  }) : _userSettingsService = userSettingsService,
+       _authService = authService;
 
   final UserSettingsService _userSettingsService;
+  final AuthService _authService;
   final ImagePicker _imagePicker = ImagePicker();
 
   final Rxn<UserSettingsProfileModel> profile =
@@ -21,21 +29,35 @@ class SettingsController extends GetxController {
   final RxBool isSavingName = false.obs;
   final RxBool isUploadingAvatar = false.obs;
   final RxBool isChangingPassword = false.obs;
-  final RxBool hapticsEnabled = false.obs;
+  final RxBool isRequestingContactOtp = false.obs;
+  final RxBool isVerifyingContactOtp = false.obs;
+  final RxBool isResendingContactOtp = false.obs;
+  final RxBool isDeletingAccount = false.obs;
   final RxBool obscureCurrentPassword = true.obs;
   final RxBool obscureNewPassword = true.obs;
   final RxBool obscureConfirmPassword = true.obs;
   final RxString editProfileTab = 'email'.obs;
+  final RxString emailDraft = ''.obs;
+  final RxString phoneDraft = ''.obs;
   final RxString newPasswordDraft = ''.obs;
   final RxString confirmPasswordDraft = ''.obs;
   final RxString deleteConfirmText = ''.obs;
+  final RxString pendingContactType = ''.obs;
+  final RxString pendingContactValue = ''.obs;
 
   final TextEditingController fullNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController currentPasswordController =
       TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final List<TextEditingController> otpControllers = List.generate(
+    4,
+    (_) => TextEditingController(),
+  );
+  final List<FocusNode> otpFocusNodes = List.generate(4, (_) => FocusNode());
 
   @override
   void onInit() {
@@ -46,9 +68,17 @@ class SettingsController extends GetxController {
   @override
   void onClose() {
     fullNameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
     currentPasswordController.dispose();
     newPasswordController.dispose();
     confirmPasswordController.dispose();
+    for (final TextEditingController controller in otpControllers) {
+      controller.dispose();
+    }
+    for (final FocusNode focusNode in otpFocusNodes) {
+      focusNode.dispose();
+    }
     super.onClose();
   }
 
@@ -57,29 +87,48 @@ class SettingsController extends GetxController {
     return name.isEmpty ? 'Italian Learner' : name;
   }
 
+  int get streakFreezeCount => profile.value?.streakFreezeCount ?? 0;
+
   String get primaryContact {
     final UserSettingsProfileModel? value = profile.value;
     return value?.email ?? value?.phone ?? 'No contact added';
   }
 
-  String get selectedContactValue {
-    final UserSettingsProfileModel? value = profile.value;
-    if (editProfileTab.value == 'phone') {
-      return value?.phone ?? 'No phone number added';
-    }
-    return value?.email ?? 'No email address added';
-  }
+  bool get selectedContactIsEmail => editProfileTab.value == 'email';
+
+  TextEditingController get selectedContactController =>
+      selectedContactIsEmail ? emailController : phoneController;
+
+  String get selectedContactValue => selectedContactController.text.trim();
 
   bool get selectedContactVerified {
     final UserSettingsProfileModel? value = profile.value;
-    if (editProfileTab.value == 'phone') {
-      return value?.isPhoneVerified == true;
-    }
-    return value?.isEmailVerified == true;
+    return selectedContactIsEmail
+        ? value?.isEmailVerified == true
+        : value?.isPhoneVerified == true;
   }
 
+  bool get selectedContactChanged {
+    final UserSettingsProfileModel? value = profile.value;
+    if (value == null) return false;
+
+    if (selectedContactIsEmail) {
+      return emailDraft.value.trim().toLowerCase() !=
+          (value.email ?? '').trim().toLowerCase();
+    }
+    return phoneDraft.value.trim() != (value.phone ?? '').trim();
+  }
+
+  String get pendingContactDescription => pendingContactType.value == 'phone'
+      ? 'phone number'
+      : 'email address';
+
+  String get otpCode => otpControllers.map((item) => item.text).join();
+
+  bool get isOtpComplete => RegExp(r'^\d{4}$').hasMatch(otpCode);
+
   bool get canDeleteAccount =>
-      deleteConfirmText.value.trim().toUpperCase() == 'DELETE';
+      _normalizeName(deleteConfirmText.value) == _normalizeName(displayName);
 
   bool get hasValidNewPassword {
     final String password = newPasswordDraft.value;
@@ -88,7 +137,6 @@ class SettingsController extends GetxController {
         RegExp(r'\d').hasMatch(password) &&
         RegExp(r'[@$!%*?&#]').hasMatch(password);
   }
-
 
   bool get hasPasswordMinimumLength => newPasswordDraft.value.length >= 8;
 
@@ -144,6 +192,171 @@ class SettingsController extends GetxController {
     } finally {
       isSavingName.value = false;
     }
+  }
+
+  Future<ProfileSaveResult> saveProfileAndContinue() async {
+    final UserSettingsProfileModel? current = profile.value;
+    if (current == null) return ProfileSaveResult.failed;
+
+    final String fullName = fullNameController.text.trim();
+    final bool nameChanged = fullName != current.fullName.trim();
+    final bool contactChanged = selectedContactChanged;
+    final bool contactIsEmail = selectedContactIsEmail;
+    final String contactValue = selectedContactValue;
+
+    if (nameChanged && !await saveFullName()) {
+      return ProfileSaveResult.failed;
+    }
+
+    if (contactChanged) {
+      final bool requested = await requestSelectedContactChange(
+        isEmailOverride: contactIsEmail,
+        valueOverride: contactValue,
+      );
+      return requested
+          ? ProfileSaveResult.verificationStarted
+          : ProfileSaveResult.failed;
+    }
+
+    return nameChanged ? ProfileSaveResult.saved : ProfileSaveResult.noChanges;
+  }
+
+  Future<bool> requestSelectedContactChange({
+    bool? isEmailOverride,
+    String? valueOverride,
+  }) async {
+    final bool isEmail = isEmailOverride ?? selectedContactIsEmail;
+    final String value = valueOverride?.trim() ?? selectedContactValue;
+    if (!_validateContact(value, isEmail: isEmail)) return false;
+
+    isRequestingContactOtp.value = true;
+    try {
+      final ApiResult<ContactOtpResponseModel> result =
+          await ApiErrorHandler.call<ContactOtpResponseModel>(
+            () => isEmail
+                ? _userSettingsService.requestEmailChangeOtp(value)
+                : _userSettingsService.requestPhoneChangeOtp(value),
+            errorTitle: 'Verify Contact',
+          );
+
+      if (!result.isSuccess || result.data == null) return false;
+
+      pendingContactType.value = result.data!.contactType;
+      pendingContactValue.value = result.data!.destination;
+      clearOtpFields();
+
+      final String? devOtp = result.data!.devOtp;
+      if (devOtp != null && devOtp.isNotEmpty) {
+        Get.snackbar('OTP', devOtp);
+      }
+
+      Get.toNamed(AppRoutes.verifyContact);
+      return true;
+    } finally {
+      isRequestingContactOtp.value = false;
+    }
+  }
+
+  Future<bool> verifyPendingContact() async {
+    if (!isOtpComplete) {
+      Get.snackbar('Verification Code', 'Enter the complete 4-digit code.');
+      return false;
+    }
+
+    final String type = pendingContactType.value;
+    final String destination = pendingContactValue.value;
+    if (type.isEmpty || destination.isEmpty) {
+      Get.snackbar('Verify Contact', 'The verification request has expired.');
+      return false;
+    }
+
+    isVerifyingContactOtp.value = true;
+    try {
+      final ApiResult<UserSettingsProfileResponseModel> result =
+          await ApiErrorHandler.call<UserSettingsProfileResponseModel>(
+            () => type == 'phone'
+                ? _userSettingsService.verifyPhoneChangeOtp(
+                    phone: destination,
+                    otp: otpCode,
+                  )
+                : _userSettingsService.verifyEmailChangeOtp(
+                    email: destination,
+                    otp: otpCode,
+                  ),
+            errorTitle: 'Verify Contact',
+          );
+
+      if (!result.isSuccess || result.data == null) return false;
+      _applyProfile(result.data!.profile);
+      clearPendingContact();
+
+      Get.offNamed(
+        AppRoutes.profileSuccess,
+        arguments: <String, String>{
+          'type': type == 'phone' ? 'phoneUpdated' : 'emailUpdated',
+        },
+      );
+      return true;
+    } finally {
+      isVerifyingContactOtp.value = false;
+    }
+  }
+
+  Future<void> resendPendingContactOtp() async {
+    if (pendingContactValue.value.isEmpty || isResendingContactOtp.value) {
+      return;
+    }
+
+    isResendingContactOtp.value = true;
+    try {
+      final bool isPhone = pendingContactType.value == 'phone';
+      final ApiResult<ContactOtpResponseModel> result =
+          await ApiErrorHandler.call<ContactOtpResponseModel>(
+            () => isPhone
+                ? _userSettingsService.requestPhoneChangeOtp(
+                    pendingContactValue.value,
+                  )
+                : _userSettingsService.requestEmailChangeOtp(
+                    pendingContactValue.value,
+                  ),
+            errorTitle: 'Resend Code',
+          );
+
+      if (!result.isSuccess || result.data == null) return;
+      clearOtpFields();
+      final String? devOtp = result.data!.devOtp;
+      Get.snackbar(
+        'Verification Code',
+        devOtp == null || devOtp.isEmpty
+            ? result.data!.message
+            : '${result.data!.message}\nCode: $devOtp',
+      );
+    } finally {
+      isResendingContactOtp.value = false;
+    }
+  }
+
+  void onOtpDigitChanged(int index, String value) {
+    if (value.isNotEmpty && index < otpFocusNodes.length - 1) {
+      otpFocusNodes[index + 1].requestFocus();
+    } else if (value.isEmpty && index > 0) {
+      otpFocusNodes[index - 1].requestFocus();
+    }
+  }
+
+  void clearOtpFields() {
+    for (final TextEditingController controller in otpControllers) {
+      controller.clear();
+    }
+    if (otpFocusNodes.isNotEmpty) {
+      otpFocusNodes.first.requestFocus();
+    }
+  }
+
+  void clearPendingContact() {
+    pendingContactType.value = '';
+    pendingContactValue.value = '';
+    clearOtpFields();
   }
 
   Future<bool> pickAvatar(ImageSource source) async {
@@ -232,6 +445,29 @@ class SettingsController extends GetxController {
     }
   }
 
+  Future<void> deleteAccountPermanently() async {
+    if (!canDeleteAccount || isDeletingAccount.value) return;
+
+    isDeletingAccount.value = true;
+    try {
+      final ApiResult<UserSettingsMessageModel> result =
+          await ApiErrorHandler.call<UserSettingsMessageModel>(
+            () => _userSettingsService.deleteAccount(displayName),
+            errorTitle: 'Delete Account',
+          );
+
+      if (!result.isSuccess) return;
+      await _authService.logout();
+      if (Get.isRegistered<AppDrawerController>()) {
+        Get.find<AppDrawerController>().clear();
+      }
+      Get.offAllNamed(AppRoutes.login);
+      Get.snackbar('Account Deleted', result.data?.message ?? 'Account deleted.');
+    } finally {
+      isDeletingAccount.value = false;
+    }
+  }
+
   void clearPasswordFields() {
     currentPasswordController.clear();
     newPasswordController.clear();
@@ -243,33 +479,25 @@ class SettingsController extends GetxController {
     obscureConfirmPassword.value = true;
   }
 
-  void onNewPasswordChanged(String value) {
-    newPasswordDraft.value = value;
-  }
+  void onNewPasswordChanged(String value) => newPasswordDraft.value = value;
 
-  void onConfirmPasswordChanged(String value) {
-    confirmPasswordDraft.value = value;
-  }
+  void onConfirmPasswordChanged(String value) =>
+      confirmPasswordDraft.value = value;
 
-  void toggleHaptics() {
-    hapticsEnabled.toggle();
-  }
+  void toggleCurrentPasswordVisibility() => obscureCurrentPassword.toggle();
 
-  void toggleCurrentPasswordVisibility() {
-    obscureCurrentPassword.toggle();
-  }
+  void toggleNewPasswordVisibility() => obscureNewPassword.toggle();
 
-  void toggleNewPasswordVisibility() {
-    obscureNewPassword.toggle();
-  }
-
-  void toggleConfirmPasswordVisibility() {
-    obscureConfirmPassword.toggle();
-  }
+  void toggleConfirmPasswordVisibility() =>
+      obscureConfirmPassword.toggle();
 
   void setEditProfileTab(String tab) {
     editProfileTab.value = tab;
   }
+
+  void onEmailChanged(String value) => emailDraft.value = value;
+
+  void onPhoneChanged(String value) => phoneDraft.value = value;
 
   void onSettingsTap() => Get.toNamed(AppRoutes.settings);
 
@@ -277,14 +505,13 @@ class SettingsController extends GetxController {
 
   void changePassword() => Get.toNamed(AppRoutes.changePassword);
 
-  void deleteAccount() => Get.toNamed(AppRoutes.deleteAccountConfirm);
+  void deleteAccount() {
+    deleteConfirmText.value = '';
+    Get.toNamed(AppRoutes.deleteAccountConfirm);
+  }
 
   void rateUs() {
     Get.snackbar('Rate Us', 'Store rating page will open here.');
-  }
-
-  void openReports() {
-    Get.snackbar('Reports', 'Reports page will open here.');
   }
 
   void openPrivacyPolicy() {
@@ -295,8 +522,42 @@ class SettingsController extends GetxController {
     Get.snackbar('Terms of Service', 'Terms page will open here.');
   }
 
+  bool _validateContact(String value, {required bool isEmail}) {
+    if (isEmail) {
+      if (!GetUtils.isEmail(value)) {
+        Get.snackbar('Email', 'Enter a valid email address.');
+        return false;
+      }
+      return true;
+    }
+
+    if (!RegExp(r'^(?:\+8801\d{9}|\+39\d{8,11})$').hasMatch(value)) {
+      Get.snackbar(
+        'Phone Number',
+        'Use a valid number such as +8801XXXXXXXXX or +39XXXXXXXXXX.',
+      );
+      return false;
+    }
+    return true;
+  }
+
   void _applyProfile(UserSettingsProfileModel value) {
     profile.value = value;
     fullNameController.text = value.fullName;
+    emailController.text = value.email ?? '';
+    phoneController.text = value.phone ?? '';
+    emailDraft.value = emailController.text;
+    phoneDraft.value = phoneController.text;
+    _refreshDrawer();
+  }
+
+  void _refreshDrawer() {
+    if (Get.isRegistered<AppDrawerController>()) {
+      Get.find<AppDrawerController>().refreshProfile(showError: false);
+    }
+  }
+
+  String _normalizeName(String value) {
+    return value.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
   }
 }

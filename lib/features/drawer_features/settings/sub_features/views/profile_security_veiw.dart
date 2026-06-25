@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../../routes/routes.dart';
 import '../../settings_controller.dart';
 import '../../widgets/settings_ui_widgets.dart';
-import '../../../../../routes/routes.dart';
 
 class ProfileSecurityView extends GetView<SettingsController> {
   const ProfileSecurityView({super.key});
@@ -36,46 +36,67 @@ class ProfileSecurityView extends GetView<SettingsController> {
                 keyboardType: TextInputType.name,
               ),
               SizedBox(height: 24.h),
-              Obx(() {
-                final bool isEmail = controller.editProfileTab.value == 'email';
-                return _SegmentedSwitch(
-                  isEmail: isEmail,
+              Obx(
+                () => _SegmentedSwitch(
+                  isEmail: controller.selectedContactIsEmail,
                   onEmailTap: () => controller.setEditProfileTab('email'),
                   onPhoneTap: () => controller.setEditProfileTab('phone'),
-                );
-              }),
+                ),
+              ),
               SizedBox(height: 13.h),
-              Obx(() {
-                final bool isEmail = controller.editProfileTab.value == 'email';
-                return _ReadOnlyContactField(
-                  label: isEmail ? 'Email' : 'Phone',
-                  value: controller.selectedContactValue,
-                  icon: isEmail
+              Obx(
+                () => SettingsPillField(
+                  label: controller.selectedContactIsEmail ? 'Email' : 'Phone',
+                  hint: controller.selectedContactIsEmail
+                      ? 'Enter your new email'
+                      : 'Enter your new phone number',
+                  icon: controller.selectedContactIsEmail
                       ? Icons.alternate_email_rounded
                       : Icons.phone_rounded,
-                );
-              }),
+                  controller: controller.selectedContactController,
+                  onChanged: controller.selectedContactIsEmail
+                      ? controller.onEmailChanged
+                      : controller.onPhoneChanged,
+                  keyboardType: controller.selectedContactIsEmail
+                      ? TextInputType.emailAddress
+                      : TextInputType.phone,
+                  suffixIcon: controller.selectedContactChanged
+                      ? Icons.verified_user_outlined
+                      : Icons.verified_rounded,
+                ),
+              ),
               SizedBox(height: 24.h),
               Obx(
-                () => _ContactLockCard(
+                () => _ContactVerificationCard(
                   isVerified: controller.selectedContactVerified,
-                  isEmail: controller.editProfileTab.value == 'email',
+                  isEmail: controller.selectedContactIsEmail,
+                  hasChanged: controller.selectedContactChanged,
                 ),
               ),
               SizedBox(height: 36.h),
               Obx(
                 () => SettingsPrimaryButton(
-                  text: 'SAVE CHANGES',
-                  icon: Icons.save_rounded,
-                  isLoading: controller.isSavingName.value,
+                  text: controller.selectedContactChanged
+                      ? 'SAVE & VERIFY  →'
+                      : 'SAVE CHANGES',
+                  icon: controller.selectedContactChanged
+                      ? Icons.mark_email_read_outlined
+                      : Icons.save_rounded,
+                  isLoading:
+                      controller.isSavingName.value ||
+                      controller.isRequestingContactOtp.value,
                   onTap: () async {
-                    final bool updated = await controller.saveFullName();
-                    if (!updated) return;
-
-                    await SettingsSuccessBottomSheet.show(
-                      title: 'Profile Updated!',
-                      subtitle: 'Your full name has been updated successfully.',
-                    );
+                    final ProfileSaveResult result =
+                        await controller.saveProfileAndContinue();
+                    if (result == ProfileSaveResult.saved) {
+                      await SettingsSuccessBottomSheet.show(
+                        title: 'Profile Updated!',
+                        subtitle:
+                            'Your profile information has been updated successfully.',
+                      );
+                    } else if (result == ProfileSaveResult.noChanges) {
+                      Get.snackbar('Profile', 'There are no changes to save.');
+                    }
                   },
                 ),
               ),
@@ -244,96 +265,47 @@ class _SegmentButton extends StatelessWidget {
   }
 }
 
-class _ReadOnlyContactField extends StatelessWidget {
-  const _ReadOnlyContactField({
-    required this.label,
-    required this.value,
-    required this.icon,
+class _ContactVerificationCard extends StatelessWidget {
+  const _ContactVerificationCard({
+    required this.isVerified,
+    required this.isEmail,
+    required this.hasChanged,
   });
-
-  final String label;
-  final String value;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(left: 24.w, bottom: 10.h),
-          child: Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.4,
-              color: const Color(0xFF666666),
-            ),
-          ),
-        ),
-        Container(
-          height: 64.h,
-          padding: EdgeInsets.symmetric(horizontal: 23.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(100.r),
-          ),
-          child: Row(
-            children: <Widget>[
-              Icon(icon, size: 22.r, color: SettingsUi.green),
-              SizedBox(width: 18.w),
-              Expanded(
-                child: Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w800,
-                    color: SettingsUi.text,
-                  ),
-                ),
-              ),
-              Icon(Icons.lock_outline_rounded, size: 20.r),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ContactLockCard extends StatelessWidget {
-  const _ContactLockCard({required this.isVerified, required this.isEmail});
 
   final bool isVerified;
   final bool isEmail;
+  final bool hasChanged;
 
   @override
   Widget build(BuildContext context) {
     final String contactName = isEmail ? 'email address' : 'phone number';
+    final String message = hasChanged
+        ? 'A 4-digit OTP will be sent to the new $contactName. The change is applied only after verification.'
+        : isVerified
+        ? 'Your current $contactName is verified. Enter a new one to change it through OTP verification.'
+        : 'Enter your $contactName and verify it with the 4-digit OTP.';
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 18.h),
       decoration: BoxDecoration(
-        color: isVerified
-            ? const Color(0xFFE3F8D9)
-            : const Color(0xFFFFF1D3),
+        color: hasChanged
+            ? const Color(0xFFDCEBFF)
+            : const Color(0xFFE3F8D9),
         borderRadius: BorderRadius.circular(28.r),
       ),
       child: Row(
         children: <Widget>[
           Icon(
-            isVerified ? Icons.verified_rounded : Icons.info_outline_rounded,
-            color: isVerified ? SettingsUi.green : const Color(0xFFB36A00),
+            hasChanged
+                ? Icons.mark_email_unread_outlined
+                : Icons.verified_user_outlined,
+            color: hasChanged ? const Color(0xFF0064A8) : SettingsUi.green,
           ),
           SizedBox(width: 14.w),
           Expanded(
             child: Text(
-              isVerified
-                  ? 'Your verified $contactName cannot be changed.'
-                  : 'This $contactName is not verified and cannot be edited from settings.',
+              message,
               style: TextStyle(
                 fontSize: 13.sp,
                 height: 1.35,

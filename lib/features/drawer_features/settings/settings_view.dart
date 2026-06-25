@@ -29,17 +29,13 @@ class SettingsView extends GetView<SettingsController> {
 
               SizedBox(height: 32.h),
 
-              const _StreakFreezeCard(),
+              Obx(
+                () => _StreakFreezeCard(
+                  count: controller.streakFreezeCount,
+                ),
+              ),
 
               SizedBox(height: 36.h),
-
-              const _SectionTitle(title: 'PREFERENCES'),
-
-              SizedBox(height: 18.h),
-
-              _HapticsTile(onTap: controller.toggleHaptics),
-
-              SizedBox(height: 34.h),
 
               const _SectionTitle(title: 'PROFILE & SECURITY'),
 
@@ -83,11 +79,6 @@ class SettingsView extends GetView<SettingsController> {
                 child: Column(
                   children: <Widget>[
                     _LegalTile(
-                      icon: Icons.flag_outlined,
-                      title: 'Reports',
-                      onTap: controller.openReports,
-                    ),
-                    _LegalTile(
                       icon: Icons.policy_outlined,
                       title: 'Privacy Policy',
                       onTap: controller.openPrivacyPolicy,
@@ -129,7 +120,9 @@ class SettingsView extends GetView<SettingsController> {
 }
 
 class _StreakFreezeCard extends StatelessWidget {
-  const _StreakFreezeCard();
+  const _StreakFreezeCard({required this.count});
+
+  final int count;
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +152,7 @@ class _StreakFreezeCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  '2 Streak Freezes',
+                  '$count Streak ${count == 1 ? 'Freeze' : 'Freezes'}',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w900,
@@ -206,88 +199,6 @@ class _SectionTitle extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _HapticsTile extends GetView<SettingsController> {
-  final VoidCallback onTap;
-
-  const _HapticsTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 72.h,
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(18.w, 0, 14.w, 0),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F6),
-        borderRadius: BorderRadius.circular(100.r),
-      ),
-      child: Row(
-        children: <Widget>[
-          Container(
-            width: 48.r,
-            height: 48.r,
-            decoration: const BoxDecoration(
-              color: Color(0xFFDDE2EA),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.vibration_rounded,
-              size: 22.r,
-              color: const Color(0xFF4D535B),
-            ),
-          ),
-          SizedBox(width: 18.w),
-          Expanded(
-            child: Text(
-              'Haptics',
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w900,
-                color: const Color(0xFF24272A),
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: onTap,
-            child: Obx(() {
-              final bool enabled = controller.hapticsEnabled.value;
-
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                width: 50.w,
-                height: 28.h,
-                padding: EdgeInsets.all(4.r),
-                decoration: BoxDecoration(
-                  color: enabled
-                      ? const Color(0xFF79F535)
-                      : const Color(0xFFDDE0E7),
-                  borderRadius: BorderRadius.circular(100.r),
-                ),
-                child: AnimatedAlign(
-                  duration: const Duration(milliseconds: 180),
-                  alignment: enabled
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: Container(
-                    width: 20.r,
-                    height: 20.r,
-                    decoration: BoxDecoration(
-                      color: enabled
-                          ? const Color(0xFF267A05)
-                          : const Color(0xFFBFC4CC),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
     );
   }
 }

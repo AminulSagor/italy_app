@@ -65,6 +65,7 @@ import '../features/service_hub/sub_features/cv_builder/controllers/cv_template_
 import '../features/service_hub/sub_features/cv_builder/services/cv_builder_api_service.dart';
 import '../features/service_hub/sub_features/cv_builder/services/cv_pdf_download_service.dart';
 import '../core/services/api_client.dart';
+import '../core/services/auth_service.dart';
 import '../core/services/token_service.dart';
 import '../features/messages/services/chat_socket_service.dart';
 import '../features/messages/services/presence_service.dart';
@@ -797,6 +798,7 @@ class AppPages {
         Get.lazyPut<SettingsController>(
           () => SettingsController(
             userSettingsService: Get.find<UserSettingsService>(),
+            authService: Get.find<AuthService>(),
           ),
           fenix: true,
         );
@@ -810,6 +812,7 @@ class AppPages {
           Get.lazyPut<SettingsController>(
             () => SettingsController(
               userSettingsService: Get.find<UserSettingsService>(),
+              authService: Get.find<AuthService>(),
             ),
             fenix: true,
           );
@@ -852,6 +855,7 @@ class AppPages {
           Get.lazyPut<SettingsController>(
             () => SettingsController(
               userSettingsService: Get.find<UserSettingsService>(),
+              authService: Get.find<AuthService>(),
             ),
             fenix: true,
           );
@@ -867,6 +871,7 @@ class AppPages {
           Get.lazyPut<SettingsController>(
             () => SettingsController(
               userSettingsService: Get.find<UserSettingsService>(),
+              authService: Get.find<AuthService>(),
             ),
             fenix: true,
           );
@@ -877,6 +882,17 @@ class AppPages {
     GetPage(
       name: AppRoutes.verifyContact,
       page: () => const VerifyContactView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.lazyPut<SettingsController>(
+            () => SettingsController(
+              userSettingsService: Get.find<UserSettingsService>(),
+              authService: Get.find<AuthService>(),
+            ),
+            fenix: true,
+          );
+        }
+      }),
     ),
 
     GetPage(
@@ -892,6 +908,7 @@ class AppPages {
           Get.lazyPut<SettingsController>(
             () => SettingsController(
               userSettingsService: Get.find<UserSettingsService>(),
+              authService: Get.find<AuthService>(),
             ),
             fenix: true,
           );

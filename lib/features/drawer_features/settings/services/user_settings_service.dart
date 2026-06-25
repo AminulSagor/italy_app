@@ -32,6 +32,47 @@ class UserSettingsService {
     return UserSettingsProfileResponseModel.fromJson(_responseMap(response));
   }
 
+  Future<ContactOtpResponseModel> requestEmailChangeOtp(String email) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '$_settingsEndpoint/email/request-otp',
+      data: <String, dynamic>{'email': email.trim().toLowerCase()},
+    );
+    return ContactOtpResponseModel.fromJson(_responseMap(response));
+  }
+
+  Future<UserSettingsProfileResponseModel> verifyEmailChangeOtp({
+    required String email,
+    required String otp,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '$_settingsEndpoint/email/verify-otp',
+      data: <String, dynamic>{
+        'email': email.trim().toLowerCase(),
+        'otp': otp.trim(),
+      },
+    );
+    return UserSettingsProfileResponseModel.fromJson(_responseMap(response));
+  }
+
+  Future<ContactOtpResponseModel> requestPhoneChangeOtp(String phone) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '$_settingsEndpoint/phone/request-otp',
+      data: <String, dynamic>{'phone': phone.trim()},
+    );
+    return ContactOtpResponseModel.fromJson(_responseMap(response));
+  }
+
+  Future<UserSettingsProfileResponseModel> verifyPhoneChangeOtp({
+    required String phone,
+    required String otp,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '$_settingsEndpoint/phone/verify-otp',
+      data: <String, dynamic>{'phone': phone.trim(), 'otp': otp.trim()},
+    );
+    return UserSettingsProfileResponseModel.fromJson(_responseMap(response));
+  }
+
   Future<UserSettingsProfileResponseModel> uploadAvatar(XFile image) async {
     final String originalName = _safeOriginalName(image);
     final String mimeType = _imageMimeType(image);
@@ -84,6 +125,15 @@ class UserSettingsService {
     final Response<dynamic> response = await _apiClient.dio.patch(
       '$_settingsEndpoint/password',
       data: payload.toJson(),
+    );
+
+    return UserSettingsMessageModel.fromJson(_responseMap(response));
+  }
+
+  Future<UserSettingsMessageModel> deleteAccount(String fullName) async {
+    final Response<dynamic> response = await _apiClient.dio.delete(
+      '$_settingsEndpoint/account',
+      data: <String, dynamic>{'fullName': fullName.trim()},
     );
 
     return UserSettingsMessageModel.fromJson(_responseMap(response));

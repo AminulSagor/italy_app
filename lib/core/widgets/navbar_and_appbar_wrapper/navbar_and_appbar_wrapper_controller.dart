@@ -18,6 +18,7 @@ import '../../../features/notifications/views/notifications_bottom_sheet.dart';
 import '../../localization/translation_service.dart';
 import '../../services/auth_service.dart';
 import '../../themes/app_colors.dart';
+import '../app_drawer_controller.dart';
 import '../../../routes/routes.dart';
 
 class NavbarAndAppbarWrapperController extends GetxController
@@ -387,6 +388,11 @@ class NavbarAndAppbarWrapperController extends GetxController
     Get.toNamed(AppRoutes.shop);
   }
 
+  void onDrawerChanged(bool isOpened) {
+    if (!isOpened || !Get.isRegistered<AppDrawerController>()) return;
+    Get.find<AppDrawerController>().refreshProfile(showError: false);
+  }
+
   Future<void> onLogoutTap() async {
     try {
       if (Get.isRegistered<ChatSocketService>()) {
@@ -395,6 +401,9 @@ class NavbarAndAppbarWrapperController extends GetxController
     } catch (_) {}
 
     await _authService.logout();
+    if (Get.isRegistered<AppDrawerController>()) {
+      Get.find<AppDrawerController>().clear();
+    }
     Get.offAllNamed(AppRoutes.login);
   }
 

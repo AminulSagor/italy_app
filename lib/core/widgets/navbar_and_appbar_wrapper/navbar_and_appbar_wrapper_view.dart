@@ -40,6 +40,7 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
           onMessageTap: controller.openMessages,
           onProfileTap: () => scaffoldKey.currentState?.openDrawer(),
         ),
+        onDrawerChanged: controller.onDrawerChanged,
         drawer: AppDrawer(
           onLanguageTap: () => controller.onLanguageTap(context),
           onShopTap: controller.onShopTap,

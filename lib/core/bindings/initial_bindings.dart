@@ -20,6 +20,8 @@ import '../../features/messages/sub-feature/call/service/incoming_call_coordinat
 import '../../features/notifications/services/notifications_mock_service.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
 import '../services/api_client.dart';
+import '../services/current_user_summary_service.dart';
+import '../widgets/app_drawer_controller.dart';
 import '../services/token_service.dart';
 import '../../features/practice_hub/controllers/job_sentences_controller.dart';
 import '../../features/practice_hub/controllers/important_verbs_controller.dart';
@@ -31,6 +33,16 @@ import '../../features/practice_hub/services/practice_hub_api_service.dart';
 class InitialBindings extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut<CurrentUserSummaryService>(
+      () => CurrentUserSummaryService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
+    Get.lazyPut<AppDrawerController>(
+      () => AppDrawerController(
+        currentUserSummaryService: Get.find<CurrentUserSummaryService>(),
+      ),
+      fenix: true,
+    );
     Get.lazyPut<UserSettingsService>(
       () => UserSettingsService(apiClient: Get.find<ApiClient>()),
       fenix: true,
