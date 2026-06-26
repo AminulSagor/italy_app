@@ -21,10 +21,16 @@ class FinalExamOverviewView extends GetView<FinalExamController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.coursesDetailBg,
-      bottomNavigationBar: FinalExamBottomButton(
-        label: 'Start The Exam',
-        onTap: controller.startExam,
-      ),
+      bottomNavigationBar: Obx(() {
+        final FinalExamOverviewModel? overview = controller.overview.value;
+        return FinalExamBottomButton(
+          label: overview?.canStart == true
+              ? 'Start The Exam'
+              : 'Final Exam Locked',
+          onTap: controller.startExam,
+          isLoading: controller.isSubmitting.value,
+        );
+      }),
       body: SafeArea(
         bottom: false,
         child: Obx(() {

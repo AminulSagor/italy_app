@@ -17,6 +17,11 @@ class QuizQuestionModel {
   final String title;
   final String subtitle;
   final List<String> options;
+  final List<String> optionIds;
+  final List<String> matchingLeftPairIds;
+  final List<String> matchingLeftTexts;
+  final List<String> matchingRightTexts;
+  final List<String> matchingRightPairIds;
   final List<String> selectedWords;
   final List<String> disabledWords;
   final List<String> correctWords;
@@ -26,6 +31,10 @@ class QuizQuestionModel {
   final String correctMeaning;
   final String? prompt;
   final String? objectLabel;
+  final String mediaFileId;
+  final String mediaUrl;
+  final String mediaMimeType;
+  final String generatedAudioText;
 
   const QuizQuestionModel({
     required this.id,
@@ -34,6 +43,11 @@ class QuizQuestionModel {
     required this.title,
     required this.subtitle,
     required this.options,
+    this.optionIds = const <String>[],
+    this.matchingLeftPairIds = const <String>[],
+    this.matchingLeftTexts = const <String>[],
+    this.matchingRightTexts = const <String>[],
+    this.matchingRightPairIds = const <String>[],
     required this.selectedWords,
     required this.disabledWords,
     required this.correctWords,
@@ -43,7 +57,25 @@ class QuizQuestionModel {
     required this.correctMeaning,
     this.prompt,
     this.objectLabel,
+    this.mediaFileId = '',
+    this.mediaUrl = '',
+    this.mediaMimeType = '',
+    this.generatedAudioText = '',
   });
+
+  bool get hasAudioMedia {
+    if (mediaUrl.isEmpty) return false;
+    return mediaMimeType.toLowerCase().startsWith('audio/') ||
+        type == QuizQuestionType.listening ||
+        type == QuizQuestionType.listeningAssembly;
+  }
+
+  bool get hasImageMedia {
+    if (mediaUrl.isEmpty) return false;
+    return mediaMimeType.toLowerCase().startsWith('image/') ||
+        type == QuizQuestionType.writingWordTranslation ||
+        type == QuizQuestionType.identifyImage;
+  }
 
   factory QuizQuestionModel.fromJson(Map<String, dynamic> json) {
     return QuizQuestionModel(
@@ -58,6 +90,25 @@ class QuizQuestionModel {
       options: ((json['options'] as List<dynamic>?) ?? <dynamic>[])
           .map((dynamic item) => item as String)
           .toList(),
+      optionIds: ((json['optionIds'] as List<dynamic>?) ?? <dynamic>[])
+          .map((dynamic item) => item as String)
+          .toList(),
+      matchingLeftPairIds:
+          ((json['matchingLeftPairIds'] as List<dynamic>?) ?? <dynamic>[])
+              .map((dynamic item) => item as String)
+              .toList(),
+      matchingLeftTexts:
+          ((json['matchingLeftTexts'] as List<dynamic>?) ?? <dynamic>[])
+              .map((dynamic item) => item as String)
+              .toList(),
+      matchingRightTexts:
+          ((json['matchingRightTexts'] as List<dynamic>?) ?? <dynamic>[])
+              .map((dynamic item) => item as String)
+              .toList(),
+      matchingRightPairIds:
+          ((json['matchingRightPairIds'] as List<dynamic>?) ?? <dynamic>[])
+              .map((dynamic item) => item as String)
+              .toList(),
       selectedWords: ((json['selectedWords'] as List<dynamic>?) ?? <dynamic>[])
           .map((dynamic item) => item as String)
           .toList(),
@@ -73,6 +124,10 @@ class QuizQuestionModel {
       correctMeaning: json['correctMeaning'] as String? ?? '',
       prompt: json['prompt'] as String?,
       objectLabel: json['objectLabel'] as String?,
+      mediaFileId: json['mediaFileId'] as String? ?? '',
+      mediaUrl: json['mediaUrl'] as String? ?? '',
+      mediaMimeType: json['mediaMimeType'] as String? ?? '',
+      generatedAudioText: json['generatedAudioText'] as String? ?? '',
     );
   }
 
@@ -84,6 +139,11 @@ class QuizQuestionModel {
       'title': title,
       'subtitle': subtitle,
       'options': options,
+      'optionIds': optionIds,
+      'matchingLeftPairIds': matchingLeftPairIds,
+      'matchingLeftTexts': matchingLeftTexts,
+      'matchingRightTexts': matchingRightTexts,
+      'matchingRightPairIds': matchingRightPairIds,
       'selectedWords': selectedWords,
       'disabledWords': disabledWords,
       'correctWords': correctWords,
@@ -93,6 +153,10 @@ class QuizQuestionModel {
       'correctMeaning': correctMeaning,
       'prompt': prompt,
       'objectLabel': objectLabel,
+      'mediaFileId': mediaFileId,
+      'mediaUrl': mediaUrl,
+      'mediaMimeType': mediaMimeType,
+      'generatedAudioText': generatedAudioText,
     };
   }
 }
@@ -234,4 +298,43 @@ class QuizLessonCompleteModel {
       'boostRemaining': boostRemaining,
     };
   }
+}
+
+typedef QuizExternalAnswerHandler = Future<QuizExternalAnswerResult> Function(
+  QuizQuestionModel question,
+  QuizAnswerInput input,
+);
+
+class QuizAnswerInput {
+  final int selectedOptionIndex;
+  final int selectedLeftPairIndex;
+  final int selectedRightPairIndex;
+  final List<String> sentenceSelectedWords;
+  final List<String> listeningSelectedWords;
+  final List<String> matchingRightOrder;
+  final List<String> matchingRightPairIdOrder;
+  final String writtenAnswer;
+
+  const QuizAnswerInput({
+    required this.selectedOptionIndex,
+    required this.selectedLeftPairIndex,
+    required this.selectedRightPairIndex,
+    required this.sentenceSelectedWords,
+    required this.listeningSelectedWords,
+    required this.matchingRightOrder,
+    required this.matchingRightPairIdOrder,
+    required this.writtenAnswer,
+  });
+}
+
+class QuizExternalAnswerResult {
+  final bool isCorrect;
+  final String correctAnswer;
+  final String meaning;
+
+  const QuizExternalAnswerResult({
+    required this.isCorrect,
+    this.correctAnswer = '',
+    this.meaning = '',
+  });
 }

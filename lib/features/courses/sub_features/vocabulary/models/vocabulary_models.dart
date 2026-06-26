@@ -5,6 +5,7 @@ class VocabularyCardModel {
   final String meaning;
   final String example;
   final bool hasAudio;
+  final String? audioFileId;
 
   const VocabularyCardModel({
     required this.id,
@@ -13,6 +14,7 @@ class VocabularyCardModel {
     required this.meaning,
     required this.example,
     required this.hasAudio,
+    this.audioFileId,
   });
 
   factory VocabularyCardModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class VocabularyCardModel {
       meaning: json['meaning'] as String,
       example: json['example'] as String,
       hasAudio: json['hasAudio'] as bool? ?? false,
+      audioFileId: json['audioFileId'] as String?,
     );
   }
 
@@ -34,6 +37,7 @@ class VocabularyCardModel {
       'meaning': meaning,
       'example': example,
       'hasAudio': hasAudio,
+      'audioFileId': audioFileId,
     };
   }
 
@@ -44,6 +48,7 @@ class VocabularyCardModel {
     String? meaning,
     String? example,
     bool? hasAudio,
+    String? audioFileId,
   }) {
     return VocabularyCardModel(
       id: id ?? this.id,
@@ -52,12 +57,14 @@ class VocabularyCardModel {
       meaning: meaning ?? this.meaning,
       example: example ?? this.example,
       hasAudio: hasAudio ?? this.hasAudio,
+      audioFileId: audioFileId ?? this.audioFileId,
     );
   }
 }
 
 class VocabularySessionModel {
   final String title;
+  final String? sessionId;
   final int currentCardIndex;
   final int streakDays;
   final int level;
@@ -65,6 +72,7 @@ class VocabularySessionModel {
 
   const VocabularySessionModel({
     required this.title,
+    this.sessionId,
     required this.currentCardIndex,
     required this.streakDays,
     required this.level,
@@ -74,6 +82,7 @@ class VocabularySessionModel {
   factory VocabularySessionModel.fromJson(Map<String, dynamic> json) {
     return VocabularySessionModel(
       title: json['title'] as String,
+      sessionId: json['sessionId'] as String?,
       currentCardIndex: json['currentCardIndex'] as int,
       streakDays: json['streakDays'] as int,
       level: json['level'] as int,
@@ -90,6 +99,7 @@ class VocabularySessionModel {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'title': title,
+      'sessionId': sessionId,
       'currentCardIndex': currentCardIndex,
       'streakDays': streakDays,
       'level': level,

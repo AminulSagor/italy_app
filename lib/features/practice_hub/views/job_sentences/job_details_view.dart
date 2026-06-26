@@ -4,9 +4,12 @@ import 'package:get/get.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
-import '../../controllers/practice_hub_controller.dart';
+import '../../controllers/job_sentences_controller.dart';
+import '../../models/job_track_models.dart';
+import '_widgets/job_intro_video_card.dart';
+import 'job_phrase_details_view.dart';
 
-class JobDetailsView extends GetView<PracticeHubController> {
+class JobDetailsView extends GetView<JobSentencesController> {
   const JobDetailsView({super.key});
 
   @override
@@ -15,59 +18,123 @@ class JobDetailsView extends GetView<PracticeHubController> {
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 48.h),
-          child: Obx(() {
-            final Map<String, dynamic> job = controller.currentJobTrack;
-            final List<Map<String, dynamic>> categories =
-                controller.currentJobCategories;
-
-            return Column(
-              children: <Widget>[
-                _JobDetailsHeader(title: job['title'] as String),
-                SizedBox(height: 21.h),
-                Transform.scale(
-                  scale: 1.11,
-                  child: Image.asset(
-                    'assets/heroes/job_details_video.png',
-                    width: double.infinity,
+        child: Obx(() {
+          final JobCareerTrackDetailsModel? details =
+              controller.trackDetails.value;
+          return RefreshIndicator(
+            color: AppColors.primaryGreen,
+            onRefresh: () => controller.loadCareerTrackDetails(showError: false),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 48.h),
+              child: Column(
+                children: <Widget>[
+                  _JobDetailsHeader(
+                    title: details?.title ??
+                        controller.selectedTrack.value?.title ??
+                        'Career Track',
                   ),
-                ),
-
-                //_JobIntroVideoCard(job: job),
-                //SizedBox(height: 32.h),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: categories.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 17.h,
-                    crossAxisSpacing: 17.w,
-                    childAspectRatio: 1.08,
-                  ),
-                  itemBuilder: (BuildContext context, int index) {
-                    return _JobCategoryCard(item: categories[index]);
-                  },
-                ),
-
-                SizedBox(height: 34.h),
-
-                _TheoryBookCard(job: job),
-              ],
-            );
-          }),
-        ),
+                  SizedBox(height: 21.h),
+                  if (controller.isTrackDetailsLoading.value && details == null)
+                    const _DetailsLoadingState()
+                  else if (controller.trackDetailsError.value.isNotEmpty &&
+                      details == null)
+                    _DetailsMessageState(
+                      message: controller.trackDetailsError.value,
+                      onRetry: () => controller.loadCareerTrackDetails(),
+                    )
+                  else if (details != null)
+                    _CareerTrackContent(details: details)
+                  else
+                    const _DetailsMessageState(
+                      message: 'Career track details are unavailable.',
+                    ),
+                ],
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
 }
 
-class _JobDetailsHeader extends GetView<PracticeHubController> {
-  final String title;
+class _CareerTrackContent extends GetView<JobSentencesController> {
+  const _CareerTrackContent({required this.details});
 
+  final JobCareerTrackDetailsModel details;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        if (details.description.isNotEmpty) ...<Widget>[
+          Text(
+            details.description,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: AppFont.font14.sp,
+              height: 1.5,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF767B7F),
+            ),
+          ),
+          SizedBox(height: 20.h),
+        ],
+        if (details.introVideo?.isAvailable ?? false) ...<Widget>[
+          JobIntroVideoCard(
+            videoUrl: details.introVideo!.url,
+            initialProgressPercent: details.trackProgress.videoWatchPercent,
+            onProgress: (int percent, int seconds) {
+              controller.recordVideoProgress(
+                watchedPercent: percent,
+                timeSpentSeconds: seconds,
+              );
+            },
+          ),
+          SizedBox(height: 28.h),
+        ],
+        _TrackProgressCard(progress: details.progress),
+        SizedBox(height: 28.h),
+        if (details.modules.isEmpty)
+          const _DetailsMessageState(
+            message: 'No sentence modules are available for this track.',
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: details.modules.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 17.h,
+              crossAxisSpacing: 17.w,
+              childAspectRatio: 1.02,
+            ),
+            itemBuilder: (BuildContext context, int index) {
+              return _JobModuleCard(
+                item: details.modules[index],
+                color: _parseCardColor(
+                  details.cardColor,
+                  AppColors.primaryGreen,
+                ),
+                icon: _moduleIcon(index),
+              );
+            },
+          ),
+        SizedBox(height: 34.h),
+        _TheoryBookCard(details: details),
+      ],
+    );
+  }
+}
+
+class _JobDetailsHeader extends GetView<JobSentencesController> {
   const _JobDetailsHeader({required this.title});
+
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +143,7 @@ class _JobDetailsHeader extends GetView<PracticeHubController> {
       child: Row(
         children: <Widget>[
           GestureDetector(
-            onTap: controller.onJobDetailsBackTap,
+            onTap: controller.onBackTap,
             child: Container(
               width: 48.r,
               height: 48.r,
@@ -101,10 +168,12 @@ class _JobDetailsHeader extends GetView<PracticeHubController> {
           Expanded(
             child: Text(
               title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font18.sp,
-                height: 1,
+                height: 1.1,
                 fontWeight: FontWeight.w900,
                 color: AppColors.primaryGreen,
               ),
@@ -117,21 +186,98 @@ class _JobDetailsHeader extends GetView<PracticeHubController> {
   }
 }
 
-class _JobCategoryCard extends GetView<PracticeHubController> {
-  final Map<String, dynamic> item;
+class _TrackProgressCard extends StatelessWidget {
+  const _TrackProgressCard({required this.progress});
 
-  const _JobCategoryCard({required this.item});
+  final JobLearningSummaryModel progress;
 
   @override
   Widget build(BuildContext context) {
-    final bool showIcon = item['showIcon'] as bool? ?? true;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(22.w, 18.h, 22.w, 18.h),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(28.r),
+      ),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 50.r,
+            height: 50.r,
+            decoration: const BoxDecoration(
+              color: Color(0xFFE5FFD7),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.trending_up_rounded,
+              size: 26.r,
+              color: AppColors.primaryGreen,
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  '${progress.learnedSentences} of ${progress.totalSentences} sentences learned',
+                  style: TextStyle(
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF303539),
+                  ),
+                ),
+                SizedBox(height: 9.h),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999.r),
+                  child: LinearProgressIndicator(
+                    value: progress.completionPercent / 100,
+                    minHeight: 6.h,
+                    backgroundColor: const Color(0xFFE4E7E6),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppColors.primaryGreen,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 14.w),
+          Text(
+            '${progress.completionPercent}%',
+            style: TextStyle(
+              fontSize: AppFont.font16.sp,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primaryGreen,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
+class _JobModuleCard extends GetView<JobSentencesController> {
+  const _JobModuleCard({
+    required this.item,
+    required this.color,
+    required this.icon,
+  });
+
+  final JobModuleModel item;
+  final Color color;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => controller.openJobPhraseCategory(item),
+      onTap: () => controller.openModule(item),
       child: Container(
+        padding: EdgeInsets.all(18.r),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(42.r),
+          borderRadius: BorderRadius.circular(38.r),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.045),
@@ -143,41 +289,48 @@ class _JobCategoryCard extends GetView<PracticeHubController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            if (showIcon) ...<Widget>[
-              Container(
-                width: 56.r,
-                height: 56.r,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFEFE3),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  item['icon'] as IconData,
-                  size: 28.r,
-                  color: const Color(0xFF9B5C00),
-                ),
+            Container(
+              width: 54.r,
+              height: 54.r,
+              decoration: BoxDecoration(
+                color: Color.lerp(color, AppColors.white, 0.84),
+                shape: BoxShape.circle,
               ),
-              SizedBox(height: 22.h),
-            ],
+              child: Icon(icon, size: 27.r, color: color),
+            ),
+            SizedBox(height: 15.h),
             Text(
-              item['title'] as String,
+              item.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: AppFont.font15.sp,
-                height: 1.1,
+                fontSize: AppFont.font14.sp,
+                height: 1.15,
                 fontWeight: FontWeight.w900,
                 color: const Color(0xFF2D3236),
               ),
             ),
-            SizedBox(height: 5.h),
+            if (item.subtitleBn.isNotEmpty) ...<Widget>[
+              SizedBox(height: 5.h),
+              Text(
+                item.subtitleBn,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: AppFont.font11.sp,
+                  color: const Color(0xFF8A8E92),
+                ),
+              ),
+            ],
+            SizedBox(height: 9.h),
             Text(
-              item['bangla'] as String,
-              textAlign: TextAlign.center,
+              '${item.learnedSentenceCount}/${item.sentenceCount} learned',
               style: TextStyle(
-                fontSize: AppFont.font12.sp,
-                height: 1,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF8A8E92),
+                fontSize: AppFont.font11.sp,
+                fontWeight: FontWeight.w800,
+                color: color,
               ),
             ),
           ],
@@ -187,31 +340,30 @@ class _JobCategoryCard extends GetView<PracticeHubController> {
   }
 }
 
-class _TheoryBookCard extends GetView<PracticeHubController> {
-  final Map<String, dynamic> job;
+class _TheoryBookCard extends GetView<JobSentencesController> {
+  const _TheoryBookCard({required this.details});
 
-  const _TheoryBookCard({required this.job});
+  final JobCareerTrackDetailsModel details;
 
   @override
   Widget build(BuildContext context) {
-    final Color color = job['color'] as Color? ?? AppColors.primaryGreen;
-    final Color background =
-        job['theoryBackground'] as Color? ?? const Color(0xFFEAF8EA);
+    final Color color = _parseCardColor(
+      details.cardColor,
+      AppColors.primaryGreen,
+    );
+    final JobMediaFileModel? resource = details.theoryResource;
+    final bool isAvailable = resource?.isAvailable ?? false;
 
     return GestureDetector(
-      onTap: controller.openJobTheoryBook,
+      onTap: isAvailable ? controller.openTheoryBook : null,
       child: Container(
         width: double.infinity,
-        height: 139.h,
-        padding: EdgeInsets.fromLTRB(26.w, 25.h, 26.w, 25.h),
+        constraints: BoxConstraints(minHeight: 126.h),
+        padding: EdgeInsets.fromLTRB(24.w, 22.h, 24.w, 22.h),
         decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(42.r),
-          border: Border.all(
-            color: color.withValues(alpha: 0.15),
-            width: 2.w,
-            strokeAlign: BorderSide.strokeAlignInside,
-          ),
+          color: Color.lerp(color, AppColors.white, 0.88),
+          borderRadius: BorderRadius.circular(40.r),
+          border: Border.all(color: color.withValues(alpha: 0.15), width: 2.w),
         ),
         child: Row(
           children: <Widget>[
@@ -226,20 +378,41 @@ class _TheoryBookCard extends GetView<PracticeHubController> {
             ),
             SizedBox(width: 20.w),
             Expanded(
-              child: Text(
-                'Theory Book –\nRestaurant Basics\n12 pages of grammar & job\nrules',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  height: 1.35,
-                  fontWeight: FontWeight.w900,
-                  color: color,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Theory Book',
+                    style: TextStyle(
+                      fontSize: AppFont.font16.sp,
+                      fontWeight: FontWeight.w900,
+                      color: color,
+                    ),
+                  ),
+                  SizedBox(height: 5.h),
+                  Text(
+                    isAvailable
+                        ? (resource!.originalName.isEmpty
+                              ? 'Open supplementary material'
+                              : resource.originalName)
+                        : 'Theory resource not provided',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: AppFont.font12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: color.withValues(alpha: 0.72),
+                    ),
+                  ),
+                ],
               ),
             ),
             Icon(
-              Icons.chevron_right_rounded,
+              isAvailable
+                  ? Icons.chevron_right_rounded
+                  : Icons.remove_circle_outline_rounded,
               size: 28.r,
-              color: const Color(0xFFC1A670),
+              color: color.withValues(alpha: 0.65),
             ),
           ],
         ),
@@ -248,253 +421,82 @@ class _TheoryBookCard extends GetView<PracticeHubController> {
   }
 }
 
-class JobPhraseDetailsView extends GetView<PracticeHubController> {
-  const JobPhraseDetailsView({super.key});
+class _DetailsLoadingState extends StatelessWidget {
+  const _DetailsLoadingState();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.homeBackground,
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(30.w, 24.h, 18.w, 48.h),
-          child: Column(
-            children: <Widget>[
-              const _PhraseDetailsHeader(),
-              SizedBox(height: 25.h),
-              const _PhraseSearchField(),
-              SizedBox(height: 31.h),
-              Obx(
-                () => Column(
-                  children: controller.filteredJobPhrases
-                      .map(
-                        (Map<String, dynamic> phrase) => Padding(
-                          padding: EdgeInsets.only(bottom: 24.h),
-                          child: _PhraseCard(phrase: phrase),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 140.h),
+      child: const CircularProgressIndicator(color: AppColors.primaryGreen),
     );
   }
 }
 
-class _PhraseDetailsHeader extends GetView<PracticeHubController> {
-  const _PhraseDetailsHeader();
+class _DetailsMessageState extends StatelessWidget {
+  const _DetailsMessageState({required this.message, this.onRetry});
 
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final Map<String, dynamic> category = controller.currentJobPhraseCategory;
-
-      return Row(
-        children: <Widget>[
-          GestureDetector(
-            onTap: controller.onJobPhraseBackTap,
-            child: Icon(
-              Icons.arrow_back_rounded,
-              size: 25.r,
-              color: AppColors.primaryGreen,
-            ),
-          ),
-          SizedBox(width: 23.w),
-          Expanded(
-            child: Text(
-              category['title'] as String,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: AppFont.font18.sp,
-                height: 1,
-                fontWeight: FontWeight.w900,
-                color: AppColors.primaryGreen,
-              ),
-            ),
-          ),
-          Container(
-            height: 36.h,
-            padding: EdgeInsets.symmetric(horizontal: 17.w),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE5FFD7),
-              borderRadius: BorderRadius.circular(999.r),
-              border: Border.all(color: const Color(0xFFBDEDA6), width: 1.w),
-            ),
-            child: Center(
-              child: Text(
-                '${category['learned']} / ${category['total']} Phrases Learned',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.primaryGreen,
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    });
-  }
-}
-
-class _PhraseSearchField extends GetView<PracticeHubController> {
-  const _PhraseSearchField();
+  final String message;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 57.h,
-      padding: EdgeInsets.symmetric(horizontal: 19.w),
+      width: double.infinity,
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(999.r),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
-            blurRadius: 16.r,
-            offset: Offset(0, 7.h),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(30.r),
       ),
-      child: Row(
+      child: Column(
         children: <Widget>[
-          Icon(
-            Icons.search_rounded,
-            size: 24.r,
-            color: const Color(0xFFAFB2B5),
-          ),
-          SizedBox(width: 14.w),
-          Expanded(
-            child: TextField(
-              controller: controller.jobPhraseSearchController,
-              onChanged: controller.onJobPhraseSearchChanged,
-              cursorColor: AppColors.primaryGreen,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Search phrases...',
-                hintStyle: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFFC0C2C4),
-                ),
-              ),
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF2D3236),
-              ),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: AppFont.font14.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF6D7276),
             ),
           ),
+          if (onRetry != null) ...<Widget>[
+            SizedBox(height: 10.h),
+            TextButton(
+              onPressed: onRetry,
+              child: const Text('Retry'),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _PhraseCard extends GetView<PracticeHubController> {
-  final Map<String, dynamic> phrase;
+Color _parseCardColor(String value, Color fallback) {
+  String normalized = value.trim().replaceAll('#', '');
+  if (normalized.length == 6) normalized = 'FF$normalized';
+  final int? colorValue = int.tryParse(normalized, radix: 16);
+  return colorValue == null ? fallback : Color(colorValue);
+}
 
-  const _PhraseCard({required this.phrase});
+IconData _moduleIcon(int index) {
+  const List<IconData> icons = <IconData>[
+    Icons.record_voice_over_rounded,
+    Icons.groups_rounded,
+    Icons.receipt_long_rounded,
+    Icons.forum_rounded,
+    Icons.support_agent_rounded,
+    Icons.task_alt_rounded,
+  ];
+  return icons[index % icons.length];
+}
+
+class JobPhraseDetailsView extends StatelessWidget {
+  const JobPhraseDetailsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final String id = phrase['id'] as String;
-      final bool isPlaying = controller.currentPlayingJobPhraseId.value == id;
-
-      return GestureDetector(
-        onTap: () => controller.playJobPhrase(id),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          width: double.infinity,
-          constraints: BoxConstraints(minHeight: isPlaying ? 265.h : 145.h),
-          padding: EdgeInsets.fromLTRB(32.w, 31.h, 32.w, 28.h),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(43.r),
-            border: Border.all(
-              color: isPlaying ? const Color(0xFF70FF35) : AppColors.white,
-              width: 2.w,
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.035),
-                blurRadius: 18.r,
-                offset: Offset(0, 9.h),
-              ),
-            ],
-          ),
-          child: Column(
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      phrase['italian'] as String,
-                      style: TextStyle(
-                        fontSize: 25.sp,
-                        height: 1.2,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                        color: AppColors.primaryGreen,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 20.w),
-                  Container(
-                    width: 56.r,
-                    height: 56.r,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFCFFFAD),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      isPlaying ? Icons.pause_rounded : Icons.volume_up_rounded,
-                      size: 29.r,
-                      color: AppColors.primaryGreen,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 14.h),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  phrase['bangla'] as String,
-                  style: TextStyle(
-                    fontSize: 17.sp,
-                    height: 1.35,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF777C80),
-                  ),
-                ),
-              ),
-              if (isPlaying) ...<Widget>[
-                SizedBox(height: 58.h),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999.r),
-                  child: LinearProgressIndicator(
-                    value: controller.currentJobPhraseAudioProgress.value,
-                    minHeight: 6.h,
-                    backgroundColor: const Color(0xFFE3E5E5),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppColors.primaryGreen,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      );
-    });
+    return const JobPhraseDetailsScreen();
   }
 }
+

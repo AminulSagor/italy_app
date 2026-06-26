@@ -9,6 +9,7 @@ import 'quiz_common_widgets.dart';
 
 part 'quiz_panel_parts.dart';
 part 'quiz_panel_more_parts.dart';
+part 'quiz_panel_shared_parts.dart';
 
 class QuizQuestionPanel extends StatelessWidget {
   final QuizQuestionModel question;
@@ -17,16 +18,15 @@ class QuizQuestionPanel extends StatelessWidget {
   final bool isAnswerCorrect;
   final List<String> sentenceSelectedWords;
   final List<String> listeningSelectedWords;
-  final int selectedLeftPairIndex;
-  final int selectedRightPairIndex;
+  final List<String> matchingRightOrder;
+  final List<String> matchingRightKeys;
   final TextEditingController writingAnswerController;
   final ValueChanged<int> onOptionTap;
   final ValueChanged<String> onSentenceWordTap;
   final ValueChanged<String> onSentenceSelectedWordTap;
   final ValueChanged<String> onListeningWordTap;
   final ValueChanged<String> onListeningSelectedWordTap;
-  final ValueChanged<int> onLeftPairTap;
-  final ValueChanged<int> onRightPairTap;
+  final void Function(int oldIndex, int newIndex) onMatchingRightReorder;
 
   const QuizQuestionPanel({
     super.key,
@@ -36,16 +36,15 @@ class QuizQuestionPanel extends StatelessWidget {
     required this.isAnswerCorrect,
     required this.sentenceSelectedWords,
     required this.listeningSelectedWords,
-    required this.selectedLeftPairIndex,
-    required this.selectedRightPairIndex,
+    required this.matchingRightOrder,
+    required this.matchingRightKeys,
     required this.writingAnswerController,
     required this.onOptionTap,
     required this.onSentenceWordTap,
     required this.onSentenceSelectedWordTap,
     required this.onListeningWordTap,
     required this.onListeningSelectedWordTap,
-    required this.onLeftPairTap,
-    required this.onRightPairTap,
+    required this.onMatchingRightReorder,
   });
 
   @override
@@ -100,11 +99,11 @@ class QuizQuestionPanel extends StatelessWidget {
       case QuizQuestionType.matchingPairs:
         return _MatchingPairsPanel(
           question: question,
-          selectedLeftIndex: selectedLeftPairIndex,
-          selectedRightIndex: selectedRightPairIndex,
+          rightOptions: matchingRightOrder,
+          rightKeys: matchingRightKeys,
+          isLocked: hasCheckedAnswer,
           showWrongResult: showWrongResult,
-          onLeftTap: onLeftPairTap,
-          onRightTap: onRightPairTap,
+          onReorder: onMatchingRightReorder,
         );
       case QuizQuestionType.writingWordTranslation:
         return _WritingWordPanel(

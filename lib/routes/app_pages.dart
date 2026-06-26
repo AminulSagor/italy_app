@@ -18,13 +18,13 @@ import '../features/auth/sub_features/login/views/login_view.dart';
 import '../features/courses/controllers/course_detail_controller.dart';
 import '../features/courses/controllers/course_certificate_controller.dart';
 import '../features/courses/controllers/courses_controller.dart';
-import '../features/courses/services/courses_mock_service.dart';
+import '../features/courses/services/courses_api_service.dart';
 import '../features/courses/services/course_certificate_mock_service.dart';
 import '../features/courses/sub_features/chapter_detail/controllers/chapter_detail_controller.dart';
-import '../features/courses/sub_features/chapter_detail/services/chapter_detail_mock_service.dart';
+import '../features/courses/sub_features/chapter_detail/services/chapter_detail_api_service.dart';
 import '../features/courses/sub_features/chapter_detail/views/chapter_detail_view.dart';
 import '../features/courses/sub_features/final_exam/controllers/final_exam_controller.dart';
-import '../features/courses/sub_features/final_exam/services/final_exam_mock_service.dart';
+import '../features/courses/sub_features/final_exam/services/final_exam_api_service.dart';
 import '../features/courses/sub_features/final_exam/views/final_exam_listening_view.dart';
 import '../features/courses/sub_features/final_exam/views/final_exam_overview_view.dart';
 import '../features/courses/sub_features/final_exam/views/final_exam_result_view.dart';
@@ -37,11 +37,13 @@ import '../features/courses/sub_features/pro_checkout/views/pro_checkout_view.da
 import '../features/courses/sub_features/pro_checkout/views/pro_order_summary_view.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_purchase_success_view.dart';
 import '../features/courses/sub_features/quiz/controllers/quiz_controller.dart';
+import '../features/courses/sub_features/quiz/services/quiz_api_service.dart';
 import '../features/courses/sub_features/quiz/services/quiz_mock_service.dart';
 import '../features/courses/sub_features/quiz/views/quiz_completion_view.dart';
 import '../features/courses/sub_features/quiz/views/quiz_review_answers_view.dart';
 import '../features/courses/sub_features/quiz/views/quiz_view.dart';
 import '../features/courses/sub_features/vocabulary/controllers/vocabulary_controller.dart';
+import '../features/courses/sub_features/vocabulary/services/vocabulary_api_service.dart';
 import '../features/courses/sub_features/vocabulary/services/vocabulary_mock_service.dart';
 import '../features/courses/sub_features/vocabulary/views/vocabulary_view.dart';
 import '../features/courses/views/course_detail_view.dart';
@@ -116,6 +118,7 @@ import '../features/drawer_features/settings/sub_features/views/verify_contact_v
 import '../features/drawer_features/settings/sub_features/views/settings_success_view.dart';
 import '../features/drawer_features/settings/sub_features/views/delete_account_confirm_view.dart';
 import '../features/practice_hub/controllers/practice_hub_controller.dart';
+import '../features/practice_hub/services/practice_hub_api_service.dart';
 import '../features/practice_hub/views/important_verbs/verb_details.dart';
 import '../features/practice_hub/views/survival_italian/survival_italian_view.dart';
 import '../features/practice_hub/views/widgets/pdf_viewer.dart';
@@ -130,9 +133,12 @@ class AppPages {
 
   static T _arguments<T>() => Get.arguments as T;
 
-  static void _ensureCoursesMockService() {
-    if (!Get.isRegistered<CoursesMockService>()) {
-      Get.lazyPut<CoursesMockService>(() => CoursesMockService());
+  static void _ensureCoursesApiService() {
+    if (!Get.isRegistered<CoursesApiService>()) {
+      Get.lazyPut<CoursesApiService>(
+        () => CoursesApiService(apiClient: Get.find<ApiClient>()),
+        fenix: true,
+      );
     }
   }
 
@@ -237,11 +243,11 @@ class AppPages {
       name: AppRoutes.wrapper,
       page: () => const NavbarAndAppbarWrapper(),
       binding: BindingsBuilder(() {
-        _ensureCoursesMockService();
+        _ensureCoursesApiService();
         if (!Get.isRegistered<CoursesController>()) {
           Get.lazyPut<CoursesController>(
             () => CoursesController(
-              coursesMockService: Get.find<CoursesMockService>(),
+              coursesApiService: Get.find<CoursesApiService>(),
             ),
           );
         }
@@ -290,12 +296,12 @@ class AppPages {
       binding: BindingsBuilder(() {
         final CourseDetailRouteArguments args =
             _arguments<CourseDetailRouteArguments>();
-        _ensureCoursesMockService();
+        _ensureCoursesApiService();
         Get.lazyPut<CourseDetailController>(
           () => CourseDetailController(
             controllerTag: args.controllerTag,
             course: args.course,
-            coursesMockService: Get.find<CoursesMockService>(),
+            coursesApiService: Get.find<CoursesApiService>(),
           ),
           tag: args.controllerTag,
         );
@@ -372,14 +378,14 @@ class AppPages {
       binding: BindingsBuilder(() {
         final ChapterDetailRouteArguments args =
             _arguments<ChapterDetailRouteArguments>();
-        Get.lazyPut<ChapterDetailMockService>(
-          () => ChapterDetailMockService(),
+        Get.lazyPut<ChapterDetailApiService>(
+          () => ChapterDetailApiService(apiClient: Get.find<ApiClient>()),
           tag: args.controllerTag,
         );
         Get.lazyPut<ChapterDetailController>(
           () => ChapterDetailController(
             chapter: args.chapter,
-            chapterDetailMockService: Get.find<ChapterDetailMockService>(
+            chapterDetailApiService: Get.find<ChapterDetailApiService>(
               tag: args.controllerTag,
             ),
           ),
@@ -396,15 +402,27 @@ class AppPages {
         return VocabularyView(controllerTag: args.controllerTag);
       },
       binding: BindingsBuilder(() {
-        final ControllerTagRouteArguments args =
-            _arguments<ControllerTagRouteArguments>();
+        final Object routeArgs = Get.arguments as Object;
+        final VocabularyRouteArguments args = routeArgs is VocabularyRouteArguments
+            ? routeArgs
+            : VocabularyRouteArguments(
+                controllerTag: (routeArgs as ControllerTagRouteArguments).controllerTag,
+              );
         Get.lazyPut<VocabularyMockService>(
           () => VocabularyMockService(),
           tag: args.controllerTag,
         );
+        Get.lazyPut<VocabularyApiService>(
+          () => VocabularyApiService(apiClient: Get.find<ApiClient>()),
+          tag: args.controllerTag,
+        );
         Get.lazyPut<VocabularyController>(
           () => VocabularyController(
+            lessonId: args.lessonId,
             vocabularyMockService: Get.find<VocabularyMockService>(
+              tag: args.controllerTag,
+            ),
+            vocabularyApiService: Get.find<VocabularyApiService>(
               tag: args.controllerTag,
             ),
           ),
@@ -442,11 +460,21 @@ class AppPages {
           () => QuizMockService(),
           tag: args.controllerTag,
         );
+        Get.lazyPut<QuizApiService>(
+          () => QuizApiService(apiClient: Get.find<ApiClient>()),
+          tag: args.controllerTag,
+        );
         Get.lazyPut<QuizController>(
           () => QuizController(
             quizMockService: Get.find<QuizMockService>(tag: args.controllerTag),
+            quizApiService: Get.find<QuizApiService>(tag: args.controllerTag),
+            lessonId: args.lessonId,
+            courseId: args.courseId,
+            chapterTitle: args.chapterTitle,
             isExamMode: args.isExamMode,
             questionCount: args.questionCount,
+            initialQuestions: args.initialQuestions,
+            externalAnswerHandler: args.externalAnswerHandler,
           ),
           tag: args.controllerTag,
         );
@@ -570,14 +598,15 @@ class AppPages {
       binding: BindingsBuilder(() {
         final FinalExamRouteArguments args =
             _arguments<FinalExamRouteArguments>();
-        Get.lazyPut<FinalExamMockService>(
-          () => FinalExamMockService(),
+        Get.lazyPut<FinalExamApiService>(
+          () => FinalExamApiService(apiClient: Get.find<ApiClient>()),
           tag: args.controllerTag,
         );
         Get.lazyPut<FinalExamController>(
           () => FinalExamController(
             controllerTag: args.controllerTag,
-            finalExamMockService: Get.find<FinalExamMockService>(
+            courseId: args.courseId,
+            finalExamApiService: Get.find<FinalExamApiService>(
               tag: args.controllerTag,
             ),
           ),
@@ -854,7 +883,10 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<PracticeHubController>()) {
           Get.lazyPut<PracticeHubController>(
-            () => PracticeHubController(),
+            () => PracticeHubController(
+              coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
+            ),
             fenix: true,
           );
         }
@@ -877,10 +909,16 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<PracticeHubController>()) {
           Get.lazyPut<PracticeHubController>(
-            () => PracticeHubController(),
+            () => PracticeHubController(
+              coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
+            ),
             fenix: true,
           );
         }
+        Get.find<PracticeHubController>().loadSurvivalItalian(
+          showError: false,
+        );
       }),
     ),
 
@@ -890,7 +928,10 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<PracticeHubController>()) {
           Get.lazyPut<PracticeHubController>(
-            () => PracticeHubController(),
+            () => PracticeHubController(
+              coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
+            ),
             fenix: true,
           );
         }
@@ -903,7 +944,10 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<PracticeHubController>()) {
           Get.lazyPut<PracticeHubController>(
-            () => PracticeHubController(),
+            () => PracticeHubController(
+              coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
+            ),
             fenix: true,
           );
         }
@@ -916,7 +960,10 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<PracticeHubController>()) {
           Get.lazyPut<PracticeHubController>(
-            () => PracticeHubController(),
+            () => PracticeHubController(
+              coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
+            ),
             fenix: true,
           );
         }
@@ -929,7 +976,10 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<PracticeHubController>()) {
           Get.lazyPut<PracticeHubController>(
-            () => PracticeHubController(),
+            () => PracticeHubController(
+              coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
+            ),
             fenix: true,
           );
         }
@@ -942,10 +992,16 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<PracticeHubController>()) {
           Get.lazyPut<PracticeHubController>(
-            () => PracticeHubController(),
+            () => PracticeHubController(
+              coursesApiService: Get.find<CoursesApiService>(),
+              practiceHubApiService: Get.find<PracticeHubApiService>(),
+            ),
             fenix: true,
           );
         }
+        Get.find<PracticeHubController>().loadDailyChallenges(
+          showError: false,
+        );
       }),
     ),
     GetPage(

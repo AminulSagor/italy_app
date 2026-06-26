@@ -22,6 +22,7 @@ class AuthService {
   static const String _loginEndpoint = '/auth/login';
   static const String _verifyOtpEndpoint = '/auth/verify-otp';
   static const String _resendOtpEndpoint = '/auth/resend-otp';
+  static const String _currentUserEndpoint = '/users/me';
 
   Future<SignupResultModel> signup(SignupPayloadModel payload) async {
     final Response<dynamic> response = await _apiClient.dio.post(
@@ -79,6 +80,26 @@ class AuthService {
     );
 
     return OtpResponseModel.fromJson(_responseMap(response));
+  }
+
+
+  Future<bool> validateStoredSession() async {
+    if (!await _tokenService.hasLocallyValidAccessToken()) {
+      return false;
+    }
+
+    try {
+      await _apiClient.dio.get(_currentUserEndpoint);
+      await _storageService.setLoggedInData();
+      return true;
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 401) {
+        return false;
+      }
+
+      // Keep a locally valid session during temporary network/server failures.
+      return error.response == null || (error.response?.statusCode ?? 500) >= 500;
+    }
   }
 
   Future<void> logout() async {

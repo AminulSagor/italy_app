@@ -25,7 +25,7 @@ class AppBootstrapController extends GetxController {
     }
 
     await Get.putAsync<StorageService>(
-          () => StorageService().init(),
+      () => StorageService().init(),
       permanent: true,
     );
 
@@ -35,7 +35,10 @@ class AppBootstrapController extends GetxController {
 
     if (!Get.isRegistered<ApiClient>()) {
       Get.put<ApiClient>(
-        ApiClient(tokenService: Get.find<TokenService>()),
+        ApiClient(
+          tokenService: Get.find<TokenService>(),
+          storageService: Get.find<StorageService>(),
+        ),
         permanent: true,
       );
     }
@@ -53,17 +56,14 @@ class AppBootstrapController extends GetxController {
 
     if (!Get.isRegistered<DevicePushTokenService>()) {
       final DevicePushTokenService devicePushTokenService =
-      DevicePushTokenService(
-        apiClient: Get.find<ApiClient>(),
-        storageService: Get.find<StorageService>(),
-      );
+          DevicePushTokenService(
+            apiClient: Get.find<ApiClient>(),
+            storageService: Get.find<StorageService>(),
+          );
 
       devicePushTokenService.listenForTokenRefresh();
 
-      Get.put<DevicePushTokenService>(
-        devicePushTokenService,
-        permanent: true,
-      );
+      Get.put<DevicePushTokenService>(devicePushTokenService, permanent: true);
     }
 
     // Ensure HomeMockService is available early to avoid Get.find errors.

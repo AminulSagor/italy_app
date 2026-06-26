@@ -2,6 +2,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../features/service_hub/sub_features/cv_builder/models/cv_builder_models.dart';
 import '../features/courses/models/course_models.dart';
+import '../features/courses/sub_features/quiz/models/quiz_models.dart';
 
 class CourseDetailRouteArguments {
   final CourseCardModel course;
@@ -29,17 +30,37 @@ class ControllerTagRouteArguments {
   const ControllerTagRouteArguments({required this.controllerTag});
 }
 
+class VocabularyRouteArguments extends ControllerTagRouteArguments {
+  final String? lessonId;
+
+  const VocabularyRouteArguments({
+    required super.controllerTag,
+    this.lessonId,
+  });
+}
+
 class QuizRouteArguments {
   final String controllerTag;
   final bool isExamMode;
   final int questionCount;
+  final String? lessonId;
+  final String? courseId;
+  final String? chapterTitle;
+  final List<QuizQuestionModel> initialQuestions;
+  final QuizExternalAnswerHandler? externalAnswerHandler;
 
   const QuizRouteArguments({
     required this.controllerTag,
     this.isExamMode = false,
     this.questionCount = 15,
+    this.lessonId,
+    this.courseId,
+    this.chapterTitle,
+    this.initialQuestions = const <QuizQuestionModel>[],
+    this.externalAnswerHandler,
   });
 }
+
 
 class FinalExamRouteArguments {
   final String controllerTag;
