@@ -11,125 +11,94 @@ import '../widgets/message_call_controls.dart';
 import '../widgets/message_call_participant_card.dart';
 import '../widgets/message_video_placeholder.dart';
 
-class MessageCallView
-    extends GetView<MessageCallController> {
-  const MessageCallView({
-    super.key,
-  });
+class MessageCallView extends GetView<MessageCallController> {
+  const MessageCallView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-          () {
-        final MessageCallType callType =
-            controller.callType;
+    return Obx(() {
+      final MessageCallType callType = controller.callType;
 
-        final bool showVideoStage =
-            callType.isVideo &&
-                controller.isActive.value;
+      final bool showVideoStage = callType.isVideo && controller.isActive.value;
 
-        return PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (
-              bool didPop,
-              Object? result,
-              ) async {
-            if (didPop) {
-              return;
-            }
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (bool didPop, Object? result) async {
+          if (didPop) {
+            return;
+          }
 
-            await controller.endCall();
-          },
-          child: Scaffold(
-            backgroundColor: showVideoStage
-                ? AppColors.black
-                : AppColors.homeBackground,
-            body: Stack(
-              children: <Widget>[
-                if (showVideoStage)
-                  Positioned.fill(
-                    child: _buildRemoteVideo(),
-                  ),
+          await controller.endCall();
+        },
+        child: Scaffold(
+          backgroundColor: showVideoStage
+              ? AppColors.black
+              : AppColors.homeBackground,
+          body: Stack(
+            children: <Widget>[
+              if (showVideoStage) Positioned.fill(child: _buildRemoteVideo()),
 
-                SafeArea(
-                  child: Column(
-                    children: <Widget>[
-                      _MessageCallTopBar(
-                        callType: callType,
-                        status:
-                        controller.durationLabel.value,
-                        useLightText: showVideoStage,
+              SafeArea(
+                child: Column(
+                  children: <Widget>[
+                    _MessageCallTopBar(
+                      callType: callType,
+                      status: controller.durationLabel.value,
+                      useLightText: showVideoStage,
+                    ),
+
+                    if (controller.isLoading.value)
+                      const LinearProgressIndicator(
+                        minHeight: 2,
+                        color: AppColors.primaryGreen,
                       ),
 
-                      if (controller.isLoading.value)
-                        const LinearProgressIndicator(
-                          minHeight: 2,
-                          color: AppColors.primaryGreen,
-                        ),
-
-                      Expanded(
-                        child: Center(
-                          child: _buildParticipantArea(
-                            showVideoStage:
-                            showVideoStage,
-                          ),
+                    Expanded(
+                      child: Center(
+                        child: _buildParticipantArea(
+                          showVideoStage: showVideoStage,
                         ),
                       ),
+                    ),
 
-                      MessageCallControls(
-                        callType: callType,
-                        isMuted:
-                        controller.isMuted.value,
-                        isSpeakerOn:
-                        controller.isSpeakerOn.value,
-                        isCameraOff:
-                        controller.isCameraOff.value,
-                        isEnding:
-                        controller.isEnding.value,
-                        onMuteTap:
-                        controller.toggleMute,
-                        onSpeakerTap:
-                        controller.toggleSpeaker,
-                        onCameraTap:
-                        controller.toggleCamera,
-                        onSwitchCameraTap:
-                        controller.switchCamera,
-                        onEndTap:
-                        controller.endCall,
-                      ),
-                    ],
-                  ),
+                    MessageCallControls(
+                      callType: callType,
+                      isMuted: controller.isMuted.value,
+                      isSpeakerOn: controller.isSpeakerOn.value,
+                      isCameraOff: controller.isCameraOff.value,
+                      isEnding: controller.isEnding.value,
+                      onMuteTap: controller.toggleMute,
+                      onSpeakerTap: controller.toggleSpeaker,
+                      onCameraTap: controller.toggleCamera,
+                      onSwitchCameraTap: controller.switchCamera,
+                      onEndTap: controller.endCall,
+                    ),
+                  ],
                 ),
+              ),
 
-                if (showVideoStage)
-                  _buildLocalVideoPreview(),
-              ],
-            ),
+              if (showVideoStage) _buildLocalVideoPreview(),
+            ],
           ),
-        );
-      },
-    );
+        ),
+      );
+    });
   }
 
   Widget _buildRemoteVideo() {
-    final RtcEngine? engine =
-        controller.agoraEngine;
+    final RtcEngine? engine = controller.agoraEngine;
 
-    final int? remoteUid =
-        controller.agora.remoteUid.value;
+    final int? remoteUid = controller.agora.remoteUid.value;
 
-    final String? channelName =
-        controller.agoraChannelName;
+    final String? channelName = controller.agoraChannelName;
 
     if (engine == null ||
         remoteUid == null ||
         channelName == null ||
         channelName.isEmpty) {
       return MessageVideoPlaceholder(
-        isCameraOff:
-        controller.isCameraOff.value,
-        isFrontCamera:
-        controller.isFrontCamera.value,
+        isCameraOff: controller.isCameraOff.value,
+        isFrontCamera: controller.isFrontCamera.value,
       );
     }
 
@@ -138,35 +107,26 @@ class MessageCallView
         rtcEngine: engine,
         canvas: VideoCanvas(
           uid: remoteUid,
-          renderMode:
-          RenderModeType.renderModeHidden,
+          renderMode: RenderModeType.renderModeHidden,
         ),
-        connection: RtcConnection(
-          channelId: channelName,
-        ),
+        connection: RtcConnection(channelId: channelName),
       ),
     );
   }
 
-  Widget _buildParticipantArea({
-    required bool showVideoStage,
-  }) {
+  Widget _buildParticipantArea({required bool showVideoStage}) {
     final bool hasRemoteVideo =
-        showVideoStage &&
-            controller.agora.remoteUid.value != null;
+        showVideoStage && controller.agora.remoteUid.value != null;
 
     if (hasRemoteVideo) {
       return const SizedBox.shrink();
     }
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 24.w,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: MessageCallParticipantCard(
         participant: controller.participant,
-        durationLabel:
-        controller.durationLabel.value,
+        durationLabel: controller.durationLabel.value,
 
         // Before answer, use the normal audio-call colors.
         isVideoCall: showVideoStage,
@@ -175,8 +135,7 @@ class MessageCallView
   }
 
   Widget _buildLocalVideoPreview() {
-    final RtcEngine? engine =
-        controller.agoraEngine;
+    final RtcEngine? engine = controller.agoraEngine;
 
     if (engine == null ||
         !controller.agora.isJoined.value ||
@@ -188,8 +147,7 @@ class MessageCallView
       top: 110.h,
       right: 18.w,
       child: ClipRRect(
-        borderRadius:
-        BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16.r),
         child: Container(
           width: 110.w,
           height: 155.h,
@@ -199,8 +157,7 @@ class MessageCallView
               rtcEngine: engine,
               canvas: const VideoCanvas(
                 uid: 0,
-                renderMode:
-                RenderModeType.renderModeHidden,
+                renderMode: RenderModeType.renderModeHidden,
               ),
             ),
           ),
@@ -210,8 +167,7 @@ class MessageCallView
   }
 }
 
-class _MessageCallTopBar
-    extends StatelessWidget {
+class _MessageCallTopBar extends StatelessWidget {
   const _MessageCallTopBar({
     required this.callType,
     required this.status,
@@ -229,45 +185,32 @@ class _MessageCallTopBar
         : AppColors.homePrimaryText;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        24.w,
-        18.h,
-        24.w,
-        8.h,
-      ),
+      padding: EdgeInsets.fromLTRB(24.w, 18.h, 24.w, 8.h),
       child: Row(
         children: <Widget>[
           Icon(
-            callType.isVideo
-                ? Icons.videocam_rounded
-                : Icons.call_rounded,
+            callType.isVideo ? Icons.videocam_rounded : Icons.call_rounded,
             size: 24.w,
             color: AppColors.primaryGreen,
           ),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
                   callType.title,
                   style: TextStyle(
-                    fontSize:
-                    AppFont.font18.sp,
-                    fontWeight:
-                    FontWeight.w800,
+                    fontSize: AppFont.font18.sp,
+                    fontWeight: FontWeight.w800,
                     color: textColor,
                   ),
                 ),
                 Text(
                   status,
                   style: TextStyle(
-                    fontSize:
-                    AppFont.font12.sp,
-                    color: textColor.withValues(
-                      alpha: 0.75,
-                    ),
+                    fontSize: AppFont.font12.sp,
+                    color: textColor.withValues(alpha: 0.75),
                   ),
                 ),
               ],

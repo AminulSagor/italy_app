@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/themes/app_colors.dart';
-import '../../../../../core/themes/app_font.dart';
+import '../../../../core/themes/app_font.dart';
 import '../../controllers/practice_hub_controller.dart';
+import '../../models/survival_italian_models.dart';
+import '_widgets/survival_situation_cards.dart';
 
 class SurvivalItalianView extends GetView<PracticeHubController> {
   const SurvivalItalianView({super.key});
@@ -17,64 +19,179 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
         children: <Widget>[
           SafeArea(
             bottom: false,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 150.h),
+            child: RefreshIndicator(
+              color: AppColors.primaryGreen,
+              onRefresh: () => controller.loadSurvivalItalian(showError: true),
               child: Obx(() {
-                final Map<String, dynamic> hero = controller.survivalHeroItem;
-                final List<Map<String, dynamic>> smallCards =
-                    controller.survivalSmallCards;
-                final Map<String, dynamic> wideCard =
-                    controller.survivalWideItem;
+                if (controller.isSurvivalLoading.value &&
+                    controller.survivalItalianItems.isEmpty) {
+                  return const _SurvivalLoadingView();
+                }
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const _SurvivalHeader(),
-                    SizedBox(height: 26.h),
+                if (controller.survivalItalianItems.isEmpty) {
+                  return _SurvivalEmptyView(
+                    message: controller.survivalError.value.isEmpty
+                        ? 'No Survival Italian situations are available.'
+                        : controller.survivalError.value,
+                    onRetry: () =>
+                        controller.loadSurvivalItalian(showError: true),
+                  );
+                }
 
-                    _HeroSituationCard(item: hero),
+                final SurvivalSituationModel? hero =
+                    controller.survivalHeroItem;
+                final List<SurvivalSituationModel> normalItems =
+                    controller.survivalNormalItems;
+                final List<SurvivalSituationModel> wideItems =
+                    controller.survivalWideItems;
 
-                    SizedBox(height: 32.h),
-
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: _SmallSituationCard(item: smallCards[0]),
-                        ),
-                        SizedBox(width: 24.w),
-                        Expanded(
-                          child: _SmallSituationCard(item: smallCards[1]),
-                        ),
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 150.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const _SurvivalHeader(),
+                      SizedBox(height: 26.h),
+                      if (hero != null) ...<Widget>[
+                        SurvivalHeroSituationCard(item: hero),
+                        SizedBox(height: 32.h),
                       ],
-                    ),
-
-                    SizedBox(height: 24.h),
-
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: _SmallSituationCard(item: smallCards[2]),
+                      if (normalItems.isNotEmpty)
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: normalItems.length,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 24.w,
+                                mainAxisSpacing: 24.h,
+                                childAspectRatio: 0.94,
+                              ),
+                          itemBuilder: (BuildContext context, int index) {
+                            return SurvivalSmallSituationCard(
+                              item: normalItems[index],
+                            );
+                          },
                         ),
-                        SizedBox(width: 24.w),
-                        Expanded(
-                          child: _SmallSituationCard(item: smallCards[3]),
+                      if (normalItems.isNotEmpty && wideItems.isNotEmpty)
+                        SizedBox(height: 25.h),
+                      ...wideItems.map(
+                        (SurvivalSituationModel item) => Padding(
+                          padding: EdgeInsets.only(bottom: 20.h),
+                          child: SurvivalWideSituationCard(item: item),
                         ),
-                      ],
-                    ),
-
-                    SizedBox(height: 25.h),
-
-                    _WideSituationCard(item: wideCard),
-                  ],
+                      ),
+                    ],
+                  ),
                 );
               }),
             ),
           ),
-
-          const _SurvivalProgressBar(),
+          Obx(
+            () => controller.survivalItalianItems.isEmpty
+                ? const SizedBox.shrink()
+                : const _SurvivalProgressBar(),
+          ),
+          Obx(() {
+            if (!controller.isOpeningSurvivalPdf.value) {
+              return const SizedBox.shrink();
+            }
+            return ColoredBox(
+              color: Colors.black.withValues(alpha: 0.22),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primaryGreen,
+                ),
+              ),
+            );
+          }),
         ],
       ),
+    );
+  }
+}
+
+class _SurvivalLoadingView extends StatelessWidget {
+  const _SurvivalLoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: <Widget>[
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 0),
+                child: const _SurvivalHeader(),
+              ),
+              const Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryGreen,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SurvivalEmptyView extends StatelessWidget {
+  const _SurvivalEmptyView({
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: <Widget>[
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 120.h),
+            child: Column(
+              children: <Widget>[
+                const _SurvivalHeader(),
+                const Spacer(),
+                Icon(
+                  Icons.menu_book_outlined,
+                  size: 58.r,
+                  color: AppColors.primaryGreen.withValues(alpha: 0.5),
+                ),
+                SizedBox(height: 18.h),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font15.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF6A6F73),
+                  ),
+                ),
+                SizedBox(height: 14.h),
+                TextButton(onPressed: onRetry, child: const Text('Retry')),
+                const Spacer(),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -148,253 +265,6 @@ class _SurvivalHeader extends GetView<PracticeHubController> {
   }
 }
 
-class _HeroSituationCard extends GetView<PracticeHubController> {
-  final Map<String, dynamic> item;
-
-  const _HeroSituationCard({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => controller.openSurvivalPdf(item),
-      child: Container(
-        width: double.infinity,
-        height: 296.h,
-        padding: EdgeInsets.fromLTRB(32.w, 32.h, 26.w, 31.h),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[Color(0xFFFF9F15), Color(0xFFFFB75C)],
-          ),
-          borderRadius: BorderRadius.circular(44.r),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: const Color(0xFFFFA629).withValues(alpha: 0.32),
-              blurRadius: 28.r,
-              offset: Offset(0, 18.h),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              right: -5.w,
-              bottom: -24.h,
-              child: Transform.rotate(
-                angle: -0.35,
-                child: Icon(
-                  Icons.flight_takeoff_rounded,
-                  size: 92.r,
-                  color: AppColors.white.withValues(alpha: 0.18),
-                ),
-              ),
-            ),
-
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  width: 80.r,
-                  height: 80.r,
-                  decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.22),
-                    borderRadius: BorderRadius.circular(17.r),
-                  ),
-                  child: Icon(
-                    item['icon'] as IconData,
-                    size: 38.r,
-                    color: AppColors.white,
-                  ),
-                ),
-
-                const Spacer(),
-
-                Text(
-                  item['title'] as String,
-                  style: TextStyle(
-                    fontSize: AppFont.font30.sp,
-                    height: 1,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1,
-                    color: AppColors.white,
-                  ),
-                ),
-
-                SizedBox(height: 11.h),
-
-                Text(
-                  item['subtitle'] as String,
-                  style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    height: 1,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.white,
-                  ),
-                ),
-
-                SizedBox(height: 26.h),
-
-                Container(
-                  height: 48.h,
-                  width: 142.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(999.r),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'Start Here',
-                        style: TextStyle(
-                          fontSize: AppFont.font15.sp,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFF8C4F05),
-                        ),
-                      ),
-                      SizedBox(width: 5.w),
-                      Icon(
-                        Icons.play_arrow_rounded,
-                        size: 16.r,
-                        color: const Color(0xFF8C4F05),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SmallSituationCard extends GetView<PracticeHubController> {
-  final Map<String, dynamic> item;
-
-  const _SmallSituationCard({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    final Color background = item['background'] as Color;
-    final Color iconBackground = item['iconBackground'] as Color;
-    final Color color = item['color'] as Color;
-
-    return GestureDetector(
-      onTap: () => controller.openSurvivalPdf(item),
-      child: Container(
-        height: 176.h,
-        padding: EdgeInsets.fromLTRB(24.w, 25.h, 18.w, 22.h),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(42.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              width: 48.r,
-              height: 48.r,
-              decoration: BoxDecoration(
-                color: iconBackground,
-                borderRadius: BorderRadius.circular(15.r),
-              ),
-              child: Icon(item['icon'] as IconData, size: 25.r, color: color),
-            ),
-            const Spacer(),
-            Text(
-              item['title'] as String,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: AppFont.font18.sp,
-                height: 1.12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.45,
-                color: color,
-              ),
-            ),
-            SizedBox(height: 7.h),
-            Text(
-              item['bangla'] as String,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: AppFont.font12.sp,
-                height: 1,
-                fontWeight: FontWeight.w800,
-                color: color.withValues(alpha: 0.72),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _WideSituationCard extends GetView<PracticeHubController> {
-  final Map<String, dynamic> item;
-
-  const _WideSituationCard({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    final Color background = item['background'] as Color;
-    final Color iconBackground = item['iconBackground'] as Color;
-    final Color color = item['color'] as Color;
-
-    return GestureDetector(
-      onTap: () => controller.openSurvivalPdf(item),
-      child: Container(
-        width: double.infinity,
-        height: 153.h,
-        padding: EdgeInsets.fromLTRB(24.w, 22.h, 24.w, 25.h),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(42.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              width: 48.r,
-              height: 48.r,
-              decoration: BoxDecoration(
-                color: iconBackground,
-                borderRadius: BorderRadius.circular(15.r),
-              ),
-              child: Icon(item['icon'] as IconData, size: 25.r, color: color),
-            ),
-            const Spacer(),
-            Text(
-              item['title'] as String,
-              style: TextStyle(
-                fontSize: AppFont.font18.sp,
-                height: 1,
-                fontWeight: FontWeight.w900,
-                color: color,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              item['bangla'] as String,
-              style: TextStyle(
-                fontSize: AppFont.font12.sp,
-                height: 1,
-                fontWeight: FontWeight.w800,
-                color: color.withValues(alpha: 0.72),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _SurvivalProgressBar extends GetView<PracticeHubController> {
   const _SurvivalProgressBar();
 
@@ -431,15 +301,15 @@ class _SurvivalProgressBar extends GetView<PracticeHubController> {
                 children: <Widget>[
                   Positioned(
                     left: 0,
+                    right: 0,
                     bottom: 0,
-                    child: LayoutBuilder(
-                      builder: (BuildContext context, BoxConstraints _) {
-                        return Container(
-                          width: 342.w * progress,
-                          height: 5.h,
-                          color: const Color(0xFF70FF36),
-                        );
-                      },
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: progress.clamp(0, 1).toDouble(),
+                      child: Container(
+                        height: 5.h,
+                        color: const Color(0xFF70FF36),
+                      ),
                     ),
                   ),
                   Center(

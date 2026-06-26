@@ -5,12 +5,21 @@ import 'package:get/get.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_font.dart';
 import '../../../core/widgets/widgets.dart';
+import '../services/leaderboard_service.dart';
 
 class ScoreSystemInfoView extends StatelessWidget {
   const ScoreSystemInfoView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final LeaderboardService svc = Get.find<LeaderboardService>();
+    // fetch scoring guide once (fire-and-forget)
+    svc.fetchScoringGuide().then((Map<String, dynamic>? data) {
+      if (data == null) return;
+      // Optionally cache or pass via Get.arguments in future; for now
+      // we could set up a simple reactive binding later. This keeps
+      // the current UI unchanged but prepares the service call.
+    });
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F7),
       appBar: SimpleAppbar(

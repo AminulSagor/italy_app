@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_font.dart';
 import '../controllers/leaderboard_controller.dart';
+import '../models/leaderboard_models.dart';
 
 class LeagueSystemPromotionView extends GetView<LeaderboardController> {
   const LeagueSystemPromotionView({super.key});
@@ -83,7 +84,9 @@ class LeagueSystemPromotionView extends GetView<LeaderboardController> {
                       Get.back<void>();
                       controller.openPopupInsiderPage();
                     },
-                    child: const _LeagueTrackCard(),
+                    child: _LeagueTrackCard(
+                      leagues: controller.leagues.toList(),
+                    ),
                   ),
                   SizedBox(height: 24.h),
                   Row(
@@ -127,10 +130,60 @@ class LeagueSystemPromotionView extends GetView<LeaderboardController> {
 }
 
 class _LeagueTrackCard extends StatelessWidget {
-  const _LeagueTrackCard();
+  final List<LeagueModel>? leagues;
+
+  const _LeagueTrackCard({this.leagues});
+
+  IconData _iconForKey(String key) {
+    switch (key) {
+      case 'bronze':
+        return Icons.military_tech_rounded;
+      case 'silver':
+        return Icons.workspace_premium_rounded;
+      case 'gold':
+        return Icons.star_rounded;
+      case 'diamond':
+        return Icons.diamond_rounded;
+      default:
+        return Icons.emoji_events_outlined;
+    }
+  }
+
+  Color _colorForKey(String key) {
+    switch (key) {
+      case 'bronze':
+        return const Color(0xFF9A4E05);
+      case 'silver':
+        return const Color(0xFF1765A5);
+      case 'gold':
+        return const Color(0xFFFFA400);
+      case 'diamond':
+        return const Color(0xFF00A5B8);
+      default:
+        return const Color(0xFF9AA1AA);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final List<LeagueModel> list = leagues ?? <LeagueModel>[];
+    final LeaderboardController ctrl = Get.find<LeaderboardController>();
+
+    // Compute progress from milestone if present, else fallback
+    final Map<String, dynamic>? ms = ctrl.milestoneData.value;
+    double progress = 0.4;
+    if (ms != null) {
+      if (ms['progressPercentage'] is num) {
+        progress = (ms['progressPercentage'] as num).toDouble() / 100.0;
+      } else if (ms['targetXp'] is int &&
+          ms['currentXp'] is int &&
+          ms['targetXp'] > 0) {
+        progress = (ms['currentXp'] as int) / (ms['targetXp'] as int);
+      }
+    }
+
+    final String currentLeagueKey = ctrl.currentUser.value?.league.key ?? '';
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 20.h),
@@ -144,7 +197,7 @@ class _LeagueTrackCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(999.r),
             child: LinearProgressIndicator(
-              value: 0.40,
+              value: progress.clamp(0.0, 1.0),
               minHeight: 8.h,
               backgroundColor: const Color(0xFFE4E8EF),
               valueColor: const AlwaysStoppedAnimation<Color>(
@@ -154,42 +207,35 @@ class _LeagueTrackCard extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           Row(
-            children: const <Widget>[
-              Expanded(
+            children: List<Widget>.generate(4, (int idx) {
+              final LeagueModel? lm = idx < list.length ? list[idx] : null;
+              final String title =
+                  lm?.name.toUpperCase() ??
+                  ['BRONZE', 'SILVER', 'GOLD', 'DIAMOND'][idx];
+              final String key =
+                  lm?.key ?? ['bronze', 'silver', 'gold', 'diamond'][idx];
+              final bool isActive = key == currentLeagueKey;
+
+              Color? bgColor;
+              Color? textColor;
+              Color? borderColor;
+
+              if (key == 'silver') bgColor = const Color(0xFFA9D1FF);
+              if (key == 'gold') borderColor = const Color(0xFFFFC100);
+              if (key == 'diamond') borderColor = const Color(0xFF73DCE5);
+
+              return Expanded(
                 child: _LeagueTrackItem(
-                  title: 'BRONZE',
-                  icon: Icons.military_tech_rounded,
-                  color: Color(0xFF9A4E05),
-                  borderColor: Color(0xFF9A4E05),
+                  title: title,
+                  icon: _iconForKey(key),
+                  color: key == 'silver' ? AppColors.white : _colorForKey(key),
+                  bgColor: bgColor,
+                  textColor: key == 'silver' ? const Color(0xFF1765A5) : null,
+                  borderColor: borderColor,
+                  isActive: isActive,
                 ),
-              ),
-              Expanded(
-                child: _LeagueTrackItem(
-                  title: 'SILVER',
-                  icon: Icons.workspace_premium_rounded,
-                  color: AppColors.white,
-                  bgColor: Color(0xFFA9D1FF),
-                  textColor: Color(0xFF1765A5),
-                  isActive: true,
-                ),
-              ),
-              Expanded(
-                child: _LeagueTrackItem(
-                  title: 'GOLD',
-                  icon: Icons.star_rounded,
-                  color: Color(0xFFFFA400),
-                  borderColor: Color(0xFFFFC100),
-                ),
-              ),
-              Expanded(
-                child: _LeagueTrackItem(
-                  title: 'DIAMOND',
-                  icon: Icons.diamond_rounded,
-                  color: Color(0xFF00A5B8),
-                  borderColor: Color(0xFF73DCE5),
-                ),
-              ),
-            ],
+              );
+            }),
           ),
         ],
       ),

@@ -5,11 +5,17 @@ import 'package:get/get.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_font.dart';
 import '../controllers/ai_chat_controller.dart';
+import '../models/ai_tutor_guided_learning_models.dart';
 
 class GuidedLearningTopicsView extends GetView<AiChatController> {
   final String level;
+  final AiTutorGuidedMode mode;
 
-  const GuidedLearningTopicsView({super.key, required this.level});
+  const GuidedLearningTopicsView({
+    super.key,
+    required this.level,
+    required this.mode,
+  });
 
   @override
   AiChatController get controller {
@@ -19,58 +25,70 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
     return Get.put<AiChatController>(AiChatController());
   }
 
-  List<Map<String, dynamic>> get topics => <Map<String, dynamic>>[
-    {
-      'title': 'Comprare un\nbiglietto',
-      'subtitle': 'বাসের টিকিট কেনা',
-      'icon': Icons.directions_bus_rounded,
-    },
-    {
-      'title': 'Ordinare al bar',
-      'subtitle': 'বারে কফি অর্ডার করা',
-      'icon': Icons.local_cafe_rounded,
-    },
-    {
-      'title': 'Fare la spesa',
-      'subtitle': 'সুপারমার্কেটে কেনাকাটা',
-      'icon': Icons.shopping_cart_rounded,
-    },
-    {
-      'title': 'Chiedere\nindicazioni',
-      'subtitle': 'রাস্তা জিজ্ঞাসা করা',
-      'icon': Icons.map_outlined,
-    },
-    {
-      'title': 'Dal dottore',
-      'subtitle': 'ডাক্তারের কাছে',
-      'icon': Icons.medical_services_outlined,
-    },
-    {
-      'title': 'Prenotare un\nhotel',
-      'subtitle': 'হোটেল বুক করা',
-      'icon': Icons.hotel_rounded,
-    },
-    {
-      'title': 'In posta',
-      'subtitle': 'পোস্ট অফিসে',
-      'icon': Icons.email_outlined,
-    },
-    {
-      'title': 'Incontrare\namici',
-      'subtitle': 'বন্ধুদের সাথে দেখা',
-      'icon': Icons.group_outlined,
-    },
-    {
-      'title': 'Al lavoro',
-      'subtitle': 'কাজের জায়গায়',
-      'icon': Icons.work_outline_rounded,
-    },
-    {
-      'title': 'Al ristorante',
-      'subtitle': 'রেস্টুরেন্টে',
-      'icon': Icons.restaurant_rounded,
-    },
+  static const List<_GuidedTopic> _topics = <_GuidedTopic>[
+    _GuidedTopic(
+      title: 'Comprare un\nbiglietto',
+      subtitle: 'বাসের টিকিট কেনা',
+      icon: Icons.directions_bus_rounded,
+    ),
+    _GuidedTopic(
+      title: 'Ordinare al bar',
+      subtitle: 'বারে কফি অর্ডার করা',
+      icon: Icons.local_cafe_rounded,
+    ),
+    _GuidedTopic(
+      title: 'Fare la spesa',
+      subtitle: 'সুপারমার্কেটে কেনাকাটা',
+      icon: Icons.shopping_cart_rounded,
+    ),
+    _GuidedTopic(
+      title: 'Chiedere\nindicazioni',
+      subtitle: 'রাস্তা জিজ্ঞাসা করা',
+      icon: Icons.map_outlined,
+    ),
+    _GuidedTopic(
+      title: 'Dal dottore',
+      subtitle: 'ডাক্তারের কাছে',
+      icon: Icons.medical_services_outlined,
+    ),
+    _GuidedTopic(
+      title: 'Prenotare un\nhotel',
+      subtitle: 'হোটেল বুক করা',
+      icon: Icons.hotel_rounded,
+    ),
+    _GuidedTopic(
+      title: 'In posta',
+      subtitle: 'পোস্ট অফিসে',
+      icon: Icons.email_outlined,
+    ),
+    _GuidedTopic(
+      title: 'Incontrare\namici',
+      subtitle: 'বন্ধুদের সাথে দেখা',
+      icon: Icons.group_outlined,
+    ),
+    _GuidedTopic(
+      title: 'Al lavoro',
+      subtitle: 'কাজের জায়গায়',
+      icon: Icons.work_outline_rounded,
+    ),
+    _GuidedTopic(
+      title: 'Al ristorante',
+      subtitle: 'রেস্টুরেন্টে',
+      icon: Icons.restaurant_rounded,
+    ),
   ];
+
+  String get _lessonDescription {
+    switch (mode) {
+      case AiTutorGuidedMode.guided:
+        return 'Listen to one Italian phrase and repeat it\n'
+            'exactly before moving to the next phrase.';
+      case AiTutorGuidedMode.assisted:
+        return 'Answer the AI questions in Italian and get\nsimple help when you make a mistake.';
+      case AiTutorGuidedMode.free:
+        return 'Practice a natural real-life Italian\nconversation for the selected scenario.';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +98,7 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
         bottom: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(40.w, 27.h, 40.w, 70.h),
+          padding: EdgeInsets.fromLTRB(30.w, 27.h, 30.w, 70.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -108,7 +126,7 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
               SizedBox(height: 16.h),
               Center(
                 child: Text(
-                  'Select a real world scenario. The AI will\nstart the conversation on that.',
+                  _lessonDescription,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16.sp,
@@ -119,15 +137,17 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
                 ),
               ),
               SizedBox(height: 31.h),
-              ...topics.map((Map<String, dynamic> item) {
+              ..._topics.map((_GuidedTopic item) {
                 return Padding(
                   padding: EdgeInsets.only(bottom: 24.h),
                   child: _TopicCard(
-                    title: item['title'] as String,
-                    subtitle: item['subtitle'] as String,
-                    icon: item['icon'] as IconData,
+                    title: item.title,
+                    subtitle: item.subtitle,
+                    icon: item.icon,
                     onTap: () => controller.onGuidedTopicTap(
-                      (item['title'] as String).replaceAll('\n', ' '),
+                      level: level,
+                      mode: mode,
+                      topicTitle: item.title.replaceAll('\n', ' '),
                     ),
                   ),
                 );
@@ -140,6 +160,18 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
       ),
     );
   }
+}
+
+class _GuidedTopic {
+  const _GuidedTopic({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
 }
 
 class _TopicCard extends StatelessWidget {
@@ -193,7 +225,7 @@ class _TopicCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 21.sp,
+                      fontSize: 20.sp,
                       height: 1.18,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -0.7,

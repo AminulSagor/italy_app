@@ -1,43 +1,57 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../routes/app_route_arguments.dart';
 import '../../../../../routes/app_routes.dart';
 import '../../quiz/controllers/quiz_controller.dart';
+import '../../quiz/models/quiz_models.dart';
+import '../../quiz/services/quiz_api_service.dart';
 import '../../quiz/services/quiz_mock_service.dart';
+import '../helpers/final_exam_flow_mapper.dart';
+import '../models/final_exam_api_models.dart';
 import '../models/final_exam_models.dart';
-import '../services/final_exam_mock_service.dart';
+import '../services/final_exam_api_service.dart';
+import 'final_exam_media_coordinator.dart';
 
 class FinalExamController extends GetxController {
   final String controllerTag;
-  final FinalExamMockService _finalExamMockService;
+  final String courseId;
+  final FinalExamApiService _finalExamApiService;
+  final FinalExamMediaCoordinator _media = FinalExamMediaCoordinator();
 
   FinalExamController({
     required this.controllerTag,
-    required FinalExamMockService finalExamMockService,
-  }) : _finalExamMockService = finalExamMockService;
+    required this.courseId,
+    required FinalExamApiService finalExamApiService,
+  }) : _finalExamApiService = finalExamApiService;
 
   final RxBool isLoading = false.obs;
   final RxBool isSubmitting = false.obs;
-  final RxBool isAudioPlaying = false.obs;
-  final RxBool isRecording = false.obs;
-  final RxBool hasRecording = false.obs;
-  final RxBool isRecordedAudioPlaying = false.obs;
   final RxBool teacherReviewComplete = false.obs;
   final RxBool resultComplete = false.obs;
-  final RxInt selectedListeningOption = 0.obs;
-  final RxInt recordedSeconds = 0.obs;
-  final RxString referenceId = '#EXAM-A1-4922'.obs;
-  final RxString recordedAudioPath = ''.obs;
+  final RxInt selectedListeningOption = (-1).obs;
+  final RxString referenceId = ''.obs;
+  final RxString estimatedResult = ''.obs;
+
+  RxBool get isAudioPlaying => _media.isAudioPlaying;
+  RxBool get isRecording => _media.isRecording;
+  RxBool get hasRecording => _media.hasRecording;
+  RxBool get isRecordedAudioPlaying => _media.isRecordedAudioPlaying;
+  RxInt get recordedSeconds => _media.recordedSeconds;
+  RxString get recordedAudioPath => _media.recordedAudioPath;
+  PlayerController get listeningWaveController =>
+      _media.listeningWaveController;
+  RecorderController get speakingRecorderController =>
+      _media.speakingRecorderController;
+  PlayerController get recordedWaveController => _media.recordedWaveController;
 
   final Rxn<FinalExamOverviewModel> overview = Rxn<FinalExamOverviewModel>();
+  final Rxn<FinalExamGatewayModel> gateway = Rxn<FinalExamGatewayModel>();
+  final Rxn<FinalExamAttemptModel> attempt = Rxn<FinalExamAttemptModel>();
   final Rxn<FinalExamListeningModel> listeningTask =
       Rxn<FinalExamListeningModel>();
   final Rxn<FinalExamWritingModel> writingTask = Rxn<FinalExamWritingModel>();
@@ -47,171 +61,373 @@ class FinalExamController extends GetxController {
 
   final TextEditingController writingController = TextEditingController();
 
-  final PlayerController listeningWaveController = PlayerController();
-  final RecorderController speakingRecorderController = RecorderController();
-  PlayerController recordedWaveController = PlayerController();
-
-  Timer? _recordTimer;
-  Timer? _teacherTimer;
-  Timer? _resultTimer;
-  StreamSubscription<PlayerState>? _listeningPlayerSub;
-  StreamSubscription<PlayerState>? _recordedPlayerSub;
-  bool _isListeningAudioPrepared = false;
-  bool _isRecordedAudioPrepared = false;
-  bool _isPreparingListeningAudio = false;
-  String? _listeningAudioPath;
+  Timer? _resultPollTimer;
+  int _activeSectionIndex = -1;
+  DateTime? _attemptStartedAt;
 
   @override
   void onInit() {
     super.onInit();
-    _configureRecorder();
-    _listenToPlayerState();
-    unawaited(_prepareListeningAudio());
-    loadOverview();
+    _media.initialize();
+    unawaited(loadOverview());
   }
 
   @override
   void onClose() {
-    _recordTimer?.cancel();
-    _teacherTimer?.cancel();
-    _resultTimer?.cancel();
-    _listeningPlayerSub?.cancel();
-    _recordedPlayerSub?.cancel();
-    speakingRecorderController.dispose();
-    listeningWaveController.dispose();
-    recordedWaveController.dispose();
+    _resultPollTimer?.cancel();
+    _media.dispose();
     writingController.dispose();
     super.onClose();
   }
 
   Future<void> loadOverview() async {
-    if (overview.value != null || isLoading.value) {
-      return;
-    }
+    if (overview.value != null || isLoading.value) return;
 
     isLoading.value = true;
     try {
-      overview.value = await _finalExamMockService.fetchOverview();
-    } finally {
-      isLoading.value = false;
-    }
-  }
+      final ApiResult<FinalExamGatewayModel> result =
+          await ApiErrorHandler.call<FinalExamGatewayModel>(
+        () => _finalExamApiService.fetchGateway(courseId: courseId),
+        errorTitle: 'Final Exam',
+      );
+      if (!result.isSuccess || result.data == null) return;
 
-  Future<void> loadListeningTask() async {
-    if (listeningTask.value != null || isLoading.value) {
-      return;
-    }
-
-    isLoading.value = true;
-    try {
-      listeningTask.value = await _finalExamMockService.fetchListeningTask();
-      await _prepareListeningAudio();
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> loadWritingTask() async {
-    if (writingTask.value != null || isLoading.value) {
-      return;
-    }
-
-    isLoading.value = true;
-    try {
-      writingTask.value = await _finalExamMockService.fetchWritingTask();
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> loadSpeakingTask() async {
-    if (speakingTask.value != null || isLoading.value) {
-      return;
-    }
-
-    isLoading.value = true;
-    try {
-      speakingTask.value = await _finalExamMockService.fetchSpeakingTask();
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> loadResult() async {
-    if (result.value != null || isLoading.value) {
-      return;
-    }
-
-    isLoading.value = true;
-    try {
-      result.value = await _finalExamMockService.fetchResult();
+      gateway.value = result.data;
+      overview.value = FinalExamFlowMapper.overviewFromGateway(result.data!);
     } finally {
       isLoading.value = false;
     }
   }
 
   Future<void> startExam() async {
-    final int questionCount = 6 + Random().nextInt(15);
-    final String quizTag =
-        'final_exam_quiz_${DateTime.now().millisecondsSinceEpoch}';
-
-    final Object? quizResult = await Get.toNamed(
-      AppRoutes.quiz,
-      arguments: QuizRouteArguments(
-        controllerTag: quizTag,
-        isExamMode: true,
-        questionCount: questionCount,
-      ),
-    );
-
-    if (Get.isRegistered<QuizController>(tag: quizTag)) {
-      Get.delete<QuizController>(tag: quizTag, force: true);
-    }
-    if (Get.isRegistered<QuizMockService>(tag: quizTag)) {
-      Get.delete<QuizMockService>(tag: quizTag, force: true);
-    }
-
-    if (quizResult == true) {
-      await openListeningLab();
-    }
-  }
-
-  Future<void> openListeningLab() async {
-    await loadListeningTask();
-    await Get.toNamed(
-      AppRoutes.finalExamListening,
-      arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
-    );
-  }
-
-  Future<void> submitListeningAnswer() async {
-    await _stopListeningAudio(reset: true);
-    await loadWritingTask();
-    await Get.toNamed(
-      AppRoutes.finalExamWriting,
-      arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
-    );
-  }
-
-  Future<void> submitWritingAnswer() async {
-    await loadSpeakingTask();
-    await Get.toNamed(
-      AppRoutes.finalExamSpeaking,
-      arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
-    );
-  }
-
-  Future<void> submitSpeakingAnswer() async {
-    if (isSubmitting.value) {
+    final FinalExamOverviewModel? currentOverview = overview.value;
+    if (isSubmitting.value || currentOverview == null) return;
+    if (!currentOverview.canStart) {
+      Get.snackbar('Final Exam', currentOverview.startMessage);
       return;
     }
 
     isSubmitting.value = true;
+    FinalExamAttemptModel? startedAttempt;
     try {
-      await _stopRecordedAudio(reset: true);
-      referenceId.value = await _finalExamMockService.submitExam();
-      startEvaluationSimulation();
-      await Get.offNamed(
+      final ApiResult<FinalExamAttemptModel> result =
+          await ApiErrorHandler.call<FinalExamAttemptModel>(
+        () => _finalExamApiService.startAttempt(courseId: courseId),
+        errorTitle: 'Start Final Exam',
+      );
+      if (!result.isSuccess || result.data == null) return;
+
+      final FinalExamAttemptModel data = result.data!;
+      startedAttempt = data;
+      attempt.value = data;
+      referenceId.value = data.referenceCode;
+      _attemptStartedAt = data.startedAt ?? DateTime.now();
+    } finally {
+      isSubmitting.value = false;
+    }
+
+    if (startedAttempt != null) {
+      await _openSectionAt(0);
+    }
+  }
+
+  Future<void> _openSectionAt(int index) async {
+    final FinalExamAttemptModel? currentAttempt = attempt.value;
+    if (currentAttempt == null) return;
+    if (index >= currentAttempt.sections.length) {
+      await _submitAttemptAndOpenSuccess();
+      return;
+    }
+
+    final FinalExamSectionModel section = currentAttempt.sections[index];
+    if (section.questions.isEmpty) {
+      await _openSectionAt(index + 1);
+      return;
+    }
+
+    _activeSectionIndex = index;
+    switch (section.type) {
+      case FinalExamSectionType.coreQuiz:
+      case FinalExamSectionType.listeningLab:
+        await _openAutoGradedSection(section, index);
+        return;
+      case FinalExamSectionType.writingTask:
+        writingTask.value = FinalExamFlowMapper.writingTask(section);
+        writingController.clear();
+        await Get.toNamed(
+          AppRoutes.finalExamWriting,
+          arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
+        );
+        return;
+      case FinalExamSectionType.speakingLab:
+        speakingTask.value = FinalExamFlowMapper.speakingTask(section);
+        await _media.resetRecording();
+        await Get.toNamed(
+          AppRoutes.finalExamSpeaking,
+          arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
+        );
+        return;
+      case FinalExamSectionType.unknown:
+        await _openSectionAt(index + 1);
+    }
+  }
+
+  Future<void> _openAutoGradedSection(
+    FinalExamSectionModel section,
+    int sectionIndex,
+  ) async {
+    final List<QuizQuestionModel> questions = section.questions
+        .map(
+          (FinalExamQuestionModel question) =>
+              FinalExamFlowMapper.quizQuestion(section, question),
+        )
+        .toList(growable: false);
+    if (questions.isEmpty) {
+      await _openSectionAt(sectionIndex + 1);
+      return;
+    }
+
+    final String quizTag =
+        'final_exam_${section.id}_${DateTime.now().millisecondsSinceEpoch}';
+    final Object? routeResult = await Get.toNamed(
+      AppRoutes.quiz,
+      arguments: QuizRouteArguments(
+        controllerTag: quizTag,
+        isExamMode: true,
+        questionCount: questions.length,
+        initialQuestions: questions,
+        externalAnswerHandler: submitQuizAnswer,
+      ),
+    );
+    _disposeQuizRoute(quizTag);
+
+    if (routeResult == true) {
+      await _openSectionAt(sectionIndex + 1);
+    }
+  }
+
+  void _disposeQuizRoute(String tag) {
+    if (Get.isRegistered<QuizController>(tag: tag)) {
+      Get.delete<QuizController>(tag: tag, force: true);
+    }
+    if (Get.isRegistered<QuizApiService>(tag: tag)) {
+      Get.delete<QuizApiService>(tag: tag, force: true);
+    }
+    if (Get.isRegistered<QuizMockService>(tag: tag)) {
+      Get.delete<QuizMockService>(tag: tag, force: true);
+    }
+  }
+
+  Future<QuizExternalAnswerResult> submitQuizAnswer(
+    QuizQuestionModel question,
+    QuizAnswerInput input,
+  ) async {
+    final FinalExamAttemptModel? currentAttempt = attempt.value;
+    final FinalExamQuestionModel? examQuestion = _findQuestion(question.id);
+    if (currentAttempt == null || examQuestion == null) {
+      throw StateError('Final exam question was not found.');
+    }
+
+    final ApiResult<FinalExamAnswerResultModel> response =
+        await ApiErrorHandler.call<FinalExamAnswerResultModel>(
+      () => _finalExamApiService.submitAnswer(
+        attemptId: currentAttempt.id,
+        payload: FinalExamFlowMapper.answerPayload(
+          examQuestion,
+          question,
+          input,
+        ),
+      ),
+      errorTitle: 'Final Exam Answer',
+    );
+    if (!response.isSuccess || response.data == null) {
+      throw StateError('Final exam answer could not be submitted.');
+    }
+
+    final FinalExamAnswerResultModel result = response.data!;
+    return QuizExternalAnswerResult(
+      isCorrect: result.isCorrect ?? true,
+      correctAnswer: result.correctAnswer,
+      meaning: examQuestion.promptBn,
+    );
+  }
+
+  Future<void> loadListeningTask() async {
+    final FinalExamSectionModel? section = _sectionAt(_activeSectionIndex);
+    if (section == null || section.questions.isEmpty) return;
+    listeningTask.value = FinalExamFlowMapper.listeningTask(section);
+    await _media.prepareListeningAudio(listeningTask.value!.audioUrl);
+  }
+
+  Future<void> loadWritingTask() async {
+    final FinalExamSectionModel? section = _sectionAt(_activeSectionIndex);
+    if (section != null) {
+      writingTask.value = FinalExamFlowMapper.writingTask(section);
+    }
+  }
+
+  Future<void> loadSpeakingTask() async {
+    final FinalExamSectionModel? section = _sectionAt(_activeSectionIndex);
+    if (section != null) {
+      speakingTask.value = FinalExamFlowMapper.speakingTask(section);
+    }
+  }
+
+  Future<void> submitListeningAnswer() async {
+    final FinalExamAttemptModel? currentAttempt = attempt.value;
+    final FinalExamListeningModel? task = listeningTask.value;
+    if (currentAttempt == null || task == null || isSubmitting.value) return;
+    if (selectedListeningOption.value < 0 ||
+        selectedListeningOption.value >= task.optionIds.length) {
+      Get.snackbar('Listening', 'Please select an answer.');
+      return;
+    }
+
+    bool submitted = false;
+    isSubmitting.value = true;
+    try {
+      final ApiResult<FinalExamAnswerResultModel> result =
+          await ApiErrorHandler.call<FinalExamAnswerResultModel>(
+        () => _finalExamApiService.submitAnswer(
+          attemptId: currentAttempt.id,
+          payload: <String, dynamic>{
+            'sectionId': task.sectionId,
+            'questionId': task.questionId,
+            'answerType': 'single_option',
+            'selectedOptionId': task.optionIds[selectedListeningOption.value],
+          },
+        ),
+        errorTitle: 'Listening',
+      );
+      submitted = result.isSuccess;
+    } finally {
+      isSubmitting.value = false;
+    }
+
+    if (!submitted) return;
+    await _media.stopListeningAudio(reset: true);
+    Get.back<void>();
+    await _openSectionAt(_activeSectionIndex + 1);
+  }
+
+  Future<void> submitWritingAnswer() async {
+    final FinalExamAttemptModel? currentAttempt = attempt.value;
+    final FinalExamWritingModel? task = writingTask.value;
+    if (currentAttempt == null || task == null || isSubmitting.value) return;
+
+    final String answer = writingController.text.trim();
+    final int words = answer.isEmpty ? 0 : answer.split(RegExp(r'\s+')).length;
+    if (answer.isEmpty) {
+      Get.snackbar('Writing Task', 'Please write your answer first.');
+      return;
+    }
+    if (task.minWords > 0 && words < task.minWords) {
+      Get.snackbar(
+        'Writing Task',
+        'Please write at least ${task.minWords} words.',
+      );
+      return;
+    }
+
+    bool submitted = false;
+    isSubmitting.value = true;
+    try {
+      final ApiResult<FinalExamAnswerResultModel> result =
+          await ApiErrorHandler.call<FinalExamAnswerResultModel>(
+        () => _finalExamApiService.submitAnswer(
+          attemptId: currentAttempt.id,
+          payload: <String, dynamic>{
+            'sectionId': task.sectionId,
+            'questionId': task.questionId,
+            'answerType': 'text',
+            'textAnswer': answer,
+          },
+        ),
+        errorTitle: 'Writing Task',
+      );
+      submitted = result.isSuccess;
+    } finally {
+      isSubmitting.value = false;
+    }
+
+    if (!submitted) return;
+    Get.back<void>();
+    await _openSectionAt(_activeSectionIndex + 1);
+  }
+
+  Future<void> submitSpeakingAnswer() async {
+    final FinalExamAttemptModel? currentAttempt = attempt.value;
+    final FinalExamSpeakingModel? task = speakingTask.value;
+    if (currentAttempt == null || task == null || isSubmitting.value) return;
+
+    if (isRecording.value) await _media.stopRecording();
+    if (!hasRecording.value || recordedAudioPath.value.isEmpty) {
+      Get.snackbar('Speaking Task', 'Please record your answer first.');
+      return;
+    }
+
+    bool submitted = false;
+    isSubmitting.value = true;
+    try {
+      await _media.stopRecordedAudio(reset: true);
+      final ApiResult<String> uploadResult = await ApiErrorHandler.call<String>(
+        () => _finalExamApiService.uploadSpeakingAudio(
+          filePath: recordedAudioPath.value,
+          durationSeconds: recordedSeconds.value,
+        ),
+        errorTitle: 'Speaking Audio',
+      );
+      if (!uploadResult.isSuccess || uploadResult.data == null) return;
+
+      final ApiResult<FinalExamAnswerResultModel> result =
+          await ApiErrorHandler.call<FinalExamAnswerResultModel>(
+        () => _finalExamApiService.submitAnswer(
+          attemptId: currentAttempt.id,
+          payload: <String, dynamic>{
+            'sectionId': task.sectionId,
+            'questionId': task.questionId,
+            'answerType': 'audio',
+            'audioFileId': uploadResult.data,
+            'durationSeconds': recordedSeconds.value,
+          },
+        ),
+        errorTitle: 'Speaking Task',
+      );
+      submitted = result.isSuccess;
+    } finally {
+      isSubmitting.value = false;
+    }
+
+    if (!submitted) return;
+    Get.back<void>();
+    await _openSectionAt(_activeSectionIndex + 1);
+  }
+
+  Future<void> _submitAttemptAndOpenSuccess() async {
+    final FinalExamAttemptModel? currentAttempt = attempt.value;
+    if (currentAttempt == null || isSubmitting.value) return;
+
+    isSubmitting.value = true;
+    try {
+      final int durationSeconds = DateTime.now()
+          .difference(_attemptStartedAt ?? DateTime.now())
+          .inSeconds;
+      final ApiResult<FinalExamSubmissionModel> result =
+          await ApiErrorHandler.call<FinalExamSubmissionModel>(
+        () => _finalExamApiService.submitAttempt(
+          attemptId: currentAttempt.id,
+          totalDurationSeconds: durationSeconds,
+        ),
+        errorTitle: 'Submit Final Exam',
+      );
+      if (!result.isSuccess || result.data == null) return;
+
+      referenceId.value = result.data!.referenceCode;
+      estimatedResult.value = result.data!.estimatedResult;
+      teacherReviewComplete.value = result.data!.status == 'evaluated';
+      resultComplete.value = result.data!.status == 'evaluated';
+      _startResultPolling();
+      await Get.toNamed(
         AppRoutes.finalExamSuccess,
         arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
       );
@@ -220,8 +436,41 @@ class FinalExamController extends GetxController {
     }
   }
 
+  Future<void> loadResult({bool showPendingMessage = true}) async {
+    final FinalExamAttemptModel? currentAttempt = attempt.value;
+    if (currentAttempt == null || isLoading.value) return;
+
+    isLoading.value = true;
+    try {
+      final ApiResult<FinalExamResultResponseModel> response =
+          await ApiErrorHandler.call<FinalExamResultResponseModel>(
+        () => _finalExamApiService.fetchResult(attemptId: currentAttempt.id),
+        showError: showPendingMessage,
+        errorTitle: 'Final Exam Result',
+      );
+      if (!response.isSuccess || response.data == null) return;
+
+      final FinalExamResultResponseModel data = response.data!;
+      referenceId.value = data.referenceCode;
+      resultComplete.value = data.resultReady;
+      teacherReviewComplete.value = data.resultReady;
+      if (!data.resultReady) {
+        if (showPendingMessage) {
+          Get.snackbar('Final Exam Result', data.message);
+        }
+        return;
+      }
+
+      result.value = FinalExamResultModel.fromReview(data.review);
+      _resultPollTimer?.cancel();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> openResult() async {
     await loadResult();
+    if (result.value == null) return;
     await Get.toNamed(
       AppRoutes.finalExamResult,
       arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
@@ -237,8 +486,33 @@ class FinalExamController extends GetxController {
     );
   }
 
+  void _startResultPolling() {
+    _resultPollTimer?.cancel();
+    unawaited(loadResult(showPendingMessage: false));
+    _resultPollTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      unawaited(loadResult(showPendingMessage: false));
+    });
+  }
+
+  FinalExamQuestionModel? _findQuestion(String questionId) {
+    for (final FinalExamSectionModel section in
+        attempt.value?.sections ?? const <FinalExamSectionModel>[]) {
+      for (final FinalExamQuestionModel question in section.questions) {
+        if (question.id == questionId) return question;
+      }
+    }
+    return null;
+  }
+
+  FinalExamSectionModel? _sectionAt(int index) {
+    final List<FinalExamSectionModel> sections =
+        attempt.value?.sections ?? const <FinalExamSectionModel>[];
+    if (index < 0 || index >= sections.length) return null;
+    return sections[index];
+  }
+
   void toggleListeningAudio() {
-    unawaited(_toggleListeningAudio());
+    unawaited(_media.toggleListeningAudio(listeningTask.value?.audioUrl ?? ''));
   }
 
   void selectListeningOption(int index) {
@@ -246,311 +520,14 @@ class FinalExamController extends GetxController {
   }
 
   void startRecording() {
-    unawaited(_startRecording());
+    unawaited(
+      _media.startRecording(
+        maxDurationSeconds: speakingTask.value?.maxDurationSeconds ?? 60,
+      ),
+    );
   }
 
-  void stopRecording() {
-    unawaited(_stopRecording());
-  }
-
-  void resetRecording() {
-    unawaited(_resetRecording());
-  }
-
-  void toggleRecordedAudio() {
-    unawaited(_toggleRecordedAudio());
-  }
-
-  void startEvaluationSimulation() {
-    teacherReviewComplete.value = false;
-    resultComplete.value = false;
-    _teacherTimer?.cancel();
-    _resultTimer?.cancel();
-    _teacherTimer = Timer(const Duration(seconds: 10), () {
-      teacherReviewComplete.value = true;
-    });
-    _resultTimer = Timer(const Duration(seconds: 20), () {
-      resultComplete.value = true;
-    });
-  }
-
-  void _configureRecorder() {
-    speakingRecorderController
-      ..androidEncoder = AndroidEncoder.aac
-      ..androidOutputFormat = AndroidOutputFormat.mpeg4
-      ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
-      ..sampleRate = 44100;
-  }
-
-  void _listenToPlayerState() {
-    _listeningPlayerSub = listeningWaveController.onPlayerStateChanged.listen((
-      PlayerState state,
-    ) {
-      isAudioPlaying.value = state == PlayerState.playing;
-    });
-
-    _bindRecordedPlayerState();
-  }
-
-  void _bindRecordedPlayerState() {
-    _recordedPlayerSub?.cancel();
-    _recordedPlayerSub = recordedWaveController.onPlayerStateChanged.listen((
-      PlayerState state,
-    ) {
-      isRecordedAudioPlaying.value = state == PlayerState.playing;
-    });
-  }
-
-  Future<void> _toggleListeningAudio() async {
-    if (isAudioPlaying.value) {
-      await _pauseListeningAudio();
-      return;
-    }
-
-    await _prepareListeningAudio();
-    if (!_isListeningAudioPrepared) {
-      return;
-    }
-
-    isAudioPlaying.value = true;
-    try {
-      await listeningWaveController.seekTo(0);
-      await listeningWaveController.startPlayer();
-    } catch (_) {
-      isAudioPlaying.value = false;
-    }
-  }
-
-  Future<void> _pauseListeningAudio() async {
-    isAudioPlaying.value = false;
-    try {
-      await listeningWaveController.pausePlayer();
-    } catch (_) {}
-  }
-
-  Future<void> _stopListeningAudio({required bool reset}) async {
-    isAudioPlaying.value = false;
-    try {
-      await listeningWaveController.stopPlayer();
-      if (reset && _listeningAudioPath != null) {
-        _isListeningAudioPrepared = false;
-        await listeningWaveController.preparePlayer(
-          path: _listeningAudioPath!,
-          shouldExtractWaveform: true,
-          noOfSamples: 80,
-        );
-        _isListeningAudioPrepared = true;
-      }
-    } catch (_) {}
-  }
-
-  Future<void> _prepareListeningAudio() async {
-    if (_isListeningAudioPrepared || _isPreparingListeningAudio) {
-      return;
-    }
-
-    _isPreparingListeningAudio = true;
-    try {
-      final File file = await _createSilentWavFile(
-        fileName: 'final_exam_listening_mock.wav',
-        seconds: 4,
-      );
-      _listeningAudioPath = file.path;
-      await listeningWaveController.preparePlayer(
-        path: file.path,
-        shouldExtractWaveform: true,
-        noOfSamples: 80,
-      );
-      _isListeningAudioPrepared = true;
-    } catch (_) {
-      _isListeningAudioPrepared = false;
-    } finally {
-      _isPreparingListeningAudio = false;
-    }
-  }
-
-  Future<void> _startRecording() async {
-    if (isRecording.value) {
-      return;
-    }
-
-    try {
-      final bool hasPermission = await speakingRecorderController
-          .checkPermission();
-      if (!hasPermission) {
-        Get.snackbar(
-          'Permission needed',
-          'Please allow microphone permission to record your answer.',
-        );
-        return;
-      }
-
-      await _resetRecording(clearPathOnly: false);
-      final String path =
-          '${Directory.systemTemp.path}/final_exam_speaking_${DateTime.now().millisecondsSinceEpoch}.m4a';
-      recordedAudioPath.value = path;
-      await speakingRecorderController.record(path: path);
-      recordedSeconds.value = 0;
-      isRecording.value = true;
-      _recordTimer?.cancel();
-      _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (recordedSeconds.value < 60) {
-          recordedSeconds.value += 1;
-        }
-      });
-    } catch (_) {
-      isRecording.value = false;
-    }
-  }
-
-  Future<void> _stopRecording() async {
-    if (!isRecording.value) {
-      return;
-    }
-
-    try {
-      final String? path = await speakingRecorderController.stop();
-      if (path != null && path.isNotEmpty) {
-        recordedAudioPath.value = path;
-      }
-      hasRecording.value =
-          recordedSeconds.value > 0 && recordedAudioPath.value.isNotEmpty;
-    } finally {
-      isRecording.value = false;
-      _recordTimer?.cancel();
-    }
-  }
-
-  Future<void> _resetRecording({bool clearPathOnly = true}) async {
-    if (isRecording.value) {
-      await _stopRecording();
-    }
-
-    await _stopRecordedAudio(reset: false);
-    hasRecording.value = false;
-    isRecordedAudioPlaying.value = false;
-    recordedSeconds.value = 0;
-    _recordTimer?.cancel();
-
-    if (clearPathOnly && recordedAudioPath.value.isNotEmpty) {
-      try {
-        final File file = File(recordedAudioPath.value);
-        if (await file.exists()) {
-          await file.delete();
-        }
-      } catch (_) {}
-      recordedAudioPath.value = '';
-    }
-
-    _recordedPlayerSub?.cancel();
-    recordedWaveController.dispose();
-    recordedWaveController = PlayerController();
-    _bindRecordedPlayerState();
-    _isRecordedAudioPrepared = false;
-  }
-
-  Future<void> _toggleRecordedAudio() async {
-    if (!hasRecording.value || recordedAudioPath.value.isEmpty) {
-      return;
-    }
-
-    if (isRecordedAudioPlaying.value) {
-      await _pauseRecordedAudio();
-      return;
-    }
-
-    await _prepareRecordedAudio();
-    if (!_isRecordedAudioPrepared) {
-      return;
-    }
-
-    isRecordedAudioPlaying.value = true;
-    try {
-      await recordedWaveController.seekTo(0);
-      await recordedWaveController.startPlayer();
-    } catch (_) {
-      isRecordedAudioPlaying.value = false;
-    }
-  }
-
-  Future<void> _pauseRecordedAudio() async {
-    isRecordedAudioPlaying.value = false;
-    try {
-      await recordedWaveController.pausePlayer();
-    } catch (_) {}
-  }
-
-  Future<void> _stopRecordedAudio({required bool reset}) async {
-    isRecordedAudioPlaying.value = false;
-    try {
-      await recordedWaveController.stopPlayer();
-      if (reset) {
-        _isRecordedAudioPrepared = false;
-      }
-    } catch (_) {}
-  }
-
-  Future<void> _prepareRecordedAudio() async {
-    if (_isRecordedAudioPrepared || recordedAudioPath.value.isEmpty) {
-      return;
-    }
-
-    try {
-      await recordedWaveController.preparePlayer(
-        path: recordedAudioPath.value,
-        shouldExtractWaveform: true,
-        noOfSamples: 70,
-      );
-      _isRecordedAudioPrepared = true;
-    } catch (_) {
-      _isRecordedAudioPrepared = false;
-    }
-  }
-
-  Future<File> _createSilentWavFile({
-    required String fileName,
-    required int seconds,
-  }) async {
-    final File file = File('${Directory.systemTemp.path}/$fileName');
-    if (await file.exists()) {
-      return file;
-    }
-
-    const int sampleRate = 44100;
-    const int channels = 1;
-    const int bitsPerSample = 16;
-    const int bytesPerSample = bitsPerSample ~/ 8;
-    final int dataSize = sampleRate * seconds * channels * bytesPerSample;
-    final int byteRate = sampleRate * channels * bytesPerSample;
-    final BytesBuilder builder = BytesBuilder();
-
-    void addString(String value) => builder.add(ascii.encode(value));
-    void addInt16(int value) {
-      final ByteData data = ByteData(2)..setInt16(0, value, Endian.little);
-      builder.add(data.buffer.asUint8List());
-    }
-
-    void addInt32(int value) {
-      final ByteData data = ByteData(4)..setInt32(0, value, Endian.little);
-      builder.add(data.buffer.asUint8List());
-    }
-
-    addString('RIFF');
-    addInt32(36 + dataSize);
-    addString('WAVE');
-    addString('fmt ');
-    addInt32(16);
-    addInt16(1);
-    addInt16(channels);
-    addInt32(sampleRate);
-    addInt32(byteRate);
-    addInt16(channels * bytesPerSample);
-    addInt16(bitsPerSample);
-    addString('data');
-    addInt32(dataSize);
-    builder.add(Uint8List(dataSize));
-
-    await file.writeAsBytes(builder.toBytes(), flush: true);
-    return file;
-  }
+  void stopRecording() => unawaited(_media.stopRecording());
+  void resetRecording() => unawaited(_media.resetRecording());
+  void toggleRecordedAudio() => unawaited(_media.toggleRecordedAudio());
 }

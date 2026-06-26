@@ -157,21 +157,40 @@ class _CompletedStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
+    final List<Widget> stats = <Widget>[
+      if (quiz.scoreLabel.trim().isNotEmpty)
         _StatPill(icon: Icons.star_rounded, label: quiz.scoreLabel),
-        SizedBox(height: 14.h),
+      if (quiz.xpLabel.trim().isNotEmpty)
         _StatPill(
           icon: Icons.workspace_premium_rounded,
           label: quiz.xpLabel,
           isOrange: true,
         ),
-        SizedBox(height: 14.h),
+      if (quiz.timeLabel.trim().isNotEmpty)
         _StatPill(
           icon: Icons.timer_outlined,
           label: quiz.timeLabel,
           isMuted: true,
         ),
+    ];
+
+    if (stats.isEmpty) {
+      return Text(
+        'Completed successfully',
+        style: TextStyle(
+          fontSize: AppFont.font14.sp,
+          fontWeight: FontWeight.w800,
+          color: AppColors.primaryGreen,
+        ),
+      );
+    }
+
+    return Column(
+      children: <Widget>[
+        for (int index = 0; index < stats.length; index++) ...<Widget>[
+          if (index > 0) SizedBox(height: 14.h),
+          stats[index],
+        ],
       ],
     );
   }

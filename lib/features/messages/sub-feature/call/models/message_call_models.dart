@@ -2,8 +2,7 @@ enum MessageCallType {
   audio,
   video;
 
-  bool get isVideo =>
-      this == MessageCallType.video;
+  bool get isVideo => this == MessageCallType.video;
 
   String get value {
     switch (this) {
@@ -23,9 +22,7 @@ enum MessageCallType {
     }
   }
 
-  static MessageCallType fromValue(
-      String? value,
-      ) {
+  static MessageCallType fromValue(String? value) {
     switch (value) {
       case 'video':
         return MessageCallType.video;
@@ -49,19 +46,15 @@ class MessageCallParticipantModel {
     required this.isOnline,
   });
 
-  factory MessageCallParticipantModel.fromJson(
-      Map<String, dynamic> json,
-      ) {
+  factory MessageCallParticipantModel.fromJson(Map<String, dynamic> json) {
     return MessageCallParticipantModel(
       id: json['id']?.toString() ?? '',
       name:
-      json['name']?.toString() ??
+          json['name']?.toString() ??
           json['fullName']?.toString() ??
           'Unknown user',
-      avatarUrl:
-      json['avatarUrl']?.toString() ?? '',
-      isOnline:
-      json['isOnline'] as bool? ?? false,
+      avatarUrl: json['avatarUrl']?.toString() ?? '',
+      isOnline: json['isOnline'] as bool? ?? false,
     );
   }
 
@@ -104,18 +97,13 @@ class MessageCallMediaModel {
     required this.expiresAt,
   });
 
-  factory MessageCallMediaModel.fromJson(
-      Map<String, dynamic> json,
-      ) {
+  factory MessageCallMediaModel.fromJson(Map<String, dynamic> json) {
     return MessageCallMediaModel(
       appId: json['appId']?.toString() ?? '',
-      channelName:
-      json['channelName']?.toString() ??
-          '',
+      channelName: json['channelName']?.toString() ?? '',
       uid: _parseInt(json['uid']),
       token: json['token']?.toString() ?? '',
-      expiresAt:
-      _parseInt(json['expiresAt']),
+      expiresAt: _parseInt(json['expiresAt']),
     );
   }
 
@@ -134,10 +122,7 @@ class MessageCallMediaModel {
       return value;
     }
 
-    return int.tryParse(
-      value?.toString() ?? '',
-    ) ??
-        0;
+    return int.tryParse(value?.toString() ?? '') ?? 0;
   }
 }
 
@@ -166,39 +151,21 @@ class MessageCallSessionModel {
     required Map<String, dynamic> response,
     required MessageCallParticipantModel participant,
   }) {
-    final Map<String, dynamic> call =
-    _mapFrom(response['call']);
+    final Map<String, dynamic> call = _mapFrom(response['call']);
 
-    final Map<String, dynamic> media =
-    _mapFrom(response['media']);
+    final Map<String, dynamic> media = _mapFrom(response['media']);
 
-    final String createdAt =
-        call['createdAt']?.toString() ?? '';
+    final String createdAt = call['createdAt']?.toString() ?? '';
 
     return MessageCallSessionModel(
       id: call['id']?.toString() ?? '',
-      conversationId:
-      call['directConversationId']
-          ?.toString() ??
-          '',
-      type: MessageCallType.fromValue(
-        call['callType']?.toString(),
-      ),
+      conversationId: call['directConversationId']?.toString() ?? '',
+      type: MessageCallType.fromValue(call['callType']?.toString()),
       participant: participant,
-      status:
-      call['status']?.toString() ??
-          'ringing',
-      startedAt:
-      DateTime.tryParse(createdAt)
-          ?.toLocal() ??
-          DateTime.now(),
-      media:
-      MessageCallMediaModel.fromJson(
-        media,
-      ),
-      created:
-      response['created'] as bool? ??
-          false,
+      status: call['status']?.toString() ?? 'ringing',
+      startedAt: DateTime.tryParse(createdAt)?.toLocal() ?? DateTime.now(),
+      media: MessageCallMediaModel.fromJson(media),
+      created: response['created'] as bool? ?? false,
     );
   }
 
@@ -244,8 +211,7 @@ class MessageCallSessionModel {
       'type': type.value,
       'participant': participant.toJson(),
       'status': status,
-      'startedAt':
-      startedAt.toIso8601String(),
+      'startedAt': startedAt.toIso8601String(),
       'media': media.toJson(),
       'created': created,
     };
@@ -255,8 +221,7 @@ class MessageCallSessionModel {
     String? id,
     String? conversationId,
     MessageCallType? type,
-    MessageCallParticipantModel?
-    participant,
+    MessageCallParticipantModel? participant,
     String? status,
     DateTime? startedAt,
     MessageCallMediaModel? media,
@@ -264,31 +229,23 @@ class MessageCallSessionModel {
   }) {
     return MessageCallSessionModel(
       id: id ?? this.id,
-      conversationId:
-      conversationId ??
-          this.conversationId,
+      conversationId: conversationId ?? this.conversationId,
       type: type ?? this.type,
-      participant:
-      participant ?? this.participant,
+      participant: participant ?? this.participant,
       status: status ?? this.status,
-      startedAt:
-      startedAt ?? this.startedAt,
+      startedAt: startedAt ?? this.startedAt,
       media: media ?? this.media,
       created: created ?? this.created,
     );
   }
 
-  static Map<String, dynamic> _mapFrom(
-      dynamic value,
-      ) {
+  static Map<String, dynamic> _mapFrom(dynamic value) {
     if (value is Map<String, dynamic>) {
       return value;
     }
 
     if (value is Map) {
-      return Map<String, dynamic>.from(
-        value,
-      );
+      return Map<String, dynamic>.from(value);
     }
 
     return <String, dynamic>{};
