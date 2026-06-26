@@ -50,7 +50,7 @@ import '../features/home/controllers/home_controller.dart';
 import '../features/home/services/home_mock_service.dart';
 import '../features/home/views/home_view.dart';
 import '../features/messages/controllers/messages_controller.dart';
-import '../features/messages/services/messages_mock_service.dart';
+import '../features/messages/services/messages_service.dart';
 import '../features/notifications/services/notifications_mock_service.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_contact_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_dynamic_form_controller.dart';

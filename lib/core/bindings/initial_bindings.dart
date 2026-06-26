@@ -4,12 +4,13 @@ import '../../features/courses/services/courses_mock_service.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/home/services/home_mock_service.dart';
 import '../../features/messages/controllers/messages_controller.dart';
-import '../../features/messages/services/messages_mock_service.dart';
+import '../../features/messages/services/messages_service.dart';
 import '../../features/messages/services/chat_socket_service.dart';
 import '../services/api_client.dart';
 import '../services/token_service.dart';
 import '../../features/notifications/services/notifications_mock_service.dart';
 import '../../features/leaderboard/controllers/leaderboard_controller.dart';
+import '../../features/leaderboard/services/leaderboard_service.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
 
 class InitialBindings extends Bindings {
@@ -45,7 +46,19 @@ class InitialBindings extends Bindings {
       ),
     );
     Get.lazyPut<NotificationsMockService>(() => NotificationsMockService());
-    Get.lazyPut<LeaderboardController>(() => LeaderboardController());
+    Get.lazyPut<LeaderboardService>(
+      () => LeaderboardService(
+        apiClient: Get.find<ApiClient>(),
+        tokenService: Get.find<TokenService>(),
+      ),
+      fenix: true,
+    );
+    Get.lazyPut<LeaderboardController>(
+      () => LeaderboardController(
+        leaderboardService: Get.find<LeaderboardService>(),
+      ),
+      fenix: true,
+    );
     Get.lazyPut<PracticeHubController>(
       () => PracticeHubController(),
       fenix: true,

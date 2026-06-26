@@ -6,6 +6,9 @@ import 'package:get/get.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
+import '../../../messages/controllers/messages_controller.dart';
+import '../../services/leaderboard_service.dart';
+import '../../models/leaderboard_models.dart';
 
 class LeaderboardChatDialog extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -93,14 +96,57 @@ class LeaderboardChatDialog extends StatelessWidget {
                   SizedBox(height: 35.h),
                   _DeepGreenButton(
                     text: 'Start Chatting',
-                    onTap: () {
+                    onTap: () async {
+                      // Close the dialog first
                       Get.back<void>();
-                      Get.snackbar(
-                        'Chat',
-                        'Chat screen will open after API integration.',
-                        snackPosition: SnackPosition.BOTTOM,
-                        duration: const Duration(seconds: 2),
-                      );
+                      try {
+                        // Fetch a preview from the server to check canChat/chatTargetUserId
+                        try {
+                          final LeaderboardService svc =
+                              Get.find<LeaderboardService>();
+                          final String otherId =
+                              (user['userId'] ?? user['id'])?.toString() ?? '';
+                          if (otherId.isNotEmpty) {
+                            final ProfileModel? preview = await svc
+                                .fetchUserPreview(otherId);
+                            if (preview != null && !preview.canChat) {
+                              Get.snackbar(
+                                'Chat',
+                                'This user is not available for direct messages.',
+                                snackPosition: SnackPosition.BOTTOM,
+                                duration: const Duration(seconds: 2),
+                              );
+                              return;
+                            }
+                            if (preview != null &&
+                                preview.chatTargetUserId?.isNotEmpty == true) {
+                              // If server redirected chats to another id, replace
+                              user['userId'] = preview.chatTargetUserId;
+                            }
+                          }
+                        } catch (_) {}
+
+                        if (Get.isRegistered<MessagesController>()) {
+                          final MessagesController mc =
+                              Get.find<MessagesController>();
+                          await mc.startDirectConversation(user);
+                          return;
+                        }
+                        // If messages controller not registered, attempt to navigate to MessagesView
+                        Get.snackbar(
+                          'Chat',
+                          'Messages module not available.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          duration: const Duration(seconds: 2),
+                        );
+                      } catch (e) {
+                        Get.snackbar(
+                          'Chat',
+                          'Failed to open chat.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          duration: const Duration(seconds: 2),
+                        );
+                      }
                     },
                   ),
                   SizedBox(height: 30.h),
