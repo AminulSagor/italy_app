@@ -6,6 +6,9 @@ import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../controllers/leaderboard_controller.dart';
+import '../services/leaderboard_service.dart';
+import '../../../core/services/api_client.dart';
+import '../../../core/services/token_service.dart';
 
 class LeaderboardView extends GetView<LeaderboardController> {
   final bool showPageAppBar;
@@ -18,7 +21,21 @@ class LeaderboardView extends GetView<LeaderboardController> {
       return Get.find<LeaderboardController>();
     }
 
-    return Get.put<LeaderboardController>(LeaderboardController());
+    // Ensure LeaderboardService is available before creating the controller.
+    if (!Get.isRegistered<LeaderboardService>()) {
+      try {
+        Get.put<LeaderboardService>(
+          LeaderboardService(
+            apiClient: Get.find<ApiClient>(),
+            tokenService: Get.find<TokenService>(),
+          ),
+        );
+      } catch (_) {}
+    }
+
+    return Get.put<LeaderboardController>(
+      LeaderboardController(leaderboardService: Get.find<LeaderboardService>()),
+    );
   }
 
   @override
@@ -50,6 +67,33 @@ class LeaderboardView extends GetView<LeaderboardController> {
                             onHelpTap: controller.onHelpTap,
                           ),
                           SizedBox(height: 24.h),
+                          if (controller.hasError.value)
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(12.h),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFE6E6),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              child: Row(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: const Color(0xFFB00020),
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  Expanded(
+                                    child: Text(
+                                      controller.errorMessage.value,
+                                      style: TextStyle(
+                                        color: const Color(0xFFB00020),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           _LeaderboardTabBar(
                             selectedIndex: controller.selectedTabIndex.value,
                             onChanged: controller.onTabChanged,
@@ -61,7 +105,9 @@ class LeaderboardView extends GetView<LeaderboardController> {
                           ),
                           if (controller.isMyLeagueSelected) ...<Widget>[
                             SizedBox(height: 30.h),
-                            const _MilestoneCard(),
+                            _MilestoneCard(
+                              milestone: controller.milestoneData.value,
+                            ),
                           ],
                           SizedBox(height: 32.h),
                           _SearchField(
@@ -94,7 +140,12 @@ class LeaderboardView extends GetView<LeaderboardController> {
               left: 24.w,
               right: 24.w,
               bottom: showPageAppBar ? 28.h : 90.h,
-              child: _MyRankFloatingCard(onInfoTap: controller.onRankInfoTap),
+              child: _MyRankFloatingCard(
+                onInfoTap: controller.onRankInfoTap,
+                rankLabel: controller.myRankLabel,
+                xpLabel: controller.myXpLabel,
+                zoneLabel: controller.currentUser.value?.zoneLabel,
+              ),
             ),
           ],
         ),
@@ -274,9 +325,15 @@ class _PodiumSection extends StatelessWidget {
   const _PodiumSection({required this.users, required this.isGlobal});
 
   Map<String, dynamic> _userByRank(int rank) {
-    return users.firstWhere((Map<String, dynamic> user) {
-      return user['rank'] == rank;
-    });
+    return users.firstWhere(
+      (Map<String, dynamic> user) => user['rank'] == rank,
+      orElse: () => <String, dynamic>{
+        'rank': rank,
+        'name': '—',
+        'xp': '0',
+        'league': '',
+      },
+    );
   }
 
   @override
@@ -537,12 +594,51 @@ class _PodiumAvatar extends StatelessWidget {
 }
 
 class _MilestoneCard extends StatelessWidget {
-  const _MilestoneCard();
+  final Map<String, dynamic>? milestone;
+
+  const _MilestoneCard({this.milestone});
+
+  String _formatWithCommas(int n) {
+    final String s = n.toString();
+    final StringBuffer sb = StringBuffer();
+    int count = 0;
+    for (int i = s.length - 1; i >= 0; i--) {
+      sb.write(s[i]);
+      count++;
+      if (count == 3 && i != 0) {
+        sb.write(',');
+        count = 0;
+      }
+    }
+    return sb.toString().split('').reversed.join();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic>? ms = milestone;
+    final String nextLeagueName = ms?['nextLeague'] is Map
+        ? (ms!['nextLeague']['name']?.toString() ?? '')
+        : '';
+    final String message = ms?['message']?.toString() ?? '';
+
+    final int currentXp = ms?['currentXp'] is int
+        ? ms!['currentXp'] as int
+        : int.tryParse(ms?['currentXp']?.toString() ?? '0') ?? 0;
+    final int targetXp = ms?['targetXp'] is int
+        ? ms!['targetXp'] as int
+        : int.tryParse(ms?['targetXp']?.toString() ?? '0') ?? 0;
+
+    double progress = 0.0;
+    if (ms?['progressPercentage'] is num) {
+      progress = (ms!['progressPercentage'] as num).toDouble() / 100.0;
+    } else if (targetXp > 0) {
+      progress = currentXp / targetXp;
+    } else {
+      progress = 0.0;
+    }
+
     return Container(
-      height: 172.h,
+      height: 190.h,
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 20.h),
       decoration: BoxDecoration(
@@ -560,7 +656,9 @@ class _MilestoneCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Milestone: Silver League',
+            nextLeagueName.isNotEmpty
+                ? 'Milestone: $nextLeagueName'
+                : 'Milestone',
             style: TextStyle(
               fontSize: AppFont.font20.sp,
               fontWeight: FontWeight.w900,
@@ -570,7 +668,9 @@ class _MilestoneCard extends StatelessWidget {
           ),
           SizedBox(height: 6.h),
           Text(
-            'Earn 160 more XP to reach Gold!',
+            message.isNotEmpty
+                ? message
+                : 'Earn more XP to reach the next league!',
             style: TextStyle(
               fontSize: AppFont.font15.sp,
               fontWeight: FontWeight.w600,
@@ -588,15 +688,13 @@ class _MilestoneCard extends StatelessWidget {
                   color: const Color.fromARGB(29, 0, 0, 0),
                 ),
                 child: Icon(Icons.emoji_events_outlined),
-                // iconColor: Color(0xFFB34E00),
-                // backgroundColor: Color(0xFFF0F0F0),
               ),
               SizedBox(width: 14.w),
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100.r),
                   child: LinearProgressIndicator(
-                    value: 0.82,
+                    value: progress.clamp(0.0, 1.0),
                     minHeight: 16.h,
                     backgroundColor: AppColors.legacyColorFFDFDFDF,
                     valueColor: const AlwaysStoppedAnimation<Color>(
@@ -617,7 +715,7 @@ class _MilestoneCard extends StatelessWidget {
           Row(
             children: <Widget>[
               Text(
-                '4299',
+                _formatWithCommas(currentXp),
                 style: TextStyle(
                   fontSize: AppFont.font11.sp,
                   fontWeight: FontWeight.w900,
@@ -632,7 +730,7 @@ class _MilestoneCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '5000',
+                _formatWithCommas(targetXp),
                 style: TextStyle(
                   fontSize: AppFont.font11.sp,
                   fontWeight: FontWeight.w900,
@@ -934,8 +1032,16 @@ class _SmallAvatar extends StatelessWidget {
 
 class _MyRankFloatingCard extends StatelessWidget {
   final VoidCallback onInfoTap;
+  final String rankLabel;
+  final String xpLabel;
+  final String? zoneLabel;
 
-  const _MyRankFloatingCard({required this.onInfoTap});
+  const _MyRankFloatingCard({
+    required this.onInfoTap,
+    required this.rankLabel,
+    required this.xpLabel,
+    this.zoneLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -971,7 +1077,7 @@ class _MyRankFloatingCard extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  '#14 | Arif (You)',
+                  rankLabel,
                   style: TextStyle(
                     fontSize: AppFont.font17.sp,
                     fontWeight: FontWeight.w900,
@@ -986,7 +1092,7 @@ class _MyRankFloatingCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
               Text(
-                '1,240 XP',
+                xpLabel,
                 style: TextStyle(
                   fontSize: AppFont.font18.sp,
                   fontWeight: FontWeight.w900,
@@ -1001,7 +1107,7 @@ class _MyRankFloatingCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100.r),
                 ),
                 child: Text(
-                  'PROMOTION ZONE',
+                  zoneLabel ?? 'PROMOTION ZONE',
                   style: TextStyle(
                     fontSize: AppFont.font9.sp,
                     fontWeight: FontWeight.w900,

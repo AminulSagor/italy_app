@@ -83,7 +83,6 @@ class TranslationService extends Translations {
       case AppLanguage.bengali:
         return const Locale('bn', 'BD');
       case AppLanguage.english:
-      default:
         return const Locale('en', 'US');
     }
   }
@@ -107,7 +106,6 @@ class TranslationService extends Translations {
       case AppLanguage.bengali:
         return 'বাং';
       case AppLanguage.english:
-      default:
         return 'EN';
     }
   }

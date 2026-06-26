@@ -8,7 +8,7 @@ import '../models/presence_model.dart';
 import '../sub-feature/call/service/call_agora_service.dart';
 import '../sub-feature/call/service/call_socket_service.dart';
 import '../sub-feature/user-block/service/user_block_api_service.dart';
-import '../services/messages_mock_service.dart';
+import '../services/messages_service.dart';
 import '../services/chat_socket_service.dart';
 import '../../../core/services/token_service.dart';
 import '../sub-feature/call/views/message_call_view.dart';
