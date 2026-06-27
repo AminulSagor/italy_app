@@ -11,6 +11,10 @@ import '../../../features/messages/services/chat_socket_service.dart';
 import '../../../features/messages/services/presence_service.dart';
 import '../../../features/messages/models/message_models.dart';
 import '../../services/api_client.dart';
+import '../../controllers/user_session_controller.dart';
+import '../../services/api_error_handler.dart';
+import '../../services/learning_activity_tracker_service.dart';
+import '../../services/notification_summary_service.dart';
 import '../../services/token_service.dart';
 import '../../../features/notifications/controllers/notifications_controller.dart';
 import '../../../features/notifications/services/notifications_mock_service.dart';
@@ -27,6 +31,7 @@ class NavbarAndAppbarWrapperController extends GetxController
   final AuthService _authService = Get.find<AuthService>();
   final RxInt currentIndex = 0.obs;
   final RxBool isMessagesPageOpen = false.obs;
+  final RxBool hasUnreadNotifications = false.obs;
   final RxSet<int> visitedTabs = <int>{0}.obs;
   // Presence listener registration flag
   bool _presenceInitialized = false;
@@ -41,6 +46,9 @@ class NavbarAndAppbarWrapperController extends GetxController
 
     currentIndex.value = index;
     visitedTabs.add(index);
+    if (Get.isRegistered<LearningActivityTrackerService>()) {
+      Get.find<LearningActivityTrackerService>().setShellTab(index);
+    }
   }
 
   void openNotifications() {
@@ -69,6 +77,7 @@ class NavbarAndAppbarWrapperController extends GetxController
       if (Get.isRegistered<NotificationsController>()) {
         Get.delete<NotificationsController>();
       }
+      refreshNotificationState();
     });
   }
 
@@ -131,6 +140,13 @@ class NavbarAndAppbarWrapperController extends GetxController
     WidgetsBinding.instance.addObserver(this);
     _initCurrentUserId();
     _ensurePresenceListener();
+    if (Get.isRegistered<UserSessionController>()) {
+      Get.find<UserSessionController>().loadUser();
+    }
+    if (Get.isRegistered<LearningActivityTrackerService>()) {
+      Get.find<LearningActivityTrackerService>().setShellTab(currentIndex.value);
+    }
+    refreshNotificationState();
   }
 
   @override
@@ -388,9 +404,20 @@ class NavbarAndAppbarWrapperController extends GetxController
     Get.toNamed(AppRoutes.shop);
   }
 
+  Future<void> refreshNotificationState() async {
+    if (!Get.isRegistered<NotificationSummaryService>()) return;
+    final ApiResult<bool> result = await ApiErrorHandler.call<bool>(
+      Get.find<NotificationSummaryService>().hasUnreadNotifications,
+      showError: false,
+    );
+    if (result.isSuccess && result.data != null) {
+      hasUnreadNotifications.value = result.data!;
+    }
+  }
+
   void onDrawerChanged(bool isOpened) {
-    if (!isOpened || !Get.isRegistered<AppDrawerController>()) return;
-    Get.find<AppDrawerController>().refreshProfile(showError: false);
+    if (!isOpened || !Get.isRegistered<UserSessionController>()) return;
+    Get.find<UserSessionController>().loadUser();
   }
 
   Future<void> onLogoutTap() async {
@@ -400,7 +427,13 @@ class NavbarAndAppbarWrapperController extends GetxController
       }
     } catch (_) {}
 
+    if (Get.isRegistered<LearningActivityTrackerService>()) {
+      await Get.find<LearningActivityTrackerService>().endSession();
+    }
     await _authService.logout();
+    if (Get.isRegistered<UserSessionController>()) {
+      Get.find<UserSessionController>().clear();
+    }
     if (Get.isRegistered<AppDrawerController>()) {
       Get.find<AppDrawerController>().clear();
     }

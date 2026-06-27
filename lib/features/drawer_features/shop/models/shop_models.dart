@@ -1,0 +1,562 @@
+enum StorePackageType {
+  aiBundle('ai_bundle'),
+  streakFreeze('streak_freeze'),
+  cvCredit('cv_credit');
+
+  const StorePackageType(this.apiValue);
+  final String apiValue;
+
+  static StorePackageType fromApi(String? value) {
+    return StorePackageType.values.firstWhere(
+      (StorePackageType type) => type.apiValue == value,
+      orElse: () => StorePackageType.aiBundle,
+    );
+  }
+}
+
+enum RefillCurrency {
+  eur('EUR', '€'),
+  bdt('BDT', '৳');
+
+  const RefillCurrency(this.apiValue, this.symbol);
+  final String apiValue;
+  final String symbol;
+}
+
+enum CheckoutPaymentMethod {
+  googlePlay('google_play'),
+  card('stripe'),
+  paypal('paypal'),
+  applePay('apple_pay'),
+  bkash('bkash');
+
+  const CheckoutPaymentMethod(this.providerValue);
+  final String providerValue;
+
+  static CheckoutPaymentMethod fromProvider(String? value) {
+    if (value == 'google_play') return CheckoutPaymentMethod.googlePlay;
+    if (value == 'stripe') return CheckoutPaymentMethod.card;
+    if (value == 'apple_pay') return CheckoutPaymentMethod.applePay;
+    if (value == 'bkash') return CheckoutPaymentMethod.bkash;
+    return CheckoutPaymentMethod.paypal;
+  }
+}
+
+class StoreBalancesModel {
+  const StoreBalancesModel({
+    required this.aiVoiceMinutes,
+    required this.aiTextTokens,
+    required this.streakFreezeCount,
+    required this.unlimitedProtectionActive,
+    required this.unlimitedProtectionExpiresAt,
+    required this.cvCredits,
+    required this.freeCvCreditsPerSignup,
+    required this.allowCvEditingWithoutCredit,
+  });
+
+  final int aiVoiceMinutes;
+  final int aiTextTokens;
+  final int streakFreezeCount;
+  final bool unlimitedProtectionActive;
+  final DateTime? unlimitedProtectionExpiresAt;
+  final int cvCredits;
+  final int freeCvCreditsPerSignup;
+  final bool allowCvEditingWithoutCredit;
+
+  factory StoreBalancesModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> ai = _map(json['ai']);
+    final Map<String, dynamic> streak = _map(json['streakFreeze']);
+    final Map<String, dynamic> unlimited = _map(
+      streak['unlimitedProtection'],
+    );
+    final Map<String, dynamic> cv = _map(json['cv']);
+
+    return StoreBalancesModel(
+      aiVoiceMinutes: _int(ai['voiceMinutes']),
+      aiTextTokens: _int(ai['textTokens']),
+      streakFreezeCount: _int(streak['count']),
+      unlimitedProtectionActive: _bool(unlimited['active']),
+      unlimitedProtectionExpiresAt: _date(unlimited['expiresAt']),
+      cvCredits: _int(cv['credits']),
+      freeCvCreditsPerSignup: _int(cv['freeCreditsPerSignup']),
+      allowCvEditingWithoutCredit: _bool(cv['allowEditingWithoutCredit']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'ai': <String, dynamic>{
+      'voiceMinutes': aiVoiceMinutes,
+      'textTokens': aiTextTokens,
+    },
+    'streakFreeze': <String, dynamic>{
+      'count': streakFreezeCount,
+      'unlimitedProtection': <String, dynamic>{
+        'active': unlimitedProtectionActive,
+        'expiresAt': unlimitedProtectionExpiresAt?.toIso8601String(),
+      },
+    },
+    'cv': <String, dynamic>{
+      'credits': cvCredits,
+      'freeCreditsPerSignup': freeCvCreditsPerSignup,
+      'allowEditingWithoutCredit': allowCvEditingWithoutCredit,
+    },
+  };
+
+  StoreBalancesModel copyWith({
+    int? aiVoiceMinutes,
+    int? aiTextTokens,
+    int? streakFreezeCount,
+    bool? unlimitedProtectionActive,
+    DateTime? unlimitedProtectionExpiresAt,
+    int? cvCredits,
+    int? freeCvCreditsPerSignup,
+    bool? allowCvEditingWithoutCredit,
+  }) {
+    return StoreBalancesModel(
+      aiVoiceMinutes: aiVoiceMinutes ?? this.aiVoiceMinutes,
+      aiTextTokens: aiTextTokens ?? this.aiTextTokens,
+      streakFreezeCount: streakFreezeCount ?? this.streakFreezeCount,
+      unlimitedProtectionActive:
+          unlimitedProtectionActive ?? this.unlimitedProtectionActive,
+      unlimitedProtectionExpiresAt:
+          unlimitedProtectionExpiresAt ?? this.unlimitedProtectionExpiresAt,
+      cvCredits: cvCredits ?? this.cvCredits,
+      freeCvCreditsPerSignup:
+          freeCvCreditsPerSignup ?? this.freeCvCreditsPerSignup,
+      allowCvEditingWithoutCredit:
+          allowCvEditingWithoutCredit ?? this.allowCvEditingWithoutCredit,
+    );
+  }
+}
+
+class StorePackageModel {
+  const StorePackageModel({
+    required this.id,
+    required this.type,
+    required this.name,
+    required this.description,
+    required this.priceEur,
+    required this.billingModel,
+    required this.marketingBadge,
+    required this.aiVoiceMinutes,
+    required this.aiTextTokens,
+    required this.cvCredits,
+    required this.streakFreezeCount,
+    required this.streakProtectionMode,
+    required this.protectionDurationDays,
+    required this.couponEnabled,
+    required this.sortOrder,
+  });
+
+  final String id;
+  final StorePackageType type;
+  final String name;
+  final String description;
+  final double priceEur;
+  final String billingModel;
+  final String marketingBadge;
+  final int aiVoiceMinutes;
+  final int aiTextTokens;
+  final int cvCredits;
+  final int streakFreezeCount;
+  final String streakProtectionMode;
+  final int? protectionDurationDays;
+  final bool couponEnabled;
+  final int sortOrder;
+
+  bool get isMonthly => billingModel == 'monthly';
+  bool get isUnlimitedStreak =>
+      streakProtectionMode == 'monthly_unlimited';
+
+  String get badgeLabel {
+    switch (marketingBadge) {
+      case 'limited_time':
+        return 'LIMITED TIME';
+      case 'most_popular':
+        return 'MOST POPULAR';
+      case 'best_value':
+        return 'BEST VALUE';
+      default:
+        return '';
+    }
+  }
+
+  String get entitlementSummary {
+    switch (type) {
+      case StorePackageType.aiBundle:
+        return '$aiVoiceMinutes Mins Voice | ${_compactNumber(aiTextTokens)} Tokens';
+      case StorePackageType.streakFreeze:
+        if (isUnlimitedStreak) {
+          return '${protectionDurationDays ?? 30} days unlimited protection';
+        }
+        return '$streakFreezeCount Streak Freeze${streakFreezeCount == 1 ? '' : 's'}';
+      case StorePackageType.cvCredit:
+        return '$cvCredits CV Credit${cvCredits == 1 ? '' : 's'}';
+    }
+  }
+
+  factory StorePackageModel.fromJson(Map<String, dynamic> json) {
+    return StorePackageModel(
+      id: _string(json['id']),
+      type: StorePackageType.fromApi(_string(json['type'])),
+      name: _string(json['name'], fallback: 'Package'),
+      description: _string(json['description']),
+      priceEur: _double(json['priceEur']),
+      billingModel: _string(json['billingModel'], fallback: 'one_time'),
+      marketingBadge: _string(json['marketingBadge'], fallback: 'none'),
+      aiVoiceMinutes: _int(json['aiVoiceMinutes']),
+      aiTextTokens: _int(json['aiTextTokens']),
+      cvCredits: _int(json['cvCredits']),
+      streakFreezeCount: _int(json['streakFreezeCount']),
+      streakProtectionMode: _string(json['streakProtectionMode']),
+      protectionDurationDays: _nullableInt(json['protectionDurationDays']),
+      couponEnabled: _bool(json['couponEnabled']),
+      sortOrder: _int(json['sortOrder']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'type': type.apiValue,
+    'name': name,
+    'description': description,
+    'priceEur': priceEur.toStringAsFixed(2),
+    'billingModel': billingModel,
+    'marketingBadge': marketingBadge,
+    'aiVoiceMinutes': aiVoiceMinutes,
+    'aiTextTokens': aiTextTokens,
+    'cvCredits': cvCredits,
+    'streakFreezeCount': streakFreezeCount,
+    'streakProtectionMode': streakProtectionMode,
+    'protectionDurationDays': protectionDurationDays,
+    'couponEnabled': couponEnabled,
+    'sortOrder': sortOrder,
+  };
+
+  StorePackageModel copyWith({
+    String? id,
+    StorePackageType? type,
+    String? name,
+    String? description,
+    double? priceEur,
+    String? billingModel,
+    String? marketingBadge,
+    int? aiVoiceMinutes,
+    int? aiTextTokens,
+    int? cvCredits,
+    int? streakFreezeCount,
+    String? streakProtectionMode,
+    int? protectionDurationDays,
+    bool? couponEnabled,
+    int? sortOrder,
+  }) {
+    return StorePackageModel(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      priceEur: priceEur ?? this.priceEur,
+      billingModel: billingModel ?? this.billingModel,
+      marketingBadge: marketingBadge ?? this.marketingBadge,
+      aiVoiceMinutes: aiVoiceMinutes ?? this.aiVoiceMinutes,
+      aiTextTokens: aiTextTokens ?? this.aiTextTokens,
+      cvCredits: cvCredits ?? this.cvCredits,
+      streakFreezeCount: streakFreezeCount ?? this.streakFreezeCount,
+      streakProtectionMode:
+          streakProtectionMode ?? this.streakProtectionMode,
+      protectionDurationDays:
+          protectionDurationDays ?? this.protectionDurationDays,
+      couponEnabled: couponEnabled ?? this.couponEnabled,
+      sortOrder: sortOrder ?? this.sortOrder,
+    );
+  }
+}
+
+class StoreShopSectionModel {
+  const StoreShopSectionModel({
+    required this.packageType,
+    required this.title,
+    required this.subtitle,
+    required this.packageCount,
+    required this.startingPriceEur,
+  });
+
+  final StorePackageType packageType;
+  final String title;
+  final String subtitle;
+  final int packageCount;
+  final double? startingPriceEur;
+
+  factory StoreShopSectionModel.fromJson(Map<String, dynamic> json) {
+    return StoreShopSectionModel(
+      packageType: StorePackageType.fromApi(_string(json['packageType'])),
+      title: _string(json['title']),
+      subtitle: _string(json['subtitle']),
+      packageCount: _int(json['packageCount']),
+      startingPriceEur: _nullableDouble(json['startingPriceEur']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'packageType': packageType.apiValue,
+    'title': title,
+    'subtitle': subtitle,
+    'packageCount': packageCount,
+    'startingPriceEur': startingPriceEur?.toStringAsFixed(2),
+  };
+}
+
+class StoreShopModel {
+  const StoreShopModel({
+    required this.balances,
+    required this.sections,
+    required this.hasOrders,
+    required this.latestOrderNumber,
+  });
+
+  final StoreBalancesModel balances;
+  final List<StoreShopSectionModel> sections;
+  final bool hasOrders;
+  final String latestOrderNumber;
+
+  factory StoreShopModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> history = _map(json['orderHistory']);
+    return StoreShopModel(
+      balances: StoreBalancesModel.fromJson(_map(json['balances'])),
+      sections: _list(json['sections'])
+          .map(StoreShopSectionModel.fromJson)
+          .toList(growable: false),
+      hasOrders: _bool(history['hasOrders']),
+      latestOrderNumber: _string(history['latestOrderNumber']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'balances': balances.toJson(),
+    'sections': sections
+        .map((StoreShopSectionModel item) => item.toJson())
+        .toList(growable: false),
+    'orderHistory': <String, dynamic>{
+      'hasOrders': hasOrders,
+      'latestOrderNumber': latestOrderNumber,
+    },
+  };
+}
+
+class StoreProviderOptionModel {
+  const StoreProviderOptionModel({
+    required this.provider,
+    required this.enabled,
+    required this.demo,
+    required this.demoProductId,
+    this.label = '',
+    this.unavailableReason = '',
+  });
+
+  final String provider;
+  final bool enabled;
+  final bool demo;
+  final String demoProductId;
+  final String label;
+  final String unavailableReason;
+
+  CheckoutPaymentMethod get method =>
+      CheckoutPaymentMethod.fromProvider(provider);
+
+  factory StoreProviderOptionModel.fromJson(Map<String, dynamic> json) {
+    return StoreProviderOptionModel(
+      provider: _string(json['provider']),
+      enabled: _bool(json['enabled']),
+      demo: _bool(json['demo']),
+      demoProductId: _string(json['demoProductId']),
+      label: _string(json['label']),
+      unavailableReason: _string(json['unavailableReason']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'provider': provider,
+    'enabled': enabled,
+    'demo': demo,
+    'demoProductId': demoProductId,
+    'label': label,
+    'unavailableReason': unavailableReason,
+  };
+}
+
+class StoreQuotePricingModel {
+  const StoreQuotePricingModel({
+    required this.selectedCurrency,
+    required this.originalAmount,
+    required this.couponCode,
+    required this.discountPercentage,
+    required this.discountAmount,
+    required this.payableAmount,
+  });
+
+  final String selectedCurrency;
+  final double originalAmount;
+  final String couponCode;
+  final int discountPercentage;
+  final double discountAmount;
+  final double payableAmount;
+
+  factory StoreQuotePricingModel.fromJson(Map<String, dynamic> json) {
+    return StoreQuotePricingModel(
+      selectedCurrency: _string(json['selectedCurrency'], fallback: 'EUR'),
+      originalAmount: _double(json['originalAmount']),
+      couponCode: _string(json['couponCode']),
+      discountPercentage: _int(json['discountPercentage']),
+      discountAmount: _double(json['discountAmount']),
+      payableAmount: _double(json['payableAmount']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'selectedCurrency': selectedCurrency,
+    'originalAmount': originalAmount.toStringAsFixed(2),
+    'couponCode': couponCode.isEmpty ? null : couponCode,
+    'discountPercentage': discountPercentage,
+    'discountAmount': discountAmount.toStringAsFixed(2),
+    'payableAmount': payableAmount.toStringAsFixed(2),
+  };
+}
+
+class StoreQuoteResponseModel {
+  const StoreQuoteResponseModel({
+    required this.package,
+    required this.pricing,
+    required this.balances,
+    required this.supportedProviders,
+  });
+
+  final StorePackageModel package;
+  final StoreQuotePricingModel pricing;
+  final StoreBalancesModel balances;
+  final List<StoreProviderOptionModel> supportedProviders;
+
+  factory StoreQuoteResponseModel.fromJson(Map<String, dynamic> json) {
+    return StoreQuoteResponseModel(
+      package: StorePackageModel.fromJson(_map(json['package'])),
+      pricing: StoreQuotePricingModel.fromJson(_map(json['pricing'])),
+      balances: StoreBalancesModel.fromJson(_map(json['balances'])),
+      supportedProviders: _list(json['supportedProviders'])
+          .map(StoreProviderOptionModel.fromJson)
+          .toList(growable: false),
+    );
+  }
+}
+
+class StorePackageListResponseModel {
+  const StorePackageListResponseModel({
+    required this.balances,
+    required this.items,
+    required this.page,
+    required this.totalPages,
+  });
+
+  final StoreBalancesModel balances;
+  final List<StorePackageModel> items;
+  final int page;
+  final int totalPages;
+
+  factory StorePackageListResponseModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> meta = _map(json['meta']);
+    return StorePackageListResponseModel(
+      balances: StoreBalancesModel.fromJson(_map(json['balances'])),
+      items: _list(json['items'])
+          .map(StorePackageModel.fromJson)
+          .toList(growable: false),
+      page: _int(meta['page'], fallback: 1),
+      totalPages: _int(meta['totalPages'], fallback: 1),
+    );
+  }
+}
+
+class CreateStoreOrderPayloadModel {
+  const CreateStoreOrderPayloadModel({
+    required this.packageId,
+    required this.currency,
+    required this.paymentProvider,
+    required this.idempotencyKey,
+    required this.couponCode,
+  });
+
+  final String packageId;
+  final RefillCurrency currency;
+  final String paymentProvider;
+  final String idempotencyKey;
+  final String couponCode;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'packageId': packageId,
+    'currency': currency.apiValue,
+    'paymentProvider': paymentProvider,
+    'idempotencyKey': idempotencyKey,
+    if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
+  };
+}
+
+Map<String, dynamic> shopJsonMap(dynamic value) => _map(value);
+List<Map<String, dynamic>> shopJsonList(dynamic value) => _list(value);
+String shopString(dynamic value, {String fallback = ''}) =>
+    _string(value, fallback: fallback);
+int shopInt(dynamic value, {int fallback = 0}) =>
+    _int(value, fallback: fallback);
+double shopDouble(dynamic value, {double fallback = 0}) =>
+    _double(value, fallback: fallback);
+bool shopBool(dynamic value) => _bool(value);
+DateTime? shopDate(dynamic value) => _date(value);
+
+Map<String, dynamic> _map(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return <String, dynamic>{};
+}
+
+List<Map<String, dynamic>> _list(dynamic value) {
+  if (value is! List) return <Map<String, dynamic>>[];
+  return value.map(_map).toList(growable: false);
+}
+
+String _string(dynamic value, {String fallback = ''}) {
+  final String result = value?.toString().trim() ?? '';
+  return result.isEmpty ? fallback : result;
+}
+
+int _int(dynamic value, {int fallback = 0}) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? fallback;
+}
+
+int? _nullableInt(dynamic value) {
+  if (value == null) return null;
+  return _int(value);
+}
+
+double _double(dynamic value, {double fallback = 0}) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? fallback;
+}
+
+double? _nullableDouble(dynamic value) {
+  if (value == null || value.toString().trim().isEmpty) return null;
+  return _double(value);
+}
+
+bool _bool(dynamic value) {
+  if (value is bool) return value;
+  return value?.toString().toLowerCase() == 'true';
+}
+
+DateTime? _date(dynamic value) {
+  final String raw = _string(value);
+  return raw.isEmpty ? null : DateTime.tryParse(raw)?.toLocal();
+}
+
+String _compactNumber(int value) {
+  if (value < 1000) return value.toString();
+  if (value % 1000 == 0) return '${value ~/ 1000}k';
+  return '${(value / 1000).toStringAsFixed(1)}k';
+}

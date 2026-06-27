@@ -7,6 +7,7 @@ class UserSettingsProfileModel {
     required this.canChangeEmail,
     required this.canChangePhone,
     required this.streakFreezeCount,
+    required this.currentStreakDays,
     required this.learnerLevel,
     this.email,
     this.phone,
@@ -25,6 +26,7 @@ class UserSettingsProfileModel {
   final bool canChangeEmail;
   final bool canChangePhone;
   final int streakFreezeCount;
+  final int currentStreakDays;
   final String learnerLevel;
 
   factory UserSettingsProfileModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class UserSettingsProfileModel {
       canChangeEmail: json['canChangeEmail'] != false,
       canChangePhone: json['canChangePhone'] != false,
       streakFreezeCount: _asInt(json['streakFreezeCount']),
+      currentStreakDays: _asInt(json['currentStreakDays']),
       learnerLevel: _stringOrDefault(json['learnerLevel'], 'A1'),
     );
   }
@@ -57,6 +60,7 @@ class UserSettingsProfileModel {
       'canChangeEmail': canChangeEmail,
       'canChangePhone': canChangePhone,
       'streakFreezeCount': streakFreezeCount,
+      'currentStreakDays': currentStreakDays,
       'learnerLevel': learnerLevel,
     };
   }
@@ -73,6 +77,7 @@ class UserSettingsProfileModel {
     bool? canChangeEmail,
     bool? canChangePhone,
     int? streakFreezeCount,
+    int? currentStreakDays,
     String? learnerLevel,
   }) {
     return UserSettingsProfileModel(
@@ -87,6 +92,7 @@ class UserSettingsProfileModel {
       canChangeEmail: canChangeEmail ?? this.canChangeEmail,
       canChangePhone: canChangePhone ?? this.canChangePhone,
       streakFreezeCount: streakFreezeCount ?? this.streakFreezeCount,
+      currentStreakDays: currentStreakDays ?? this.currentStreakDays,
       learnerLevel: learnerLevel ?? this.learnerLevel,
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../features/home/views/home_view.dart';
+import '../../controllers/user_session_controller.dart';
 import '../../../features/messages/views/messages_view.dart';
 import '../../../features/service_hub/views/service_hub_view.dart';
 import '../app_home_bottom_navigation_bar.dart';
@@ -30,15 +31,24 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         key: scaffoldKey,
-        appBar: AppHomeTopBar(
-          greeting: 'Buongiorno,',
-          userName: 'Arif!',
-          streakLabel: '5d',
-          notificationCount: 3,
-          messageCount: 1,
-          onNotificationTap: controller.openNotifications,
-          onMessageTap: controller.openMessages,
-          onProfileTap: () => scaffoldKey.currentState?.openDrawer(),
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Obx(() {
+            final UserSessionController session =
+                Get.find<UserSessionController>();
+            return AppHomeTopBar(
+              greeting: 'Buongiorno,',
+              userName: session.displayName,
+              avatarUrl: session.avatarUrl,
+              streakLabel: '${session.currentStreakDays}d',
+              showNotificationDot:
+                  controller.hasUnreadNotifications.value,
+              messageCount: 0,
+              onNotificationTap: controller.openNotifications,
+              onMessageTap: controller.openMessages,
+              onProfileTap: () => scaffoldKey.currentState?.openDrawer(),
+            );
+          }),
         ),
         onDrawerChanged: controller.onDrawerChanged,
         drawer: AppDrawer(

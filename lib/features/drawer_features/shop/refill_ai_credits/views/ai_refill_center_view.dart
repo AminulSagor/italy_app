@@ -5,6 +5,7 @@ import 'package:italir_pothe/core/widgets/custom_button.dart';
 import 'package:italir_pothe/core/widgets/simple_appbar.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../models/shop_models.dart';
 import '../../shop_controller.dart';
 
 class AiRefillCenterPage extends StatelessWidget {
@@ -30,74 +31,86 @@ class AiRefillCenterPage extends StatelessWidget {
       ),
       body: SafeArea(
         child: Column(
-          children: [
+          children: <Widget>[
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
-                  children: [
-                    _topStats(),
+                  children: <Widget>[
+                    Obx(() => _topStats(controller)),
                     const SizedBox(height: 24),
                     _heroCard(),
                     const SizedBox(height: 24),
-
-                    Obx(
-                      () => _selectablePlanCard(
-                        title: 'Basic Starter',
-                        subtitle: '15 Mins Voice | 1,000 Tokens',
-                        price: '€2.49',
-                        isSelected: controller.isSelected(AiRefillPlan.basic),
-                        onTap: () => controller.selectPlan(AiRefillPlan.basic),
-                      ),
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    Obx(
-                      () => _selectablePlanCard(
-                        title: 'Fluent Learner',
-                        subtitle: '60 Mins Voice | 5,000\nTokens',
-                        price: '€6.99',
-                        isPopular: true,
-                        isSelected: controller.isSelected(AiRefillPlan.fluent),
-                        onTap: () => controller.selectPlan(AiRefillPlan.fluent),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    Obx(
-                      () => _selectablePlanCard(
-                        title: 'Elite Mastery',
-                        subtitle: '180 Mins | 15,000 Tokens',
-                        price: '€14.99',
-                        isSelected: controller.isSelected(AiRefillPlan.elite),
-                        onTap: () => controller.selectPlan(AiRefillPlan.elite),
-                        unselectedBgColor: paleOrange,
-                        unselectedBorderColor: const Color(0xFFFFEBC0),
-                        unselectedSubtitleColor: orange,
-                        unselectedPriceBgColor: Colors.white,
-                        unselectedPriceTextColor: orange,
-                        unselectedPriceBorderColor: const Color(0xFFF8D564),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
+                    Obx(() {
+                      if (controller.aiPackages.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40),
+                          child: Text('No AI refill packages are available.'),
+                        );
+                      }
+                      return Column(
+                        children: controller.aiPackages
+                            .asMap()
+                            .entries
+                            .map((MapEntry<int, StorePackageModel> entry) {
+                              final StorePackageModel package = entry.value;
+                              final bool warmCard = entry.key.isOdd;
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: _selectablePlanCard(
+                                  title: package.name,
+                                  subtitle: package.entitlementSummary,
+                                  price: controller.packagePriceText(package),
+                                  isPopular: package.badgeLabel.isNotEmpty,
+                                  isSelected: controller.isAiPackageSelected(
+                                    package.id,
+                                  ),
+                                  onTap: () => controller.selectAiPackage(
+                                    package.id,
+                                  ),
+                                  unselectedBgColor:
+                                      warmCard ? paleOrange : Colors.white,
+                                  unselectedBorderColor: warmCard
+                                      ? const Color(0xFFFFEBC0)
+                                      : const Color(0xFFEDEDED),
+                                  unselectedSubtitleColor:
+                                      warmCard ? orange : muted,
+                                  unselectedPriceBgColor: warmCard
+                                      ? Colors.white
+                                      : const Color(0xFFE8E6E6),
+                                  unselectedPriceTextColor:
+                                      warmCard ? orange : const Color(0xFF3A3434),
+                                  unselectedPriceBorderColor: warmCard
+                                      ? const Color(0xFFF8D564)
+                                      : Colors.transparent,
+                                ),
+                              );
+                            })
+                            .toList(growable: false),
+                      );
+                    }),
+                    const SizedBox(height: 8),
                     _infoCard(),
                     const SizedBox(height: 30),
                   ],
                 ),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 30),
-              child: CustomButton.primary(
-                text: 'Confirm Purchase  ▶',
-                onPressed: controller.confirmPurchase,
-                btnColor: green,
-                borderRadius: 30,
-                btnShadowColor: darkGreen,
+              child: Obx(
+                () => CustomButton.primary(
+                  text: controller.isLoadingQuote.value
+                      ? 'Loading...'
+                      : 'Confirm Purchase  ▶',
+                  onPressed: controller.isLoadingQuote.value ||
+                          controller.aiPackages.isEmpty
+                      ? () {}
+                      : controller.confirmPurchase,
+                  btnColor: green,
+                  borderRadius: 30,
+                  btnShadowColor: darkGreen,
+                ),
               ),
             ),
           ],
@@ -106,7 +119,7 @@ class AiRefillCenterPage extends StatelessWidget {
     );
   }
 
-  Widget _topStats() {
+  Widget _topStats(ShopController controller) {
     return Container(
       height: 60,
       decoration: BoxDecoration(
@@ -123,13 +136,17 @@ class AiRefillCenterPage extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _statItem(icon: Icons.mic, label: '12 Mins', color: green),
+            child: _statItem(
+              icon: Icons.mic,
+              label: '${controller.aiVoiceMinutes} Mins',
+              color: green,
+            ),
           ),
           Container(height: 34, width: 1, color: const Color(0xFFE7E7E7)),
           Expanded(
             child: _statItem(
               icon: Symbols.deployed_code,
-              label: '1,200 Tokens',
+              label: '${controller.aiTextTokens} Tokens',
               color: const Color.fromARGB(255, 202, 114, 42),
             ),
           ),

@@ -9,7 +9,7 @@ import '../../features/ai_chat/services/ai_tutor_voice_service.dart';
 import '../../features/courses/controllers/courses_controller.dart';
 import '../../features/courses/services/courses_api_service.dart';
 import '../../features/home/controllers/home_controller.dart';
-import '../../features/home/services/home_mock_service.dart';
+import '../../features/home/services/home_api_service.dart';
 import '../../features/drawer_features/settings/services/user_settings_service.dart';
 import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/messages/controllers/messages_controller.dart';
@@ -20,6 +20,8 @@ import '../../features/messages/sub-feature/call/service/incoming_call_coordinat
 import '../../features/notifications/services/notifications_mock_service.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
 import '../services/api_client.dart';
+import '../controllers/user_session_controller.dart';
+import '../services/learning_activity_api_service.dart';
 import '../services/current_user_summary_service.dart';
 import '../widgets/app_drawer_controller.dart';
 import '../services/token_service.dart';
@@ -33,13 +35,23 @@ import '../../features/practice_hub/services/practice_hub_api_service.dart';
 class InitialBindings extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<CurrentUserSummaryService>(
-      () => CurrentUserSummaryService(apiClient: Get.find<ApiClient>()),
-      fenix: true,
-    );
+    if (!Get.isRegistered<CurrentUserSummaryService>()) {
+      Get.lazyPut<CurrentUserSummaryService>(
+        () => CurrentUserSummaryService(apiClient: Get.find<ApiClient>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<UserSessionController>()) {
+      Get.put<UserSessionController>(
+        UserSessionController(
+          currentUserSummaryService: Get.find<CurrentUserSummaryService>(),
+        ),
+        permanent: true,
+      );
+    }
     Get.lazyPut<AppDrawerController>(
       () => AppDrawerController(
-        currentUserSummaryService: Get.find<CurrentUserSummaryService>(),
+        userSessionController: Get.find<UserSessionController>(),
       ),
       fenix: true,
     );
@@ -73,7 +85,6 @@ class InitialBindings extends Bindings {
       ),
       fenix: true,
     );
-    Get.lazyPut<HomeMockService>(() => HomeMockService());
     Get.lazyPut<CoursesApiService>(
       () => CoursesApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,
@@ -83,8 +94,18 @@ class InitialBindings extends Bindings {
       fenix: true,
     );
 
+    Get.lazyPut<HomeApiService>(
+      () => HomeApiService(
+        apiClient: Get.find<ApiClient>(),
+        learningActivityApiService: Get.find<LearningActivityApiService>(),
+      ),
+      fenix: true,
+    );
     Get.lazyPut<HomeController>(
-      () => HomeController(homeMockService: Get.find<HomeMockService>()),
+      () => HomeController(
+        homeApiService: Get.find<HomeApiService>(),
+        userSessionController: Get.find<UserSessionController>(),
+      ),
       fenix: true,
     );
 

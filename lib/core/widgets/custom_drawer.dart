@@ -59,7 +59,7 @@ class AppDrawer extends GetView<AppDrawerController> {
                 child: IntrinsicHeight(
                   child: Column(
                     children: <Widget>[
-                      SizedBox(height: 55.h),
+                      SizedBox(height: 30.h),
                       Obx(
                         () => _DrawerProfileHeader(
                           name: controller.displayName,
@@ -119,7 +119,6 @@ class AppDrawer extends GetView<AppDrawerController> {
                               Get.toNamed(AppRoutes.settings);
                             },
                       ),
-                      const Spacer(),
                       Divider(
                         color: Colors.grey.withValues(alpha: 0.28),
                         thickness: 1,
@@ -146,7 +145,6 @@ class AppDrawer extends GetView<AppDrawerController> {
                           color: Colors.grey.withValues(alpha: 0.55),
                         ),
                       ),
-                      SizedBox(height: 28.h),
                     ],
                   ),
                 ),
@@ -297,9 +295,7 @@ class _DrawerItem extends StatelessWidget {
           width: double.infinity,
           height: 46.h,
           padding: EdgeInsets.symmetric(horizontal: 21.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100.r),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(100.r)),
           child: Row(
             children: <Widget>[
               Icon(icon, size: 22.r, color: const Color(0xFF5D5D5D)),

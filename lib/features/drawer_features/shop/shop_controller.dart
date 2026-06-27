@@ -1,259 +1,289 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:italir_pothe/routes/routes.dart';
+import 'package:uuid/uuid.dart';
 
-enum AiRefillPlan { basic, fluent, elite }
-
-enum RefillCurrency { eur, bdt }
-
-enum CheckoutPaymentMethod { card, paypal, applePay, bkash }
-
-class StreakFreezePackTitles {
-  static const String singleFreezeTitle = 'Single Freeze';
-  static const String tripleProtectionTitle = 'Triple Protection (3x)';
-  static const String unlimitedMonthlyShieldTitle = 'Unlimited Monthly Shield';
-}
-
-class CvCreditOffer {
-  final String id;
-  final String title;
-  final String subtitle;
-  final int credits;
-  final double priceEur;
-  final double? couponPriceEur;
-  final String badge;
-  final bool isMonthly;
-  final IconData icon;
-
-  const CvCreditOffer({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.credits,
-    required this.priceEur,
-    this.couponPriceEur,
-    this.badge = '',
-    this.isMonthly = false,
-    required this.icon,
-  });
-}
+import '../../../core/services/api_error_handler.dart';
+import '../../../routes/routes.dart';
+import 'models/shop_models.dart';
+import 'models/shop_order_models.dart';
+import 'services/shop_api_service.dart';
 
 class OrderHistoryFilterTitles {
   static const String allOrders = 'All Orders';
   static const String courses = 'Courses';
   static const String aiRefills = 'AI Refills';
-}
-
-class OrderHistoryItem {
-  final String id;
-  final String title;
-  final String category;
-  final String price;
-  final String date;
-  final String status;
-
-  const OrderHistoryItem({
-    required this.id,
-    required this.title,
-    required this.category,
-    required this.price,
-    required this.date,
-    this.status = 'COMPLETED',
-  });
+  static const String streakFreezes = 'Streak Freezes';
+  static const String cvCredits = 'CV Credits';
 }
 
 class ShopController extends GetxController {
-  void onRefillCreditTap() {
-    Get.toNamed(AppRoutes.aiRefillCenter);
-  }
+  ShopController({required ShopApiService apiService})
+    : _apiService = apiService;
 
-  // AI refill center state
-  final Rx<AiRefillPlan> selectedPlan = AiRefillPlan.fluent.obs;
+  final ShopApiService _apiService;
+  static const Uuid _uuid = Uuid();
 
-  void selectPlan(AiRefillPlan plan) {
-    selectedPlan.value = plan;
-    clearCoupon();
-  }
+  final RxBool isLoadingShop = false.obs;
+  final RxBool isLoadingQuote = false.obs;
+  final RxBool isCheckoutLoading = false.obs;
+  final RxString shopError = ''.obs;
+  final RxString checkoutError = ''.obs;
 
-  bool isSelected(AiRefillPlan plan) {
-    return selectedPlan.value == plan;
-  }
+  final Rxn<StoreShopModel> shop = Rxn<StoreShopModel>();
+  final Rxn<StoreBalancesModel> balances = Rxn<StoreBalancesModel>();
+  final RxList<StorePackageModel> aiPackages = <StorePackageModel>[].obs;
+  final RxList<StorePackageModel> streakPackages = <StorePackageModel>[].obs;
+  final RxList<StorePackageModel> cvPackages = <StorePackageModel>[].obs;
 
-  String get selectedPlanTitle {
-    switch (selectedPlan.value) {
-      case AiRefillPlan.basic:
-        return 'Basic Starter';
-      case AiRefillPlan.fluent:
-        return 'Fluent Learner';
-      case AiRefillPlan.elite:
-        return 'Elite Mastery';
-    }
-  }
+  final RxString selectedAiPackageId = ''.obs;
+  final RxString selectedStreakPackageId = ''.obs;
+  final RxString selectedCvPackageId = ''.obs;
+  final Rxn<StorePackageModel> activePackage = Rxn<StorePackageModel>();
 
-  String get selectedPlanSubtitle {
-    switch (selectedPlan.value) {
-      case AiRefillPlan.basic:
-        return '15 Mins Voice | 1,000 Tokens';
-      case AiRefillPlan.fluent:
-        return '60 Mins Voice | 5,000 Tokens';
-      case AiRefillPlan.elite:
-        return '180 Mins | 15,000 Tokens';
-    }
-  }
-
-  // Order summary state
   final Rx<RefillCurrency> selectedCurrency = RefillCurrency.eur.obs;
-
   final TextEditingController couponTextController = TextEditingController();
-
   final RxString couponCode = ''.obs;
   final RxBool isCouponApplied = false.obs;
-
-  void selectCurrency(RefillCurrency currency) {
-    selectedCurrency.value = currency;
-    syncDefaultPaymentMethod();
-  }
-
-  void onCouponChanged(String value) {
-    couponCode.value = value;
-
-    if (isCouponApplied.value) {
-      isCouponApplied.value = false;
-    }
-  }
-
-  void applyCoupon() {
-    final code = couponTextController.text.trim();
-
-    if (code.isEmpty) {
-      Get.snackbar(
-        'Coupon Required',
-        'Please enter a coupon code',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    couponCode.value = code;
-    isCouponApplied.value = true;
-  }
-
-  void clearCoupon() {
-    couponTextController.clear();
-    couponCode.value = '';
-    isCouponApplied.value = false;
-  }
-
-  double get selectedPlanPriceEurValue {
-    switch (selectedPlan.value) {
-      case AiRefillPlan.basic:
-        return 2.49;
-      case AiRefillPlan.fluent:
-        return 5.99;
-      case AiRefillPlan.elite:
-        return 14.99;
-    }
-  }
-
-  double get selectedPlanPriceBdtValue {
-    switch (selectedPlan.value) {
-      case AiRefillPlan.basic:
-        return 299;
-      case AiRefillPlan.fluent:
-        return 867;
-      case AiRefillPlan.elite:
-        return 1799;
-    }
-  }
-
-  double get currentBasePrice {
-    return selectedCurrency.value == RefillCurrency.eur
-        ? selectedPlanPriceEurValue
-        : selectedPlanPriceBdtValue;
-  }
-
-  double get discountAmount {
-    if (!isCouponApplied.value) return 0;
-    return currentBasePrice * 0.20;
-  }
-
-  double get payableAmount {
-    return currentBasePrice - discountAmount;
-  }
-
-  // Checkout design always shows the sale/discount badge like the reference UI.
-  double get checkoutDiscountAmount => currentBasePrice * 0.20;
-
-  double get checkoutPayableAmount => currentBasePrice - checkoutDiscountAmount;
-
-  String formatPrice(double? value) {
-    final double safeValue = value ?? 0;
-
-    if (selectedCurrency.value == RefillCurrency.eur) {
-      return '€${safeValue.toStringAsFixed(2)}';
-    }
-
-    return '৳${safeValue.toStringAsFixed(0)}';
-  }
-
-  String get selectedPlanPrice => formatPrice(selectedPlanPriceEurValue);
-
-  String get selectedPlanPriceBdt => formatPrice(selectedPlanPriceBdtValue);
-
-  String get orderSummaryPrice => formatPrice(payableAmount);
-
-  String get originalPriceText => formatPrice(currentBasePrice);
-
-  String get payablePriceText => formatPrice(payableAmount);
-
-  String get savedAmountText => formatPrice(discountAmount);
-
-  String get checkoutOriginalPriceText => formatPrice(currentBasePrice);
-
-  String get checkoutPayablePriceText => formatPrice(checkoutPayableAmount);
-
-  String get checkoutSavedAmountText => formatPrice(checkoutDiscountAmount);
-
-  void confirmPurchase() {
-    clearCoupon();
-    Get.toNamed(AppRoutes.orderSummary);
-  }
-
-  void buySelectedPlan() {
-    goToCheckout();
-  }
-
-  // Checkout state
+  final Rxn<StoreQuoteResponseModel> quote = Rxn<StoreQuoteResponseModel>();
   final Rx<CheckoutPaymentMethod> selectedPaymentMethod =
       CheckoutPaymentMethod.card.obs;
 
-  final RxBool isCheckoutLoading = false.obs;
-  final RxString checkoutError = ''.obs;
+  final Rxn<StorePurchaseCompletionModel> completedPurchase =
+      Rxn<StorePurchaseCompletionModel>();
 
-  void syncDefaultPaymentMethod() {
-    selectedPaymentMethod.value = selectedCurrency.value == RefillCurrency.bdt
-        ? CheckoutPaymentMethod.bkash
-        : CheckoutPaymentMethod.card;
+  @override
+  void onInit() {
+    super.onInit();
+    loadShop();
   }
 
-  List<CheckoutPaymentMethod> get availablePaymentMethods => const [
-    CheckoutPaymentMethod.card,
-    CheckoutPaymentMethod.paypal,
-    CheckoutPaymentMethod.applePay,
-    CheckoutPaymentMethod.bkash,
-  ];
+  StorePackageModel? get selectedAiPackage =>
+      _findPackage(aiPackages, selectedAiPackageId.value);
+  StorePackageModel? get selectedStreakPackage =>
+      _findPackage(streakPackages, selectedStreakPackageId.value);
+  StorePackageModel? get selectedCvPackage =>
+      _findPackage(cvPackages, selectedCvPackageId.value);
+
+  int get aiVoiceMinutes => balances.value?.aiVoiceMinutes ?? 0;
+  int get aiTextTokens => balances.value?.aiTextTokens ?? 0;
+  int get streakFreezeBalance => balances.value?.streakFreezeCount ?? 0;
+  int get cvCreditBalance => balances.value?.cvCredits ?? 0;
+
+  StoreShopSectionModel? sectionFor(StorePackageType type) {
+    for (final StoreShopSectionModel item in shop.value?.sections ?? const []) {
+      if (item.packageType == type) return item;
+    }
+    return null;
+  }
+
+  Future<void> loadShop() async {
+    if (isLoadingShop.value) return;
+    isLoadingShop.value = true;
+    shopError.value = '';
+
+    final ApiResult<List<Object>> result =
+        await ApiErrorHandler.call<List<Object>>(() async {
+          final List<Object> values = await Future.wait<Object>(<Future<Object>>[
+            _apiService.getShop(),
+            _apiService.getPackages(packageType: StorePackageType.aiBundle),
+            _apiService.getPackages(
+              packageType: StorePackageType.streakFreeze,
+            ),
+            _apiService.getPackages(packageType: StorePackageType.cvCredit),
+          ]);
+          return values;
+        }, showError: false);
+
+    if (result.isSuccess && result.data != null) {
+      final List<Object> data = result.data!;
+      final StoreShopModel shopData = data[0] as StoreShopModel;
+      shop.value = shopData;
+      balances.value = shopData.balances;
+      aiPackages.assignAll((data[1] as StorePackageListResponseModel).items);
+      streakPackages.assignAll((data[2] as StorePackageListResponseModel).items);
+      cvPackages.assignAll((data[3] as StorePackageListResponseModel).items);
+      _selectDefaults();
+    } else {
+      shopError.value = result.error ?? 'Could not load the shop.';
+    }
+    isLoadingShop.value = false;
+  }
+
+  Future<void> refreshBalances() async {
+    final ApiResult<StoreBalancesModel> result =
+        await ApiErrorHandler.call<StoreBalancesModel>(
+          _apiService.getBalances,
+          showError: false,
+        );
+    if (result.isSuccess && result.data != null) balances.value = result.data;
+  }
+
+  void selectAiPackage(String packageId) {
+    selectedAiPackageId.value = packageId;
+    _resetQuote();
+  }
+
+  void selectStreakPackage(String packageId) {
+    selectedStreakPackageId.value = packageId;
+    _resetQuote();
+  }
+
+  void selectCvPackage(String packageId) {
+    selectedCvPackageId.value = packageId;
+    _resetQuote();
+  }
+
+  bool isAiPackageSelected(String id) => selectedAiPackageId.value == id;
+  bool isStreakPackageSelected(String id) =>
+      selectedStreakPackageId.value == id;
+  bool isCvPackageSelected(String id) => selectedCvPackageId.value == id;
+
+  String packagePriceText(StorePackageModel package) {
+    final String price = '€${package.priceEur.toStringAsFixed(2)}';
+    return package.isMonthly ? '$price/mo' : price;
+  }
+
+  Future<void> selectCurrency(RefillCurrency currency) async {
+    if (selectedCurrency.value == currency) return;
+    selectedCurrency.value = currency;
+    await _loadQuote(coupon: isCouponApplied.value ? couponCode.value : '');
+  }
+
+  void onCouponChanged(String value) {
+    couponCode.value = value.trim();
+    if (isCouponApplied.value) isCouponApplied.value = false;
+  }
+
+  Future<void> applyCoupon() async {
+    final String code = couponTextController.text.trim();
+    if (code.isEmpty) {
+      Get.snackbar('Coupon Required', 'Please enter a coupon code.');
+      return;
+    }
+    final bool loaded = await _loadQuote(coupon: code);
+    if (loaded) {
+      couponCode.value = code;
+      isCouponApplied.value = true;
+    }
+  }
+
+  Future<void> clearCoupon() async {
+    couponTextController.clear();
+    couponCode.value = '';
+    isCouponApplied.value = false;
+    if (activePackage.value != null) await _loadQuote();
+  }
+
+  String formatPrice(double value) {
+    final bool eur = selectedCurrency.value == RefillCurrency.eur;
+    return eur ? '€${value.toStringAsFixed(2)}' : '৳${value.toStringAsFixed(0)}';
+  }
+
+  StoreQuotePricingModel? get pricing => quote.value?.pricing;
+  double get currentBasePrice =>
+      pricing?.originalAmount ?? activePackage.value?.priceEur ?? 0;
+  double get discountAmount => pricing?.discountAmount ?? 0;
+  double get payableAmount => pricing?.payableAmount ?? currentBasePrice;
+  String get originalPriceText => formatPrice(currentBasePrice);
+  String get payablePriceText => formatPrice(payableAmount);
+  String get savedAmountText => formatPrice(discountAmount);
+  String get orderSummaryPrice => payablePriceText;
+  String get checkoutOriginalPriceText => originalPriceText;
+  String get checkoutPayablePriceText => payablePriceText;
+  String get checkoutSavedAmountText => savedAmountText;
+  String get streakFreezeOriginalPriceText => originalPriceText;
+  String get streakFreezePayablePriceText => payablePriceText;
+  String get streakFreezeSavedAmountText => savedAmountText;
+  String get cvCreditOriginalPriceText => originalPriceText;
+  String get cvCreditPayablePriceText => payablePriceText;
+  String get cvCreditSavedAmountText => savedAmountText;
+
+  StorePackageModel? get checkoutPackage =>
+      activePackage.value ?? selectedAiPackage;
+  String get selectedPlanTitle => checkoutPackage?.name ?? 'Package';
+  String get selectedPlanSubtitle => checkoutPackage?.entitlementSummary ?? '';
+  String get checkoutBillingLabel =>
+      checkoutPackage?.isMonthly == true ? '/ month' : '/ one-time';
+  String get selectedStreakFreezePackTitle =>
+      selectedStreakPackage?.name ?? 'Streak Freeze';
+  int get selectedStreakFreezeCount =>
+      selectedStreakPackage?.streakFreezeCount ?? 0;
+  StorePackageModel get selectedCvCreditOffer =>
+      selectedCvPackage ?? _emptyPackage(StorePackageType.cvCredit);
+  String get selectedCvCreditOfferSummary =>
+      selectedCvPackage?.entitlementSummary ?? '';
+
+  Future<void> onRefillCreditTap() async {
+    await _openPackageList(StorePackageType.aiBundle, AppRoutes.aiRefillCenter);
+  }
+
+  Future<void> onStreakFreezeTap() async {
+    await _openPackageList(StorePackageType.streakFreeze, AppRoutes.streakFreeze);
+  }
+
+  Future<void> onCvCreditTap() async {
+    await _openPackageList(StorePackageType.cvCredit, AppRoutes.cvCreditStore);
+  }
+
+  Future<void> confirmPurchase() async {
+    await _openSummary(selectedAiPackage, AppRoutes.orderSummary);
+  }
+
+  Future<void> goToStreakFreezeOrderSummary() async {
+    await _openSummary(
+      selectedStreakPackage,
+      AppRoutes.streakFreezeOrderSummary,
+    );
+  }
+
+  Future<void> goToCvCreditOrderSummary() async {
+    await _openSummary(selectedCvPackage, AppRoutes.cvCreditOrderSummary);
+  }
+
+  Future<void> buySelectedPlan() async {
+    if (quote.value == null && !await _loadQuote()) return;
+    _selectDefaultPaymentMethod();
+    Get.toNamed(AppRoutes.checkout);
+  }
+
+  List<CheckoutPaymentMethod> get availablePaymentMethods =>
+      quote.value?.supportedProviders
+          .map((StoreProviderOptionModel item) => item.method)
+          .toList(growable: false) ??
+      const <CheckoutPaymentMethod>[];
+
+  StoreProviderOptionModel? paymentOption(CheckoutPaymentMethod method) {
+    for (final StoreProviderOptionModel option
+        in quote.value?.supportedProviders ?? const []) {
+      if (option.method == method) return option;
+    }
+    return null;
+  }
+
+  bool isPaymentMethodSelected(CheckoutPaymentMethod method) =>
+      selectedPaymentMethod.value == method;
 
   void selectPaymentMethod(CheckoutPaymentMethod method) {
+    final StoreProviderOptionModel? option = paymentOption(method);
+    if (option == null || !option.enabled) {
+      Get.snackbar(
+        'Payment Unavailable',
+        option?.unavailableReason.isNotEmpty == true
+            ? option!.unavailableReason
+            : 'This payment method is unavailable.',
+      );
+      return;
+    }
     selectedPaymentMethod.value = method;
     checkoutError.value = '';
   }
 
-  bool isPaymentMethodSelected(CheckoutPaymentMethod method) {
-    return selectedPaymentMethod.value == method;
-  }
-
-  String get selectedPaymentMethodTitle {
-    switch (selectedPaymentMethod.value) {
+  String paymentMethodTitle(CheckoutPaymentMethod method) {
+    final String apiLabel = paymentOption(method)?.label ?? '';
+    if (apiLabel.isNotEmpty) return apiLabel;
+    switch (method) {
+      case CheckoutPaymentMethod.googlePlay:
+        return 'Google Play';
       case CheckoutPaymentMethod.card:
         return 'Card';
       case CheckoutPaymentMethod.paypal:
@@ -265,430 +295,299 @@ class ShopController extends GetxController {
     }
   }
 
-  void goToCheckout() {
-    syncDefaultPaymentMethod();
-    checkoutError.value = '';
-    Get.toNamed(AppRoutes.checkout);
-  }
-
   Future<void> confirmCheckout() async {
-    isCheckoutLoading.value = true;
-    checkoutError.value = '';
-
-    try {
-      await Future.delayed(const Duration(seconds: 2));
-
-      debugPrint('Plan: $selectedPlanTitle');
-      debugPrint('Currency: ${selectedCurrency.value}');
-      debugPrint('Amount: $checkoutPayablePriceText');
-      debugPrint('Payment method: $selectedPaymentMethodTitle');
-
-      Get.snackbar(
-        'Payment Started',
-        'Redirecting to $selectedPaymentMethodTitle',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (_) {
-      checkoutError.value = 'Something went wrong. Please try again.';
-    } finally {
-      isCheckoutLoading.value = false;
-    }
-  }
-
-  String get selectedPlanVoiceMinutes {
-    switch (selectedPlan.value) {
-      case AiRefillPlan.basic:
-        return '15m';
-      case AiRefillPlan.fluent:
-        return '60m';
-      case AiRefillPlan.elite:
-        return '180m';
-    }
-  }
-
-  String get selectedPlanTokensShort {
-    switch (selectedPlan.value) {
-      case AiRefillPlan.basic:
-        return '1k';
-      case AiRefillPlan.fluent:
-        return '5k';
-      case AiRefillPlan.elite:
-        return '15k';
-    }
-  }
-
-  String get completedMessage {
-    return "Your '$selectedPlanTitle' bundle is\nactive. You now have ${selectedPlanVoiceMinutes.replaceAll('m', ' Mins')} of\nVoice and ${selectedPlanSubtitle.split('|').last.trim()}.";
-  }
-
-  final RxString completedOrderId = '#IT-SHK-1024'.obs;
-
-  void goToPurchaseCompleted() {
-    completedOrderId.value = '#IT-SHK-1024';
-    Get.offNamed(AppRoutes.purchaseCompleted);
-  }
-
-  void startLearningNow() {
-    // TODO: replace with your learning/home route
-    Get.back();
-  }
-
-  // Streak freeze store state
-  final RxString selectedStreakFreezePack =
-      StreakFreezePackTitles.tripleProtectionTitle.obs;
-
-  void selectStreakFreezePack(String title) {
-    selectedStreakFreezePack.value = title;
-    clearCoupon();
-  }
-
-  bool isStreakFreezePackSelected(String title) {
-    return selectedStreakFreezePack.value == title;
-  }
-
-  String get selectedStreakFreezePackTitle => selectedStreakFreezePack.value;
-
-  int get selectedStreakFreezeCount {
-    switch (selectedStreakFreezePackTitle) {
-      case StreakFreezePackTitles.tripleProtectionTitle:
-        return 3;
-      case StreakFreezePackTitles.unlimitedMonthlyShieldTitle:
-        return 30;
-      default:
-        return 1;
-    }
-  }
-
-  String streakFreezePackSubtitle(String title) {
-    switch (title) {
-      case StreakFreezePackTitles.tripleProtectionTitle:
-        return "A weekend's worth of protection";
-      case StreakFreezePackTitles.unlimitedMonthlyShieldTitle:
-        return 'Never lose a streak again';
-      default:
-        return 'Save a 1-day missed streak';
-    }
-  }
-
-  String streakFreezePackBadge(String title) {
-    switch (title) {
-      case StreakFreezePackTitles.tripleProtectionTitle:
-        return 'Popular';
-      case StreakFreezePackTitles.unlimitedMonthlyShieldTitle:
-        return 'Best Value';
-      default:
-        return '';
-    }
-  }
-
-  double streakFreezePackPriceValue(String title) {
-    final bool isEur = selectedCurrency.value == RefillCurrency.eur;
-
-    switch (title) {
-      case StreakFreezePackTitles.tripleProtectionTitle:
-        return isEur ? 2.49 : 299;
-      case StreakFreezePackTitles.unlimitedMonthlyShieldTitle:
-        return isEur ? 4.99 : 599;
-      default:
-        return isEur ? 0.99 : 119;
-    }
-  }
-
-  double get currentStreakFreezeBasePrice {
-    return streakFreezePackPriceValue(selectedStreakFreezePackTitle);
-  }
-
-  double get streakFreezeDiscountAmount {
-    if (!isCouponApplied.value) return 0;
-    return currentStreakFreezeBasePrice * 0.20;
-  }
-
-  double get streakFreezePayableAmount {
-    return currentStreakFreezeBasePrice - streakFreezeDiscountAmount;
-  }
-
-  String get streakFreezeOriginalPriceText {
-    return formatPrice(currentStreakFreezeBasePrice);
-  }
-
-  String get streakFreezeSavedAmountText {
-    return formatPrice(streakFreezeDiscountAmount);
-  }
-
-  String get streakFreezePayablePriceText {
-    return formatPrice(streakFreezePayableAmount);
-  }
-
-  void onStreakFreezeTap() {
-    clearCoupon();
-    syncDefaultPaymentMethod();
-    checkoutError.value = '';
-    Get.toNamed(AppRoutes.streakFreeze);
-  }
-
-  void goToStreakFreezeOrderSummary() {
-    clearCoupon();
-    checkoutError.value = '';
-    syncDefaultPaymentMethod();
-
-    // Use your existing order summary route.
-    // If you create a separate route, replace this with AppRoutes.streakFreezeOrderSummary.
-    Get.toNamed(AppRoutes.streakFreezeOrderSummary);
+    await _completeSelectedPurchase(selectedPaymentMethod.value);
   }
 
   Future<void> confirmStreakFreezePurchase() async {
-    isCheckoutLoading.value = true;
-    checkoutError.value = '';
-
-    try {
-      await Future.delayed(const Duration(seconds: 2));
-
-      debugPrint('Pack: $selectedStreakFreezePackTitle');
-      debugPrint('Freezes: $selectedStreakFreezeCount');
-      debugPrint('Currency: ${selectedCurrency.value}');
-      debugPrint('Amount: $streakFreezePayablePriceText');
-      debugPrint('Payment method: $selectedPaymentMethodTitle');
-
-      Get.snackbar(
-        'Purchase Started',
-        'Redirecting to $selectedPaymentMethodTitle',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (_) {
-      checkoutError.value = 'Something went wrong. Please try again.';
-    } finally {
-      isCheckoutLoading.value = false;
-    }
-  }
-
-  // CV credit store state
-  static const double cvCreditBdtRate = 144.32;
-
-  final RxInt cvCreditBalance = 1.obs;
-
-  final RxList<CvCreditOffer> cvCreditOffers = <CvCreditOffer>[
-    const CvCreditOffer(
-      id: 'single_refill',
-      title: 'Single Refill',
-      subtitle: '1 Credit',
-      credits: 1,
-      priceEur: 0.99,
-      icon: Icons.history_edu_rounded,
-    ),
-    const CvCreditOffer(
-      id: 'pro_hunter_pack',
-      title: 'Pro Hunter Pack (5×)',
-      subtitle: '5 Credits',
-      credits: 5,
-      priceEur: 2.99,
-      couponPriceEur: 1.99,
-      badge: 'BEST VALUE',
-      icon: Icons.history_edu_rounded,
-    ),
-    const CvCreditOffer(
-      id: 'career_sprint_pack',
-      title: 'Career Sprint Pack',
-      subtitle: '10 Credits',
-      credits: 10,
-      priceEur: 9.99,
-      isMonthly: true,
-      icon: Icons.all_inclusive_rounded,
-    ),
-  ].obs;
-
-  final RxString selectedCvCreditOfferId = 'pro_hunter_pack'.obs;
-
-  CvCreditOffer get selectedCvCreditOffer {
-    return cvCreditOffers.firstWhere(
-      (offer) => offer.id == selectedCvCreditOfferId.value,
-      orElse: () => cvCreditOffers.first,
-    );
-  }
-
-  void selectCvCreditOffer(String offerId) {
-    selectedCvCreditOfferId.value = offerId;
-    clearCoupon();
-  }
-
-  bool isCvCreditOfferSelected(String offerId) {
-    return selectedCvCreditOfferId.value == offerId;
-  }
-
-  String get selectedCvCreditOfferSummary {
-    final int count = selectedCvCreditOffer.credits;
-    return '$count CV Credit${count == 1 ? '' : 's'} | Instant Activation';
-  }
-
-  double cvCreditOfferPriceValue(CvCreditOffer offer) {
-    if (selectedCurrency.value == RefillCurrency.eur) {
-      return offer.priceEur;
-    }
-
-    return offer.priceEur * cvCreditBdtRate;
-  }
-
-  double cvCreditOfferCouponPriceValue(CvCreditOffer offer) {
-    final double eurValue = offer.couponPriceEur ?? (offer.priceEur * 0.80);
-
-    if (selectedCurrency.value == RefillCurrency.eur) {
-      return eurValue;
-    }
-
-    return eurValue * cvCreditBdtRate;
-  }
-
-  String cvCreditOfferPriceText(CvCreditOffer offer) {
-    final String price = formatPrice(cvCreditOfferPriceValue(offer));
-    return offer.isMonthly ? '$price/mo' : price;
-  }
-
-  double get currentCvCreditBasePrice {
-    return cvCreditOfferPriceValue(selectedCvCreditOffer);
-  }
-
-  double get currentCvCreditCouponPrice {
-    return cvCreditOfferCouponPriceValue(selectedCvCreditOffer);
-  }
-
-  double get cvCreditDiscountAmount {
-    if (!isCouponApplied.value) return 0;
-    return currentCvCreditBasePrice - currentCvCreditCouponPrice;
-  }
-
-  double get cvCreditPayableAmount {
-    if (!isCouponApplied.value) return currentCvCreditBasePrice;
-    return currentCvCreditCouponPrice;
-  }
-
-  String get cvCreditOriginalPriceText {
-    return formatPrice(currentCvCreditBasePrice);
-  }
-
-  String get cvCreditSavedAmountText {
-    return formatPrice(cvCreditDiscountAmount);
-  }
-
-  String get cvCreditPayablePriceText {
-    return formatPrice(cvCreditPayableAmount);
-  }
-
-  void onCvCreditTap() {
-    clearCoupon();
-    checkoutError.value = '';
-    syncDefaultPaymentMethod();
-    Get.toNamed(AppRoutes.cvCreditStore);
-  }
-
-  void goToCvCreditOrderSummary() {
-    clearCoupon();
-    checkoutError.value = '';
-    syncDefaultPaymentMethod();
-    Get.toNamed(AppRoutes.cvCreditOrderSummary);
+    activePackage.value = selectedStreakPackage;
+    await buySelectedPlan();
   }
 
   Future<void> confirmCvCreditPurchase() async {
+    activePackage.value = selectedCvPackage;
+    await buySelectedPlan();
+  }
+
+  String get completedMessage {
+    final StorePurchaseCompletionModel? value = completedPurchase.value;
+    if (value == null) return 'Your purchase is now active.';
+    switch (value.packageType) {
+      case StorePackageType.aiBundle:
+        return "Your '${value.packageName}' bundle is active. Voice minutes and AI tokens were added to your balance.";
+      case StorePackageType.streakFreeze:
+        return "Your '${value.packageName}' protection is active and ready to protect your streak.";
+      case StorePackageType.cvCredit:
+        return "Your '${value.packageName}' credits are active and ready for CV generation.";
+    }
+  }
+
+  String get completedOrderId =>
+      completedPurchase.value?.orderNumber ?? '';
+  String get completionFirstValue {
+    final StorePurchaseCompletionModel? value = completedPurchase.value;
+    if (value == null) return '0';
+    switch (value.packageType) {
+      case StorePackageType.aiBundle:
+        return '${value.creditedVoiceMinutes}m';
+      case StorePackageType.streakFreeze:
+        return value.streakProtectionMode == 'monthly_unlimited'
+            ? '∞'
+            : '${value.creditedStreakFreezes}×';
+      case StorePackageType.cvCredit:
+        return '${value.creditedCvCredits}×';
+    }
+  }
+
+  String get completionFirstLabel {
+    switch (completedPurchase.value?.packageType) {
+      case StorePackageType.aiBundle:
+        return 'Voice Interaction';
+      case StorePackageType.streakFreeze:
+        return 'Protection Added';
+      case StorePackageType.cvCredit:
+        return 'CV Credits Added';
+      case null:
+        return 'Credits Added';
+    }
+  }
+
+  String get completionSecondValue {
+    final StorePurchaseCompletionModel? value = completedPurchase.value;
+    if (value == null) return '0';
+    switch (value.packageType) {
+      case StorePackageType.aiBundle:
+        return _compact(value.creditedTextTokens);
+      case StorePackageType.streakFreeze:
+        return '${value.balances.streakFreezeCount}×';
+      case StorePackageType.cvCredit:
+        return '${value.balances.cvCredits}×';
+    }
+  }
+
+  String get completionSecondLabel {
+    switch (completedPurchase.value?.packageType) {
+      case StorePackageType.aiBundle:
+        return 'AI Smart Tokens';
+      case StorePackageType.streakFreeze:
+        return 'Current Balance';
+      case StorePackageType.cvCredit:
+        return 'Current Balance';
+      case null:
+        return 'Current Balance';
+    }
+  }
+
+  void startLearningNow() => Get.offAllNamed(AppRoutes.wrapper);
+
+  void onOrderHistoryTap() => Get.toNamed(AppRoutes.orderHistory);
+
+  Future<void> _openPackageList(
+    StorePackageType type,
+    String route,
+  ) async {
+    if (_packagesFor(type).isEmpty) await loadShop();
+    if (_packagesFor(type).isEmpty) {
+      Get.snackbar('Unavailable', 'No published packages are available.');
+      return;
+    }
+    _resetQuote();
+    Get.toNamed(route);
+  }
+
+  Future<void> _openSummary(
+    StorePackageModel? package,
+    String route,
+  ) async {
+    if (package == null) {
+      Get.snackbar('Select a Package', 'Please select a package first.');
+      return;
+    }
+    activePackage.value = package;
+    _resetQuote(keepActivePackage: true);
+    if (await _loadQuote()) Get.toNamed(route);
+  }
+
+  Future<bool> _loadQuote({String coupon = ''}) async {
+    final StorePackageModel? package = activePackage.value;
+    if (package == null || isLoadingQuote.value) return false;
+    isLoadingQuote.value = true;
+    final ApiResult<StoreQuoteResponseModel> result =
+        await ApiErrorHandler.call<StoreQuoteResponseModel>(
+          () => _apiService.getQuote(
+            packageId: package.id,
+            currency: selectedCurrency.value,
+            couponCode: coupon,
+          ),
+        );
+    isLoadingQuote.value = false;
+    if (!result.isSuccess || result.data == null) return false;
+    quote.value = result.data;
+    balances.value = result.data!.balances;
+    _selectDefaultPaymentMethod();
+    return true;
+  }
+
+  Future<void> _completeSelectedPurchase(
+    CheckoutPaymentMethod method,
+  ) async {
+    if (isCheckoutLoading.value) return;
+    final StorePackageModel? package = activePackage.value;
+    final StoreProviderOptionModel? provider = paymentOption(method);
+    if (package == null || provider == null || !provider.enabled) {
+      checkoutError.value = 'A valid package and payment method are required.';
+      return;
+    }
+    if (!provider.demo) {
+      const String message =
+          'The supplied backend does not include the production payment SDK flow yet.';
+      checkoutError.value = message;
+      Get.snackbar('Payment Setup Required', message);
+      return;
+    }
+
     isCheckoutLoading.value = true;
     checkoutError.value = '';
+    final ApiResult<StorePurchaseCompletionModel> result =
+        await ApiErrorHandler.call<StorePurchaseCompletionModel>(() async {
+          final StoreOrderModel order = await _apiService.createOrder(
+            CreateStoreOrderPayloadModel(
+              packageId: package.id,
+              currency: selectedCurrency.value,
+              paymentProvider: provider.provider,
+              idempotencyKey: _uuid.v4(),
+              couponCode: isCouponApplied.value ? couponCode.value : '',
+            ),
+          );
+          final StoreCheckoutResponseModel checkout =
+              await _apiService.getCheckout(order.id);
+          final StoreProviderOptionModel checkoutMethod =
+              checkout.paymentMethods.firstWhere(
+                (StoreProviderOptionModel item) =>
+                    item.provider == provider.provider,
+                orElse: () => provider,
+              );
 
-    try {
-      await Future.delayed(const Duration(seconds: 2));
+          if (method == CheckoutPaymentMethod.googlePlay) {
+            final String productId = checkoutMethod.demoProductId.isNotEmpty
+                ? checkoutMethod.demoProductId
+                : provider.demoProductId;
+            if (productId.isEmpty) {
+              throw StateError('Google Play demo product ID is missing.');
+            }
+            return _apiService.confirmGooglePlayDemo(
+              orderId: order.id,
+              productId: productId,
+              purchaseToken: 'demo_${_uuid.v4()}',
+            );
+          }
+          return _apiService.confirmStripeDemo(
+            orderId: order.id,
+            paymentIntentId: 'pi_demo_${_uuid.v4().replaceAll('-', '')}',
+          );
+        });
 
-      debugPrint('CV Pack: ${selectedCvCreditOffer.title}');
-      debugPrint('Credits: ${selectedCvCreditOffer.credits}');
-      debugPrint('Currency: ${selectedCurrency.value}');
-      debugPrint('Amount: $cvCreditPayablePriceText');
-      debugPrint(
-        'Coupon: ${isCouponApplied.value ? couponCode.value : 'none'}',
-      );
-
-      Get.snackbar(
-        'Purchase Started',
-        'Your CV credits will be added after payment confirmation.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (_) {
-      checkoutError.value = 'Something went wrong. Please try again.';
-    } finally {
-      isCheckoutLoading.value = false;
+    isCheckoutLoading.value = false;
+    if (!result.isSuccess || result.data == null) {
+      checkoutError.value = result.error ?? 'Purchase could not be completed.';
+      return;
     }
+    completedPurchase.value = result.data;
+    balances.value = result.data!.balances;
+    Get.offNamed(AppRoutes.purchaseCompleted);
+  }
+
+  void _selectDefaults() {
+    selectedAiPackageId.value = _preferred(aiPackages)?.id ?? '';
+    selectedStreakPackageId.value = _preferred(streakPackages)?.id ?? '';
+    selectedCvPackageId.value = _preferred(cvPackages)?.id ?? '';
+  }
+
+  StorePackageModel? _preferred(List<StorePackageModel> packages) {
+    if (packages.isEmpty) return null;
+    for (final StorePackageModel item in packages) {
+      if (item.marketingBadge == 'most_popular' ||
+          item.marketingBadge == 'best_value') {
+        return item;
+      }
+    }
+    return packages.first;
+  }
+
+  void _selectDefaultPaymentMethod() {
+    final List<StoreProviderOptionModel> providers =
+        quote.value?.supportedProviders ?? const [];
+    for (final StoreProviderOptionModel provider in providers) {
+      if (provider.enabled && provider.provider == 'stripe') {
+        selectedPaymentMethod.value = provider.method;
+        return;
+      }
+    }
+    for (final StoreProviderOptionModel provider in providers) {
+      if (provider.enabled) {
+        selectedPaymentMethod.value = provider.method;
+        return;
+      }
+    }
+  }
+
+  void _resetQuote({bool keepActivePackage = false}) {
+    quote.value = null;
+    couponTextController.clear();
+    couponCode.value = '';
+    isCouponApplied.value = false;
+    checkoutError.value = '';
+    if (!keepActivePackage) activePackage.value = null;
+  }
+
+  List<StorePackageModel> _packagesFor(StorePackageType type) {
+    switch (type) {
+      case StorePackageType.aiBundle:
+        return aiPackages;
+      case StorePackageType.streakFreeze:
+        return streakPackages;
+      case StorePackageType.cvCredit:
+        return cvPackages;
+    }
+  }
+
+  StorePackageModel? _findPackage(
+    List<StorePackageModel> packages,
+    String id,
+  ) {
+    for (final StorePackageModel item in packages) {
+      if (item.id == id) return item;
+    }
+    return packages.isEmpty ? null : packages.first;
+  }
+
+  StorePackageModel _emptyPackage(StorePackageType type) => StorePackageModel(
+    id: '',
+    type: type,
+    name: 'Package',
+    description: '',
+    priceEur: 0,
+    billingModel: 'one_time',
+    marketingBadge: 'none',
+    aiVoiceMinutes: 0,
+    aiTextTokens: 0,
+    cvCredits: 0,
+    streakFreezeCount: 0,
+    streakProtectionMode: '',
+    protectionDurationDays: null,
+    couponEnabled: false,
+    sortOrder: 0,
+  );
+
+  String _compact(int value) {
+    if (value < 1000) return value.toString();
+    if (value % 1000 == 0) return '${value ~/ 1000}k';
+    return '${(value / 1000).toStringAsFixed(1)}k';
   }
 
   @override
   void onClose() {
     couponTextController.dispose();
-    orderSearchTextController.dispose();
     super.onClose();
-  }
-
-  // Order history state
-  final List<String> orderHistoryFilters = const <String>[
-    OrderHistoryFilterTitles.allOrders,
-    OrderHistoryFilterTitles.courses,
-    OrderHistoryFilterTitles.aiRefills,
-  ];
-
-  final RxString selectedOrderHistoryFilter =
-      OrderHistoryFilterTitles.allOrders.obs;
-
-  final TextEditingController orderSearchTextController =
-      TextEditingController();
-
-  final RxString orderSearchQuery = ''.obs;
-
-  final List<OrderHistoryItem> orderHistoryItems = const <OrderHistoryItem>[
-    OrderHistoryItem(
-      id: '#IT-SHK-1024',
-      title: 'Fluent Learner\nBundle',
-      category: OrderHistoryFilterTitles.aiRefills,
-      price: '€6.99',
-      date: 'Oct 24, 2023',
-    ),
-    OrderHistoryItem(
-      id: '#IT-SHK-0988',
-      title: 'Level A1:\nLifetime Access',
-      category: OrderHistoryFilterTitles.courses,
-      price: '€29.99',
-      date: 'Oct 15, 2023',
-    ),
-  ];
-
-  List<OrderHistoryItem> get filteredOrderHistoryItems {
-    final String filter = selectedOrderHistoryFilter.value;
-    final String search = orderSearchQuery.value.trim().toLowerCase();
-
-    return orderHistoryItems.where((OrderHistoryItem item) {
-      final bool matchesFilter =
-          filter == OrderHistoryFilterTitles.allOrders ||
-          item.category == filter;
-
-      final bool matchesSearch =
-          search.isEmpty ||
-          item.title.toLowerCase().contains(search) ||
-          item.id.toLowerCase().contains(search) ||
-          item.date.toLowerCase().contains(search) ||
-          item.price.toLowerCase().contains(search);
-
-      return matchesFilter && matchesSearch;
-    }).toList();
-  }
-
-  void selectOrderHistoryFilter(String filter) {
-    selectedOrderHistoryFilter.value = filter;
-  }
-
-  void onOrderSearchChanged(String value) {
-    orderSearchQuery.value = value;
-  }
-
-  void onOrderHistoryTap() {
-    Get.toNamed(AppRoutes.orderHistory);
-  }
-
-  void contactOrderSupport() {
-    Get.snackbar(
-      'Support',
-      'Support chat will open here.',
-      snackPosition: SnackPosition.BOTTOM,
-    );
   }
 }

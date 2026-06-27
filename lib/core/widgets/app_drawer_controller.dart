@@ -1,58 +1,31 @@
 import 'package:get/get.dart';
 
-import '../models/current_user_summary.dart';
-import '../services/api_error_handler.dart';
-import '../services/current_user_summary_service.dart';
+import '../controllers/user_session_controller.dart';
 
 class AppDrawerController extends GetxController {
-  AppDrawerController({
-    required CurrentUserSummaryService currentUserSummaryService,
-  }) : _currentUserSummaryService = currentUserSummaryService;
+  AppDrawerController({required UserSessionController userSessionController})
+    : _userSessionController = userSessionController;
 
-  final CurrentUserSummaryService _currentUserSummaryService;
+  final UserSessionController _userSessionController;
 
-  final Rxn<CurrentUserSummary> user = Rxn<CurrentUserSummary>();
-  final RxBool isLoading = false.obs;
+  RxBool get isLoading => _userSessionController.isLoading;
 
-  String get displayName {
-    final String value = user.value?.fullName.trim() ?? '';
-    return value.isEmpty ? 'Italian Learner' : value;
-  }
-
-  String get levelLabel {
-    final String value = user.value?.learnerLevel.trim() ?? '';
-    return value.isEmpty ? 'A1' : value.toUpperCase();
-  }
-
-  String? get avatarUrl => user.value?.avatarUrl;
+  String get displayName => _userSessionController.displayName;
+  String get levelLabel => _userSessionController.levelLabel;
+  String? get avatarUrl => _userSessionController.avatarUrl;
 
   @override
   void onInit() {
     super.onInit();
-    refreshProfile();
+    _userSessionController.loadUser();
   }
 
   Future<void> refreshProfile({bool showError = false}) async {
-    if (isLoading.value) return;
-
-    isLoading.value = true;
-    try {
-      final ApiResult<CurrentUserSummary> result =
-          await ApiErrorHandler.call<CurrentUserSummary>(
-            _currentUserSummaryService.getCurrentUser,
-            showError: showError,
-            errorTitle: 'Profile',
-          );
-
-      if (result.isSuccess && result.data != null) {
-        user.value = result.data;
-      }
-    } finally {
-      isLoading.value = false;
-    }
+    await _userSessionController.loadUser(
+      forceRefresh: true,
+      showError: showError,
+    );
   }
 
-  void clear() {
-    user.value = null;
-  }
+  void clear() => _userSessionController.clear();
 }

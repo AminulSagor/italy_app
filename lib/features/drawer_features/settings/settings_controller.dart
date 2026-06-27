@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/api_error_handler.dart';
+import '../../../core/controllers/user_session_controller.dart';
+import '../../../core/models/current_user_summary.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/widgets/app_drawer_controller.dart';
 import '../../../routes/routes.dart';
@@ -458,6 +460,9 @@ class SettingsController extends GetxController {
 
       if (!result.isSuccess) return;
       await _authService.logout();
+      if (Get.isRegistered<UserSessionController>()) {
+        Get.find<UserSessionController>().clear();
+      }
       if (Get.isRegistered<AppDrawerController>()) {
         Get.find<AppDrawerController>().clear();
       }
@@ -514,13 +519,9 @@ class SettingsController extends GetxController {
     Get.snackbar('Rate Us', 'Store rating page will open here.');
   }
 
-  void openPrivacyPolicy() {
-    Get.snackbar('Privacy Policy', 'Privacy policy page will open here.');
-  }
+  void openPrivacyPolicy() => Get.toNamed(AppRoutes.privacyPolicy);
 
-  void openTerms() {
-    Get.snackbar('Terms of Service', 'Terms page will open here.');
-  }
+  void openTerms() => Get.toNamed(AppRoutes.termsOfService);
 
   bool _validateContact(String value, {required bool isEmail}) {
     if (isEmail) {
@@ -548,12 +549,16 @@ class SettingsController extends GetxController {
     phoneController.text = value.phone ?? '';
     emailDraft.value = emailController.text;
     phoneDraft.value = phoneController.text;
-    _refreshDrawer();
-  }
-
-  void _refreshDrawer() {
-    if (Get.isRegistered<AppDrawerController>()) {
-      Get.find<AppDrawerController>().refreshProfile(showError: false);
+    if (Get.isRegistered<UserSessionController>()) {
+      Get.find<UserSessionController>().updateUser(
+        CurrentUserSummary(
+          id: value.id,
+          fullName: value.fullName,
+          learnerLevel: value.learnerLevel,
+          currentStreakDays: value.currentStreakDays,
+          avatarUrl: value.avatarUrl,
+        ),
+      );
     }
   }
 

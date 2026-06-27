@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/themes/app_colors.dart';
+import '../../../core/themes/app_constants.dart';
+import '../../../core/themes/app_font.dart';
 import '../models/home_models.dart';
 
-import '../../../core/themes/app_colors.dart';
-import '../../../core/themes/app_font.dart';
-import '../../../core/themes/app_constants.dart';
-
 class DailyOverviewSection extends StatelessWidget {
-  final HomeOverviewModel overview;
-
   const DailyOverviewSection({super.key, required this.overview});
+
+  final HomeOverviewModel overview;
 
   @override
   Widget build(BuildContext context) {
+    final int maxSeconds = overview.days.fold<int>(
+      0,
+      (int current, HomeActivityModel item) =>
+          item.durationSeconds > current ? item.durationSeconds : current,
+    );
+
     return Column(
       children: <Widget>[
         Row(
@@ -23,11 +28,22 @@ class DailyOverviewSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(overview.title, style: TextStyle(fontSize: AppFont.font20.sp, fontWeight: FontWeight.w800, height: 1.1, color: AppColors.homePrimaryText)),
+                  Text(
+                    'Daily Overview',
+                    style: TextStyle(
+                      fontSize: AppFont.font20.sp,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.homePrimaryText,
+                    ),
+                  ),
                   SizedBox(height: 4.h),
                   Text(
-                    overview.subtitle,
-                    style: TextStyle(fontSize: AppFont.font12.sp, fontWeight: FontWeight.w500, height: 1.2, color: AppColors.homeSecondaryText),
+                    'Your learning activity this week',
+                    style: TextStyle(
+                      fontSize: AppFont.font12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.homeSecondaryText,
+                    ),
                   ),
                 ],
               ),
@@ -36,27 +52,42 @@ class DailyOverviewSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 Text(
-                  overview.totalTime,
-                  style: TextStyle(fontSize: AppFont.font24.sp, fontWeight: FontWeight.w900, height: 1, color: AppColors.primaryGreen),
+                  overview.totalTimeLabel,
+                  style: TextStyle(
+                    fontSize: AppFont.font24.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.primaryGreen,
+                  ),
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  overview.totalTimeLabel,
-                  style: TextStyle(fontSize: AppFont.font9.sp, fontWeight: FontWeight.w900, letterSpacing: 1.1, color: AppColors.homeSecondaryText),
+                  'THIS WEEK',
+                  style: TextStyle(
+                    fontSize: AppFont.font9.sp,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.1,
+                    color: AppColors.homeSecondaryText,
+                  ),
                 ),
               ],
             ),
           ],
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: 14.h),
         SizedBox(
           height: (kHomeChartHeight + 24).h,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: overview.activities.map((HomeActivityModel activity) {
-              return Expanded(child: _DailyActivityBar(activity: activity));
-            }).toList(),
+            children: overview.days
+                .map(
+                  (HomeActivityModel activity) => Expanded(
+                    child: _DailyActivityBar(
+                      activity: activity,
+                      maxSeconds: maxSeconds,
+                    ),
+                  ),
+                )
+                .toList(growable: false),
           ),
         ),
       ],
@@ -65,46 +96,49 @@ class DailyOverviewSection extends StatelessWidget {
 }
 
 class _DailyActivityBar extends StatelessWidget {
-  final HomeActivityModel activity;
+  const _DailyActivityBar({
+    required this.activity,
+    required this.maxSeconds,
+  });
 
-  const _DailyActivityBar({required this.activity});
+  final HomeActivityModel activity;
+  final int maxSeconds;
 
   @override
   Widget build(BuildContext context) {
+    final double fraction = maxSeconds <= 0
+        ? 0
+        : (activity.durationSeconds / maxSeconds).clamp(0.0, 1.0);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
         SizedBox(
-          height: kHomeChartHeight.h - 1,
+          height: kHomeChartHeight.h,
           child: Align(
             alignment: Alignment.bottomCenter,
-            child: SizedBox(
-              width: 42.w,
-              height: activity.trackHeight.h,
-              child: Stack(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(kHomePillRadius.r),
+              child: Container(
+                width: 42.w,
+                height: kHomeChartHeight.h,
+                color: AppColors.homeBarTrack,
                 alignment: Alignment.bottomCenter,
-                children: <Widget>[
-                  Container(
-                    width: 42.w,
-                    height: activity.trackHeight.h,
+                child: FractionallySizedBox(
+                  heightFactor: fraction,
+                  widthFactor: 1,
+                  alignment: Alignment.bottomCenter,
+                  child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: AppColors.homeBarTrack,
+                      color: activity.isToday
+                          ? AppColors.primaryGreen
+                          : AppColors.homeBarLight,
                       borderRadius: BorderRadius.circular(
                         kHomePillRadius.r,
                       ),
                     ),
                   ),
-                  Container(
-                    width: 42.w,
-                    height: activity.valueHeight.h,
-                    decoration: BoxDecoration(
-                      color: _barColor(activity.tone),
-                      borderRadius: BorderRadius.circular(
-                        kHomePillRadius.r,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -112,26 +146,15 @@ class _DailyActivityBar extends StatelessWidget {
         SizedBox(height: 10.h),
         Text(
           activity.dayLabel,
-          style: TextStyle(fontSize: AppFont.font10.sp, fontWeight: FontWeight.w900, color: AppColors.homeSecondaryText).copyWith(
-            color: activity.isSelected
+          style: TextStyle(
+            fontSize: AppFont.font10.sp,
+            fontWeight: FontWeight.w900,
+            color: activity.isToday
                 ? AppColors.primaryGreen
                 : AppColors.homeSecondaryText,
           ),
         ),
       ],
     );
-  }
-
-  Color _barColor(HomeActivityTone tone) {
-    switch (tone) {
-      case HomeActivityTone.primary:
-        return AppColors.primaryGreen;
-      case HomeActivityTone.lime:
-        return AppColors.homeBarPale;
-      case HomeActivityTone.muted:
-        return AppColors.homeSoftGreen;
-      case HomeActivityTone.soft:
-        return AppColors.homeBarLight;
-    }
   }
 }

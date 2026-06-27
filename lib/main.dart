@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'core/bindings/initial_bindings.dart';
 import 'core/localization/translation_service.dart';
 import 'core/services/local_notification_service.dart';
+import 'core/services/learning_activity_tracker_service.dart';
 import 'core/themes/app_theme.dart';
 import 'routes/routes.dart';
 import 'core/bootstrap/app_bootstrap_controller.dart';
@@ -45,6 +46,13 @@ class ItalyApp extends StatelessWidget {
           fallbackLocale: TranslationService.fallbackLocale,
           theme: AppTheme.lightTheme,
           getPages: AppPages.pages,
+          routingCallback: (routing) {
+            if (Get.isRegistered<LearningActivityTrackerService>()) {
+              Get.find<LearningActivityTrackerService>().handleRoute(
+                routing?.current,
+              );
+            }
+          },
           initialRoute: initialRoute,
         );
       },

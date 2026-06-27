@@ -88,6 +88,14 @@ class JobSentencesController extends GetxController {
 
   Future<void> refreshCareerTracks() => loadCareerTracks(showError: false);
 
+  void prepareCareerTrack(JobCareerTrackModel track) {
+    selectedTrack.value = track;
+    trackDetails.value = null;
+    trackDetailsError.value = '';
+    _lastReportedVideoPercent = 0;
+    unawaited(loadCareerTrackDetails(trackId: track.id, showError: false));
+  }
+
   void openCareerTrack(JobCareerTrackModel track) {
     selectedTrack.value = track;
     trackDetails.value = null;

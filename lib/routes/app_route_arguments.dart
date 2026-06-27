@@ -129,3 +129,43 @@ class CvReadyRouteArguments {
     required this.template,
   });
 }
+
+class HomeChapterRouteArguments {
+  const HomeChapterRouteArguments({
+    required this.lessonId,
+    required this.courseId,
+    required this.chapterId,
+    required this.title,
+    required this.subtitle,
+    required this.progress,
+  });
+
+  final String lessonId;
+  final String courseId;
+  final String chapterId;
+  final String title;
+  final String subtitle;
+  final double progress;
+}
+
+class HomeJobTrackRouteArguments {
+  const HomeJobTrackRouteArguments({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.iconKey,
+    required this.cardColor,
+    required this.moduleCount,
+    required this.sentenceCount,
+    required this.learnedSentenceCount,
+  });
+
+  final String id;
+  final String title;
+  final String subtitle;
+  final String iconKey;
+  final String cardColor;
+  final int moduleCount;
+  final int sentenceCount;
+  final int learnedSentenceCount;
+}
