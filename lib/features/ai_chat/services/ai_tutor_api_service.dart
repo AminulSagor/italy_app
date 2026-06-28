@@ -35,10 +35,20 @@ class AiTutorApiService {
     return AiTutorVoiceSessionModel.fromJson(_asMap(response.data));
   }
 
-  Future<void> endVoiceSession(String sessionId) async {
-    await _apiClient.dio.post<dynamic>(
+  Future<AiTutorBalanceModel> endVoiceSession(String sessionId) async {
+    final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '/ai-tutor/voice/sessions/${Uri.encodeComponent(sessionId)}/end',
     );
+    return AiTutorBalanceModel.fromEnvelope(_asMap(response.data));
+  }
+
+  Future<AiTutorVoiceHeartbeatModel> heartbeatVoiceSession(
+    String sessionId,
+  ) async {
+    final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
+      '/ai-tutor/voice/sessions/${Uri.encodeComponent(sessionId)}/heartbeat',
+    );
+    return AiTutorVoiceHeartbeatModel.fromJson(_asMap(response.data));
   }
 
   Future<AiTutorChatResponseModel> sendMessage({

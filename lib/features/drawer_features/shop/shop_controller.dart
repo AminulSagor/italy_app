@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/services/api_error_handler.dart';
 import '../../../routes/routes.dart';
 import 'models/shop_models.dart';
@@ -99,6 +100,7 @@ class ShopController extends GetxController {
       final StoreShopModel shopData = data[0] as StoreShopModel;
       shop.value = shopData;
       balances.value = shopData.balances;
+      _syncUserSessionBalances(shopData.balances);
       aiPackages.assignAll((data[1] as StorePackageListResponseModel).items);
       streakPackages.assignAll((data[2] as StorePackageListResponseModel).items);
       cvPackages.assignAll((data[3] as StorePackageListResponseModel).items);
@@ -115,7 +117,10 @@ class ShopController extends GetxController {
           _apiService.getBalances,
           showError: false,
         );
-    if (result.isSuccess && result.data != null) balances.value = result.data;
+    if (result.isSuccess && result.data != null) {
+      balances.value = result.data;
+      _syncUserSessionBalances(result.data!);
+    }
   }
 
   void selectAiPackage(String packageId) {
@@ -424,6 +429,7 @@ class ShopController extends GetxController {
     if (!result.isSuccess || result.data == null) return false;
     quote.value = result.data;
     balances.value = result.data!.balances;
+    _syncUserSessionBalances(result.data!.balances);
     _selectDefaultPaymentMethod();
     return true;
   }
@@ -494,7 +500,20 @@ class ShopController extends GetxController {
     }
     completedPurchase.value = result.data;
     balances.value = result.data!.balances;
+    _syncUserSessionBalances(result.data!.balances);
+    if (Get.isRegistered<UserSessionController>()) {
+      await Get.find<UserSessionController>().refreshAiBalances();
+    }
     Get.offNamed(AppRoutes.purchaseCompleted);
+  }
+
+
+  void _syncUserSessionBalances(StoreBalancesModel value) {
+    if (!Get.isRegistered<UserSessionController>()) return;
+    Get.find<UserSessionController>().updateAiBalances(
+      voiceSeconds: value.aiVoiceSeconds,
+      textTokens: value.aiTextTokens,
+    );
   }
 
   void _selectDefaults() {
@@ -570,6 +589,7 @@ class ShopController extends GetxController {
     billingModel: 'one_time',
     marketingBadge: 'none',
     aiVoiceMinutes: 0,
+    aiVoiceSeconds: 0,
     aiTextTokens: 0,
     cvCredits: 0,
     streakFreezeCount: 0,

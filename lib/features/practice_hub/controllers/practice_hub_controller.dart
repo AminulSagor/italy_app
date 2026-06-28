@@ -31,11 +31,15 @@ class PracticeHubController extends GetxController {
   final RxBool isFinalExamReady = false.obs;
 
   final RxList<CourseCardModel> courses = <CourseCardModel>[].obs;
+  final RxBool isFinalExamsLoading = false.obs;
+  final RxList<PracticeFinalExamCourseModel> finalExamCourses =
+      <PracticeFinalExamCourseModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
     loadCourses();
+    loadFinalExamCourses();
     loadPracticeHubOverview();
   }
 
@@ -113,6 +117,7 @@ class PracticeHubController extends GetxController {
   Future<void> refreshPracticeHub() async {
     await Future.wait<void>(<Future<void>>[
       loadCourses(),
+      loadFinalExamCourses(showError: true),
       loadPracticeHubOverview(showError: true),
     ]);
   }
@@ -163,49 +168,77 @@ class PracticeHubController extends GetxController {
     }
   }
 
-  void onFinalExamCardTap() {
-    if (isFinalExamReady.value) {
-      onStartFinalExamTap();
+  Future<void> loadFinalExamCourses({bool showError = false}) async {
+    if (isFinalExamsLoading.value) return;
+
+    isFinalExamsLoading.value = true;
+    try {
+      final ApiResult<List<PracticeFinalExamCourseModel>> result =
+          await ApiErrorHandler.call<List<PracticeFinalExamCourseModel>>(
+        _practiceHubApiService.fetchCurrentCourseFinalExams,
+        showError: showError,
+        errorTitle: 'Final Exams',
+      );
+      if (result.isSuccess && result.data != null) {
+        finalExamCourses.assignAll(result.data!);
+      }
+    } finally {
+      isFinalExamsLoading.value = false;
+    }
+  }
+
+  void onFinalExamCardTap(PracticeFinalExamCourseModel item) {
+    if (item.isUnlocked) {
+      openFinalExam(item);
       return;
     }
 
     Get.snackbar(
       'Final Exam Locked',
-      'Complete 80% of the course to unlock the final exam.',
+      item.message.isEmpty
+          ? 'Complete ${item.unlockCompletionPercent}% of ${item.courseName} to unlock the final exam.'
+          : item.message,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.white,
       colorText: Colors.black87,
     );
   }
 
-  void onStartFinalExamTap() {
-    openFinalExam();
-  }
+  Future<void> openFinalExam(PracticeFinalExamCourseModel item) async {
+    if (!item.isUnlocked) return;
 
-  Future<void> openFinalExam() async {
-    if (courses.isEmpty) {
-      Get.snackbar(
-        'Final Exam',
-        'No active course found for final exam.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.white,
-        colorText: Colors.black87,
-      );
-      return;
-    }
-
-    final CourseCardModel course = courses[selectedCourseIndex.value];
     final String tag =
-        'final_exam_${course.id}_${DateTime.now().millisecondsSinceEpoch}';
+        'final_exam_${item.courseId}_${DateTime.now().millisecondsSinceEpoch}';
 
     await Get.toNamed(
       AppRoutes.finalExamOverview,
       arguments: FinalExamRouteArguments(
         controllerTag: tag,
-        courseId: course.id,
+        courseId: item.courseId,
       ),
     );
   }
+
+  Future<void> openCourseFromFinalExam(
+    PracticeFinalExamCourseModel item,
+  ) async {
+    final int courseIndex = courses.indexWhere(
+      (CourseCardModel course) => course.id == item.courseId,
+    );
+    if (courseIndex >= 0) {
+      await onCourseTap(courseIndex);
+      return;
+    }
+
+    await loadCourses();
+    final int refreshedIndex = courses.indexWhere(
+      (CourseCardModel course) => course.id == item.courseId,
+    );
+    if (refreshedIndex >= 0) {
+      await onCourseTap(refreshedIndex);
+    }
+  }
+
 
   void onViewAllSessionsTap() {
     Get.toNamed(AppRoutes.webinar);
@@ -221,21 +254,7 @@ class PracticeHubController extends GetxController {
     );
   }
 
-  void onWatchMoreLessonsFromGateway() {
-    if (Get.isDialogOpen ?? false) {
-      Get.back();
-    }
 
-    if (courses.isNotEmpty) {
-      onCourseTap(selectedCourseIndex.value);
-    }
-  }
-
-  void onBackToChapterFromGateway() {
-    if (Get.isDialogOpen ?? false) {
-      Get.back();
-    }
-  }
 
   final TextEditingController importantVerbSearchController =
       TextEditingController();

@@ -33,7 +33,7 @@ import '../features/courses/sub_features/final_exam/views/final_exam_speaking_vi
 import '../features/courses/sub_features/final_exam/views/final_exam_success_view.dart';
 import '../features/courses/sub_features/final_exam/views/final_exam_writing_view.dart';
 import '../features/courses/sub_features/pro_checkout/controllers/pro_checkout_controller.dart';
-import '../features/courses/sub_features/pro_checkout/services/pro_checkout_mock_service.dart';
+import '../features/courses/sub_features/pro_checkout/services/pro_checkout_api_service.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_checkout_view.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_order_summary_view.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_purchase_success_view.dart';
@@ -286,6 +286,31 @@ class AppPages {
       name: AppRoutes.wrapper,
       page: () => const NavbarAndAppbarWrapper(),
       binding: BindingsBuilder(() {
+        if (!Get.isRegistered<LearningActivityApiService>()) {
+          Get.lazyPut<LearningActivityApiService>(
+            () => LearningActivityApiService(apiClient: Get.find<ApiClient>()),
+            fenix: true,
+          );
+        }
+        if (!Get.isRegistered<HomeApiService>()) {
+          Get.lazyPut<HomeApiService>(
+            () => HomeApiService(
+              apiClient: Get.find<ApiClient>(),
+              learningActivityApiService:
+                  Get.find<LearningActivityApiService>(),
+            ),
+            fenix: true,
+          );
+        }
+        if (!Get.isRegistered<HomeController>()) {
+          Get.lazyPut<HomeController>(
+            () => HomeController(
+              homeApiService: Get.find<HomeApiService>(),
+              userSessionController: Get.find<UserSessionController>(),
+            ),
+            fenix: true,
+          );
+        }
         _ensureCoursesApiService();
         if (!Get.isRegistered<CoursesController>()) {
           Get.lazyPut<CoursesController>(
@@ -324,9 +349,12 @@ class AppPages {
             () => NotificationsMockService(),
           );
         }
-        Get.lazyPut<NavbarAndAppbarWrapperController>(
-          () => NavbarAndAppbarWrapperController(),
-        );
+        if (!Get.isRegistered<NavbarAndAppbarWrapperController>()) {
+          Get.lazyPut<NavbarAndAppbarWrapperController>(
+            () => NavbarAndAppbarWrapperController(),
+            fenix: true,
+          );
+        }
       }),
     ),
     GetPage(
@@ -580,18 +608,21 @@ class AppPages {
       binding: BindingsBuilder(() {
         final ProOrderSummaryRouteArguments args =
             _arguments<ProOrderSummaryRouteArguments>();
-        Get.lazyPut<ProCheckoutMockService>(
-          () => ProCheckoutMockService(),
+        Get.lazyPut<ProCheckoutApiService>(
+          () => ProCheckoutApiService(apiClient: Get.find<ApiClient>()),
           tag: args.controllerTag,
         );
         Get.lazyPut<ProCheckoutController>(
           () => ProCheckoutController(
-            proCheckoutMockService: Get.find<ProCheckoutMockService>(
+            proCheckoutApiService: Get.find<ProCheckoutApiService>(
               tag: args.controllerTag,
             ),
+            courseId: args.courseId,
+            courseName: args.courseName,
+            lessonCount: args.lessonCount,
             onPurchaseCompleted: Get.find<CourseDetailController>(
               tag: args.courseDetailControllerTag,
-            ).enablePro,
+            ).refreshAfterPurchase,
           ),
           tag: args.controllerTag,
         );

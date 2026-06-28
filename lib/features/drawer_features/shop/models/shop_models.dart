@@ -45,6 +45,7 @@ enum CheckoutPaymentMethod {
 class StoreBalancesModel {
   const StoreBalancesModel({
     required this.aiVoiceMinutes,
+    required this.aiVoiceSeconds,
     required this.aiTextTokens,
     required this.streakFreezeCount,
     required this.unlimitedProtectionActive,
@@ -55,6 +56,7 @@ class StoreBalancesModel {
   });
 
   final int aiVoiceMinutes;
+  final int aiVoiceSeconds;
   final int aiTextTokens;
   final int streakFreezeCount;
   final bool unlimitedProtectionActive;
@@ -66,13 +68,16 @@ class StoreBalancesModel {
   factory StoreBalancesModel.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> ai = _map(json['ai']);
     final Map<String, dynamic> streak = _map(json['streakFreeze']);
-    final Map<String, dynamic> unlimited = _map(
-      streak['unlimitedProtection'],
-    );
+    final Map<String, dynamic> unlimited = _map(streak['unlimitedProtection']);
     final Map<String, dynamic> cv = _map(json['cv']);
 
+    final int voiceSeconds = ai.containsKey('voiceSeconds')
+        ? _int(ai['voiceSeconds'])
+        : (_double(ai['voiceMinutes']) * 60).round();
+
     return StoreBalancesModel(
-      aiVoiceMinutes: _int(ai['voiceMinutes']),
+      aiVoiceMinutes: voiceSeconds <= 0 ? 0 : (voiceSeconds / 60).ceil(),
+      aiVoiceSeconds: voiceSeconds,
       aiTextTokens: _int(ai['textTokens']),
       streakFreezeCount: _int(streak['count']),
       unlimitedProtectionActive: _bool(unlimited['active']),
@@ -86,6 +91,7 @@ class StoreBalancesModel {
   Map<String, dynamic> toJson() => <String, dynamic>{
     'ai': <String, dynamic>{
       'voiceMinutes': aiVoiceMinutes,
+      'voiceSeconds': aiVoiceSeconds,
       'textTokens': aiTextTokens,
     },
     'streakFreeze': <String, dynamic>{
@@ -104,6 +110,7 @@ class StoreBalancesModel {
 
   StoreBalancesModel copyWith({
     int? aiVoiceMinutes,
+    int? aiVoiceSeconds,
     int? aiTextTokens,
     int? streakFreezeCount,
     bool? unlimitedProtectionActive,
@@ -114,6 +121,7 @@ class StoreBalancesModel {
   }) {
     return StoreBalancesModel(
       aiVoiceMinutes: aiVoiceMinutes ?? this.aiVoiceMinutes,
+      aiVoiceSeconds: aiVoiceSeconds ?? this.aiVoiceSeconds,
       aiTextTokens: aiTextTokens ?? this.aiTextTokens,
       streakFreezeCount: streakFreezeCount ?? this.streakFreezeCount,
       unlimitedProtectionActive:
@@ -146,6 +154,7 @@ class StorePackageModel {
     required this.protectionDurationDays,
     required this.couponEnabled,
     required this.sortOrder,
+    this.aiVoiceSeconds = 0,
   });
 
   final String id;
@@ -156,6 +165,7 @@ class StorePackageModel {
   final String billingModel;
   final String marketingBadge;
   final int aiVoiceMinutes;
+  final int aiVoiceSeconds;
   final int aiTextTokens;
   final int cvCredits;
   final int streakFreezeCount;
@@ -165,8 +175,7 @@ class StorePackageModel {
   final int sortOrder;
 
   bool get isMonthly => billingModel == 'monthly';
-  bool get isUnlimitedStreak =>
-      streakProtectionMode == 'monthly_unlimited';
+  bool get isUnlimitedStreak => streakProtectionMode == 'monthly_unlimited';
 
   String get badgeLabel {
     switch (marketingBadge) {
@@ -196,6 +205,11 @@ class StorePackageModel {
   }
 
   factory StorePackageModel.fromJson(Map<String, dynamic> json) {
+    final int voiceMinutes = _int(json['aiVoiceMinutes']);
+    final int voiceSeconds = json.containsKey('aiVoiceSeconds')
+        ? _int(json['aiVoiceSeconds'])
+        : voiceMinutes * 60;
+
     return StorePackageModel(
       id: _string(json['id']),
       type: StorePackageType.fromApi(_string(json['type'])),
@@ -204,7 +218,7 @@ class StorePackageModel {
       priceEur: _double(json['priceEur']),
       billingModel: _string(json['billingModel'], fallback: 'one_time'),
       marketingBadge: _string(json['marketingBadge'], fallback: 'none'),
-      aiVoiceMinutes: _int(json['aiVoiceMinutes']),
+      aiVoiceMinutes: voiceMinutes,
       aiTextTokens: _int(json['aiTextTokens']),
       cvCredits: _int(json['cvCredits']),
       streakFreezeCount: _int(json['streakFreezeCount']),
@@ -212,6 +226,7 @@ class StorePackageModel {
       protectionDurationDays: _nullableInt(json['protectionDurationDays']),
       couponEnabled: _bool(json['couponEnabled']),
       sortOrder: _int(json['sortOrder']),
+      aiVoiceSeconds: voiceSeconds,
     );
   }
 
@@ -224,6 +239,7 @@ class StorePackageModel {
     'billingModel': billingModel,
     'marketingBadge': marketingBadge,
     'aiVoiceMinutes': aiVoiceMinutes,
+    'aiVoiceSeconds': aiVoiceSeconds,
     'aiTextTokens': aiTextTokens,
     'cvCredits': cvCredits,
     'streakFreezeCount': streakFreezeCount,
@@ -242,6 +258,7 @@ class StorePackageModel {
     String? billingModel,
     String? marketingBadge,
     int? aiVoiceMinutes,
+    int? aiVoiceSeconds,
     int? aiTextTokens,
     int? cvCredits,
     int? streakFreezeCount,
@@ -259,11 +276,11 @@ class StorePackageModel {
       billingModel: billingModel ?? this.billingModel,
       marketingBadge: marketingBadge ?? this.marketingBadge,
       aiVoiceMinutes: aiVoiceMinutes ?? this.aiVoiceMinutes,
+      aiVoiceSeconds: aiVoiceSeconds ?? this.aiVoiceSeconds,
       aiTextTokens: aiTextTokens ?? this.aiTextTokens,
       cvCredits: cvCredits ?? this.cvCredits,
       streakFreezeCount: streakFreezeCount ?? this.streakFreezeCount,
-      streakProtectionMode:
-          streakProtectionMode ?? this.streakProtectionMode,
+      streakProtectionMode: streakProtectionMode ?? this.streakProtectionMode,
       protectionDurationDays:
           protectionDurationDays ?? this.protectionDurationDays,
       couponEnabled: couponEnabled ?? this.couponEnabled,
@@ -323,9 +340,9 @@ class StoreShopModel {
     final Map<String, dynamic> history = _map(json['orderHistory']);
     return StoreShopModel(
       balances: StoreBalancesModel.fromJson(_map(json['balances'])),
-      sections: _list(json['sections'])
-          .map(StoreShopSectionModel.fromJson)
-          .toList(growable: false),
+      sections: _list(
+        json['sections'],
+      ).map(StoreShopSectionModel.fromJson).toList(growable: false),
       hasOrders: _bool(history['hasOrders']),
       latestOrderNumber: _string(history['latestOrderNumber']),
     );
@@ -440,9 +457,9 @@ class StoreQuoteResponseModel {
       package: StorePackageModel.fromJson(_map(json['package'])),
       pricing: StoreQuotePricingModel.fromJson(_map(json['pricing'])),
       balances: StoreBalancesModel.fromJson(_map(json['balances'])),
-      supportedProviders: _list(json['supportedProviders'])
-          .map(StoreProviderOptionModel.fromJson)
-          .toList(growable: false),
+      supportedProviders: _list(
+        json['supportedProviders'],
+      ).map(StoreProviderOptionModel.fromJson).toList(growable: false),
     );
   }
 }
@@ -464,9 +481,9 @@ class StorePackageListResponseModel {
     final Map<String, dynamic> meta = _map(json['meta']);
     return StorePackageListResponseModel(
       balances: StoreBalancesModel.fromJson(_map(json['balances'])),
-      items: _list(json['items'])
-          .map(StorePackageModel.fromJson)
-          .toList(growable: false),
+      items: _list(
+        json['items'],
+      ).map(StorePackageModel.fromJson).toList(growable: false),
       page: _int(meta['page'], fallback: 1),
       totalPages: _int(meta['totalPages'], fallback: 1),
     );

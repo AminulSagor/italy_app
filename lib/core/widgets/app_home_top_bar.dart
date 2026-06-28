@@ -108,6 +108,12 @@ class _AvatarBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String normalizedAvatarUrl = avatarUrl?.trim() ?? '';
+    final Uri? avatarUri = Uri.tryParse(normalizedAvatarUrl);
+    final bool canLoadAvatar =
+        avatarUri != null &&
+        (avatarUri.scheme == 'https' || avatarUri.scheme == 'http');
+
     return SizedBox(
       width: (kHomeAvatarSize + 10).w,
       height: (kHomeAvatarSize + 8).w,
@@ -125,13 +131,13 @@ class _AvatarBadge extends StatelessWidget {
             child: ClipOval(
               child: ColoredBox(
                 color: AppColors.white,
-                child: avatarUrl == null
+                child: !canLoadAvatar
                     ? const Icon(
                         Icons.person_rounded,
                         color: AppColors.primaryGreen,
                       )
                     : Image.network(
-                        avatarUrl!,
+                        normalizedAvatarUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => const Icon(
                           Icons.person_rounded,

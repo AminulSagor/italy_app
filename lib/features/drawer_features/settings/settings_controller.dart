@@ -556,6 +556,8 @@ class SettingsController extends GetxController {
           fullName: value.fullName,
           learnerLevel: value.learnerLevel,
           currentStreakDays: value.currentStreakDays,
+          aiVoiceSeconds: Get.find<UserSessionController>().aiVoiceSeconds,
+          aiTextTokens: Get.find<UserSessionController>().aiTextTokens,
           avatarUrl: value.avatarUrl,
         ),
       );

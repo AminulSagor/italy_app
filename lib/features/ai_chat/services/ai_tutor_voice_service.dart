@@ -33,6 +33,9 @@ class AiTutorVoiceService extends GetxService {
   String? _identity;
   String? _sessionId;
   bool _isDisconnecting = false;
+  bool _isRecoveringMicrophone = false;
+  bool _assistantWasSpeaking = false;
+  Timer? _microphoneRecoveryTimer;
 
   bool get isConnected =>
       connectionState.value == AiTutorVoiceConnectionState.connected;
@@ -66,6 +69,10 @@ class AiTutorVoiceService extends GetxService {
 
     _sessionId = session.sessionId;
     _identity = session.identity;
+    _assistantWasSpeaking = false;
+    _isRecoveringMicrophone = false;
+    _microphoneRecoveryTimer?.cancel();
+    _microphoneRecoveryTimer = null;
     messages.clear();
 
     try {
@@ -100,6 +107,7 @@ class AiTutorVoiceService extends GetxService {
       return;
     }
 
+    _microphoneRecoveryTimer?.cancel();
     final bool enableMicrophone = isMuted.value;
     await participant.setMicrophoneEnabled(enableMicrophone);
     isMuted.value = !enableMicrophone;
@@ -111,6 +119,8 @@ class AiTutorVoiceService extends GetxService {
       return;
     }
     _isDisconnecting = true;
+    _microphoneRecoveryTimer?.cancel();
+    _microphoneRecoveryTimer = null;
 
     try {
       try {
@@ -132,6 +142,8 @@ class AiTutorVoiceService extends GetxService {
       isMuted.value = false;
       userSpeaking.value = false;
       assistantSpeaking.value = false;
+      _assistantWasSpeaking = false;
+      _isRecoveringMicrophone = false;
 
       if (!preserveErrorState) {
         connectionState.value = AiTutorVoiceConnectionState.disconnected;
@@ -159,6 +171,9 @@ class AiTutorVoiceService extends GetxService {
 
     listener
       ..on<lk.RoomDisconnectedEvent>((_) {
+        _microphoneRecoveryTimer?.cancel();
+        _microphoneRecoveryTimer = null;
+        _assistantWasSpeaking = false;
         connectionState.value = AiTutorVoiceConnectionState.disconnected;
         status.value = 'Session disconnected';
         userSpeaking.value = false;
@@ -169,6 +184,9 @@ class AiTutorVoiceService extends GetxService {
       })
       ..on<lk.RoomReconnectedEvent>((_) {
         status.value = isMuted.value ? 'Microphone muted' : 'Listening';
+        if (!isMuted.value) {
+          unawaited(_ensureMicrophonePublished());
+        }
       })
       ..on<lk.TrackSubscribedEvent>((lk.TrackSubscribedEvent event) {
         final String kind = event.track.kind.toString().toLowerCase();
@@ -187,10 +205,16 @@ class AiTutorVoiceService extends GetxService {
             (lk.Participant participant) =>
                 participant.identity == localIdentity,
           );
-          assistantSpeaking.value = event.speakers.any(
+          final bool isAssistantSpeakingNow = event.speakers.any(
             (lk.Participant participant) =>
                 participant.identity != localIdentity,
           );
+          assistantSpeaking.value = isAssistantSpeakingNow;
+
+          if (_assistantWasSpeaking && !isAssistantSpeakingNow) {
+            _scheduleMicrophoneRecovery();
+          }
+          _assistantWasSpeaking = isAssistantSpeakingNow;
 
           if (assistantSpeaking.value) {
             status.value = 'AI tutor is speaking';
@@ -228,11 +252,98 @@ class AiTutorVoiceService extends GetxService {
         return;
       }
       _upsertTranscriptMessage(message);
+      if (!message.isUser && !message.isPartial) {
+        _scheduleMicrophoneRecovery(
+          delay: const Duration(milliseconds: 1800),
+        );
+      }
     } catch (error, stackTrace) {
       _log('Unable to read voice transcript', error, stackTrace);
     }
   }
 
+  void _scheduleMicrophoneRecovery({
+    Duration delay = const Duration(milliseconds: 320),
+  }) {
+    if (!_usesAndroidMicrophoneRecovery ||
+        isMuted.value ||
+        !isConnected ||
+        _isDisconnecting) {
+      return;
+    }
+
+    _microphoneRecoveryTimer?.cancel();
+    _microphoneRecoveryTimer = Timer(delay, () {
+      _microphoneRecoveryTimer = null;
+      unawaited(_recoverMicrophoneCapture());
+    });
+  }
+
+  bool get _usesAndroidMicrophoneRecovery =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  Future<void> _ensureMicrophonePublished() async {
+    final lk.LocalParticipant? participant = _room?.localParticipant;
+    if (participant == null ||
+        isMuted.value ||
+        !isConnected ||
+        _isDisconnecting) {
+      return;
+    }
+
+    try {
+      if (!participant.isMicrophoneEnabled()) {
+        await participant.setMicrophoneEnabled(true);
+      }
+    } catch (error, stackTrace) {
+      _log('Unable to restore microphone publication', error, stackTrace);
+    }
+  }
+
+  Future<void> _recoverMicrophoneCapture() async {
+    if (_isRecoveringMicrophone ||
+        !_usesAndroidMicrophoneRecovery ||
+        isMuted.value ||
+        !isConnected ||
+        _isDisconnecting) {
+      return;
+    }
+
+    if (assistantSpeaking.value) {
+      _scheduleMicrophoneRecovery(
+        delay: const Duration(milliseconds: 500),
+      );
+      return;
+    }
+
+    final lk.LocalParticipant? participant = _room?.localParticipant;
+    if (participant == null) {
+      return;
+    }
+
+    _isRecoveringMicrophone = true;
+    try {
+      // Some Android WebRTC audio sessions can leave the published microphone
+      // track alive while capture has stopped after remote audio playback. A
+      // short republish restores capture without requiring a manual mute cycle.
+      if (participant.isMicrophoneEnabled()) {
+        await participant.setMicrophoneEnabled(false);
+        await Future<void>.delayed(const Duration(milliseconds: 140));
+      }
+
+      if (!isMuted.value && isConnected && !_isDisconnecting) {
+        await participant.setMicrophoneEnabled(true);
+        if (!assistantSpeaking.value) {
+          status.value = 'Listening';
+        }
+      }
+    } catch (error, stackTrace) {
+      _log('Unable to refresh microphone capture', error, stackTrace);
+      await _ensureMicrophonePublished();
+    } finally {
+      _isRecoveringMicrophone = false;
+    }
+  }
 
   void _upsertTranscriptMessage(AiTutorMessageModel message) {
     final int existingIndex = messages.indexWhere(

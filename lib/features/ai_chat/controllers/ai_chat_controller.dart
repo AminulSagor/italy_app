@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/services/api_error_handler.dart';
 import '../models/ai_tutor_guided_learning_models.dart';
 import '../models/ai_tutor_level_test_models.dart';
@@ -19,21 +20,25 @@ import '../views/ai_tutor_writing_help_view.dart';
 import '../views/guided_learning_level_selection_view.dart';
 import '../views/guided_learning_topics_view.dart';
 
-class AiChatController extends GetxController {
+class AiChatController extends GetxController with WidgetsBindingObserver {
   AiChatController({
     AiTutorApiService? apiService,
     AiTutorVoiceService? voiceService,
     AiTutorTtsService? ttsService,
     AiTutorPreferencesService? preferencesService,
+    UserSessionController? userSessionController,
   }) : _apiService = apiService ?? Get.find<AiTutorApiService>(),
        voiceService = voiceService ?? Get.find<AiTutorVoiceService>(),
        _ttsService = ttsService ?? Get.find<AiTutorTtsService>(),
        _preferencesService = preferencesService ??
-           Get.find<AiTutorPreferencesService>();
+           Get.find<AiTutorPreferencesService>(),
+       _userSessionController = userSessionController ??
+           Get.find<UserSessionController>();
 
   final AiTutorApiService _apiService;
   final AiTutorTtsService _ttsService;
   final AiTutorPreferencesService _preferencesService;
+  final UserSessionController _userSessionController;
   final AiTutorVoiceService voiceService;
 
   final TextEditingController inputController = TextEditingController();
@@ -53,6 +58,8 @@ class AiChatController extends GetxController {
   final Rx<AiTutorChatMode> textChatMode = AiTutorChatMode.general.obs;
   final Rxn<AiTutorWritingSourceLanguage> writingSourceLanguage =
       Rxn<AiTutorWritingSourceLanguage>();
+  final RxInt remainingVoiceSeconds = 0.obs;
+  final RxBool isVoiceBalanceExhausted = false.obs;
 
   Rxn<AiTutorLearnerProfileModel> get learnerProfile =>
       _preferencesService.learnerProfile;
@@ -92,6 +99,10 @@ class AiChatController extends GetxController {
   String? _activeVoiceTopic;
   AiTutorGuidedSessionContext? _activeGuidedSession;
   int _textSessionVersion = 0;
+  Timer? _voiceCountdownTimer;
+  Timer? _voiceHeartbeatTimer;
+  bool _isEndingVoiceSession = false;
+  bool _isSendingVoiceHeartbeat = false;
 
   final List<AiTutorStarterModel> _allStarters =
       const <AiTutorStarterModel>[
@@ -139,11 +150,30 @@ class AiChatController extends GetxController {
       voiceService.connectionState.value ==
           AiTutorVoiceConnectionState.connecting;
 
+  String get remainingVoiceTimeLabel {
+    final int totalSeconds = remainingVoiceSeconds.value.clamp(0, 86400).toInt();
+    final int minutes = totalSeconds ~/ 60;
+    final int seconds = totalSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toString().padLeft(2, '0')}';
+  }
+
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     refreshStarters();
     unawaited(refreshLearnerProfile());
+    unawaited(_userSessionController.refreshAiBalances());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      unawaited(endLiveVoiceSession());
+    }
   }
 
   Future<void> refreshLearnerProfile() async {
@@ -175,6 +205,7 @@ class AiChatController extends GetxController {
   void prepareDiscoverySession() {
     resetTextConversation();
     refreshStarters();
+    unawaited(_userSessionController.refreshAiBalances());
   }
 
   void refreshStarters() {
@@ -267,6 +298,7 @@ class AiChatController extends GetxController {
         return;
       }
 
+      _applyAiBalances(result.data!.balances);
       conversationId.value = result.data!.conversationId;
       conversationMemoryFacts.assignAll(result.data!.memoryFacts);
       recentMistakeTags.assignAll(result.data!.recentMistakeTags);
@@ -360,19 +392,33 @@ class AiChatController extends GetxController {
       return;
     }
 
+    await _userSessionController.refreshAiBalances();
+    if (_userSessionController.aiVoiceSeconds <= 0) {
+      isVoiceBalanceExhausted.value = true;
+      voiceService.connectionState.value = AiTutorVoiceConnectionState.error;
+      voiceService.status.value = 'No AI voice time remaining';
+      Get.snackbar(
+        'AI Voice Balance',
+        'You do not have any AI voice time remaining.',
+      );
+      return;
+    }
+
     isStartingVoiceSession.value = true;
+    isVoiceBalanceExhausted.value = false;
     AiTutorVoiceSessionModel? createdSession;
     try {
       final ApiResult<AiTutorVoiceSessionModel> result =
           await ApiErrorHandler.call<AiTutorVoiceSessionModel>(
-            () => _apiService.startVoiceSession(
-              topic: _activeVoiceTopic,
-              memoryFacts: conversationMemoryFacts,
-              recentMistakeTags: recentMistakeTags,
-              guidedMode: _activeGuidedSession?.mode.apiValue,
-              guidedLevel: _activeGuidedSession?.level,
-            ),
-          );
+        () => _apiService.startVoiceSession(
+          topic: _activeVoiceTopic,
+          ttlSeconds: min(_userSessionController.aiVoiceSeconds, 3600),
+          memoryFacts: conversationMemoryFacts,
+          recentMistakeTags: recentMistakeTags,
+          guidedMode: _activeGuidedSession?.mode.apiValue,
+          guidedLevel: _activeGuidedSession?.level,
+        ),
+      );
       if (!result.isSuccess || result.data == null) {
         voiceService.connectionState.value = AiTutorVoiceConnectionState.error;
         voiceService.status.value = 'Unable to start voice session';
@@ -381,18 +427,83 @@ class AiChatController extends GetxController {
 
       createdSession = result.data!;
       _activeVoiceSession = createdSession;
+      remainingVoiceSeconds.value = createdSession.allocatedSeconds;
+      _applyAiBalances(createdSession.balances);
       await voiceService.connect(createdSession);
+      await _sendVoiceHeartbeat();
+      _startVoiceUsageTimers();
     } catch (_) {
       if (createdSession != null) {
-        await ApiErrorHandler.call<void>(
+        final ApiResult<AiTutorBalanceModel> endResult =
+            await ApiErrorHandler.call<AiTutorBalanceModel>(
           () => _apiService.endVoiceSession(createdSession!.sessionId),
           showError: false,
         );
+        if (endResult.data != null) {
+          _applyAiBalances(endResult.data!);
+        }
       }
       _activeVoiceSession = null;
+      _stopVoiceUsageTimers();
     } finally {
       isStartingVoiceSession.value = false;
     }
+  }
+
+  void _startVoiceUsageTimers() {
+    _stopVoiceUsageTimers();
+    _voiceCountdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_activeVoiceSession == null || !voiceService.isConnected) return;
+      if (remainingVoiceSeconds.value > 0) {
+        remainingVoiceSeconds.value--;
+      }
+      if (remainingVoiceSeconds.value <= 0) {
+        unawaited(_handleVoiceBalanceExhausted());
+      }
+    });
+    _voiceHeartbeatTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      unawaited(_sendVoiceHeartbeat());
+    });
+  }
+
+  void _stopVoiceUsageTimers() {
+    _voiceCountdownTimer?.cancel();
+    _voiceCountdownTimer = null;
+    _voiceHeartbeatTimer?.cancel();
+    _voiceHeartbeatTimer = null;
+  }
+
+  Future<void> _sendVoiceHeartbeat() async {
+    final AiTutorVoiceSessionModel? session = _activeVoiceSession;
+    if (session == null || _isSendingVoiceHeartbeat || _isEndingVoiceSession) {
+      return;
+    }
+
+    _isSendingVoiceHeartbeat = true;
+    try {
+      final ApiResult<AiTutorVoiceHeartbeatModel> result =
+          await ApiErrorHandler.call<AiTutorVoiceHeartbeatModel>(
+        () => _apiService.heartbeatVoiceSession(session.sessionId),
+        showError: false,
+      );
+      if (!result.isSuccess || result.data == null) return;
+
+      final AiTutorVoiceHeartbeatModel heartbeat = result.data!;
+      remainingVoiceSeconds.value = heartbeat.sessionRemainingSeconds;
+      _applyAiBalances(heartbeat.balances);
+      if (heartbeat.shouldEnd || !heartbeat.active) {
+        await _handleVoiceBalanceExhausted();
+      }
+    } finally {
+      _isSendingVoiceHeartbeat = false;
+    }
+  }
+
+  Future<void> _handleVoiceBalanceExhausted() async {
+    if (_isEndingVoiceSession) return;
+    isVoiceBalanceExhausted.value = true;
+    voiceService.status.value = 'AI voice time finished';
+    await endLiveVoiceSession();
   }
 
   Future<void> retryLiveVoice() async {
@@ -405,16 +516,35 @@ class AiChatController extends GetxController {
   }
 
   Future<void> endLiveVoiceSession() async {
+    if (_isEndingVoiceSession) return;
+    _isEndingVoiceSession = true;
     final AiTutorVoiceSessionModel? session = _activeVoiceSession;
     _activeVoiceSession = null;
-    await voiceService.disconnect();
-
-    if (session != null) {
-      await ApiErrorHandler.call<void>(
-        () => _apiService.endVoiceSession(session.sessionId),
-        showError: false,
-      );
+    _stopVoiceUsageTimers();
+    try {
+      await voiceService.disconnect();
+      if (session != null) {
+        final ApiResult<AiTutorBalanceModel> result =
+            await ApiErrorHandler.call<AiTutorBalanceModel>(
+          () => _apiService.endVoiceSession(session.sessionId),
+          showError: false,
+        );
+        if (result.data != null) {
+          _applyAiBalances(result.data!);
+        } else {
+          await _userSessionController.refreshAiBalances();
+        }
+      }
+    } finally {
+      _isEndingVoiceSession = false;
     }
+  }
+
+  void _applyAiBalances(AiTutorBalanceModel balances) {
+    _userSessionController.updateAiBalances(
+      voiceSeconds: balances.voiceSeconds,
+      textTokens: balances.textTokens,
+    );
   }
 
   Future<bool> handleLiveVoiceSystemBack() async {
@@ -564,6 +694,8 @@ class AiChatController extends GetxController {
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _stopVoiceUsageTimers();
     unawaited(endLiveVoiceSession());
     unawaited(_ttsService.dispose());
     inputController.dispose();

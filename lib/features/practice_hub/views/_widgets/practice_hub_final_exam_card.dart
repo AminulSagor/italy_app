@@ -1,68 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 import '../../../../core/widgets/custom_button.dart';
-import '../../controllers/practice_hub_controller.dart';
-import '../widgets/final_exam_gateway_dialog_locked.dart';
-import '../widgets/final_exam_gateway_dialog_unlocked.dart';
+import '../../models/practice_hub_models.dart';
 
-class PracticeHubFinalExamCard extends GetView<PracticeHubController> {
-  const PracticeHubFinalExamCard({super.key});
+class PracticeHubFinalExamCard extends StatelessWidget {
+  const PracticeHubFinalExamCard({
+    super.key,
+    required this.exam,
+    required this.onTap,
+    required this.onStartTap,
+    required this.onWatchMoreLessonsTap,
+  });
+
+  final PracticeFinalExamCourseModel exam;
+  final VoidCallback onTap;
+  final VoidCallback onStartTap;
+  final VoidCallback onWatchMoreLessonsTap;
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => AnimatedSwitcher(
-        duration: const Duration(milliseconds: 260),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
-        child: controller.isFinalExamReady.value
-            ? _ReadyFinalExamCard(
-                key: const ValueKey<String>('ready-final-exam'),
-                onTap: controller.onFinalExamCardTap,
-                onStartTap: () {
-                  FinalExamGatewayDialogUnlocked.show(
-                    onStartFinalExam: controller.onStartFinalExamTap,
-                    onBackToChapter: controller.onBackToChapterFromGateway,
-                  );
-                },
-              )
-            : _LockedFinalExamCard(
-                key: const ValueKey<String>('locked-final-exam'),
-                onTap: controller.onFinalExamCardTap,
-                onLockedButtonTap: () {
-                  FinalExamGatewayDialogLocked.show(
-                    onWatchMoreLessons:
-                        controller.onWatchMoreLessonsFromGateway,
-                    onBackToChapter: controller.onBackToChapterFromGateway,
-                  );
-                },
-              ),
-      ),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 260),
+      child: exam.isUnlocked
+          ? _ReadyFinalExamCard(
+              key: ValueKey<String>('ready-${exam.courseId}'),
+              exam: exam,
+              onTap: onTap,
+              onStartTap: onStartTap,
+            )
+          : _LockedFinalExamCard(
+              key: ValueKey<String>('locked-${exam.courseId}'),
+              exam: exam,
+              onTap: onTap,
+              onLockedButtonTap: onWatchMoreLessonsTap,
+            ),
     );
   }
 }
 
 class _LockedFinalExamCard extends StatelessWidget {
-  final VoidCallback onTap;
-  final VoidCallback onLockedButtonTap;
-
   const _LockedFinalExamCard({
     super.key,
+    required this.exam,
     required this.onTap,
     required this.onLockedButtonTap,
   });
+
+  final PracticeFinalExamCourseModel exam;
+  final VoidCallback onTap;
+  final VoidCallback onLockedButtonTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 216.h,
+        constraints: BoxConstraints(minHeight: 236.h),
         width: double.infinity,
+        padding: EdgeInsets.fromLTRB(28.w, 24.h, 28.w, 26.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(45.r),
           gradient: const LinearGradient(
@@ -82,82 +80,71 @@ class _LockedFinalExamCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Stack(
+        child: Column(
           children: <Widget>[
-            Positioned(
-              right: -26.w,
-              bottom: -42.h,
-              child: Container(
-                width: 180.r,
-                height: 180.r,
-                decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.025),
-                  shape: BoxShape.circle,
-                ),
+            Container(
+              width: 55.r,
+              height: 55.r,
+              decoration: const BoxDecoration(
+                color: Color(0xFF78FF3E),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.desktop_windows_rounded,
+                size: 28.r,
+                color: const Color(0xFF102D16),
               ),
             ),
-            Positioned.fill(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(28.w, 24.h, 28.w, 26.h),
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      width: 55.r,
-                      height: 55.r,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF78FF3E),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.desktop_windows_rounded,
-                        size: 28.r,
-                        color: const Color(0xFF102D16),
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      'Final Exam – Esame finale',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: AppFont.font20.sp,
-                        height: 1,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                        color: AppColors.white,
-                      ),
-                    ),
-                    SizedBox(height: 10.h),
-                    Text(
-                      'Complete the course to unlock final exam',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: AppFont.font13.sp,
-                        height: 1,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF85FF43),
-                      ),
-                    ),
-                    const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        const _ExamMiniPill(
-                          text: '80% Required',
-                          icon: Icons.info_outline_rounded,
-                          active: true,
-                        ),
-                        SizedBox(width: 16.w),
-                        _ExamMiniPill(
-                          text: 'Locked',
-                          icon: Icons.lock_rounded,
-                          active: false,
-                          onTap: onLockedButtonTap,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+            SizedBox(height: 8.h),
+            Text(
+              exam.courseName,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: AppFont.font14.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF85FF43),
               ),
+            ),
+            SizedBox(height: 18.h),
+            Text(
+              exam.examTitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: AppFont.font20.sp,
+                height: 1.1,
+                fontWeight: FontWeight.w900,
+                color: AppColors.white,
+              ),
+            ),
+            SizedBox(height: 10.h),
+            Text(
+              '${exam.courseProgressPercent}% completed • ${exam.unlockCompletionPercent}% required',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: AppFont.font13.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF85FF43),
+              ),
+            ),
+            SizedBox(height: 20.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _ExamMiniPill(
+                  text: '${exam.unlockCompletionPercent}% Required',
+                  icon: Icons.info_outline_rounded,
+                  active: true,
+                ),
+                SizedBox(width: 12.w),
+                _ExamMiniPill(
+                  text: 'Locked',
+                  icon: Icons.lock_rounded,
+                  active: false,
+                  onTap: onLockedButtonTap,
+                ),
+              ],
             ),
           ],
         ),
@@ -167,22 +154,25 @@ class _LockedFinalExamCard extends StatelessWidget {
 }
 
 class _ReadyFinalExamCard extends StatelessWidget {
-  final VoidCallback onTap;
-  final VoidCallback onStartTap;
-
   const _ReadyFinalExamCard({
     super.key,
+    required this.exam,
     required this.onTap,
     required this.onStartTap,
   });
+
+  final PracticeFinalExamCourseModel exam;
+  final VoidCallback onTap;
+  final VoidCallback onStartTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 337.h,
+        constraints: BoxConstraints(minHeight: 300.h),
         width: double.infinity,
+        padding: EdgeInsets.fromLTRB(32.w, 30.h, 32.w, 30.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(45.r),
           gradient: const LinearGradient(
@@ -202,85 +192,83 @@ class _ReadyFinalExamCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Positioned(
-              right: -54.w,
-              bottom: -58.h,
-              child: Container(
-                width: 230.r,
-                height: 230.r,
-                decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.035),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(40.w, 32.h, 32.w, 32.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    width: 96.r,
-                    height: 96.r,
-                    decoration: BoxDecoration(
-                      color: AppColors.white.withValues(alpha: 0.14),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Container(
-                        width: 45.r,
-                        height: 45.r,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF81FF42),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.workspace_premium_rounded,
-                          size: 31.r,
-                          color: const Color(0xFF187000),
-                        ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  width: 76.r,
+                  height: 76.r,
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withValues(alpha: 0.14),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 42.r,
+                      height: 42.r,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF81FF42),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.workspace_premium_rounded,
+                        size: 28.r,
+                        color: const Color(0xFF187000),
                       ),
                     ),
                   ),
-                  SizedBox(height: 22.h),
-                  Text(
-                    'Final Certification',
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Text(
+                    exam.courseName,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: AppFont.font30.sp,
-                      height: 1,
+                      fontSize: AppFont.font20.sp,
+                      height: 1.15,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: -1.2,
                       color: AppColors.white,
                     ),
                   ),
-                  SizedBox(height: 12.h),
-                  Text(
-                    'Ready for your final challenge!',
-                    style: TextStyle(
-                      fontSize: AppFont.font18.sp,
-                      height: 1,
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFF86FF45),
-                    ),
-                  ),
-                  const Spacer(),
-                  CustomButton(
-                    onPressed: onStartTap,
-                    text: 'START FINAL EXAM',
-                    height: 60,
-                    width: double.infinity,
-                    showShadow: true,
-                    btnColor: AppColors.white,
-                    btnShadowColor: AppColors.black,
-                    borderColor: AppColors.black,
-                    textColor: AppColors.black,
-                    fontSize: AppFont.font16,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ],
+                ),
+              ],
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              exam.examTitle,
+              style: TextStyle(
+                fontSize: AppFont.font30.sp,
+                height: 1,
+                fontWeight: FontWeight.w900,
+                color: AppColors.white,
               ),
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              'Ready for your final challenge!',
+              style: TextStyle(
+                fontSize: AppFont.font18.sp,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF86FF45),
+              ),
+            ),
+            SizedBox(height: 28.h),
+            CustomButton(
+              onPressed: onStartTap,
+              text: 'START FINAL EXAM',
+              height: 60,
+              width: double.infinity,
+              showShadow: true,
+              btnColor: AppColors.white,
+              btnShadowColor: AppColors.black,
+              borderColor: AppColors.black,
+              textColor: AppColors.black,
+              fontSize: AppFont.font16,
+              fontWeight: FontWeight.w900,
             ),
           ],
         ),
@@ -290,11 +278,6 @@ class _ReadyFinalExamCard extends StatelessWidget {
 }
 
 class _ExamMiniPill extends StatelessWidget {
-  final String text;
-  final IconData icon;
-  final bool active;
-  final VoidCallback? onTap;
-
   const _ExamMiniPill({
     required this.text,
     required this.icon,
@@ -302,11 +285,16 @@ class _ExamMiniPill extends StatelessWidget {
     this.onTap,
   });
 
+  final String text;
+  final IconData icon;
+  final bool active;
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     final Widget pill = Container(
       height: 28.h,
-      padding: EdgeInsets.symmetric(horizontal: 13.w),
+      padding: EdgeInsets.symmetric(horizontal: 11.w),
       decoration: BoxDecoration(
         color: active
             ? const Color(0xFF153B0A)
@@ -316,7 +304,6 @@ class _ExamMiniPill extends StatelessWidget {
           color: active
               ? const Color(0xFF2F7C16)
               : AppColors.white.withValues(alpha: 0.12),
-          width: 1.w,
         ),
       ),
       child: Row(
@@ -332,23 +319,22 @@ class _ExamMiniPill extends StatelessWidget {
             text,
             style: TextStyle(
               fontSize: AppFont.font11.sp,
-              height: 1,
               fontWeight: FontWeight.w900,
-              color: active ? const Color(0xFF83FF45) : const Color(0xFFA3A9A0),
+              color: active
+                  ? const Color(0xFF83FF45)
+                  : const Color(0xFFA3A9A0),
             ),
           ),
         ],
       ),
     );
 
-    if (onTap == null) {
-      return pill;
-    }
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: pill,
-    );
+    return onTap == null
+        ? pill
+        : GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: pill,
+          );
   }
 }

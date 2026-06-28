@@ -1,29 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
+import '../../../../core/controllers/user_session_controller.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 import '../../../../core/widgets/widgets.dart';
 
-class AiCreditStatusRow extends StatelessWidget {
+class AiCreditStatusRow extends GetView<UserSessionController> {
   const AiCreditStatusRow();
 
   @override
+  UserSessionController get controller => Get.find<UserSessionController>();
+
+  @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        const _StatusChip(
-          icon: Icons.diamond_rounded,
-          iconColor: Color(0xFF357AFF),
-          label: '1.2k Tokens',
-        ),
-        const Spacer(),
-        const _StatusChip(
-          icon: Icons.mic_rounded,
-          iconColor: Color(0xFFFF4C7D),
-          label: '45m Voice',
-        ),
-      ],
+    return Obx(
+      () => Row(
+        children: <Widget>[
+          _StatusChip(
+            icon: Icons.diamond_rounded,
+            iconColor: const Color(0xFF357AFF),
+            label: controller.aiTextBalanceLabel,
+          ),
+          const Spacer(),
+          _StatusChip(
+            icon: Icons.mic_rounded,
+            iconColor: const Color(0xFFFF4C7D),
+            label: controller.aiVoiceBalanceLabel,
+          ),
+        ],
+      ),
     );
   }
 }

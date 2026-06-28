@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/controllers/user_session_controller.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 
@@ -70,17 +71,28 @@ class AiTutorHeader extends StatelessWidget {
   }
 }
 
-class AiTutorCreditRow extends StatelessWidget {
+class AiTutorCreditRow extends GetView<UserSessionController> {
   const AiTutorCreditRow({super.key});
 
   @override
+  UserSessionController get controller => Get.find<UserSessionController>();
+
+  @override
   Widget build(BuildContext context) {
-    return Row(
-      children: const <Widget>[
-        AiTutorMiniChip(icon: Icons.diamond_rounded, label: '1.2k Tokens'),
-        Spacer(),
-        AiTutorMiniChip(icon: Icons.mic_rounded, label: '45m Voice'),
-      ],
+    return Obx(
+      () => Row(
+        children: <Widget>[
+          AiTutorMiniChip(
+            icon: Icons.diamond_rounded,
+            label: controller.aiTextBalanceLabel,
+          ),
+          const Spacer(),
+          AiTutorMiniChip(
+            icon: Icons.mic_rounded,
+            label: controller.aiVoiceBalanceLabel,
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as dev;
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -36,12 +37,16 @@ class LearningActivityTrackerService extends GetxService
 
   Future<LearningActivityTrackerService> init() async {
     WidgetsBinding.instance.addObserver(this);
-    _heartbeat = Timer.periodic(_heartbeatDuration, (_) => _flushCurrent());
+    _heartbeat = Timer.periodic(
+      _heartbeatDuration,
+      (_) => _runInBackground(_flushCurrent()),
+    );
     return this;
   }
 
-
-  Future<void> startSession() => syncPending();
+  Future<void> startSession() {
+    return _handleBackgroundOperation(syncPending());
+  }
 
   Future<void> endSession() async {
     await _flushCurrent(clearActivity: true);
@@ -77,19 +82,19 @@ class LearningActivityTrackerService extends GetxService
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached ||
         state == AppLifecycleState.inactive) {
-      _flushCurrent(clearActivity: false);
+      _runInBackground(_flushCurrent(clearActivity: false));
       return;
     }
 
     if (state == AppLifecycleState.resumed && _currentKind != null) {
       _startedAt = DateTime.now();
-      syncPending();
+      _runInBackground(syncPending());
     }
   }
 
   void _setActivity(LearningActivityKind? kind, {String? sourceId}) {
     if (kind == _currentKind && sourceId == _currentSourceId) return;
-    _flushCurrent(clearActivity: true);
+    _runInBackground(_flushCurrent(clearActivity: true));
     _currentKind = kind;
     _currentSourceId = sourceId;
     _startedAt = kind == null ? null : DateTime.now();
@@ -169,9 +174,26 @@ class LearningActivityTrackerService extends GetxService
               Map<String, dynamic>.from(item),
             ),
           )
-          .toList(growable: false);
+          .toList(growable: true);
     } catch (_) {
       return <LearningActivityTimeEntryModel>[];
+    }
+  }
+
+  void _runInBackground(Future<void> operation) {
+    unawaited(_handleBackgroundOperation(operation));
+  }
+
+  Future<void> _handleBackgroundOperation(Future<void> operation) async {
+    try {
+      await operation;
+    } catch (error, stackTrace) {
+      dev.log(
+        'Learning activity background operation failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'LearningActivityTracker',
+      );
     }
   }
 
@@ -250,7 +272,7 @@ class LearningActivityTrackerService extends GetxService
   void onClose() {
     _heartbeat?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    _flushCurrent(clearActivity: true);
+    _runInBackground(_flushCurrent(clearActivity: true));
     super.onClose();
   }
 }

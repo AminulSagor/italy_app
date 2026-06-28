@@ -257,18 +257,66 @@ class AiTutorMessageModel {
   }
 }
 
+class AiTutorBalanceModel {
+  const AiTutorBalanceModel({
+    required this.voiceSeconds,
+    required this.textTokens,
+  });
+
+  final int voiceSeconds;
+  final int textTokens;
+
+  factory AiTutorBalanceModel.fromEnvelope(Map<String, dynamic> json) {
+    final Map<String, dynamic> balances = _asJsonMap(json['balances']);
+    final Map<String, dynamic> ai = _asJsonMap(balances['ai']);
+    return AiTutorBalanceModel(
+      voiceSeconds: _intValue(ai['voiceSeconds']),
+      textTokens: _intValue(ai['textTokens']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'voiceSeconds': voiceSeconds,
+        'textTokens': textTokens,
+      };
+}
+
+class AiTutorTokenUsageModel {
+  const AiTutorTokenUsageModel({
+    required this.promptTokens,
+    required this.completionTokens,
+    required this.totalTokens,
+  });
+
+  final int promptTokens;
+  final int completionTokens;
+  final int totalTokens;
+
+  factory AiTutorTokenUsageModel.fromJson(Map<String, dynamic> json) {
+    return AiTutorTokenUsageModel(
+      promptTokens: _intValue(json['promptTokens']),
+      completionTokens: _intValue(json['completionTokens']),
+      totalTokens: _intValue(json['totalTokens']),
+    );
+  }
+}
+
 class AiTutorChatResponseModel {
   const AiTutorChatResponseModel({
     required this.conversationId,
     required this.message,
     required this.memoryFacts,
     required this.recentMistakeTags,
+    required this.balances,
+    required this.usage,
   });
 
   final String conversationId;
   final AiTutorMessageModel message;
   final List<String> memoryFacts;
   final List<String> recentMistakeTags;
+  final AiTutorBalanceModel balances;
+  final AiTutorTokenUsageModel usage;
 
   factory AiTutorChatResponseModel.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> messageJson = _asJsonMap(json['message']);
@@ -280,29 +328,8 @@ class AiTutorChatResponseModel {
         json['recentMistakeTags'],
         maxItems: 6,
       ),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'conversationId': conversationId,
-      'message': message.toJson(),
-      'memoryFacts': memoryFacts,
-      'recentMistakeTags': recentMistakeTags,
-    };
-  }
-
-  AiTutorChatResponseModel copyWith({
-    String? conversationId,
-    AiTutorMessageModel? message,
-    List<String>? memoryFacts,
-    List<String>? recentMistakeTags,
-  }) {
-    return AiTutorChatResponseModel(
-      conversationId: conversationId ?? this.conversationId,
-      message: message ?? this.message,
-      memoryFacts: memoryFacts ?? this.memoryFacts,
-      recentMistakeTags: recentMistakeTags ?? this.recentMistakeTags,
+      balances: AiTutorBalanceModel.fromEnvelope(json),
+      usage: AiTutorTokenUsageModel.fromJson(_asJsonMap(json['usage'])),
     );
   }
 }
@@ -315,6 +342,8 @@ class AiTutorVoiceSessionModel {
     required this.identity,
     required this.token,
     required this.ttlSeconds,
+    required this.allocatedSeconds,
+    required this.balances,
   });
 
   final String sessionId;
@@ -323,44 +352,51 @@ class AiTutorVoiceSessionModel {
   final String identity;
   final String token;
   final int ttlSeconds;
+  final int allocatedSeconds;
+  final AiTutorBalanceModel balances;
 
   factory AiTutorVoiceSessionModel.fromJson(Map<String, dynamic> json) {
+    final int ttl = _intValue(json['ttlSeconds']);
     return AiTutorVoiceSessionModel(
       sessionId: json['sessionId']?.toString() ?? '',
       url: json['url']?.toString() ?? '',
       room: json['room']?.toString() ?? '',
       identity: json['identity']?.toString() ?? '',
       token: json['token']?.toString() ?? '',
-      ttlSeconds: int.tryParse(json['ttlSeconds']?.toString() ?? '') ?? 900,
+      ttlSeconds: ttl > 0 ? ttl : 900,
+      allocatedSeconds: _intValue(json['allocatedSeconds']) > 0
+          ? _intValue(json['allocatedSeconds'])
+          : (ttl > 0 ? ttl : 900),
+      balances: AiTutorBalanceModel.fromEnvelope(json),
     );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'sessionId': sessionId,
-      'url': url,
-      'room': room,
-      'identity': identity,
-      'token': token,
-      'ttlSeconds': ttlSeconds,
-    };
-  }
+class AiTutorVoiceHeartbeatModel {
+  const AiTutorVoiceHeartbeatModel({
+    required this.active,
+    required this.shouldEnd,
+    required this.chargedSeconds,
+    required this.usedSeconds,
+    required this.sessionRemainingSeconds,
+    required this.balances,
+  });
 
-  AiTutorVoiceSessionModel copyWith({
-    String? sessionId,
-    String? url,
-    String? room,
-    String? identity,
-    String? token,
-    int? ttlSeconds,
-  }) {
-    return AiTutorVoiceSessionModel(
-      sessionId: sessionId ?? this.sessionId,
-      url: url ?? this.url,
-      room: room ?? this.room,
-      identity: identity ?? this.identity,
-      token: token ?? this.token,
-      ttlSeconds: ttlSeconds ?? this.ttlSeconds,
+  final bool active;
+  final bool shouldEnd;
+  final int chargedSeconds;
+  final int usedSeconds;
+  final int sessionRemainingSeconds;
+  final AiTutorBalanceModel balances;
+
+  factory AiTutorVoiceHeartbeatModel.fromJson(Map<String, dynamic> json) {
+    return AiTutorVoiceHeartbeatModel(
+      active: json['active'] == true,
+      shouldEnd: json['shouldEnd'] == true,
+      chargedSeconds: _intValue(json['chargedSeconds']),
+      usedSeconds: _intValue(json['usedSeconds']),
+      sessionRemainingSeconds: _intValue(json['sessionRemainingSeconds']),
+      balances: AiTutorBalanceModel.fromEnvelope(json),
     );
   }
 }
@@ -490,6 +526,12 @@ AiTutorCorrectionModel? _correctionFromJson(dynamic value) {
     Map<String, dynamic>.from(value),
   );
   return correction.isValid ? correction : null;
+}
+
+int _intValue(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }
 
 String? _optionalText(dynamic value) {

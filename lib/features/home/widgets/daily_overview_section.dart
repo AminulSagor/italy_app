@@ -74,20 +74,25 @@ class DailyOverviewSection extends StatelessWidget {
           ],
         ),
         SizedBox(height: 14.h),
-        SizedBox(
-          height: (kHomeChartHeight + 24).h,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: overview.days
-                .map(
-                  (HomeActivityModel activity) => Expanded(
-                    child: _DailyActivityBar(
-                      activity: activity,
-                      maxSeconds: maxSeconds,
+        RepaintBoundary(
+          child: SizedBox(
+            // Keep a dedicated footer for the gap and day label. The previous
+            // height was smaller than the scaled children by a fraction of a
+            // pixel, which produced one RenderFlex exception for every bar.
+            height: (kHomeChartHeight + 26).h,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: overview.days
+                  .map(
+                    (HomeActivityModel activity) => Expanded(
+                      child: _DailyActivityBar(
+                        activity: activity,
+                        maxSeconds: maxSeconds,
+                      ),
                     ),
-                  ),
-                )
-                .toList(growable: false),
+                  )
+                  .toList(growable: false),
+            ),
           ),
         ),
       ],
@@ -110,19 +115,20 @@ class _DailyActivityBar extends StatelessWidget {
         ? 0
         : (activity.durationSeconds / maxSeconds).clamp(0.0, 1.0);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        SizedBox(
-          height: kHomeChartHeight.h,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(kHomePillRadius.r),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 3.w),
+      child: Column(
+        children: <Widget>[
+          Expanded(
+            child: Align(
+              alignment: Alignment.bottomCenter,
               child: Container(
                 width: 42.w,
-                height: kHomeChartHeight.h,
-                color: AppColors.homeBarTrack,
+                decoration: BoxDecoration(
+                  color: AppColors.homeBarTrack,
+                  borderRadius: BorderRadius.circular(kHomePillRadius.r),
+                ),
+                clipBehavior: Clip.antiAlias,
                 alignment: Alignment.bottomCenter,
                 child: FractionallySizedBox(
                   heightFactor: fraction,
@@ -133,28 +139,33 @@ class _DailyActivityBar extends StatelessWidget {
                       color: activity.isToday
                           ? AppColors.primaryGreen
                           : AppColors.homeBarLight,
-                      borderRadius: BorderRadius.circular(
-                        kHomePillRadius.r,
-                      ),
+                      borderRadius: BorderRadius.circular(kHomePillRadius.r),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-        SizedBox(height: 10.h),
-        Text(
-          activity.dayLabel,
-          style: TextStyle(
-            fontSize: AppFont.font10.sp,
-            fontWeight: FontWeight.w900,
-            color: activity.isToday
-                ? AppColors.primaryGreen
-                : AppColors.homeSecondaryText,
+          SizedBox(height: 8.h),
+          SizedBox(
+            height: 18.h,
+            child: Center(
+              child: Text(
+                activity.dayLabel,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: AppFont.font10.sp,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
+                  color: activity.isToday
+                      ? AppColors.primaryGreen
+                      : AppColors.homeSecondaryText,
+                ),
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

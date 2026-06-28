@@ -68,9 +68,22 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView> {
                         padding: EdgeInsets.fromLTRB(24.w, 46.h, 24.w, 175.h),
                         child: Column(
                           children: <Widget>[
-                            _SessionStatusChip(
-                              label: voice.status.value,
-                              active: voice.isConnected,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Flexible(
+                                  child: _SessionStatusChip(
+                                    label: voice.status.value,
+                                    active: voice.isConnected,
+                                  ),
+                                ),
+                                SizedBox(width: 10.w),
+                                _VoiceTimeChip(
+                                  label: controller.remainingVoiceTimeLabel,
+                                  exhausted:
+                                      controller.isVoiceBalanceExhausted.value,
+                                ),
+                              ],
                             ),
                             SizedBox(height: 46.h),
                             if (connecting)
@@ -193,6 +206,53 @@ class _VoiceBackground extends StatelessWidget {
           ],
           stops: <double>[0, .55, 1],
         ),
+      ),
+    );
+  }
+}
+
+
+class _VoiceTimeChip extends StatelessWidget {
+  const _VoiceTimeChip({required this.label, required this.exhausted});
+
+  final String label;
+  final bool exhausted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+      decoration: BoxDecoration(
+        color: exhausted ? const Color(0xFFFFE7E7) : AppColors.white,
+        borderRadius: BorderRadius.circular(999.r),
+        border: Border.all(
+          color: exhausted
+              ? const Color(0xFFFFB8B8)
+              : const Color(0xFFE0E5E1),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(
+            Icons.timer_outlined,
+            size: 14.r,
+            color: exhausted
+                ? const Color(0xFFD53232)
+                : AppColors.primaryGreen,
+          ),
+          SizedBox(width: 5.w),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w900,
+              color: exhausted
+                  ? const Color(0xFFD53232)
+                  : const Color(0xFF4C5854),
+            ),
+          ),
+        ],
       ),
     );
   }

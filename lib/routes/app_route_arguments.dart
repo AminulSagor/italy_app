@@ -75,10 +75,16 @@ class FinalExamRouteArguments {
 class ProOrderSummaryRouteArguments {
   final String controllerTag;
   final String courseDetailControllerTag;
+  final String courseId;
+  final String courseName;
+  final int lessonCount;
 
   const ProOrderSummaryRouteArguments({
     required this.controllerTag,
     required this.courseDetailControllerTag,
+    required this.courseId,
+    required this.courseName,
+    required this.lessonCount,
   });
 }
 

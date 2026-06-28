@@ -75,6 +75,7 @@ class InitialBindings extends Bindings {
         voiceService: Get.find<AiTutorVoiceService>(),
         ttsService: Get.find<AiTutorTtsService>(),
         preferencesService: Get.find<AiTutorPreferencesService>(),
+        userSessionController: Get.find<UserSessionController>(),
       ),
       fenix: true,
     );

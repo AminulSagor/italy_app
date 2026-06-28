@@ -31,6 +31,11 @@ class StoreOrderModel {
     final Map<String, dynamic> pricingJson = shopJsonMap(json['pricing']);
     final Map<String, dynamic> paymentJson = shopJsonMap(json['payment']);
 
+    final int voiceMinutes = shopInt(entitlementJson['voiceMinutes']);
+    final int voiceSeconds = entitlementJson.containsKey('voiceSeconds')
+        ? shopInt(entitlementJson['voiceSeconds'])
+        : voiceMinutes * 60;
+
     return StoreOrderModel(
       id: shopString(json['id']),
       orderNumber: shopString(json['orderNumber']),
@@ -49,7 +54,8 @@ class StoreOrderModel {
           packageJson['marketingBadge'],
           fallback: 'none',
         ),
-        aiVoiceMinutes: shopInt(entitlementJson['voiceMinutes']),
+        aiVoiceMinutes: voiceMinutes,
+        aiVoiceSeconds: voiceSeconds,
         aiTextTokens: shopInt(entitlementJson['textTokens']),
         cvCredits: shopInt(entitlementJson['cvCredits']),
         streakFreezeCount: shopInt(entitlementJson['streakFreezes']),

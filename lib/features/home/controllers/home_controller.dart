@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,8 +31,11 @@ class HomeController extends GetxController {
   final Rx<HomeDashboardModel> dashboard = HomeDashboardModel.initial.obs;
 
   @override
-  void onInit() {
-    super.onInit();
+  void onReady() {
+    super.onReady();
+    // Start network work after the wrapper has completed its first frame.
+    // This keeps initial layout and plugin startup from competing with five
+    // dashboard responses on lower-memory emulators.
     unawaited(loadDashboard());
   }
 
@@ -53,92 +57,123 @@ class HomeController extends GetxController {
       }
 
       if (Get.isRegistered<LearningActivityTrackerService>()) {
-        await Get.find<LearningActivityTrackerService>().syncPending();
+        try {
+          await Get.find<LearningActivityTrackerService>().syncPending();
+        } catch (error, stackTrace) {
+          dev.log(
+            'Unable to sync pending learning activity',
+            error: error,
+            stackTrace: stackTrace,
+            name: 'HomeController',
+          );
+        }
       }
 
-      await Future.wait<void>(<Future<void>>[
-        _loadOverview(),
-        _loadCurrentChapter(),
-        _loadCareerTracks(),
-        _loadWebinar(),
-        _loadDailyChallenges(),
+      final Future<ApiResult<HomeOverviewModel>> overviewFuture =
+          ApiErrorHandler.call<HomeOverviewModel>(
+            _homeApiService.fetchWeeklyOverview,
+            showError: false,
+          );
+      final Future<ApiResult<HomeChapterModel?>> currentChapterFuture =
+          ApiErrorHandler.call<HomeChapterModel?>(
+            _homeApiService.fetchCurrentChapter,
+            showError: false,
+          );
+      final Future<ApiResult<List<HomeWorkItemModel>>> careerTracksFuture =
+          ApiErrorHandler.call<List<HomeWorkItemModel>>(
+            _homeApiService.fetchCareerTracks,
+            showError: false,
+          );
+      final Future<ApiResult<HomeWebinarModel?>> webinarFuture =
+          ApiErrorHandler.call<HomeWebinarModel?>(
+            _homeApiService.fetchNextWebinar,
+            showError: false,
+          );
+      final Future<ApiResult<HomeDailyChallengesModel>> challengesFuture =
+          ApiErrorHandler.call<HomeDailyChallengesModel>(
+            _homeApiService.fetchDailyChallenges,
+            showError: false,
+          );
+
+      await Future.wait<dynamic>(<Future<dynamic>>[
+        overviewFuture,
+        currentChapterFuture,
+        careerTracksFuture,
+        webinarFuture,
+        challengesFuture,
       ]);
-      _applyStreak();
+
+      final ApiResult<HomeOverviewModel> overviewResult =
+          await overviewFuture;
+      final ApiResult<HomeChapterModel?> currentChapterResult =
+          await currentChapterFuture;
+      final ApiResult<List<HomeWorkItemModel>> careerTracksResult =
+          await careerTracksFuture;
+      final ApiResult<HomeWebinarModel?> webinarResult = await webinarFuture;
+      final ApiResult<HomeDailyChallengesModel> challengesResult =
+          await challengesFuture;
+
+      HomeDashboardModel nextDashboard = dashboard.value;
+
+      if (overviewResult.isSuccess && overviewResult.data != null) {
+        nextDashboard = nextDashboard.copyWith(
+          overview: overviewResult.data,
+        );
+      }
+
+      if (currentChapterResult.isSuccess) {
+        nextDashboard = currentChapterResult.data == null
+            ? nextDashboard.copyWith(clearCurrentChapter: true)
+            : nextDashboard.copyWith(
+                currentChapter: currentChapterResult.data,
+              );
+      }
+
+      if (careerTracksResult.isSuccess &&
+          careerTracksResult.data != null) {
+        nextDashboard = nextDashboard.copyWith(
+          workItems: careerTracksResult.data,
+        );
+      }
+
+      if (webinarResult.isSuccess) {
+        nextDashboard = webinarResult.data == null
+            ? nextDashboard.copyWith(clearWebinar: true)
+            : nextDashboard.copyWith(webinar: webinarResult.data);
+      }
+
+      if (challengesResult.isSuccess && challengesResult.data != null) {
+        nextDashboard = nextDashboard.copyWith(
+          dailyChallenges: challengesResult.data,
+        );
+      }
+
+      // Publish the whole dashboard once. Previously every response updated
+      // the same Rx object independently, rebuilding the complete long home
+      // page several times during a single frame window.
+      dashboard.value = nextDashboard.copyWith(streak: _buildStreakCard());
+    } catch (error, stackTrace) {
+      dev.log(
+        'Unable to load the home dashboard',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'HomeController',
+      );
+      dashboard.value = dashboard.value.copyWith(
+        streak: _buildStreakCard(),
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> _loadOverview() async {
-    final ApiResult<HomeOverviewModel> result =
-        await ApiErrorHandler.call<HomeOverviewModel>(
-          _homeApiService.fetchWeeklyOverview,
-          showError: false,
-        );
-    if (result.isSuccess && result.data != null) {
-      dashboard.value = dashboard.value.copyWith(overview: result.data);
-    }
-  }
-
-  Future<void> _loadCurrentChapter() async {
-    final ApiResult<HomeChapterModel?> result =
-        await ApiErrorHandler.call<HomeChapterModel?>(
-          _homeApiService.fetchCurrentChapter,
-          showError: false,
-        );
-    if (!result.isSuccess) return;
-    dashboard.value = result.data == null
-        ? dashboard.value.copyWith(clearCurrentChapter: true)
-        : dashboard.value.copyWith(currentChapter: result.data);
-  }
-
-  Future<void> _loadCareerTracks() async {
-    final ApiResult<List<HomeWorkItemModel>> result =
-        await ApiErrorHandler.call<List<HomeWorkItemModel>>(
-          _homeApiService.fetchCareerTracks,
-          showError: false,
-        );
-    if (result.isSuccess && result.data != null) {
-      dashboard.value = dashboard.value.copyWith(workItems: result.data);
-    }
-  }
-
-  Future<void> _loadWebinar() async {
-    final ApiResult<HomeWebinarModel?> result =
-        await ApiErrorHandler.call<HomeWebinarModel?>(
-          _homeApiService.fetchNextWebinar,
-          showError: false,
-        );
-    if (!result.isSuccess) return;
-    dashboard.value = result.data == null
-        ? dashboard.value.copyWith(clearWebinar: true)
-        : dashboard.value.copyWith(webinar: result.data);
-  }
-
-  Future<void> _loadDailyChallenges() async {
-    final ApiResult<HomeDailyChallengesModel> result =
-        await ApiErrorHandler.call<HomeDailyChallengesModel>(
-          _homeApiService.fetchDailyChallenges,
-          showError: false,
-        );
-    if (result.isSuccess && result.data != null) {
-      dashboard.value = dashboard.value.copyWith(
-        dailyChallenges: result.data,
-      );
-    }
-  }
-
-  void _applyStreak() {
+  HomeInfoCardModel _buildStreakCard() {
     final int days = _userSessionController.currentStreakDays;
-    dashboard.value = dashboard.value.copyWith(
-      streak: HomeInfoCardModel(
-        eyebrow: 'DAY STREAK',
-        title: '$days ${days == 1 ? 'Day' : 'Days'}',
-        body: days > 0
-            ? 'Keep learning today!'
-            : 'Start learning today!',
-        actionLabel: '',
-      ),
+    return HomeInfoCardModel(
+      eyebrow: 'DAY STREAK',
+      title: '$days ${days == 1 ? 'Day' : 'Days'}',
+      body: days > 0 ? 'Keep learning today!' : 'Start learning today!',
+      actionLabel: '',
     );
   }
 
