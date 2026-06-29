@@ -4,9 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/services/api_client.dart';
+import '../../../../core/services/token_service.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 import '../../../messages/controllers/messages_controller.dart';
+import '../../../messages/services/chat_socket_service.dart';
+import '../../../messages/services/messages_service.dart';
 import '../../services/leaderboard_service.dart';
 import '../../models/leaderboard_models.dart';
 
@@ -126,19 +130,10 @@ class LeaderboardChatDialog extends StatelessWidget {
                           }
                         } catch (_) {}
 
-                        if (Get.isRegistered<MessagesController>()) {
-                          final MessagesController mc =
-                              Get.find<MessagesController>();
-                          await mc.startDirectConversation(user);
-                          return;
-                        }
-                        // If messages controller not registered, attempt to navigate to MessagesView
-                        Get.snackbar(
-                          'Chat',
-                          'Messages module not available.',
-                          snackPosition: SnackPosition.BOTTOM,
-                          duration: const Duration(seconds: 2),
-                        );
+                        final MessagesController messagesController =
+                            _ensureMessagesController();
+                        await messagesController.startDirectConversation(user);
+                        return;
                       } catch (e) {
                         Get.snackbar(
                           'Chat',
@@ -169,6 +164,39 @@ class LeaderboardChatDialog extends StatelessWidget {
       ),
     );
   }
+}
+
+MessagesController _ensureMessagesController() {
+  if (Get.isRegistered<MessagesController>()) {
+    return Get.find<MessagesController>();
+  }
+
+  if (!Get.isRegistered<MessagesMockService>()) {
+    if (!Get.isRegistered<ChatSocketService>()) {
+      Get.put<ChatSocketService>(
+        ChatSocketService(tokenService: Get.find<TokenService>()),
+        permanent: true,
+      );
+    }
+
+    Get.put<MessagesMockService>(
+      MessagesMockService(
+        apiClient: Get.find<ApiClient>(),
+        tokenService: Get.find<TokenService>(),
+        chatSocketService: Get.find<ChatSocketService>(),
+      ),
+      permanent: true,
+    );
+  }
+
+  if (!Get.isRegistered<MessagesController>()) {
+    Get.put<MessagesController>(
+      MessagesController(messagesMockService: Get.find<MessagesMockService>()),
+      permanent: true,
+    );
+  }
+
+  return Get.find<MessagesController>();
 }
 
 class _ChatAvatar extends StatelessWidget {
