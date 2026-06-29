@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/themes/app_font.dart';
 import '../../../../core/widgets/widgets.dart';
 
 class ShopErrorView extends StatelessWidget {
@@ -364,7 +365,7 @@ class ShopBalanceCard extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Icon(icon, size: 28.r, color: iconColor),
-          const Spacer(),
+          SizedBox(height: 16.h),
           Text(
             title,
             textAlign: TextAlign.center,
@@ -376,12 +377,17 @@ class ShopBalanceCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 12.h),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 27.sp,
-              fontWeight: FontWeight.w900,
-              color: iconColor,
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: AppFont.font26.sp,
+                  fontWeight: FontWeight.w900,
+                  color: iconColor,
+                ),
+              ),
             ),
           ),
         ],

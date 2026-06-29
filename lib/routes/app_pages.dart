@@ -518,6 +518,7 @@ class AppPages {
             vocabularyApiService: Get.find<VocabularyApiService>(
               tag: args.controllerTag,
             ),
+            userSessionController: Get.find<UserSessionController>(),
           ),
           tag: args.controllerTag,
         );

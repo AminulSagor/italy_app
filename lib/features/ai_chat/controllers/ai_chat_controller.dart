@@ -150,14 +150,6 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
       voiceService.connectionState.value ==
           AiTutorVoiceConnectionState.connecting;
 
-  String get remainingVoiceTimeLabel {
-    final int totalSeconds = remainingVoiceSeconds.value.clamp(0, 86400).toInt();
-    final int minutes = totalSeconds ~/ 60;
-    final int seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:'
-        '${seconds.toString().padLeft(2, '0')}';
-  }
-
   @override
   void onInit() {
     super.onInit();
@@ -410,14 +402,7 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     try {
       final ApiResult<AiTutorVoiceSessionModel> result =
           await ApiErrorHandler.call<AiTutorVoiceSessionModel>(
-        () => _apiService.startVoiceSession(
-          topic: _activeVoiceTopic,
-          ttlSeconds: min(_userSessionController.aiVoiceSeconds, 3600),
-          memoryFacts: conversationMemoryFacts,
-          recentMistakeTags: recentMistakeTags,
-          guidedMode: _activeGuidedSession?.mode.apiValue,
-          guidedLevel: _activeGuidedSession?.level,
-        ),
+        _requestVoiceSessionWithRetry,
       );
       if (!result.isSuccess || result.data == null) {
         voiceService.connectionState.value = AiTutorVoiceConnectionState.error;
@@ -430,9 +415,18 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
       remainingVoiceSeconds.value = createdSession.allocatedSeconds;
       _applyAiBalances(createdSession.balances);
       await voiceService.connect(createdSession);
+      final bool assistantReady = await voiceService.waitForAssistantReady(
+        timeout: const Duration(seconds: 30),
+      );
+      if (!assistantReady) {
+        throw TimeoutException('The AI tutor did not join the voice room');
+      }
       await _sendVoiceHeartbeat();
       _startVoiceUsageTimers();
     } catch (_) {
+      await voiceService.disconnect(preserveErrorState: true);
+      voiceService.connectionState.value = AiTutorVoiceConnectionState.error;
+      voiceService.status.value = 'Unable to connect to AI tutor';
       if (createdSession != null) {
         final ApiResult<AiTutorBalanceModel> endResult =
             await ApiErrorHandler.call<AiTutorBalanceModel>(
@@ -448,6 +442,35 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     } finally {
       isStartingVoiceSession.value = false;
     }
+  }
+
+  Future<AiTutorVoiceSessionModel> _requestVoiceSessionWithRetry() async {
+    Object? lastError;
+    StackTrace? lastStackTrace;
+
+    for (int attempt = 1; attempt <= 2; attempt++) {
+      try {
+        return await _apiService.startVoiceSession(
+          topic: _activeVoiceTopic,
+          ttlSeconds: min(_userSessionController.aiVoiceSeconds, 3600),
+          memoryFacts: conversationMemoryFacts,
+          recentMistakeTags: recentMistakeTags,
+          guidedMode: _activeGuidedSession?.mode.apiValue,
+          guidedLevel: _activeGuidedSession?.level,
+        );
+      } catch (error, stackTrace) {
+        lastError = error;
+        lastStackTrace = stackTrace;
+        if (attempt < 2) {
+          await Future<void>.delayed(const Duration(milliseconds: 650));
+        }
+      }
+    }
+
+    Error.throwWithStackTrace(
+      lastError ?? StateError('Unable to create an AI voice session'),
+      lastStackTrace ?? StackTrace.current,
+    );
   }
 
   void _startVoiceUsageTimers() {

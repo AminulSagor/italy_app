@@ -32,24 +32,33 @@ class UserSessionController extends GetxService {
 
   int get aiTextTokens => user.value?.aiTextTokens ?? 0;
 
-  String get aiVoiceBalanceLabel {
-    final int seconds = aiVoiceSeconds;
-    final int minutes = seconds ~/ 60;
-    final int remainder = seconds % 60;
-    if (minutes <= 0) return '${remainder}s Voice';
-    if (remainder == 0) return '${minutes}m Voice';
-    return '${minutes}m ${remainder}s Voice';
-  }
+  String get aiVoiceBalanceLabel => '${aiVoiceSeconds ~/ 60} min';
 
-  String get aiTextBalanceLabel {
-    final int tokens = aiTextTokens;
-    if (tokens >= 1000000) {
-      return '${(tokens / 1000000).toStringAsFixed(1)}m Tokens';
+  String get aiTextBalanceLabel => '${_formatCompactCount(aiTextTokens)} Tokens';
+
+  String _formatCompactCount(int value) {
+    const List<String> suffixes = <String>['', 'K', 'M', 'B', 'T', 'Q'];
+    double scaledValue = value.clamp(0, 1 << 53).toDouble();
+    int suffixIndex = 0;
+
+    while (scaledValue >= 1000 && suffixIndex < suffixes.length - 1) {
+      scaledValue /= 1000;
+      suffixIndex++;
     }
-    if (tokens >= 1000) {
-      return '${(tokens / 1000).toStringAsFixed(1)}k Tokens';
+
+    String formatted = scaledValue.toStringAsFixed(
+      suffixIndex == 0 ? 0 : 1,
+    );
+    if (formatted.endsWith('.0')) {
+      formatted = formatted.substring(0, formatted.length - 2);
     }
-    return '$tokens Tokens';
+
+    if (formatted == '1000' && suffixIndex < suffixes.length - 1) {
+      formatted = '1';
+      suffixIndex++;
+    }
+
+    return '$formatted${suffixes[suffixIndex]}';
   }
 
   Future<CurrentUserSummary?> loadUser({

@@ -56,10 +56,9 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView> {
                       final bool failed = voice.connectionState.value ==
                           AiTutorVoiceConnectionState.error;
                       final String assistantText =
-                          voice.latestAssistantMessage?.primary ??
-                              (connecting
-                                  ? 'Preparing your AI tutor...'
-                                  : 'Ciao! Tocca il microfono e iniziamo.');
+                          voice.assistantThinking.value
+                              ? ''
+                              : voice.latestAssistantMessage?.primary ?? '';
                       final String userText =
                           voice.latestUserMessage?.primary ?? '';
 
@@ -68,22 +67,11 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView> {
                         padding: EdgeInsets.fromLTRB(24.w, 46.h, 24.w, 175.h),
                         child: Column(
                           children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Flexible(
-                                  child: _SessionStatusChip(
-                                    label: voice.status.value,
-                                    active: voice.isConnected,
-                                  ),
-                                ),
-                                SizedBox(width: 10.w),
-                                _VoiceTimeChip(
-                                  label: controller.remainingVoiceTimeLabel,
-                                  exhausted:
-                                      controller.isVoiceBalanceExhausted.value,
-                                ),
-                              ],
+                            Center(
+                              child: _SessionStatusChip(
+                                label: voice.status.value,
+                                active: voice.isConnected,
+                              ),
                             ),
                             SizedBox(height: 46.h),
                             if (connecting)
@@ -106,34 +94,23 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView> {
                                 animate: voice.isConnected &&
                                     (voice.assistantSpeaking.value ||
                                         voice.userSpeaking.value),
+                                thinking: voice.assistantThinking.value,
+                                audioLevel: voice.activeAudioLevel,
                               ),
                             SizedBox(height: 42.h),
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 140),
-                              child: Text(
-                                assistantText,
-                                key: ValueKey<String>(assistantText),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: AppFont.font22.sp,
-                                  height: 1.22,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -.6,
-                                  color: const Color(0xFF26312E),
-                                ),
-                              ),
-                            ),
-                            if (voice.latestAssistantMessage?.isPartial == true)
-                              Padding(
-                                padding: EdgeInsets.only(top: 10.h),
+                            if (assistantText.isNotEmpty)
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 140),
                                 child: Text(
-                                  'AI tutor is responding...',
+                                  assistantText,
+                                  key: ValueKey<String>(assistantText),
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: 10.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.primaryGreen.withValues(
-                                      alpha: .72,
-                                    ),
+                                    fontSize: AppFont.font22.sp,
+                                    height: 1.22,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -.6,
+                                    color: const Color(0xFF26312E),
                                   ),
                                 ),
                               ),
@@ -211,52 +188,6 @@ class _VoiceBackground extends StatelessWidget {
   }
 }
 
-
-class _VoiceTimeChip extends StatelessWidget {
-  const _VoiceTimeChip({required this.label, required this.exhausted});
-
-  final String label;
-  final bool exhausted;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-      decoration: BoxDecoration(
-        color: exhausted ? const Color(0xFFFFE7E7) : AppColors.white,
-        borderRadius: BorderRadius.circular(999.r),
-        border: Border.all(
-          color: exhausted
-              ? const Color(0xFFFFB8B8)
-              : const Color(0xFFE0E5E1),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(
-            Icons.timer_outlined,
-            size: 14.r,
-            color: exhausted
-                ? const Color(0xFFD53232)
-                : AppColors.primaryGreen,
-          ),
-          SizedBox(width: 5.w),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w900,
-              color: exhausted
-                  ? const Color(0xFFD53232)
-                  : const Color(0xFF4C5854),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _SessionStatusChip extends StatelessWidget {
   const _SessionStatusChip({required this.label, required this.active});
