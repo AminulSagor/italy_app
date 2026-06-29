@@ -6,6 +6,7 @@ import 'package:italir_pothe/core/themes/app_colors.dart';
 import 'package:italir_pothe/core/themes/app_constants.dart';
 import 'package:italir_pothe/core/themes/app_font.dart';
 import 'package:italir_pothe/core/widgets/custom_button.dart';
+import '../models/shop_models.dart';
 import '../shop_controller.dart';
 
 class StreakOrderSummaryView extends GetView<ShopController> {
@@ -31,7 +32,7 @@ class StreakOrderSummaryView extends GetView<ShopController> {
               SizedBox(height: 52.h),
               Obx(
                 () => CustomButton.primary(
-                  text: 'Buy Full Course Now',
+                  text: 'Continue to Checkout',
                   icon: Icons.play_arrow_rounded,
                   isLoading: controller.isCheckoutLoading.value,
                   onPressed: controller.confirmStreakFreezePurchase,

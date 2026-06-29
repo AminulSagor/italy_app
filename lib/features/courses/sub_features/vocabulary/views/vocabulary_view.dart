@@ -66,7 +66,7 @@ class VocabularyView extends GetView<VocabularyController> {
                 ),
                 Spacer(),
                 _VocabularyStats(
-                  streakDays: session.streakDays,
+                  streakDays: controller.currentStreakDays,
                   level: session.level,
                 ),
                 SizedBox(height: 30.h),

@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:italir_pothe/core/widgets/custom_button.dart';
-
-import '../models/home_models.dart';
 
 import '../../../core/themes/app_colors.dart';
-import '../../../core/themes/app_font.dart';
 import '../../../core/themes/app_constants.dart';
+import '../../../core/themes/app_font.dart';
+import '../../../core/widgets/custom_button.dart';
+import '../models/home_models.dart';
 
 class CurrentChapterCard extends StatelessWidget {
-  final HomeChapterModel chapter;
-  final VoidCallback? onContinueTap;
-
   const CurrentChapterCard({
     super.key,
     required this.chapter,
     this.onContinueTap,
   });
+
+  final HomeChapterModel chapter;
+  final VoidCallback? onContinueTap;
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +35,12 @@ class CurrentChapterCard extends StatelessWidget {
         ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            chapter.eyebrow,
+            chapter.courseTitle.isEmpty
+                ? 'CURRENT CHAPTER'
+                : chapter.courseTitle.toUpperCase(),
             style: TextStyle(
               fontSize: AppFont.font11.sp,
               fontWeight: FontWeight.w900,
@@ -48,9 +48,9 @@ class CurrentChapterCard extends StatelessWidget {
               color: AppColors.homeBarLight,
             ),
           ),
-          SizedBox(height: 14.h),
+          SizedBox(height: 12.h),
           Text(
-            chapter.title,
+            chapter.lessonTitle,
             style: TextStyle(
               fontSize: AppFont.font22.sp,
               fontWeight: FontWeight.w900,
@@ -58,12 +58,22 @@ class CurrentChapterCard extends StatelessWidget {
               color: AppColors.homePaleGreen,
             ),
           ),
+          if (chapter.chapterTitle.isNotEmpty) ...<Widget>[
+            SizedBox(height: 5.h),
+            Text(
+              chapter.chapterTitle,
+              style: TextStyle(
+                fontSize: AppFont.font12.sp,
+                color: AppColors.homeBarLight,
+              ),
+            ),
+          ],
           SizedBox(height: 18.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
-                chapter.progressLabel,
+                'Chapter progress',
                 style: TextStyle(
                   fontSize: AppFont.font12.sp,
                   fontWeight: FontWeight.w800,
@@ -71,7 +81,7 @@ class CurrentChapterCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${(chapter.progress * 100).round()}%',
+                chapter.progressLabel,
                 style: TextStyle(
                   fontSize: AppFont.font12.sp,
                   fontWeight: FontWeight.w800,
@@ -94,8 +104,8 @@ class CurrentChapterCard extends StatelessWidget {
           ),
           SizedBox(height: 28.h),
           CustomButton(
-            onPressed: () => onContinueTap?.call(),
-            text: chapter.buttonLabel,
+            onPressed: onContinueTap ?? () {},
+            text: 'Continue Learning',
             width: double.infinity,
             height: 56.h,
             icon: Icons.play_arrow_rounded,

@@ -32,10 +32,6 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
             );
           }
 
-          final bool showCurrencyToggle =
-              controller.selectedPaymentMethod.value == ProPaymentMethod.card ||
-              controller.selectedPaymentMethod.value == ProPaymentMethod.bkash;
-
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.fromLTRB(24.w, 10.h, 24.w, 66.h),
@@ -46,15 +42,15 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
                   title: 'Checkout',
                   onBackTap: () => Get.back<void>(),
                 ),
-                if (showCurrencyToggle) ...<Widget>[
-                  SizedBox(height: 20.h),
-                  ProCurrencyToggle(
-                    selectedCurrency: controller.selectedCurrency.value,
-                    onChanged: controller.setCurrency,
-                  ),
-                ],
+                SizedBox(height: 20.h),
+                ProCurrencyToggle(
+                  selectedCurrency: controller.selectedCurrency.value,
+                  onChanged: controller.setCurrency,
+                ),
                 SizedBox(height: 20.h),
                 CheckoutProductCard(
+                  courseName: order.courseName,
+                  lessonCount: order.lessonCount,
                   plan: order.plan,
                   currency: controller.selectedCurrency.value,
                   isCouponApplied: controller.isCouponApplied.value,
@@ -83,30 +79,13 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
                 ),
                 SizedBox(height: 24.h),
                 CheckoutPaymentMethodCard(
-                  method: ProPaymentMethod.paypal,
+                  method: ProPaymentMethod.googlePlay,
                   isSelected:
                       controller.selectedPaymentMethod.value ==
-                      ProPaymentMethod.paypal,
-                  onTap: () =>
-                      controller.selectPaymentMethod(ProPaymentMethod.paypal),
-                ),
-                SizedBox(height: 24.h),
-                CheckoutPaymentMethodCard(
-                  method: ProPaymentMethod.applePay,
-                  isSelected:
-                      controller.selectedPaymentMethod.value ==
-                      ProPaymentMethod.applePay,
-                  onTap: () =>
-                      controller.selectPaymentMethod(ProPaymentMethod.applePay),
-                ),
-                SizedBox(height: 24.h),
-                CheckoutPaymentMethodCard(
-                  method: ProPaymentMethod.bkash,
-                  isSelected:
-                      controller.selectedPaymentMethod.value ==
-                      ProPaymentMethod.bkash,
-                  onTap: () =>
-                      controller.selectPaymentMethod(ProPaymentMethod.bkash),
+                      ProPaymentMethod.googlePlay,
+                  onTap: () => controller.selectPaymentMethod(
+                    ProPaymentMethod.googlePlay,
+                  ),
                 ),
                 SizedBox(height: 58.h),
                 CustomButton.primary(

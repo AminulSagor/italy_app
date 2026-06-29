@@ -5,6 +5,7 @@ import 'package:italir_pothe/core/widgets/custom_button.dart';
 import 'package:italir_pothe/core/widgets/simple_appbar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../models/shop_models.dart';
 import '../../shop_controller.dart';
 
 class OrderSummaryPage extends StatelessWidget {
@@ -73,7 +74,7 @@ class OrderSummaryPage extends StatelessWidget {
                       SizedBox(height: 24.h),
 
                       CustomButton.primary(
-                        text: 'Buy Full Course Now  ▶',
+                        text: 'Continue to Checkout  ▶',
                         onPressed: controller.buySelectedPlan,
                         btnColor: green,
                         borderRadius: 30,
@@ -336,7 +337,7 @@ class OrderSummaryPage extends StatelessWidget {
           ),
           SizedBox(width: 10.w),
           CustomButton(
-            onPressed: () {},
+            onPressed: controller.clearCoupon,
             text: '',
             height: 60.h,
             width: 82.w,
@@ -347,7 +348,7 @@ class OrderSummaryPage extends StatelessWidget {
             borderRadius: 31,
             borderWidth: 2,
             textColor: green,
-            icon: Icons.check,
+            icon: Icons.close_rounded,
           ),
           //_couponCheckButton(),
         ],

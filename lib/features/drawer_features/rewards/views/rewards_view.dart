@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../models/reward_models.dart';
+import '../models/reward_response_models.dart';
 import '../reward_controller.dart';
 import '../widgets/reward_shipping_dialog.dart';
 import '../widgets/reward_widgets.dart';
@@ -17,88 +19,146 @@ class RewardsView extends GetView<RewardController> {
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 52.h),
-          child: Column(
-            children: <Widget>[
-              RewardTopBar(title: 'gen_rewards'.tr.tr),
-              SizedBox(height: 24.h),
+        child: Obx(() {
+          if (controller.isLoadingDashboard.value &&
+              controller.dashboard.value == null) {
+            return const Center(
+              child: CircularProgressIndicator(color: green),
+            );
+          }
 
-              _WinnerCard(onOpenChest: controller.openChest),
-
-              SizedBox(height: 34.h),
-
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      'Reward History',
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF2D3032),
-                        letterSpacing: -0.35,
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: controller.openRewardsHistory,
-                    child: Text(
-                      'See all',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w900,
-                        color: green,
-                      ),
-                    ),
-                  ),
-                ],
+          final RewardDashboardModel? dashboard = controller.dashboard.value;
+          return RefreshIndicator(
+            color: green,
+            onRefresh: controller.refreshDashboard,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-
-              SizedBox(height: 20.h),
-
-              Obx(() => GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: controller.rewardCards.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisExtent: 220.h,
-                  crossAxisSpacing: 16.w,
-                  mainAxisSpacing: 18.h,
-                ),
-                itemBuilder: (context, index) {
-                  final RewardCardItem item = controller.rewardCards[index];
-
-                  return _RewardCard(
-                    item: item,
-                    onTap: () {
-                      if (item.id == 'boat-headphones') {
-                        Get.dialog(
-                          const RewardShippingDialog(),
-                          barrierColor: Colors.black.withValues(alpha: 0.38),
+              padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 52.h),
+              children: <Widget>[
+                const RewardTopBar(title: 'Rewards'),
+                SizedBox(height: 24.h),
+                if (dashboard == null)
+                  RewardStateMessage(
+                    icon: Icons.error_outline_rounded,
+                    title: 'Rewards unavailable',
+                    message: controller.dashboardError.value.isEmpty
+                        ? 'Could not load your rewards.'
+                        : controller.dashboardError.value,
+                    buttonText: 'Retry',
+                    onTap: controller.loadDashboard,
+                  )
+                else ...<Widget>[
+                  if (dashboard.pendingChest != null)
+                    _WinnerCard(
+                      chest: dashboard.pendingChest!,
+                      onOpenChest: controller.openChest,
+                    )
+                  else
+                    const RewardStateMessage(
+                      icon: Icons.inventory_2_outlined,
+                      title: 'No unopened chest',
+                      message:
+                          'Keep learning and climbing the leaderboard to unlock your next reward.',
+                    ),
+                  SizedBox(height: 34.h),
+                  _HistoryHeader(onSeeAll: controller.openRewardsHistory),
+                  SizedBox(height: 20.h),
+                  if (dashboard.recentRewards.isEmpty)
+                    const RewardStateMessage(
+                      icon: Icons.emoji_events_outlined,
+                      title: 'No rewards yet',
+                      message:
+                          'Your claimed and unlocked rewards will appear here.',
+                    )
+                  else
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: dashboard.recentRewards.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisExtent: 238.h,
+                        crossAxisSpacing: 16.w,
+                        mainAxisSpacing: 18.h,
+                      ),
+                      itemBuilder: (BuildContext context, int index) {
+                        final RewardModel item =
+                            dashboard.recentRewards[index];
+                        return _RewardCard(
+                          item: item,
+                          onDetailsTap: () =>
+                              controller.openRewardDetails(item.id),
+                          onActionTap: () => _handleRewardAction(item),
                         );
-                        return;
-                      }
+                      },
+                    ),
+                ],
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
 
-                      controller.handleRewardCardTap(item);
-                    },
-                  );
-                },
-              )),
-            ],
+  Future<void> _handleRewardAction(RewardModel reward) async {
+    if (reward.action?.type == RewardActionType.shippingAddress) {
+      final bool ready = await controller.prepareShippingAddress(reward);
+      if (ready) {
+        await Get.dialog<void>(
+          const RewardShippingDialog(),
+          barrierColor: Colors.black.withValues(alpha: 0.38),
+        );
+      }
+      return;
+    }
+    await controller.handleRewardAction(reward);
+  }
+}
+
+class _HistoryHeader extends StatelessWidget {
+  const _HistoryHeader({required this.onSeeAll});
+
+  final VoidCallback onSeeAll;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            'Reward History',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF2D3032),
+              letterSpacing: -0.35,
+            ),
           ),
         ),
-      ),
+        GestureDetector(
+          onTap: onSeeAll,
+          child: Text(
+            'See all',
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w900,
+              color: RewardsView.green,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
 class _WinnerCard extends StatelessWidget {
-  final VoidCallback onOpenChest;
+  const _WinnerCard({required this.chest, required this.onOpenChest});
 
-  const _WinnerCard({required this.onOpenChest});
+  final RewardChestModel chest;
+  final VoidCallback onOpenChest;
 
   @override
   Widget build(BuildContext context) {
@@ -128,22 +188,33 @@ class _WinnerCard extends StatelessWidget {
         alignment: Alignment.center,
         children: <Widget>[
           Positioned(
-            top: 60.h,
-            child: SizedBox(
-              width: 150.r,
-              height: 150.r,
-              child: Image.asset('assets/icons_png/reward.png'),
+            top: 48.h,
+            child: Container(
+              width: 158.r,
+              height: 158.r,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: RewardImage(
+                rewardType: chest.rewardType,
+                imageUrl: chest.imageUrl,
+                size: 135,
+              ),
             ),
           ),
           Positioned(
-            top: 195.h,
-            left: 34.w,
-            right: 34.w,
+            top: 205.h,
+            left: 30.w,
+            right: 30.w,
             child: Text(
-              'Admin Giveaway\nWinner!',
+              chest.headline.isEmpty ? chest.title : chest.headline,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 29.sp,
+                fontSize: 27.sp,
                 height: 1.18,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
@@ -152,17 +223,21 @@ class _WinnerCard extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 285.h,
-            left: 54.w,
-            right: 54.w,
+            top: 282.h,
+            left: 45.w,
+            right: 45.w,
             child: Text(
-              'You won a special\nreward for your performance.',
+              chest.congratulatoryNote.isEmpty
+                  ? 'You unlocked a special reward for your progress.'
+                  : chest.congratulatoryNote,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 15.sp,
-                height: 1.45,
+                fontSize: 14.sp,
+                height: 1.4,
                 fontWeight: FontWeight.w600,
-                color: Colors.white.withValues(alpha: 0.72),
+                color: Colors.white.withValues(alpha: 0.78),
               ),
             ),
           ),
@@ -179,11 +254,13 @@ class _WinnerCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100.r),
                 ),
                 child: Text(
-                  'Open Chest',
+                  chest.action?.label.isNotEmpty == true
+                      ? chest.action!.label
+                      : 'Open Chest',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w900,
-                    color: const Color(0xFF267A05),
+                    color: RewardsView.green,
                   ),
                 ),
               ),
@@ -196,90 +273,138 @@ class _WinnerCard extends StatelessWidget {
 }
 
 class _RewardCard extends StatelessWidget {
-  final RewardCardItem item;
-  final VoidCallback onTap;
+  const _RewardCard({
+    required this.item,
+    required this.onDetailsTap,
+    required this.onActionTap,
+  });
 
-  const _RewardCard({required this.item, required this.onTap});
+  final RewardModel item;
+  final VoidCallback onDetailsTap;
+  final VoidCallback onActionTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 20.h, 18.w, 18.h),
-      decoration: BoxDecoration(
-        color: item.bgColor,
-        borderRadius: BorderRadius.circular(42.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            width: 48.r,
-            height: 48.r,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
+    final Color accent = RewardVisuals.accent(item.rewardType);
+    final String subtitle = item.subtitle.isNotEmpty
+        ? item.subtitle
+        : item.valueLabel;
+
+    return GestureDetector(
+      onTap: onDetailsTap,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(18.w, 18.h, 16.w, 16.h),
+        decoration: BoxDecoration(
+          color: RewardVisuals.background(item.rewardType),
+          borderRadius: BorderRadius.circular(42.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Container(
+                  width: 48.r,
+                  height: 48.r,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    RewardVisuals.icon(item.rewardType),
+                    size: 25.r,
+                    color: accent,
+                  ),
+                ),
+                const Spacer(),
+                if (!item.isSeen)
+                  Container(
+                    width: 9.r,
+                    height: 9.r,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFD71920),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
             ),
-            child: Icon(item.icon, size: 25.r, color: item.iconColor),
-          ),
-          SizedBox(height: 26.h),
-          Text(
-            item.title,
-            style: TextStyle(
-              fontSize: 16.sp,
-              height: 1.08,
-              fontWeight: FontWeight.w900,
-              color: item.textColor,
-              letterSpacing: -0.25,
-            ),
-          ),
-          if (item.subtitle.isNotEmpty) ...[
-            SizedBox(height: 8.h),
+            SizedBox(height: 20.h),
             Text(
-              item.subtitle,
+              item.title,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 9.5.sp,
-                height: 1.28,
-                fontWeight: FontWeight.w500,
-                color: item.textColor.withValues(alpha: 0.82),
+                fontSize: 16.sp,
+                height: 1.1,
+                fontWeight: FontWeight.w900,
+                color: accent,
+                letterSpacing: -0.25,
               ),
             ),
-          ],
-          const Spacer(),
-          if (item.buttonText != null)
-            GestureDetector(
-              onTap: onTap,
-              child: Container(
-                height: 35.h,
-                //padding: EdgeInsets.symmetric(horizontal: 0.w),
+            if (subtitle.isNotEmpty) ...<Widget>[
+              SizedBox(height: 7.h),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  height: 1.3,
+                  fontWeight: FontWeight.w600,
+                  color: accent.withValues(alpha: 0.82),
+                ),
+              ),
+            ],
+            const Spacer(),
+            if (item.action != null)
+              GestureDetector(
+                onTap: onActionTap,
+                child: Container(
+                  height: 35.h,
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: item.rewardType == RewardType.courseAccess
+                        ? Colors.white
+                        : accent,
+                    borderRadius: BorderRadius.circular(100.r),
+                  ),
+                  child: Text(
+                    item.action!.label.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 8.5.sp,
+                      fontWeight: FontWeight.w900,
+                      color: item.rewardType == RewardType.courseAccess
+                          ? accent
+                          : Colors.white,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Container(
+                height: 26.h,
+                padding: EdgeInsets.symmetric(horizontal: 10.w),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: item.buttonColor,
+                  color: Colors.white.withValues(alpha: 0.72),
                   borderRadius: BorderRadius.circular(100.r),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    if (item.id == 'boat-headphones') ...[
-                      Icon(
-                        Icons.local_shipping_outlined,
-                        size: 12.r,
-                        color: item.buttonTextColor,
-                      ),
-                      SizedBox(width: 4.w),
-                    ],
-                    Text(
-                      item.buttonText!,
-                      style: TextStyle(
-                        fontSize: 9.sp,
-                        fontWeight: FontWeight.w900,
-                        color: item.buttonTextColor,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  item.statusLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 8.5.sp,
+                    fontWeight: FontWeight.w900,
+                    color: accent,
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

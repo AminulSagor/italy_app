@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import 'package:italir_pothe/core/themes/app_colors.dart';
-import 'package:italir_pothe/core/themes/app_constants.dart';
-import 'package:italir_pothe/core/themes/app_font.dart';
-import 'package:italir_pothe/core/widgets/custom_button.dart';
+import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_constants.dart';
+import '../../../../core/themes/app_font.dart';
+import '../../../../core/widgets/custom_button.dart';
+import '../models/shop_models.dart';
 import '../shop_controller.dart';
 
 class StreakFreezeView extends GetView<ShopController> {
@@ -41,7 +42,6 @@ class StreakFreezeView extends GetView<ShopController> {
                   style: TextStyle(
                     fontSize: 17.sp,
                     fontWeight: FontWeight.w600,
-                    height: 1.25,
                     color: AppColors.bodyText,
                   ),
                 ),
@@ -49,22 +49,38 @@ class StreakFreezeView extends GetView<ShopController> {
               SizedBox(height: 33.h),
               const _InventoryCard(),
               SizedBox(height: 32.h),
-              const _FreezePackCard(
-                pack: StreakFreezePackTitles.singleFreezeTitle,
-              ),
-              SizedBox(height: 15.h),
-              const _FreezePackCard(
-                pack: StreakFreezePackTitles.tripleProtectionTitle,
-              ),
-              SizedBox(height: 15.h),
-              const _FreezePackCard(
-                pack: StreakFreezePackTitles.unlimitedMonthlyShieldTitle,
-              ),
-              SizedBox(height: 65.h),
-              CustomButton.primary(
-                text: 'Confirm Purchase',
-                icon: Icons.play_arrow_rounded,
-                onPressed: controller.goToStreakFreezeOrderSummary,
+              Obx(() {
+                if (controller.streakPackages.isEmpty) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32),
+                      child: Text('No streak freeze packages are available.'),
+                    ),
+                  );
+                }
+                return Column(
+                  children: controller.streakPackages
+                      .map(
+                        (StorePackageModel package) => Padding(
+                          padding: EdgeInsets.only(bottom: 15.h),
+                          child: _FreezePackCard(package: package),
+                        ),
+                      )
+                      .toList(growable: false),
+                );
+              }),
+              SizedBox(height: 50.h),
+              Obx(
+                () => CustomButton.primary(
+                  text: controller.isLoadingQuote.value
+                      ? 'Loading...'
+                      : 'Confirm Purchase',
+                  icon: Icons.play_arrow_rounded,
+                  onPressed: controller.isLoadingQuote.value ||
+                          controller.streakPackages.isEmpty
+                      ? () {}
+                      : controller.goToStreakFreezeOrderSummary,
+                ),
               ),
             ],
           ),
@@ -119,12 +135,10 @@ class _StoreTopBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               Text(
                 'Streak Freeze Refiller',
-                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font20.sp,
                   fontWeight: FontWeight.w900,
                   color: AppColors.blockSuccessBlueText,
-                  letterSpacing: -0.35,
                 ),
               ),
             ],
@@ -135,7 +149,7 @@ class _StoreTopBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-class _InventoryCard extends StatelessWidget {
+class _InventoryCard extends GetView<ShopController> {
   const _InventoryCard();
 
   @override
@@ -165,14 +179,14 @@ class _InventoryCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 6.h),
-                Text(
-                  'Freezes: 2',
-                  style: TextStyle(
-                    fontSize: 30.sp,
-                    fontWeight: FontWeight.w900,
-                    height: 1.05,
-                    letterSpacing: -0.4,
-                    color: AppColors.blockSuccessBlueText,
+                Obx(
+                  () => Text(
+                    'Freezes: ${controller.streakFreezeBalance}',
+                    style: TextStyle(
+                      fontSize: 30.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.blockSuccessBlueText,
+                    ),
                   ),
                 ),
               ],
@@ -198,7 +212,6 @@ class _InventoryCard extends StatelessWidget {
               color: AppColors.blockSuccessBlueText,
             ),
           ),
-          SizedBox(width: 10.w),
         ],
       ),
     );
@@ -206,23 +219,20 @@ class _InventoryCard extends StatelessWidget {
 }
 
 class _FreezePackCard extends GetView<ShopController> {
-  final String pack;
+  const _FreezePackCard({required this.package});
 
-  const _FreezePackCard({required this.pack});
+  final StorePackageModel package;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final String selectedPack = controller.selectedStreakFreezePack.value;
-      final bool selected = selectedPack == pack;
-      final String badge = controller.streakFreezePackBadge(pack);
-
+      final bool selected = controller.isStreakPackageSelected(package.id);
       return Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.topCenter,
         children: <Widget>[
           GestureDetector(
-            onTap: () => controller.selectStreakFreezePack(pack),
+            onTap: () => controller.selectStreakPackage(package.id),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               width: double.infinity,
@@ -242,7 +252,7 @@ class _FreezePackCard extends GetView<ShopController> {
                 children: <Widget>[
                   SizedBox(
                     width: 68.w,
-                    child: _PackIcon(pack: pack, selected: selected),
+                    child: _PackIcon(package: package),
                   ),
                   SizedBox(width: 22.w),
                   Expanded(
@@ -251,39 +261,47 @@ class _FreezePackCard extends GetView<ShopController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          _displayTitle(pack),
+                          package.name,
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: AppFont.font20.sp,
                             fontWeight: FontWeight.w900,
-                            height: 1.28,
-                            letterSpacing: -0.35,
                             color: AppColors.headerText,
                           ),
                         ),
-                        SizedBox(height: 3.h),
+                        SizedBox(height: 5.h),
                         Text(
-                          controller.streakFreezePackSubtitle(pack),
+                          package.description.isNotEmpty
+                              ? package.description
+                              : package.entitlementSummary,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: AppFont.font13.sp,
                             fontWeight: FontWeight.w500,
-                            height: 1.35,
                             color: AppColors.bodyText,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(width: 14.w),
-                  _PackPrice(pack: pack, selected: selected),
+                  SizedBox(width: 12.w),
+                  Text(
+                    controller.packagePriceText(package),
+                    style: TextStyle(
+                      fontSize: AppFont.font20.sp,
+                      fontWeight: FontWeight.w900,
+                      color: selected
+                          ? AppColors.blockSuccessBlueText
+                          : AppColors.headerText,
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-          if (selected && badge.isNotEmpty)
+          if (selected && package.badgeLabel.isNotEmpty)
             Positioned(
               top: -13.h,
               child: Container(
@@ -295,11 +313,10 @@ class _FreezePackCard extends GetView<ShopController> {
                   borderRadius: BorderRadius.circular(kRadius60.r),
                 ),
                 child: Text(
-                  badge.toUpperCase(),
+                  package.badgeLabel,
                   style: TextStyle(
                     fontSize: AppFont.font12.sp,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 1.1,
                     color: AppColors.white,
                   ),
                 ),
@@ -309,133 +326,50 @@ class _FreezePackCard extends GetView<ShopController> {
       );
     });
   }
-
-  String _displayTitle(String value) {
-    if (pack == StreakFreezePackTitles.tripleProtectionTitle) {
-      return value.replaceAll(' (3x)', '\n(3x)');
-    }
-    if (pack == StreakFreezePackTitles.unlimitedMonthlyShieldTitle) {
-      return value.replaceFirst('Unlimited ', 'Unlimited\n');
-    }
-    return value.replaceFirst(' ', '\n');
-  }
 }
 
 class _PackIcon extends StatelessWidget {
-  final String pack;
-  final bool selected;
+  const _PackIcon({required this.package});
 
-  const _PackIcon({required this.pack, required this.selected});
+  final StorePackageModel package;
 
   @override
   Widget build(BuildContext context) {
-    if (pack == StreakFreezePackTitles.tripleProtectionTitle) {
-      return SizedBox(
-        width: 67.w,
-        height: 54.h,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: <Widget>[
-            Positioned(
-              left: 22.w,
-              top: 0,
-              child: _Snowflake(size: 33.r),
-            ),
-            Positioned(
-              left: 0,
-              top: 22.h,
-              child: _Snowflake(size: 28.r),
-            ),
-            Positioned(
-              right: 0,
-              top: 24.h,
-              child: _Snowflake(size: 30.r),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (pack == StreakFreezePackTitles.unlimitedMonthlyShieldTitle) {
+    if (package.isUnlimitedStreak) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          _Snowflake(size: 31.r),
-          Transform.translate(
-            offset: Offset(0, -2.h),
-            child: Text(
-              '∞',
-              style: TextStyle(
-                fontSize: 30.sp,
-                fontWeight: FontWeight.w900,
-                height: 0.72,
-                color: AppColors.blockSuccessBlueText,
-              ),
+          Icon(
+            Icons.ac_unit_rounded,
+            size: 31.r,
+            color: AppColors.blockSuccessBlueText,
+          ),
+          Text(
+            '∞',
+            style: TextStyle(
+              fontSize: 30.sp,
+              fontWeight: FontWeight.w900,
+              height: 0.72,
+              color: AppColors.blockSuccessBlueText,
             ),
           ),
         ],
       );
     }
 
-    return Center(child: _Snowflake(size: 31.r));
-  }
-}
-
-class _Snowflake extends StatelessWidget {
-  final double size;
-
-  const _Snowflake({required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(
-      Icons.ac_unit_rounded,
-      size: size,
-      color: AppColors.blockSuccessBlueText,
-    );
-  }
-}
-
-class _PackPrice extends GetView<ShopController> {
-  final String pack;
-  final bool selected;
-
-  const _PackPrice({required this.pack, required this.selected});
-
-  @override
-  Widget build(BuildContext context) {
-    final String price = controller.formatPrice(
-      controller.streakFreezePackPriceValue(pack),
-    );
-    final bool monthly =
-        pack == StreakFreezePackTitles.unlimitedMonthlyShieldTitle;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        Text(
-          price,
-          style: TextStyle(
-            fontSize: monthly ? AppFont.font20.sp : AppFont.font22.sp,
-            fontWeight: FontWeight.w900,
-            height: 1,
-            color: selected
-                ? AppColors.blockSuccessBlueText
-                : AppColors.headerText,
-          ),
+    final int count = package.streakFreezeCount.clamp(1, 3).toInt();
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 2.w,
+      runSpacing: 2.h,
+      children: List<Widget>.generate(
+        count,
+        (_) => Icon(
+          Icons.ac_unit_rounded,
+          size: 27.r,
+          color: AppColors.blockSuccessBlueText,
         ),
-        if (monthly)
-          Text(
-            '/mo',
-            style: TextStyle(
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w700,
-              height: 1.2,
-              color: AppColors.bodyText,
-            ),
-          ),
-      ],
+      ),
     );
   }
 }

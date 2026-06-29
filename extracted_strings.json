@@ -1,0 +1,2157 @@
+[
+  {
+    "path": "lib/main.dart",
+    "string": "Italir Pothe",
+    "match": "title: 'Italir Pothe'"
+  },
+  {
+    "path": "lib/features/ai_chat/ai_chat_view.dart",
+    "string": "Writing Help",
+    "match": "title: 'Writing Help'"
+  },
+  {
+    "path": "lib/features/ai_chat/ai_chat_view.dart",
+    "string": "রাইটিং অ্যাসিস্ট্যান্ট",
+    "match": "subtitle: 'রাইটিং অ্যাসিস্ট্যান্ট'"
+  },
+  {
+    "path": "lib/features/ai_chat/ai_chat_view.dart",
+    "string": "Level Test",
+    "match": "title: 'Level Test'"
+  },
+  {
+    "path": "lib/features/splash/splash_view.dart",
+    "string": "splash_slide_1_title",
+    "match": "title: 'splash_slide_1_title'"
+  },
+  {
+    "path": "lib/features/splash/splash_view.dart",
+    "string": "splash_slide_2_title",
+    "match": "title: 'splash_slide_2_title'"
+  },
+  {
+    "path": "lib/features/splash/splash_view.dart",
+    "string": "splash_slide_3_title",
+    "match": "title: 'splash_slide_3_title'"
+  },
+  {
+    "path": "lib/features/splash/splash_view.dart",
+    "string": "splash_service_italian",
+    "match": "label: 'splash_service_italian'"
+  },
+  {
+    "path": "lib/features/splash/splash_view.dart",
+    "string": "splash_service_caf",
+    "match": "label: 'splash_service_caf'"
+  },
+  {
+    "path": "lib/features/splash/splash_view.dart",
+    "string": "splash_service_cv",
+    "match": "label: 'splash_service_cv'"
+  },
+  {
+    "path": "lib/features/webinar/views/webinar_view.dart",
+    "string": "Live Webinars",
+    "match": "title: 'Live Webinars'"
+  },
+  {
+    "path": "lib/features/webinar/widgets/webinar_live_widgets.dart",
+    "string": "Write a message...",
+    "match": "Text: 'Write a message...'"
+  },
+  {
+    "path": "lib/features/service_hub/views/service_hub_view.dart",
+    "string": "CV Builder",
+    "match": "title: 'CV Builder'"
+  },
+  {
+    "path": "lib/features/service_hub/views/service_hub_view.dart",
+    "string": "২ মিনিটে আপনার সিভি তৈরি করুন",
+    "match": "subtitle: '২ মিনিটে আপনার সিভি তৈরি করুন'"
+  },
+  {
+    "path": "lib/features/service_hub/views/service_hub_view.dart",
+    "string": "CREATE MY CV",
+    "match": "Text: 'CREATE MY CV'"
+  },
+  {
+    "path": "lib/features/service_hub/views/service_hub_view.dart",
+    "string": "CAF &\\nAdministrative\\nHelp",
+    "match": "title: 'CAF &\\nAdministrative\\nHelp'"
+  },
+  {
+    "path": "lib/features/service_hub/views/service_hub_view.dart",
+    "string": "EXPLORE SERVICES",
+    "match": "Text: 'EXPLORE SERVICES'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/models/cv_builder_models.dart",
+    "string": "Title",
+    "match": "label: 'Title'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/models/cv_builder_models.dart",
+    "string": "Company / Institution",
+    "match": "label: 'Company / Institution'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/models/cv_builder_models.dart",
+    "string": "Date range",
+    "match": "label: 'Date range'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/models/cv_builder_models.dart",
+    "string": "Description",
+    "match": "label: 'Description'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/choose_cv_template_view.dart",
+    "string": "Search template name...",
+    "match": "Text: 'Search template name...'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Create a New CV",
+    "match": "title: 'Create a New CV'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Use Existing CV",
+    "match": "title: 'Use Existing CV'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Duplicate or edit your previous version.",
+    "match": "subtitle: 'Duplicate or edit your previous version.'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "DRAFTS",
+    "match": "title: 'DRAFTS'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Kitchen Assistant",
+    "match": "title: 'Kitchen Assistant'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Last edited 2 days ago",
+    "match": "subtitle: 'Last edited 2 days ago'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Delivery Driver",
+    "match": "title: 'Delivery Driver'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Last edited 5 days ago",
+    "match": "subtitle: 'Last edited 5 days ago'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "COMPLETED",
+    "match": "title: 'COMPLETED'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Restaurant Waiter",
+    "match": "title: 'Restaurant Waiter'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Oct 2023",
+    "match": "subtitle: 'Oct 2023'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Cleaning Staff",
+    "match": "title: 'Cleaning Staff'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart",
+    "string": "Sept 2023",
+    "match": "subtitle: 'Sept 2023'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart",
+    "string": "Step 1: Identity & Contact",
+    "match": "title: 'Step 1: Identity & Contact'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart",
+    "string": "33%",
+    "match": "Text: '33%'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart",
+    "string": "FULL NAME",
+    "match": "label: 'FULL NAME'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart",
+    "string": "e.g. Fahid Hasan",
+    "match": "Text: 'e.g. Fahid Hasan'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart",
+    "string": "EMAIL ADDRESS",
+    "match": "label: 'EMAIL ADDRESS'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart",
+    "string": "email@example.com",
+    "match": "Text: 'email@example.com'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart",
+    "string": "PHONE NUMBER",
+    "match": "label: 'PHONE NUMBER'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart",
+    "string": "+39 XXX XXX XXXX",
+    "match": "Text: '+39 XXX XXX XXXX'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart",
+    "string": "CURRENT CITY IN ITALY",
+    "match": "label: 'CURRENT CITY IN ITALY'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart",
+    "string": "e.g. Milano, Roma...",
+    "match": "Text: 'e.g. Milano, Roma...'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_dynamic_form_view.dart",
+    "string": "Bullet list",
+    "match": "label: 'Bullet list'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_dynamic_form_view.dart",
+    "string": "Number list",
+    "match": "label: 'Number list'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart",
+    "string": "Step 3: Skills & Education",
+    "match": "title: 'Step 3: Skills & Education'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart",
+    "string": "Your Skills",
+    "match": "title: 'Your Skills'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart",
+    "string": "AI Suggested Skills",
+    "match": "title: 'AI Suggested Skills'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart",
+    "string": "Continue to Summary",
+    "match": "title: 'Continue to Summary'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart",
+    "string": "TYPE OF EDUCATION",
+    "match": "label: 'TYPE OF EDUCATION'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart",
+    "string": "Select type...",
+    "match": "Text: 'Select type...'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart",
+    "string": "LEVEL",
+    "match": "label: 'LEVEL'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart",
+    "string": "Select level...",
+    "match": "Text: 'Select level...'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart",
+    "string": "e.g. Politecnico di Milano",
+    "match": "Text: 'e.g. Politecnico di Milano'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Step 2: Work Experience",
+    "match": "title: 'Step 2: Work Experience'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Continue to Education",
+    "match": "title: 'Continue to Education'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "JOB POSITION",
+    "match": "label: 'JOB POSITION'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Pizza Maker",
+    "match": "Text: 'Pizza Maker'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "COMPANY NAME",
+    "match": "label: 'COMPANY NAME'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Pizzeria Da Michele",
+    "match": "Text: 'Pizzeria Da Michele'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "START DATE",
+    "match": "label: 'START DATE'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "01/01/2020",
+    "match": "Text: '01/01/2020'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "END DATE",
+    "match": "label: 'END DATE'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "10/01/2023",
+    "match": "Text: '10/01/2023'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Dough Preparation",
+    "match": "title: 'Dough Preparation'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Oven Handling",
+    "match": "title: 'Oven Handling'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Ingredient Prep",
+    "match": "title: 'Ingredient Prep'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Kitchen Hygiene",
+    "match": "title: 'Kitchen Hygiene'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Add custom responsibility",
+    "match": "title: 'Add custom responsibility'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Hobbies & Interests",
+    "match": "title: 'Hobbies & Interests'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "e.g. Photography...",
+    "match": "Text: 'e.g. Photography...'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Added hobbies will appear here.",
+    "match": "Text: 'Added hobbies will appear here.'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Driving License",
+    "match": "title: 'Driving License'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "e.g. Category B, C",
+    "match": "Text: 'e.g. Category B, C'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart",
+    "string": "Manage your driving categories here.",
+    "match": "Text: 'Manage your driving categories here.'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_summary_view.dart",
+    "string": "Step 4: Professional Summary",
+    "match": "title: 'Step 4: Professional Summary'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_summary_view.dart",
+    "string": "Save & Continue",
+    "match": "title: 'Save & Continue'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_theme_view.dart",
+    "string": "Primary Color",
+    "match": "title: 'Primary Color'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/create_cv_theme_view.dart",
+    "string": "Accent Color",
+    "match": "title: 'Accent Color'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/cv_builder_view.dart",
+    "string": "GET MORE CREDITS",
+    "match": "title: 'GET MORE CREDITS'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/cv_builder_view.dart",
+    "string": "1 CV Credit",
+    "match": "title: '1 CV Credit'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/cv_builder_view.dart",
+    "string": "5 CV Credits",
+    "match": "title: '5 CV Credits'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/cv_builder_view.dart",
+    "string": "Unlimited",
+    "match": "title: 'Unlimited'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/cv_builder_view.dart",
+    "string": "YOUR DOCUMENTS",
+    "match": "title: 'YOUR DOCUMENTS'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/cv_builder_view.dart",
+    "string": "Restaurant Waiter CV",
+    "match": "title: 'Restaurant Waiter CV'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/cv_builder_view.dart",
+    "string": "Saved Oct 24,2023",
+    "match": "subtitle: 'Saved Oct 24,2023'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/cv_builder_view.dart",
+    "string": "Saved Sep 12, 2023",
+    "match": "subtitle: 'Saved Sep 12, 2023'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/cv_ready_view.dart",
+    "string": "Share to\\nWhatsApp",
+    "match": "title: 'Share to\\nWhatsApp'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/views/cv_ready_view.dart",
+    "string": "Finish & Go to Dashboard",
+    "match": "title: 'Finish & Go to Dashboard'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/_widgets/cv_ai_suggested_skills_card.dart",
+    "string": "Type skill here...",
+    "match": "Text: 'Type skill here...'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/_widgets/cv_color_bottom_sheet.dart",
+    "string": "Confirm Color",
+    "match": "title: 'Confirm Color'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/_widgets/cv_language_skills_card.dart",
+    "string": "Language Skills",
+    "match": "title: 'Language Skills'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/_widgets/cv_language_skills_card.dart",
+    "string": "Set native language...",
+    "match": "Text: 'Set native language...'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/_widgets/cv_summary_preview_card.dart",
+    "string": "Regenerate",
+    "match": "title: 'Regenerate'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/cv_builder/_widgets/cv_summary_preview_card.dart",
+    "string": "Edit Text",
+    "match": "title: 'Edit Text'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/ _widgets/guide_info_card.dart",
+    "string": "খোলা Passport",
+    "match": "title: 'খোলা Passport'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/ _widgets/guide_info_card.dart",
+    "string": "পাসপোর্টের ফটোকপি",
+    "match": "subtitle: 'পাসপোর্টের ফটোকপি'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/ _widgets/guide_info_card.dart",
+    "string": "Revenue Stamp (€16.00)",
+    "match": "title: 'Revenue Stamp (€16.00)'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/ _widgets/guide_info_card.dart",
+    "string": "সু marca da bollo",
+    "match": "subtitle: 'সু marca da bollo'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/ _widgets/guide_info_card.dart",
+    "string": "Proof of Residence",
+    "match": "title: 'Proof of Residence'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/ _widgets/guide_info_card.dart",
+    "string": "রেসিডেন্সির প্রমাণপত্র",
+    "match": "subtitle: 'রেসিডেন্সির প্রমাণপত্র'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/ permesso_soggiorno_guide_view.dart",
+    "string": "Go To official Website",
+    "match": "title: 'Go To official Website'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "PERMIT",
+    "match": "label: 'PERMIT'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "Permesso di Soggiorno",
+    "match": "title: 'Permesso di Soggiorno'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "HEALTH",
+    "match": "label: 'HEALTH'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "Tessera Sanitaria",
+    "match": "title: 'Tessera Sanitaria'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "OFFICIAL DOCUMENT",
+    "match": "label: 'OFFICIAL DOCUMENT'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "Bangladesh Passport",
+    "match": "title: 'Bangladesh Passport'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "Safe work",
+    "match": "Text: 'Safe work'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "TAXES",
+    "match": "label: 'TAXES'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "Agenzia delle Entrate",
+    "match": "title: 'Agenzia delle Entrate'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "EMPLOYMENT",
+    "match": "label: 'EMPLOYMENT'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "Jobs / Work Contract",
+    "match": "title: 'Jobs / Work Contract'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "LEGAL",
+    "match": "label: 'LEGAL'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/administrative_services_view.dart",
+    "string": "Ministry of Justice",
+    "match": "title: 'Ministry of Justice'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/caf_administrative_help_view.dart",
+    "string": "CAF Courses",
+    "match": "title: 'CAF Courses'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/caf_administrative_help_view.dart",
+    "string": "START LEARNING",
+    "match": "Text: 'START LEARNING'"
+  },
+  {
+    "path": "lib/features/service_hub/sub_features/caf_administrative_help/views/caf_administrative_help_view.dart",
+    "string": "CAF Services & Guides",
+    "match": "title: 'CAF Services & Guides'"
+  },
+  {
+    "path": "lib/features/practice_hub/services/practice_hub_api_service.dart",
+    "string": "Important Verbs",
+    "match": "title: 'Important Verbs'"
+  },
+  {
+    "path": "lib/features/practice_hub/services/practice_hub_api_service.dart",
+    "string": "$reviewedVerbCount reviewed",
+    "match": "subtitle: '$reviewedVerbCount reviewed'"
+  },
+  {
+    "path": "lib/features/practice_hub/services/practice_hub_api_service.dart",
+    "string": "Survival Italian",
+    "match": "title: 'Survival Italian'"
+  },
+  {
+    "path": "lib/features/practice_hub/services/practice_hub_api_service.dart",
+    "string": "Job Sentences",
+    "match": "title: 'Job Sentences'"
+  },
+  {
+    "path": "lib/features/practice_hub/services/practice_hub_api_service.dart",
+    "string": "$careerTrackCount career tracks",
+    "match": "subtitle: '$careerTrackCount career tracks'"
+  },
+  {
+    "path": "lib/features/practice_hub/services/practice_hub_api_service.dart",
+    "string": "Daily Challenges",
+    "match": "title: 'Daily Challenges'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/practice_hub_view.dart",
+    "string": "Practice Hub – Courses",
+    "match": "title: 'Practice Hub – Courses'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/practice_hub_view.dart",
+    "string": "View All",
+    "match": "Text: 'View All'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/practice_hub_view.dart",
+    "string": "Skill Builders",
+    "match": "title: 'Skill Builders'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/practice_hub_view.dart",
+    "string": "Specialized Learning",
+    "match": "title: 'Specialized Learning'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/practice_hub_view.dart",
+    "string": "Upcoming Webinars",
+    "match": "title: 'Upcoming Webinars'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/important_verbs/important_verbs_view.dart",
+    "string": "Search for a verb (e.g., Avere)...",
+    "match": "Text: 'Search for a verb (e.g., Avere)...'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/important_verbs/saved_verbs_view.dart",
+    "string": "Saved Verbs",
+    "match": "title: 'Saved Verbs'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/important_verbs/saved_verbs_view.dart",
+    "string": "Search saved verbs",
+    "match": "Text: 'Search saved verbs'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/job_sentences/job_phrase_details_view.dart",
+    "string": "Search phrases...",
+    "match": "Text: 'Search phrases...'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/widgets/pdf_viewer.dart",
+    "string": "PREVIOUS",
+    "match": "label: 'PREVIOUS'"
+  },
+  {
+    "path": "lib/features/practice_hub/views/widgets/pdf_viewer.dart",
+    "string": "NEXT",
+    "match": "label: 'NEXT'"
+  },
+  {
+    "path": "lib/features/notifications/services/notifications_mock_service.dart",
+    "string": "All",
+    "match": "label: 'All'"
+  },
+  {
+    "path": "lib/features/notifications/services/notifications_mock_service.dart",
+    "string": "Learning",
+    "match": "label: 'Learning'"
+  },
+  {
+    "path": "lib/features/notifications/services/notifications_mock_service.dart",
+    "string": "System",
+    "match": "label: 'System'"
+  },
+  {
+    "path": "lib/features/notifications/services/notifications_mock_service.dart",
+    "string": "Social",
+    "match": "label: 'Social'"
+  },
+  {
+    "path": "lib/features/notifications/services/notifications_mock_service.dart",
+    "string": "New Lesson Added!",
+    "match": "title: 'New Lesson Added!'"
+  },
+  {
+    "path": "lib/features/notifications/services/notifications_mock_service.dart",
+    "string": "Live Webinar starting soon!",
+    "match": "title: 'Live Webinar starting soon!'"
+  },
+  {
+    "path": "lib/features/notifications/services/notifications_mock_service.dart",
+    "string": "Message from\\nGiacomo",
+    "match": "title: 'Message from\\nGiacomo'"
+  },
+  {
+    "path": "lib/features/notifications/services/notifications_mock_service.dart",
+    "string": "Streak at Risk!",
+    "match": "title: 'Streak at Risk!'"
+  },
+  {
+    "path": "lib/features/messages/views/message_block_success_view.dart",
+    "string": "SECURE",
+    "match": "title: 'SECURE'"
+  },
+  {
+    "path": "lib/features/messages/views/message_block_success_view.dart",
+    "string": "PRIVATE",
+    "match": "title: 'PRIVATE'"
+  },
+  {
+    "path": "lib/features/messages/views/message_report_view.dart",
+    "string": "Describe what happened... (e.g.,\\n'This user is sending spam links').",
+    "match": "Text:\n              \"Describe what happened... (e.g.,\\n'This user is sending spam links').\""
+  },
+  {
+    "path": "lib/features/messages/views/message_user_info_view.dart",
+    "string": "CURRENT STREAK",
+    "match": "label: 'CURRENT STREAK'"
+  },
+  {
+    "path": "lib/features/messages/views/message_user_info_view.dart",
+    "string": "TOTAL EARNED",
+    "match": "label: 'TOTAL EARNED'"
+  },
+  {
+    "path": "lib/features/messages/views/message_user_info_view.dart",
+    "string": "Stop contact",
+    "match": "subtitle: 'Stop contact'"
+  },
+  {
+    "path": "lib/features/messages/views/message_user_info_view.dart",
+    "string": "Report Profile",
+    "match": "title: 'Report Profile'"
+  },
+  {
+    "path": "lib/features/messages/views/message_user_info_view.dart",
+    "string": "Notify Admin",
+    "match": "subtitle: 'Notify Admin'"
+  },
+  {
+    "path": "lib/features/messages/widgets/chat_input_bar.dart",
+    "string": "Type a message...",
+    "match": "Text: 'Type a message...'"
+  },
+  {
+    "path": "lib/features/messages/widgets/message_search_field.dart",
+    "string": "Search learners...",
+    "match": "Text: 'Search learners...'"
+  },
+  {
+    "path": "lib/features/messages/sub-feature/call/views/message_incoming_call_view.dart",
+    "string": "Decline",
+    "match": "label: 'Decline'"
+  },
+  {
+    "path": "lib/features/messages/sub-feature/call/views/message_incoming_call_view.dart",
+    "string": "Answer",
+    "match": "label: 'Answer'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/leaderboard_view.dart",
+    "string": "My League",
+    "match": "title: 'My League'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/leaderboard_view.dart",
+    "string": "Global",
+    "match": "title: 'Global'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/leaderboard_view.dart",
+    "string": "Search users...",
+    "match": "Text: 'Search users...'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/league_system_promotion_view.dart",
+    "string": "Promotion",
+    "match": "title: 'Promotion'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/league_system_promotion_view.dart",
+    "string": "Earn More\\nXP to\\nmove up.",
+    "match": "subtitle: 'Earn More\\nXP to\\nmove up.'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/league_system_promotion_view.dart",
+    "string": "Demotion",
+    "match": "title: 'Demotion'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/league_system_promotion_view.dart",
+    "string": "Finish in the\\nBottom 5 to\\ndrop back.",
+    "match": "subtitle: 'Finish in the\\nBottom 5 to\\ndrop back.'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/popup_insider_view.dart",
+    "string": "Bronze League",
+    "match": "title: 'Bronze League'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/popup_insider_view.dart",
+    "string": "Silver League",
+    "match": "title: 'Silver League'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/popup_insider_view.dart",
+    "string": "Gold League",
+    "match": "title: 'Gold League'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/popup_insider_view.dart",
+    "string": "Diamond League",
+    "match": "title: 'Diamond League'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/score_system_info_view.dart",
+    "string": "Scoring Guide",
+    "match": "title: 'Scoring Guide'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/score_system_info_view.dart",
+    "string": "3-STREAK",
+    "match": "label: '3-STREAK'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/score_system_info_view.dart",
+    "string": "5-STREAK",
+    "match": "label: '5-STREAK'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/score_system_info_view.dart",
+    "string": "100% Mastery",
+    "match": "title: '100% Mastery'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/score_system_info_view.dart",
+    "string": "Perfect score on\\nfirst attempt.",
+    "match": "subtitle: 'Perfect score on\\nfirst attempt.'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/score_system_info_view.dart",
+    "string": "Speed Bonus",
+    "match": "title: 'Speed Bonus'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/score_system_info_view.dart",
+    "string": "Finish the quiz in\\nunder 200s.",
+    "match": "subtitle: 'Finish the quiz in\\nunder 200s.'"
+  },
+  {
+    "path": "lib/features/leaderboard/views/widgets/promotion_hero/diamond.dart",
+    "string": "Earn XP faster",
+    "match": "title: 'Earn XP faster'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Daily Overview",
+    "match": "title: 'Daily Overview'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Your learning activity this week",
+    "match": "subtitle: 'Your learning activity this week'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Capitolo 2: Saluti\\n(Greetings)",
+    "match": "title: 'Capitolo 2: Saluti\\n(Greetings)'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Takes 2 mins",
+    "match": "subtitle: 'Takes 2 mins'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "CAF Services",
+    "match": "title: 'CAF Services'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Tax & Legal Help",
+    "match": "subtitle: 'Tax & Legal Help'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Restaurant Job",
+    "match": "title: 'Restaurant Job'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Order Coffee",
+    "match": "title: 'Order Coffee'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Find Housing",
+    "match": "title: 'Find Housing'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Need Help?",
+    "match": "title: 'Need Help?'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Join Community",
+    "match": "subtitle: 'Join Community'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Greeting In Italia",
+    "match": "title: 'Greeting In Italia'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Cultural Tip of the Day",
+    "match": "title: 'Cultural Tip of the Day'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "14 Day Streak",
+    "match": "title: '14 Day Streak'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "Master Italian\\nthrough natural\\nconversations.",
+    "match": "title: 'Master Italian\\nthrough natural\\nconversations.'"
+  },
+  {
+    "path": "lib/features/home/services/home_mock_service.dart",
+    "string": "DAILY CHALLENGES",
+    "match": "label: 'DAILY CHALLENGES'"
+  },
+  {
+    "path": "lib/features/drawer_features/contact/contact_support_view.dart",
+    "string": "Call Support",
+    "match": "title: 'Call Support'"
+  },
+  {
+    "path": "lib/features/drawer_features/contact/contact_support_view.dart",
+    "string": "+39 123 456 7890",
+    "match": "subtitle: '+39 123 456 7890'"
+  },
+  {
+    "path": "lib/features/drawer_features/contact/contact_support_view.dart",
+    "string": "Send Email",
+    "match": "title: 'Send Email'"
+  },
+  {
+    "path": "lib/features/drawer_features/contact/contact_support_view.dart",
+    "string": "support@lumina.it",
+    "match": "subtitle: 'support@lumina.it'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "How do I restore my Pro purchase?",
+    "match": "title: 'How do I restore my Pro purchase?'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "Open Settings",
+    "match": "title: 'Open Settings'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "Tap Restore Purchase",
+    "match": "title: 'Tap Restore Purchase'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "Wait for Activation",
+    "match": "title: 'Wait for Activation'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "How to use the AI Speaking Lab?",
+    "match": "title: 'How to use the AI Speaking Lab?'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "Select your Topic",
+    "match": "title: 'Select your Topic'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "Record your Voice",
+    "match": "title: 'Record your Voice'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "Review AI Feedback",
+    "match": "title: 'Review AI Feedback'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "Where to find CAF services?",
+    "match": "title: 'Where to find CAF services?'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "Open Services",
+    "match": "title: 'Open Services'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "Choose CAF",
+    "match": "title: 'Choose CAF'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/guide_controller.dart",
+    "string": "Contact Support",
+    "match": "title: 'Contact Support'"
+  },
+  {
+    "path": "lib/features/drawer_features/language/language_switch_dialogue.dart",
+    "string": "Italian",
+    "match": "title: 'Italian'"
+  },
+  {
+    "path": "lib/features/drawer_features/language/language_switch_dialogue.dart",
+    "string": "English",
+    "match": "title: 'English'"
+  },
+  {
+    "path": "lib/features/drawer_features/language/language_switch_dialogue.dart",
+    "string": "Bengali",
+    "match": "title: 'Bengali'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "Level A2\\nCourse\\nUnlocked",
+    "match": "title: 'Level A2\\nCourse\\nUnlocked'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "START COURSE",
+    "match": "Text: 'START COURSE'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "3× Streak\\nFreeze",
+    "match": "title: '3× Streak\\nFreeze'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "Protect your streak if you\\nmiss a day",
+    "match": "subtitle: 'Protect your streak if you\\nmiss a day'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "Physical Prize:\\nBoat\\nHeadphones",
+    "match": "title: 'Physical Prize:\\nBoat\\nHeadphones'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "ENTER SHIPPING INFO",
+    "match": "Text: 'ENTER SHIPPING INFO'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "Exclusive:\\nAdvanced Verb\\nGuide",
+    "match": "title: 'Exclusive:\\nAdvanced Verb\\nGuide'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "DOWNLOAD PDF",
+    "match": "Text: 'DOWNLOAD PDF'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "+100 Bonus XP",
+    "match": "title: '+100 Bonus XP'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "Level A1\\nCertificate",
+    "match": "title: 'Level A1\\nCertificate'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/reward_controller.dart",
+    "string": "Boat\\nHeadphones",
+    "match": "title: 'Boat\\nHeadphones'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/settings_view.dart",
+    "string": "PREFERENCES",
+    "match": "title: 'PREFERENCES'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/settings_view.dart",
+    "string": "PROFILE & SECURITY",
+    "match": "title: 'PROFILE & SECURITY'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/settings_view.dart",
+    "string": "Change Password",
+    "match": "title: 'Change Password'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/settings_view.dart",
+    "string": "PRIVACY & LEGAL",
+    "match": "title: 'PRIVACY & LEGAL'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/settings_view.dart",
+    "string": "Reports",
+    "match": "title: 'Reports'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/settings_view.dart",
+    "string": "Privacy Policy",
+    "match": "title: 'Privacy Policy'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/settings_view.dart",
+    "string": "Terms of Service",
+    "match": "title: 'Terms of Service'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/settings_view.dart",
+    "string": "Delete Account",
+    "match": "title: 'Delete Account'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_controller.dart",
+    "string": "Single Refill",
+    "match": "title: 'Single Refill'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_controller.dart",
+    "string": "1 Credit",
+    "match": "subtitle: '1 Credit'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_controller.dart",
+    "string": "Pro Hunter Pack (5×)",
+    "match": "title: 'Pro Hunter Pack (5×)'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_controller.dart",
+    "string": "5 Credits",
+    "match": "subtitle: '5 Credits'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_controller.dart",
+    "string": "Career Sprint Pack",
+    "match": "title: 'Career Sprint Pack'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_controller.dart",
+    "string": "10 Credits",
+    "match": "subtitle: '10 Credits'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_controller.dart",
+    "string": "Fluent Learner\\nBundle",
+    "match": "title: 'Fluent Learner\\nBundle'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_controller.dart",
+    "string": "Level A1:\\nLifetime Access",
+    "match": "title: 'Level A1:\\nLifetime Access'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_view.dart",
+    "string": "Shop",
+    "match": "title: 'Shop'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_view.dart",
+    "string": "TOKENS",
+    "match": "title: 'TOKENS'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_view.dart",
+    "string": "MINUTES",
+    "match": "title: 'MINUTES'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/shop_view.dart",
+    "string": "STREAK\\nFREEZES",
+    "match": "title: 'STREAK\\nFREEZES'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/cv_credit_store/cv_credit_order_summary_view.dart",
+    "string": "EUR",
+    "match": "title: 'EUR'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/cv_credit_store/cv_credit_order_summary_view.dart",
+    "string": "BDT",
+    "match": "title: 'BDT'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/cv_credit_store/cv_credit_order_summary_view.dart",
+    "string": "Enter Coupon Code",
+    "match": "Text: 'Enter Coupon Code'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/order_history/order_history_view.dart",
+    "string": "Search orders...",
+    "match": "Text: 'Search orders...'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/streak_freeze_store/order_summary_view.dart",
+    "string": "WELCOME10",
+    "match": "Text: 'WELCOME10'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/streak_freeze_store/order_summary_view.dart",
+    "string": "👨",
+    "match": "label: '👨'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/streak_freeze_store/order_summary_view.dart",
+    "string": "👩",
+    "match": "label: '👩'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/streak_freeze_store/order_summary_view.dart",
+    "string": "🧑",
+    "match": "label: '🧑'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "AI Refill Center",
+    "match": "title: 'AI Refill Center'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "Basic Starter",
+    "match": "title: 'Basic Starter'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "15 Mins Voice | 1,000 Tokens",
+    "match": "subtitle: '15 Mins Voice | 1,000 Tokens'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "Fluent Learner",
+    "match": "title: 'Fluent Learner'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "60 Mins Voice | 5,000\\nTokens",
+    "match": "subtitle: '60 Mins Voice | 5,000\\nTokens'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "Elite Mastery",
+    "match": "title: 'Elite Mastery'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "180 Mins | 15,000 Tokens",
+    "match": "subtitle: '180 Mins | 15,000 Tokens'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "12 Mins",
+    "match": "label: '12 Mins'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "1,200 Tokens",
+    "match": "label: '1,200 Tokens'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "Voice Minutes",
+    "match": "title: 'Voice Minutes'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart",
+    "string": "Text Tokens",
+    "match": "title: 'Text Tokens'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/checkout_view.dart",
+    "string": "Checkout",
+    "match": "title: 'Checkout'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/checkout_view.dart",
+    "string": "Card",
+    "match": "title: 'Card'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/checkout_view.dart",
+    "string": "PayPal",
+    "match": "title: 'PayPal'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/checkout_view.dart",
+    "string": "Apple Pay",
+    "match": "title: 'Apple Pay'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/checkout_view.dart",
+    "string": "Bkash",
+    "match": "title: 'Bkash'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/order_summary_view.dart",
+    "string": "Order Summary",
+    "match": "title: 'Order Summary'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/purchase_complete.dart",
+    "string": "Refill Completed",
+    "match": "title: 'Refill Completed'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/purchase_complete.dart",
+    "string": "Voice Interaction",
+    "match": "label: 'Voice Interaction'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/purchase_complete.dart",
+    "string": "AI Smart Tokens",
+    "match": "label: 'AI Smart Tokens'"
+  },
+  {
+    "path": "lib/features/drawer_features/shop/refill_ai_credits/views/purchase_complete.dart",
+    "string": "ORDER ID",
+    "match": "label: 'ORDER ID'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/change_password_view.dart",
+    "string": "Current Password",
+    "match": "label: 'Current Password'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/change_password_view.dart",
+    "string": "New Password",
+    "match": "label: 'New Password'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/change_password_view.dart",
+    "string": "Confirm New Password",
+    "match": "label: 'Confirm New Password'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/change_password_view.dart",
+    "string": "Password Updated!",
+    "match": "title: 'Password Updated!'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/change_password_view.dart",
+    "string": "Your Password has been\\nsuccessfully updated.",
+    "match": "subtitle: 'Your Password has been\\nsuccessfully updated.'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/delete_account_confirm_view.dart",
+    "string": "Type here...",
+    "match": "Text: 'Type here...'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/profile_photo_view.dart",
+    "string": "Profile Photo",
+    "match": "title: 'Profile Photo'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/profile_photo_view.dart",
+    "string": "Take a Photo",
+    "match": "title: 'Take a Photo'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/profile_photo_view.dart",
+    "string": "Choose from\\nGallery",
+    "match": "title: 'Choose from\\nGallery'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/profile_photo_view.dart",
+    "string": "Profile Picture Updated!",
+    "match": "title: 'Profile Picture Updated!'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/profile_photo_view.dart",
+    "string": "Your Profile Picture has been\\nsuccessfully updated.",
+    "match": "subtitle:\n                        'Your Profile Picture has been\\nsuccessfully updated.'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/profile_security_veiw.dart",
+    "string": "Edit Profile",
+    "match": "title: 'Edit Profile'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/profile_security_veiw.dart",
+    "string": "Full Name",
+    "match": "label: 'Full Name'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/profile_security_veiw.dart",
+    "string": "Your account is secure",
+    "match": "subtitle: 'Your account is secure'"
+  },
+  {
+    "path": "lib/features/drawer_features/settings/sub_features/views/verify_contact_view.dart",
+    "string": "•",
+    "match": "Text: '•'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/views/rewards_history_view.dart",
+    "string": "Rewards History",
+    "match": "title: 'Rewards History'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/views/rewards_view.dart",
+    "string": "Rewards",
+    "match": "title: 'Rewards'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/views/reward_chest_view.dart",
+    "string": "Chest",
+    "match": "title: 'Chest'"
+  },
+  {
+    "path": "lib/features/drawer_features/rewards/views/reward_details_view.dart",
+    "string": "Reward Details",
+    "match": "title: 'Reward Details'"
+  },
+  {
+    "path": "lib/features/drawer_features/guide/views/guide_view.dart",
+    "string": "Guides",
+    "match": "title: 'Guides'"
+  },
+  {
+    "path": "lib/features/courses/services/courses_api_service.dart",
+    "string": "No published lesson yet",
+    "match": "subtitle: 'No published lesson yet'"
+  },
+  {
+    "path": "lib/features/courses/services/courses_api_service.dart",
+    "string": "Final Exam – Esame finale",
+    "match": "title: 'Final Exam – Esame finale'"
+  },
+  {
+    "path": "lib/features/courses/services/courses_api_service.dart",
+    "string": "Complete the course to unlock final exam",
+    "match": "subtitle: 'Complete the course to unlock final exam'"
+  },
+  {
+    "path": "lib/features/courses/widgets/course_certificate_widgets.dart",
+    "string": "ISSUE DATE",
+    "match": "label: 'ISSUE DATE'"
+  },
+  {
+    "path": "lib/features/courses/widgets/course_certificate_widgets.dart",
+    "string": "FINAL SCORE",
+    "match": "label: 'FINAL SCORE'"
+  },
+  {
+    "path": "lib/features/courses/widgets/course_certificate_widgets.dart",
+    "string": "WORDS",
+    "match": "label: 'WORDS'"
+  },
+  {
+    "path": "lib/features/courses/widgets/course_certificate_widgets.dart",
+    "string": "DAYS",
+    "match": "label: 'DAYS'"
+  },
+  {
+    "path": "lib/features/courses/widgets/course_certificate_widgets.dart",
+    "string": "QUIZZES",
+    "match": "label: 'QUIZZES'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/vocabulary/views/vocabulary_view.dart",
+    "string": "$streakDays DAY STREAK",
+    "match": "label: '$streakDays DAY STREAK'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/vocabulary/views/vocabulary_view.dart",
+    "string": "LEVEL $level",
+    "match": "label: 'LEVEL $level'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/vocabulary/widgets/vocabulary_completion_dialog.dart",
+    "string": "RIGHT",
+    "match": "label: 'RIGHT'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/vocabulary/widgets/vocabulary_completion_dialog.dart",
+    "string": "WRONG",
+    "match": "label: 'WRONG'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/quiz/views/quiz_completion_view.dart",
+    "string": "ACCURACY",
+    "match": "label: 'ACCURACY'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/quiz/views/quiz_completion_view.dart",
+    "string": "TIME TAKEN",
+    "match": "label: 'TIME TAKEN'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/quiz/views/quiz_completion_view.dart",
+    "string": "DAILY STREAK",
+    "match": "subtitle: 'DAILY STREAK'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/quiz/widgets/quiz_panel_more_parts.dart",
+    "string": "Type your answer in Italian...",
+    "match": "Text: 'Type your answer in Italian...'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/quiz/widgets/quiz_review_widgets.dart",
+    "string": "Buongiorno",
+    "match": "label: 'Buongiorno'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/quiz/widgets/quiz_review_widgets.dart",
+    "string": "Good\\nmorning",
+    "match": "label: 'Good\\nmorning'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/quiz/widgets/quiz_review_widgets.dart",
+    "string": "Ciao",
+    "match": "label: 'Ciao'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/pro_checkout/views/pro_purchase_success_view.dart",
+    "string": "Congratulations!",
+    "match": "title: 'Congratulations!'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/pro_checkout/widgets/unlock_chapter_dialog.dart",
+    "string": "AI\\nPractice",
+    "match": "label: 'AI\\nPractice'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/pro_checkout/widgets/unlock_chapter_dialog.dart",
+    "string": "Certificates",
+    "match": "label: 'Certificates'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/helpers/final_exam_flow_mapper.dart",
+    "string": "Part 1: Core Quiz",
+    "match": "title: 'Part 1: Core Quiz'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/helpers/final_exam_flow_mapper.dart",
+    "string": "Auto-graded knowledge assessment",
+    "match": "subtitle: 'Auto-graded knowledge assessment'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/helpers/final_exam_flow_mapper.dart",
+    "string": "Part 2: Listening Lab",
+    "match": "title: 'Part 2: Listening Lab'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/helpers/final_exam_flow_mapper.dart",
+    "string": "Audio comprehension assessment",
+    "match": "subtitle: 'Audio comprehension assessment'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/helpers/final_exam_flow_mapper.dart",
+    "string": "Part 3: Writing Task",
+    "match": "title: 'Part 3: Writing Task'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/helpers/final_exam_flow_mapper.dart",
+    "string": "Teacher review may be required",
+    "match": "subtitle: 'Teacher review may be required'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/helpers/final_exam_flow_mapper.dart",
+    "string": "Part 4: Speaking Lab",
+    "match": "title: 'Part 4: Speaking Lab'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/helpers/final_exam_flow_mapper.dart",
+    "string": "Record and submit your answer",
+    "match": "subtitle: 'Record and submit your answer'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/helpers/final_exam_flow_mapper.dart",
+    "string": "Speak clearly and submit your best recording.",
+    "match": "subtitle\n          : 'Speak clearly and submit your best recording.'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/models/final_exam_models.dart",
+    "string": "Vocabulary",
+    "match": "label: 'Vocabulary'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/models/final_exam_models.dart",
+    "string": "Grammar",
+    "match": "label: 'Grammar'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/models/final_exam_models.dart",
+    "string": "Writing",
+    "match": "label: 'Writing'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/models/final_exam_models.dart",
+    "string": "Speaking",
+    "match": "label: 'Speaking'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/services/final_exam_mock_service.dart",
+    "string": "Final Exam",
+    "match": "title: 'Final Exam'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/services/final_exam_mock_service.dart",
+    "string": "Complete the final exam to earn your certificate.",
+    "match": "title: 'Complete the final exam to earn your certificate.'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/services/final_exam_mock_service.dart",
+    "string": "Listening",
+    "match": "title: 'Listening'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/services/final_exam_mock_service.dart",
+    "string": "Final Exam Result",
+    "match": "title: 'Final Exam Result'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/services/final_exam_mock_service.dart",
+    "string": "Result unavailable.",
+    "match": "subtitle: 'Result unavailable.'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/views/final_exam_listening_view.dart",
+    "string": "Submit Answer",
+    "match": "label: 'Submit Answer'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/views/final_exam_listening_view.dart",
+    "string": "Once the audio finishes, you cannot replay it. Make your selection carefully.",
+    "match": "Text:\n                      'Once the audio finishes, you cannot replay it. Make your selection carefully.'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/views/final_exam_success_view.dart",
+    "string": "Exam Received",
+    "match": "title: 'Exam Received'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/views/final_exam_success_view.dart",
+    "string": "Successfully uploaded to server",
+    "match": "subtitle: 'Successfully uploaded to server'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/views/final_exam_success_view.dart",
+    "string": "Teacher Review",
+    "match": "title: 'Teacher Review'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/views/final_exam_success_view.dart",
+    "string": "Result & Certificate",
+    "match": "title: 'Result & Certificate'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/views/final_exam_writing_view.dart",
+    "string": "35:10",
+    "match": "Text: '35:10'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/final_exam/views/final_exam_writing_view.dart",
+    "string": "Inizia a scrivere qui la tua storia...",
+    "match": "Text: 'Inizia a scrivere qui la tua storia...'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/chapter_detail/controllers/chapter_detail_controller.dart",
+    "string": "Pages unavailable",
+    "match": "subtitle: 'Pages unavailable'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/chapter_detail/controllers/chapter_detail_controller.dart",
+    "string": "...",
+    "match": "subtitle: '...'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/chapter_detail/models/chapter_detail_models.dart",
+    "string": "Theory Book",
+    "match": "title: 'Theory Book'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/chapter_detail/models/chapter_detail_models.dart",
+    "string": "Not given",
+    "match": "subtitle: 'Not given'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/chapter_detail/widgets/chapter_pdf_viewer.dart",
+    "string": "Previous",
+    "match": "label: 'Previous'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/chapter_detail/widgets/chapter_pdf_viewer.dart",
+    "string": "Next",
+    "match": "label: 'Next'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/chapter_detail/widgets/lesson_content_card.dart",
+    "string": "0.75×",
+    "match": "label: '0.75×'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/chapter_detail/widgets/lesson_content_card.dart",
+    "string": "1×",
+    "match": "label: '1×'"
+  },
+  {
+    "path": "lib/features/courses/sub_features/chapter_detail/widgets/lesson_content_card.dart",
+    "string": "1.25×",
+    "match": "label: '1.25×'"
+  },
+  {
+    "path": "lib/features/auth/sub_features/Signup/views/account_created.dart",
+    "string": "field_full_name",
+    "match": "title: 'field_full_name'"
+  },
+  {
+    "path": "lib/features/auth/sub_features/Signup/views/signup_view.dart",
+    "string": "email",
+    "match": "label: 'email'"
+  },
+  {
+    "path": "lib/features/auth/sub_features/Signup/views/signup_view.dart",
+    "string": "phone",
+    "match": "label: 'phone'"
+  },
+  {
+    "path": "lib/features/auth/sub_features/forgot_password/views/reset_password_view.dart",
+    "string": "check_min_length",
+    "match": "label: 'check_min_length'"
+  },
+  {
+    "path": "lib/features/auth/sub_features/forgot_password/views/reset_password_view.dart",
+    "string": "check_upper_number",
+    "match": "label: 'check_upper_number'"
+  },
+  {
+    "path": "lib/features/auth/sub_features/forgot_password/views/reset_password_view.dart",
+    "string": "check_match",
+    "match": "label: 'check_match'"
+  },
+  {
+    "path": "lib/features/ai_chat/controllers/ai_chat_controller.dart",
+    "string": "Practice ordering food",
+    "match": "title: 'Practice ordering food'"
+  },
+  {
+    "path": "lib/features/ai_chat/controllers/ai_chat_controller.dart",
+    "string": "Al ristorante",
+    "match": "subtitle: 'Al ristorante'"
+  },
+  {
+    "path": "lib/features/ai_chat/controllers/ai_chat_controller.dart",
+    "string": "Talk about my day",
+    "match": "title: 'Talk about my day'"
+  },
+  {
+    "path": "lib/features/ai_chat/controllers/ai_chat_controller.dart",
+    "string": "La mia giornata",
+    "match": "subtitle: 'La mia giornata'"
+  },
+  {
+    "path": "lib/features/ai_chat/controllers/ai_chat_controller.dart",
+    "string": "Review basic greetings",
+    "match": "title: 'Review basic greetings'"
+  },
+  {
+    "path": "lib/features/ai_chat/controllers/ai_chat_controller.dart",
+    "string": "I saluti base",
+    "match": "subtitle: 'I saluti base'"
+  },
+  {
+    "path": "lib/features/ai_chat/controllers/ai_chat_controller.dart",
+    "string": "Ask for directions",
+    "match": "title: 'Ask for directions'"
+  },
+  {
+    "path": "lib/features/ai_chat/controllers/ai_chat_controller.dart",
+    "string": "Chiedere indicazioni",
+    "match": "subtitle: 'Chiedere indicazioni'"
+  },
+  {
+    "path": "lib/features/ai_chat/controllers/ai_chat_controller.dart",
+    "string": "Coffee shop phrases",
+    "match": "title: 'Coffee shop phrases'"
+  },
+  {
+    "path": "lib/features/ai_chat/controllers/ai_chat_controller.dart",
+    "string": "Al bar",
+    "match": "subtitle: 'Al bar'"
+  },
+  {
+    "path": "lib/features/ai_chat/data/ai_tutor_level_test_questions.dart",
+    "string": "মাইক্রোফোন চেপে ধরে ইতালিয়ান ভাষায় বলো। নিজের নাম, দেশ বা কাজ বলতে পারো।",
+    "match": "Text:\n        'মাইক্রোফোন চেপে ধরে ইতালিয়ান ভাষায় বলো। নিজের নাম, দেশ বা কাজ বলতে পারো।'"
+  },
+  {
+    "path": "lib/features/ai_chat/data/ai_tutor_level_test_questions.dart",
+    "string": "মাইক্রোফোন চেপে ধরে তোমার একটি সাধারণ দিনের কথা ইতালিয়ান ভাষায় ২–৪টি বাক্যে বলো।",
+    "match": "Text:\n        'মাইক্রোফোন চেপে ধরে তোমার একটি সাধারণ দিনের কথা ইতালিয়ান ভাষায় ২–৪টি বাক্যে বলো।'"
+  },
+  {
+    "path": "lib/features/ai_chat/data/ai_tutor_level_test_questions.dart",
+    "string": "মাইক্রোফোন চেপে ধরে রেস্টুরেন্টে খাবার অর্ডার এবং দাম জিজ্ঞেস করার মতো করে বলো।",
+    "match": "Text:\n        'মাইক্রোফোন চেপে ধরে রেস্টুরেন্টে খাবার অর্ডার এবং দাম জিজ্ঞেস করার মতো করে বলো।'"
+  },
+  {
+    "path": "lib/features/ai_chat/data/ai_tutor_level_test_questions.dart",
+    "string": "সঠিক ইংরেজি অর্থটি বেছে নাও।",
+    "match": "Text: 'সঠিক ইংরেজি অর্থটি বেছে নাও।'"
+  },
+  {
+    "path": "lib/features/ai_chat/data/ai_tutor_level_test_questions.dart",
+    "string": "শূন্যস্থানে সবচেয়ে স্বাভাবিক শব্দটি বেছে নাও।",
+    "match": "Text: 'শূন্যস্থানে সবচেয়ে স্বাভাবিক শব্দটি বেছে নাও।'"
+  },
+  {
+    "path": "lib/features/ai_chat/data/ai_tutor_level_test_questions.dart",
+    "string": "perché শব্দটি ব্যবহার করে একটি পূর্ণ বাক্য লেখো।",
+    "match": "Text: 'perché শব্দটি ব্যবহার করে একটি পূর্ণ বাক্য লেখো।'"
+  },
+  {
+    "path": "lib/features/ai_chat/data/ai_tutor_level_test_questions.dart",
+    "string": "ইতালিয়ান ভাষায় বয়স বলার সঠিক বাক্যটি বেছে নাও।",
+    "match": "Text: 'ইতালিয়ান ভাষায় বয়স বলার সঠিক বাক্যটি বেছে নাও।'"
+  },
+  {
+    "path": "lib/features/ai_chat/data/ai_tutor_level_test_questions.dart",
+    "string": "parlare ক্রিয়ার সঠিক রূপটি বেছে নাও।",
+    "match": "Text: 'parlare ক্রিয়ার সঠিক রূপটি বেছে নাও।'"
+  },
+  {
+    "path": "lib/features/ai_chat/data/ai_tutor_level_test_questions.dart",
+    "string": "গতকালের কাজ বোঝাতে সঠিক রূপটি বেছে নাও।",
+    "match": "Text: 'গতকালের কাজ বোঝাতে সঠিক রূপটি বেছে নাও।'"
+  },
+  {
+    "path": "lib/features/ai_chat/data/ai_tutor_level_test_questions.dart",
+    "string": "পূর্ণ ইতালিয়ান বাক্যে অনুবাদ করো।",
+    "match": "Text: 'পূর্ণ ইতালিয়ান বাক্যে অনুবাদ করো।'"
+  },
+  {
+    "path": "lib/features/ai_chat/models/ai_tutor_guided_learning_models.dart",
+    "string": "Guided Mode",
+    "match": "title: 'Guided Mode'"
+  },
+  {
+    "path": "lib/features/ai_chat/models/ai_tutor_guided_learning_models.dart",
+    "string": "Assisted Mode",
+    "match": "title: 'Assisted Mode'"
+  },
+  {
+    "path": "lib/features/ai_chat/models/ai_tutor_guided_learning_models.dart",
+    "string": "Free Mode",
+    "match": "title: 'Free Mode'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/ai_level_test_view.dart",
+    "string": "Communication & Fluency",
+    "match": "subtitle: 'Communication & Fluency'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/ai_level_test_view.dart",
+    "string": "Word knowledge & Context",
+    "match": "subtitle: 'Word knowledge & Context'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/ai_level_test_view.dart",
+    "string": "Sentence structure & Verbs",
+    "match": "subtitle: 'Sentence structure & Verbs'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/ai_tutor_chat_view.dart",
+    "string": "$memoryCount remembered",
+    "match": "label: '$memoryCount remembered'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/ai_tutor_chat_view.dart",
+    "string": "$mistakeCount focus areas",
+    "match": "label: '$mistakeCount focus areas'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/ai_tutor_level_test_question_view.dart",
+    "string": "Write your answer here...",
+    "match": "Text: 'Write your answer here...'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/ai_tutor_level_test_result_view.dart",
+    "string": "YOUR STRENGTHS",
+    "match": "title: 'YOUR STRENGTHS'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/ai_tutor_level_test_result_view.dart",
+    "string": "FOCUS NEXT",
+    "match": "title: 'FOCUS NEXT'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/ai_tutor_writing_help_view.dart",
+    "string": "Italian Writing Help",
+    "match": "title: 'Italian Writing Help'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_level_selection_view.dart",
+    "string": "Guided AI Tour",
+    "match": "title: 'Guided AI Tour'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_level_selection_view.dart",
+    "string": "Level A1",
+    "match": "title: 'Level A1'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_level_selection_view.dart",
+    "string": "Explore A1 Topics",
+    "match": "Text: 'Explore A1 Topics'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_level_selection_view.dart",
+    "string": "Level A2",
+    "match": "title: 'Level A2'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_level_selection_view.dart",
+    "string": "Explore A2 Topics",
+    "match": "Text: 'Explore A2 Topics'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_level_selection_view.dart",
+    "string": "Level B1",
+    "match": "title: 'Level B1'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_level_selection_view.dart",
+    "string": "Explore B1 Topics",
+    "match": "Text: 'Explore B1 Topics'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "Comprare un\\nbiglietto",
+    "match": "title: 'Comprare un\\nbiglietto'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "বাসের টিকিট কেনা",
+    "match": "subtitle: 'বাসের টিকিট কেনা'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "Ordinare al bar",
+    "match": "title: 'Ordinare al bar'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "বারে কফি অর্ডার করা",
+    "match": "subtitle: 'বারে কফি অর্ডার করা'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "Fare la spesa",
+    "match": "title: 'Fare la spesa'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "সুপারমার্কেটে কেনাকাটা",
+    "match": "subtitle: 'সুপারমার্কেটে কেনাকাটা'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "Chiedere\\nindicazioni",
+    "match": "title: 'Chiedere\\nindicazioni'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "রাস্তা জিজ্ঞাসা করা",
+    "match": "subtitle: 'রাস্তা জিজ্ঞাসা করা'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "Dal dottore",
+    "match": "title: 'Dal dottore'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "ডাক্তারের কাছে",
+    "match": "subtitle: 'ডাক্তারের কাছে'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "Prenotare un\\nhotel",
+    "match": "title: 'Prenotare un\\nhotel'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "হোটেল বুক করা",
+    "match": "subtitle: 'হোটেল বুক করা'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "In posta",
+    "match": "title: 'In posta'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "পোস্ট অফিসে",
+    "match": "subtitle: 'পোস্ট অফিসে'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "Incontrare\\namici",
+    "match": "title: 'Incontrare\\namici'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "বন্ধুদের সাথে দেখা",
+    "match": "subtitle: 'বন্ধুদের সাথে দেখা'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "Al lavoro",
+    "match": "title: 'Al lavoro'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "কাজের জায়গায়",
+    "match": "subtitle: 'কাজের জায়গায়'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/guided_learning_topics_view.dart",
+    "string": "রেস্টুরেন্টে",
+    "match": "subtitle: 'রেস্টুরেন্টে'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_chat_home_widgets.dart",
+    "string": "1.2k Tokens",
+    "match": "label: '1.2k Tokens'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_chat_home_widgets.dart",
+    "string": "45m Voice",
+    "match": "label: '45m Voice'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_level_test_widgets.dart",
+    "string": "SPEAKING",
+    "match": "label: 'SPEAKING'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_level_test_widgets.dart",
+    "string": "VOCABULARY",
+    "match": "label: 'VOCABULARY'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_level_test_widgets.dart",
+    "string": "GRAMMAR",
+    "match": "label: 'GRAMMAR'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_message_bubble.dart",
+    "string": "ENGLISH",
+    "match": "label: 'ENGLISH'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_message_bubble.dart",
+    "string": "BENGALI",
+    "match": "label: 'BENGALI'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_writing_language_sheet.dart",
+    "string": "English → Italian",
+    "match": "title: 'English → Italian'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_writing_language_sheet.dart",
+    "string": "Short English explanations for Italian writing",
+    "match": "subtitle: 'Short English explanations for Italian writing'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_writing_language_sheet.dart",
+    "string": "EN",
+    "match": "Text: 'EN'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_writing_language_sheet.dart",
+    "string": "Bangla → Italian",
+    "match": "title: 'Bangla → Italian'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_writing_language_sheet.dart",
+    "string": "বাংলায় সংক্ষিপ্ত ব্যাখ্যাসহ ইতালীয় লেখা",
+    "match": "subtitle: 'বাংলায় সংক্ষিপ্ত ব্যাখ্যাসহ ইতালীয় লেখা'"
+  },
+  {
+    "path": "lib/features/ai_chat/views/widgets/ai_tutor_writing_language_sheet.dart",
+    "string": "বাং",
+    "match": "Text: 'বাং'"
+  },
+  {
+    "path": "lib/core/widgets/custom_drawer.dart",
+    "string": "Profile",
+    "match": "title: 'Profile'"
+  },
+  {
+    "path": "lib/core/widgets/custom_drawer.dart",
+    "string": "Guide",
+    "match": "title: 'Guide'"
+  },
+  {
+    "path": "lib/core/widgets/custom_drawer.dart",
+    "string": "Reward",
+    "match": "title: 'Reward'"
+  },
+  {
+    "path": "lib/core/widgets/custom_drawer.dart",
+    "string": "Support",
+    "match": "title: 'Support'"
+  },
+  {
+    "path": "lib/core/widgets/custom_drawer.dart",
+    "string": "Language",
+    "match": "title: 'Language'"
+  },
+  {
+    "path": "lib/core/widgets/custom_drawer.dart",
+    "string": "Settings",
+    "match": "title: 'Settings'"
+  }
+]

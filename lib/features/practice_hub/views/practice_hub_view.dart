@@ -7,6 +7,9 @@ import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../../courses/services/courses_api_service.dart';
 import '../controllers/practice_hub_controller.dart';
+import '../models/practice_hub_models.dart';
+import 'widgets/final_exam_gateway_dialog_locked.dart';
+import 'widgets/final_exam_gateway_dialog_unlocked.dart';
 import '../services/practice_hub_api_service.dart';
 import '_widgets/practice_hub_course_carousel.dart';
 import '_widgets/practice_hub_final_exam_card.dart';
@@ -46,8 +49,8 @@ class PracticeHubView extends GetView<PracticeHubController> {
             children: <Widget>[
             _HorizontalPadding(
               child: _SectionTitleRow(
-                title: 'gen_practice_hub_courses'.tr.tr,
-                actionText: 'gen_view_all'.tr.tr,
+                title: 'Practice Hub – Courses',
+                actionText: 'View All',
                 onActionTap: controller.onViewAllCoursesTap,
               ),
             ),
@@ -55,25 +58,87 @@ class PracticeHubView extends GetView<PracticeHubController> {
             const PracticeHubCourseCarousel(),
             SizedBox(height: 47.h),
 
-            _HorizontalPadding(
-              child: _SectionTitleOnly(title: 'gen_skill_builders'.tr.tr),
+            const _HorizontalPadding(
+              child: _SectionTitleOnly(title: 'Skill Builders'),
             ),
             SizedBox(height: 24.h),
             const _HorizontalPadding(child: PracticeHubSkillBuilderGrid()),
             SizedBox(height: 46.h),
 
-            _HorizontalPadding(
-              child: _SectionTitleOnly(title: 'gen_specialized_learning'.tr.tr),
-            ),
-            SizedBox(height: 24.h),
-            const _HorizontalPadding(child: PracticeHubFinalExamCard()),
-            SizedBox(height: 42.h),
+            Obx(() {
+              if (controller.isFinalExamsLoading.value &&
+                  controller.finalExamCourses.isEmpty) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 22.h),
+                  child: const _HorizontalPadding(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryGreen,
+                      ),
+                    ),
+                  ),
+                );
+              }
 
-            _HorizontalPadding(
-              child: _SectionTitleOnly(title: 'gen_upcoming_webinars'.tr.tr),
+              if (controller.finalExamCourses.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const _HorizontalPadding(
+                    child: _SectionTitleOnly(title: 'Specialized Learning'),
+                  ),
+                  SizedBox(height: 24.h),
+                  ...controller.finalExamCourses.map(
+                    (PracticeFinalExamCourseModel exam) {
+                      return Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          kHomeHorizontalPadding.w,
+                          0,
+                          kHomeHorizontalPadding.w,
+                          20.h,
+                        ),
+                        child: PracticeHubFinalExamCard(
+                          exam: exam,
+                          onTap: () => controller.onFinalExamCardTap(exam),
+                          onStartTap: () {
+                            FinalExamGatewayDialogUnlocked.show(
+                              onStartFinalExam: () {
+                                if (Get.isDialogOpen ?? false) Get.back<void>();
+                                controller.openFinalExam(exam);
+                              },
+                              onBackToChapter: () {
+                                if (Get.isDialogOpen ?? false) Get.back<void>();
+                              },
+                            );
+                          },
+                          onWatchMoreLessonsTap: () {
+                            FinalExamGatewayDialogLocked.show(
+                              onWatchMoreLessons: () {
+                                if (Get.isDialogOpen ?? false) Get.back<void>();
+                                controller.openCourseFromFinalExam(exam);
+                              },
+                              onBackToChapter: () {
+                                if (Get.isDialogOpen ?? false) Get.back<void>();
+                              },
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 2.h),
+                ],
+              );
+            }),
+
+            const _HorizontalPadding(
+              child: _SectionTitleOnly(title: 'Upcoming Webinars'),
             ),
             SizedBox(height: 20.h),
-              const _HorizontalPadding(child: PracticeHubWebinarCard()),
+            const _HorizontalPadding(child: PracticeHubWebinarCard()),
             ],
           ),
         ),

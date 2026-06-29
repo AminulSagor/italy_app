@@ -169,6 +169,41 @@ class MessageCallSessionModel {
     );
   }
 
+  factory MessageCallSessionModel.fromAnswerResponse({
+    required Map<String, dynamic> response,
+    required String callId,
+    required MessageCallParticipantModel participant,
+  }) {
+    final Map<String, dynamic> call =
+    _mapFrom(response['call']);
+
+    final Map<String, dynamic> media =
+    _mapFrom(response['media']);
+
+    final String createdAt =
+        call['createdAt']?.toString() ??
+            call['answeredAt']?.toString() ??
+            '';
+
+    return MessageCallSessionModel(
+      id: call['id']?.toString() ?? callId,
+      conversationId:
+      call['directConversationId']?.toString() ??
+          call['conversationId']?.toString() ??
+          '',
+      type: MessageCallType.fromValue(
+        call['callType']?.toString(),
+      ),
+      participant: participant,
+      status: call['status']?.toString() ?? 'active',
+      startedAt:
+      DateTime.tryParse(createdAt)?.toLocal() ??
+          DateTime.now(),
+      media: MessageCallMediaModel.fromJson(media),
+      created: response['created'] as bool? ?? false,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,

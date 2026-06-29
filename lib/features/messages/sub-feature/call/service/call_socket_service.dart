@@ -7,32 +7,24 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../../../../core/services/token_service.dart';
 
-typedef CallSocketListener = void Function(
-    Map<String, dynamic> payload,
-    );
+typedef CallSocketListener = void Function(Map<String, dynamic> payload);
 
 class CallSocketException implements Exception {
   final String code;
   final String message;
 
-  const CallSocketException({
-    required this.code,
-    required this.message,
-  });
+  const CallSocketException({required this.code, required this.message});
 
-  factory CallSocketException.fromResponse(
-      Map<String, dynamic> response,
-      ) {
+  factory CallSocketException.fromResponse(Map<String, dynamic> response) {
     final dynamic rawError = response['error'];
 
     if (rawError is Map) {
-      final Map<String, dynamic> error =
-      Map<String, dynamic>.from(rawError);
+      final Map<String, dynamic> error = Map<String, dynamic>.from(rawError);
 
       return CallSocketException(
         code: error['code']?.toString() ?? 'CALL_ERROR',
         message:
-        error['message']?.toString() ??
+            error['message']?.toString() ??
             'Unable to complete the call request.',
       );
     }
@@ -48,32 +40,29 @@ class CallSocketException implements Exception {
 }
 
 class CallSocketService extends GetxService {
-  CallSocketService({
-    required TokenService tokenService,
-  }) : _tokenService = tokenService;
+  CallSocketService({required TokenService tokenService})
+    : _tokenService = tokenService;
 
   final TokenService _tokenService;
 
   io.Socket? _socket;
   Completer<void>? _connectingCompleter;
 
-  final List<CallSocketListener> _connectedListeners =
-  <CallSocketListener>[];
+  final List<CallSocketListener> _connectedListeners = <CallSocketListener>[];
 
   final List<CallSocketListener> _incomingCallListeners =
-  <CallSocketListener>[];
+      <CallSocketListener>[];
 
   final List<CallSocketListener> _answeredCallListeners =
-  <CallSocketListener>[];
+      <CallSocketListener>[];
 
   final List<CallSocketListener> _rejectedCallListeners =
-  <CallSocketListener>[];
+      <CallSocketListener>[];
 
   final List<CallSocketListener> _cancelledCallListeners =
-  <CallSocketListener>[];
+      <CallSocketListener>[];
 
-  final List<CallSocketListener> _endedCallListeners =
-  <CallSocketListener>[];
+  final List<CallSocketListener> _endedCallListeners = <CallSocketListener>[];
 
   bool get isConnected => _socket?.connected ?? false;
 
@@ -84,15 +73,13 @@ class CallSocketService extends GetxService {
       return;
     }
 
-    final Completer<void>? existingCompleter =
-        _connectingCompleter;
+    final Completer<void>? existingCompleter = _connectingCompleter;
 
     if (existingCompleter != null) {
       return existingCompleter.future;
     }
 
-    final String? token =
-    await _tokenService.getAccessToken();
+    final String? token = await _tokenService.getAccessToken();
 
     if (token == null || token.trim().isEmpty) {
       throw const CallSocketException(
@@ -103,35 +90,24 @@ class CallSocketService extends GetxService {
 
     await _disposeSocket();
 
-    final Completer<void> completer =
-    Completer<void>();
+    final Completer<void> completer = Completer<void>();
 
     _connectingCompleter = completer;
 
-    final io.OptionBuilder options =
-    io.OptionBuilder()
-        .setTransports(<String>[
-      'websocket',
-    ])
-        .setAuth(<String, dynamic>{
-      'token': token.trim(),
-    })
+    final io.OptionBuilder options = io.OptionBuilder()
+        .setTransports(<String>['websocket'])
+        .setAuth(<String, dynamic>{'token': token.trim()})
         .enableReconnection()
         .setReconnectionAttempts(5)
         .setReconnectionDelay(1000)
         .disableAutoConnect();
 
-    final io.Socket socket = io.io(
-      _socketUrl,
-      options.build(),
-    );
+    final io.Socket socket = io.io(_socketUrl, options.build());
 
     _socket = socket;
 
     socket.onConnect((dynamic _) {
-      debugPrint(
-        '[CallSocket] Connected: ${socket.id}',
-      );
+      debugPrint('[CallSocket] Connected: ${socket.id}');
 
       if (!completer.isCompleted) {
         completer.complete();
@@ -139,105 +115,80 @@ class CallSocketService extends GetxService {
     });
 
     socket.onDisconnect((dynamic reason) {
-      debugPrint(
-        '[CallSocket] Disconnected: $reason',
-      );
+      debugPrint('[CallSocket] Disconnected: $reason');
     });
 
     socket.onConnectError((dynamic error) {
-      debugPrint(
-        '[CallSocket] Connection error: $error',
-      );
+      debugPrint('[CallSocket] Connection error: $error');
 
       if (!completer.isCompleted) {
         completer.completeError(
           CallSocketException(
             code: 'CALL_SOCKET_CONNECTION_FAILED',
             message:
-            error?.toString() ??
-                'Unable to connect to the call server.',
+                error?.toString() ?? 'Unable to connect to the call server.',
           ),
         );
       }
     });
 
     socket.onError((dynamic error) {
-      debugPrint(
-        '[CallSocket] Socket error: $error',
+      debugPrint('[CallSocket] Socket error: $error');
+    });
+
+    socket.on('call:connected', (dynamic data) {
+      _handleSocketEvent(
+        event: 'call:connected',
+        data: data,
+        listeners: _connectedListeners,
+        listenerName: 'Connected',
       );
     });
 
-    socket.on(
-      'call:connected',
-          (dynamic data) {
-        _handleSocketEvent(
-          event: 'call:connected',
-          data: data,
-          listeners: _connectedListeners,
-          listenerName: 'Connected',
-        );
-      },
-    );
+    socket.on('call:incoming', (dynamic data) {
+      _handleSocketEvent(
+        event: 'call:incoming',
+        data: data,
+        listeners: _incomingCallListeners,
+        listenerName: 'Incoming call',
+      );
+    });
 
-    socket.on(
-      'call:incoming',
-          (dynamic data) {
-        _handleSocketEvent(
-          event: 'call:incoming',
-          data: data,
-          listeners: _incomingCallListeners,
-          listenerName: 'Incoming call',
-        );
-      },
-    );
+    socket.on('call:answered', (dynamic data) {
+      _handleSocketEvent(
+        event: 'call:answered',
+        data: data,
+        listeners: _answeredCallListeners,
+        listenerName: 'Answered call',
+      );
+    });
 
-    socket.on(
-      'call:answered',
-          (dynamic data) {
-        _handleSocketEvent(
-          event: 'call:answered',
-          data: data,
-          listeners: _answeredCallListeners,
-          listenerName: 'Answered call',
-        );
-      },
-    );
+    socket.on('call:rejected', (dynamic data) {
+      _handleSocketEvent(
+        event: 'call:rejected',
+        data: data,
+        listeners: _rejectedCallListeners,
+        listenerName: 'Rejected call',
+      );
+    });
 
-    socket.on(
-      'call:rejected',
-          (dynamic data) {
-        _handleSocketEvent(
-          event: 'call:rejected',
-          data: data,
-          listeners: _rejectedCallListeners,
-          listenerName: 'Rejected call',
-        );
-      },
-    );
+    socket.on('call:cancelled', (dynamic data) {
+      _handleSocketEvent(
+        event: 'call:cancelled',
+        data: data,
+        listeners: _cancelledCallListeners,
+        listenerName: 'Cancelled call',
+      );
+    });
 
-    socket.on(
-      'call:cancelled',
-          (dynamic data) {
-        _handleSocketEvent(
-          event: 'call:cancelled',
-          data: data,
-          listeners: _cancelledCallListeners,
-          listenerName: 'Cancelled call',
-        );
-      },
-    );
-
-    socket.on(
-      'call:ended',
-          (dynamic data) {
-        _handleSocketEvent(
-          event: 'call:ended',
-          data: data,
-          listeners: _endedCallListeners,
-          listenerName: 'Ended call',
-        );
-      },
-    );
+    socket.on('call:ended', (dynamic data) {
+      _handleSocketEvent(
+        event: 'call:ended',
+        data: data,
+        listeners: _endedCallListeners,
+        listenerName: 'Ended call',
+      );
+    });
 
     socket.connect();
 
@@ -247,16 +198,12 @@ class CallSocketService extends GetxService {
         onTimeout: () {
           throw const CallSocketException(
             code: 'CALL_SOCKET_TIMEOUT',
-            message:
-            'The call server connection timed out.',
+            message: 'The call server connection timed out.',
           );
         },
       );
     } finally {
-      if (identical(
-        _connectingCompleter,
-        completer,
-      )) {
+      if (identical(_connectingCompleter, completer)) {
         _connectingCompleter = null;
       }
     }
@@ -275,8 +222,7 @@ class CallSocketService extends GetxService {
         'clientCallId': clientCallId,
       },
       timeoutCode: 'CALL_INITIATE_TIMEOUT',
-      timeoutMessage:
-      'The server did not respond to the call request.',
+      timeoutMessage: 'The server did not respond to the call request.',
     );
   }
 
@@ -285,12 +231,9 @@ class CallSocketService extends GetxService {
   }) {
     return _emitCallAction(
       event: 'call:answer',
-      payload: <String, dynamic>{
-        'callId': callId,
-      },
+      payload: <String, dynamic>{'callId': callId},
       timeoutCode: 'CALL_ANSWER_TIMEOUT',
-      timeoutMessage:
-      'The server did not respond to the answer request.',
+      timeoutMessage: 'The server did not respond to the answer request.',
     );
   }
 
@@ -299,41 +242,89 @@ class CallSocketService extends GetxService {
   }) {
     return _emitCallAction(
       event: 'call:reject',
-      payload: <String, dynamic>{
-        'callId': callId,
-      },
+      payload: <String, dynamic>{'callId': callId},
       timeoutCode: 'CALL_REJECT_TIMEOUT',
-      timeoutMessage:
-      'The server did not respond to the rejection request.',
+      timeoutMessage: 'The server did not respond to the rejection request.',
     );
   }
 
-  Future<Map<String, dynamic>> cancelCall({
-    required String callId,
-  }) {
+  Future<Map<String, dynamic>> cancelCall({required String callId}) {
     return _emitCallAction(
       event: 'call:cancel',
-      payload: <String, dynamic>{
-        'callId': callId,
-      },
+      payload: <String, dynamic>{'callId': callId},
       timeoutCode: 'CALL_CANCEL_TIMEOUT',
-      timeoutMessage:
-      'The server did not respond to the cancellation request.',
+      timeoutMessage: 'The server did not respond to the cancellation request.',
     );
   }
 
-  Future<Map<String, dynamic>> endCall({
-    required String callId,
-  }) {
+  Future<Map<String, dynamic>> endCall({required String callId}) {
     return _emitCallAction(
       event: 'call:end',
-      payload: <String, dynamic>{
-        'callId': callId,
-      },
+      payload: <String, dynamic>{'callId': callId},
       timeoutCode: 'CALL_END_TIMEOUT',
-      timeoutMessage:
-      'The server did not respond to the end call request.',
+      timeoutMessage: 'The server did not respond to the end call request.',
     );
+  }
+
+  Future<void> acknowledgeIncomingCall({required String callId}) async {
+    final String normalizedCallId = callId.trim();
+
+    if (normalizedCallId.isEmpty) {
+      throw const CallSocketException(
+        code: 'INVALID_CALL_ID',
+        message: 'A valid call ID is required for acknowledgement.',
+      );
+    }
+
+    final io.Socket? socket = _socket;
+
+    if (socket == null || !socket.connected) {
+      throw const CallSocketException(
+        code: 'CALL_SOCKET_NOT_CONNECTED',
+        message: 'The call socket is not connected.',
+      );
+    }
+
+    final Completer<Map<String, dynamic>> completer =
+        Completer<Map<String, dynamic>>();
+
+    debugPrint(
+      '[CallSocket] Sending call:incoming:ack '
+      '$normalizedCallId',
+    );
+
+    socket.emitWithAck(
+      'call:incoming:ack',
+      <String, dynamic>{'callId': normalizedCallId},
+      ack: (dynamic rawResponse) {
+        if (completer.isCompleted) {
+          return;
+        }
+
+        final Map<String, dynamic> response = _toMap(rawResponse);
+
+        debugPrint(
+          '[CallSocket] call:incoming:ack '
+          'response $response',
+        );
+
+        completer.complete(response);
+      },
+    );
+
+    final Map<String, dynamic> response = await completer.future.timeout(
+      const Duration(seconds: 3),
+      onTimeout: () {
+        throw const CallSocketException(
+          code: 'CALL_INCOMING_ACK_TIMEOUT',
+          message: 'The incoming call acknowledgement timed out.',
+        );
+      },
+    );
+
+    if (response['ok'] != true) {
+      throw CallSocketException.fromResponse(response);
+    }
   }
 
   Future<Map<String, dynamic>> _emitCallAction({
@@ -349,17 +340,14 @@ class CallSocketService extends GetxService {
     if (socket == null || !socket.connected) {
       throw const CallSocketException(
         code: 'CALL_SOCKET_NOT_CONNECTED',
-        message:
-        'The foreground call socket is not connected.',
+        message: 'The foreground call socket is not connected.',
       );
     }
 
     final Completer<Map<String, dynamic>> completer =
-    Completer<Map<String, dynamic>>();
+        Completer<Map<String, dynamic>>();
 
-    debugPrint(
-      '[CallSocket] Sending $event $payload',
-    );
+    debugPrint('[CallSocket] Sending $event $payload');
 
     socket.emitWithAck(
       event,
@@ -369,32 +357,23 @@ class CallSocketService extends GetxService {
           return;
         }
 
-        final Map<String, dynamic> response =
-        _toMap(rawResponse);
+        final Map<String, dynamic> response = _toMap(rawResponse);
 
-        debugPrint(
-          '[CallSocket] $event response $response',
-        );
+        debugPrint('[CallSocket] $event response $response');
 
         completer.complete(response);
       },
     );
 
-    final Map<String, dynamic> response =
-    await completer.future.timeout(
+    final Map<String, dynamic> response = await completer.future.timeout(
       const Duration(seconds: 15),
       onTimeout: () {
-        throw CallSocketException(
-          code: timeoutCode,
-          message: timeoutMessage,
-        );
+        throw CallSocketException(code: timeoutCode, message: timeoutMessage);
       },
     );
 
     if (response['ok'] != true) {
-      throw CallSocketException.fromResponse(
-        response,
-      );
+      throw CallSocketException.fromResponse(response);
     }
 
     final dynamic rawData = response['data'];
@@ -402,101 +381,58 @@ class CallSocketService extends GetxService {
     if (rawData is! Map) {
       throw const CallSocketException(
         code: 'INVALID_CALL_RESPONSE',
-        message:
-        'The server returned an invalid call response.',
+        message: 'The server returned an invalid call response.',
       );
     }
 
     return Map<String, dynamic>.from(rawData);
   }
 
-  void addConnectedListener(
-      CallSocketListener listener,
-      ) {
-    _addListener(
-      _connectedListeners,
-      listener,
-    );
+  void addConnectedListener(CallSocketListener listener) {
+    _addListener(_connectedListeners, listener);
   }
 
-  void removeConnectedListener(
-      CallSocketListener listener,
-      ) {
+  void removeConnectedListener(CallSocketListener listener) {
     _connectedListeners.remove(listener);
   }
 
-  void addIncomingCallListener(
-      CallSocketListener listener,
-      ) {
-    _addListener(
-      _incomingCallListeners,
-      listener,
-    );
+  void addIncomingCallListener(CallSocketListener listener) {
+    _addListener(_incomingCallListeners, listener);
   }
 
-  void removeIncomingCallListener(
-      CallSocketListener listener,
-      ) {
+  void removeIncomingCallListener(CallSocketListener listener) {
     _incomingCallListeners.remove(listener);
   }
 
-  void addAnsweredCallListener(
-      CallSocketListener listener,
-      ) {
-    _addListener(
-      _answeredCallListeners,
-      listener,
-    );
+  void addAnsweredCallListener(CallSocketListener listener) {
+    _addListener(_answeredCallListeners, listener);
   }
 
-  void removeAnsweredCallListener(
-      CallSocketListener listener,
-      ) {
+  void removeAnsweredCallListener(CallSocketListener listener) {
     _answeredCallListeners.remove(listener);
   }
 
-  void addRejectedCallListener(
-      CallSocketListener listener,
-      ) {
-    _addListener(
-      _rejectedCallListeners,
-      listener,
-    );
+  void addRejectedCallListener(CallSocketListener listener) {
+    _addListener(_rejectedCallListeners, listener);
   }
 
-  void removeRejectedCallListener(
-      CallSocketListener listener,
-      ) {
+  void removeRejectedCallListener(CallSocketListener listener) {
     _rejectedCallListeners.remove(listener);
   }
 
-  void addCancelledCallListener(
-      CallSocketListener listener,
-      ) {
-    _addListener(
-      _cancelledCallListeners,
-      listener,
-    );
+  void addCancelledCallListener(CallSocketListener listener) {
+    _addListener(_cancelledCallListeners, listener);
   }
 
-  void removeCancelledCallListener(
-      CallSocketListener listener,
-      ) {
+  void removeCancelledCallListener(CallSocketListener listener) {
     _cancelledCallListeners.remove(listener);
   }
 
-  void addEndedCallListener(
-      CallSocketListener listener,
-      ) {
-    _addListener(
-      _endedCallListeners,
-      listener,
-    );
+  void addEndedCallListener(CallSocketListener listener) {
+    _addListener(_endedCallListeners, listener);
   }
 
-  void removeEndedCallListener(
-      CallSocketListener listener,
-      ) {
+  void removeEndedCallListener(CallSocketListener listener) {
     _endedCallListeners.remove(listener);
   }
 
@@ -515,12 +451,9 @@ class CallSocketService extends GetxService {
     required List<CallSocketListener> listeners,
     required String listenerName,
   }) {
-    final Map<String, dynamic> payload =
-    _toMap(data);
+    final Map<String, dynamic> payload = _toMap(data);
 
-    debugPrint(
-      '[CallSocket] $event $payload',
-    );
+    debugPrint('[CallSocket] $event $payload');
 
     _notifyListeners(
       listeners: listeners,
@@ -530,9 +463,9 @@ class CallSocketService extends GetxService {
   }
 
   void _addListener(
-      List<CallSocketListener> listeners,
-      CallSocketListener listener,
-      ) {
+    List<CallSocketListener> listeners,
+    CallSocketListener listener,
+  ) {
     if (!listeners.contains(listener)) {
       listeners.add(listener);
     }
@@ -544,20 +477,15 @@ class CallSocketService extends GetxService {
     required String listenerName,
   }) {
     final List<CallSocketListener> copiedListeners =
-    List<CallSocketListener>.from(listeners);
+        List<CallSocketListener>.from(listeners);
 
-    for (final CallSocketListener listener
-    in copiedListeners) {
+    for (final CallSocketListener listener in copiedListeners) {
       try {
         listener(payload);
       } catch (error, stackTrace) {
-        debugPrint(
-          '[CallSocket] $listenerName listener error: $error',
-        );
+        debugPrint('[CallSocket] $listenerName listener error: $error');
 
-        debugPrintStack(
-          stackTrace: stackTrace,
-        );
+        debugPrintStack(stackTrace: stackTrace);
       }
     }
   }
@@ -577,15 +505,11 @@ class CallSocketService extends GetxService {
       socket.disconnect();
       socket.dispose();
     } catch (error) {
-      debugPrint(
-        '[CallSocket] Dispose error: $error',
-      );
+      debugPrint('[CallSocket] Dispose error: $error');
     }
   }
 
-  Map<String, dynamic> _toMap(
-      dynamic data,
-      ) {
+  Map<String, dynamic> _toMap(dynamic data) {
     if (data is Map<String, dynamic>) {
       return data;
     }
@@ -598,26 +522,18 @@ class CallSocketService extends GetxService {
   }
 
   String get _socketUrl {
-    final String apiBaseUrl =
-        dotenv.env['API_BASE_URL']?.trim() ?? '';
+    final String apiBaseUrl = dotenv.env['API_BASE_URL']?.trim() ?? '';
 
     if (apiBaseUrl.isEmpty) {
       throw const CallSocketException(
         code: 'API_BASE_URL_MISSING',
-        message:
-        'API_BASE_URL is missing from the .env file.',
+        message: 'API_BASE_URL is missing from the .env file.',
       );
     }
 
     final Uri uri = Uri.parse(apiBaseUrl);
 
-    return uri
-        .replace(
-      path: '/calls',
-      query: null,
-      fragment: null,
-    )
-        .toString();
+    return uri.replace(path: '/calls', query: null, fragment: null).toString();
   }
 
   @override

@@ -2,34 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../shop_controller.dart';
+import '../controllers/shop_order_history_controller.dart';
+import '../models/shop_order_models.dart';
 
-class OrderHistoryView extends GetView<ShopController> {
+class OrderHistoryView extends GetView<ShopOrderHistoryController> {
   const OrderHistoryView({super.key});
 
-  static const Color _bg = Color(0xFFF3F3F3);
-  static const Color _green = Color(0xFF267A05);
+  static const Color _background = Color(0xFFF3F3F3);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: _background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 40.h),
-          child: Column(
-            children: <Widget>[
-              const _HistoryTopBar(),
-              SizedBox(height: 40.h),
-              const _FilterTabs(),
-              SizedBox(height: 24.h),
-              const _SearchBox(),
-              SizedBox(height: 24.h),
-              const _OrdersList(),
-              SizedBox(height: 18.h),
-              const _SupportCard(),
-            ],
+        child: RefreshIndicator(
+          onRefresh: () => controller.loadOrderHistory(reset: true),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 40.h),
+            child: Column(
+              children: <Widget>[
+                const _HistoryTopBar(),
+                SizedBox(height: 40.h),
+                const _FilterTabs(),
+                SizedBox(height: 24.h),
+                const _SearchBox(),
+                SizedBox(height: 24.h),
+                const _OrdersList(),
+                SizedBox(height: 18.h),
+                const _SupportCard(),
+              ],
+            ),
           ),
         ),
       ),
@@ -90,7 +95,7 @@ class _HistoryTopBar extends StatelessWidget {
   }
 }
 
-class _FilterTabs extends GetView<ShopController> {
+class _FilterTabs extends GetView<ShopOrderHistoryController> {
   const _FilterTabs();
 
   @override
@@ -102,13 +107,11 @@ class _FilterTabs extends GetView<ShopController> {
         physics: const BouncingScrollPhysics(),
         itemCount: controller.orderHistoryFilters.length,
         separatorBuilder: (_, _) => SizedBox(width: 12.w),
-        itemBuilder: (context, index) {
+        itemBuilder: (BuildContext context, int index) {
           final String title = controller.orderHistoryFilters[index];
-
           return Obx(() {
             final bool selected =
                 controller.selectedOrderHistoryFilter.value == title;
-
             return GestureDetector(
               onTap: () => controller.selectOrderHistoryFilter(title),
               child: AnimatedContainer(
@@ -154,7 +157,7 @@ class _FilterTabs extends GetView<ShopController> {
   }
 }
 
-class _SearchBox extends GetView<ShopController> {
+class _SearchBox extends GetView<ShopOrderHistoryController> {
   const _SearchBox();
 
   @override
@@ -202,54 +205,96 @@ class _SearchBox extends GetView<ShopController> {
   }
 }
 
-class _OrdersList extends GetView<ShopController> {
+class _OrdersList extends GetView<ShopOrderHistoryController> {
   const _OrdersList();
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final List<OrderHistoryItem> orders =
-          controller.filteredOrderHistoryItems;
-
-      if (orders.isEmpty) {
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 40.h, horizontal: 20.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(34.r),
-          ),
-          child: Text(
-            'No orders found',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF666666),
-            ),
-          ),
+      if (controller.isLoadingHistory.value &&
+          controller.orderHistoryItems.isEmpty) {
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 40.h),
+          child: const CircularProgressIndicator(),
         );
       }
 
+      final List<StoreOrderHistoryItemModel> orders =
+          controller.filteredOrderHistoryItems;
+      if (orders.isEmpty) return const _EmptyOrdersCard();
+
       return Column(
-        children: List.generate(
-          orders.length,
-          (index) => Padding(
-            padding: EdgeInsets.only(
-              bottom: index == orders.length - 1 ? 0 : 16.h,
+        children: <Widget>[
+          ...List<Widget>.generate(
+            orders.length,
+            (int index) => Padding(
+              padding: EdgeInsets.only(
+                bottom: index == orders.length - 1 ? 0 : 16.h,
+              ),
+              child: _OrderCard(item: orders[index]),
             ),
-            child: _OrderCard(item: orders[index]),
           ),
-        ),
+          if (controller.historyHasMore) ...<Widget>[
+            SizedBox(height: 20.h),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: controller.isLoadingMoreHistory.value
+                    ? null
+                    : () => controller.loadOrderHistory(reset: false),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF267A05),
+                  side: const BorderSide(color: Color(0xFF267A05)),
+                  padding: EdgeInsets.symmetric(vertical: 15.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(100.r),
+                  ),
+                ),
+                child: controller.isLoadingMoreHistory.value
+                    ? SizedBox(
+                        width: 22.r,
+                        height: 22.r,
+                        child: const CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Load More'),
+              ),
+            ),
+          ],
+        ],
       );
     });
   }
 }
 
-class _OrderCard extends StatelessWidget {
-  final OrderHistoryItem item;
+class _EmptyOrdersCard extends StatelessWidget {
+  const _EmptyOrdersCard();
 
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 40.h, horizontal: 20.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(34.r),
+      ),
+      child: Text(
+        'No orders found',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF666666),
+        ),
+      ),
+    );
+  }
+}
+
+class _OrderCard extends StatelessWidget {
   const _OrderCard({required this.item});
+
+  final StoreOrderHistoryItemModel item;
 
   static const Color _text = Color(0xFF2D3032);
   static const Color _muted = Color(0xFF5F6265);
@@ -257,8 +302,6 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isCourse = item.category == OrderHistoryFilterTitles.courses;
-
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(24.w, 22.h, 24.w, 22.h),
@@ -278,30 +321,14 @@ class _OrderCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Container(
-                width: 48.r,
-                height: 48.r,
-                decoration: BoxDecoration(
-                  color: isCourse
-                      ? const Color(0xFFFF9700)
-                      : const Color(0xFFAED2FF),
-                  borderRadius: BorderRadius.circular(15.r),
-                ),
-                child: Icon(
-                  isCourse ? Icons.school_outlined : Icons.mic_none_rounded,
-                  size: 24.r,
-                  color: isCourse
-                      ? const Color(0xFF905000)
-                      : const Color(0xFF0065A8),
-                ),
-              ),
+              _OrderIcon(category: item.category),
               SizedBox(width: 18.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      item.title,
+                      item.name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -314,7 +341,7 @@ class _OrderCard extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      item.date,
+                      item.formattedDate,
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -329,7 +356,9 @@ class _OrderCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   Text(
-                    item.price,
+                    item.formattedAmount.isNotEmpty
+                        ? item.formattedAmount
+                        : '${item.currency} ${item.amount.toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: 19.sp,
                       fontWeight: FontWeight.w900,
@@ -338,29 +367,7 @@ class _OrderCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 8.h),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Container(
-                        width: 8.r,
-                        height: 8.r,
-                        decoration: const BoxDecoration(
-                          color: _green,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      SizedBox(width: 6.w),
-                      Text(
-                        item.status,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w900,
-                          color: _green,
-                          letterSpacing: 0.35,
-                        ),
-                      ),
-                    ],
-                  ),
+                  _StatusLabel(status: item.status),
                 ],
               ),
             ],
@@ -381,7 +388,9 @@ class _OrderCard extends StatelessWidget {
                 ),
                 children: <TextSpan>[
                   TextSpan(
-                    text: item.id,
+                    text: item.orderNumber.isNotEmpty
+                        ? item.orderNumber
+                        : item.id,
                     style: const TextStyle(fontWeight: FontWeight.w900),
                   ),
                 ],
@@ -394,7 +403,88 @@ class _OrderCard extends StatelessWidget {
   }
 }
 
-class _SupportCard extends GetView<ShopController> {
+class _OrderIcon extends StatelessWidget {
+  const _OrderIcon({required this.category});
+
+  final String category;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool course = category == 'course';
+    final bool streak = category == 'streak_freeze';
+    final bool cv = category == 'cv_credit';
+    final Color background = course
+        ? const Color(0xFFFF9700)
+        : streak
+        ? const Color(0xFFFFE7A3)
+        : cv
+        ? const Color(0xFFD7F3CA)
+        : const Color(0xFFAED2FF);
+    final Color foreground = course
+        ? const Color(0xFF905000)
+        : streak
+        ? const Color(0xFF8A6400)
+        : cv
+        ? const Color(0xFF267A05)
+        : const Color(0xFF0065A8);
+    final IconData icon = course
+        ? Icons.school_outlined
+        : streak
+        ? Icons.ac_unit_rounded
+        : cv
+        ? Icons.description_outlined
+        : Icons.mic_none_rounded;
+
+    return Container(
+      width: 48.r,
+      height: 48.r,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(15.r),
+      ),
+      child: Icon(icon, size: 24.r, color: foreground),
+    );
+  }
+}
+
+class _StatusLabel extends StatelessWidget {
+  const _StatusLabel({required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final String normalized = status.toLowerCase();
+    final bool successful = normalized == 'completed' || normalized == 'paid';
+    final Color color = successful
+        ? const Color(0xFF267A05)
+        : normalized == 'refunded'
+        ? const Color(0xFFB26A00)
+        : const Color(0xFF777777);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Container(
+          width: 8.r,
+          height: 8.r,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        SizedBox(width: 6.w),
+        Text(
+          status.isEmpty ? 'Pending' : status.capitalizeFirst ?? status,
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w900,
+            color: color,
+            letterSpacing: 0.35,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SupportCard extends GetView<ShopOrderHistoryController> {
   const _SupportCard();
 
   static const Color _green = Color(0xFF267A05);

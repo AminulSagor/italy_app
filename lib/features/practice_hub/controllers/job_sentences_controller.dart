@@ -88,6 +88,14 @@ class JobSentencesController extends GetxController {
 
   Future<void> refreshCareerTracks() => loadCareerTracks(showError: false);
 
+  void prepareCareerTrack(JobCareerTrackModel track) {
+    selectedTrack.value = track;
+    trackDetails.value = null;
+    trackDetailsError.value = '';
+    _lastReportedVideoPercent = 0;
+    unawaited(loadCareerTrackDetails(trackId: track.id, showError: false));
+  }
+
   void openCareerTrack(JobCareerTrackModel track) {
     selectedTrack.value = track;
     trackDetails.value = null;
@@ -314,16 +322,26 @@ class JobSentencesController extends GetxController {
     await _reviewSentence(sentenceId);
   }
 
-  Future<void> _reviewSentence(String sentenceId) async {
-    if (_reviewRequests.contains(sentenceId)) return;
+  Future<bool> markSentenceLearnedWhenVisible(
+    JobSentenceModel sentence,
+  ) async {
+    if (sentence.hasAudio || sentence.isLearned) {
+      return sentence.isLearned;
+    }
+    return _reviewSentence(sentence.id);
+  }
+
+  Future<bool> _reviewSentence(String sentenceId) async {
+    if (_reviewRequests.contains(sentenceId)) return false;
     _reviewRequests.add(sentenceId);
     try {
       final ApiResult<void> result = await ApiErrorHandler.call<void>(
         () => _apiService.reviewSentence(sentenceId: sentenceId),
         showError: false,
       );
-      if (!result.isSuccess) return;
+      if (!result.isSuccess) return false;
       _markSentenceLearnedLocally(sentenceId);
+      return true;
     } finally {
       _reviewRequests.remove(sentenceId);
     }

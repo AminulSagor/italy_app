@@ -26,6 +26,8 @@ class CourseDetailView extends GetView<CourseDetailController> {
   void _showUnlockChapterDialog() {
     Get.dialog<void>(
       UnlockChapterDialog(
+        courseName: controller.detail.value?.title ?? controller.course.title,
+        lessonCount: controller.detail.value?.lessonCount ?? 0,
         onGetProTap: () {
           if (Get.isDialogOpen ?? false) {
             Get.back<void>();
@@ -97,7 +99,7 @@ class CourseDetailView extends GetView<CourseDetailController> {
                   ),
                 ),
               ),
-              if (!detail.isProEnabled)
+              if (!detail.isFree && !detail.isProEnabled)
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
                     kCoursesHorizontalPadding.w,
@@ -108,6 +110,8 @@ class CourseDetailView extends GetView<CourseDetailController> {
                   sliver: SliverToBoxAdapter(
                     child: CourseProBanner(
                       isLoading: controller.isProSubmitting.value,
+                      courseName: detail.title,
+                      lessonCount: detail.lessonCount,
                       onGetProTap: _showUnlockChapterDialog,
                     ),
                   ),

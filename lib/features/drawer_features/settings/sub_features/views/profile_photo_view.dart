@@ -1,9 +1,14 @@
-import 'package:get/get.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:italir_pothe/features/drawer_features/settings/widgets/settings_ui_widgets.dart';
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
-class ProfilePhotoView extends StatelessWidget {
+import '../../settings_controller.dart';
+import '../../widgets/settings_ui_widgets.dart';
+
+class ProfilePhotoView extends GetView<SettingsController> {
   const ProfilePhotoView({super.key});
 
   @override
@@ -16,9 +21,14 @@ class ProfilePhotoView extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 28.h),
           child: Column(
             children: <Widget>[
-              SettingsTopBar(title: 'gen_profile_photo'.tr.tr),
+              const SettingsTopBar(title: 'Profile Photo'),
               SizedBox(height: 61.h),
-              const _PhotoPreview(),
+              Obx(
+                () => _PhotoPreview(
+                  selectedPath: controller.selectedAvatar.value?.path,
+                  avatarUrl: controller.profile.value?.avatarUrl,
+                ),
+              ),
               SizedBox(height: 34.h),
               Text(
                 'Say Cheese!',
@@ -45,75 +55,51 @@ class ProfilePhotoView extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: _PhotoOptionCard(
-                      title: 'gen_take_a_photo'.tr.tr,
+                      title: 'Take a Photo',
                       icon: Icons.camera_alt_outlined,
                       bgColor: const Color(0xFFD7FFC6),
                       iconBgColor: SettingsUi.lightGreen,
                       iconColor: SettingsUi.green,
-                      onTap: () {},
+                      onTap: () => controller.pickAvatar(ImageSource.camera),
                     ),
                   ),
                   SizedBox(width: 16.w),
                   Expanded(
                     child: _PhotoOptionCard(
-                      title: 'gen_choose_from_ngallery'.tr.tr,
+                      title: 'Choose from\nGallery',
                       icon: Icons.image_rounded,
                       bgColor: const Color(0xFFDCEBFF),
                       iconBgColor: const Color(0xFFA9D0FF),
                       iconColor: const Color(0xFF005A97),
-                      onTap: () {},
+                      onTap: () => controller.pickAvatar(ImageSource.gallery),
                     ),
                   ),
                 ],
               ),
               SizedBox(height: 48.h),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0F0F0),
-                  borderRadius: BorderRadius.circular(28.r),
-                ),
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      width: 40.r,
-                      height: 40.r,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFFE9BD),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.lightbulb_outline_rounded,
-                        size: 24.r,
-                        color: const Color(0xFFFF9900),
-                      ),
-                    ),
-                    SizedBox(width: 17.w),
-                    Expanded(
-                      child: Text(
-                        'A clear face photo helps you gain\n15% more interactions with fellow\nlearners!',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          height: 1.35,
-                          fontWeight: FontWeight.w600,
-                          color: SettingsUi.muted,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const _PhotoTipCard(),
               SizedBox(height: 39.h),
-              SettingsPrimaryButton(
-                text: 'CONFIRM PHOTO',
-                onTap: () {
-                  SettingsSuccessBottomSheet.show(
-                    title: 'gen_profile_picture_updated'.tr.tr,
-                    subtitle:
-                        'gen_your_profile_picture_has_been'.tr.tr,
-                  );
-                },
+              Obx(
+                () => SettingsPrimaryButton(
+                  text: 'CONFIRM PHOTO',
+                  enabled: controller.selectedAvatar.value != null,
+                  isLoading: controller.isUploadingAvatar.value,
+                  onTap: () async {
+                    final bool uploaded =
+                        await controller.uploadSelectedAvatar();
+                    if (!uploaded) return;
+
+                    await SettingsSuccessBottomSheet.show(
+                      title: 'Profile Picture Updated!',
+                      subtitle:
+                          'Your profile picture has been updated successfully.',
+                      onDone: () {
+                        Get.back<void>();
+                        Get.back<void>();
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -124,7 +110,10 @@ class ProfilePhotoView extends StatelessWidget {
 }
 
 class _PhotoPreview extends StatelessWidget {
-  const _PhotoPreview();
+  const _PhotoPreview({required this.selectedPath, required this.avatarUrl});
+
+  final String? selectedPath;
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -149,16 +138,7 @@ class _PhotoPreview extends StatelessWidget {
                 ),
               ],
             ),
-            child: ClipOval(
-              child: Container(
-                color: const Color(0xFFD1DCE2),
-                child: Icon(
-                  Icons.person_rounded,
-                  size: 150.r,
-                  color: const Color(0xFFE8D6CE),
-                ),
-              ),
-            ),
+            child: ClipOval(child: _SelectedPhoto(path: selectedPath, url: avatarUrl)),
           ),
           Positioned(
             right: 14.w,
@@ -183,14 +163,53 @@ class _PhotoPreview extends StatelessWidget {
   }
 }
 
-class _PhotoOptionCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color bgColor;
-  final Color iconBgColor;
-  final Color iconColor;
-  final VoidCallback onTap;
+class _SelectedPhoto extends StatelessWidget {
+  const _SelectedPhoto({required this.path, required this.url});
 
+  final String? path;
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    final String localPath = path?.trim() ?? '';
+    if (localPath.isNotEmpty) {
+      return Image.file(
+        File(localPath),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const _PhotoFallback(),
+      );
+    }
+
+    final String networkUrl = url?.trim() ?? '';
+    if (networkUrl.isNotEmpty) {
+      return Image.network(
+        networkUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const _PhotoFallback(),
+      );
+    }
+
+    return const _PhotoFallback();
+  }
+}
+
+class _PhotoFallback extends StatelessWidget {
+  const _PhotoFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFFD1DCE2),
+      child: Icon(
+        Icons.person_rounded,
+        size: 150.r,
+        color: const Color(0xFFE8D6CE),
+      ),
+    );
+  }
+}
+
+class _PhotoOptionCard extends StatelessWidget {
   const _PhotoOptionCard({
     required this.title,
     required this.icon,
@@ -199,6 +218,13 @@ class _PhotoOptionCard extends StatelessWidget {
     required this.iconColor,
     required this.onTap,
   });
+
+  final String title;
+  final IconData icon;
+  final Color bgColor;
+  final Color iconBgColor;
+  final Color iconColor;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -216,25 +242,67 @@ class _PhotoOptionCard extends StatelessWidget {
             Container(
               width: 56.r,
               height: 56.r,
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 31.r, color: iconColor),
+              decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+              child: Icon(icon, size: 27.r, color: iconColor),
             ),
-            SizedBox(height: 19.h),
+            SizedBox(height: 16.h),
             Text(
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16.sp,
-                height: 1.05,
+                fontSize: 15.sp,
+                height: 1.25,
                 fontWeight: FontWeight.w900,
-                color: iconColor,
+                color: SettingsUi.text,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PhotoTipCard extends StatelessWidget {
+  const _PhotoTipCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F0F0),
+        borderRadius: BorderRadius.circular(28.r),
+      ),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 40.r,
+            height: 40.r,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFFE9BD),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.lightbulb_outline_rounded,
+              size: 24.r,
+              color: const Color(0xFFFF9900),
+            ),
+          ),
+          SizedBox(width: 17.w),
+          Expanded(
+            child: Text(
+              'Use a clear JPG, PNG, or WEBP image smaller than 5 MB.',
+              style: TextStyle(
+                fontSize: 14.sp,
+                height: 1.35,
+                fontWeight: FontWeight.w600,
+                color: SettingsUi.muted,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

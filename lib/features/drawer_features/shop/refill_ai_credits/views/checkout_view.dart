@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:italir_pothe/core/themes/app_colors.dart';
 import 'package:italir_pothe/core/widgets/widgets.dart';
+import '../../models/shop_models.dart';
 import '../../shop_controller.dart';
 
 class CheckoutPage extends StatelessWidget {
@@ -48,6 +49,7 @@ class CheckoutPage extends StatelessWidget {
                 payableAmount: controller.checkoutPayablePriceText,
                 originalAmount: controller.checkoutOriginalPriceText,
                 savedAmount: controller.checkoutSavedAmountText,
+                billingLabel: controller.checkoutBillingLabel,
               ),
             ),
             const SizedBox(height: 36),
@@ -69,9 +71,12 @@ class CheckoutPage extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 32),
                         child: _PaymentMethodPill(
                           method: method,
+                          title: controller.paymentMethodTitle(method),
                           isSelected: controller.isPaymentMethodSelected(
                             method,
                           ),
+                          isEnabled:
+                              controller.paymentOption(method)?.enabled ?? false,
                           onTap: () => controller.selectPaymentMethod(method),
                         ),
                       ),
@@ -87,7 +92,7 @@ class CheckoutPage extends StatelessWidget {
                     : 'Complete Purchase',
                 onPressed: controller.isCheckoutLoading.value
                     ? () {}
-                    : controller.goToPurchaseCompleted,
+                    : controller.confirmCheckout,
                 btnColor: controller.isCheckoutLoading.value
                     ? AppColors.bodyText
                     : _green,
@@ -136,50 +141,6 @@ class CheckoutPage extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CheckoutHeader extends StatelessWidget {
-  const _CheckoutHeader({required this.onBackTap});
-
-  final VoidCallback onBackTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 28,
-      width: double.infinity,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: InkWell(
-              onTap: onBackTap,
-              borderRadius: BorderRadius.circular(24),
-              child: const SizedBox(
-                height: 36,
-                width: 36,
-                child: Icon(
-                  Icons.arrow_back,
-                  color: CheckoutPage._green,
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
-          const Text(
-            'Checkout',
-            style: TextStyle(
-              color: CheckoutPage._green,
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.2,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -273,6 +234,7 @@ class _OrderSummaryCard extends StatelessWidget {
     required this.payableAmount,
     required this.originalAmount,
     required this.savedAmount,
+    required this.billingLabel,
   });
 
   final String title;
@@ -280,6 +242,7 @@ class _OrderSummaryCard extends StatelessWidget {
   final String payableAmount;
   final String originalAmount;
   final String savedAmount;
+  final String billingLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -403,9 +366,9 @@ class _OrderSummaryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Text(
-                  '/ one-time',
-                  style: TextStyle(
+                Text(
+                  billingLabel,
+                  style: const TextStyle(
                     color: CheckoutPage._bodyText,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
@@ -423,12 +386,16 @@ class _OrderSummaryCard extends StatelessWidget {
 class _PaymentMethodPill extends StatelessWidget {
   const _PaymentMethodPill({
     required this.method,
+    required this.title,
     required this.isSelected,
+    required this.isEnabled,
     required this.onTap,
   });
 
   final CheckoutPaymentMethod method;
+  final String title;
   final bool isSelected;
+  final bool isEnabled;
   final VoidCallback onTap;
 
   @override
@@ -436,33 +403,36 @@ class _PaymentMethodPill extends StatelessWidget {
     final data = _paymentMethodUi(method);
 
     return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        height: 96,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : CheckoutPage._softGray,
-          borderRadius: BorderRadius.circular(50),
-          border: isSelected
-              ? Border.all(color: CheckoutPage._green, width: 2)
-              : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            data.icon,
-            const SizedBox(height: 9),
-            Text(
-              data.title,
-              style: const TextStyle(
-                color: CheckoutPage._bodyText,
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.2,
+      onTap: isEnabled ? onTap : null,
+      child: Opacity(
+        opacity: isEnabled ? 1 : 0.45,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          height: 96,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : CheckoutPage._softGray,
+            borderRadius: BorderRadius.circular(50),
+            border: isSelected
+                ? Border.all(color: CheckoutPage._green, width: 2)
+                : null,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              data.icon,
+              const SizedBox(height: 9),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: CheckoutPage._bodyText,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -470,6 +440,15 @@ class _PaymentMethodPill extends StatelessWidget {
 
   _PaymentMethodUi _paymentMethodUi(CheckoutPaymentMethod method) {
     switch (method) {
+      case CheckoutPaymentMethod.googlePlay:
+        return const _PaymentMethodUi(
+          title: 'Google Play',
+          icon: Icon(
+            Icons.play_arrow_rounded,
+            color: CheckoutPage._green,
+            size: 34,
+          ),
+        );
       case CheckoutPaymentMethod.card:
         return _PaymentMethodUi(
           title: 'gen_card'.tr.tr,

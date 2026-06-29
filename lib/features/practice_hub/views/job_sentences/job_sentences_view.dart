@@ -6,6 +6,7 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 import '../../controllers/job_sentences_controller.dart';
 import '../../models/job_track_models.dart';
+import '_widgets/job_track_card_palette.dart';
 
 class JobSentencesView extends GetView<JobSentencesController> {
   const JobSentencesView({super.key});
@@ -141,11 +142,10 @@ class _CareerTrackCard extends GetView<JobSentencesController> {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = _parseCardColor(
+    final JobTrackCardPalette palette = jobTrackCardPalette(
       item.cardColor,
-      const Color(0xFF1768A5),
+      fallback: const Color(0xFFB2D4FF),
     );
-    final Color background = Color.lerp(color, AppColors.white, 0.82)!;
 
     return GestureDetector(
       onTap: () => controller.openCareerTrack(item),
@@ -154,8 +154,9 @@ class _CareerTrackCard extends GetView<JobSentencesController> {
         constraints: BoxConstraints(minHeight: 136.h),
         padding: EdgeInsets.fromLTRB(25.w, 22.h, 20.w, 22.h),
         decoration: BoxDecoration(
-          color: background,
+          color: palette.background,
           borderRadius: BorderRadius.circular(42.r),
+          border: Border.all(color: palette.border),
         ),
         child: Row(
           children: <Widget>[
@@ -163,14 +164,14 @@ class _CareerTrackCard extends GetView<JobSentencesController> {
               width: 87.r,
               height: 87.r,
               decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.66),
+                color: palette.iconSurface,
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Icon(
                   _careerTrackIcon(item.iconKey),
                   size: 38.r,
-                  color: color,
+                  color: palette.accent,
                 ),
               ),
             ),
@@ -212,13 +213,17 @@ class _CareerTrackCard extends GetView<JobSentencesController> {
                     style: TextStyle(
                       fontSize: AppFont.font11.sp,
                       fontWeight: FontWeight.w800,
-                      color: color,
+                      color: palette.accent,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, size: 31.r, color: color),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 31.r,
+              color: palette.accent,
+            ),
           ],
         ),
       ),
@@ -341,13 +346,6 @@ class _JobTipCard extends StatelessWidget {
       ),
     );
   }
-}
-
-Color _parseCardColor(String value, Color fallback) {
-  String normalized = value.trim().replaceAll('#', '');
-  if (normalized.length == 6) normalized = 'FF$normalized';
-  final int? colorValue = int.tryParse(normalized, radix: 16);
-  return colorValue == null ? fallback : Color(colorValue);
 }
 
 IconData _careerTrackIcon(String iconKey) {

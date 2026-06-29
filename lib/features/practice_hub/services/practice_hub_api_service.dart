@@ -98,6 +98,20 @@ class PracticeHubApiService {
     );
   }
 
+  Future<List<PracticeFinalExamCourseModel>>
+      fetchCurrentCourseFinalExams() async {
+    final Response<dynamic> response = await _apiClient.dio.get(
+      '/final-exams/my-courses/gateways',
+    );
+    final Map<String, dynamic> body = _responseMap(response);
+    return _jsonList(body['items'])
+        .map(PracticeFinalExamCourseModel.fromJson)
+        .where(
+          (PracticeFinalExamCourseModel item) => item.courseId.isNotEmpty,
+        )
+        .toList(growable: false);
+  }
+
   Future<SurvivalSituationsResponseModel> fetchSurvivalSituations() async {
     final Response<dynamic> response = await _apiClient.dio.get(
       '/survival-italian/situations',

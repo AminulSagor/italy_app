@@ -2,91 +2,98 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../themes/app_colors.dart';
-import '../themes/app_font.dart';
 import '../themes/app_constants.dart';
+import '../themes/app_font.dart';
 
 class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
-  @override
-  Size get preferredSize => Size.fromHeight(60.h);
-  final String greeting;
-  final String userName;
-  final String streakLabel;
-  final int notificationCount;
-  final int messageCount;
-  final VoidCallback? onNotificationTap;
-  final VoidCallback? onMessageTap;
-  final VoidCallback? onProfileTap;
-
   const AppHomeTopBar({
     super.key,
     required this.greeting,
     required this.userName,
     required this.streakLabel,
-    required this.notificationCount,
+    required this.showNotificationDot,
     required this.messageCount,
+    this.avatarUrl,
     this.onNotificationTap,
     this.onMessageTap,
     this.onProfileTap,
   });
 
+  final String greeting;
+  final String userName;
+  final String streakLabel;
+  final String? avatarUrl;
+  final bool showNotificationDot;
+  final int messageCount;
+  final VoidCallback? onNotificationTap;
+  final VoidCallback? onMessageTap;
+  final VoidCallback? onProfileTap;
+
+  @override
+  Size get preferredSize => Size.fromHeight(60.h);
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        color: AppColors.homeBackground, // padding: const EdgeInsets.all(8.0),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-
-          child: Row(
-            children: <Widget>[
-              GestureDetector(
-                onTap: onProfileTap,
-                child: _AvatarBadge(streakLabel: streakLabel),
+        color: AppColors.homeBackground,
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        child: Row(
+          children: <Widget>[
+            GestureDetector(
+              onTap: onProfileTap,
+              child: _AvatarBadge(
+                streakLabel: streakLabel,
+                avatarUrl: avatarUrl,
               ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      greeting,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: AppFont.font11.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.homeSecondaryText,
-                      ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    greeting,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: AppFont.font11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.homeSecondaryText,
                     ),
-                    SizedBox(height: 3.h),
-                    Text(
-                      'Ciao, $userName',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: AppFont.font18.sp,
-                        fontWeight: FontWeight.w800,
-                        height: 1,
-                        color: AppColors.primaryGreen,
-                      ),
+                  ),
+                  SizedBox(height: 3.h),
+                  Text(
+                    'Ciao, $userName',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: AppFont.font18.sp,
+                      fontWeight: FontWeight.w800,
+                      height: 1,
+                      color: AppColors.primaryGreen,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              _TopActionIcon(
-                icon: Icons.notifications_none_rounded,
-                badgeCount: notificationCount,
-                onTap: onNotificationTap,
-              ),
-              SizedBox(width: 16.w),
-              _TopActionIcon(
-                icon: Icons.chat_bubble_outline_rounded,
-                badgeCount: messageCount,
-                onTap: onMessageTap,
-              ),
-            ],
-          ),
+            ),
+            _TopActionIcon(
+              icon: Icons.notifications_none_rounded,
+              showDot: showNotificationDot,
+              badgeCount: 0,
+              showCount: false,
+              onTap: onNotificationTap,
+            ),
+            SizedBox(width: 16.w),
+            _TopActionIcon(
+              icon: Icons.chat_bubble_outline_rounded,
+              showDot: messageCount > 0,
+              badgeCount: messageCount,
+              showCount: true,
+              onTap: onMessageTap,
+            ),
+          ],
         ),
       ),
     );
@@ -94,12 +101,19 @@ class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class _AvatarBadge extends StatelessWidget {
-  final String streakLabel;
+  const _AvatarBadge({required this.streakLabel, this.avatarUrl});
 
-  const _AvatarBadge({required this.streakLabel});
+  final String streakLabel;
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
+    final String normalizedAvatarUrl = avatarUrl?.trim() ?? '';
+    final Uri? avatarUri = Uri.tryParse(normalizedAvatarUrl);
+    final bool canLoadAvatar =
+        avatarUri != null &&
+        (avatarUri.scheme == 'https' || avatarUri.scheme == 'http');
+
     return SizedBox(
       width: (kHomeAvatarSize + 10).w,
       height: (kHomeAvatarSize + 8).w,
@@ -114,16 +128,22 @@ class _AvatarBadge extends StatelessWidget {
               color: AppColors.homeLime,
               shape: BoxShape.circle,
             ),
-            child: Container(
-              decoration: const BoxDecoration(
+            child: ClipOval(
+              child: ColoredBox(
                 color: AppColors.white,
-                shape: BoxShape.circle,
-              ),
-              child: Image.asset(
-                'assets/profile_images/Fahid Hasan.png',
-                fit: BoxFit.cover,
-                width: kHomeTopIconSize.w,
-                height: kHomeTopIconSize.w,
+                child: !canLoadAvatar
+                    ? const Icon(
+                        Icons.person_rounded,
+                        color: AppColors.primaryGreen,
+                      )
+                    : Image.network(
+                        normalizedAvatarUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.person_rounded,
+                          color: AppColors.primaryGreen,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -155,15 +175,19 @@ class _AvatarBadge extends StatelessWidget {
 }
 
 class _TopActionIcon extends StatelessWidget {
-  final IconData icon;
-  final int badgeCount;
-  final VoidCallback? onTap;
-
   const _TopActionIcon({
     required this.icon,
+    required this.showDot,
     required this.badgeCount,
+    required this.showCount,
     this.onTap,
   });
+
+  final IconData icon;
+  final bool showDot;
+  final int badgeCount;
+  final bool showCount;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +202,7 @@ class _TopActionIcon extends StatelessWidget {
           clipBehavior: Clip.none,
           children: <Widget>[
             Icon(icon, size: kHomeTopIconSize.w, color: AppColors.primaryGreen),
-            if (badgeCount > 0)
+            if (showDot && (!showCount || badgeCount <= 1))
               Positioned(
                 right: 7.w,
                 top: 8.h,
@@ -192,7 +216,7 @@ class _TopActionIcon extends StatelessWidget {
                   ),
                 ),
               ),
-            if (badgeCount > 1)
+            if (showCount && badgeCount > 1)
               Positioned(
                 right: 1.w,
                 top: 3.h,
@@ -209,8 +233,7 @@ class _TopActionIcon extends StatelessWidget {
                     style: TextStyle(
                       fontSize: AppFont.font9.sp,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 1.0,
-                      color: AppColors.homePaleGreen,
+                      color: AppColors.white,
                     ),
                   ),
                 ),

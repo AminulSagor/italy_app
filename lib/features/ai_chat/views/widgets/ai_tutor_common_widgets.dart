@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/controllers/user_session_controller.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 
@@ -70,17 +71,28 @@ class AiTutorHeader extends StatelessWidget {
   }
 }
 
-class AiTutorCreditRow extends StatelessWidget {
+class AiTutorCreditRow extends GetView<UserSessionController> {
   const AiTutorCreditRow({super.key});
 
   @override
+  UserSessionController get controller => Get.find<UserSessionController>();
+
+  @override
   Widget build(BuildContext context) {
-    return Row(
-      children: const <Widget>[
-        AiTutorMiniChip(icon: Icons.diamond_rounded, label: '1.2k Tokens'),
-        Spacer(),
-        AiTutorMiniChip(icon: Icons.mic_rounded, label: '45m Voice'),
-      ],
+    return Obx(
+      () => Row(
+        children: <Widget>[
+          AiTutorMiniChip(
+            icon: Icons.diamond_rounded,
+            label: controller.aiTextBalanceLabel,
+          ),
+          const Spacer(),
+          AiTutorMiniChip(
+            icon: Icons.mic_rounded,
+            label: controller.aiVoiceBalanceLabel,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -153,6 +165,8 @@ class AiTutorWaveform extends StatefulWidget {
   final double height;
   final bool dense;
   final bool animate;
+  final bool thinking;
+  final double audioLevel;
 
   const AiTutorWaveform({
     super.key,
@@ -162,6 +176,8 @@ class AiTutorWaveform extends StatefulWidget {
     this.height = 28,
     this.dense = false,
     this.animate = false,
+    this.thinking = false,
+    this.audioLevel = 0,
   });
 
   @override
@@ -177,26 +193,20 @@ class _AiTutorWaveformState extends State<AiTutorWaveform>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 950),
-    );
-    _syncAnimation();
+      duration: const Duration(milliseconds: 820),
+    )..repeat();
   }
 
   @override
   void didUpdateWidget(covariant AiTutorWaveform oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.animate != widget.animate) {
-      _syncAnimation();
-    }
-  }
-
-  void _syncAnimation() {
-    if (widget.animate) {
-      _animationController.repeat();
-    } else {
-      _animationController
-        ..stop()
-        ..value = 0;
+    if (oldWidget.thinking != widget.thinking) {
+      _animationController.duration = Duration(
+        milliseconds: widget.thinking ? 660 : 900,
+      );
+      if (!_animationController.isAnimating) {
+        _animationController.repeat();
+      }
     }
   }
 
@@ -208,6 +218,54 @@ class _AiTutorWaveformState extends State<AiTutorWaveform>
 
   @override
   Widget build(BuildContext context) {
+    return SizedBox(
+      width: widget.width.w,
+      height: widget.height.h,
+      child: AnimatedBuilder(
+        animation: _animationController,
+        builder: (BuildContext context, Widget? child) {
+          if (!widget.animate) {
+            return _buildThinkingDots();
+          }
+          return _buildAudioBars();
+        },
+      ),
+    );
+  }
+
+  Widget _buildThinkingDots() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: List<Widget>.generate(5, (int index) {
+        final double phase =
+            (_animationController.value * math.pi * 2) - (index * .68);
+        final double wave = (math.sin(phase) + 1) / 2;
+        final double offset = -(wave * (widget.thinking ? 9 : 6));
+        final double scale = .72 + (wave * .38);
+
+        return Transform.translate(
+          offset: Offset(0, offset.h),
+          child: Transform.scale(
+            scale: scale,
+            child: Container(
+              width: (widget.dense ? 5 : 7).r,
+              height: (widget.dense ? 5 : 7).r,
+              margin: EdgeInsets.symmetric(horizontal: 3.w),
+              decoration: BoxDecoration(
+                color: widget.activeColor.withValues(
+                  alpha: .48 + (wave * .52),
+                ),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildAudioBars() {
     final List<double> bars = widget.dense
         ? <double>[.25, .55, .36, .8, .5, .92, .65, .35, .75, .48]
         : <double>[
@@ -226,44 +284,38 @@ class _AiTutorWaveformState extends State<AiTutorWaveform>
             .44,
             .22,
           ];
+    final double audioEnergy = math.sqrt(
+      widget.audioLevel.clamp(0.0, 1.0).toDouble(),
+    );
 
-    return SizedBox(
-      width: widget.width.w,
-      height: widget.height.h,
-      child: AnimatedBuilder(
-        animation: _animationController,
-        builder: (BuildContext context, Widget? child) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: List<Widget>.generate(bars.length, (int index) {
-              final bool active = index < bars.length * .72;
-              final double phase =
-                  (_animationController.value * math.pi * 2) + (index * .72);
-              final double normalizedWave = (math.sin(phase) + 1) / 2;
-              final double wave = widget.animate
-                  ? .68 + (.32 * normalizedWave)
-                  : 1.0;
-              final double barHeight = (widget.height * bars[index] * wave)
-                  .clamp(4, widget.height)
-                  .toDouble();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: List<Widget>.generate(bars.length, (int index) {
+        final double phase =
+            (_animationController.value * math.pi * 2) + (index * .72);
+        final double normalizedWave = (math.sin(phase) + 1) / 2;
+        final double energy = .22 + (audioEnergy * .78);
+        final double movement = .58 + (normalizedWave * .42);
+        final double barHeight =
+            (widget.height * bars[index] * energy * movement)
+                .clamp(4.0, widget.height)
+                .toDouble();
 
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 90),
-                width: widget.dense ? 2.2.w : 2.6.w,
-                height: barHeight.h,
-                margin: EdgeInsets.symmetric(
-                  horizontal: widget.dense ? 1.2.w : 1.6.w,
-                ),
-                decoration: BoxDecoration(
-                  color: active ? widget.activeColor : widget.inactiveColor,
-                  borderRadius: BorderRadius.circular(999.r),
-                ),
-              );
-            }),
-          );
-        },
-      ),
+        return Container(
+          width: widget.dense ? 2.2.w : 2.6.w,
+          height: barHeight.h,
+          margin: EdgeInsets.symmetric(
+            horizontal: widget.dense ? 1.2.w : 1.6.w,
+          ),
+          decoration: BoxDecoration(
+            color: audioEnergy > .04
+                ? widget.activeColor
+                : widget.inactiveColor,
+            borderRadius: BorderRadius.circular(999.r),
+          ),
+        );
+      }),
     );
   }
 }

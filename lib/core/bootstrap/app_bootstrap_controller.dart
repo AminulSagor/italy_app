@@ -10,7 +10,11 @@ import '../services/auth_service.dart';
 import '../services/device_push_token_service.dart';
 import '../services/storage_service.dart';
 import '../services/token_service.dart';
-import '../../features/home/services/home_mock_service.dart';
+import '../controllers/user_session_controller.dart';
+import '../services/current_user_summary_service.dart';
+import '../services/learning_activity_api_service.dart';
+import '../services/learning_activity_tracker_service.dart';
+import '../services/notification_summary_service.dart';
 import '../../features/messages/services/chat_socket_service.dart';
 import '../../features/messages/services/presence_service.dart';
 
@@ -66,9 +70,44 @@ class AppBootstrapController extends GetxController {
       Get.put<DevicePushTokenService>(devicePushTokenService, permanent: true);
     }
 
-    // Ensure HomeMockService is available early to avoid Get.find errors.
-    if (!Get.isRegistered<HomeMockService>()) {
-      Get.put<HomeMockService>(HomeMockService(), permanent: true);
+    if (!Get.isRegistered<CurrentUserSummaryService>()) {
+      Get.put<CurrentUserSummaryService>(
+        CurrentUserSummaryService(apiClient: Get.find<ApiClient>()),
+        permanent: true,
+      );
+    }
+
+    if (!Get.isRegistered<UserSessionController>()) {
+      Get.put<UserSessionController>(
+        UserSessionController(
+          currentUserSummaryService: Get.find<CurrentUserSummaryService>(),
+        ),
+        permanent: true,
+      );
+    }
+
+    if (!Get.isRegistered<LearningActivityApiService>()) {
+      Get.put<LearningActivityApiService>(
+        LearningActivityApiService(apiClient: Get.find<ApiClient>()),
+        permanent: true,
+      );
+    }
+
+    if (!Get.isRegistered<LearningActivityTrackerService>()) {
+      await Get.putAsync<LearningActivityTrackerService>(
+        () => LearningActivityTrackerService(
+          apiService: Get.find<LearningActivityApiService>(),
+          storageService: Get.find<StorageService>(),
+        ).init(),
+        permanent: true,
+      );
+    }
+
+    if (!Get.isRegistered<NotificationSummaryService>()) {
+      Get.put<NotificationSummaryService>(
+        NotificationSummaryService(apiClient: Get.find<ApiClient>()),
+        permanent: true,
+      );
     }
 
     if (!Get.isRegistered<TranslationService>()) {
@@ -163,9 +202,13 @@ class AppBootstrapController extends GetxController {
         } catch (_) {}
 
         await _registerFcmTokenSafely();
+        await Get.find<UserSessionController>().loadUser();
+        await Get.find<LearningActivityTrackerService>().startSession();
         Get.offAllNamed(AppRoutes.wrapper);
         return;
       }
+
+      await Get.find<LearningActivityTrackerService>().discardSession();
 
       if (storageService.isLoggedIn) {
         await storageService.clearLoggedInData();

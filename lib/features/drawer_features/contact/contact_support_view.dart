@@ -81,7 +81,7 @@ class ContactSupportView extends GetView<ContactController> {
                     child: _SmallContactCard(
                       icon: Icons.call_rounded,
                       title: 'gen_call_support'.tr.tr,
-                      subtitle: 'gen_39_123_456_7890'.tr.tr,
+                      subtitle: ContactController.supportPhoneDisplay,
                       bgColor: const Color(0xFFE8FFDD),
                       iconBgColor: Colors.white,
                       iconColor: _green,
@@ -94,7 +94,7 @@ class ContactSupportView extends GetView<ContactController> {
                     child: _SmallContactCard(
                       icon: Icons.email_rounded,
                       title: 'gen_send_email'.tr.tr,
-                      subtitle: 'gen_support_lumina_it'.tr.tr,
+                      subtitle: ContactController.supportEmail,
                       bgColor: Colors.white,
                       iconBgColor: const Color(0xFFF1F1F1),
                       iconColor: const Color(0xFF4C4C4C),

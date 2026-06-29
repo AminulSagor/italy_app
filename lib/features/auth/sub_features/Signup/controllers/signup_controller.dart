@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 
 import '../../../../../core/localization/translation_service.dart';
 import '../../../../../core/services/api_error_handler.dart';
+import '../../../../../core/controllers/user_session_controller.dart';
+import '../../../../../core/services/learning_activity_tracker_service.dart';
 import '../../../../../core/services/auth_service.dart';
 import '../../../../../features/messages/services/chat_socket_service.dart';
 import '../../../../../core/services/device_push_token_service.dart';
@@ -297,6 +299,12 @@ class SignupController extends GetxController {
         // Socket refresh failure should not prevent navigation
       }
 
+      if (Get.isRegistered<UserSessionController>()) {
+        await Get.find<UserSessionController>().loadUser(forceRefresh: true);
+      }
+      if (Get.isRegistered<LearningActivityTrackerService>()) {
+        await Get.find<LearningActivityTrackerService>().startSession();
+      }
       Get.offAllNamed(AppRoutes.wrapper);
     } finally {
       accountCreatedUi.value = accountCreatedUi.value.copyWith(

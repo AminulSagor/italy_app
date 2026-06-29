@@ -7,6 +7,7 @@ import '../../../../core/themes/app_font.dart';
 import '../../controllers/job_sentences_controller.dart';
 import '../../models/job_track_models.dart';
 import '_widgets/job_intro_video_card.dart';
+import '_widgets/job_track_card_palette.dart';
 import 'job_phrase_details_view.dart';
 
 class JobDetailsView extends GetView<JobSentencesController> {
@@ -103,24 +104,36 @@ class _CareerTrackContent extends GetView<JobSentencesController> {
             message: 'No sentence modules are available for this track.',
           )
         else
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: details.modules.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 17.h,
-              crossAxisSpacing: 17.w,
-              childAspectRatio: 1.02,
-            ),
-            itemBuilder: (BuildContext context, int index) {
-              return _JobModuleCard(
-                item: details.modules[index],
-                color: _parseCardColor(
-                  details.cardColor,
-                  AppColors.primaryGreen,
+          LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              final int crossAxisCount = constraints.maxWidth >= 640 ? 3 : 2;
+              final double spacing = 17.w;
+              final double itemWidth =
+                  (constraints.maxWidth - (spacing * (crossAxisCount - 1))) /
+                      crossAxisCount;
+              final double itemHeight = itemWidth < 158.w ? 190.h : 184.h;
+              final JobTrackCardPalette palette = jobTrackCardPalette(
+                details.cardColor,
+                fallback: const Color(0xFFB2D4FF),
+              );
+
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: details.modules.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: spacing,
+                  crossAxisSpacing: spacing,
+                  mainAxisExtent: itemHeight,
                 ),
-                icon: _moduleIcon(index),
+                itemBuilder: (BuildContext context, int index) {
+                  return _JobModuleCard(
+                    item: details.modules[index],
+                    palette: palette,
+                    icon: _moduleIcon(index),
+                  );
+                },
               );
             },
           ),
@@ -261,12 +274,12 @@ class _TrackProgressCard extends StatelessWidget {
 class _JobModuleCard extends GetView<JobSentencesController> {
   const _JobModuleCard({
     required this.item,
-    required this.color,
+    required this.palette,
     required this.icon,
   });
 
   final JobModuleModel item;
-  final Color color;
+  final JobTrackCardPalette palette;
   final IconData icon;
 
   @override
@@ -274,10 +287,11 @@ class _JobModuleCard extends GetView<JobSentencesController> {
     return GestureDetector(
       onTap: () => controller.openModule(item),
       child: Container(
-        padding: EdgeInsets.all(18.r),
+        padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 13.h),
         decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(38.r),
+          color: palette.background,
+          borderRadius: BorderRadius.circular(34.r),
+          border: Border.all(color: palette.border),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.045),
@@ -287,50 +301,60 @@ class _JobModuleCard extends GetView<JobSentencesController> {
           ],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-              width: 54.r,
-              height: 54.r,
+              width: 50.r,
+              height: 50.r,
               decoration: BoxDecoration(
-                color: Color.lerp(color, AppColors.white, 0.84),
+                color: palette.iconSurface,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 27.r, color: color),
+              child: Icon(icon, size: 25.r, color: palette.accent),
             ),
-            SizedBox(height: 15.h),
-            Text(
-              item.name,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: AppFont.font14.sp,
-                height: 1.15,
-                fontWeight: FontWeight.w900,
-                color: const Color(0xFF2D3236),
+            SizedBox(height: 10.h),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    item.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: AppFont.font14.sp,
+                      height: 1.15,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF2D3236),
+                    ),
+                  ),
+                  if (item.subtitleBn.isNotEmpty) ...<Widget>[
+                    SizedBox(height: 4.h),
+                    Text(
+                      item.subtitleBn,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: AppFont.font11.sp,
+                        color: const Color(0xFF6F7478),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            if (item.subtitleBn.isNotEmpty) ...<Widget>[
-              SizedBox(height: 5.h),
-              Text(
-                item.subtitleBn,
+            SizedBox(height: 6.h),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                '${item.learnedSentenceCount}/${item.sentenceCount} learned',
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font11.sp,
-                  color: const Color(0xFF8A8E92),
+                  fontWeight: FontWeight.w900,
+                  color: palette.accent,
                 ),
-              ),
-            ],
-            SizedBox(height: 9.h),
-            Text(
-              '${item.learnedSentenceCount}/${item.sentenceCount} learned',
-              style: TextStyle(
-                fontSize: AppFont.font11.sp,
-                fontWeight: FontWeight.w800,
-                color: color,
               ),
             ),
           ],
@@ -347,9 +371,9 @@ class _TheoryBookCard extends GetView<JobSentencesController> {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = _parseCardColor(
+    final JobTrackCardPalette palette = jobTrackCardPalette(
       details.cardColor,
-      AppColors.primaryGreen,
+      fallback: const Color(0xFFB2D4FF),
     );
     final JobMediaFileModel? resource = details.theoryResource;
     final bool isAvailable = resource?.isAvailable ?? false;
@@ -361,9 +385,9 @@ class _TheoryBookCard extends GetView<JobSentencesController> {
         constraints: BoxConstraints(minHeight: 126.h),
         padding: EdgeInsets.fromLTRB(24.w, 22.h, 24.w, 22.h),
         decoration: BoxDecoration(
-          color: Color.lerp(color, AppColors.white, 0.88),
+          color: palette.background,
           borderRadius: BorderRadius.circular(40.r),
-          border: Border.all(color: color.withValues(alpha: 0.15), width: 2.w),
+          border: Border.all(color: palette.border, width: 2.w),
         ),
         child: Row(
           children: <Widget>[
@@ -374,7 +398,11 @@ class _TheoryBookCard extends GetView<JobSentencesController> {
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(16.r),
               ),
-              child: Icon(Icons.menu_book_rounded, size: 28.r, color: color),
+              child: Icon(
+                Icons.menu_book_rounded,
+                size: 28.r,
+                color: palette.accent,
+              ),
             ),
             SizedBox(width: 20.w),
             Expanded(
@@ -386,7 +414,7 @@ class _TheoryBookCard extends GetView<JobSentencesController> {
                     style: TextStyle(
                       fontSize: AppFont.font16.sp,
                       fontWeight: FontWeight.w900,
-                      color: color,
+                      color: palette.accent,
                     ),
                   ),
                   SizedBox(height: 5.h),
@@ -401,7 +429,7 @@ class _TheoryBookCard extends GetView<JobSentencesController> {
                     style: TextStyle(
                       fontSize: AppFont.font12.sp,
                       fontWeight: FontWeight.w600,
-                      color: color.withValues(alpha: 0.72),
+                      color: palette.accent.withValues(alpha: 0.78),
                     ),
                   ),
                 ],
@@ -412,7 +440,7 @@ class _TheoryBookCard extends GetView<JobSentencesController> {
                   ? Icons.chevron_right_rounded
                   : Icons.remove_circle_outline_rounded,
               size: 28.r,
-              color: color.withValues(alpha: 0.65),
+              color: palette.accent.withValues(alpha: 0.72),
             ),
           ],
         ),
@@ -472,13 +500,6 @@ class _DetailsMessageState extends StatelessWidget {
   }
 }
 
-Color _parseCardColor(String value, Color fallback) {
-  String normalized = value.trim().replaceAll('#', '');
-  if (normalized.length == 6) normalized = 'FF$normalized';
-  final int? colorValue = int.tryParse(normalized, radix: 16);
-  return colorValue == null ? fallback : Color(colorValue);
-}
-
 IconData _moduleIcon(int index) {
   const List<IconData> icons = <IconData>[
     Icons.record_voice_over_rounded,
@@ -490,7 +511,6 @@ IconData _moduleIcon(int index) {
   ];
   return icons[index % icons.length];
 }
-
 class JobPhraseDetailsView extends StatelessWidget {
   const JobPhraseDetailsView({super.key});
 

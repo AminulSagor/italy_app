@@ -122,45 +122,47 @@ class _CouponPlanCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 34.h),
+          if (plan.oldPriceLabel(currency) != plan.priceLabel(currency))
+            Text(
+              plan.oldPriceLabel(currency),
+              style: TextStyle(
+                fontSize: AppFont.font14.sp,
+                fontWeight: FontWeight.w900,
+                color: AppColors.proPriceStruck,
+                decoration: TextDecoration.lineThrough,
+              ),
+            ),
           Text(
             plan.priceLabel(currency),
-            style: TextStyle(
-              fontSize: AppFont.font14.sp,
-              fontWeight: FontWeight.w900,
-              color: AppColors.proPriceStruck,
-              decoration: TextDecoration.lineThrough,
-            ),
-          ),
-          Text(
-            plan.priceLabel(currency, isCouponApplied: true),
             style: TextStyle(
               fontSize: AppFont.font60.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.primaryGreen,
             ),
           ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: AppColors.homeLime,
-              borderRadius: BorderRadius.circular(kHomePillRadius.r),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: AppColors.homeLime.withValues(alpha: 0.3),
-                  blurRadius: 14.r,
-                  offset: Offset(0, 5.h),
+          if (plan.oldPriceLabel(currency) != plan.priceLabel(currency))
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+              decoration: BoxDecoration(
+                color: AppColors.homeLime,
+                borderRadius: BorderRadius.circular(kHomePillRadius.r),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: AppColors.homeLime.withValues(alpha: 0.3),
+                    blurRadius: 14.r,
+                    offset: Offset(0, 5.h),
+                  ),
+                ],
+              ),
+              child: Text(
+                plan.couponSaveLabelFor(currency),
+                style: TextStyle(
+                  fontSize: AppFont.font12.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryGreen,
                 ),
-              ],
-            ),
-            child: Text(
-              plan.couponSaveLabelFor(currency),
-              style: TextStyle(
-                fontSize: AppFont.font12.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primaryGreen,
               ),
             ),
-          ),
         ],
       ),
     );
