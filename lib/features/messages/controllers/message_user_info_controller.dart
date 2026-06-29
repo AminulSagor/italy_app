@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
 import '../models/message_models.dart';
-import '../services/messages_mock_service.dart';
+import '../services/messages_service.dart';
 import '../services/chat_socket_service.dart';
 import '../sub-feature/user-block/service/user_block_api_service.dart';
 import '../sub-feature/user-block/models/user_block_models.dart';

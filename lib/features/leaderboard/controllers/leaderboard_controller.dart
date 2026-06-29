@@ -5,8 +5,15 @@ import '../views/league_system_promotion_view.dart';
 import '../views/popup_insider_view.dart';
 import '../views/score_system_info_view.dart';
 import '../views/widgets/leaderboard_chat_dialogue.dart';
+import '../services/leaderboard_service.dart';
+import '../models/leaderboard_models.dart';
 
 class LeaderboardController extends GetxController {
+  final LeaderboardService _leaderboardService;
+
+  LeaderboardController({required LeaderboardService leaderboardService})
+    : _leaderboardService = leaderboardService;
+
   final RxInt selectedTabIndex = 0.obs;
   final RxString searchQuery = ''.obs;
 
@@ -15,6 +22,19 @@ class LeaderboardController extends GetxController {
   final RxBool isPromotionExpanded = true.obs;
 
   final TextEditingController searchController = TextEditingController();
+
+  // Reactive lists exposed as Map<String,dynamic> to keep the existing view unchanged
+  final RxList<Map<String, dynamic>> entries = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> podium = <Map<String, dynamic>>[].obs;
+
+  final RxBool isLoading = false.obs;
+  final RxBool hasError = false.obs;
+  final RxString errorMessage = ''.obs;
+  final RxBool hasAttemptedLoad = false.obs;
+  final Rx<LeaderboardMetaModel?> meta = Rxn<LeaderboardMetaModel>();
+  final Rxn<ProfileModel?> currentUser = Rxn<ProfileModel>();
+  final Rxn<Map<String, dynamic>?> milestoneData = Rxn<Map<String, dynamic>?>();
+  final RxList<LeagueModel> leagues = <LeagueModel>[].obs;
 
   bool get isMyLeagueSelected => selectedTabIndex.value == 0;
   bool get isGlobalSelected => selectedTabIndex.value == 1;
@@ -82,6 +102,7 @@ class LeaderboardController extends GetxController {
     },
   ];
 
+  // Fallback static data shown when the service hasn't returned anything yet
   final List<Map<String, dynamic>> _myLeaguePodiumUsers =
       <Map<String, dynamic>>[
         {'rank': 1, 'name': 'Sarah Ahmed', 'xp': '4.9k', 'league': 'SILVER'},
@@ -134,25 +155,77 @@ class LeaderboardController extends GetxController {
   ];
 
   List<Map<String, dynamic>> get podiumUsers {
-    return isGlobalSelected ? _globalPodiumUsers : _myLeaguePodiumUsers;
+    // Only show the static fallback podium before the first load attempt.
+    if (!hasAttemptedLoad.value) {
+      return podium.isNotEmpty
+          ? podium.toList(growable: false)
+          : (isGlobalSelected ? _globalPodiumUsers : _myLeaguePodiumUsers);
+    }
+
+    return podium.toList(growable: false);
   }
 
   List<Map<String, dynamic>> get filteredUsers {
     final String query = searchQuery.value.trim().toLowerCase();
 
-    if (query.isEmpty) return _users;
+    // Build the source list to display. If the server returned an empty
+    // `entries` array but provided a `podium`, prefer showing the podium
+    // users in the list so the UI doesn't show an empty state while there
+    // are visible podium users. Keep the fallback static `_users` when the
+    // backend hasn't been contacted yet or when a load failed.
+    final List<Map<String, dynamic>> source;
+    if (query.isEmpty) {
+      if (!hasAttemptedLoad.value && entries.isEmpty) {
+        source = _users;
+      } else if (entries.isEmpty && podium.isNotEmpty) {
+        source = podium.toList(growable: false);
+      } else if (entries.isEmpty && hasError.value) {
+        source = _users;
+      } else {
+        source = entries.toList(growable: false);
+      }
+    } else {
+      // For searches, always filter the server-provided entries.
+      source = entries.toList(growable: false);
+    }
 
-    return _users.where((Map<String, dynamic> user) {
+    if (query.isEmpty) return source;
+
+    return source.where((Map<String, dynamic> user) {
       final String name = (user['name'] as String).toLowerCase();
       final String league = (user['league'] as String).toLowerCase();
       return name.contains(query) || league.contains(query);
     }).toList();
   }
 
+  @override
+  void onInit() {
+    super.onInit();
+    // initial load
+    loadLeaderboard();
+    // load league configuration
+    loadLeagues();
+
+    // debounce the search query and call the backend search when user pauses typing
+    debounce<String>(searchQuery, (String val) {
+      loadLeaderboard(page: 1, search: val);
+    }, time: const Duration(milliseconds: 400));
+  }
+
+  Future<void> loadLeagues() async {
+    try {
+      final List<LeagueModel> resp = await _leaderboardService.fetchLeagues();
+      leagues.assignAll(resp);
+    } catch (_) {
+      // ignore league load failures for now
+    }
+  }
+
   void onTabChanged(int index) {
     selectedTabIndex.value = index;
     searchQuery.value = '';
     searchController.clear();
+    loadLeaderboard(page: 1, search: '');
   }
 
   void onSearchChanged(String value) {
@@ -190,6 +263,115 @@ class LeaderboardController extends GetxController {
       () => const PopupInsiderView(),
       transition: Transition.rightToLeft,
     );
+  }
+
+  /// Load leaderboard data from the service and map to the view-friendly shapes.
+  Future<void> loadLeaderboard({int page = 1, String search = ''}) async {
+    if (isLoading.value) return;
+
+    isLoading.value = true;
+    hasError.value = false;
+    errorMessage.value = '';
+
+    try {
+      final LeaderboardQueryDto dto = LeaderboardQueryDto(
+        scope: isMyLeagueSelected
+            ? LeaderboardScope.myLeague
+            : LeaderboardScope.global,
+        page: page,
+        limit: 20,
+        search: search.isNotEmpty ? search : null,
+      );
+      // Debug output to help diagnose why fallback data may be shown
+      print('[Leaderboard] fetching with params: ${dto.toQueryParameters()}');
+
+
+
+      final LeaderboardResponseModel resp = await _leaderboardService
+          .fetchLeaderboard(dto: dto);
+
+      print(
+        '[Leaderboard] fetched: podium=${resp.podium.length} entries=${resp.entries.length}',
+      );
+
+      meta.value = resp.meta;
+      currentUser.value = resp.currentUser;
+      milestoneData.value = resp.milestone;
+
+      // Map podium and entries to the small map shape the view expects
+      podium.assignAll(
+        resp.podium
+            .map<Map<String, dynamic>>(
+              (RankedProfileModel r) => _rankedToMap(r, compactXp: true),
+            )
+            .toList(growable: false),
+      );
+
+      entries.assignAll(
+        resp.entries
+            .map<Map<String, dynamic>>(
+              (RankedProfileModel r) => _rankedToMap(r, compactXp: false),
+            )
+            .toList(growable: false),
+      );
+    } catch (_) {
+      hasError.value = true;
+      errorMessage.value = 'Failed to load leaderboard.';
+    } finally {
+      isLoading.value = false;
+      hasAttemptedLoad.value = true;
+    }
+  }
+
+  Map<String, dynamic> _rankedToMap(
+    RankedProfileModel r, {
+    bool compactXp = false,
+  }) {
+    return <String, dynamic>{
+      'rank': r.rank,
+      'name': r.displayName,
+      'xp': compactXp
+          ? _formatCompact(r.totalXp)
+          : _formatWithCommas(r.totalXp),
+      'league': (r.league.name).toUpperCase(),
+      'isCurrentUser': r.isCurrentUser,
+      'userId': r.userId,
+    };
+  }
+
+  String get myRankLabel {
+    final ProfileModel? p = currentUser.value;
+    if (p == null) return '#14 | Arif (You)';
+    final int? rank = p.scopeRank ?? p.leagueRank ?? p.globalRank;
+    final String name = p.displayName + (p.isCurrentUser ? ' (You)' : '');
+    return '#${rank ?? '-'} | $name';
+  }
+
+  String get myXpLabel {
+    final ProfileModel? p = currentUser.value;
+    if (p == null) return '1,240 XP';
+    return '${_formatWithCommas(p.totalXp)} XP';
+  }
+
+  String _formatCompact(int n) {
+    if (n < 1000) return n.toString();
+    if (n < 10000) return (n / 1000).toStringAsFixed(1) + 'k';
+    return (n / 1000).toStringAsFixed(0) + 'k';
+  }
+
+  String _formatWithCommas(int n) {
+    final String s = n.toString();
+    final StringBuffer sb = StringBuffer();
+    int count = 0;
+    for (int i = s.length - 1; i >= 0; i--) {
+      sb.write(s[i]);
+      count++;
+      if (count == 3 && i != 0) {
+        sb.write(',');
+        count = 0;
+      }
+    }
+    return sb.toString().split('').reversed.join();
   }
 
   void onMessageTap(Map<String, dynamic> user) {

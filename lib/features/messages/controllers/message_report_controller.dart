@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/message_models.dart';
-import '../services/messages_mock_service.dart';
+import '../services/messages_service.dart';
 import '../views/message_report_success_view.dart';
 import '../../../routes/app_routes.dart';
 

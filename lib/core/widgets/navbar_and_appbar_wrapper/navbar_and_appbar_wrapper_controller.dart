@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import '../../../features/drawer_features/language/language_switch_dialogue.dart';
 import '../../../features/messages/controllers/messages_controller.dart';
 import '../../../features/messages/controllers/message_chat_controller.dart';
-import '../../../features/messages/services/messages_mock_service.dart';
+import '../../../features/messages/services/messages_service.dart';
 import '../../../features/messages/services/chat_socket_service.dart';
 import '../../../features/messages/services/presence_service.dart';
 import '../../../features/messages/models/message_models.dart';

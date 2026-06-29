@@ -8,16 +8,24 @@ import '../../features/ai_chat/services/ai_tutor_tts_service.dart';
 import '../../features/ai_chat/services/ai_tutor_voice_service.dart';
 import '../../features/courses/controllers/courses_controller.dart';
 import '../../features/courses/services/courses_api_service.dart';
+import '../../features/courses/services/courses_mock_service.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/home/services/home_api_service.dart';
 import '../../features/drawer_features/settings/services/user_settings_service.dart';
+import '../../features/home/services/home_mock_service.dart';
 import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/messages/controllers/messages_controller.dart';
+import '../../features/messages/services/messages_service.dart';
 import '../../features/messages/services/chat_socket_service.dart';
-import '../../features/messages/services/messages_mock_service.dart';
+import '../../features/messages/sub-feature/call/controllers/message_call_controller.dart';
+import '../../features/messages/sub-feature/call/models/message_call_models.dart';
+import '../../features/messages/sub-feature/call/service/call_agora_service.dart';
 import '../../features/messages/sub-feature/call/service/call_socket_service.dart';
 import '../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
+import '../../features/messages/sub-feature/call/views/message_call_view.dart';
 import '../../features/notifications/services/notifications_mock_service.dart';
+
+import '../../features/leaderboard/services/leaderboard_service.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
 import '../services/api_client.dart';
 import '../controllers/user_session_controller.dart';
@@ -109,6 +117,21 @@ class InitialBindings extends Bindings {
       ),
       fenix: true,
     );
+    if (!Get.isRegistered<HomeMockService>()) {
+      Get.lazyPut<HomeMockService>(HomeMockService.new);
+    }
+
+    if (!Get.isRegistered<CoursesMockService>()) {
+      Get.lazyPut<CoursesMockService>(CoursesMockService.new, fenix: true);
+    }
+
+    if (!Get.isRegistered<CoursesController>()) {
+      Get.lazyPut<CoursesController>(
+        () =>
+            CoursesController(coursesApiService: Get.find<CoursesApiService>()),
+        fenix: true,
+      );
+    }
 
     if (!Get.isRegistered<ChatSocketService>()) {
       Get.lazyPut<ChatSocketService>(
@@ -117,11 +140,6 @@ class InitialBindings extends Bindings {
       );
     }
 
-    /*
-     * Keep the call socket alive globally.
-     * It must be connected on the receiver phone
-     * before an incoming call can be received.
-     */
     if (!Get.isRegistered<CallSocketService>()) {
       Get.put<CallSocketService>(
         CallSocketService(tokenService: Get.find<TokenService>()),
@@ -129,34 +147,111 @@ class InitialBindings extends Bindings {
       );
     }
 
-    /*
-     * Registers the global call:incoming listener
-     * and opens MessageIncomingCallView.
-     */
+    if (!Get.isRegistered<CallAgoraService>()) {
+      Get.put<CallAgoraService>(CallAgoraService(), permanent: true);
+    }
+
     if (!Get.isRegistered<IncomingCallCoordinator>()) {
       Get.put<IncomingCallCoordinator>(
         IncomingCallCoordinator(
           callSocketService: Get.find<CallSocketService>(),
+          acceptedCallHandler:
+              ({
+                required String callId,
+                required Map<String, dynamic> callData,
+                required Map<String, dynamic> answerResponse,
+              }) async {
+                final MessageCallParticipantModel participant =
+                    MessageCallParticipantModel(
+                      id: callData['callerId']?.toString() ?? '',
+                      name: callData['callerName']?.toString() ?? 'Caller',
+                      avatarUrl: callData['callerAvatarUrl']?.toString() ?? '',
+                      isOnline: true,
+                    );
+
+                final MessageCallSessionModel session =
+                    MessageCallSessionModel.fromAnswerResponse(
+                      response: answerResponse,
+                      callId: callId,
+                      participant: participant,
+                    );
+
+                final MessageCallType callType = MessageCallType.fromValue(
+                  callData['callType']?.toString(),
+                );
+
+                final String conversationId =
+                    callData['conversationId']?.toString().trim().isNotEmpty ==
+                        true
+                    ? callData['conversationId'].toString()
+                    : session.conversationId;
+
+                if (Get.isRegistered<MessageCallController>()) {
+                  await Get.delete<MessageCallController>(force: true);
+                }
+
+                await Get.to<void>(
+                  () => const MessageCallView(),
+                  binding: BindingsBuilder(() {
+                    Get.put<MessageCallController>(
+                      MessageCallController(
+                        conversationId: conversationId,
+                        callType: callType,
+                        participant: participant,
+                        callSocketService: Get.find<CallSocketService>(),
+                        callAgoraService: Get.find<CallAgoraService>(),
+                        initialSession: session,
+                      ),
+                    );
+                  }),
+                  transition: Transition.rightToLeft,
+                );
+              },
         ),
         permanent: true,
       );
     }
 
-    Get.lazyPut<MessagesMockService>(
-      () => MessagesMockService(
-        apiClient: Get.find<ApiClient>(),
-        tokenService: Get.find<TokenService>(),
-        chatSocketService: Get.find<ChatSocketService>(),
-      ),
-    );
+    if (!Get.isRegistered<MessagesMockService>()) {
+      Get.lazyPut<MessagesMockService>(
+        () => MessagesMockService(
+          apiClient: Get.find<ApiClient>(),
+          tokenService: Get.find<TokenService>(),
+          chatSocketService: Get.find<ChatSocketService>(),
+        ),
+      );
+    }
 
-    Get.lazyPut<MessagesController>(
-      () => MessagesController(
-        messagesMockService: Get.find<MessagesMockService>(),
-      ),
-    );
-    Get.lazyPut<NotificationsMockService>(() => NotificationsMockService());
-    Get.lazyPut<LeaderboardController>(() => LeaderboardController());
+    if (!Get.isRegistered<MessagesController>()) {
+      Get.lazyPut<MessagesController>(
+        () => MessagesController(
+          messagesMockService: Get.find<MessagesMockService>(),
+        ),
+      );
+    }
+
+    if (!Get.isRegistered<NotificationsMockService>()) {
+      Get.lazyPut<NotificationsMockService>(NotificationsMockService.new);
+    }
+
+    if (!Get.isRegistered<LeaderboardController>()) {
+      Get.lazyPut<LeaderboardController>(
+        () => LeaderboardController(
+          leaderboardService: Get.find<LeaderboardService>(),
+        ),
+        fenix: true,
+      );
+    }
+
+    if (!Get.isRegistered<PracticeHubController>()) {
+      Get.lazyPut<PracticeHubController>(
+        () => PracticeHubController(
+          coursesApiService: Get.find<CoursesApiService>(),
+          practiceHubApiService: Get.find<PracticeHubApiService>(),
+        ),
+      );
+    }
+
     Get.lazyPut<PracticeHubApiService>(
       () => PracticeHubApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,
@@ -183,11 +278,32 @@ class InitialBindings extends Bindings {
       ),
       fenix: true,
     );
-    Get.lazyPut<PracticeHubController>(
-      () => PracticeHubController(
-        coursesApiService: Get.find<CoursesApiService>(),
-        practiceHubApiService: Get.find<PracticeHubApiService>(),
+
+    Get.lazyPut<AiTutorApiService>(
+      () => AiTutorApiService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
+    Get.lazyPut<AiTutorPreferencesService>(
+      () => AiTutorPreferencesService(),
+      fenix: true,
+    );
+    Get.lazyPut<AiTutorVoiceService>(() => AiTutorVoiceService(), fenix: true);
+    Get.lazyPut<AiTutorTtsService>(() => AiTutorTtsService(), fenix: true);
+    Get.lazyPut<AiChatController>(
+      () => AiChatController(
+        apiService: Get.find<AiTutorApiService>(),
+        voiceService: Get.find<AiTutorVoiceService>(),
+        ttsService: Get.find<AiTutorTtsService>(),
+        preferencesService: Get.find<AiTutorPreferencesService>(),
       ),
+      fenix: true,
+    );
+    Get.lazyPut<AiTutorLevelTestController>(
+      () => AiTutorLevelTestController(
+        apiService: Get.find<AiTutorApiService>(),
+        preferencesService: Get.find<AiTutorPreferencesService>(),
+      ),
+      fenix: true,
     );
   }
 }

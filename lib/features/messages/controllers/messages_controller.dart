@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 
 import '../models/message_models.dart';
-import '../services/messages_mock_service.dart';
+import '../services/messages_service.dart';
 import '../views/message_chat_view.dart';
 import '../../../core/services/token_service.dart';
 import '../services/presence_service.dart';
