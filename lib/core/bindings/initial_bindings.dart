@@ -234,6 +234,16 @@ class InitialBindings extends Bindings {
       Get.lazyPut<NotificationsMockService>(NotificationsMockService.new);
     }
 
+    if (!Get.isRegistered<LeaderboardService>()) {
+      Get.lazyPut<LeaderboardService>(
+        () => LeaderboardService(
+          apiClient: Get.find<ApiClient>(),
+          tokenService: Get.find<TokenService>(),
+        ),
+        fenix: true,
+      );
+    }
+
     if (!Get.isRegistered<LeaderboardController>()) {
       Get.lazyPut<LeaderboardController>(
         () => LeaderboardController(
