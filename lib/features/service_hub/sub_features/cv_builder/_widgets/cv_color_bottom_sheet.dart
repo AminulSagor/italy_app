@@ -164,7 +164,7 @@ class CvColorBottomSheet extends StatelessWidget {
             ),
             SizedBox(height: 14.h),
             CvBottomButton(
-              title: 'Confirm Color',
+              title: 'gen_confirm_color'.tr.tr,
               onTap: Get.back,
               hasOuterPadding: false,
             ),

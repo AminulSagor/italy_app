@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -127,7 +128,7 @@ class VocabularyCompletionDialog extends StatelessWidget {
                               child: _VocabularyResultPill(
                                 icon: Icons.check_circle_rounded,
                                 value: '${complete.rightCount} Words',
-                                label: 'RIGHT',
+                                label: 'gen_right'.tr.tr,
                                 color: AppColors.vocabularyCompletionRightBg,
                                 textColor: AppColors.primaryGreen,
                               ),
@@ -137,7 +138,7 @@ class VocabularyCompletionDialog extends StatelessWidget {
                               child: _VocabularyResultPill(
                                 icon: Icons.refresh_rounded,
                                 value: '${complete.wrongCount} Words',
-                                label: 'WRONG',
+                                label: 'gen_wrong'.tr.tr,
                                 color: AppColors.vocabularyCompletionWrongBg,
                                 textColor: AppColors.vocabularyStreakText,
                               ),

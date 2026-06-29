@@ -51,7 +51,7 @@ class FinalExamWritingView extends GetView<FinalExamController> {
                 FinalExamTopBar(
                   title: task.title,
                   closeIcon: true,
-                  timerText: '35:10',
+                  timerText: 'gen_35_10'.tr.tr,
                   onBackTap: () => Get.back<void>(),
                 ),
                 SizedBox(height: 32.h),
@@ -211,7 +211,7 @@ class _WritingAnswerCard extends StatelessWidget {
               textAlignVertical: TextAlignVertical.top,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'Inizia a scrivere qui la tua storia...',
+                hintText: 'gen_inizia_a_scrivere_qui_la_tua_s'.tr.tr,
                 hintStyle: TextStyle(
                   fontSize: AppFont.font16.sp,
                   fontWeight: FontWeight.w500,

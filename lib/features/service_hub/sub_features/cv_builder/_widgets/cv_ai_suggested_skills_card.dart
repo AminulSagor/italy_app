@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -88,7 +89,7 @@ class CvAiSuggestedSkillsCard extends StatelessWidget {
                   height: 1,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Type skill here...',
+                  hintText: 'gen_type_skill_here'.tr.tr,
                   hintStyle: TextStyle(
                     color: AppColors.homeSecondaryText.withValues(alpha: 0.55),
                     fontSize: AppFont.font8.sp,

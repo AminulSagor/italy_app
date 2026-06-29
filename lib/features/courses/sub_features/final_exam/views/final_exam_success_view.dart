@@ -242,14 +242,14 @@ class _TimelineCard extends StatelessWidget {
           _TimelineStep(
             isDone: true,
             isActive: true,
-            title: 'Exam Received',
-            subtitle: 'Successfully uploaded to server',
+            title: 'gen_exam_received'.tr.tr,
+            subtitle: 'gen_successfully_uploaded_to_serve'.tr.tr,
             icon: Icons.check_rounded,
           ),
           _TimelineStep(
             isDone: teacherDone,
             isActive: teacherDone,
-            title: 'Teacher Review',
+            title: 'gen_teacher_review'.tr.tr,
             subtitle: teacherDone
                 ? 'Manual review completed'
                 : 'Reviewing Speaking & Writing...',
@@ -258,7 +258,7 @@ class _TimelineCard extends StatelessWidget {
           _TimelineStep(
             isDone: resultDone,
             isActive: resultDone,
-            title: 'Result & Certificate',
+            title: 'gen_result_certificate'.tr.tr,
             subtitle: resultDone
                 ? 'Result is ready'
                 : 'Unlock your achievement',

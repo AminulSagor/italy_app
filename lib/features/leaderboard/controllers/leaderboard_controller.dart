@@ -205,11 +205,90 @@ class LeaderboardController extends GetxController {
     loadLeaderboard();
     // load league configuration
     loadLeagues();
+    
+    loadScoringGuide();
+    loadPendingPromotion();
 
     // debounce the search query and call the backend search when user pauses typing
     debounce<String>(searchQuery, (String val) {
       loadLeaderboard(page: 1, search: val);
     }, time: const Duration(milliseconds: 400));
+  }
+  
+  final Rxn<Map<String, dynamic>> scoringGuide = Rxn<Map<String, dynamic>>();
+
+  Future<void> loadScoringGuide() async {
+    try {
+      final Map<String, dynamic>? data = await _leaderboardService.fetchScoringGuide();
+      scoringGuide.value = data;
+    } catch (_) {}
+  }
+
+  Future<void> loadPendingPromotion() async {
+    try {
+      final Map<String, dynamic>? data = await _leaderboardService.fetchPendingPromotion();
+      if (data != null && data['hasPendingPromotion'] == true) {
+        final Map<String, dynamic>? promotion = data['promotion'];
+        if (promotion != null) {
+          Get.dialog<void>(
+            Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Icon(Icons.stars_rounded, color: Colors.orange, size: 64),
+                    const SizedBox(height: 16),
+                    Text(
+                      promotion['title'] as String? ?? 'Congratulations!',
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      promotion['message'] as String? ?? 'You have been promoted!',
+                      style: const TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (promotion['benefit'] != null) ...<Widget>[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                        child: Text(
+                          (promotion['benefit'] as Map<String, dynamic>)['type'] == 'xp_boost' 
+                              ? 'Reward: ${(promotion['benefit'] as Map<String, dynamic>)['multiplier']}x XP Boost!' 
+                              : 'Reward: Bonus unlocked!',
+                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColorsBridge.primaryGreen, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999))),
+                      onPressed: () {
+                        Get.back<void>();
+                        _leaderboardService.acknowledgePromotion(promotion['id'].toString());
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        child: Text('Awesome!', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            barrierDismissible: false,
+          );
+        }
+      }
+    } catch (_) {}
   }
 
   Future<void> loadLeagues() async {
@@ -341,7 +420,7 @@ class LeaderboardController extends GetxController {
 
   String get myRankLabel {
     final ProfileModel? p = currentUser.value;
-    if (p == null) return '#14 | Arif (You)';
+    if (p == null) return '-';
     final int? rank = p.scopeRank ?? p.leagueRank ?? p.globalRank;
     final String name = p.displayName + (p.isCurrentUser ? ' (You)' : '');
     return '#${rank ?? '-'} | $name';
@@ -349,7 +428,7 @@ class LeaderboardController extends GetxController {
 
   String get myXpLabel {
     final ProfileModel? p = currentUser.value;
-    if (p == null) return '1,240 XP';
+    if (p == null) return '- XP';
     return '${_formatWithCommas(p.totalXp)} XP';
   }
 
@@ -374,13 +453,26 @@ class LeaderboardController extends GetxController {
     return sb.toString().split('').reversed.join();
   }
 
-  void onMessageTap(Map<String, dynamic> user) {
+  void onMessageTap(Map<String, dynamic> user) async {
     if ((user['isCurrentUser'] as bool?) ?? false) return;
-
-    Get.dialog<void>(
-      LeaderboardChatDialog(user: user),
-      barrierColor: Colors.black.withValues(alpha: 0.45),
-    );
+    
+    final String? userId = user['userId']?.toString();
+    if (userId == null) return;
+    
+    final ProfileModel? preview = await _leaderboardService.fetchUserPreview(userId);
+    if (preview != null && preview.canChat == true) {
+      Get.dialog<void>(
+        LeaderboardChatDialog(user: <String, dynamic>{
+          ...user,
+          'chatTargetUserId': preview.chatTargetUserId,
+          'totalXp': preview.totalXp,
+          'streakDays': preview.streakDays,
+        }),
+        barrierColor: Colors.black.withValues(alpha: 0.45),
+      );
+    } else {
+      Get.snackbar('Cannot Chat', 'This user cannot be messaged right now.');
+    }
   }
 
   @override

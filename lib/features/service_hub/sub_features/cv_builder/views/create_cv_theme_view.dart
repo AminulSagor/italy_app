@@ -61,13 +61,13 @@ class CreateCvThemeView extends GetView<CreateCvThemeController> {
                     ),
                     SizedBox(height: 18.h),
                     _ColorSelector(
-                      title: 'Primary Color',
+                      title: 'gen_primary_color'.tr.tr,
                       selectedHex: controller.selectedPrimaryColor,
                       onSelected: controller.selectPrimaryColor,
                     ),
                     SizedBox(height: 16.h),
                     _ColorSelector(
-                      title: 'Accent Color',
+                      title: 'gen_accent_color'.tr.tr,
                       selectedHex: controller.selectedAccentColor,
                       onSelected: controller.selectAccentColor,
                     ),

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 import '../../league_promotion_view.dart';
@@ -7,7 +8,7 @@ class DiamondLeaguePromotionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LeaguePromotionScreen(
+    return LeaguePromotionScreen(
       headerAssetPath: 'assets/images/promotion/diamond_promotion_header.png',
       leagueName: 'Diamond',
       xpRange: '10000+ XP',
@@ -16,7 +17,7 @@ class DiamondLeaguePromotionView extends StatelessWidget {
       leagueIcon: Icons.diamond_rounded,
       hasBenefit: true,
       boostTitle: '3.0× XP Boost',
-      boostSubtitle: 'Earn XP faster',
+      boostSubtitle: 'gen_earn_xp_faster'.tr.tr,
       boostFooter: '3 days',
     );
   }

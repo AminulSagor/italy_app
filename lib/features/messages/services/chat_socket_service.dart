@@ -176,23 +176,30 @@ class ChatSocketService {
     void Function()? onConnect,
   }) async {
     // Always register the provided callbacks to the listeners list
-    if (onMessage != null && !_messageListeners.contains(onMessage))
+    if (onMessage != null && !_messageListeners.contains(onMessage)) {
       _messageListeners.add(onMessage);
+    }
     if (onReceiveMessage != null &&
-        !_receiveListeners.contains(onReceiveMessage))
+        !_receiveListeners.contains(onReceiveMessage)) {
       _receiveListeners.add(onReceiveMessage);
-    if (onNewMessage != null && !_newMessageListeners.contains(onNewMessage))
+    }
+    if (onNewMessage != null && !_newMessageListeners.contains(onNewMessage)) {
       _newMessageListeners.add(onNewMessage);
+    }
     if (onPresenceChange != null &&
-        !_presenceListeners.contains(onPresenceChange))
+        !_presenceListeners.contains(onPresenceChange)) {
       _presenceListeners.add(onPresenceChange);
-    if (onBlockChange != null && !_blockListeners.contains(onBlockChange))
+    }
+    if (onBlockChange != null && !_blockListeners.contains(onBlockChange)) {
       _blockListeners.add(onBlockChange);
+    }
     if (onCallIncoming != null &&
-        !_callIncomingListeners.contains(onCallIncoming))
+        !_callIncomingListeners.contains(onCallIncoming)) {
       _callIncomingListeners.add(onCallIncoming);
-    if (onConnect != null && !_connectListeners.contains(onConnect))
+    }
+    if (onConnect != null && !_connectListeners.contains(onConnect)) {
       _connectListeners.add(onConnect);
+    }
 
     // If we have an active socket object that isn't disposed
     if (_socket != null) {
@@ -413,6 +420,29 @@ class ChatSocketService {
     try {
       _joinedConversations.remove(conversationId);
       _socket?.emit('leave_conversation', <String, dynamic>{
+        'conversationId': conversationId,
+      });
+    } catch (_) {}
+  }
+
+  /// Tell the backend the user is actively viewing this conversation's chat
+  /// screen. The backend uses this to suppress FCM push notifications when
+  /// both participants are in the same inbox.
+  void enterInbox(String conversationId) {
+    try {
+      _socket?.emit('presence:enter_inbox', <String, dynamic>{
+        'conversationId': conversationId,
+      });
+    } catch (_) {}
+  }
+
+  /// Tell the backend the user has left this conversation's chat screen
+  /// (navigated away, app backgrounded, etc.). After this, the backend will
+  /// resume sending FCM push notifications for new messages in this
+  /// conversation.
+  void leaveInbox(String conversationId) {
+    try {
+      _socket?.emit('presence:leave_inbox', <String, dynamic>{
         'conversationId': conversationId,
       });
     } catch (_) {}

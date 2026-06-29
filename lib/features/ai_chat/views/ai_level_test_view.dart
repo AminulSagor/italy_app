@@ -83,28 +83,28 @@ class AiLevelTestView extends GetView<AiTutorLevelTestController> {
                     ),
                   ),
                   SizedBox(height: 17.h),
-                  const AiTutorLevelMeasureCard(
+                  AiTutorLevelMeasureCard(
                     icon: Icons.mic_rounded,
                     iconColor: Color(0xFF1376FF),
                     iconBackground: Color(0xFFE7F0FF),
                     title: 'Speaking',
-                    subtitle: 'Communication & Fluency',
+                    subtitle: 'gen_communication_fluency'.tr.tr,
                   ),
                   SizedBox(height: 17.h),
-                  const AiTutorLevelMeasureCard(
+                  AiTutorLevelMeasureCard(
                     icon: Icons.chat_bubble_rounded,
                     iconColor: Color(0xFFE93838),
                     iconBackground: Color(0xFFFFE5E5),
                     title: 'Vocabulary',
-                    subtitle: 'Word knowledge & Context',
+                    subtitle: 'gen_word_knowledge_context'.tr.tr,
                   ),
                   SizedBox(height: 17.h),
-                  const AiTutorLevelMeasureCard(
+                  AiTutorLevelMeasureCard(
                     icon: Icons.menu_book_rounded,
                     iconColor: Color(0xFF24A75A),
                     iconBackground: Color(0xFFDDF9E7),
                     title: 'Grammar',
-                    subtitle: 'Sentence structure & Verbs',
+                    subtitle: 'gen_sentence_structure_verbs'.tr.tr,
                   ),
                 ],
               ),

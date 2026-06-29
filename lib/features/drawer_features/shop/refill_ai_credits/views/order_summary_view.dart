@@ -24,7 +24,7 @@ class OrderSummaryPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: bg,
       appBar: SimpleAppbar(
-        title: 'Order Summary',
+        title: 'gen_order_summary'.tr.tr,
         onBackTap: () => Navigator.maybePop(context),
       ),
       body: SafeArea(

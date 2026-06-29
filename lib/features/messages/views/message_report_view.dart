@@ -231,7 +231,7 @@ class _DescriptionField extends GetView<MessageReportController> {
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText:
-              "Describe what happened... (e.g.,\n'This user is sending spam links').",
+              'gen_describe_what_happened_e_g_n_t'.tr.tr,
           hintStyle: TextStyle(
             fontSize: AppFont.font20.sp,
             fontWeight: FontWeight.w500,

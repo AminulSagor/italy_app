@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
+import '../../../core/services/local_notification_service.dart';
+
 import '../models/message_models.dart';
 import '../models/presence_model.dart';
 import '../sub-feature/call/service/call_agora_service.dart';
@@ -20,7 +22,8 @@ import 'message_user_info_controller.dart';
 import 'messages_controller.dart';
 import '../services/presence_service.dart';
 
-class MessageChatController extends GetxController {
+class MessageChatController extends GetxController
+    with WidgetsBindingObserver {
   final MessageThreadModel thread;
   final MessagesMockService _messagesMockService;
 
@@ -45,11 +48,16 @@ class MessageChatController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     loadChat();
     checkBlockStatus();
     chatScrollController.addListener(_handleChatScroll);
     _initSocket();
     _initPresenceSync();
+
+    // Suppress local notifications for this conversation while the user is
+    // actively viewing it (client-side safety net).
+    LocalNotificationService.instance.suppressConversation(thread.id);
   }
 
   void _initPresenceSync() {
@@ -76,14 +84,37 @@ class MessageChatController extends GetxController {
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     chatTextController.dispose();
     chatScrollController.dispose();
     try {
+      // Tell backend we left this conversation's inbox
+      _socketService?.leaveInbox(thread.id);
       if (chat.value != null) {
         _socketService?.leaveConversation(thread.id);
       }
     } catch (_) {}
+    // Remove client-side notification suppression
+    LocalNotificationService.instance.unsuppressConversation(thread.id);
     super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // User came back to the app while still on this chat screen
+      try {
+        _socketService?.enterInbox(thread.id);
+        LocalNotificationService.instance.suppressConversation(thread.id);
+      } catch (_) {}
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      // App went to background — tell backend to resume sending FCM
+      try {
+        _socketService?.leaveInbox(thread.id);
+        LocalNotificationService.instance.unsuppressConversation(thread.id);
+      } catch (_) {}
+    }
   }
 
   Future<void> checkBlockStatus() async {
@@ -300,6 +331,8 @@ class MessageChatController extends GetxController {
       onConnect: () {
         try {
           _socketService?.joinConversation(thread.id);
+          // Signal backend that we're actively in this inbox
+          _socketService?.enterInbox(thread.id);
         } catch (_) {}
         _flushPendingSends();
       },

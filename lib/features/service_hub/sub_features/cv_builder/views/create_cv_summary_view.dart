@@ -29,8 +29,8 @@ class CreateCvSummaryView extends GetView<CreateCvSummaryController> {
                   children: <Widget>[
                     const _Header(),
                     SizedBox(height: 12.h),
-                    const CvStepProgress(
-                      title: 'Step 4: Professional Summary',
+                    CvStepProgress(
+                      title: 'gen_step_4_professional_summary'.tr.tr,
                       progressText: '33%',
                       progress: 0.33,
                     ),
@@ -53,7 +53,7 @@ class CreateCvSummaryView extends GetView<CreateCvSummaryController> {
               ),
             ),
             _BottomButton(
-              title: 'Save & Continue',
+              title: 'gen_save_continue'.tr.tr,
               onTap: controller.onSaveContinueTap,
             ),
           ],

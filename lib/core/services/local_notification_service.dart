@@ -4,6 +4,14 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:get/get.dart';
+import 'dart:convert';
+
+import 'notification_reply_handler.dart';
+import '../../features/messages/views/message_chat_view.dart';
+import '../../features/messages/controllers/message_chat_controller.dart';
+import '../../features/messages/models/message_models.dart';
+import '../../features/messages/services/messages_service.dart';
 
 class LocalNotificationService {
   LocalNotificationService._();
@@ -20,6 +28,10 @@ class LocalNotificationService {
 
   bool _isInitialized = false;
   bool _isListening = false;
+
+  /// Conversation IDs that should NOT show local notifications because the
+  /// user is actively viewing that conversation in the chat screen.
+  final Set<String> _suppressedConversationIds = <String>{};
 
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
     _channelId,
@@ -51,6 +63,7 @@ class LocalNotificationService {
     await _plugin.initialize(
       settings: settings,
       onDidReceiveNotificationResponse: _handleNotificationTap,
+      onDidReceiveBackgroundNotificationResponse: onDidReceiveBackgroundNotificationResponse,
     );
 
     await _plugin
@@ -84,6 +97,20 @@ class LocalNotificationService {
           name: 'LocalNotificationService',
         );
 
+        // Skip displaying the notification if the user is currently viewing
+        // the conversation that this message belongs to.
+        final String? conversationId =
+            message.data['conversationId']?.toString();
+        if (conversationId != null &&
+            _suppressedConversationIds.contains(conversationId)) {
+          dev.log(
+            'Suppressing notification for active conversation: '
+            '$conversationId',
+            name: 'LocalNotificationService',
+          );
+          return;
+        }
+
         await showRemoteMessage(message);
       },
       onError: (Object error, StackTrace stackTrace) {
@@ -95,6 +122,54 @@ class LocalNotificationService {
         );
       },
     );
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      dev.log('FCM Notification tapped from background: data=${message.data}', name: 'LocalNotificationService');
+      _handleFCMTap(message);
+    });
+
+    _checkInitialMessage();
+  }
+
+  Future<void> _checkInitialMessage() async {
+    try {
+      final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+      if (initialMessage != null) {
+        dev.log('FCM Notification tapped from terminated state: data=${initialMessage.data}', name: 'LocalNotificationService');
+        // Add a slight delay to allow the app to finish bootstrapping before navigating
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _handleFCMTap(initialMessage);
+        });
+      }
+    } catch (e) {
+      dev.log('Error checking initial message: $e');
+    }
+  }
+
+  void _handleFCMTap(RemoteMessage message) {
+    final String deepLink = message.data['deepLink']?.toString().trim() ?? '';
+    final String conversationId = message.data['conversationId']?.toString().trim() ?? '';
+    final String contactId = message.data['senderId']?.toString().trim() ?? '';
+    final String contactName = message.data['senderName']?.toString().trim() ?? 'User';
+    
+    if (conversationId.isNotEmpty) {
+      final String payloadString = jsonEncode({
+        'conversationId': conversationId,
+        'contactId': contactId,
+        'contactName': contactName,
+        'deepLink': deepLink,
+      });
+      // Mock a NotificationResponse with the payload and call our existing handler
+      _handleNotificationTap(NotificationResponse(
+        notificationResponseType: NotificationResponseType.selectedNotification,
+        payload: payloadString,
+      ));
+    } else if (deepLink.isNotEmpty) {
+      _handleNotificationTap(NotificationResponse(
+        notificationResponseType: NotificationResponseType.selectedNotification,
+        payload: deepLink,
+      ));
+    }
   }
 
   Future<void> showRemoteMessage(RemoteMessage message) async {
@@ -139,13 +214,29 @@ class LocalNotificationService {
     );
 
     final String deepLink = message.data['deepLink']?.toString().trim() ?? '';
+    final String conversationId = message.data['conversationId']?.toString().trim() ?? '';
+    final String contactId = message.data['senderId']?.toString().trim() ?? '';
+    final String contactName = message.data['senderName']?.toString().trim() ?? title;
+    
+    // We pass a JSON payload if we have a conversationId, otherwise just the deepLink
+    String? payloadString;
+    if (conversationId.isNotEmpty) {
+      payloadString = jsonEncode({
+        'conversationId': conversationId,
+        'contactId': contactId,
+        'contactName': contactName,
+        'deepLink': deepLink,
+      });
+    } else if (deepLink.isNotEmpty) {
+      payloadString = deepLink;
+    }
 
     await _plugin.show(
       id: DateTime.now().millisecondsSinceEpoch.remainder(2147483647),
       title: title,
       body: body,
       notificationDetails: notificationDetails,
-      payload: deepLink.isEmpty ? null : deepLink,
+      payload: payloadString,
     );
   }
 
@@ -154,8 +245,21 @@ class LocalNotificationService {
     required String body,
     required String? localImagePath,
   }) {
+    final List<AndroidNotificationAction> actions = [
+      AndroidNotificationAction(
+        'REPLY_ACTION',
+        'Reply',
+        icon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+        inputs: [
+          const AndroidNotificationActionInput(
+            label: 'Type a message...',
+          ),
+        ],
+      )
+    ];
+
     if (localImagePath == null) {
-      return const AndroidNotificationDetails(
+      return AndroidNotificationDetails(
         _channelId,
         _channelName,
         channelDescription: _channelDescription,
@@ -163,6 +267,7 @@ class LocalNotificationService {
         priority: Priority.high,
         playSound: true,
         enableVibration: true,
+        actions: actions,
       );
     }
 
@@ -174,6 +279,7 @@ class LocalNotificationService {
       priority: Priority.high,
       playSound: true,
       enableVibration: true,
+      actions: actions,
       styleInformation: BigPictureStyleInformation(
         FilePathAndroidBitmap(localImagePath),
         contentTitle: title,
@@ -330,6 +436,59 @@ class LocalNotificationService {
       name: 'LocalNotificationService',
     );
 
-    // Deep-link navigation can be added here later.
+    final String? payloadStr = response.payload;
+    if (payloadStr != null && payloadStr.isNotEmpty) {
+      try {
+        if (payloadStr.startsWith('{')) {
+          final Map<String, dynamic> data = jsonDecode(payloadStr);
+          final String conversationId = data['conversationId']?.toString() ?? '';
+          if (conversationId.isNotEmpty) {
+            final String contactId = data['contactId']?.toString() ?? '';
+            final String contactName = data['contactName']?.toString() ?? 'User';
+            
+            final MessageThreadModel thread = MessageThreadModel(
+              id: conversationId,
+              learnerName: contactName,
+              lastMessage: '',
+              timeLabel: '',
+              unreadCount: 0,
+              isOnline: false,
+              isHighlighted: false,
+              isDelivered: true,
+              avatarUrl: '',
+              contactId: contactId,
+            );
+            
+            Get.to<void>(
+              () => const MessageChatView(),
+              binding: BindingsBuilder(() {
+                Get.put<MessageChatController>(
+                  MessageChatController(
+                    thread: thread,
+                    messagesMockService: Get.find<MessagesMockService>(),
+                  ),
+                );
+              }),
+              transition: Transition.rightToLeft,
+            );
+            return;
+          }
+        }
+      } catch (e) {
+        dev.log('Error parsing notification payload: $e');
+      }
+    }
+  }
+
+  /// Mark a conversation as suppressed — no local notifications will be shown
+  /// for FCM messages belonging to this conversation.
+  void suppressConversation(String conversationId) {
+    _suppressedConversationIds.add(conversationId);
+  }
+
+  /// Remove suppression for a conversation — notifications will be shown
+  /// again for messages in this conversation.
+  void unsuppressConversation(String conversationId) {
+    _suppressedConversationIds.remove(conversationId);
   }
 }

@@ -25,55 +25,55 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
     return Get.put<AiChatController>(AiChatController());
   }
 
-  static const List<_GuidedTopic> _topics = <_GuidedTopic>[
+  static List<_GuidedTopic> _topics = <_GuidedTopic>[
     _GuidedTopic(
-      title: 'Comprare un\nbiglietto',
-      subtitle: 'বাসের টিকিট কেনা',
+      title: 'gen_comprare_un_nbiglietto'.tr.tr,
+      subtitle: 'বাসের টিকিট কেনা'.tr,
       icon: Icons.directions_bus_rounded,
     ),
     _GuidedTopic(
-      title: 'Ordinare al bar',
-      subtitle: 'বারে কফি অর্ডার করা',
+      title: 'gen_ordinare_al_bar'.tr.tr,
+      subtitle: 'বারে কফি অর্ডার করা'.tr,
       icon: Icons.local_cafe_rounded,
     ),
     _GuidedTopic(
-      title: 'Fare la spesa',
-      subtitle: 'সুপারমার্কেটে কেনাকাটা',
+      title: 'gen_fare_la_spesa'.tr.tr,
+      subtitle: 'সুপারমার্কেটে কেনাকাটা'.tr,
       icon: Icons.shopping_cart_rounded,
     ),
     _GuidedTopic(
-      title: 'Chiedere\nindicazioni',
-      subtitle: 'রাস্তা জিজ্ঞাসা করা',
+      title: 'gen_chiedere_nindicazioni'.tr.tr,
+      subtitle: 'রাস্তা জিজ্ঞাসা করা'.tr,
       icon: Icons.map_outlined,
     ),
     _GuidedTopic(
-      title: 'Dal dottore',
-      subtitle: 'ডাক্তারের কাছে',
+      title: 'gen_dal_dottore'.tr.tr,
+      subtitle: 'ডাক্তারের কাছে'.tr,
       icon: Icons.medical_services_outlined,
     ),
     _GuidedTopic(
-      title: 'Prenotare un\nhotel',
-      subtitle: 'হোটেল বুক করা',
+      title: 'gen_prenotare_un_nhotel'.tr.tr,
+      subtitle: 'হোটেল বুক করা'.tr,
       icon: Icons.hotel_rounded,
     ),
     _GuidedTopic(
-      title: 'In posta',
-      subtitle: 'পোস্ট অফিসে',
+      title: 'gen_in_posta'.tr.tr,
+      subtitle: 'পোস্ট অফিসে'.tr,
       icon: Icons.email_outlined,
     ),
     _GuidedTopic(
-      title: 'Incontrare\namici',
-      subtitle: 'বন্ধুদের সাথে দেখা',
+      title: 'gen_incontrare_namici'.tr.tr,
+      subtitle: 'বন্ধুদের সাথে দেখা'.tr,
       icon: Icons.group_outlined,
     ),
     _GuidedTopic(
-      title: 'Al lavoro',
-      subtitle: 'কাজের জায়গায়',
+      title: 'gen_al_lavoro'.tr.tr,
+      subtitle: 'কাজের জায়গায়'.tr,
       icon: Icons.work_outline_rounded,
     ),
     _GuidedTopic(
       title: 'Al ristorante',
-      subtitle: 'রেস্টুরেন্টে',
+      subtitle: 'রেস্টুরেন্টে'.tr,
       icon: Icons.restaurant_rounded,
     ),
   ];

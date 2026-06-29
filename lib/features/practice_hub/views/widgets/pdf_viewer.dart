@@ -330,7 +330,7 @@ class _PdfBottomNavigation extends GetView<PracticeHubController> {
           children: <Widget>[
             _PdfSideNavButton(
               icon: Icons.chevron_left_rounded,
-              label: 'PREVIOUS',
+              label: 'gen_previous'.tr.tr,
               enabled: controller.canGoPreviousSurvivalPdfPage,
               onTap: onPreviousTap,
             ),
@@ -369,7 +369,7 @@ class _PdfBottomNavigation extends GetView<PracticeHubController> {
 
             _PdfSideNavButton(
               icon: Icons.chevron_right_rounded,
-              label: 'NEXT',
+              label: 'gen_next'.tr.tr,
               enabled: controller.canGoNextSurvivalPdfPage,
               onTap: onNextTap,
               reversed: true,

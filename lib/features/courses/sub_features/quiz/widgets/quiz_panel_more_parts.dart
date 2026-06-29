@@ -156,12 +156,12 @@ class _ReorderablePairColumn extends StatelessWidget {
       buildDefaultDragHandles: false,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: words.length,
-      onReorder: isLocked ? (_, _) {} : onReorder,
-      proxyDecorator: (
-        Widget child,
-        int index,
-        Animation<double> animation,
-      ) {
+      onReorderItem: isLocked
+          ? null
+          : (int oldIndex, int newIndex) {
+              onReorder(oldIndex, newIndex);
+            },
+      proxyDecorator: (Widget child, int index, Animation<double> animation) {
         return Material(
           color: AppColors.transparent,
           elevation: 6,
@@ -234,7 +234,7 @@ class _WritingWordPanel extends StatelessWidget {
           ),
           readOnly: showWrongResult,
           decoration: InputDecoration(
-            hintText: 'Type your answer in Italian...',
+            hintText: 'gen_type_your_answer_in_italian'.tr.tr,
             hintStyle: TextStyle(
               fontSize: AppFont.font18.sp,
               fontWeight: FontWeight.w800,

@@ -241,7 +241,7 @@ class _PdfBottomNavigation extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: _PdfNavButton(
-            label: 'Previous',
+            label: 'gen_previous_1'.tr.tr,
             icon: Icons.arrow_back_rounded,
             isEnabled: canGoPrevious,
             onTap: onPreviousTap,
@@ -250,7 +250,7 @@ class _PdfBottomNavigation extends StatelessWidget {
         SizedBox(width: 14.w),
         Expanded(
           child: _PdfNavButton(
-            label: 'Next',
+            label: 'gen_next_1'.tr.tr,
             icon: Icons.arrow_forward_rounded,
             isEnabled: canGoNext,
             onTap: onNextTap,

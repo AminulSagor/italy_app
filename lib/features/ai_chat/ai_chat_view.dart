@@ -65,8 +65,8 @@ class AiChatView extends GetView<AiChatController> {
               children: <Widget>[
                 Expanded(
                   child: AiToolCard(
-                    title: 'Writing Help',
-                    subtitle: 'রাইটিং অ্যাসিস্ট্যান্ট',
+                    title: 'gen_writing_help'.tr.tr,
+                    subtitle: 'রাইটিং অ্যাসিস্ট্যান্ট'.tr,
                     icon: Icons.auto_awesome_rounded,
                     backgroundColor: const Color(0xFFE9FFF4),
                     iconColor: const Color(0xFF08C99B),
@@ -78,7 +78,7 @@ class AiChatView extends GetView<AiChatController> {
                 Expanded(
                   child: Obx(
                     () => AiToolCard(
-                      title: 'Level Test',
+                      title: 'gen_level_test'.tr.tr,
                       subtitle: controller.levelTestSubtitle,
                       icon: Icons.settings_suggest_rounded,
                       backgroundColor: const Color(0xFFFFF4E7),

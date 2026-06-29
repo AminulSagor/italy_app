@@ -31,8 +31,8 @@ class CreateCvEducationView extends GetView<CreateCvEducationController> {
                   children: <Widget>[
                     const _Header(),
                     SizedBox(height: 12.h),
-                    const CvStepProgress(
-                      title: 'Step 3: Skills & Education',
+                    CvStepProgress(
+                      title: 'gen_step_3_skills_education'.tr.tr,
                       progressText: '33%',
                       progress: 0.33,
                     ),
@@ -41,11 +41,11 @@ class CreateCvEducationView extends GetView<CreateCvEducationController> {
                     SizedBox(height: 18.h),
                     CvLanguageSkillsCard(controller: controller),
                     SizedBox(height: 22.h),
-                    const _SectionTitle(title: 'Your Skills'),
+                    _SectionTitle(title: 'gen_your_skills'.tr.tr),
                     SizedBox(height: 10.h),
                     CvSkillSectionCard(controller: controller),
                     SizedBox(height: 22.h),
-                    const _SectionTitle(title: 'AI Suggested Skills'),
+                    _SectionTitle(title: 'gen_ai_suggested_skills'.tr.tr),
                     SizedBox(height: 10.h),
                     CvAiSuggestedSkillsCard(controller: controller),
                   ],
@@ -53,7 +53,7 @@ class CreateCvEducationView extends GetView<CreateCvEducationController> {
               ),
             ),
             _BottomButton(
-              title: 'Continue to Summary',
+              title: 'gen_continue_to_summary'.tr.tr,
               onTap: controller.onContinueTap,
             ),
           ],
@@ -151,8 +151,8 @@ class _EducationProfileCard extends StatelessWidget {
           SizedBox(height: 18.h),
           Obx(
             () => CvEducationDropdownField(
-              label: 'TYPE OF EDUCATION',
-              hintText: 'Select type...',
+              label: 'gen_type_of_education'.tr.tr,
+              hintText: 'gen_select_type'.tr.tr,
               value: controller.selectedEducationType.value.isEmpty
                   ? null
                   : controller.selectedEducationType.value,
@@ -163,8 +163,8 @@ class _EducationProfileCard extends StatelessWidget {
           SizedBox(height: 14.h),
           Obx(
             () => CvEducationDropdownField(
-              label: 'LEVEL',
-              hintText: 'Select level...',
+              label: 'gen_level'.tr.tr,
+              hintText: 'gen_select_level'.tr.tr,
               value: controller.selectedLevel.value.isEmpty
                   ? null
                   : controller.selectedLevel.value,
@@ -231,7 +231,7 @@ class _SchoolField extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
             decoration: InputDecoration(
-              hintText: 'e.g. Politecnico di Milano',
+              hintText: 'gen_e_g_politecnico_di_milano'.tr.tr,
               hintStyle: TextStyle(
                 color: AppColors.homeSecondaryText.withValues(alpha: 0.55),
                 fontSize: AppFont.font9.sp,

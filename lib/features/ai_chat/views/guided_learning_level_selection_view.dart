@@ -29,7 +29,7 @@ class GuidedLearningLevelSelectionView extends GetView<AiChatController> {
           padding: EdgeInsets.fromLTRB(24.w, 27.h, 24.w, 56.h),
           child: Column(
             children: <Widget>[
-              const _GuidedHeader(title: 'Guided AI Tour'),
+              _GuidedHeader(title: 'gen_guided_ai_tour'.tr.tr),
               SizedBox(height: 47.h),
               Text(
                 'আপনার লেভেল নির্বাচন করুন',
@@ -55,11 +55,11 @@ class GuidedLearningLevelSelectionView extends GetView<AiChatController> {
               SizedBox(height: 45.h),
               _LevelCard(
                 icon: Icons.school_rounded,
-                title: 'Level A1',
+                title: 'gen_level_a1'.tr.tr,
                 levelLabel: '(Beginner)',
                 description:
                     '10 topics. Listen to short Italian phrases\nand repeat them exactly.',
-                buttonText: 'Explore A1 Topics',
+                buttonText: 'gen_explore_a1_topics'.tr.tr,
                 onTap: () => controller.openGuidedTopics(
                   level: 'A1',
                   mode: AiTutorGuidedMode.guided,
@@ -68,11 +68,11 @@ class GuidedLearningLevelSelectionView extends GetView<AiChatController> {
               SizedBox(height: 24.h),
               _LevelCard(
                 icon: Icons.rocket_launch_rounded,
-                title: 'Level A2',
+                title: 'gen_level_a2'.tr.tr,
                 levelLabel: '(Intermediate)',
                 description:
                     'Answer topic questions in Italian with\nguidance and simple corrections.',
-                buttonText: 'Explore A2 Topics',
+                buttonText: 'gen_explore_a2_topics'.tr.tr,
                 onTap: () => controller.openGuidedTopics(
                   level: 'A2',
                   mode: AiTutorGuidedMode.assisted,
@@ -81,10 +81,10 @@ class GuidedLearningLevelSelectionView extends GetView<AiChatController> {
               SizedBox(height: 24.h),
               _LevelCard(
                 icon: Icons.chat_bubble_rounded,
-                title: 'Level B1',
+                title: 'gen_level_b1'.tr.tr,
                 levelLabel: '(Advanced)',
                 description: 'Natural role-play conversations in\nreal-life Italian situations.',
-                buttonText: 'Explore B1 Topics',
+                buttonText: 'gen_explore_b1_topics'.tr.tr,
                 onTap: () => controller.openGuidedTopics(
                   level: 'B1',
                   mode: AiTutorGuidedMode.free,

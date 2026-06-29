@@ -219,7 +219,7 @@ class ChapterDetailController extends GetxController {
       if (afterMedia != null && afterMedia.id == current.id) {
         detail.value = afterMedia.copyWith(
           theoryBook: afterMedia.theoryBook.copyWith(
-            subtitle: 'Pages unavailable',
+            subtitle: 'gen_pages_unavailable'.tr.tr,
           ),
         );
       }
@@ -229,7 +229,7 @@ class ChapterDetailController extends GetxController {
     detail.value = afterMedia.copyWith(
       theoryBook: afterMedia.theoryBook.copyWith(
         fileUrl: media.url,
-        subtitle: '...',
+        subtitle: '...'.tr,
       ),
     );
 

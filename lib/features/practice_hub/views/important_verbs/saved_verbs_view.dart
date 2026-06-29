@@ -16,7 +16,7 @@ class SavedVerbsView extends GetView<ImportantVerbsController> {
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
       appBar: SimpleAppbar(
-        title: 'Saved Verbs',
+        title: 'gen_saved_verbs'.tr.tr,
         onBackTap: () => Navigator.of(context).pop(),
       ),
       body: NotificationListener<ScrollNotification>(
@@ -41,7 +41,7 @@ class SavedVerbsView extends GetView<ImportantVerbsController> {
                 Obx(
                   () => VerbSearchField(
                     textController: controller.savedVerbSearchController,
-                    hintText: 'Search saved verbs',
+                    hintText: 'gen_search_saved_verbs'.tr.tr,
                     query: controller.savedVerbSearchQuery.value,
                     onChanged: controller.onSavedVerbSearchChanged,
                     onClear: controller.clearSavedVerbSearch,

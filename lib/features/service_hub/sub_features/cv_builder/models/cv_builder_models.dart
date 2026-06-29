@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 class CvTemplateDynamicItemFieldModel {
   const CvTemplateDynamicItemFieldModel({
     required this.key,
@@ -98,30 +99,30 @@ class CvTemplateFieldModel {
           : double.tryParse(json['repeatGap']?.toString() ?? '') ?? 10,
       itemFields: parsedItemFields.isEmpty
           ? <CvTemplateDynamicItemFieldModel>[
-              const CvTemplateDynamicItemFieldModel(
+              CvTemplateDynamicItemFieldModel(
                 key: 'title',
-                label: 'Title',
+                label: 'gen_title'.tr.tr,
                 type: 'text',
                 required: false,
                 placeholder: 'Senior Software Developer',
               ),
-              const CvTemplateDynamicItemFieldModel(
+              CvTemplateDynamicItemFieldModel(
                 key: 'subtitle',
-                label: 'Company / Institution',
+                label: 'gen_company_institution'.tr.tr,
                 type: 'text',
                 required: false,
                 placeholder: 'Company - Country',
               ),
-              const CvTemplateDynamicItemFieldModel(
+              CvTemplateDynamicItemFieldModel(
                 key: 'dateRange',
-                label: 'Date range',
+                label: 'gen_date_range'.tr.tr,
                 type: 'text',
                 required: false,
                 placeholder: 'Jan 2022 - Dec 2023',
               ),
-              const CvTemplateDynamicItemFieldModel(
+              CvTemplateDynamicItemFieldModel(
                 key: 'description',
-                label: 'Description',
+                label: 'gen_description'.tr.tr,
                 type: 'textarea',
                 required: false,
                 placeholder: 'Describe the role or achievement',

@@ -210,7 +210,7 @@ class ItalyApp extends StatelessWidget {
 
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Italir Pothe',
+          title: 'gen_italir_pothe'.tr.tr,
           translations: translationService,
           locale: translationService.currentLocale,
           fallbackLocale: TranslationService.fallbackLocale,
