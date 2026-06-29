@@ -178,17 +178,17 @@ class _SafetyStatusCards extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        const Expanded(
+        Expanded(
           child: _SafetyStatusCard(
             icon: Icons.lock_outline_rounded,
-            title: 'SECURE',
+            title: 'gen_secure'.tr.tr,
           ),
         ),
         SizedBox(width: 26.w),
-        const Expanded(
+        Expanded(
           child: _SafetyStatusCard(
             icon: Icons.shield_outlined,
-            title: 'PRIVATE',
+            title: 'gen_private'.tr.tr,
           ),
         ),
       ],

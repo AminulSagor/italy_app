@@ -24,7 +24,7 @@ class FinalExamListeningView extends GetView<FinalExamController> {
       backgroundColor: AppColors.coursesDetailBg,
       bottomNavigationBar: Obx(
         () => FinalExamBottomButton(
-          label: 'Submit Answer',
+          label: 'gen_submit_answer'.tr.tr,
           onTap: controller.submitListeningAnswer,
           isLoading: controller.isSubmitting.value,
         ),
@@ -58,10 +58,10 @@ class FinalExamListeningView extends GetView<FinalExamController> {
                   onPlayTap: controller.toggleListeningAudio,
                 ),
                 SizedBox(height: 26.h),
-                const ExamInfoTip(
+                ExamInfoTip(
                   text: 'STRICT EXAM MODE',
                   subText:
-                      'Once the audio finishes, you cannot replay it. Make your selection carefully.',
+                      'gen_once_the_audio_finishes_you_ca'.tr.tr,
                   bg: AppColors.coursesCreamLightBg,
                   borderColor: AppColors.vocabularyOrangeShadow,
                   color: AppColors.profileOrangeText,

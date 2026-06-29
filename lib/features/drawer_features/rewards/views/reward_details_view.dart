@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -19,7 +20,7 @@ class RewardDetailsView extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(25.w, 39.h, 25.w, 56.h),
           child: Column(
             children: <Widget>[
-              const RewardTopBar(title: 'Reward Details'),
+              RewardTopBar(title: 'gen_reward_details'.tr.tr),
               SizedBox(height: 30.h),
 
               Container(

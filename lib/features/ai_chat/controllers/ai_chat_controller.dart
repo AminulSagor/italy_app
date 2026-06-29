@@ -94,38 +94,38 @@ class AiChatController extends GetxController {
   int _textSessionVersion = 0;
 
   final List<AiTutorStarterModel> _allStarters =
-      const <AiTutorStarterModel>[
+      <AiTutorStarterModel>[
         AiTutorStarterModel(
-          title: 'Practice ordering food',
-          subtitle: 'Al ristorante',
+          title: 'gen_practice_ordering_food'.tr.tr,
+          subtitle: 'gen_al_ristorante'.tr.tr,
           prompt: 'Practice ordering food at an Italian restaurant.',
           isVoice: true,
           icon: Icons.restaurant_rounded,
         ),
         AiTutorStarterModel(
-          title: 'Talk about my day',
-          subtitle: 'La mia giornata',
+          title: 'gen_talk_about_my_day'.tr.tr,
+          subtitle: 'gen_la_mia_giornata'.tr.tr,
           prompt: 'Help me talk about my day in Italian.',
           isVoice: false,
           icon: Icons.wb_sunny_rounded,
         ),
         AiTutorStarterModel(
-          title: 'Review basic greetings',
-          subtitle: 'I saluti base',
+          title: 'gen_review_basic_greetings'.tr.tr,
+          subtitle: 'gen_i_saluti_base'.tr.tr,
           prompt: 'Teach me basic Italian greetings.',
           isVoice: false,
           icon: Icons.school_rounded,
         ),
         AiTutorStarterModel(
-          title: 'Ask for directions',
-          subtitle: 'Chiedere indicazioni',
+          title: 'gen_ask_for_directions'.tr.tr,
+          subtitle: 'gen_chiedere_indicazioni'.tr.tr,
           prompt: 'Practice asking for directions in Italian.',
           isVoice: false,
           icon: Icons.near_me_rounded,
         ),
         AiTutorStarterModel(
-          title: 'Coffee shop phrases',
-          subtitle: 'Al bar',
+          title: 'gen_coffee_shop_phrases'.tr.tr,
+          subtitle: 'gen_al_bar'.tr.tr,
           prompt: 'Practice Italian coffee shop phrases with me.',
           isVoice: true,
           icon: Icons.local_cafe_rounded,

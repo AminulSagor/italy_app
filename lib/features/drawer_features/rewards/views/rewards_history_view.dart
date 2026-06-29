@@ -21,7 +21,7 @@ class RewardsHistoryView extends GetView<RewardController> {
           padding: EdgeInsets.fromLTRB(26.w, 39.h, 26.w, 54.h),
           child: Column(
             children: <Widget>[
-              const RewardTopBar(title: 'Rewards History'),
+              RewardTopBar(title: 'gen_rewards_history'.tr.tr),
               SizedBox(height: 36.h),
 
               Container(
@@ -63,7 +63,7 @@ class RewardsHistoryView extends GetView<RewardController> {
 
               SizedBox(height: 44.h),
 
-              Column(
+              Obx(() => Column(
                 children: controller.historyItems
                     .map(
                       (item) => Padding(
@@ -75,7 +75,7 @@ class RewardsHistoryView extends GetView<RewardController> {
                       ),
                     )
                     .toList(),
-              ),
+              )),
             ],
           ),
         ),

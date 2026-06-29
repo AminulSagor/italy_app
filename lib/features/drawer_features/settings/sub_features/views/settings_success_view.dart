@@ -92,7 +92,7 @@ class SettingsSuccessView extends StatelessWidget {
                   SizedBox(height: isDelete ? 69.h : 64.h),
                   SettingsPrimaryButton(
                     text: isDelete
-                        ? 'BACK TO LOGIN'
+                        ? 'back_to_login'.tr.toUpperCase()
                         : 'Back to Edit Profile  →',
                     height: isDelete ? 62 : 68,
                     onTap: () {

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -171,7 +172,7 @@ class CourseCertificateCard extends StatelessWidget {
               mainAxisAlignment: .spaceBetween,
               children: <Widget>[
                 _CertificateMeta(
-                  label: 'ISSUE DATE',
+                  label: 'gen_issue_date'.tr.tr,
                   value: certificate.issueDate,
                 ),
                 Container(
@@ -184,7 +185,7 @@ class CourseCertificateCard extends StatelessWidget {
                   child: SvgPicture.asset('assets/icons_svg/app_icon.svg'),
                 ),
                 _CertificateMeta(
-                  label: 'FINAL SCORE',
+                  label: 'gen_final_score'.tr.tr,
                   value: '${certificate.finalScore} / 100',
                   alignEnd: true,
                 ),
@@ -221,7 +222,7 @@ class CourseCertificateStatsRow extends StatelessWidget {
             icon: Icons.menu_book_rounded,
             iconColor: AppColors.reportReviewText,
             value: _formatNumber(certificate.wordsLearned),
-            label: 'WORDS',
+            label: 'gen_words'.tr.tr,
           ),
         ),
         SizedBox(width: 16.w),
@@ -230,7 +231,7 @@ class CourseCertificateStatsRow extends StatelessWidget {
             icon: Icons.local_fire_department_rounded,
             iconColor: AppColors.blockDangerRed,
             value: '${certificate.streakDays}',
-            label: 'DAYS',
+            label: 'gen_days'.tr.tr,
           ),
         ),
         SizedBox(width: 16.w),
@@ -239,7 +240,7 @@ class CourseCertificateStatsRow extends StatelessWidget {
             icon: Icons.check_circle_rounded,
             iconColor: AppColors.primaryGreen,
             value: '${certificate.quizzesCompleted}',
-            label: 'QUIZZES',
+            label: 'gen_quizzes'.tr.tr,
           ),
         ),
       ],

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -131,13 +132,13 @@ class CvSummaryPreviewCard extends StatelessWidget {
             children: <Widget>[
               _SummaryActionButton(
                 icon: Icons.refresh_rounded,
-                title: 'Regenerate',
+                title: 'gen_regenerate'.tr.tr,
                 onTap: onRegenerateTap,
               ),
               SizedBox(width: 10.w),
               _SummaryActionButton(
                 icon: Icons.edit_rounded,
-                title: 'Edit Text',
+                title: 'gen_edit_text'.tr.tr,
                 onTap: onEditTap,
               ),
             ],

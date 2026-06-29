@@ -1,23 +1,24 @@
+import 'package:get/get.dart';
 import '../models/notification_models.dart';
 
 class NotificationsMockService {
   Future<NotificationsResponseModel> fetchNotifications() async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
 
-    return const NotificationsResponseModel(
+    return NotificationsResponseModel(
       filters: <NotificationFilterModel>[
-        NotificationFilterModel(category: NotificationCategory.all, label: 'All'),
+        NotificationFilterModel(category: NotificationCategory.all, label: 'gen_all'.tr.tr),
         NotificationFilterModel(
           category: NotificationCategory.learning,
-          label: 'Learning',
+          label: 'gen_learning'.tr.tr,
         ),
         NotificationFilterModel(
           category: NotificationCategory.system,
-          label: 'System',
+          label: 'gen_system'.tr.tr,
         ),
         NotificationFilterModel(
           category: NotificationCategory.social,
-          label: 'Social',
+          label: 'gen_social'.tr.tr,
         ),
       ],
       notifications: <NotificationItemModel>[
@@ -25,7 +26,7 @@ class NotificationsMockService {
           id: 'lesson-1',
           category: NotificationCategory.learning,
           tone: NotificationTone.lesson,
-          title: 'New Lesson Added!',
+          title: 'gen_new_lesson_added'.tr.tr,
           body: 'Capitolo 5 is now available. Start mastering past tense today!',
           timeLabel: '10MAGO',
           isRead: false,
@@ -34,7 +35,7 @@ class NotificationsMockService {
           id: 'webinar-1',
           category: NotificationCategory.learning,
           tone: NotificationTone.webinar,
-          title: 'Live Webinar starting soon!',
+          title: 'gen_live_webinar_starting_soon'.tr.tr,
           body: 'Join our Kitchen Job live class with Chef Marco in 15 minutes.',
           timeLabel: '15M\nAGO',
           isRead: false,
@@ -43,7 +44,7 @@ class NotificationsMockService {
           id: 'message-1',
           category: NotificationCategory.social,
           tone: NotificationTone.message,
-          title: 'Message from\nGiacomo',
+          title: 'gen_message_from_ngiacomo'.tr.tr,
           body: '"Hey, do you want to practice together for the exam?"',
           timeLabel: '1H\nAGO',
           isRead: true,
@@ -53,7 +54,7 @@ class NotificationsMockService {
           id: 'streak-1',
           category: NotificationCategory.system,
           tone: NotificationTone.streak,
-          title: 'Streak at Risk!',
+          title: 'gen_streak_at_risk'.tr.tr,
           body: 'Finish one quiz before midnight to keep your 12-day streak alive!',
           timeLabel: '3HAGO',
           isRead: false,
@@ -62,7 +63,7 @@ class NotificationsMockService {
           id: 'streak-2',
           category: NotificationCategory.system,
           tone: NotificationTone.streak,
-          title: 'Streak at Risk!',
+          title: 'gen_streak_at_risk'.tr.tr,
           body: 'Finish one quiz before midnight to keep your 12-day streak alive!',
           timeLabel: '3HAGO',
           isRead: false,

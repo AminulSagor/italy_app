@@ -179,19 +179,7 @@ class _SkillBuilderCard extends StatelessWidget {
                       color: textColor,
                     ),
                   ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFont.font11.sp,
-                      height: 1,
-                      fontWeight: FontWeight.w700,
-                      color: textColor.withValues(alpha: 0.68),
-                    ),
-                  ),
+                  SizedBox(height: 8.h)
                 ],
               ),
             ),

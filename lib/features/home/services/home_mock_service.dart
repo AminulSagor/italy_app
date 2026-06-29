@@ -1,10 +1,11 @@
+import 'package:get/get.dart';
 import '../models/home_models.dart';
 
 class HomeMockService {
   Future<HomeDashboardModel> fetchDashboard() async {
     await Future<void>.delayed(const Duration(milliseconds: 650));
 
-    return const HomeDashboardModel(
+    return HomeDashboardModel(
       user: HomeUserModel(
         greeting: 'Benvenuto,',
         displayName: 'Ciao, Arif!',
@@ -13,8 +14,8 @@ class HomeMockService {
         messageCount: 2,
       ),
       overview: HomeOverviewModel(
-        title: 'Daily Overview',
-        subtitle: 'Your learning activity this week',
+        title: 'gen_daily_overview'.tr.tr,
+        subtitle: 'gen_your_learning_activity_this_we'.tr.tr,
         totalTime: '14.5h',
         totalTimeLabel: 'TOTAL TIME',
         activities: <HomeActivityModel>[
@@ -71,7 +72,7 @@ class HomeMockService {
       ),
       currentChapter: HomeChapterModel(
         eyebrow: 'CURRENT CHAPTER',
-        title: 'Capitolo 2: Saluti\n(Greetings)',
+        title: 'gen_capitolo_2_saluti_n_greetings'.tr.tr,
         progressLabel: 'Progress',
         progress: 0.6,
         buttonLabel: 'Continue Lesson',
@@ -79,52 +80,52 @@ class HomeMockService {
       quickTools: <HomeToolModel>[
         HomeToolModel(
           title: 'CV Builder',
-          subtitle: 'Takes 2 mins',
+          subtitle: 'gen_takes_2_mins'.tr.tr,
           iconKey: 'document',
           tone: HomeToolTone.blue,
         ),
         HomeToolModel(
-          title: 'CAF Services',
-          subtitle: 'Tax & Legal Help',
+          title: 'gen_caf_services'.tr.tr,
+          subtitle: 'gen_tax_legal_help'.tr.tr,
           iconKey: 'gavel',
           tone: HomeToolTone.orange,
         ),
       ],
       workItems: <HomeWorkItemModel>[
-        HomeWorkItemModel(title: 'Restaurant Job', emoji: '🍽️'),
-        HomeWorkItemModel(title: 'Order Coffee', emoji: '☕'),
-        HomeWorkItemModel(title: 'Find Housing', emoji: '🏠'),
+        HomeWorkItemModel(title: 'gen_restaurant_job'.tr.tr, emoji: '🍽️'),
+        HomeWorkItemModel(title: 'gen_order_coffee'.tr.tr, emoji: '☕'),
+        HomeWorkItemModel(title: 'gen_find_housing'.tr.tr, emoji: '🏠'),
       ],
-      support: HomeSupportModel(title: 'Need Help?', subtitle: 'Join Community'),
+      support: HomeSupportModel(title: 'gen_need_help'.tr.tr, subtitle: 'gen_join_community'.tr.tr),
       webinar: HomeWebinarModel(
         badgeLabel: 'UPCOMING WEBINAR',
-        title: 'Greeting In Italia',
+        title: 'gen_greeting_in_italia'.tr.tr,
         hostName: 'Mr. Devson',
         timeLabel: 'Today, 04:30 PM',
         buttonLabel: 'Join',
       ),
       culturalTip: HomeInfoCardModel(
         eyebrow: 'Cultural Tip of the Day',
-        title: 'Cultural Tip of the Day',
+        title: 'gen_cultural_tip_of_the_day'.tr.tr,
         body:
             'In Italy, coffee is often standing at the bar. Saying “Un caffè, per favore” is the first step to your morning routine.',
         actionLabel: '',
       ),
       streak: HomeInfoCardModel(
         eyebrow: '',
-        title: '14 Day Streak',
+        title: 'gen_14_day_streak'.tr.tr,
         body: 'Keep it up!',
         actionLabel: '',
       ),
       aiTutor: HomeInfoCardModel(
         eyebrow: 'AI TUTOR',
-        title: 'Master Italian\nthrough natural\nconversations.',
+        title: 'gen_master_italian_nthrough_natura'.tr.tr,
         body:
             'Practice ordering coffee or discussing art with your friendly virtual guide.',
         actionLabel: 'Start Chatting',
       ),
       dailyChallenges: HomeDailyChallengesModel(
-        label: 'DAILY CHALLENGES',
+        label: 'gen_daily_challenges_1'.tr.tr,
         completed: 2,
         total: 3,
       ),

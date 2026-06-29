@@ -26,7 +26,7 @@ class AiRefillCenterPage extends StatelessWidget {
       backgroundColor: bg,
       appBar: SimpleAppbar(
         onBackTap: () => Navigator.maybePop(context),
-        title: 'AI Refill Center',
+        title: 'gen_ai_refill_center'.tr.tr,
       ),
       body: SafeArea(
         child: Column(
@@ -43,8 +43,8 @@ class AiRefillCenterPage extends StatelessWidget {
 
                     Obx(
                       () => _selectablePlanCard(
-                        title: 'Basic Starter',
-                        subtitle: '15 Mins Voice | 1,000 Tokens',
+                        title: 'gen_basic_starter'.tr.tr,
+                        subtitle: 'gen_15_mins_voice_1_000_tokens'.tr.tr,
                         price: '€2.49',
                         isSelected: controller.isSelected(AiRefillPlan.basic),
                         onTap: () => controller.selectPlan(AiRefillPlan.basic),
@@ -55,8 +55,8 @@ class AiRefillCenterPage extends StatelessWidget {
 
                     Obx(
                       () => _selectablePlanCard(
-                        title: 'Fluent Learner',
-                        subtitle: '60 Mins Voice | 5,000\nTokens',
+                        title: 'gen_fluent_learner'.tr.tr,
+                        subtitle: 'gen_60_mins_voice_5_000_ntokens'.tr.tr,
                         price: '€6.99',
                         isPopular: true,
                         isSelected: controller.isSelected(AiRefillPlan.fluent),
@@ -68,8 +68,8 @@ class AiRefillCenterPage extends StatelessWidget {
 
                     Obx(
                       () => _selectablePlanCard(
-                        title: 'Elite Mastery',
-                        subtitle: '180 Mins | 15,000 Tokens',
+                        title: 'gen_elite_mastery'.tr.tr,
+                        subtitle: 'gen_180_mins_15_000_tokens'.tr.tr,
                         price: '€14.99',
                         isSelected: controller.isSelected(AiRefillPlan.elite),
                         onTap: () => controller.selectPlan(AiRefillPlan.elite),
@@ -123,13 +123,13 @@ class AiRefillCenterPage extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _statItem(icon: Icons.mic, label: '12 Mins', color: green),
+            child: _statItem(icon: Icons.mic, label: 'gen_12_mins'.tr.tr, color: green),
           ),
           Container(height: 34, width: 1, color: const Color(0xFFE7E7E7)),
           Expanded(
             child: _statItem(
               icon: Symbols.deployed_code,
-              label: '1,200 Tokens',
+              label: 'gen_1_200_tokens'.tr.tr,
               color: const Color.fromARGB(255, 202, 114, 42),
             ),
           ),
@@ -407,7 +407,7 @@ class AiRefillCenterPage extends StatelessWidget {
             icon: Icons.mic,
             iconBg: const Color(0xFFEAF5E4),
             iconColor: green,
-            title: 'Voice Minutes',
+            title: 'gen_voice_minutes'.tr.tr,
             desc:
                 'Consumed during live conversation\nsessions with your AI Speaking Partner.',
           ),
@@ -416,7 +416,7 @@ class AiRefillCenterPage extends StatelessWidget {
             icon: Icons.chat_bubble,
             iconBg: const Color(0xFFE9F5FF),
             iconColor: const Color(0xFF006BAA),
-            title: 'Text Tokens',
+            title: 'gen_text_tokens'.tr.tr,
             desc:
                 'Used for text based chat, grammar\ncorrections, and writing feedback.',
           ),

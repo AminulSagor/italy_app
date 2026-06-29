@@ -247,12 +247,12 @@ class _AdaptiveTutorStatusCard extends StatelessWidget {
                       if (memoryCount > 0)
                         _StatusPill(
                           icon: Icons.memory_rounded,
-                          label: '$memoryCount remembered',
+                          label: 'gen_memorycount_remembered'.tr.tr,
                         ),
                       if (mistakeCount > 0)
                         _StatusPill(
                           icon: Icons.auto_fix_high_rounded,
-                          label: '$mistakeCount focus areas',
+                          label: 'gen_mistakecount_focus_areas'.tr.tr,
                         ),
                     ],
                   ),

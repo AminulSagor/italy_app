@@ -17,7 +17,7 @@ class CvLanguageSkillsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return _BaseCard(
       icon: Icons.language_rounded,
-      title: 'Language Skills',
+      title: 'gen_language_skills'.tr.tr,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -44,7 +44,7 @@ class CvLanguageSkillsCard extends StatelessWidget {
           SizedBox(height: 10.h),
           _AddInput(
             controller: controller.nativeLanguageController,
-            hintText: 'Set native language...',
+            hintText: 'gen_set_native_language'.tr.tr,
             onTap: controller.addNativeLanguage,
           ),
           SizedBox(height: 16.h),

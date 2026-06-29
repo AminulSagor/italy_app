@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:italir_pothe/features/drawer_features/settings/widgets/settings_ui_widgets.dart';
@@ -15,7 +16,7 @@ class ProfilePhotoView extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 28.h),
           child: Column(
             children: <Widget>[
-              const SettingsTopBar(title: 'Profile Photo'),
+              SettingsTopBar(title: 'gen_profile_photo'.tr.tr),
               SizedBox(height: 61.h),
               const _PhotoPreview(),
               SizedBox(height: 34.h),
@@ -44,7 +45,7 @@ class ProfilePhotoView extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: _PhotoOptionCard(
-                      title: 'Take a Photo',
+                      title: 'gen_take_a_photo'.tr.tr,
                       icon: Icons.camera_alt_outlined,
                       bgColor: const Color(0xFFD7FFC6),
                       iconBgColor: SettingsUi.lightGreen,
@@ -55,7 +56,7 @@ class ProfilePhotoView extends StatelessWidget {
                   SizedBox(width: 16.w),
                   Expanded(
                     child: _PhotoOptionCard(
-                      title: 'Choose from\nGallery',
+                      title: 'gen_choose_from_ngallery'.tr.tr,
                       icon: Icons.image_rounded,
                       bgColor: const Color(0xFFDCEBFF),
                       iconBgColor: const Color(0xFFA9D0FF),
@@ -108,9 +109,9 @@ class ProfilePhotoView extends StatelessWidget {
                 text: 'CONFIRM PHOTO',
                 onTap: () {
                   SettingsSuccessBottomSheet.show(
-                    title: 'Profile Picture Updated!',
+                    title: 'gen_profile_picture_updated'.tr.tr,
                     subtitle:
-                        'Your Profile Picture has been\nsuccessfully updated.',
+                        'gen_your_profile_picture_has_been'.tr.tr,
                   );
                 },
               ),

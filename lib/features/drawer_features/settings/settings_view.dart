@@ -33,7 +33,7 @@ class SettingsView extends GetView<SettingsController> {
 
               SizedBox(height: 36.h),
 
-              const _SectionTitle(title: 'PREFERENCES'),
+              _SectionTitle(title: 'gen_preferences'.tr.tr),
 
               SizedBox(height: 18.h),
 
@@ -41,7 +41,7 @@ class SettingsView extends GetView<SettingsController> {
 
               SizedBox(height: 34.h),
 
-              const _SectionTitle(title: 'PROFILE & SECURITY'),
+              _SectionTitle(title: 'gen_profile_security'.tr.tr),
 
               SizedBox(height: 20.h),
 
@@ -54,7 +54,7 @@ class SettingsView extends GetView<SettingsController> {
                 icon: Icons.lock_outline_rounded,
                 iconBgColor: const Color(0xFFAED2FF),
                 iconColor: const Color(0xFF0065A8),
-                title: 'Change Password',
+                title: 'gen_change_password'.tr.tr,
                 onTap: controller.changePassword,
               ),
 
@@ -64,7 +64,7 @@ class SettingsView extends GetView<SettingsController> {
 
               SizedBox(height: 48.h),
 
-              const _SectionTitle(title: 'PRIVACY & LEGAL'),
+              _SectionTitle(title: 'gen_privacy_legal'.tr.tr),
 
               SizedBox(height: 19.h),
 
@@ -79,22 +79,22 @@ class SettingsView extends GetView<SettingsController> {
                   children: <Widget>[
                     _LegalTile(
                       icon: Icons.flag_outlined,
-                      title: 'Reports',
+                      title: 'gen_reports'.tr.tr,
                       onTap: controller.openReports,
                     ),
                     _LegalTile(
                       icon: Icons.policy_outlined,
-                      title: 'Privacy Policy',
+                      title: 'gen_privacy_policy'.tr.tr,
                       onTap: controller.openPrivacyPolicy,
                     ),
                     _LegalTile(
                       icon: Icons.description_outlined,
-                      title: 'Terms of Service',
+                      title: 'gen_terms_of_service'.tr.tr,
                       onTap: controller.openTerms,
                     ),
                     _LegalTile(
                       icon: Icons.no_accounts_outlined,
-                      title: 'Delete Account',
+                      title: 'gen_delete_account'.tr.tr,
                       isDanger: true,
                       onTap: controller.deleteAccount,
                     ),

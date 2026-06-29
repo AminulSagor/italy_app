@@ -85,7 +85,7 @@ class QuizCompletionView extends GetView<QuizController> {
                       child: LessonMetricCard(
                         icon: Icons.track_changes_rounded,
                         value: '${complete.accuracyPercent}%',
-                        label: 'ACCURACY',
+                        label: 'gen_accuracy'.tr.tr,
                         backgroundColor: AppColors.lessonAccuracyBg,
                         iconBackgroundColor: AppColors.homeLime,
                         valueColor: AppColors.primaryGreen,
@@ -96,7 +96,7 @@ class QuizCompletionView extends GetView<QuizController> {
                       child: LessonMetricCard(
                         icon: Icons.local_fire_department_rounded,
                         value: complete.timeTaken,
-                        label: 'TIME TAKEN',
+                        label: 'gen_time_taken'.tr.tr,
                         backgroundColor: AppColors.lessonTimeBg,
                         iconBackgroundColor: AppColors.reportReviewIconBg,
                         valueColor: AppColors.lessonTimeText,
@@ -117,7 +117,7 @@ class QuizCompletionView extends GetView<QuizController> {
                 SizedBox(height: 24.h),
                 LessonSimplePill(
                   icon: Icons.local_fire_department_rounded,
-                  subtitle: 'DAILY STREAK',
+                  subtitle: 'gen_daily_streak'.tr.tr,
                   title: '${complete.streakDays} Days',
                   iconColor: AppColors.blockDangerRed,
                   backgroundColor: AppColors.lessonStreakBg,

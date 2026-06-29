@@ -225,7 +225,7 @@ class _StatsSection extends StatelessWidget {
           child: ProfileStatCard(
             icon: Icons.local_fire_department_rounded,
             value: profile.streakValue,
-            label: 'CURRENT STREAK',
+            label: 'gen_current_streak'.tr.tr,
             backgroundColor: AppColors.profileOrangeCardBg,
             textColor: AppColors.profileOrangeText,
             iconColor: AppColors.notificationOrange,
@@ -236,7 +236,7 @@ class _StatsSection extends StatelessWidget {
           child: ProfileStatCard(
             icon: Icons.flash_on_rounded,
             value: profile.xpValue,
-            label: 'TOTAL EARNED',
+            label: 'gen_total_earned'.tr.tr,
             backgroundColor: AppColors.profileBlueCardBg,
             textColor: AppColors.profileBlueText,
             iconColor: AppColors.profileBlueText,
@@ -261,7 +261,7 @@ class _SafetyActions extends GetView<MessageUserInfoController> {
             child: ProfileSafetyActionCard(
               icon: Icons.block_rounded,
               title: isBlocked ? 'Unblock User' : 'Block User',
-              subtitle: 'Stop contact',
+              subtitle: 'gen_stop_contact'.tr.tr,
               isBlockedAction: isBlocked,
               onTap: isBlocked
                   ? controller.openUnblockUserSheet
@@ -272,8 +272,8 @@ class _SafetyActions extends GetView<MessageUserInfoController> {
           Expanded(
             child: ProfileSafetyActionCard(
               icon: Icons.warning_amber_rounded,
-              title: 'Report Profile',
-              subtitle: 'Notify Admin',
+              title: 'gen_report_profile'.tr.tr,
+              subtitle: 'gen_notify_admin'.tr.tr,
               isDashed: true,
               onTap: controller.openReportUser,
             ),

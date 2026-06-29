@@ -467,28 +467,28 @@ class ShopController extends GetxController {
   final RxInt cvCreditBalance = 1.obs;
 
   final RxList<CvCreditOffer> cvCreditOffers = <CvCreditOffer>[
-    const CvCreditOffer(
+    CvCreditOffer(
       id: 'single_refill',
-      title: 'Single Refill',
-      subtitle: '1 Credit',
+      title: 'gen_single_refill'.tr.tr,
+      subtitle: 'gen_1_credit'.tr.tr,
       credits: 1,
       priceEur: 0.99,
       icon: Icons.history_edu_rounded,
     ),
-    const CvCreditOffer(
+    CvCreditOffer(
       id: 'pro_hunter_pack',
-      title: 'Pro Hunter Pack (5×)',
-      subtitle: '5 Credits',
+      title: 'gen_pro_hunter_pack_5'.tr.tr,
+      subtitle: 'gen_5_credits'.tr.tr,
       credits: 5,
       priceEur: 2.99,
       couponPriceEur: 1.99,
       badge: 'BEST VALUE',
       icon: Icons.history_edu_rounded,
     ),
-    const CvCreditOffer(
+    CvCreditOffer(
       id: 'career_sprint_pack',
-      title: 'Career Sprint Pack',
-      subtitle: '10 Credits',
+      title: 'gen_career_sprint_pack'.tr.tr,
+      subtitle: 'gen_10_credits'.tr.tr,
       credits: 10,
       priceEur: 9.99,
       isMonthly: true,
@@ -635,17 +635,17 @@ class ShopController extends GetxController {
 
   final RxString orderSearchQuery = ''.obs;
 
-  final List<OrderHistoryItem> orderHistoryItems = const <OrderHistoryItem>[
+  final List<OrderHistoryItem> orderHistoryItems = <OrderHistoryItem>[
     OrderHistoryItem(
       id: '#IT-SHK-1024',
-      title: 'Fluent Learner\nBundle',
+      title: 'gen_fluent_learner_nbundle'.tr.tr,
       category: OrderHistoryFilterTitles.aiRefills,
       price: '€6.99',
       date: 'Oct 24, 2023',
     ),
     OrderHistoryItem(
       id: '#IT-SHK-0988',
-      title: 'Level A1:\nLifetime Access',
+      title: 'gen_level_a1_nlifetime_access'.tr.tr,
       category: OrderHistoryFilterTitles.courses,
       price: '€29.99',
       date: 'Oct 15, 2023',

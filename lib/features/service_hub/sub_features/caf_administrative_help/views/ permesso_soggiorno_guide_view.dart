@@ -41,7 +41,7 @@ class PermessoSoggiornoGuideView extends StatelessWidget {
               ),
             ),
             GuideBottomActionButton(
-              title: 'Go To official Website',
+              title: 'gen_go_to_official_website'.tr.tr,
               onTap: () {},
             ),
           ],

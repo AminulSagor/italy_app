@@ -140,7 +140,7 @@ class AppDrawer extends StatelessWidget {
 
                       _DrawerItem(
                         icon: Icons.person,
-                        title: 'Profile',
+                        title: 'gen_profile'.tr,
                         isSelected: true,
                         onTap: onProfileTap,
                       ),
@@ -153,7 +153,7 @@ class AppDrawer extends StatelessWidget {
 
                       _DrawerItem(
                         icon: Icons.menu_book_outlined,
-                        title: 'Guide',
+                        title: 'gen_guide'.tr,
                         onTap:
                             onGuideTap ??
                             () {
@@ -164,7 +164,7 @@ class AppDrawer extends StatelessWidget {
 
                       _DrawerItem(
                         icon: Icons.card_giftcard_outlined,
-                        title: 'Reward',
+                        title: 'gen_reward'.tr,
                         onTap:
                             onRewardTap ??
                             () {
@@ -175,7 +175,7 @@ class AppDrawer extends StatelessWidget {
 
                       _DrawerItem(
                         icon: Icons.help_outline,
-                        title: 'Support',
+                        title: 'gen_support'.tr,
                         onTap:
                             onSupportTap ??
                             () {
@@ -186,13 +186,13 @@ class AppDrawer extends StatelessWidget {
 
                       _DrawerItem(
                         icon: Icons.translate,
-                        title: 'Language',
+                        title: 'gen_language'.tr,
                         onTap: onLanguageTap,
                       ),
 
                       _DrawerItem(
                         icon: Icons.settings_outlined,
-                        title: 'Settings',
+                        title: 'gen_settings'.tr,
                         onTap:
                             onSettingsTap ??
                             () {

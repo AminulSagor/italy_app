@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 enum ChapterQuizStatus { disabled, enabled, completed }
 
 enum ChapterMediaType { video, audio, pdf }
@@ -64,7 +65,7 @@ class ChapterDetailModel {
           : resources.isNotEmpty
               ? resources.first
               : ChapterResourceModel.notGiven(
-                  title: 'Theory Book',
+                  title: 'gen_theory_book'.tr.tr,
                   iconName: 'book',
                 ),
       vocabulary: json['vocabulary'] is Map
@@ -264,7 +265,7 @@ class ChapterResourceModel {
   }) {
     return ChapterResourceModel(
       title: title,
-      subtitle: 'Not given',
+      subtitle: 'gen_not_given'.tr.tr,
       iconName: iconName,
       isAvailable: false,
     );

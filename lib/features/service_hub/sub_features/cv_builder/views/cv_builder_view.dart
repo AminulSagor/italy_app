@@ -31,7 +31,7 @@ class CvBuilderView extends StatelessWidget {
                 onTap: () => Get.toNamed(AppRoutes.createCvChoice),
               ),
               SizedBox(height: 22.h),
-              const _SectionTitle(title: 'GET MORE CREDITS'),
+              _SectionTitle(title: 'gen_get_more_credits'.tr.tr),
               SizedBox(height: 10.h),
               SizedBox(
                 height: 88.h,
@@ -40,7 +40,7 @@ class CvBuilderView extends StatelessWidget {
                   physics: const BouncingScrollPhysics(),
                   children: <Widget>[
                     CvCreditCard(
-                      title: '1 CV Credit',
+                      title: 'gen_1_cv_credit'.tr.tr,
                       price: '€0.99',
                       backgroundColor: AppColors.white,
                       titleColor: AppColors.homePrimaryText,
@@ -51,7 +51,7 @@ class CvBuilderView extends StatelessWidget {
                     ),
                     SizedBox(width: 10.w),
                     CvCreditCard(
-                      title: '5 CV Credits',
+                      title: 'gen_5_cv_credits'.tr.tr,
                       price: '€2.99',
                       backgroundColor: AppColors.primaryGreen,
                       titleColor: AppColors.white,
@@ -62,7 +62,7 @@ class CvBuilderView extends StatelessWidget {
                     ),
                     SizedBox(width: 10.w),
                     CvCreditCard(
-                      title: 'Unlimited',
+                      title: 'gen_unlimited'.tr.tr,
                       price: '€5.99',
                       backgroundColor: AppColors.homeOrange,
                       titleColor: AppColors.homePrimaryText,
@@ -73,7 +73,7 @@ class CvBuilderView extends StatelessWidget {
                     ),
                     SizedBox(width: 10.w),
                     CvCreditCard(
-                      title: '1 CV Credit',
+                      title: 'gen_1_cv_credit'.tr.tr,
                       price: '€0.99',
                       backgroundColor: AppColors.white,
                       titleColor: AppColors.homePrimaryText,
@@ -84,7 +84,7 @@ class CvBuilderView extends StatelessWidget {
                     ),
                     SizedBox(width: 10.w),
                     CvCreditCard(
-                      title: '5 CV Credits',
+                      title: 'gen_5_cv_credits'.tr.tr,
                       price: '€2.99',
                       backgroundColor: AppColors.primaryGreen,
                       titleColor: AppColors.white,
@@ -95,7 +95,7 @@ class CvBuilderView extends StatelessWidget {
                     ),
                     SizedBox(width: 10.w),
                     CvCreditCard(
-                      title: 'Unlimited',
+                      title: 'gen_unlimited'.tr.tr,
                       price: '€5.99',
                       backgroundColor: AppColors.homeOrange,
                       titleColor: AppColors.homePrimaryText,
@@ -108,11 +108,11 @@ class CvBuilderView extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 22.h),
-              const _SectionTitle(title: 'YOUR DOCUMENTS'),
+              _SectionTitle(title: 'gen_your_documents'.tr.tr),
               SizedBox(height: 10.h),
               CvDocumentCard(
-                title: 'Restaurant Waiter CV',
-                subtitle: 'Saved Oct 24,2023',
+                title: 'gen_restaurant_waiter_cv'.tr.tr,
+                subtitle: 'gen_saved_oct_24_2023'.tr.tr,
                 onPreviewTap: () {},
                 onDownloadTap: () {},
                 onEditTap: () {},
@@ -120,7 +120,7 @@ class CvBuilderView extends StatelessWidget {
               SizedBox(height: 10.h),
               CvDocumentCard(
                 title: 'Delivery Driver',
-                subtitle: 'Saved Sep 12, 2023',
+                subtitle: 'gen_saved_sep_12_2023'.tr.tr,
                 onPreviewTap: () {},
                 onDownloadTap: () {},
                 onEditTap: () {},

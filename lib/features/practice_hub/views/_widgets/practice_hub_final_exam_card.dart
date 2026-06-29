@@ -116,7 +116,7 @@ class _LockedFinalExamCard extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      'Final Exam – Esame finale',
+                      '${'gen_final_exam'.tr} – Esame finale',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: AppFont.font20.sp,
@@ -128,7 +128,7 @@ class _LockedFinalExamCard extends StatelessWidget {
                     ),
                     SizedBox(height: 10.h),
                     Text(
-                      'Complete the course to unlock final exam',
+                      'gen_complete_the_course_to_unlock'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: AppFont.font13.sp,

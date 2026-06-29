@@ -22,7 +22,7 @@ class RewardsView extends GetView<RewardController> {
           padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 52.h),
           child: Column(
             children: <Widget>[
-              const RewardTopBar(title: 'Rewards'),
+              RewardTopBar(title: 'gen_rewards'.tr.tr),
               SizedBox(height: 24.h),
 
               _WinnerCard(onOpenChest: controller.openChest),
@@ -58,7 +58,7 @@ class RewardsView extends GetView<RewardController> {
 
               SizedBox(height: 20.h),
 
-              GridView.builder(
+              Obx(() => GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: controller.rewardCards.length,
@@ -86,7 +86,7 @@ class RewardsView extends GetView<RewardController> {
                     },
                   );
                 },
-              ),
+              )),
             ],
           ),
         ),

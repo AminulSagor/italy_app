@@ -140,7 +140,7 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
                   ),
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: 'Type here...',
+                    hintText: 'gen_type_here'.tr.tr,
                     hintStyle: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,

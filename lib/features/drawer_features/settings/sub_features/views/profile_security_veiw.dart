@@ -18,7 +18,7 @@ class ProfileSecurityView extends GetView<SettingsController> {
           padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 58.h),
           child: Column(
             children: <Widget>[
-              const SettingsTopBar(title: 'Edit Profile'),
+              SettingsTopBar(title: 'gen_edit_profile'.tr.tr),
               SizedBox(height: 49.h),
               _ProfileAvatar(onTap: () => Get.toNamed(AppRoutes.profilePhoto)),
               SizedBox(height: 19.h),
@@ -32,8 +32,8 @@ class ProfileSecurityView extends GetView<SettingsController> {
                 ),
               ),
               SizedBox(height: 27.h),
-              const _ProfileTextField(
-                label: 'Full Name',
+              _ProfileTextField(
+                label: 'gen_full_name_1'.tr.tr,
                 value: 'Alessandro Rossi',
                 icon: Icons.person_outline_rounded,
               ),
@@ -67,7 +67,7 @@ class ProfileSecurityView extends GetView<SettingsController> {
 
                 return _VerifiedCard(
                   title: isEmail ? 'Email Verified' : 'Phone Verified',
-                  subtitle: 'Your account is secure',
+                  subtitle: 'gen_your_account_is_secure'.tr.tr,
                 );
               }),
               SizedBox(height: 36.h),

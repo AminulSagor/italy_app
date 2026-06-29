@@ -103,6 +103,7 @@ import '../features/drawer_features/guide/guide_controller.dart';
 import '../features/drawer_features/guide/views/guide_view.dart';
 import '../features/drawer_features/guide/views/guide_faq_view.dart';
 import '../features/drawer_features/rewards/reward_controller.dart';
+import '../features/drawer_features/rewards/services/reward_service.dart';
 import '../features/drawer_features/rewards/views/rewards_view.dart';
 import '../features/drawer_features/rewards/views/reward_chest_view.dart';
 import '../features/drawer_features/rewards/views/rewards_history_view.dart';
@@ -747,7 +748,10 @@ class AppPages {
       name: AppRoutes.rewards,
       page: () => const RewardsView(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+        if (!Get.isRegistered<RewardService>()) {
+          Get.lazyPut<RewardService>(() => RewardService(apiClient: Get.find<ApiClient>()), fenix: true);
+        }
+        Get.lazyPut<RewardController>(() => RewardController(rewardService: Get.find<RewardService>()), fenix: true);
       }),
     ),
 
@@ -755,8 +759,11 @@ class AppPages {
       name: AppRoutes.rewardChest,
       page: () => const RewardChestView(),
       binding: BindingsBuilder(() {
+        if (!Get.isRegistered<RewardService>()) {
+          Get.lazyPut<RewardService>(() => RewardService(apiClient: Get.find<ApiClient>()), fenix: true);
+        }
         if (!Get.isRegistered<RewardController>()) {
-          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+          Get.lazyPut<RewardController>(() => RewardController(rewardService: Get.find<RewardService>()), fenix: true);
         }
       }),
     ),
@@ -765,8 +772,11 @@ class AppPages {
       name: AppRoutes.rewardsHistory,
       page: () => const RewardsHistoryView(),
       binding: BindingsBuilder(() {
+        if (!Get.isRegistered<RewardService>()) {
+          Get.lazyPut<RewardService>(() => RewardService(apiClient: Get.find<ApiClient>()), fenix: true);
+        }
         if (!Get.isRegistered<RewardController>()) {
-          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+          Get.lazyPut<RewardController>(() => RewardController(rewardService: Get.find<RewardService>()), fenix: true);
         }
       }),
     ),
@@ -775,8 +785,11 @@ class AppPages {
       name: AppRoutes.rewardDetails,
       page: () => const RewardDetailsView(),
       binding: BindingsBuilder(() {
+        if (!Get.isRegistered<RewardService>()) {
+          Get.lazyPut<RewardService>(() => RewardService(apiClient: Get.find<ApiClient>()), fenix: true);
+        }
         if (!Get.isRegistered<RewardController>()) {
-          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
+          Get.lazyPut<RewardController>(() => RewardController(rewardService: Get.find<RewardService>()), fenix: true);
         }
       }),
     ),

@@ -46,8 +46,8 @@ class PracticeHubView extends GetView<PracticeHubController> {
             children: <Widget>[
             _HorizontalPadding(
               child: _SectionTitleRow(
-                title: 'Practice Hub – Courses',
-                actionText: 'View All',
+                title: 'gen_practice_hub_courses'.tr.tr,
+                actionText: 'gen_view_all'.tr.tr,
                 onActionTap: controller.onViewAllCoursesTap,
               ),
             ),
@@ -55,22 +55,22 @@ class PracticeHubView extends GetView<PracticeHubController> {
             const PracticeHubCourseCarousel(),
             SizedBox(height: 47.h),
 
-            const _HorizontalPadding(
-              child: _SectionTitleOnly(title: 'Skill Builders'),
+            _HorizontalPadding(
+              child: _SectionTitleOnly(title: 'gen_skill_builders'.tr.tr),
             ),
             SizedBox(height: 24.h),
             const _HorizontalPadding(child: PracticeHubSkillBuilderGrid()),
             SizedBox(height: 46.h),
 
-            const _HorizontalPadding(
-              child: _SectionTitleOnly(title: 'Specialized Learning'),
+            _HorizontalPadding(
+              child: _SectionTitleOnly(title: 'gen_specialized_learning'.tr.tr),
             ),
             SizedBox(height: 24.h),
             const _HorizontalPadding(child: PracticeHubFinalExamCard()),
             SizedBox(height: 42.h),
 
-            const _HorizontalPadding(
-              child: _SectionTitleOnly(title: 'Upcoming Webinars'),
+            _HorizontalPadding(
+              child: _SectionTitleOnly(title: 'gen_upcoming_webinars'.tr.tr),
             ),
             SizedBox(height: 20.h),
               const _HorizontalPadding(child: PracticeHubWebinarCard()),

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -12,16 +13,16 @@ class AiCreditStatusRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        const _StatusChip(
+        _StatusChip(
           icon: Icons.diamond_rounded,
           iconColor: Color(0xFF357AFF),
-          label: '1.2k Tokens',
+          label: 'gen_1_2k_tokens'.tr.tr,
         ),
         const Spacer(),
-        const _StatusChip(
+        _StatusChip(
           icon: Icons.mic_rounded,
           iconColor: Color(0xFFFF4C7D),
-          label: '45m Voice',
+          label: 'gen_45m_voice'.tr.tr,
         ),
       ],
     );

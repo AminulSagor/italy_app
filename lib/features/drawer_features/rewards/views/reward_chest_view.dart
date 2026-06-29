@@ -22,7 +22,7 @@ class RewardChestView extends GetView<RewardController> {
           padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 48.h),
           child: Column(
             children: <Widget>[
-              const RewardTopBar(title: 'Chest'),
+              RewardTopBar(title: 'gen_chest'.tr.tr),
               SizedBox(height: 24.h),
 
               Container(

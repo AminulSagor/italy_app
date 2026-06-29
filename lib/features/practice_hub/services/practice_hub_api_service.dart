@@ -1,3 +1,4 @@
+import 'package:get/get.dart' hide Response, MultipartFile, FormData;
 import 'package:dio/dio.dart';
 
 import '../../../core/services/api_client.dart';
@@ -6,29 +7,31 @@ import '../models/practice_hub_models.dart';
 import '../models/survival_italian_models.dart';
 
 class PracticeHubApiService {
-  PracticeHubApiService({required ApiClient apiClient}) : _apiClient = apiClient;
+  PracticeHubApiService({required ApiClient apiClient})
+    : _apiClient = apiClient;
 
   final ApiClient _apiClient;
 
   Future<PracticeHubOverviewModel> fetchOverview() async {
-    final List<Response<dynamic>> responses =
-        await Future.wait(<Future<Response<dynamic>>>[
-          _apiClient.dio.get('/important-verbs/progress'),
-          _apiClient.dio.get(
-            '/skill-builder/career-tracks',
-            queryParameters: <String, dynamic>{'page': 1, 'limit': 100},
-          ),
-          _apiClient.dio.get('/survival-italian/situations'),
-          _apiClient.dio.get('/daily-challenges/today'),
-          _apiClient.dio.get(
-            '/webinars/live',
-            queryParameters: <String, dynamic>{'page': 1, 'limit': 1},
-          ),
-          _apiClient.dio.get(
-            '/webinars/upcoming',
-            queryParameters: <String, dynamic>{'page': 1, 'limit': 1},
-          ),
-        ]);
+    final List<Response<dynamic>> responses = await Future.wait(
+      <Future<Response<dynamic>>>[
+        _apiClient.dio.get('/important-verbs/progress'),
+        _apiClient.dio.get(
+          '/skill-builder/career-tracks',
+          queryParameters: <String, dynamic>{'page': 1, 'limit': 100},
+        ),
+        _apiClient.dio.get('/survival-italian/situations'),
+        _apiClient.dio.get('/daily-challenges/today'),
+        _apiClient.dio.get(
+          '/webinars/live',
+          queryParameters: <String, dynamic>{'page': 1, 'limit': 1},
+        ),
+        _apiClient.dio.get(
+          '/webinars/upcoming',
+          queryParameters: <String, dynamic>{'page': 1, 'limit': 1},
+        ),
+      ],
+    );
 
     final int reviewedVerbCount = _responseList(responses[0]).length;
     final Map<String, dynamic> careerTracks = _responseMap(responses[1]);
@@ -57,25 +60,36 @@ class PracticeHubApiService {
       skillBuilders: <PracticeHubSkillBuilderModel>[
         PracticeHubSkillBuilderModel(
           type: PracticeHubSkillBuilderType.importantVerbs,
-          title: 'Important Verbs',
-          subtitle: '$reviewedVerbCount reviewed',
+          title: 'gen_important_verbs'.tr,
+          subtitle: 'gen_reviewedverbcount_reviewed'.tr.replaceFirst(
+            r'$reviewedVerbCount',
+            reviewedVerbCount.toString(),
+          ),
         ),
         PracticeHubSkillBuilderModel(
           type: PracticeHubSkillBuilderType.survivalItalian,
-          title: 'Survival Italian',
-          subtitle:
-              '${survival.progress.completedCount}/${survival.progress.totalCount} learned',
+          title: 'gen_survival_italian'.tr,
+          subtitle: 'gen_survival_italian_progress'.tr
+              .replaceFirst(
+                '{completed}',
+                survival.progress.completedCount.toString(),
+              )
+              .replaceFirst('{total}', survival.progress.totalCount.toString()),
         ),
         PracticeHubSkillBuilderModel(
           type: PracticeHubSkillBuilderType.jobSentences,
-          title: 'Job Sentences',
-          subtitle: '$careerTrackCount career tracks',
+          title: 'gen_job_sentences'.tr,
+          subtitle: 'gen_careertrackcount_career_tracks'.tr.replaceFirst(
+            r'$careerTrackCount',
+            careerTrackCount.toString(),
+          ),
         ),
         PracticeHubSkillBuilderModel(
           type: PracticeHubSkillBuilderType.dailyChallenges,
-          title: 'Daily Challenges',
-          subtitle:
-              '${daily.completedTaskCount}/${daily.tasks.length} complete',
+          title: 'gen_daily_challenges'.tr,
+          subtitle: 'gen_daily_challenges_progress'.tr
+              .replaceFirst('{completed}', daily.completedTaskCount.toString())
+              .replaceFirst('{total}', daily.tasks.length.toString()),
         ),
       ],
       featuredWebinar: featuredWebinarJson == null
@@ -100,9 +114,7 @@ class PracticeHubApiService {
     return SurvivalSituationDetailModel.fromJson(_responseMap(response));
   }
 
-  Future<void> completeSurvivalSituation({
-    required String situationId,
-  }) async {
+  Future<void> completeSurvivalSituation({required String situationId}) async {
     await _apiClient.dio.post(
       '/survival-italian/situations/$situationId/complete',
       data: <String, dynamic>{

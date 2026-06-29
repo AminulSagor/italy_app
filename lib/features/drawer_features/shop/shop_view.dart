@@ -13,7 +13,7 @@ class ShopView extends GetView<ShopController> {
       backgroundColor: const Color(0xFFF8F8F8),
       appBar: SimpleAppbar(
         onBackTap: () => Navigator.pop(context),
-        title: 'Shop',
+        title: 'gen_shop'.tr.tr,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -55,7 +55,7 @@ class ShopView extends GetView<ShopController> {
                   Expanded(
                     child: _BalanceCard(
                       icon: Icons.view_in_ar_outlined,
-                      title: 'TOKENS',
+                      title: 'gen_tokens'.tr.tr,
                       value: '1,240',
                       bgColor: const Color(0xFFFFF4E9),
                       borderColor: const Color(0xFFFF9D55),
@@ -66,7 +66,7 @@ class ShopView extends GetView<ShopController> {
                   Expanded(
                     child: _BalanceCard(
                       icon: Icons.mic_none_rounded,
-                      title: 'MINUTES',
+                      title: 'gen_minutes'.tr.tr,
                       value: '45m',
                       bgColor: const Color(0xFFEFFFF7),
                       borderColor: const Color(0xFF20E5A2),
@@ -77,7 +77,7 @@ class ShopView extends GetView<ShopController> {
                   Expanded(
                     child: _BalanceCard(
                       icon: Icons.ac_unit_rounded,
-                      title: 'STREAK\nFREEZES',
+                      title: 'gen_streak_nfreezes'.tr.tr,
                       value: '3×',
                       bgColor: const Color(0xFFE8F5FF),
                       borderColor: const Color(0xFF91CFFF),

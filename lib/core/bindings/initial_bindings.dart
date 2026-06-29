@@ -14,11 +14,9 @@ import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/messages/controllers/messages_controller.dart';
 import '../../features/messages/services/messages_service.dart';
 import '../../features/messages/services/chat_socket_service.dart';
-import '../../features/messages/services/messages_mock_service.dart';
 import '../../features/messages/sub-feature/call/service/call_socket_service.dart';
 import '../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import '../../features/notifications/services/notifications_mock_service.dart';
-import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/leaderboard/services/leaderboard_service.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
 import '../services/api_client.dart';
@@ -133,9 +131,7 @@ class InitialBindings extends Bindings {
       ),
       fenix: true,
     );
-    Get.lazyPut<PracticeHubController>(
-      () => PracticeHubController(),
-    Get.lazyPut<LeaderboardController>(() => LeaderboardController());
+
     Get.lazyPut<PracticeHubApiService>(
       () => PracticeHubApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,

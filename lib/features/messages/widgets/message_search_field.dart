@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -35,7 +36,7 @@ class MessageSearchField extends StatelessWidget {
         ).copyWith(color: AppColors.homePrimaryText),
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: 'Search learners...',
+          hintText: 'gen_search_learners'.tr.tr,
           hintStyle: TextStyle(
             fontSize: AppFont.font18.sp,
             fontWeight: FontWeight.w400,

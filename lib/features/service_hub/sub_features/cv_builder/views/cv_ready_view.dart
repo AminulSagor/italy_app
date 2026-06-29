@@ -80,7 +80,7 @@ class CvReadyView extends GetView<CvReadyController> {
                         SizedBox(width: 14.w),
                         Expanded(
                           child: CvReadyActionCard(
-                            title: 'Share to\nWhatsApp',
+                            title: 'gen_share_to_nwhatsapp'.tr.tr,
                             icon: Icons.chat_rounded,
                             backgroundColor: AppColors.messageOnlineGreen,
                             iconBackgroundColor: AppColors.white.withValues(
@@ -100,7 +100,7 @@ class CvReadyView extends GetView<CvReadyController> {
               ),
             ),
             _BottomButton(
-              title: 'Finish & Go to Dashboard',
+              title: 'gen_finish_go_to_dashboard'.tr.tr,
               onTap: controller.onFinishTap,
             ),
           ],

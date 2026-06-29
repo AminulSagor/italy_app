@@ -23,7 +23,7 @@ class CheckoutPage extends StatelessWidget {
       backgroundColor: _bg,
       appBar: SimpleAppbar(
         onBackTap: () => Navigator.maybePop(context),
-        title: 'Checkout',
+        title: 'gen_checkout'.tr.tr,
         icon: Icons.arrow_back,
       ),
       body: SingleChildScrollView(
@@ -471,8 +471,8 @@ class _PaymentMethodPill extends StatelessWidget {
   _PaymentMethodUi _paymentMethodUi(CheckoutPaymentMethod method) {
     switch (method) {
       case CheckoutPaymentMethod.card:
-        return const _PaymentMethodUi(
-          title: 'Card',
+        return _PaymentMethodUi(
+          title: 'gen_card'.tr.tr,
           icon: Icon(
             Icons.credit_card_outlined,
             color: CheckoutPage._green,
@@ -480,14 +480,14 @@ class _PaymentMethodPill extends StatelessWidget {
           ),
         );
       case CheckoutPaymentMethod.paypal:
-        return const _PaymentMethodUi(title: 'PayPal', icon: _PaypalMark());
+        return _PaymentMethodUi(title: 'gen_paypal'.tr.tr, icon: _PaypalMark());
       case CheckoutPaymentMethod.applePay:
-        return const _PaymentMethodUi(
-          title: 'Apple Pay',
+        return _PaymentMethodUi(
+          title: 'gen_apple_pay'.tr.tr,
           icon: Icon(Icons.apple, color: Colors.black, size: 33),
         );
       case CheckoutPaymentMethod.bkash:
-        return const _PaymentMethodUi(title: 'Bkash', icon: _BkashMark());
+        return _PaymentMethodUi(title: 'gen_bkash'.tr.tr, icon: _BkashMark());
     }
   }
 }

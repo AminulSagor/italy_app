@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -122,17 +123,17 @@ class UnlockChapterDialog extends StatelessWidget {
                 SizedBox(height: 16.h),
                 Row(
                   children: <Widget>[
-                    const Expanded(
+                    Expanded(
                       child: _DialogBenefitSmall(
                         icon: Icons.psychology_outlined,
-                        label: 'AI\nPractice',
+                        label: 'gen_ai_npractice'.tr.tr,
                       ),
                     ),
                     SizedBox(width: 16.w),
-                    const Expanded(
+                    Expanded(
                       child: _DialogBenefitSmall(
                         icon: Icons.school_outlined,
-                        label: 'Certificates',
+                        label: 'gen_certificates'.tr.tr,
                       ),
                     ),
                   ],

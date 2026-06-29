@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -52,17 +53,17 @@ class GuideInfoCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12.h),
-          const _RequirementItem(
-            title: 'খোলা Passport',
-            subtitle: 'পাসপোর্টের ফটোকপি',
+          _RequirementItem(
+            title: 'gen_passport'.tr.tr,
+            subtitle: 'পাসপোর্টের ফটোকপি'.tr,
           ),
-          const _RequirementItem(
-            title: 'Revenue Stamp (€16.00)',
-            subtitle: 'সু marca da bollo',
+          _RequirementItem(
+            title: 'gen_revenue_stamp_16_00'.tr.tr,
+            subtitle: 'gen_marca_da_bollo'.tr.tr,
           ),
-          const _RequirementItem(
-            title: 'Proof of Residence',
-            subtitle: 'রেসিডেন্সির প্রমাণপত্র',
+          _RequirementItem(
+            title: 'gen_proof_of_residence'.tr.tr,
+            subtitle: 'রেসিডেন্সির প্রমাণপত্র'.tr,
           ),
           SizedBox(height: 12.h),
           Divider(

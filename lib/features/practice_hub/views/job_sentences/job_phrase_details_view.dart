@@ -144,7 +144,7 @@ class _PhraseSearchField extends GetView<JobSentencesController> {
               cursorColor: AppColors.primaryGreen,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'Search phrases...',
+                hintText: 'gen_search_phrases'.tr.tr,
                 hintStyle: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,

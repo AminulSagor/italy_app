@@ -229,7 +229,7 @@ class _OtpBox extends StatelessWidget {
         decoration: InputDecoration(
           counterText: '',
           border: InputBorder.none,
-          hintText: '•',
+          hintText: '•'.tr,
           hintStyle: TextStyle(
             fontSize: 32.sp,
             fontWeight: FontWeight.w900,

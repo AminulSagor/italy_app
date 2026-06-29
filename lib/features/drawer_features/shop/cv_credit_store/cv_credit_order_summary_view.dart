@@ -104,12 +104,12 @@ class _CurrencyToggle extends GetView<ShopController> {
         child: Row(
           children: <Widget>[
             _CurrencyItem(
-              title: 'EUR',
+              title: 'gen_eur'.tr.tr,
               selected: controller.selectedCurrency.value == RefillCurrency.eur,
               onTap: () => controller.selectCurrency(RefillCurrency.eur),
             ),
             _CurrencyItem(
-              title: 'BDT',
+              title: 'gen_bdt'.tr.tr,
               selected: controller.selectedCurrency.value == RefillCurrency.bdt,
               onTap: () => controller.selectCurrency(RefillCurrency.bdt),
             ),
@@ -347,7 +347,7 @@ class _CouponSection extends GetView<ShopController> {
               decoration: InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
-                hintText: 'Enter Coupon Code',
+                hintText: 'gen_enter_coupon_code'.tr.tr,
                 hintStyle: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,

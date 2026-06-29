@@ -337,12 +337,12 @@ class _TranslationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           if (message.english?.isNotEmpty ?? false)
-            _LanguageLine(label: 'ENGLISH', text: message.english!),
+            _LanguageLine(label: 'gen_english_1'.tr.tr, text: message.english!),
           if ((message.english?.isNotEmpty ?? false) &&
               (message.bangla?.isNotEmpty ?? false))
             SizedBox(height: 10.h),
           if (message.bangla?.isNotEmpty ?? false)
-            _LanguageLine(label: 'BENGALI', text: message.bangla!),
+            _LanguageLine(label: 'gen_bengali_1'.tr.tr, text: message.bangla!),
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import '../models/final_exam_models.dart';
 
 /// Legacy fallback kept for older routes and tests.
@@ -5,10 +6,10 @@ import '../models/final_exam_models.dart';
 /// The production final-exam flow uses [FinalExamApiService].
 class FinalExamMockService {
   Future<FinalExamOverviewModel> fetchOverview() async {
-    return const FinalExamOverviewModel(
-      title: 'Final Exam',
+    return FinalExamOverviewModel(
+      title: 'gen_final_exam'.tr.tr,
       heroTitle: 'Ready to Graduate?',
-      heroSubtitle: 'Complete the final exam to earn your certificate.',
+      heroSubtitle: 'gen_complete_the_final_exam_to_ear'.tr.tr,
       components: <FinalExamComponentModel>[],
       noteBangla: '',
       noteEnglish: '',
@@ -18,10 +19,10 @@ class FinalExamMockService {
   }
 
   Future<FinalExamListeningModel> fetchListeningTask() async {
-    return const FinalExamListeningModel(
+    return FinalExamListeningModel(
       sectionId: '',
       questionId: '',
-      title: 'Listening',
+      title: 'gen_listening'.tr.tr,
       clipTitle: '',
       questionTag: '',
       question: '',
@@ -63,10 +64,10 @@ class FinalExamMockService {
   Future<String> submitExam() async => '';
 
   Future<FinalExamResultModel> fetchResult() async {
-    return const FinalExamResultModel(
+    return FinalExamResultModel(
       markPercent: 0,
-      title: 'Final Exam Result',
-      subtitle: 'Result unavailable.',
+      title: 'gen_final_exam_result'.tr.tr,
+      subtitle: 'gen_result_unavailable'.tr.tr,
       xpAwarded: 0,
       teacherComment: '',
       teacherCommentBangla: '',

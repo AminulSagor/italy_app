@@ -1,3 +1,4 @@
+import 'package:get/get.dart' hide Response, MultipartFile, FormData;
 import 'package:dio/dio.dart';
 
 import '../../../core/services/api_client.dart';
@@ -354,7 +355,7 @@ class CoursesApiService {
       courseId: _stringValue(chapter['courseId']),
       chapterId: _stringValue(chapter['id']),
       title: _fallbackString(chapter['title'], 'Untitled Chapter'),
-      subtitle: 'No published lesson yet',
+      subtitle: 'gen_no_published_lesson_yet'.tr.tr,
       statusLabel: 'NOT AVAILABLE',
       progress: 0,
       state: CourseChapterState.locked,
@@ -554,10 +555,10 @@ class CoursesApiService {
         ),
       ];
 
-  static const SpecializedLearningModel _defaultSpecializedLearning =
+  static SpecializedLearningModel _defaultSpecializedLearning =
       SpecializedLearningModel(
-        title: 'Final Exam – Esame finale',
-        subtitle: 'Complete the course to unlock final exam',
+        title: 'gen_final_exam_esame_finale'.tr.tr,
+        subtitle: 'gen_complete_the_course_to_unlock'.tr.tr,
         requirementLabel: '80% Required',
         lockedLabel: 'Locked',
       );

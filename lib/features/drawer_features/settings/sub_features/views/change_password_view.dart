@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:italir_pothe/features/drawer_features/settings/widgets/settings_ui_widgets.dart';
@@ -42,23 +43,23 @@ class ChangePasswordView extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 43.h),
-              const SettingsPillField(
-                label: 'Current Password',
+              SettingsPillField(
+                label: 'gen_current_password'.tr.tr,
                 hint: '••••••••',
                 icon: Icons.lock_outline_rounded,
                 obscureText: true,
               ),
               SizedBox(height: 28.h),
-              const SettingsPillField(
-                label: 'New Password',
+              SettingsPillField(
+                label: 'gen_new_password'.tr.tr,
                 hint: 'Create a new password',
                 icon: Icons.key_rounded,
                 suffixIcon: Icons.visibility_outlined,
                 obscureText: true,
               ),
               SizedBox(height: 28.h),
-              const SettingsPillField(
-                label: 'Confirm New Password',
+              SettingsPillField(
+                label: 'gen_confirm_new_password'.tr.tr,
                 hint: 'Repeat new password',
                 icon: Icons.verified_user_outlined,
                 obscureText: true,
@@ -70,8 +71,8 @@ class ChangePasswordView extends StatelessWidget {
                 text: 'RESET PASSWORD  →',
                 onTap: () {
                   SettingsSuccessBottomSheet.show(
-                    title: 'Password Updated!',
-                    subtitle: 'Your Password has been\nsuccessfully updated.',
+                    title: 'gen_password_updated'.tr.tr,
+                    subtitle: 'gen_your_password_has_been_nsucces'.tr.tr,
                   );
                 },
               ),

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import '../../quiz/models/quiz_models.dart';
 import '../models/final_exam_api_models.dart';
 import '../models/final_exam_models.dart';
@@ -14,32 +15,32 @@ class FinalExamFlowMapper {
       heroSubtitle: data.examDescription.isNotEmpty
           ? data.examDescription
           : 'Complete the final exam to earn your course certificate.',
-      components: const <FinalExamComponentModel>[
+      components: <FinalExamComponentModel>[
         FinalExamComponentModel(
           id: 'core_quiz',
-          title: 'Part 1: Core Quiz',
-          subtitle: 'Auto-graded knowledge assessment',
+          title: 'gen_part_1_core_quiz'.tr.tr,
+          subtitle: 'gen_auto_graded_knowledge_assessme'.tr.tr,
           iconName: 'quiz',
           tone: FinalExamComponentTone.green,
         ),
         FinalExamComponentModel(
           id: 'listening_lab',
-          title: 'Part 2: Listening Lab',
-          subtitle: 'Audio comprehension assessment',
+          title: 'gen_part_2_listening_lab'.tr.tr,
+          subtitle: 'gen_audio_comprehension_assessment'.tr.tr,
           iconName: 'headphones',
           tone: FinalExamComponentTone.blue,
         ),
         FinalExamComponentModel(
           id: 'writing_task',
-          title: 'Part 3: Writing Task',
-          subtitle: 'Teacher review may be required',
+          title: 'gen_part_3_writing_task'.tr.tr,
+          subtitle: 'gen_teacher_review_may_be_required'.tr.tr,
           iconName: 'write',
           tone: FinalExamComponentTone.orange,
         ),
         FinalExamComponentModel(
           id: 'speaking_lab',
-          title: 'Part 4: Speaking Lab',
-          subtitle: 'Record and submit your answer',
+          title: 'gen_part_4_speaking_lab'.tr.tr,
+          subtitle: 'gen_record_and_submit_your_answer'.tr.tr,
           iconName: 'speak',
           tone: FinalExamComponentTone.lime,
         ),
@@ -177,7 +178,7 @@ class FinalExamFlowMapper {
       banglaInstruction: question.promptBn,
       tip: question.subtitle.isNotEmpty
           ? question.subtitle
-          : 'Speak clearly and submit your best recording.',
+          : 'gen_speak_clearly_and_submit_your'.tr.tr,
       maxDurationSeconds: section.rule.maxDurationSeconds > 0
           ? section.rule.maxDurationSeconds
           : 60,

@@ -25,7 +25,7 @@ class PurchaseCompletedPage extends StatelessWidget {
       backgroundColor: bg,
       appBar: SimpleAppbar(
         onBackTap: () => Get.back(),
-        title: 'Refill Completed',
+        title: 'gen_refill_completed'.tr.tr,
         icon: Icons.close,
       ),
       body: SafeArea(
@@ -83,7 +83,7 @@ class PurchaseCompletedPage extends StatelessWidget {
                               icon: Icons.mic,
                               iconColor: const Color(0xFF006BAA),
                               value: controller.selectedPlanVoiceMinutes,
-                              label: 'Voice Interaction',
+                              label: 'gen_voice_interaction'.tr.tr,
                               textColor: const Color(0xFF075D97),
                             ),
                           ),
@@ -94,7 +94,7 @@ class PurchaseCompletedPage extends StatelessWidget {
                               icon: Symbols.deployed_code,
                               iconColor: const Color(0xFF9A5A00),
                               value: controller.selectedPlanTokensShort,
-                              label: 'AI Smart Tokens',
+                              label: 'gen_ai_smart_tokens'.tr.tr,
                               textColor: const Color(0xFF3A3434),
                             ),
                           ),
@@ -260,7 +260,7 @@ class PurchaseCompletedPage extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _orderInfo(label: 'ORDER ID', value: orderId),
+            child: _orderInfo(label: 'gen_order_id'.tr.tr, value: orderId),
           ),
           Container(height: 34.h, width: 1.w, color: const Color(0xFFE1E1E1)),
           SizedBox(width: 12.w),
