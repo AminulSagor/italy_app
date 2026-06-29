@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../models/shop_models.dart';
 import '../shop_controller.dart';
 
 class CvCreditOrderSummaryView extends GetView<ShopController> {
@@ -206,14 +207,16 @@ class _SelectedCvPackCard extends GetView<ShopController> {
                 borderRadius: BorderRadius.circular(28.r),
               ),
               child: Icon(
-                controller.selectedCvCreditOffer.icon,
+                controller.selectedCvCreditOffer.isMonthly
+                    ? Icons.all_inclusive_rounded
+                    : Icons.history_edu_rounded,
                 size: 34.r,
                 color: _brown,
               ),
             ),
             const Spacer(),
             Text(
-              controller.selectedCvCreditOffer.title,
+              controller.selectedCvCreditOffer.name,
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -437,7 +440,7 @@ class _BuyButton extends GetView<ShopController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      'Buy CV Credits Now',
+                      'Continue to Checkout',
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w900,

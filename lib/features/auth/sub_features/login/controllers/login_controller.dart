@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 
 import '../../../../../core/localization/translation_service.dart';
 import '../../../../../core/services/api_error_handler.dart';
+import '../../../../../core/controllers/user_session_controller.dart';
+import '../../../../../core/services/learning_activity_tracker_service.dart';
 import '../../../../../core/services/auth_service.dart';
 import '../../../../../features/messages/services/chat_socket_service.dart';
 import '../../../../../core/services/device_push_token_service.dart';
@@ -111,6 +113,12 @@ class LoginController extends GetxController {
       }
 
       await Get.find<DevicePushTokenService>().registerCurrentDevice();
+      if (Get.isRegistered<UserSessionController>()) {
+        await Get.find<UserSessionController>().loadUser(forceRefresh: true);
+      }
+      if (Get.isRegistered<LearningActivityTrackerService>()) {
+        await Get.find<LearningActivityTrackerService>().startSession();
+      }
       Get.offAllNamed(AppRoutes.wrapper);
     } finally {
       form.value = form.value.copyWith(isLoading: false);

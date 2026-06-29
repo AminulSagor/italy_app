@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
+import '../../../../../core/controllers/user_session_controller.dart';
 import '../../../../../core/services/api_error_handler.dart';
 import '../models/vocabulary_models.dart';
 import '../services/vocabulary_api_service.dart';
@@ -11,13 +14,16 @@ class VocabularyController extends GetxController {
   final String? lessonId;
   final VocabularyMockService _vocabularyMockService;
   final VocabularyApiService _vocabularyApiService;
+  final UserSessionController _userSessionController;
 
   VocabularyController({
     required VocabularyMockService vocabularyMockService,
     required VocabularyApiService vocabularyApiService,
+    required UserSessionController userSessionController,
     this.lessonId,
   })  : _vocabularyMockService = vocabularyMockService,
-        _vocabularyApiService = vocabularyApiService;
+        _vocabularyApiService = vocabularyApiService,
+        _userSessionController = userSessionController;
 
   final RxBool isLoading = false.obs;
   final RxBool isRevealed = false.obs;
@@ -50,10 +56,18 @@ class VocabularyController extends GetxController {
 
   int get reviewedCount => rightCount.value + wrongCount.value;
 
+  int get currentStreakDays => _userSessionController.currentStreakDays;
+
   @override
   void onInit() {
     super.onInit();
-    loadVocabulary();
+    unawaited(
+      _userSessionController.loadUser(
+        forceRefresh: true,
+        showError: false,
+      ),
+    );
+    unawaited(loadVocabulary());
   }
 
   Future<void> loadVocabulary() async {

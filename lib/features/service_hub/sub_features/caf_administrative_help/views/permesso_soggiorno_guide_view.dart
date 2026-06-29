@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-
-import '../ _widgets/guide_bottom_action_button.dart';
-import '../ _widgets/guide_info_card.dart';
-import '../ _widgets/guide_video_card.dart';
-import '../ _widgets/official_checklist_card.dart';
 import '../../../../../core/themes/app_colors.dart';
 
 import '../../../../../core/themes/app_font.dart';
-
-
-
+import '../_widgets/guide_bottom_action_button.dart';
+import '../_widgets/guide_info_card.dart';
+import '../_widgets/guide_video_card.dart';
+import '../_widgets/official_checklist_card.dart';
 
 class PermessoSoggiornoGuideView extends StatelessWidget {
   const PermessoSoggiornoGuideView({super.key});

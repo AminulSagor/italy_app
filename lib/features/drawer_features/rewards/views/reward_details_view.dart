@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
+import '../models/reward_models.dart';
+import '../reward_controller.dart';
+import '../widgets/reward_shipping_dialog.dart';
 import '../widgets/reward_widgets.dart';
 
-class RewardDetailsView extends StatelessWidget {
+class RewardDetailsView extends GetView<RewardController> {
   const RewardDetailsView({super.key});
 
   static const Color bg = Color(0xFFF5F5F5);
@@ -14,283 +18,428 @@ class RewardDetailsView extends StatelessWidget {
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(25.w, 39.h, 25.w, 56.h),
-          child: Column(
-            children: <Widget>[
-              const RewardTopBar(title: 'Reward Details'),
-              SizedBox(height: 30.h),
-
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.fromLTRB(34.w, 31.h, 34.w, 33.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(45.r),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.035),
-                      blurRadius: 22.r,
-                      offset: Offset(0, 10.h),
+        child: Obx(() {
+          final RewardModel? reward = controller.selectedReward.value;
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(25.w, 39.h, 25.w, 56.h),
+            child: Column(
+              children: <Widget>[
+                const RewardTopBar(title: 'Reward Details'),
+                SizedBox(height: 30.h),
+                if (controller.isLoadingDetails.value && reward == null)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 120),
+                    child: CircularProgressIndicator(color: green),
+                  )
+                else if (reward == null)
+                  RewardStateMessage(
+                    icon: Icons.error_outline_rounded,
+                    title: 'Reward unavailable',
+                    message: controller.detailsError.value.isEmpty
+                        ? 'Could not load this reward.'
+                        : controller.detailsError.value,
+                    buttonText: 'Back',
+                    onTap: Get.back,
+                  )
+                else ...<Widget>[
+                  _RewardHeroCard(reward: reward),
+                  SizedBox(height: 30.h),
+                  _RewardMetaRow(reward: reward),
+                  if (reward.valueLabel.isNotEmpty) ...<Widget>[
+                    SizedBox(height: 28.h),
+                    _RewardValueCard(reward: reward),
+                  ],
+                  if (reward.earnedReason?.isNotEmpty == true) ...<Widget>[
+                    SizedBox(height: 28.h),
+                    _EarnedReasonCard(reason: reward.earnedReason!),
+                  ],
+                  if (reward.rewardType.isPhysical) ...<Widget>[
+                    SizedBox(height: 28.h),
+                    _DeliveryCard(reward: reward),
+                  ],
+                  if (reward.action != null ||
+                      reward.canConfirmDelivery) ...<Widget>[
+                    SizedBox(height: 34.h),
+                    RewardPrimaryButton(
+                      text: reward.canConfirmDelivery
+                          ? 'Confirm Delivery'
+                          : reward.action!.label,
+                      suffixIcon: _actionIcon(reward),
+                      onTap: () => _handleAction(reward),
+                      isLoading:
+                          controller.isSavingShippingAddress.value ||
+                          controller.isConfirmingDelivery.value ||
+                          controller.isDownloadingReward.value,
                     ),
                   ],
-                ),
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      height: 191.h,
-                      width: 191.h,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(26.r),
-                      ),
-                      child: Image.asset(
-                        'assets/rewards/headphones.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => Icon(
-                          Icons.headphones_rounded,
-                          size: 136.r,
-                          color: const Color(0xFFD71920),
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: 25.h),
-
-                    Text(
-                      'Boat Wireless\nHeadphones',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 29.sp,
-                        height: 1.08,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF2D3032),
-                        letterSpacing: -0.8,
-                      ),
-                    ),
-
-                    SizedBox(height: 13.h),
-
-                    Text(
-                      'Premium Sound Experience',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF626262),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 32.h),
-
-              Row(
-                children: <Widget>[
-                  Container(
-                    width: 161.w,
-                    height: 65.h,
-                    padding: EdgeInsets.symmetric(horizontal: 19.w),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD4F8C3),
-                      borderRadius: BorderRadius.circular(100.r),
-                      border: Border.all(color: const Color(0xFFAAE891)),
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Container(
-                          width: 7.r,
-                          height: 7.r,
-                          decoration: const BoxDecoration(
-                            color: green,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 15.w),
-                        Text(
-                          'Status:\nDelivered',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            height: 1.25,
-                            fontWeight: FontWeight.w900,
-                            color: green,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 18.w),
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    size: 18.r,
-                    color: const Color(0xFF575757),
-                  ),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: Text(
-                      'Awarded: Sept 20,\n2023',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        height: 1.25,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF626262),
-                      ),
-                    ),
-                  ),
                 ],
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Future<void> _handleAction(RewardModel reward) async {
+    if (reward.canConfirmDelivery) {
+      await controller.confirmDelivery(reward);
+      return;
+    }
+
+    if (reward.action?.type == RewardActionType.shippingAddress) {
+      final bool ready = await controller.prepareShippingAddress(reward);
+      if (ready) {
+        await Get.dialog<void>(
+          const RewardShippingDialog(),
+          barrierColor: Colors.black.withValues(alpha: 0.38),
+        );
+      }
+      return;
+    }
+
+    await controller.handleRewardAction(reward);
+  }
+
+  IconData? _actionIcon(RewardModel reward) {
+    if (reward.canConfirmDelivery) return Icons.inventory_2_outlined;
+    switch (reward.action?.type) {
+      case RewardActionType.shippingAddress:
+      case RewardActionType.trackDelivery:
+        return Icons.local_shipping_outlined;
+      case RewardActionType.downloadFile:
+      case RewardActionType.viewCertificate:
+        return Icons.file_download_outlined;
+      case RewardActionType.startCourse:
+        return Icons.school_outlined;
+      default:
+        return null;
+    }
+  }
+}
+
+class _RewardHeroCard extends StatelessWidget {
+  const _RewardHeroCard({required this.reward});
+
+  final RewardModel reward;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(34.w, 31.h, 34.w, 33.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(45.r),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.035),
+            blurRadius: 22.r,
+            offset: Offset(0, 10.h),
+          ),
+        ],
+      ),
+      child: Column(
+        children: <Widget>[
+          Container(
+            height: 191.h,
+            width: 191.h,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: RewardVisuals.background(reward.rewardType),
+              borderRadius: BorderRadius.circular(36.r),
+            ),
+            child: RewardImage(
+              rewardType: reward.rewardType,
+              imageUrl: reward.imageUrl,
+              size: 150,
+            ),
+          ),
+          SizedBox(height: 25.h),
+          Text(
+            reward.title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 27.sp,
+              height: 1.1,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF2D3032),
+              letterSpacing: -0.8,
+            ),
+          ),
+          if (reward.subtitle.isNotEmpty) ...<Widget>[
+            SizedBox(height: 13.h),
+            Text(
+              reward.subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15.sp,
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF626262),
               ),
-
-              SizedBox(height: 35.h),
-
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.fromLTRB(32.w, 31.h, 32.w, 31.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F1F1),
-                  borderRadius: BorderRadius.circular(34.r),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Container(
-                          width: 48.r,
-                          height: 48.r,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF9700),
-                            borderRadius: BorderRadius.circular(15.r),
-                          ),
-                          child: Icon(
-                            Icons.workspace_premium_rounded,
-                            size: 26.r,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 17.w),
-                        Expanded(
-                          child: Text(
-                            'How you earned this',
-                            style: TextStyle(
-                              fontSize: 21.sp,
-                              fontWeight: FontWeight.w900,
-                              color: const Color(0xFF2D3032),
-                              letterSpacing: -0.45,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 24.h),
-                    RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          fontSize: 17.sp,
-                          height: 1.55,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF626262),
-                          letterSpacing: -0.2,
-                        ),
-                        children: const <TextSpan>[
-                          TextSpan(text: 'You reached the '),
-                          TextSpan(
-                            text: 'Top 3 in the\nGold League',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFFA76500),
-                            ),
-                          ),
-                          TextSpan(
-                            text:
-                                ' for 4 consecutive\nweeks. Remarkable consistency!',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+          ],
+          if (reward.congratulatoryNote?.isNotEmpty == true) ...<Widget>[
+            SizedBox(height: 16.h),
+            Text(
+              reward.congratulatoryNote!,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13.sp,
+                height: 1.45,
+                fontWeight: FontWeight.w600,
+                color: RewardVisuals.accent(reward.rewardType),
               ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
-              SizedBox(height: 39.h),
+class _RewardMetaRow extends StatelessWidget {
+  const _RewardMetaRow({required this.reward});
 
+  final RewardModel reward;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Container(
+            height: 62.h,
+            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: RewardVisuals.statusBackground(reward.status),
+              borderRadius: BorderRadius.circular(100.r),
+            ),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 7.r,
+                  height: 7.r,
+                  decoration: BoxDecoration(
+                    color: RewardVisuals.statusText(reward.status),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(width: 11.w),
+                Expanded(
+                  child: Text(
+                    reward.statusLabel,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w900,
+                      color: RewardVisuals.statusText(reward.status),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(width: 16.w),
+        Icon(
+          Icons.calendar_today_outlined,
+          size: 18.r,
+          color: const Color(0xFF575757),
+        ),
+        SizedBox(width: 9.w),
+        Expanded(
+          child: Text(
+            'Awarded\n${formatRewardDate(reward.awardedAt)}',
+            style: TextStyle(
+              fontSize: 12.sp,
+              height: 1.3,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF626262),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RewardValueCard extends StatelessWidget {
+  const _RewardValueCard({required this.reward});
+
+  final RewardModel reward;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color accent = RewardVisuals.accent(reward.rewardType);
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 22.h),
+      decoration: BoxDecoration(
+        color: RewardVisuals.background(reward.rewardType),
+        borderRadius: BorderRadius.circular(30.r),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            RewardVisuals.icon(reward.rewardType),
+            size: 32.r,
+            color: accent,
+          ),
+          SizedBox(width: 18.w),
+          Expanded(
+            child: Text(
+              reward.valueLabel,
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w900,
+                color: accent,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EarnedReasonCard extends StatelessWidget {
+  const _EarnedReasonCard({required this.reason});
+
+  final String reason;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(28.w, 27.h, 28.w, 28.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F1F1),
+        borderRadius: BorderRadius.circular(34.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
               Container(
-                width: double.infinity,
-                height: 138.h,
-                padding: EdgeInsets.fromLTRB(26.w, 24.h, 22.w, 24.h),
+                width: 48.r,
+                height: 48.r,
                 decoration: BoxDecoration(
+                  color: const Color(0xFFFF9700),
+                  borderRadius: BorderRadius.circular(15.r),
+                ),
+                child: Icon(
+                  Icons.workspace_premium_rounded,
+                  size: 26.r,
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(42.r),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.035),
-                      blurRadius: 16.r,
-                      offset: Offset(0, 8.h),
-                    ),
-                  ],
                 ),
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      width: 64.r,
-                      height: 64.r,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE7F3FF),
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Icon(
-                        Icons.inventory_2_rounded,
-                        size: 29.r,
-                        color: const Color(0xFF0067A7),
-                      ),
-                    ),
-                    SizedBox(width: 22.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            'Delivery\nConfirmed',
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              height: 1.05,
-                              fontWeight: FontWeight.w900,
-                              color: const Color(0xFF2D3032),
-                              letterSpacing: -0.35,
-                            ),
-                          ),
-                          SizedBox(height: 7.h),
-                          Text(
-                            'Signed by: Arif on\nSept 22',
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              height: 1.25,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF626262),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: 24.r,
-                      height: 24.r,
-                      decoration: const BoxDecoration(
-                        color: green,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.check_rounded,
-                        size: 18.r,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+              ),
+              SizedBox(width: 17.w),
+              Expanded(
+                child: Text(
+                  'How you earned this',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF2D3032),
+                  ),
                 ),
               ),
             ],
           ),
-        ),
+          SizedBox(height: 20.h),
+          Text(
+            reason,
+            style: TextStyle(
+              fontSize: 15.sp,
+              height: 1.55,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF626262),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeliveryCard extends StatelessWidget {
+  const _DeliveryCard({required this.reward});
+
+  final RewardModel reward;
+
+  @override
+  Widget build(BuildContext context) {
+    final RewardFulfillmentModel? fulfillment = reward.fulfillment;
+    final RewardShippingAddressModel? address = reward.shippingAddress;
+    final String title = reward.status.toLowerCase() == 'delivered'
+        ? 'Delivery Confirmed'
+        : reward.status.toLowerCase() == 'dispatched'
+        ? 'Reward Dispatched'
+        : address == null
+        ? 'Shipping Address Required'
+        : 'Shipping In Progress';
+    final String detail = fulfillment?.trackingNumber?.isNotEmpty == true
+        ? 'Tracking: ${fulfillment!.trackingNumber}'
+        : fulfillment?.carrierName?.isNotEmpty == true
+        ? 'Carrier: ${fulfillment!.carrierName}'
+        : address?.addressLine ?? 'Add your delivery information to continue.';
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(24.w, 22.h, 22.w, 22.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(36.r),
+      ),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 62.r,
+            height: 62.r,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE7F3FF),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Icon(
+              Icons.local_shipping_outlined,
+              size: 29.r,
+              color: const Color(0xFF0067A7),
+            ),
+          ),
+          SizedBox(width: 20.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF2D3032),
+                  ),
+                ),
+                SizedBox(height: 7.h),
+                Text(
+                  detail,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    height: 1.35,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF626262),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

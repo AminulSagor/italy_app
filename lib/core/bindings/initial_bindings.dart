@@ -10,6 +10,8 @@ import '../../features/courses/controllers/courses_controller.dart';
 import '../../features/courses/services/courses_api_service.dart';
 import '../../features/courses/services/courses_mock_service.dart';
 import '../../features/home/controllers/home_controller.dart';
+import '../../features/home/services/home_api_service.dart';
+import '../../features/drawer_features/settings/services/user_settings_service.dart';
 import '../../features/home/services/home_mock_service.dart';
 import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/messages/controllers/messages_controller.dart';
@@ -26,6 +28,10 @@ import '../../features/notifications/services/notifications_mock_service.dart';
 import '../../features/leaderboard/services/leaderboard_service.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
 import '../services/api_client.dart';
+import '../controllers/user_session_controller.dart';
+import '../services/learning_activity_api_service.dart';
+import '../services/current_user_summary_service.dart';
+import '../widgets/app_drawer_controller.dart';
 import '../services/token_service.dart';
 import '../../features/practice_hub/controllers/job_sentences_controller.dart';
 import '../../features/practice_hub/controllers/important_verbs_controller.dart';
@@ -37,31 +43,92 @@ import '../../features/practice_hub/services/practice_hub_api_service.dart';
 class InitialBindings extends Bindings {
   @override
   void dependencies() {
-    if (!Get.isRegistered<HomeMockService>()) {
-      Get.lazyPut<HomeMockService>(
-        HomeMockService.new,
+    if (!Get.isRegistered<CurrentUserSummaryService>()) {
+      Get.lazyPut<CurrentUserSummaryService>(
+        () => CurrentUserSummaryService(apiClient: Get.find<ApiClient>()),
+        fenix: true,
       );
+    }
+    if (!Get.isRegistered<UserSessionController>()) {
+      Get.put<UserSessionController>(
+        UserSessionController(
+          currentUserSummaryService: Get.find<CurrentUserSummaryService>(),
+        ),
+        permanent: true,
+      );
+    }
+    Get.lazyPut<AppDrawerController>(
+      () => AppDrawerController(
+        userSessionController: Get.find<UserSessionController>(),
+      ),
+      fenix: true,
+    );
+    Get.lazyPut<UserSettingsService>(
+      () => UserSettingsService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
+    Get.lazyPut<AiTutorApiService>(
+      () => AiTutorApiService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
+    Get.lazyPut<AiTutorPreferencesService>(
+      () => AiTutorPreferencesService(),
+      fenix: true,
+    );
+    Get.lazyPut<AiTutorVoiceService>(() => AiTutorVoiceService(), fenix: true);
+    Get.lazyPut<AiTutorTtsService>(() => AiTutorTtsService(), fenix: true);
+    Get.lazyPut<AiChatController>(
+      () => AiChatController(
+        apiService: Get.find<AiTutorApiService>(),
+        voiceService: Get.find<AiTutorVoiceService>(),
+        ttsService: Get.find<AiTutorTtsService>(),
+        preferencesService: Get.find<AiTutorPreferencesService>(),
+        userSessionController: Get.find<UserSessionController>(),
+      ),
+      fenix: true,
+    );
+    Get.lazyPut<AiTutorLevelTestController>(
+      () => AiTutorLevelTestController(
+        apiService: Get.find<AiTutorApiService>(),
+        preferencesService: Get.find<AiTutorPreferencesService>(),
+      ),
+      fenix: true,
+    );
+    Get.lazyPut<CoursesApiService>(
+      () => CoursesApiService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
+    Get.lazyPut<CoursesController>(
+      () => CoursesController(coursesApiService: Get.find<CoursesApiService>()),
+      fenix: true,
+    );
+
+    Get.lazyPut<HomeApiService>(
+      () => HomeApiService(
+        apiClient: Get.find<ApiClient>(),
+        learningActivityApiService: Get.find<LearningActivityApiService>(),
+      ),
+      fenix: true,
+    );
+    Get.lazyPut<HomeController>(
+      () => HomeController(
+        homeApiService: Get.find<HomeApiService>(),
+        userSessionController: Get.find<UserSessionController>(),
+      ),
+      fenix: true,
+    );
+    if (!Get.isRegistered<HomeMockService>()) {
+      Get.lazyPut<HomeMockService>(HomeMockService.new);
     }
 
     if (!Get.isRegistered<CoursesMockService>()) {
-      Get.lazyPut<CoursesMockService>(
-        CoursesMockService.new,
-        fenix: true,
-      );
+      Get.lazyPut<CoursesMockService>(CoursesMockService.new, fenix: true);
     }
 
     if (!Get.isRegistered<CoursesController>()) {
       Get.lazyPut<CoursesController>(
-            () => CoursesController(coursesApiService: Get.find<CoursesApiService>()),
-        fenix: true,
-      );
-    }
-
-    if (!Get.isRegistered<HomeController>()) {
-      Get.lazyPut<HomeController>(
-            () => HomeController(
-          homeMockService: Get.find<HomeMockService>(),
-        ),
+        () =>
+            CoursesController(coursesApiService: Get.find<CoursesApiService>()),
         fenix: true,
       );
     }
@@ -81,73 +148,65 @@ class InitialBindings extends Bindings {
     }
 
     if (!Get.isRegistered<CallAgoraService>()) {
-      Get.put<CallAgoraService>(
-        CallAgoraService(),
-        permanent: true,
-      );
+      Get.put<CallAgoraService>(CallAgoraService(), permanent: true);
     }
 
     if (!Get.isRegistered<IncomingCallCoordinator>()) {
       Get.put<IncomingCallCoordinator>(
         IncomingCallCoordinator(
           callSocketService: Get.find<CallSocketService>(),
-          acceptedCallHandler: ({
-            required String callId,
-            required Map<String, dynamic> callData,
-            required Map<String, dynamic> answerResponse,
-          }) async {
-            final MessageCallParticipantModel participant =
-            MessageCallParticipantModel(
-              id: callData['callerId']?.toString() ?? '',
-              name: callData['callerName']?.toString() ?? 'Caller',
-              avatarUrl:
-              callData['callerAvatarUrl']?.toString() ?? '',
-              isOnline: true,
-            );
+          acceptedCallHandler:
+              ({
+                required String callId,
+                required Map<String, dynamic> callData,
+                required Map<String, dynamic> answerResponse,
+              }) async {
+                final MessageCallParticipantModel participant =
+                    MessageCallParticipantModel(
+                      id: callData['callerId']?.toString() ?? '',
+                      name: callData['callerName']?.toString() ?? 'Caller',
+                      avatarUrl: callData['callerAvatarUrl']?.toString() ?? '',
+                      isOnline: true,
+                    );
 
-            final MessageCallSessionModel session =
-            MessageCallSessionModel.fromAnswerResponse(
-              response: answerResponse,
-              callId: callId,
-              participant: participant,
-            );
+                final MessageCallSessionModel session =
+                    MessageCallSessionModel.fromAnswerResponse(
+                      response: answerResponse,
+                      callId: callId,
+                      participant: participant,
+                    );
 
-            final MessageCallType callType =
-            MessageCallType.fromValue(
-              callData['callType']?.toString(),
-            );
-
-            final String conversationId =
-            callData['conversationId']?.toString().trim().isNotEmpty ==
-                true
-                ? callData['conversationId'].toString()
-                : session.conversationId;
-
-            if (Get.isRegistered<MessageCallController>()) {
-              await Get.delete<MessageCallController>(
-                force: true,
-              );
-            }
-
-            await Get.to<void>(
-                  () => const MessageCallView(),
-              binding: BindingsBuilder(() {
-                Get.put<MessageCallController>(
-                  MessageCallController(
-                    conversationId: conversationId,
-                    callType: callType,
-                    participant: participant,
-                    callSocketService:
-                    Get.find<CallSocketService>(),
-                    callAgoraService:
-                    Get.find<CallAgoraService>(),
-                    initialSession: session,
-                  ),
+                final MessageCallType callType = MessageCallType.fromValue(
+                  callData['callType']?.toString(),
                 );
-              }),
-              transition: Transition.rightToLeft,
-            );
-          },
+
+                final String conversationId =
+                    callData['conversationId']?.toString().trim().isNotEmpty ==
+                        true
+                    ? callData['conversationId'].toString()
+                    : session.conversationId;
+
+                if (Get.isRegistered<MessageCallController>()) {
+                  await Get.delete<MessageCallController>(force: true);
+                }
+
+                await Get.to<void>(
+                  () => const MessageCallView(),
+                  binding: BindingsBuilder(() {
+                    Get.put<MessageCallController>(
+                      MessageCallController(
+                        conversationId: conversationId,
+                        callType: callType,
+                        participant: participant,
+                        callSocketService: Get.find<CallSocketService>(),
+                        callAgoraService: Get.find<CallAgoraService>(),
+                        initialSession: session,
+                      ),
+                    );
+                  }),
+                  transition: Transition.rightToLeft,
+                );
+              },
         ),
         permanent: true,
       );
@@ -155,7 +214,7 @@ class InitialBindings extends Bindings {
 
     if (!Get.isRegistered<MessagesMockService>()) {
       Get.lazyPut<MessagesMockService>(
-            () => MessagesMockService(
+        () => MessagesMockService(
           apiClient: Get.find<ApiClient>(),
           tokenService: Get.find<TokenService>(),
           chatSocketService: Get.find<ChatSocketService>(),
@@ -165,21 +224,19 @@ class InitialBindings extends Bindings {
 
     if (!Get.isRegistered<MessagesController>()) {
       Get.lazyPut<MessagesController>(
-            () => MessagesController(
+        () => MessagesController(
           messagesMockService: Get.find<MessagesMockService>(),
         ),
       );
     }
 
     if (!Get.isRegistered<NotificationsMockService>()) {
-      Get.lazyPut<NotificationsMockService>(
-        NotificationsMockService.new,
-      );
+      Get.lazyPut<NotificationsMockService>(NotificationsMockService.new);
     }
 
     if (!Get.isRegistered<LeaderboardController>()) {
       Get.lazyPut<LeaderboardController>(
-            () => LeaderboardController(
+        () => LeaderboardController(
           leaderboardService: Get.find<LeaderboardService>(),
         ),
         fenix: true,
@@ -188,7 +245,7 @@ class InitialBindings extends Bindings {
 
     if (!Get.isRegistered<PracticeHubController>()) {
       Get.lazyPut<PracticeHubController>(
-            () => PracticeHubController(
+        () => PracticeHubController(
           coursesApiService: Get.find<CoursesApiService>(),
           practiceHubApiService: Get.find<PracticeHubApiService>(),
         ),
@@ -196,45 +253,44 @@ class InitialBindings extends Bindings {
     }
 
     Get.lazyPut<PracticeHubApiService>(
-          () => PracticeHubApiService(apiClient: Get.find<ApiClient>()),
+      () => PracticeHubApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,
     );
     Get.lazyPut<JobSentencesApiService>(
-          () => JobSentencesApiService(apiClient: Get.find<ApiClient>()),
+      () => JobSentencesApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,
     );
     Get.lazyPut<JobSentencesController>(
-          () => JobSentencesController(
+      () => JobSentencesController(
         apiService: Get.find<JobSentencesApiService>(),
       ),
       fenix: true,
     );
     Get.lazyPut<ImportantVerbsApiService>(
-          () => ImportantVerbsApiService(apiClient: Get.find<ApiClient>()),
+      () => ImportantVerbsApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,
     );
     Get.lazyPut<ItalianTtsService>(() => ItalianTtsService(), fenix: true);
     Get.lazyPut<ImportantVerbsController>(
-          () => ImportantVerbsController(
+      () => ImportantVerbsController(
         apiService: Get.find<ImportantVerbsApiService>(),
         ttsService: Get.find<ItalianTtsService>(),
       ),
       fenix: true,
     );
 
-
     Get.lazyPut<AiTutorApiService>(
-          () => AiTutorApiService(apiClient: Get.find<ApiClient>()),
+      () => AiTutorApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,
     );
     Get.lazyPut<AiTutorPreferencesService>(
-          () => AiTutorPreferencesService(),
+      () => AiTutorPreferencesService(),
       fenix: true,
     );
     Get.lazyPut<AiTutorVoiceService>(() => AiTutorVoiceService(), fenix: true);
     Get.lazyPut<AiTutorTtsService>(() => AiTutorTtsService(), fenix: true);
     Get.lazyPut<AiChatController>(
-          () => AiChatController(
+      () => AiChatController(
         apiService: Get.find<AiTutorApiService>(),
         voiceService: Get.find<AiTutorVoiceService>(),
         ttsService: Get.find<AiTutorTtsService>(),
@@ -243,12 +299,11 @@ class InitialBindings extends Bindings {
       fenix: true,
     );
     Get.lazyPut<AiTutorLevelTestController>(
-          () => AiTutorLevelTestController(
+      () => AiTutorLevelTestController(
         apiService: Get.find<AiTutorApiService>(),
         preferencesService: Get.find<AiTutorPreferencesService>(),
       ),
       fenix: true,
     );
-
   }
 }

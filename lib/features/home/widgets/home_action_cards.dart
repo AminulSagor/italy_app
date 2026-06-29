@@ -106,7 +106,7 @@ class WebinarCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(kHomePillRadius.r),
               ),
               child: Text(
-                webinar.badgeLabel,
+                'UPCOMING WEBINAR',
                 style: TextStyle(
                   fontSize: AppFont.font9.sp,
                   fontWeight: FontWeight.w900,
@@ -182,7 +182,7 @@ class WebinarCard extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      webinar.buttonLabel,
+                      'View',
                       style: TextStyle(
                         fontSize: AppFont.font13.sp,
                         fontWeight: FontWeight.w900,

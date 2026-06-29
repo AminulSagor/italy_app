@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:italir_pothe/core/themes/app_colors.dart';
 import 'package:italir_pothe/core/widgets/widgets.dart';
+import '../../models/shop_models.dart';
 import '../../shop_controller.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -25,7 +26,7 @@ class PurchaseCompletedPage extends StatelessWidget {
       backgroundColor: bg,
       appBar: SimpleAppbar(
         onBackTap: () => Get.back(),
-        title: 'Refill Completed',
+        title: 'Purchase Completed',
         icon: Icons.close,
       ),
       body: SafeArea(
@@ -74,16 +75,18 @@ class PurchaseCompletedPage extends StatelessWidget {
 
                     SizedBox(height: 42.h),
 
-                    Obx(
-                      () => Row(
+                    Obx(() {
+                      final StorePackageType? packageType =
+                          controller.completedPurchase.value?.packageType;
+                      return Row(
                         children: [
                           Expanded(
                             child: _creditCard(
                               bgColor: blueCard,
-                              icon: Icons.mic,
+                              icon: _firstCompletionIcon(packageType),
                               iconColor: const Color(0xFF006BAA),
-                              value: controller.selectedPlanVoiceMinutes,
-                              label: 'Voice Interaction',
+                              value: controller.completionFirstValue,
+                              label: controller.completionFirstLabel,
                               textColor: const Color(0xFF075D97),
                             ),
                           ),
@@ -91,22 +94,22 @@ class PurchaseCompletedPage extends StatelessWidget {
                           Expanded(
                             child: _creditCard(
                               bgColor: orangeCard,
-                              icon: Symbols.deployed_code,
+                              icon: _secondCompletionIcon(packageType),
                               iconColor: const Color(0xFF9A5A00),
-                              value: controller.selectedPlanTokensShort,
-                              label: 'AI Smart Tokens',
+                              value: controller.completionSecondValue,
+                              label: controller.completionSecondLabel,
                               textColor: const Color(0xFF3A3434),
                             ),
                           ),
                         ],
-                      ),
-                    ),
+                      );
+                    }),
 
                     SizedBox(height: 42.h),
 
                     Obx(
                       () => _orderStatusBox(
-                        orderId: controller.completedOrderId.value,
+                        orderId: controller.completedOrderId,
                       ),
                     ),
                   ],
@@ -151,7 +154,7 @@ class PurchaseCompletedPage extends StatelessWidget {
             ),
           ),
           Text(
-            'Refill Completed',
+            'Purchase Completed',
             style: TextStyle(
               color: green,
               fontSize: 18.sp,
@@ -318,5 +321,31 @@ class PurchaseCompletedPage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  IconData _firstCompletionIcon(StorePackageType? packageType) {
+    switch (packageType) {
+      case StorePackageType.aiBundle:
+        return Icons.mic;
+      case StorePackageType.streakFreeze:
+        return Icons.ac_unit_rounded;
+      case StorePackageType.cvCredit:
+        return Icons.description_outlined;
+      case null:
+        return Icons.check_rounded;
+    }
+  }
+
+  IconData _secondCompletionIcon(StorePackageType? packageType) {
+    switch (packageType) {
+      case StorePackageType.aiBundle:
+        return Symbols.deployed_code;
+      case StorePackageType.streakFreeze:
+        return Icons.inventory_2_outlined;
+      case StorePackageType.cvCredit:
+        return Icons.account_balance_wallet_outlined;
+      case null:
+        return Icons.account_balance_wallet_outlined;
+    }
   }
 }

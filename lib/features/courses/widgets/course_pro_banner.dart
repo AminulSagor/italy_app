@@ -7,11 +7,15 @@ import '../../../core/themes/app_font.dart';
 
 class CourseProBanner extends StatelessWidget {
   final bool isLoading;
+  final String courseName;
+  final int lessonCount;
   final VoidCallback onGetProTap;
 
   const CourseProBanner({
     super.key,
     required this.isLoading,
+    required this.courseName,
+    required this.lessonCount,
     required this.onGetProTap,
   });
 
@@ -46,7 +50,7 @@ class CourseProBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Unlock the full A1 Course',
+                  'Unlock $courseName',
                   style: TextStyle(
                     fontSize: AppFont.font18.sp,
                     fontWeight: FontWeight.w700,
@@ -56,7 +60,7 @@ class CourseProBanner extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Master Italian with 50+ lessons',
+                  '$lessonCount lessons included',
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w400,

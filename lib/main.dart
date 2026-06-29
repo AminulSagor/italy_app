@@ -14,6 +14,7 @@ import 'core/localization/translation_service.dart';
 import 'core/services/callkit_background_action_handler.dart';
 import 'core/services/callkit_incoming_service.dart';
 import 'core/services/local_notification_service.dart';
+import 'core/services/learning_activity_tracker_service.dart';
 import 'core/themes/app_theme.dart';
 import 'features/messages/sub-feature/call/service/call_socket_service.dart';
 import 'features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
@@ -215,6 +216,13 @@ class ItalyApp extends StatelessWidget {
           fallbackLocale: TranslationService.fallbackLocale,
           theme: AppTheme.lightTheme,
           getPages: AppPages.pages,
+          routingCallback: (routing) {
+            if (Get.isRegistered<LearningActivityTrackerService>()) {
+              Get.find<LearningActivityTrackerService>().handleRoute(
+                routing?.current,
+              );
+            }
+          },
           initialRoute: initialRoute,
         );
       },

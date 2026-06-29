@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../models/reward_models.dart';
 import '../reward_controller.dart';
 import '../widgets/reward_widgets.dart';
 
@@ -16,88 +17,123 @@ class RewardsHistoryView extends GetView<RewardController> {
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(26.w, 39.h, 26.w, 54.h),
-          child: Column(
-            children: <Widget>[
-              const RewardTopBar(title: 'Rewards History'),
-              SizedBox(height: 36.h),
-
-              Container(
-                width: 58.r,
-                height: 58.r,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF79F535),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.emoji_events_rounded,
-                  size: 31.r,
-                  color: green,
-                ),
+        child: Obx(() {
+          return RefreshIndicator(
+            color: green,
+            onRefresh: () => controller.loadHistory(reset: true),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-
-              SizedBox(height: 23.h),
-
-              Text(
-                'Reward History',
-                style: TextStyle(
-                  fontSize: 30.sp,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF2D3032),
-                  letterSpacing: -0.75,
+              padding: EdgeInsets.fromLTRB(26.w, 39.h, 26.w, 54.h),
+              children: <Widget>[
+                const RewardTopBar(title: 'Rewards History'),
+                SizedBox(height: 36.h),
+                Container(
+                  width: 58.r,
+                  height: 58.r,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF79F535),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.emoji_events_rounded,
+                    size: 31.r,
+                    color: green,
+                  ),
                 ),
-              ),
-
-              SizedBox(height: 8.h),
-
-              Text(
-                'Italian Shikhi Achievements',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF666666),
+                SizedBox(height: 23.h),
+                Text(
+                  'Reward History',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 30.sp,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF2D3032),
+                    letterSpacing: -0.75,
+                  ),
                 ),
-              ),
-
-              SizedBox(height: 44.h),
-
-              Column(
-                children: controller.historyItems
-                    .map(
-                      (item) => Padding(
-                        padding: EdgeInsets.only(bottom: 24.h),
-                        child: _HistoryTile(
-                          item: item,
-                          onTap: () => controller.openRewardDetails(item.id),
-                        ),
+                SizedBox(height: 8.h),
+                Text(
+                  controller.historyTotal.value > 0
+                      ? '${controller.historyTotal.value} achievements earned'
+                      : 'Italian Shikhi Achievements',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF666666),
+                  ),
+                ),
+                SizedBox(height: 44.h),
+                if (controller.isLoadingHistory.value &&
+                    controller.historyItems.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 80),
+                    child: Center(
+                      child: CircularProgressIndicator(color: green),
+                    ),
+                  )
+                else if (controller.historyError.value.isNotEmpty &&
+                    controller.historyItems.isEmpty)
+                  RewardStateMessage(
+                    icon: Icons.error_outline_rounded,
+                    title: 'History unavailable',
+                    message: controller.historyError.value,
+                    buttonText: 'Retry',
+                    onTap: () => controller.loadHistory(reset: true),
+                  )
+                else if (controller.historyItems.isEmpty)
+                  const RewardStateMessage(
+                    icon: Icons.history_rounded,
+                    title: 'No rewards yet',
+                    message: 'Rewards you unlock or claim will be saved here.',
+                  )
+                else ...<Widget>[
+                  ...controller.historyItems.map(
+                    (RewardModel item) => Padding(
+                      padding: EdgeInsets.only(bottom: 24.h),
+                      child: _HistoryTile(
+                        item: item,
+                        onTap: () => controller.openRewardDetails(item.id),
                       ),
-                    )
-                    .toList(),
-              ),
-            ],
-          ),
-        ),
+                    ),
+                  ),
+                  if (controller.hasMoreHistory)
+                    Padding(
+                      padding: EdgeInsets.only(top: 4.h, bottom: 10.h),
+                      child: RewardPrimaryButton(
+                        text: 'Load More',
+                        height: 52,
+                        onTap: controller.loadMoreHistory,
+                        isLoading: controller.isLoadingMoreHistory.value,
+                      ),
+                    ),
+                ],
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
 }
 
 class _HistoryTile extends StatelessWidget {
-  final RewardHistoryItem item;
-  final VoidCallback onTap;
-
   const _HistoryTile({required this.item, required this.onTap});
+
+  final RewardModel item;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final Color accent = RewardVisuals.accent(item.rewardType);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 120.h,
         width: double.infinity,
-        padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
+        padding: EdgeInsets.fromLTRB(20.w, 16.h, 18.w, 16.h),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(30.r),
@@ -115,53 +151,60 @@ class _HistoryTile extends StatelessWidget {
               width: 64.r,
               height: 64.r,
               decoration: BoxDecoration(
-                color: item.iconBgColor,
+                color: RewardVisuals.background(item.rewardType),
                 borderRadius: BorderRadius.circular(14.r),
               ),
-              child: Icon(item.icon, size: 27.r, color: item.iconColor),
+              child: Icon(
+                RewardVisuals.icon(item.rewardType),
+                size: 27.r,
+                color: accent,
+              ),
             ),
-            SizedBox(width: 25.w),
+            SizedBox(width: 20.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
                     item.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 21.sp,
+                      fontSize: 19.sp,
                       height: 1.14,
                       fontWeight: FontWeight.w900,
                       color: const Color(0xFF2D3032),
                       letterSpacing: -0.35,
                     ),
                   ),
-                  const Spacer(),
-                  Row(
+                  SizedBox(height: 13.h),
+                  Wrap(
+                    spacing: 12.w,
+                    runSpacing: 8.h,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: <Widget>[
                       Text(
-                        item.date,
+                        formatRewardDate(item.awardedAt),
                         style: TextStyle(
-                          fontSize: 15.sp,
-                          height: 1.22,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF666666),
                         ),
                       ),
-                      SizedBox(width: 18.w),
                       Container(
                         height: 24.h,
-                        padding: EdgeInsets.symmetric(horizontal: 15.w),
+                        padding: EdgeInsets.symmetric(horizontal: 12.w),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: item.badgeBgColor,
+                          color: RewardVisuals.statusBackground(item.status),
                           borderRadius: BorderRadius.circular(100.r),
                         ),
                         child: Text(
-                          item.badge,
+                          item.statusLabel,
                           style: TextStyle(
-                            fontSize: 10.sp,
+                            fontSize: 9.sp,
                             fontWeight: FontWeight.w900,
-                            color: item.badgeTextColor,
+                            color: RewardVisuals.statusText(item.status),
                           ),
                         ),
                       ),

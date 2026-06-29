@@ -197,7 +197,7 @@ class AiTutorCard extends StatelessWidget {
           ),
           SizedBox(height: 22.h),
           CustomButton.primary(
-            onPressed: () => onStartTap,
+            onPressed: onStartTap ?? () {},
             text: tutor.actionLabel,
             icon: Icons.chat_bubble_outline_rounded,
           ),
@@ -209,75 +209,80 @@ class AiTutorCard extends StatelessWidget {
 
 class DailyChallengesCard extends StatelessWidget {
   final HomeDailyChallengesModel challenges;
+  final VoidCallback? onTap;
 
-  const DailyChallengesCard({super.key, required this.challenges});
+  const DailyChallengesCard({super.key, required this.challenges, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(minHeight: kHomeChallengeCardHeight.h),
-      padding: EdgeInsets.fromLTRB(22.w, 18.h, 22.w, 20.h),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(kHomeSmallCardRadius.r),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AppColors.homeNeutralShadow,
-            blurRadius: 18.r,
-            offset: Offset(0, 8.h),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            width: kHomeIconCircleSize.w,
-            height: kHomeIconCircleSize.w,
-            decoration: const BoxDecoration(
-              color: AppColors.homePaleGreen,
-              shape: BoxShape.circle,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(kHomeSmallCardRadius.r),
+      child: Container(
+        constraints: BoxConstraints(minHeight: kHomeChallengeCardHeight.h),
+        padding: EdgeInsets.fromLTRB(22.w, 18.h, 22.w, 20.h),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(kHomeSmallCardRadius.r),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: AppColors.homeNeutralShadow,
+              blurRadius: 18.r,
+              offset: Offset(0, 8.h),
             ),
-            child: Icon(
-              Icons.track_changes_rounded,
-              color: AppColors.primaryGreen,
-              size: kHomeTopIconSize.w,
-            ),
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            challenges.label,
-            style: TextStyle(
-              fontSize: AppFont.font11.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.3,
-              color: AppColors.homeSecondaryText,
-            ),
-          ),
-          SizedBox(height: 3.h),
-          Text(
-            challenges.valueLabel,
-            style: TextStyle(
-              fontSize: AppFont.font23.sp,
-              fontWeight: FontWeight.w900,
-              height: 1,
-              color: AppColors.homePrimaryText,
-            ),
-          ),
-          SizedBox(height: 14.h),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(kHomePillRadius.r),
-            child: LinearProgressIndicator(
-              minHeight: kHomeSlimProgressHeight.h,
-              value: challenges.progress,
-              backgroundColor: AppColors.homeProgressTrack,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                AppColors.homeChallengeGreen,
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              width: kHomeIconCircleSize.w,
+              height: kHomeIconCircleSize.w,
+              decoration: const BoxDecoration(
+                color: AppColors.homePaleGreen,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.track_changes_rounded,
+                color: AppColors.primaryGreen,
+                size: kHomeTopIconSize.w,
               ),
             ),
-          ),
-        ],
+            SizedBox(height: 12.h),
+            Text(
+              challenges.label,
+              style: TextStyle(
+                fontSize: AppFont.font11.sp,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.3,
+                color: AppColors.homeSecondaryText,
+              ),
+            ),
+            SizedBox(height: 3.h),
+            Text(
+              challenges.valueLabel,
+              style: TextStyle(
+                fontSize: AppFont.font23.sp,
+                fontWeight: FontWeight.w900,
+                height: 1,
+                color: AppColors.homePrimaryText,
+              ),
+            ),
+            SizedBox(height: 14.h),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(kHomePillRadius.r),
+              child: LinearProgressIndicator(
+                minHeight: kHomeSlimProgressHeight.h,
+                value: challenges.progress,
+                backgroundColor: AppColors.homeProgressTrack,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.homeChallengeGreen,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

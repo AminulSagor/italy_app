@@ -131,9 +131,9 @@ class _FaqTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 64.h,
+        constraints: BoxConstraints(minHeight: 64.h),
         width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 22.w),
+        padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 16.h),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(100.r),
@@ -150,7 +150,7 @@ class _FaqTile extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 16.sp,

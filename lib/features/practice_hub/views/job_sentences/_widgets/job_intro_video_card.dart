@@ -3,7 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../../core/themes/app_colors.dart';
+import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import '../../../../courses/sub_features/chapter_detail/widgets/chapter_video_fullscreen_view.dart';
+import '../../../../courses/sub_features/chapter_detail/widgets/chapter_video_player_surface.dart';
 
 class JobIntroVideoCard extends StatefulWidget {
   const JobIntroVideoCard({
@@ -22,283 +25,360 @@ class JobIntroVideoCard extends StatefulWidget {
 }
 
 class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
-  VideoPlayerController? _controller;
+  VideoPlayerController? _videoController;
+  Future<void>? _initializationFuture;
+  late final ValueNotifier<bool> _hasWatchedFullyNotifier;
+
   bool _isInitializing = false;
   String? _errorMessage;
   int _lastReportedPercent = 0;
-  int _lastReportedPositionSeconds = 0;
-  int _unreportedWatchSeconds = 0;
+  int _unreportedWatchMilliseconds = 0;
+  DateTime? _lastPlaybackTickAt;
 
   @override
   void initState() {
     super.initState();
-    _lastReportedPercent = widget.initialProgressPercent;
+    _lastReportedPercent = widget.initialProgressPercent.clamp(0, 100).toInt();
+    _hasWatchedFullyNotifier = ValueNotifier<bool>(
+      _lastReportedPercent >= 100,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _ensurePlayerInitialized();
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant JobIntroVideoCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.videoUrl == widget.videoUrl) {
+      return;
+    }
+
+    _disposePlayer();
+    _initializationFuture = null;
+    _isInitializing = false;
+    _errorMessage = null;
+    _lastReportedPercent = widget.initialProgressPercent.clamp(0, 100).toInt();
+    _hasWatchedFullyNotifier.value = _lastReportedPercent >= 100;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _ensurePlayerInitialized();
+      }
+    });
   }
 
   @override
   void dispose() {
-    final VideoPlayerController? controller = _controller;
-    if (controller != null && controller.value.isInitialized) {
-      _reportProgress(controller.value.position, controller.value.duration);
-    }
-    controller?.removeListener(_onVideoChanged);
-    controller?.dispose();
+    _flushProgress(force: true);
+    _disposePlayer();
+    _hasWatchedFullyNotifier.dispose();
     super.dispose();
   }
 
-  Future<void> _togglePlayback() async {
-    if (_isInitializing) return;
-
-    if (_controller == null) {
-      await _initializeAndPlay();
+  Future<void> _ensurePlayerInitialized() async {
+    if (_videoController?.value.isInitialized == true) {
       return;
     }
 
-    final VideoPlayerController controller = _controller!;
-    if (controller.value.isPlaying) {
-      await controller.pause();
-      _reportProgress(controller.value.position, controller.value.duration);
-    } else {
-      if (controller.value.position >= controller.value.duration &&
-          controller.value.duration > Duration.zero) {
-        await controller.seekTo(Duration.zero);
-        _lastReportedPositionSeconds = 0;
-      }
-      await controller.play();
+    final Future<void>? activeInitialization = _initializationFuture;
+    if (activeInitialization != null) {
+      await activeInitialization;
+      return;
     }
-    if (mounted) setState(() {});
-  }
 
-  Future<void> _initializeAndPlay() async {
-    setState(() {
-      _isInitializing = true;
-      _errorMessage = null;
-    });
-
-    VideoPlayerController? pendingController;
+    final Future<void> initialization = _initializePlayer();
+    _initializationFuture = initialization;
     try {
-      pendingController = VideoPlayerController.networkUrl(
-        Uri.parse(widget.videoUrl),
-      );
-      await pendingController.initialize();
-      pendingController.addListener(_onVideoChanged);
-      _controller = pendingController;
-      pendingController = null;
-      await _controller!.play();
-    } catch (_) {
-      final VideoPlayerController? failedController =
-          pendingController ?? _controller;
-      failedController?.removeListener(_onVideoChanged);
-      await failedController?.dispose();
-      _controller = null;
-      _errorMessage = 'Unable to load the introduction video.';
+      await initialization;
     } finally {
-      if (mounted) {
-        setState(() => _isInitializing = false);
-      }
+      _initializationFuture = null;
     }
   }
 
-  void _onVideoChanged() {
-    final VideoPlayerController? controller = _controller;
-    if (!mounted || controller == null) return;
+  Future<void> _initializePlayer() async {
+    if (mounted) {
+      setState(() {
+        _isInitializing = true;
+        _errorMessage = null;
+      });
+    }
 
-    final VideoPlayerValue value = controller.value;
-    _reportProgress(value.position, value.duration);
-    setState(() {});
+    VideoPlayerController? controller;
+    try {
+      final Uri? uri = Uri.tryParse(widget.videoUrl.trim());
+      if (uri == null || !uri.hasScheme) {
+        throw StateError('Video URL is not available');
+      }
+
+      controller = VideoPlayerController.networkUrl(uri);
+      await controller.initialize();
+      await _seekToSavedProgress(controller);
+
+      if (!mounted) {
+        await controller.dispose();
+        return;
+      }
+
+      _videoController = controller;
+      controller.addListener(_onVideoTick);
+      setState(() => _isInitializing = false);
+    } catch (_) {
+      await controller?.dispose();
+      if (!mounted) return;
+      setState(() {
+        _isInitializing = false;
+        _errorMessage = 'Video could not be loaded. Tap to retry.';
+      });
+    }
   }
 
-  void _reportProgress(Duration position, Duration duration) {
-    if (duration.inMilliseconds <= 0) return;
-
-    final int percent = ((position.inMilliseconds / duration.inMilliseconds) *
-            100)
-        .round()
-        .clamp(0, 100)
-        .toInt();
-    final bool shouldReport =
-        percent >= 100 ||
-        (percent >= 80 && _lastReportedPercent < 80) ||
-        percent >= _lastReportedPercent + 10;
-    if (!shouldReport) return;
-
-    final int currentSeconds = position.inSeconds;
-    final int elapsedSeconds = currentSeconds > _lastReportedPositionSeconds
-        ? currentSeconds - _lastReportedPositionSeconds
-        : 0;
-    _unreportedWatchSeconds += elapsedSeconds;
-    final bool shouldFlushTime =
-        _unreportedWatchSeconds >= 60 || percent >= 100;
-    final int timeSpentSeconds = shouldFlushTime
-        ? _unreportedWatchSeconds
-        : 0;
-    if (shouldFlushTime) _unreportedWatchSeconds = 0;
-
-    _lastReportedPercent = percent;
-    _lastReportedPositionSeconds = currentSeconds;
-    widget.onProgress(percent, timeSpentSeconds);
-  }
-
-  Future<void> _seek(double value) async {
-    final VideoPlayerController? controller = _controller;
-    if (controller == null || !controller.value.isInitialized) return;
-
+  Future<void> _seekToSavedProgress(VideoPlayerController controller) async {
     final Duration duration = controller.value.duration;
+    final double savedProgress =
+        (widget.initialProgressPercent / 100).clamp(0.0, 1.0).toDouble();
+    if (duration.inMilliseconds <= 0 || savedProgress <= 0) {
+      return;
+    }
+
+    if (savedProgress >= 1) {
+      await controller.seekTo(Duration.zero);
+      return;
+    }
+
     await controller.seekTo(
-      Duration(milliseconds: (duration.inMilliseconds * value).round()),
+      Duration(milliseconds: (duration.inMilliseconds * savedProgress).round()),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final VideoPlayerController? controller = _controller;
-    final bool isReady = controller?.value.isInitialized ?? false;
-    final bool isPlaying = controller?.value.isPlaying ?? false;
-    final Duration position = controller?.value.position ?? Duration.zero;
-    final Duration duration = controller?.value.duration ?? Duration.zero;
-    final double progress = duration.inMilliseconds <= 0
-        ? (widget.initialProgressPercent / 100).clamp(0, 1).toDouble()
-        : (position.inMilliseconds / duration.inMilliseconds)
-              .clamp(0, 1)
-              .toDouble();
+  void _disposePlayer() {
+    final VideoPlayerController? controller = _videoController;
+    if (controller == null) return;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: const Color(0xFF111715),
-        borderRadius: BorderRadius.circular(36.r),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 18.r,
-            offset: Offset(0, 8.h),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(36.r),
-        child: Column(
-          children: <Widget>[
-            AspectRatio(
-              aspectRatio: isReady && controller!.value.aspectRatio > 0
-                  ? controller.value.aspectRatio
-                  : 16 / 9,
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  if (isReady)
-                    ColoredBox(
-                      color: Colors.black,
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: SizedBox(
-                          width: controller!.value.size.width,
-                          height: controller.value.size.height,
-                          child: VideoPlayer(controller),
-                        ),
-                      ),
-                    )
-                  else
-                    const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: <Color>[Color(0xFF263B34), Color(0xFF0D1713)],
-                        ),
-                      ),
-                    ),
-                  Center(
-                    child: _isInitializing
-                        ? const CircularProgressIndicator(
-                            color: AppColors.primaryGreen,
-                          )
-                        : GestureDetector(
-                            onTap: _togglePlayback,
-                            child: Container(
-                              width: 66.r,
-                              height: 66.r,
-                              decoration: BoxDecoration(
-                                color: AppColors.white.withValues(alpha: 0.92),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                isPlaying
-                                    ? Icons.pause_rounded
-                                    : Icons.play_arrow_rounded,
-                                size: 36.r,
-                                color: AppColors.primaryGreen,
-                              ),
-                            ),
-                          ),
-                  ),
-                  if (_errorMessage != null)
-                    Positioned.fill(
-                      child: ColoredBox(
-                        color: Colors.black.withValues(alpha: 0.72),
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(20.r),
-                            child: Text(
-                              _errorMessage!,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: AppFont.font14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 14.h),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 4.h,
-                        thumbShape: RoundSliderThumbShape(
-                          enabledThumbRadius: 6.r,
-                        ),
-                        overlayShape: RoundSliderOverlayShape(
-                          overlayRadius: 12.r,
-                        ),
-                      ),
-                      child: Slider(
-                        value: progress,
-                        onChanged: isReady ? _seek : null,
-                        activeColor: AppColors.primaryGreen,
-                        inactiveColor: Colors.white24,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    '${_formatDuration(position)} / ${_formatDuration(duration)}',
-                    style: TextStyle(
-                      fontSize: AppFont.font11.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    controller.removeListener(_onVideoTick);
+    controller.dispose();
+    _videoController = null;
+    _lastPlaybackTickAt = null;
+  }
+
+  void _onVideoTick() {
+    final VideoPlayerController? controller = _videoController;
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
+
+    final VideoPlayerValue value = controller.value;
+    final DateTime now = DateTime.now();
+    if (value.isPlaying && !value.isBuffering) {
+      final DateTime? previousTick = _lastPlaybackTickAt;
+      if (previousTick != null) {
+        final int elapsed = now.difference(previousTick).inMilliseconds;
+        if (elapsed > 0 && elapsed <= 2000) {
+          _unreportedWatchMilliseconds += elapsed;
+        }
+      }
+      _lastPlaybackTickAt = now;
+    } else {
+      _lastPlaybackTickAt = null;
+    }
+
+    final Duration duration = value.duration;
+    final Duration position = value.position;
+    if (duration.inMilliseconds <= 0) {
+      return;
+    }
+
+    final Duration remaining = duration - position;
+    final bool isComplete = position > Duration.zero &&
+        (position >= duration ||
+            remaining <= const Duration(milliseconds: 150));
+    final int percent = isComplete
+        ? 100
+        : ((position.inMilliseconds / duration.inMilliseconds) * 100)
+            .floor()
+            .clamp(0, 99)
+            .toInt();
+
+    if (isComplete && !_hasWatchedFullyNotifier.value) {
+      _hasWatchedFullyNotifier.value = true;
+    }
+
+    final bool reachedQuizThreshold =
+        _lastReportedPercent < 80 && percent >= 80;
+    if (percent >= 100 ||
+        reachedQuizThreshold ||
+        percent >= _lastReportedPercent + 10) {
+      _reportProgress(percent);
+    }
+  }
+
+  void _reportProgress(int percent) {
+    final int normalizedPercent = percent.clamp(0, 100).toInt();
+    final int timeSpentSeconds = _unreportedWatchMilliseconds ~/ 1000;
+    _unreportedWatchMilliseconds %= 1000;
+    _lastReportedPercent = normalizedPercent;
+    widget.onProgress(normalizedPercent, timeSpentSeconds);
+  }
+
+  void _flushProgress({bool force = false}) {
+    final VideoPlayerController? controller = _videoController;
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
+
+    final Duration duration = controller.value.duration;
+    if (duration.inMilliseconds <= 0) return;
+    final int percent = ((controller.value.position.inMilliseconds /
+                duration.inMilliseconds) *
+            100)
+        .floor()
+        .clamp(0, 100)
+        .toInt();
+    if (force && _unreportedWatchMilliseconds >= 1000) {
+      _reportProgress(percent);
+    }
+  }
+
+  Future<void> _play() async {
+    await _ensurePlayerInitialized();
+    final VideoPlayerController? controller = _videoController;
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
+
+    final VideoPlayerValue value = controller.value;
+    if (value.duration.inMilliseconds > 0 &&
+        value.position >= value.duration - const Duration(milliseconds: 400)) {
+      await controller.seekTo(Duration.zero);
+    }
+    await controller.play();
+  }
+
+  Future<void> _openFullscreen() async {
+    final VideoPlayerController? controller = _videoController;
+    if (controller == null || !controller.value.isInitialized || !mounted) {
+      return;
+    }
+
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => ChapterVideoFullscreenView(
+          controller: controller,
+          hasWatchedFullyListenable: _hasWatchedFullyNotifier,
+          progressLabel: 'Career introduction',
+          fallbackPositionLabel: '0:00',
+          fallbackDurationLabel: '0:00',
         ),
       ),
     );
   }
 
-  String _formatDuration(Duration value) {
-    final int minutes = value.inMinutes;
-    final int seconds = value.inSeconds.remainder(60);
-    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  @override
+  Widget build(BuildContext context) {
+    final VideoPlayerController? controller = _videoController;
+
+    return Container(
+      height: kChapterVideoCardHeight.h,
+      decoration: BoxDecoration(
+        color: AppColors.chapterVideoDark,
+        borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: AppColors.homeNeutralShadow,
+            blurRadius: 24.r,
+            offset: Offset(0, 16.h),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
+        child: controller != null && controller.value.isInitialized
+            ? ChapterVideoPlayerSurface(
+                controller: controller,
+                hasWatchedFullyListenable: _hasWatchedFullyNotifier,
+                progressLabel: 'Career introduction',
+                fallbackPositionLabel: '0:00',
+                fallbackDurationLabel: '0:00',
+                onFullscreenTap: _openFullscreen,
+              )
+            : _VideoPlaceholder(
+                isLoading: _isInitializing,
+                errorMessage: _errorMessage,
+                onPlayTap: _play,
+              ),
+      ),
+    );
+  }
+}
+
+class _VideoPlaceholder extends StatelessWidget {
+  const _VideoPlaceholder({
+    required this.isLoading,
+    required this.onPlayTap,
+    this.errorMessage,
+  });
+
+  final bool isLoading;
+  final String? errorMessage;
+  final VoidCallback onPlayTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            AppColors.chapterVideoDark,
+            AppColors.chapterVideoDeep,
+          ],
+        ),
+      ),
+      child: Center(
+        child: isLoading
+            ? const CircularProgressIndicator(color: AppColors.homeLime)
+            : GestureDetector(
+                onTap: onPlayTap,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Container(
+                      width: 64.w,
+                      height: 64.w,
+                      decoration: BoxDecoration(
+                        color: AppColors.black.withValues(alpha: 0.42),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.white.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.play_arrow_rounded,
+                        color: AppColors.white,
+                        size: 38.w,
+                      ),
+                    ),
+                    if (errorMessage != null) ...<Widget>[
+                      SizedBox(height: 12.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Text(
+                          errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: AppFont.font13.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+      ),
+    );
   }
 }

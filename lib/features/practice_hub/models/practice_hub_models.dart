@@ -171,3 +171,46 @@ Map<String, dynamic>? _jsonMapOrNull(dynamic value) {
   if (value is Map) return Map<String, dynamic>.from(value);
   return null;
 }
+
+class PracticeFinalExamCourseModel {
+  const PracticeFinalExamCourseModel({
+    required this.courseId,
+    required this.courseName,
+    required this.examTitle,
+    required this.unlockCompletionPercent,
+    required this.courseProgressPercent,
+    required this.isUnlocked,
+    required this.message,
+  });
+
+  final String courseId;
+  final String courseName;
+  final String examTitle;
+  final int unlockCompletionPercent;
+  final int courseProgressPercent;
+  final bool isUnlocked;
+  final String message;
+
+  factory PracticeFinalExamCourseModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> course = _jsonMapOrNull(json['course']) ??
+        <String, dynamic>{};
+    final Map<String, dynamic> exam = _jsonMapOrNull(json['exam']) ??
+        <String, dynamic>{};
+
+    int intValue(dynamic value) {
+      if (value is int) return value;
+      if (value is num) return value.round();
+      return double.tryParse(value?.toString() ?? '')?.round() ?? 0;
+    }
+
+    return PracticeFinalExamCourseModel(
+      courseId: course['id']?.toString().trim() ?? '',
+      courseName: course['title']?.toString().trim() ?? 'Course',
+      examTitle: exam['title']?.toString().trim() ?? 'Final Exam',
+      unlockCompletionPercent: intValue(exam['unlockCompletionPercent']),
+      courseProgressPercent: intValue(json['courseProgressPercent']),
+      isUnlocked: json['isUnlocked'] == true,
+      message: json['message']?.toString().trim() ?? '',
+    );
+  }
+}

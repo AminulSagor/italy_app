@@ -251,6 +251,8 @@ class CourseDetailModel {
   final String chapterId;
   final String progressLabel;
   final bool isProEnabled;
+  final bool isFree;
+  final int lessonCount;
   final bool isExamFinished;
   final List<CourseChapterModel> chapters;
   final CourseFinalExamModel finalExam;
@@ -262,6 +264,8 @@ class CourseDetailModel {
     required this.chapterId,
     required this.progressLabel,
     required this.isProEnabled,
+    this.isFree = false,
+    this.lessonCount = 0,
     required this.isExamFinished,
     required this.chapters,
     required this.finalExam,
@@ -275,6 +279,8 @@ class CourseDetailModel {
       title: json['title'] as String,
       progressLabel: json['progressLabel'] as String,
       isProEnabled: json['isProEnabled'] as bool,
+      isFree: json['isFree'] as bool? ?? false,
+      lessonCount: (json['lessonCount'] as num?)?.toInt() ?? 0,
       isExamFinished: json['isExamFinished'] as bool,
       chapters: (json['chapters'] as List<dynamic>)
           .map(
@@ -296,6 +302,8 @@ class CourseDetailModel {
       'title': title,
       'progressLabel': progressLabel,
       'isProEnabled': isProEnabled,
+      'isFree': isFree,
+      'lessonCount': lessonCount,
       'isExamFinished': isExamFinished,
       'chapters': chapters
           .map((CourseChapterModel item) => item.toJson())
@@ -311,6 +319,8 @@ class CourseDetailModel {
     String? title,
     String? progressLabel,
     bool? isProEnabled,
+    bool? isFree,
+    int? lessonCount,
     bool? isExamFinished,
     List<CourseChapterModel>? chapters,
     CourseFinalExamModel? finalExam,
@@ -322,6 +332,8 @@ class CourseDetailModel {
       title: title ?? this.title,
       progressLabel: progressLabel ?? this.progressLabel,
       isProEnabled: isProEnabled ?? this.isProEnabled,
+      isFree: isFree ?? this.isFree,
+      lessonCount: lessonCount ?? this.lessonCount,
       isExamFinished: isExamFinished ?? this.isExamFinished,
       chapters: chapters ?? this.chapters,
       finalExam: finalExam ?? this.finalExam,

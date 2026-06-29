@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -8,12 +7,16 @@ import '../../../../../core/themes/app_font.dart';
 import '../models/pro_checkout_models.dart';
 
 class CheckoutProductCard extends StatelessWidget {
+  final String courseName;
+  final int lessonCount;
   final ProPlanModel plan;
   final ProCurrency currency;
   final bool isCouponApplied;
 
   const CheckoutProductCard({
     super.key,
+    required this.courseName,
+    required this.lessonCount,
     required this.plan,
     required this.currency,
     required this.isCouponApplied,
@@ -48,7 +51,7 @@ class CheckoutProductCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      'ITALIAN SHIKHI',
+                      'ITALIR POTHE',
                       style: TextStyle(
                         fontSize: AppFont.font12.sp,
                         fontWeight: FontWeight.w700,
@@ -58,7 +61,7 @@ class CheckoutProductCard extends StatelessWidget {
                     ),
                     SizedBox(height: 10.h),
                     Text(
-                      'Full Italian Mastery\n(A1–B1)',
+                      '$courseName\n$lessonCount lessons',
                       style: TextStyle(
                         fontSize: AppFont.font22.sp,
                         fontWeight: FontWeight.w800,
@@ -104,7 +107,7 @@ class CheckoutProductCard extends StatelessWidget {
               Text(
                 price,
                 style: TextStyle(
-                  fontSize: AppFont.font30.sp,
+                  fontSize: AppFont.font24.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primaryGreen,
                 ),
@@ -113,25 +116,33 @@ class CheckoutProductCard extends StatelessWidget {
               Text(
                 oldPrice,
                 style: TextStyle(
-                  fontSize: AppFont.font14.sp,
+                  fontSize: AppFont.font12.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.bodyText,
                   decoration: TextDecoration.lineThrough,
                 ),
               ),
-              const Spacer(),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: AppColors.homeOrange,
-                  borderRadius: BorderRadius.circular(kHomePillRadius.r),
-                ),
-                child: Text(
-                  plan.discountLabel,
-                  style: TextStyle(
-                    fontSize: AppFont.font12.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.black,
+              6.w.horizontalSpace,
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.homeOrange,
+                      borderRadius: BorderRadius.circular(kHomePillRadius.r),
+                    ),
+                    child: Text(
+                      plan.discountLabel,
+                      style: TextStyle(
+                        fontSize: AppFont.font10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.black,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -192,14 +203,10 @@ class CheckoutPaymentMethodCard extends StatelessWidget {
 
   String _label(ProPaymentMethod method) {
     switch (method) {
-      case ProPaymentMethod.paypal:
-        return 'PayPal';
-      case ProPaymentMethod.applePay:
-        return 'Apple Pay';
-      case ProPaymentMethod.bkash:
-        return 'Bkash';
+      case ProPaymentMethod.googlePlay:
+        return 'Google Play';
       case ProPaymentMethod.card:
-        return 'Card';
+        return 'Card / Stripe';
     }
   }
 }
@@ -211,16 +218,12 @@ class _PaymentMethodIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (method == ProPaymentMethod.paypal) {
-      return SvgPicture.asset('assets/icons_svg/paypal.svg', height: 25.h);
-    }
-
-    if (method == ProPaymentMethod.bkash) {
-      return SvgPicture.asset('assets/icons_svg/bkash.svg', height: 25.h);
-    }
-
-    if (method == ProPaymentMethod.applePay) {
-      return Icon(Icons.apple_rounded, color: AppColors.black, size: 34.w);
+    if (method == ProPaymentMethod.googlePlay) {
+      return Icon(
+        Icons.play_circle_fill_rounded,
+        color: AppColors.primaryGreen,
+        size: 32.w,
+      );
     }
 
     return Icon(

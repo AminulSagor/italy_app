@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:italir_pothe/features/drawer_features/settings/settings_controller.dart';
-import 'package:italir_pothe/features/drawer_features/settings/widgets/settings_ui_widgets.dart';
-import 'package:italir_pothe/routes/routes.dart';
+
+import '../../../../../routes/routes.dart';
+import '../../settings_controller.dart';
+import '../../widgets/settings_ui_widgets.dart';
 
 class ProfileSecurityView extends GetView<SettingsController> {
   const ProfileSecurityView({super.key});
@@ -20,67 +21,84 @@ class ProfileSecurityView extends GetView<SettingsController> {
             children: <Widget>[
               const SettingsTopBar(title: 'Edit Profile'),
               SizedBox(height: 49.h),
-              _ProfileAvatar(onTap: () => Get.toNamed(AppRoutes.profilePhoto)),
-              SizedBox(height: 19.h),
-              Text(
-                'LEVEL 12 LINGUIST',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF5B5B5B),
-                  letterSpacing: 0.8,
+              Obx(
+                () => _ProfileAvatar(
+                  avatarUrl: controller.profile.value?.avatarUrl,
+                  onTap: () => Get.toNamed(AppRoutes.profilePhoto),
                 ),
               ),
               SizedBox(height: 27.h),
-              const _ProfileTextField(
+              SettingsPillField(
                 label: 'Full Name',
-                value: 'Alessandro Rossi',
+                hint: 'Enter your full name',
                 icon: Icons.person_outline_rounded,
+                controller: controller.fullNameController,
+                keyboardType: TextInputType.name,
               ),
               SizedBox(height: 24.h),
-              Obx(() {
-                final bool isEmail = controller.editProfileTab.value == 'email';
-
-                return _SegmentedSwitch(
-                  isEmail: isEmail,
+              Obx(
+                () => _SegmentedSwitch(
+                  isEmail: controller.selectedContactIsEmail,
                   onEmailTap: () => controller.setEditProfileTab('email'),
                   onPhoneTap: () => controller.setEditProfileTab('phone'),
-                );
-              }),
+                ),
+              ),
               SizedBox(height: 13.h),
-              Obx(() {
-                final bool isEmail = controller.editProfileTab.value == 'email';
-
-                return _ProfileTextField(
-                  label: isEmail ? 'Email' : 'Phone',
-                  value: isEmail
-                      ? 'alessandro.r@shikhi.it'
-                      : '+88 013 5462 489',
-                  icon: isEmail
+              Obx(
+                () => SettingsPillField(
+                  label: controller.selectedContactIsEmail ? 'Email' : 'Phone',
+                  hint: controller.selectedContactIsEmail
+                      ? 'Enter your new email'
+                      : 'Enter your new phone number',
+                  icon: controller.selectedContactIsEmail
                       ? Icons.alternate_email_rounded
                       : Icons.phone_rounded,
-                );
-              }),
+                  controller: controller.selectedContactController,
+                  onChanged: controller.selectedContactIsEmail
+                      ? controller.onEmailChanged
+                      : controller.onPhoneChanged,
+                  keyboardType: controller.selectedContactIsEmail
+                      ? TextInputType.emailAddress
+                      : TextInputType.phone,
+                  suffixIcon: controller.selectedContactChanged
+                      ? Icons.verified_user_outlined
+                      : Icons.verified_rounded,
+                ),
+              ),
               SizedBox(height: 24.h),
-              Obx(() {
-                final bool isEmail = controller.editProfileTab.value == 'email';
-
-                return _VerifiedCard(
-                  title: isEmail ? 'Email Verified' : 'Phone Verified',
-                  subtitle: 'Your account is secure',
-                );
-              }),
+              Obx(
+                () => _ContactVerificationCard(
+                  isVerified: controller.selectedContactVerified,
+                  isEmail: controller.selectedContactIsEmail,
+                  hasChanged: controller.selectedContactChanged,
+                ),
+              ),
               SizedBox(height: 36.h),
-              SettingsPrimaryButton(
-                text: 'SAVE CHANGES',
-                icon: Icons.save_rounded,
-                onTap: () {
-                  final String mode = controller.editProfileTab.value;
-                  Get.toNamed(
-                    AppRoutes.verifyContact,
-                    arguments: {'mode': mode},
-                  );
-                },
+              Obx(
+                () => SettingsPrimaryButton(
+                  text: controller.selectedContactChanged
+                      ? 'SAVE & VERIFY  →'
+                      : 'SAVE CHANGES',
+                  icon: controller.selectedContactChanged
+                      ? Icons.mark_email_read_outlined
+                      : Icons.save_rounded,
+                  isLoading:
+                      controller.isSavingName.value ||
+                      controller.isRequestingContactOtp.value,
+                  onTap: () async {
+                    final ProfileSaveResult result =
+                        await controller.saveProfileAndContinue();
+                    if (result == ProfileSaveResult.saved) {
+                      await SettingsSuccessBottomSheet.show(
+                        title: 'Profile Updated!',
+                        subtitle:
+                            'Your profile information has been updated successfully.',
+                      );
+                    } else if (result == ProfileSaveResult.noChanges) {
+                      Get.snackbar('Profile', 'There are no changes to save.');
+                    }
+                  },
+                ),
               ),
             ],
           ),
@@ -91,9 +109,10 @@ class ProfileSecurityView extends GetView<SettingsController> {
 }
 
 class _ProfileAvatar extends StatelessWidget {
-  final VoidCallback onTap;
+  const _ProfileAvatar({required this.avatarUrl, required this.onTap});
 
-  const _ProfileAvatar({required this.onTap});
+  final String? avatarUrl;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -110,20 +129,7 @@ class _ProfileAvatar extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: SettingsUi.lightGreen, width: 4.w),
             ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/profile_images/Fahid Hasan.png',
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  color: const Color(0xFF1B242D),
-                  child: Icon(
-                    Icons.person_rounded,
-                    size: 72.r,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            child: ClipOval(child: _AvatarImage(avatarUrl: avatarUrl)),
           ),
           Positioned(
             right: 0,
@@ -152,73 +158,46 @@ class _ProfileAvatar extends StatelessWidget {
   }
 }
 
-class _ProfileTextField extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
+class _AvatarImage extends StatelessWidget {
+  const _AvatarImage({required this.avatarUrl});
 
-  const _ProfileTextField({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(left: 24.w, bottom: 10.h),
-          child: Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.4,
-              color: const Color(0xFF666666),
-            ),
-          ),
-        ),
-        Container(
-          height: 64.h,
-          padding: EdgeInsets.symmetric(horizontal: 23.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(100.r),
-          ),
-          child: Row(
-            children: <Widget>[
-              Icon(icon, size: 22.r, color: SettingsUi.green),
-              SizedBox(width: 18.w),
-              Expanded(
-                child: Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w800,
-                    color: SettingsUi.text,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+    final String url = avatarUrl?.trim() ?? '';
+    if (url.isEmpty) return const _AvatarFallback();
+
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => const _AvatarFallback(),
+    );
+  }
+}
+
+class _AvatarFallback extends StatelessWidget {
+  const _AvatarFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFF1B242D),
+      child: Icon(Icons.person_rounded, size: 72.r, color: Colors.white),
     );
   }
 }
 
 class _SegmentedSwitch extends StatelessWidget {
-  final bool isEmail;
-  final VoidCallback onEmailTap;
-  final VoidCallback onPhoneTap;
-
   const _SegmentedSwitch({
     required this.isEmail,
     required this.onEmailTap,
     required this.onPhoneTap,
   });
+
+  final bool isEmail;
+  final VoidCallback onEmailTap;
+  final VoidCallback onPhoneTap;
 
   @override
   Widget build(BuildContext context) {
@@ -226,21 +205,21 @@ class _SegmentedSwitch extends StatelessWidget {
       height: 60.h,
       padding: EdgeInsets.all(5.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFD9DADA),
+        color: const Color(0xFFE8E8E8),
         borderRadius: BorderRadius.circular(100.r),
       ),
       child: Row(
         children: <Widget>[
           Expanded(
-            child: _SegmentItem(
-              text: 'Email',
+            child: _SegmentButton(
+              text: 'EMAIL',
               selected: isEmail,
               onTap: onEmailTap,
             ),
           ),
           Expanded(
-            child: _SegmentItem(
-              text: 'Phone',
+            child: _SegmentButton(
+              text: 'PHONE',
               selected: !isEmail,
               onTap: onPhoneTap,
             ),
@@ -251,16 +230,16 @@ class _SegmentedSwitch extends StatelessWidget {
   }
 }
 
-class _SegmentItem extends StatelessWidget {
-  final String text;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _SegmentItem({
+class _SegmentButton extends StatelessWidget {
+  const _SegmentButton({
     required this.text,
     required this.selected,
     required this.onTap,
   });
+
+  final String text;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -276,9 +255,9 @@ class _SegmentItem extends StatelessWidget {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 13.sp,
             fontWeight: FontWeight.w900,
-            color: const Color(0xFF4C4C4C),
+            color: selected ? SettingsUi.green : SettingsUi.muted,
           ),
         ),
       ),
@@ -286,60 +265,54 @@ class _SegmentItem extends StatelessWidget {
   }
 }
 
-class _VerifiedCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
+class _ContactVerificationCard extends StatelessWidget {
+  const _ContactVerificationCard({
+    required this.isVerified,
+    required this.isEmail,
+    required this.hasChanged,
+  });
 
-  const _VerifiedCard({required this.title, required this.subtitle});
+  final bool isVerified;
+  final bool isEmail;
+  final bool hasChanged;
 
   @override
   Widget build(BuildContext context) {
+    final String contactName = isEmail ? 'email address' : 'phone number';
+    final String message = hasChanged
+        ? 'A 4-digit OTP will be sent to the new $contactName. The change is applied only after verification.'
+        : isVerified
+        ? 'Your current $contactName is verified. Enter a new one to change it through OTP verification.'
+        : 'Enter your $contactName and verify it with the 4-digit OTP.';
+
     return Container(
-      height: 94.h,
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 18.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFDCEBFF),
-        borderRadius: BorderRadius.circular(38.r),
+        color: hasChanged
+            ? const Color(0xFFDCEBFF)
+            : const Color(0xFFE3F8D9),
+        borderRadius: BorderRadius.circular(28.r),
       ),
       child: Row(
         children: <Widget>[
-          Container(
-            width: 48.r,
-            height: 48.r,
-            decoration: const BoxDecoration(
-              color: Color(0xFFA9D0FF),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.verified_outlined,
-              size: 25.r,
-              color: const Color(0xFF0064A8),
-            ),
+          Icon(
+            hasChanged
+                ? Icons.mark_email_unread_outlined
+                : Icons.verified_user_outlined,
+            color: hasChanged ? const Color(0xFF0064A8) : SettingsUi.green,
           ),
-          SizedBox(width: 18.w),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF005A97),
-                ),
+          SizedBox(width: 14.w),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                fontSize: 13.sp,
+                height: 1.35,
+                fontWeight: FontWeight.w700,
+                color: SettingsUi.text,
               ),
-              SizedBox(height: 3.h),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF005A97),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

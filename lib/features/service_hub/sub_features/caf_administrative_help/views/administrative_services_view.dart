@@ -4,10 +4,10 @@ import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
-import '../ _widgets/administrative_search_bar.dart';
-import '../ _widgets/administrative_service_card.dart';
-import '../ _widgets/administrative_service_pill.dart';
 
+import '../_widgets/administrative_service_pill.dart';
+import '../_widgets/administrative_search_bar.dart';
+import '../_widgets/administrative_service_card.dart';
 
 class AdministrativeServicesView extends StatelessWidget {
   const AdministrativeServicesView({super.key});

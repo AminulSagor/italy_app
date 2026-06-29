@@ -3,11 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../guide_controller.dart';
+import '../models/guide_faq_item.dart';
+import '../widgets/guide_faq_video_player.dart';
 
 class GuideFaqView extends GetView<GuideController> {
   const GuideFaqView({super.key});
 
-  static const Color _bg = Color(0xFFF5F5F5);
+  static const Color _backgroundColor = Color(0xFFF5F5F5);
   static const Color _green = Color(0xFF267A05);
   static const Color _text = Color(0xFF2D3032);
   static const Color _muted = Color(0xFF626262);
@@ -18,7 +20,7 @@ class GuideFaqView extends GetView<GuideController> {
     final GuideFaqItem faq = controller.getFaqById(faqId);
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: _backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -28,7 +30,6 @@ class GuideFaqView extends GetView<GuideController> {
             children: <Widget>[
               const _FaqTopBar(),
               SizedBox(height: 34.h),
-
               Text(
                 faq.category,
                 style: TextStyle(
@@ -38,9 +39,7 @@ class GuideFaqView extends GetView<GuideController> {
                   color: _green,
                 ),
               ),
-
               SizedBox(height: 12.h),
-
               Text(
                 faq.title,
                 style: TextStyle(
@@ -51,9 +50,7 @@ class GuideFaqView extends GetView<GuideController> {
                   letterSpacing: -0.95,
                 ),
               ),
-
               SizedBox(height: 12.h),
-
               Text(
                 faq.description,
                 style: TextStyle(
@@ -64,30 +61,27 @@ class GuideFaqView extends GetView<GuideController> {
                   letterSpacing: -0.2,
                 ),
               ),
-
+              if (faq.hasVideo) ...<Widget>[
+                SizedBox(height: 36.h),
+                GuideFaqVideoPlayer(assetPath: faq.videoAssetPath!),
+              ],
               SizedBox(height: 42.h),
-
-              const _VideoPreview(),
-
-              SizedBox(height: 42.h),
-
               Column(
                 children: faq.steps
                     .map(
-                      (step) => Padding(
+                      (GuideStepItem step) => Padding(
                         padding: EdgeInsets.only(bottom: 32.h),
                         child: _StepBlock(step: step),
                       ),
                     )
                     .toList(),
               ),
-
-              SizedBox(height: 8.h),
-
-              const _ExpertTipCard(),
-
-              SizedBox(height: 40.h),
-
+              if (faq.hasExpertTip) ...<Widget>[
+                SizedBox(height: 8.h),
+                _ExpertTipCard(text: faq.expertTip!),
+                SizedBox(height: 40.h),
+              ] else
+                SizedBox(height: 8.h),
               _SupportCard(onTap: controller.chatWithSupport),
             ],
           ),
@@ -150,127 +144,12 @@ class _FaqTopBar extends StatelessWidget {
   }
 }
 
-class _VideoPreview extends StatelessWidget {
-  const _VideoPreview();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 188.h,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(42.r),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 18.r,
-            offset: Offset(0, 8.h),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(42.r),
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Positioned(
-              top: -46.h,
-              child: Container(
-                width: 284.r,
-                height: 284.r,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: <Color>[
-                      const Color(0xFF315F5C),
-                      const Color(0xFF183F3D),
-                    ],
-                  ),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.22),
-                      blurRadius: 18.r,
-                      offset: Offset(0, 8.h),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            Container(
-              width: 76.r,
-              height: 76.r,
-              decoration: BoxDecoration(
-                color: const Color(0xFF79F535),
-                shape: BoxShape.circle,
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: const Color(0xFF1C7300),
-                    blurRadius: 0,
-                    offset: Offset(0, 9.h),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.play_arrow_rounded,
-                size: 42.r,
-                color: const Color(0xFF0D6200),
-              ),
-            ),
-
-            Positioned(
-              left: 28.w,
-              right: 28.w,
-              bottom: 26.h,
-              child: Stack(
-                children: <Widget>[
-                  Container(
-                    height: 13.h,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.55),
-                      borderRadius: BorderRadius.circular(100.r),
-                    ),
-                  ),
-                  FractionallySizedBox(
-                    widthFactor: 0.31,
-                    child: Container(
-                      height: 13.h,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF79F535),
-                        borderRadius: BorderRadius.circular(100.r),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 86.w,
-                    top: 0,
-                    child: Container(
-                      width: 15.r,
-                      height: 15.r,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _StepBlock extends StatelessWidget {
   final GuideStepItem step;
 
   const _StepBlock({required this.step});
 
   static const Color _text = Color(0xFF2D3032);
-  static const Color _muted = Color(0xFF626262);
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +160,10 @@ class _StepBlock extends StatelessWidget {
           width: 48.r,
           height: 48.r,
           alignment: Alignment.center,
-          decoration: BoxDecoration(color: step.color, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: step.color,
+            shape: BoxShape.circle,
+          ),
           child: Text(
             step.number,
             style: TextStyle(
@@ -307,7 +189,16 @@ class _StepBlock extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 8.h),
-              _StepDescription(text: step.description),
+              Text(
+                step.description,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  height: 1.48,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF626262),
+                  letterSpacing: -0.1,
+                ),
+              ),
             ],
           ),
         ),
@@ -316,51 +207,10 @@ class _StepBlock extends StatelessWidget {
   }
 }
 
-class _StepDescription extends StatelessWidget {
+class _ExpertTipCard extends StatelessWidget {
   final String text;
 
-  const _StepDescription({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle baseStyle = TextStyle(
-      fontSize: 16.sp,
-      height: 1.48,
-      fontWeight: FontWeight.w500,
-      color: const Color(0xFF626262),
-      letterSpacing: -0.1,
-    );
-
-    if (!text.contains('Green') && !text.contains('Red')) {
-      return Text(text, style: baseStyle);
-    }
-
-    return Text.rich(
-      TextSpan(
-        style: baseStyle,
-        children: const <TextSpan>[
-          TextSpan(
-            text:
-                'Receive a detailed breakdown of your performance. Words highlighted in ',
-          ),
-          TextSpan(
-            text: 'Green',
-            style: TextStyle(color: Color(0xFF267A05)),
-          ),
-          TextSpan(text: ' are perfect, while '),
-          TextSpan(
-            text: 'Red',
-            style: TextStyle(color: Color(0xFFE73508)),
-          ),
-          TextSpan(text: ' ones need more practice.'),
-        ],
-      ),
-    );
-  }
-}
-
-class _ExpertTipCard extends StatelessWidget {
-  const _ExpertTipCard();
+  const _ExpertTipCard({required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -395,7 +245,7 @@ class _ExpertTipCard extends StatelessWidget {
           ),
           SizedBox(height: 18.h),
           Text(
-            'Use noise canceling headphones for the best AI accuracy. This helps the Lab isolate your voice from background noise for 99% precision.',
+            text,
             style: TextStyle(
               fontSize: 16.sp,
               height: 1.45,
@@ -441,7 +291,7 @@ class _SupportCard extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Our support humans are here to help\nyou 24/7.',
+            'Our support team is ready to help with any issue not covered in this guide.',
             style: TextStyle(
               fontSize: 16.sp,
               height: 1.35,

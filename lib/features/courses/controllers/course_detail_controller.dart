@@ -19,7 +19,6 @@ class CourseDetailController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxBool isProSubmitting = false.obs;
-  final RxBool isProEnabled = false.obs;
   final Rxn<CourseDetailModel> detail = Rxn<CourseDetailModel>();
 
   @override
@@ -39,7 +38,6 @@ class CourseDetailController extends GetxController {
           await ApiErrorHandler.call<CourseDetailModel>(
         () => _coursesApiService.fetchCourseDetail(
           courseId: course.id,
-          isProEnabled: isProEnabled.value,
         ),
         errorTitle: 'Course Details',
       );
@@ -54,30 +52,8 @@ class CourseDetailController extends GetxController {
     }
   }
 
-  Future<void> enablePro() async {
-    if (isProSubmitting.value || isProEnabled.value) {
-      return;
-    }
-
-    isProSubmitting.value = true;
-    try {
-      final ApiResult<Object?> result = await ApiErrorHandler.call<Object?>(
-        () async {
-          await _coursesApiService.enableProAccess();
-          return null;
-        },
-        errorTitle: 'Pro Access',
-      );
-
-      if (!result.isSuccess) {
-        return;
-      }
-
-      isProEnabled.value = true;
-      await loadDetail();
-    } finally {
-      isProSubmitting.value = false;
-    }
+  Future<void> refreshAfterPurchase() async {
+    await loadDetail();
   }
 
   Future<void> openProOrderSummary() async {
@@ -88,6 +64,9 @@ class CourseDetailController extends GetxController {
       arguments: ProOrderSummaryRouteArguments(
         controllerTag: tag,
         courseDetailControllerTag: controllerTag,
+        courseId: course.id,
+        courseName: detail.value?.title ?? course.title,
+        lessonCount: detail.value?.lessonCount ?? 0,
       ),
     );
   }

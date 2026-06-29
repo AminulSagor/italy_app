@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import ' permesso_soggiorno_guide_view.dart';
-import '../ _widgets/caf_path_card.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
+import '../_widgets/caf_path_card.dart';
 import 'administrative_services_view.dart';
-
+import 'permesso_soggiorno_guide_view.dart';
 
 class CafAdministrativeHelpView extends StatelessWidget {
   const CafAdministrativeHelpView({super.key});
@@ -55,9 +54,12 @@ class CafAdministrativeHelpView extends StatelessWidget {
                 leadingIcon: Icons.school_rounded,
                 trailingIcon: Icons.menu_book_rounded,
                 title: 'CAF Courses',
-                description: 'Learn how the Italian tax and legal system works.',
+                description:
+                    'Learn how the Italian tax and legal system works.',
                 buttonText: 'START LEARNING',
-                onTap: () {Get.to(() => const PermessoSoggiornoGuideView());},
+                onTap: () {
+                  Get.to(() => const PermessoSoggiornoGuideView());
+                },
               ),
               SizedBox(height: 20.h),
               CafPathCard(
@@ -70,10 +72,12 @@ class CafAdministrativeHelpView extends StatelessWidget {
                 trailingIcon: Icons.verified_rounded,
                 title: 'CAF Services & Guides',
                 description:
-                'Step-by-step help for your documents.\nপ্রশাসনিক সহায়তা এবং গাইড',
+                    'Step-by-step help for your documents.\nপ্রশাসনিক সহায়তা এবং গাইড',
                 descriptionMaxLines: 3,
                 buttonText: 'EXPLORE SERVICES',
-                onTap: () {Get.to(() => const  AdministrativeServicesView());},
+                onTap: () {
+                  Get.to(() => const AdministrativeServicesView());
+                },
               ),
             ],
           ),

@@ -18,6 +18,7 @@ import '../features/auth/sub_features/login/views/login_view.dart';
 import '../features/courses/controllers/course_detail_controller.dart';
 import '../features/courses/controllers/course_certificate_controller.dart';
 import '../features/courses/controllers/courses_controller.dart';
+import '../features/courses/models/course_models.dart';
 import '../features/courses/services/courses_api_service.dart';
 import '../features/courses/services/course_certificate_mock_service.dart';
 import '../features/courses/sub_features/chapter_detail/controllers/chapter_detail_controller.dart';
@@ -32,7 +33,7 @@ import '../features/courses/sub_features/final_exam/views/final_exam_speaking_vi
 import '../features/courses/sub_features/final_exam/views/final_exam_success_view.dart';
 import '../features/courses/sub_features/final_exam/views/final_exam_writing_view.dart';
 import '../features/courses/sub_features/pro_checkout/controllers/pro_checkout_controller.dart';
-import '../features/courses/sub_features/pro_checkout/services/pro_checkout_mock_service.dart';
+import '../features/courses/sub_features/pro_checkout/services/pro_checkout_api_service.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_checkout_view.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_order_summary_view.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_purchase_success_view.dart';
@@ -49,11 +50,12 @@ import '../features/courses/sub_features/vocabulary/views/vocabulary_view.dart';
 import '../features/courses/views/course_detail_view.dart';
 import '../features/courses/views/course_certificate_view.dart';
 import '../features/home/controllers/home_controller.dart';
-import '../features/home/services/home_mock_service.dart';
+import '../features/home/services/home_api_service.dart';
 import '../features/home/views/home_view.dart';
 import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_service.dart';
 import '../features/notifications/services/notifications_mock_service.dart';
+import '../features/practice_hub/services/job_sentences_api_service.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_contact_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_dynamic_form_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_theme_controller.dart';
@@ -65,6 +67,9 @@ import '../features/service_hub/sub_features/cv_builder/controllers/cv_template_
 import '../features/service_hub/sub_features/cv_builder/services/cv_builder_api_service.dart';
 import '../features/service_hub/sub_features/cv_builder/services/cv_pdf_download_service.dart';
 import '../core/services/api_client.dart';
+import '../core/controllers/user_session_controller.dart';
+import '../core/services/learning_activity_api_service.dart';
+import '../core/services/auth_service.dart';
 import '../core/services/token_service.dart';
 import '../features/messages/services/chat_socket_service.dart';
 import '../features/messages/services/presence_service.dart';
@@ -90,6 +95,8 @@ import 'app_route_arguments.dart';
 import 'app_routes.dart';
 import '../features/drawer_features/shop/shop_view.dart';
 import '../features/drawer_features/shop/shop_controller.dart';
+import '../features/drawer_features/shop/controllers/shop_order_history_controller.dart';
+import '../features/drawer_features/shop/services/shop_api_service.dart';
 import '../features/drawer_features/shop/refill_ai_credits/views/ai_refill_center_view.dart';
 import '../features/drawer_features/shop/refill_ai_credits/views/order_summary_view.dart';
 import '../features/drawer_features/shop/refill_ai_credits/views/checkout_view.dart';
@@ -103,6 +110,7 @@ import '../features/drawer_features/guide/guide_controller.dart';
 import '../features/drawer_features/guide/views/guide_view.dart';
 import '../features/drawer_features/guide/views/guide_faq_view.dart';
 import '../features/drawer_features/rewards/reward_controller.dart';
+import '../features/drawer_features/rewards/services/reward_api_service.dart';
 import '../features/drawer_features/rewards/views/rewards_view.dart';
 import '../features/drawer_features/rewards/views/reward_chest_view.dart';
 import '../features/drawer_features/rewards/views/rewards_history_view.dart';
@@ -111,13 +119,18 @@ import '../features/drawer_features/contact/contact_controller.dart';
 import '../features/drawer_features/contact/contact_support_view.dart';
 import '../features/drawer_features/settings/settings_controller.dart';
 import '../features/drawer_features/settings/settings_view.dart';
+import '../features/drawer_features/settings/services/user_settings_service.dart';
 import '../features/drawer_features/settings/sub_features/views/profile_security_veiw.dart';
 import '../features/drawer_features/settings/sub_features/views/profile_photo_view.dart';
 import '../features/drawer_features/settings/sub_features/views/change_password_view.dart';
 import '../features/drawer_features/settings/sub_features/views/verify_contact_view.dart';
 import '../features/drawer_features/settings/sub_features/views/settings_success_view.dart';
 import '../features/drawer_features/settings/sub_features/views/delete_account_confirm_view.dart';
+import '../features/drawer_features/settings/sub_features/views/privacy_policy_view.dart';
+import '../features/drawer_features/settings/sub_features/views/terms_of_service_view.dart';
 import '../features/practice_hub/controllers/practice_hub_controller.dart';
+import '../features/practice_hub/controllers/job_sentences_controller.dart';
+import '../features/practice_hub/models/job_track_models.dart';
 import '../features/practice_hub/services/practice_hub_api_service.dart';
 import '../features/practice_hub/views/important_verbs/verb_details.dart';
 import '../features/practice_hub/views/survival_italian/survival_italian_view.dart';
@@ -132,6 +145,21 @@ class AppPages {
   static const String initial = AppRoutes.login;
 
   static T _arguments<T>() => Get.arguments as T;
+
+  static void _ensureRewardDependencies() {
+    if (!Get.isRegistered<RewardApiService>()) {
+      Get.lazyPut<RewardApiService>(
+        () => RewardApiService(apiClient: Get.find<ApiClient>()),
+        fenix: true,
+      );
+    }
+    if (!Get.isRegistered<RewardController>()) {
+      Get.lazyPut<RewardController>(
+        () => RewardController(apiService: Get.find<RewardApiService>()),
+        fenix: true,
+      );
+    }
+  }
 
   static void _ensureCoursesApiService() {
     if (!Get.isRegistered<CoursesApiService>()) {
@@ -233,16 +261,56 @@ class AppPages {
       name: AppRoutes.home,
       page: () => const HomeView(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<HomeMockService>(() => HomeMockService());
-        Get.lazyPut<HomeController>(
-          () => HomeController(homeMockService: Get.find<HomeMockService>()),
-        );
+        if (!Get.isRegistered<HomeApiService>()) {
+          Get.lazyPut<HomeApiService>(
+            () => HomeApiService(
+              apiClient: Get.find<ApiClient>(),
+              learningActivityApiService:
+                  Get.find<LearningActivityApiService>(),
+            ),
+            fenix: true,
+          );
+        }
+        if (!Get.isRegistered<HomeController>()) {
+          Get.lazyPut<HomeController>(
+            () => HomeController(
+              homeApiService: Get.find<HomeApiService>(),
+              userSessionController: Get.find<UserSessionController>(),
+            ),
+            fenix: true,
+          );
+        }
       }),
     ),
     GetPage(
       name: AppRoutes.wrapper,
       page: () => const NavbarAndAppbarWrapper(),
       binding: BindingsBuilder(() {
+        if (!Get.isRegistered<LearningActivityApiService>()) {
+          Get.lazyPut<LearningActivityApiService>(
+            () => LearningActivityApiService(apiClient: Get.find<ApiClient>()),
+            fenix: true,
+          );
+        }
+        if (!Get.isRegistered<HomeApiService>()) {
+          Get.lazyPut<HomeApiService>(
+            () => HomeApiService(
+              apiClient: Get.find<ApiClient>(),
+              learningActivityApiService:
+                  Get.find<LearningActivityApiService>(),
+            ),
+            fenix: true,
+          );
+        }
+        if (!Get.isRegistered<HomeController>()) {
+          Get.lazyPut<HomeController>(
+            () => HomeController(
+              homeApiService: Get.find<HomeApiService>(),
+              userSessionController: Get.find<UserSessionController>(),
+            ),
+            fenix: true,
+          );
+        }
         _ensureCoursesApiService();
         if (!Get.isRegistered<CoursesController>()) {
           Get.lazyPut<CoursesController>(
@@ -281,9 +349,12 @@ class AppPages {
             () => NotificationsMockService(),
           );
         }
-        Get.lazyPut<NavbarAndAppbarWrapperController>(
-          () => NavbarAndAppbarWrapperController(),
-        );
+        if (!Get.isRegistered<NavbarAndAppbarWrapperController>()) {
+          Get.lazyPut<NavbarAndAppbarWrapperController>(
+            () => NavbarAndAppbarWrapperController(),
+            fenix: true,
+          );
+        }
       }),
     ),
     GetPage(
@@ -371,25 +442,45 @@ class AppPages {
     GetPage(
       name: AppRoutes.chapterDetail,
       page: () {
-        final ChapterDetailRouteArguments args =
-            _arguments<ChapterDetailRouteArguments>();
-        return ChapterDetailView(controllerTag: args.controllerTag);
+        final Object rawArgs = Get.arguments as Object;
+        final String controllerTag = rawArgs is HomeChapterRouteArguments
+            ? 'home-chapter-${rawArgs.lessonId}'
+            : (rawArgs as ChapterDetailRouteArguments).controllerTag;
+        return ChapterDetailView(controllerTag: controllerTag);
       },
       binding: BindingsBuilder(() {
-        final ChapterDetailRouteArguments args =
-            _arguments<ChapterDetailRouteArguments>();
+        final Object rawArgs = Get.arguments as Object;
+        final HomeChapterRouteArguments? homeArgs =
+            rawArgs is HomeChapterRouteArguments ? rawArgs : null;
+        final ChapterDetailRouteArguments? existingArgs =
+            rawArgs is ChapterDetailRouteArguments ? rawArgs : null;
+        final String controllerTag = homeArgs != null
+            ? 'home-chapter-${homeArgs.lessonId}'
+            : existingArgs!.controllerTag;
+        final CourseChapterModel chapter = homeArgs == null
+            ? existingArgs!.chapter
+            : CourseChapterModel(
+                id: homeArgs.lessonId,
+                courseId: homeArgs.courseId,
+                chapterId: homeArgs.chapterId,
+                title: homeArgs.title,
+                subtitle: homeArgs.subtitle,
+                progress: homeArgs.progress,
+                state: CourseChapterState.current,
+                statusLabel: 'CURRENT',
+              );
         Get.lazyPut<ChapterDetailApiService>(
           () => ChapterDetailApiService(apiClient: Get.find<ApiClient>()),
-          tag: args.controllerTag,
+          tag: controllerTag,
         );
         Get.lazyPut<ChapterDetailController>(
           () => ChapterDetailController(
-            chapter: args.chapter,
+            chapter: chapter,
             chapterDetailApiService: Get.find<ChapterDetailApiService>(
-              tag: args.controllerTag,
+              tag: controllerTag,
             ),
           ),
-          tag: args.controllerTag,
+          tag: controllerTag,
         );
       }),
     ),
@@ -403,10 +494,12 @@ class AppPages {
       },
       binding: BindingsBuilder(() {
         final Object routeArgs = Get.arguments as Object;
-        final VocabularyRouteArguments args = routeArgs is VocabularyRouteArguments
+        final VocabularyRouteArguments args =
+            routeArgs is VocabularyRouteArguments
             ? routeArgs
             : VocabularyRouteArguments(
-                controllerTag: (routeArgs as ControllerTagRouteArguments).controllerTag,
+                controllerTag:
+                    (routeArgs as ControllerTagRouteArguments).controllerTag,
               );
         Get.lazyPut<VocabularyMockService>(
           () => VocabularyMockService(),
@@ -425,6 +518,7 @@ class AppPages {
             vocabularyApiService: Get.find<VocabularyApiService>(
               tag: args.controllerTag,
             ),
+            userSessionController: Get.find<UserSessionController>(),
           ),
           tag: args.controllerTag,
         );
@@ -515,18 +609,21 @@ class AppPages {
       binding: BindingsBuilder(() {
         final ProOrderSummaryRouteArguments args =
             _arguments<ProOrderSummaryRouteArguments>();
-        Get.lazyPut<ProCheckoutMockService>(
-          () => ProCheckoutMockService(),
+        Get.lazyPut<ProCheckoutApiService>(
+          () => ProCheckoutApiService(apiClient: Get.find<ApiClient>()),
           tag: args.controllerTag,
         );
         Get.lazyPut<ProCheckoutController>(
           () => ProCheckoutController(
-            proCheckoutMockService: Get.find<ProCheckoutMockService>(
+            proCheckoutApiService: Get.find<ProCheckoutApiService>(
               tag: args.controllerTag,
             ),
+            courseId: args.courseId,
+            courseName: args.courseName,
+            lessonCount: args.lessonCount,
             onPurchaseCompleted: Get.find<CourseDetailController>(
               tag: args.courseDetailControllerTag,
-            ).enablePro,
+            ).refreshAfterPurchase,
           ),
           tag: args.controllerTag,
         );
@@ -685,9 +782,17 @@ class AppPages {
 
     GetPage(
       name: AppRoutes.shop,
-      page: () => ShopView(),
+      page: () => const ShopView(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<ShopController>(() => ShopController());
+        if (!Get.isRegistered<ShopApiService>()) {
+          Get.lazyPut<ShopApiService>(
+            () => ShopApiService(apiClient: Get.find<ApiClient>()),
+            fenix: true,
+          );
+        }
+        Get.lazyPut<ShopController>(
+          () => ShopController(apiService: Get.find<ShopApiService>()),
+        );
       }),
     ),
     GetPage(
@@ -719,9 +824,17 @@ class AppPages {
       name: AppRoutes.orderHistory,
       page: () => const OrderHistoryView(),
       binding: BindingsBuilder(() {
-        if (!Get.isRegistered<ShopController>()) {
-          Get.lazyPut<ShopController>(() => ShopController());
+        if (!Get.isRegistered<ShopApiService>()) {
+          Get.lazyPut<ShopApiService>(
+            () => ShopApiService(apiClient: Get.find<ApiClient>()),
+            fenix: true,
+          );
         }
+        Get.lazyPut<ShopOrderHistoryController>(
+          () => ShopOrderHistoryController(
+            apiService: Get.find<ShopApiService>(),
+          ),
+        );
       }),
     ),
 
@@ -746,39 +859,25 @@ class AppPages {
     GetPage(
       name: AppRoutes.rewards,
       page: () => const RewardsView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
-      }),
+      binding: BindingsBuilder(_ensureRewardDependencies),
     ),
 
     GetPage(
       name: AppRoutes.rewardChest,
       page: () => const RewardChestView(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<RewardController>()) {
-          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
-        }
-      }),
+      binding: BindingsBuilder(_ensureRewardDependencies),
     ),
 
     GetPage(
       name: AppRoutes.rewardsHistory,
       page: () => const RewardsHistoryView(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<RewardController>()) {
-          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
-        }
-      }),
+      binding: BindingsBuilder(_ensureRewardDependencies),
     ),
 
     GetPage(
       name: AppRoutes.rewardDetails,
       page: () => const RewardDetailsView(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<RewardController>()) {
-          Get.lazyPut<RewardController>(() => RewardController(), fenix: true);
-        }
-      }),
+      binding: BindingsBuilder(_ensureRewardDependencies),
     ),
 
     GetPage(
@@ -794,10 +893,21 @@ class AppPages {
       page: () => const SettingsView(),
       binding: BindingsBuilder(() {
         Get.lazyPut<SettingsController>(
-          () => SettingsController(),
+          () => SettingsController(
+            userSettingsService: Get.find<UserSettingsService>(),
+            authService: Get.find<AuthService>(),
+          ),
           fenix: true,
         );
       }),
+    ),
+    GetPage(
+      name: AppRoutes.privacyPolicy,
+      page: () => const PrivacyPolicyView(),
+    ),
+    GetPage(
+      name: AppRoutes.termsOfService,
+      page: () => const TermsOfServiceView(),
     ),
     GetPage(
       name: AppRoutes.profileSecurity,
@@ -805,7 +915,10 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<SettingsController>()) {
           Get.lazyPut<SettingsController>(
-            () => SettingsController(),
+            () => SettingsController(
+              userSettingsService: Get.find<UserSettingsService>(),
+              authService: Get.find<AuthService>(),
+            ),
             fenix: true,
           );
         }
@@ -845,18 +958,46 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<SettingsController>()) {
           Get.lazyPut<SettingsController>(
-            () => SettingsController(),
+            () => SettingsController(
+              userSettingsService: Get.find<UserSettingsService>(),
+              authService: Get.find<AuthService>(),
+            ),
             fenix: true,
           );
         }
       }),
     ),
 
-    GetPage(name: AppRoutes.profilePhoto, page: () => const ProfilePhotoView()),
+    GetPage(
+      name: AppRoutes.profilePhoto,
+      page: () => const ProfilePhotoView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.lazyPut<SettingsController>(
+            () => SettingsController(
+              userSettingsService: Get.find<UserSettingsService>(),
+              authService: Get.find<AuthService>(),
+            ),
+            fenix: true,
+          );
+        }
+      }),
+    ),
 
     GetPage(
       name: AppRoutes.verifyContact,
       page: () => const VerifyContactView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<SettingsController>()) {
+          Get.lazyPut<SettingsController>(
+            () => SettingsController(
+              userSettingsService: Get.find<UserSettingsService>(),
+              authService: Get.find<AuthService>(),
+            ),
+            fenix: true,
+          );
+        }
+      }),
     ),
 
     GetPage(
@@ -870,7 +1011,10 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<SettingsController>()) {
           Get.lazyPut<SettingsController>(
-            () => SettingsController(),
+            () => SettingsController(
+              userSettingsService: Get.find<UserSettingsService>(),
+              authService: Get.find<AuthService>(),
+            ),
             fenix: true,
           );
         }
@@ -916,9 +1060,7 @@ class AppPages {
             fenix: true,
           );
         }
-        Get.find<PracticeHubController>().loadSurvivalItalian(
-          showError: false,
-        );
+        Get.find<PracticeHubController>().loadSurvivalItalian(showError: false);
       }),
     ),
 
@@ -967,6 +1109,31 @@ class AppPages {
             fenix: true,
           );
         }
+        if (!Get.isRegistered<JobSentencesController>()) {
+          Get.lazyPut<JobSentencesController>(
+            () => JobSentencesController(
+              apiService: Get.find<JobSentencesApiService>(),
+            ),
+            fenix: true,
+          );
+        }
+        final Object? rawArgs = Get.arguments;
+        if (rawArgs is HomeJobTrackRouteArguments) {
+          Get.find<JobSentencesController>().prepareCareerTrack(
+            JobCareerTrackModel(
+              id: rawArgs.id,
+              title: rawArgs.title,
+              subtitleBn: rawArgs.subtitle,
+              description: '',
+              iconKey: rawArgs.iconKey,
+              cardColor: rawArgs.cardColor,
+              sortOrder: 0,
+              moduleCount: rawArgs.moduleCount,
+              sentenceCount: rawArgs.sentenceCount,
+              learnedSentenceCount: rawArgs.learnedSentenceCount,
+            ),
+          );
+        }
       }),
     ),
 
@@ -999,9 +1166,7 @@ class AppPages {
             fenix: true,
           );
         }
-        Get.find<PracticeHubController>().loadDailyChallenges(
-          showError: false,
-        );
+        Get.find<PracticeHubController>().loadDailyChallenges(showError: false);
       }),
     ),
     GetPage(

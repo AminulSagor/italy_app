@@ -31,7 +31,6 @@ class CoursesApiService {
 
   Future<CourseDetailModel> fetchCourseDetail({
     required String courseId,
-    required bool isProEnabled,
   }) async {
     final List<Response<dynamic>> responses =
         await Future.wait(<Future<Response<dynamic>>>[
@@ -42,6 +41,9 @@ class CoursesApiService {
     final Map<String, dynamic> course = _responseMap(responses.first);
     final Map<String, dynamic> syllabus = _responseMap(responses.last);
     final CourseProgressModel? courseProgress = await _safeFetchCourseProgress(
+      courseId: courseId,
+    );
+    final bool hasPurchasedAccess = await _safeFetchCourseAccess(
       courseId: courseId,
     );
     final Map<String, CourseLessonProgressModel> lessonProgressById =
@@ -58,13 +60,20 @@ class CoursesApiService {
       courseProgress: courseProgress,
       lessonProgressById: lessonProgressById,
       finalExamGateway: finalExamGateway,
-      isProEnabled: isProEnabled,
+      isProEnabled: hasPurchasedAccess,
     );
   }
 
-  Future<void> enableProAccess() async {
-    // Mobile purchase API is not available in the supplied backend module yet.
-    // Keep the existing local unlock flow so the current UI can refresh.
+  Future<bool> _safeFetchCourseAccess({required String courseId}) async {
+    try {
+      final Response<dynamic> response = await _apiClient.dio.get(
+        '/course-enrollments/courses/$courseId/access',
+      );
+      final Map<String, dynamic> body = _responseMap(response);
+      return _boolValue(body['hasAccess'], fallback: false);
+    } on DioException {
+      return false;
+    }
   }
 
   Future<CourseProgressModel?> _safeFetchCourseProgress({
@@ -177,7 +186,7 @@ class CoursesApiService {
       course,
     );
     final bool courseIsFree = _boolValue(
-      sourceCourse['isFree'],
+      sourceCourse['isFree'] ?? course['isFree'],
       fallback: true,
     );
     final int lessonCount = _publishedLessonCount(syllabus);
@@ -199,6 +208,8 @@ class CoursesApiService {
       title: _fallbackString(sourceCourse['title'], 'Course Details'),
       progressLabel: '$percent%',
       isProEnabled: isProEnabled || courseIsFree,
+      isFree: courseIsFree,
+      lessonCount: lessonCount,
       isExamFinished: false,
       chapters: _learningItemsFromSyllabus(
         syllabus: syllabus,

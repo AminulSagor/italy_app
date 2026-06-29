@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -212,7 +214,10 @@ class _PhraseList extends GetView<JobSentencesController> {
             .map(
               (JobSentenceModel phrase) => Padding(
                 padding: EdgeInsets.only(bottom: 24.h),
-                child: _PhraseCard(phrase: phrase),
+                child: _PhraseCard(
+                  key: ValueKey<String>(phrase.id),
+                  phrase: phrase,
+                ),
               ),
             )
             .toList(growable: false),
@@ -221,14 +226,112 @@ class _PhraseList extends GetView<JobSentencesController> {
   }
 }
 
-class _PhraseCard extends GetView<JobSentencesController> {
-  const _PhraseCard({required this.phrase});
+class _PhraseCard extends StatefulWidget {
+  const _PhraseCard({super.key, required this.phrase});
 
   final JobSentenceModel phrase;
 
   @override
+  State<_PhraseCard> createState() => _PhraseCardState();
+}
+
+class _PhraseCardState extends State<_PhraseCard> {
+  ScrollPosition? _scrollPosition;
+  bool _visibilityCheckScheduled = false;
+  bool _isSubmittingView = false;
+  bool _hasMarkedFromView = false;
+
+  JobSentencesController get controller =>
+      Get.find<JobSentencesController>();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ScrollPosition? position = Scrollable.maybeOf(context)?.position;
+    if (_scrollPosition != position) {
+      _scrollPosition?.removeListener(_scheduleVisibilityCheck);
+      _scrollPosition = position;
+      _scrollPosition?.addListener(_scheduleVisibilityCheck);
+    }
+    _scheduleVisibilityCheck();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PhraseCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.phrase.id != widget.phrase.id) {
+      _hasMarkedFromView = false;
+      _isSubmittingView = false;
+    }
+    if (widget.phrase.isLearned) {
+      _hasMarkedFromView = true;
+    }
+    _scheduleVisibilityCheck();
+  }
+
+  void _scheduleVisibilityCheck() {
+    if (_visibilityCheckScheduled || !mounted) return;
+    _visibilityCheckScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _visibilityCheckScheduled = false;
+      if (mounted) {
+        unawaited(_markNoAudioPhraseWhenVisible());
+      }
+    });
+  }
+
+  Future<void> _markNoAudioPhraseWhenVisible() async {
+    final JobSentenceModel phrase = widget.phrase;
+    if (phrase.hasAudio ||
+        phrase.isLearned ||
+        _hasMarkedFromView ||
+        _isSubmittingView) {
+      return;
+    }
+
+    final RenderObject? cardObject = context.findRenderObject();
+    final BuildContext? viewportContext =
+        _scrollPosition?.context.storageContext;
+    final RenderObject? viewportObject = viewportContext?.findRenderObject();
+    if (cardObject is! RenderBox ||
+        viewportObject is! RenderBox ||
+        !cardObject.attached ||
+        !viewportObject.attached ||
+        !cardObject.hasSize ||
+        !viewportObject.hasSize ||
+        cardObject.size.height <= 0) {
+      return;
+    }
+
+    final Rect cardBounds =
+        cardObject.localToGlobal(Offset.zero) & cardObject.size;
+    final Rect viewportBounds =
+        viewportObject.localToGlobal(Offset.zero) & viewportObject.size;
+    if (!cardBounds.overlaps(viewportBounds)) return;
+
+    final Rect visibleBounds = cardBounds.intersect(viewportBounds);
+    final double visibleFraction =
+        visibleBounds.height / cardObject.size.height;
+    if (visibleFraction < 0.5) return;
+
+    _isSubmittingView = true;
+    final bool wasMarked =
+        await controller.markSentenceLearnedWhenVisible(phrase);
+    if (!mounted) return;
+    _isSubmittingView = false;
+    _hasMarkedFromView = wasMarked;
+  }
+
+  @override
+  void dispose() {
+    _scrollPosition?.removeListener(_scheduleVisibilityCheck);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Obx(() {
+      final JobSentenceModel phrase = widget.phrase;
       final bool isCurrent =
           controller.currentAudioSentenceId.value == phrase.id;
       final bool isLoading = isCurrent && controller.isAudioLoading.value;
