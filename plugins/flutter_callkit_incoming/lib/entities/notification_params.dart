@@ -2,6 +2,19 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'notification_params.g.dart';
 
+int? notificationIntFromJson(Object? value) {
+  if (value is int) {
+    return value;
+  }
+
+  if (value is num) {
+    return value.toInt();
+  }
+
+  return int.tryParse(value?.toString().trim() ?? '');
+}
+
+
 /// Object config for Notification Android.
 @JsonSerializable(explicitToJson: true)
 class NotificationParams {

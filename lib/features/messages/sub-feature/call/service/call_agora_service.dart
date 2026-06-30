@@ -67,6 +67,7 @@ class CallAgoraService extends GetxService {
     _engine = engine;
 
     final Completer<void> joinCompleter = Completer<void>();
+    CallAgoraException? joinError;
     _joinCompleter = joinCompleter;
 
     try {
@@ -77,6 +78,7 @@ class CallAgoraService extends GetxService {
       );
 
       isInitialized.value = true;
+      _ensureJoinStillActive(engine);
 
       engine.registerEventHandler(
         RtcEngineEventHandler(
@@ -114,17 +116,17 @@ class CallAgoraService extends GetxService {
             remoteUid.value = null;
           },
           onError: (
-              ErrorCodeType errorCode,
-              String message,
-              ) {
+            ErrorCodeType errorCode,
+            String message,
+          ) {
+            joinError = CallAgoraException(
+              message.trim().isEmpty
+                  ? 'Agora error: $errorCode'
+                  : 'Agora error: $message',
+            );
+
             if (!joinCompleter.isCompleted) {
-              joinCompleter.completeError(
-                CallAgoraException(
-                  message.trim().isEmpty
-                      ? 'Agora error: $errorCode'
-                      : 'Agora error: $message',
-                ),
-              );
+              joinCompleter.complete();
             }
           },
         ),
@@ -154,6 +156,8 @@ class CallAgoraService extends GetxService {
         enabled: true,
       );
 
+      _ensureJoinStillActive(engine);
+
       await engine.joinChannel(
         token: media.token,
         channelId: media.channelName,
@@ -176,6 +180,13 @@ class CallAgoraService extends GetxService {
           );
         },
       );
+
+      final CallAgoraException? error = joinError;
+      if (error != null) {
+        throw error;
+      }
+
+      _ensureJoinStillActive(engine);
     } catch (error) {
       await leaveCall();
 
@@ -324,13 +335,10 @@ class CallAgoraService extends GetxService {
     final Completer<void>? joinCompleter = _joinCompleter;
     _joinCompleter = null;
 
-    if (joinCompleter != null &&
-        !joinCompleter.isCompleted) {
-      joinCompleter.completeError(
-        const CallAgoraException(
-          'The call was closed before joining.',
-        ),
-      );
+    if (joinCompleter != null && !joinCompleter.isCompleted) {
+      // Complete normally to unblock joinCall without creating an unhandled
+      // asynchronous error when a call is rejected during Agora setup.
+      joinCompleter.complete();
     }
 
     if (activeEngine == null) {
@@ -348,6 +356,14 @@ class CallAgoraService extends GetxService {
     try {
       await activeEngine.release();
     } catch (_) {}
+  }
+
+  void _ensureJoinStillActive(RtcEngine engine) {
+    if (!identical(_engine, engine)) {
+      throw const CallAgoraException(
+        'The call was closed before joining.',
+      );
+    }
   }
 
   Future<void> _setSpeakerphone({

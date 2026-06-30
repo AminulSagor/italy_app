@@ -6,11 +6,13 @@ import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../controllers/message_incoming_call_controller.dart';
 
-class MessageIncomingCallView
-    extends GetView<MessageIncomingCallController> {
+class MessageIncomingCallView extends StatelessWidget {
   const MessageIncomingCallView({
     super.key,
+    required this.controller,
   });
+
+  final MessageIncomingCallController controller;
 
   @override
   Widget build(BuildContext context) {

@@ -100,7 +100,8 @@ class CallkitIncomingActivity : Activity() {
 
                 flags =
                     Intent.FLAG_ACTIVITY_NEW_TASK or
-                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP
 
                 `package` = context.packageName
             }
