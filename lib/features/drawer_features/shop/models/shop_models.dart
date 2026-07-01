@@ -2,10 +2,8 @@ enum StorePackageType {
   aiBundle('ai_bundle'),
   streakFreeze('streak_freeze'),
   cvCredit('cv_credit');
-
   const StorePackageType(this.apiValue);
   final String apiValue;
-
   static StorePackageType fromApi(String? value) {
     return StorePackageType.values.firstWhere(
       (StorePackageType type) => type.apiValue == value,
@@ -17,29 +15,76 @@ enum StorePackageType {
 enum RefillCurrency {
   eur('EUR', '€'),
   bdt('BDT', '৳');
-
   const RefillCurrency(this.apiValue, this.symbol);
   final String apiValue;
   final String symbol;
 }
 
 enum CheckoutPaymentMethod {
-  googlePlay('google_play'),
-  card('stripe'),
-  paypal('paypal'),
-  applePay('apple_pay'),
-  bkash('bkash');
-
+  googlePlay('google_play');
   const CheckoutPaymentMethod(this.providerValue);
   final String providerValue;
-
-  static CheckoutPaymentMethod fromProvider(String? value) {
-    if (value == 'google_play') return CheckoutPaymentMethod.googlePlay;
-    if (value == 'stripe') return CheckoutPaymentMethod.card;
-    if (value == 'apple_pay') return CheckoutPaymentMethod.applePay;
-    if (value == 'bkash') return CheckoutPaymentMethod.bkash;
-    return CheckoutPaymentMethod.paypal;
+  static CheckoutPaymentMethod fromProvider(String? _) {
+    return CheckoutPaymentMethod.googlePlay;
   }
+}
+
+enum StoreProviderProductType {
+  consumable('consumable'),
+  nonConsumable('non_consumable'),
+  subscription('subscription');
+  const StoreProviderProductType(this.apiValue);
+  final String apiValue;
+  static StoreProviderProductType fromApi(String? value) {
+    return StoreProviderProductType.values.firstWhere(
+      (StoreProviderProductType type) => type.apiValue == value,
+      orElse: () => StoreProviderProductType.consumable,
+    );
+  }
+}
+
+class StoreProviderProductModel {
+  const StoreProviderProductModel({
+    required this.id,
+    required this.provider,
+    required this.productId,
+    required this.productType,
+    required this.basePlanId,
+    required this.offerId,
+    required this.isActive,
+  });
+  final String id;
+  final String provider;
+  final String productId;
+  final StoreProviderProductType productType;
+  final String basePlanId;
+  final String offerId;
+  final bool isActive;
+  bool get isConsumable => productType == StoreProviderProductType.consumable;
+  bool get isSubscription =>
+      productType == StoreProviderProductType.subscription;
+  factory StoreProviderProductModel.fromJson(Map<String, dynamic> json) {
+    return StoreProviderProductModel(
+      id: _string(json['id']),
+      provider: _string(json['provider'], fallback: 'google_play'),
+      productId: _string(json['productId']),
+      productType: StoreProviderProductType.fromApi(
+        _string(json['productType']),
+      ),
+      basePlanId: _string(json['basePlanId']),
+      offerId: _string(json['offerId']),
+      isActive: _bool(json['isActive']),
+    );
+  }
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'provider': provider,
+    'productId': productId,
+    'productType': productType.apiValue,
+    'basePlanId': basePlanId.isEmpty ? null : basePlanId,
+    'offerId': offerId.isEmpty ? null : offerId,
+    'isActive': isActive,
+  };
 }
 
 class StoreBalancesModel {
@@ -54,7 +99,6 @@ class StoreBalancesModel {
     required this.freeCvCreditsPerSignup,
     required this.allowCvEditingWithoutCredit,
   });
-
   final int aiVoiceMinutes;
   final int aiVoiceSeconds;
   final int aiTextTokens;
@@ -64,17 +108,14 @@ class StoreBalancesModel {
   final int cvCredits;
   final int freeCvCreditsPerSignup;
   final bool allowCvEditingWithoutCredit;
-
   factory StoreBalancesModel.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> ai = _map(json['ai']);
     final Map<String, dynamic> streak = _map(json['streakFreeze']);
     final Map<String, dynamic> unlimited = _map(streak['unlimitedProtection']);
     final Map<String, dynamic> cv = _map(json['cv']);
-
     final int voiceSeconds = ai.containsKey('voiceSeconds')
         ? _int(ai['voiceSeconds'])
         : (_double(ai['voiceMinutes']) * 60).round();
-
     return StoreBalancesModel(
       aiVoiceMinutes: voiceSeconds <= 0 ? 0 : (voiceSeconds / 60).ceil(),
       aiVoiceSeconds: voiceSeconds,
@@ -87,7 +128,6 @@ class StoreBalancesModel {
       allowCvEditingWithoutCredit: _bool(cv['allowEditingWithoutCredit']),
     );
   }
-
   Map<String, dynamic> toJson() => <String, dynamic>{
     'ai': <String, dynamic>{
       'voiceMinutes': aiVoiceMinutes,
@@ -107,34 +147,6 @@ class StoreBalancesModel {
       'allowEditingWithoutCredit': allowCvEditingWithoutCredit,
     },
   };
-
-  StoreBalancesModel copyWith({
-    int? aiVoiceMinutes,
-    int? aiVoiceSeconds,
-    int? aiTextTokens,
-    int? streakFreezeCount,
-    bool? unlimitedProtectionActive,
-    DateTime? unlimitedProtectionExpiresAt,
-    int? cvCredits,
-    int? freeCvCreditsPerSignup,
-    bool? allowCvEditingWithoutCredit,
-  }) {
-    return StoreBalancesModel(
-      aiVoiceMinutes: aiVoiceMinutes ?? this.aiVoiceMinutes,
-      aiVoiceSeconds: aiVoiceSeconds ?? this.aiVoiceSeconds,
-      aiTextTokens: aiTextTokens ?? this.aiTextTokens,
-      streakFreezeCount: streakFreezeCount ?? this.streakFreezeCount,
-      unlimitedProtectionActive:
-          unlimitedProtectionActive ?? this.unlimitedProtectionActive,
-      unlimitedProtectionExpiresAt:
-          unlimitedProtectionExpiresAt ?? this.unlimitedProtectionExpiresAt,
-      cvCredits: cvCredits ?? this.cvCredits,
-      freeCvCreditsPerSignup:
-          freeCvCreditsPerSignup ?? this.freeCvCreditsPerSignup,
-      allowCvEditingWithoutCredit:
-          allowCvEditingWithoutCredit ?? this.allowCvEditingWithoutCredit,
-    );
-  }
 }
 
 class StorePackageModel {
@@ -155,8 +167,8 @@ class StorePackageModel {
     required this.couponEnabled,
     required this.sortOrder,
     this.aiVoiceSeconds = 0,
+    this.storeProduct,
   });
-
   final String id;
   final StorePackageType type;
   final String name;
@@ -173,6 +185,7 @@ class StorePackageModel {
   final int? protectionDurationDays;
   final bool couponEnabled;
   final int sortOrder;
+  final StoreProviderProductModel? storeProduct;
 
   bool get isMonthly => billingModel == 'monthly';
   bool get isUnlimitedStreak => streakProtectionMode == 'monthly_unlimited';
@@ -209,6 +222,7 @@ class StorePackageModel {
     final int voiceSeconds = json.containsKey('aiVoiceSeconds')
         ? _int(json['aiVoiceSeconds'])
         : voiceMinutes * 60;
+    final Map<String, dynamic> product = _map(json['storeProduct']);
 
     return StorePackageModel(
       id: _string(json['id']),
@@ -227,6 +241,9 @@ class StorePackageModel {
       couponEnabled: _bool(json['couponEnabled']),
       sortOrder: _int(json['sortOrder']),
       aiVoiceSeconds: voiceSeconds,
+      storeProduct: product.isEmpty
+          ? null
+          : StoreProviderProductModel.fromJson(product),
     );
   }
 
@@ -247,46 +264,8 @@ class StorePackageModel {
     'protectionDurationDays': protectionDurationDays,
     'couponEnabled': couponEnabled,
     'sortOrder': sortOrder,
+    'storeProduct': storeProduct?.toJson(),
   };
-
-  StorePackageModel copyWith({
-    String? id,
-    StorePackageType? type,
-    String? name,
-    String? description,
-    double? priceEur,
-    String? billingModel,
-    String? marketingBadge,
-    int? aiVoiceMinutes,
-    int? aiVoiceSeconds,
-    int? aiTextTokens,
-    int? cvCredits,
-    int? streakFreezeCount,
-    String? streakProtectionMode,
-    int? protectionDurationDays,
-    bool? couponEnabled,
-    int? sortOrder,
-  }) {
-    return StorePackageModel(
-      id: id ?? this.id,
-      type: type ?? this.type,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      priceEur: priceEur ?? this.priceEur,
-      billingModel: billingModel ?? this.billingModel,
-      marketingBadge: marketingBadge ?? this.marketingBadge,
-      aiVoiceMinutes: aiVoiceMinutes ?? this.aiVoiceMinutes,
-      aiVoiceSeconds: aiVoiceSeconds ?? this.aiVoiceSeconds,
-      aiTextTokens: aiTextTokens ?? this.aiTextTokens,
-      cvCredits: cvCredits ?? this.cvCredits,
-      streakFreezeCount: streakFreezeCount ?? this.streakFreezeCount,
-      streakProtectionMode: streakProtectionMode ?? this.streakProtectionMode,
-      protectionDurationDays:
-          protectionDurationDays ?? this.protectionDurationDays,
-      couponEnabled: couponEnabled ?? this.couponEnabled,
-      sortOrder: sortOrder ?? this.sortOrder,
-    );
-  }
 }
 
 class StoreShopSectionModel {
@@ -313,14 +292,6 @@ class StoreShopSectionModel {
       startingPriceEur: _nullableDouble(json['startingPriceEur']),
     );
   }
-
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'packageType': packageType.apiValue,
-    'title': title,
-    'subtitle': subtitle,
-    'packageCount': packageCount,
-    'startingPriceEur': startingPriceEur?.toStringAsFixed(2),
-  };
 }
 
 class StoreShopModel {
@@ -340,65 +311,55 @@ class StoreShopModel {
     final Map<String, dynamic> history = _map(json['orderHistory']);
     return StoreShopModel(
       balances: StoreBalancesModel.fromJson(_map(json['balances'])),
-      sections: _list(
-        json['sections'],
-      ).map(StoreShopSectionModel.fromJson).toList(growable: false),
+      sections: _list(json['sections'])
+          .map(StoreShopSectionModel.fromJson)
+          .toList(growable: false),
       hasOrders: _bool(history['hasOrders']),
       latestOrderNumber: _string(history['latestOrderNumber']),
     );
   }
-
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'balances': balances.toJson(),
-    'sections': sections
-        .map((StoreShopSectionModel item) => item.toJson())
-        .toList(growable: false),
-    'orderHistory': <String, dynamic>{
-      'hasOrders': hasOrders,
-      'latestOrderNumber': latestOrderNumber,
-    },
-  };
 }
 
 class StoreProviderOptionModel {
   const StoreProviderOptionModel({
     required this.provider,
     required this.enabled,
-    required this.demo,
-    required this.demoProductId,
-    this.label = '',
+    required this.productId,
+    required this.productType,
+    required this.basePlanId,
+    required this.offerId,
+    required this.developmentVerification,
+    this.label = 'Google Play',
     this.unavailableReason = '',
   });
 
   final String provider;
   final bool enabled;
-  final bool demo;
-  final String demoProductId;
+  final String productId;
+  final StoreProviderProductType productType;
+  final String basePlanId;
+  final String offerId;
+  final bool developmentVerification;
   final String label;
   final String unavailableReason;
 
-  CheckoutPaymentMethod get method =>
-      CheckoutPaymentMethod.fromProvider(provider);
+  CheckoutPaymentMethod get method => CheckoutPaymentMethod.googlePlay;
 
   factory StoreProviderOptionModel.fromJson(Map<String, dynamic> json) {
     return StoreProviderOptionModel(
-      provider: _string(json['provider']),
-      enabled: _bool(json['enabled']),
-      demo: _bool(json['demo']),
-      demoProductId: _string(json['demoProductId']),
-      label: _string(json['label']),
+      provider: _string(json['provider'], fallback: 'google_play'),
+      enabled: json.containsKey('enabled') ? _bool(json['enabled']) : true,
+      productId: _string(json['productId']),
+      productType: StoreProviderProductType.fromApi(
+        _string(json['productType']),
+      ),
+      basePlanId: _string(json['basePlanId']),
+      offerId: _string(json['offerId']),
+      developmentVerification: _bool(json['developmentVerification']),
+      label: _string(json['label'], fallback: 'Google Play'),
       unavailableReason: _string(json['unavailableReason']),
     );
   }
-
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'provider': provider,
-    'enabled': enabled,
-    'demo': demo,
-    'demoProductId': demoProductId,
-    'label': label,
-    'unavailableReason': unavailableReason,
-  };
 }
 
 class StoreQuotePricingModel {
@@ -428,15 +389,6 @@ class StoreQuotePricingModel {
       payableAmount: _double(json['payableAmount']),
     );
   }
-
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'selectedCurrency': selectedCurrency,
-    'originalAmount': originalAmount.toStringAsFixed(2),
-    'couponCode': couponCode.isEmpty ? null : couponCode,
-    'discountPercentage': discountPercentage,
-    'discountAmount': discountAmount.toStringAsFixed(2),
-    'payableAmount': payableAmount.toStringAsFixed(2),
-  };
 }
 
 class StoreQuoteResponseModel {
@@ -444,22 +396,50 @@ class StoreQuoteResponseModel {
     required this.package,
     required this.pricing,
     required this.balances,
+    required this.storeProduct,
     required this.supportedProviders,
   });
 
   final StorePackageModel package;
   final StoreQuotePricingModel pricing;
   final StoreBalancesModel balances;
+  final StoreProviderProductModel storeProduct;
   final List<StoreProviderOptionModel> supportedProviders;
 
   factory StoreQuoteResponseModel.fromJson(Map<String, dynamic> json) {
+    final StorePackageModel package = StorePackageModel.fromJson(
+      _map(json['package']),
+    );
+    final Map<String, dynamic> productJson = _map(json['storeProduct']);
+    final StoreProviderProductModel product = productJson.isEmpty
+        ? package.storeProduct ?? _emptyProviderProduct()
+        : StoreProviderProductModel.fromJson(productJson);
+    final Map<String, dynamic> payment = _map(json['payment']);
+    final String provider = _string(
+      payment['provider'],
+      fallback: product.provider,
+    );
+    final bool enabled = product.productId.isNotEmpty && product.isActive;
+
     return StoreQuoteResponseModel(
-      package: StorePackageModel.fromJson(_map(json['package'])),
+      package: package,
       pricing: StoreQuotePricingModel.fromJson(_map(json['pricing'])),
       balances: StoreBalancesModel.fromJson(_map(json['balances'])),
-      supportedProviders: _list(
-        json['supportedProviders'],
-      ).map(StoreProviderOptionModel.fromJson).toList(growable: false),
+      storeProduct: product,
+      supportedProviders: <StoreProviderOptionModel>[
+        StoreProviderOptionModel(
+          provider: provider,
+          enabled: enabled,
+          productId: product.productId,
+          productType: product.productType,
+          basePlanId: product.basePlanId,
+          offerId: product.offerId,
+          developmentVerification: _bool(payment['developmentVerification']),
+          unavailableReason: enabled
+              ? ''
+              : 'This package is not configured in Google Play.',
+        ),
+      ],
     );
   }
 }
@@ -481,9 +461,9 @@ class StorePackageListResponseModel {
     final Map<String, dynamic> meta = _map(json['meta']);
     return StorePackageListResponseModel(
       balances: StoreBalancesModel.fromJson(_map(json['balances'])),
-      items: _list(
-        json['items'],
-      ).map(StorePackageModel.fromJson).toList(growable: false),
+      items: _list(json['items'])
+          .map(StorePackageModel.fromJson)
+          .toList(growable: false),
       page: _int(meta['page'], fallback: 1),
       totalPages: _int(meta['totalPages'], fallback: 1),
     );
@@ -495,6 +475,7 @@ class CreateStoreOrderPayloadModel {
     required this.packageId,
     required this.currency,
     required this.paymentProvider,
+    required this.productId,
     required this.idempotencyKey,
     required this.couponCode,
   });
@@ -502,6 +483,7 @@ class CreateStoreOrderPayloadModel {
   final String packageId;
   final RefillCurrency currency;
   final String paymentProvider;
+  final String productId;
   final String idempotencyKey;
   final String couponCode;
 
@@ -509,8 +491,27 @@ class CreateStoreOrderPayloadModel {
     'packageId': packageId,
     'currency': currency.apiValue,
     'paymentProvider': paymentProvider,
+    'productId': productId,
     'idempotencyKey': idempotencyKey,
     if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
+  };
+}
+
+class VerifyGooglePlayPurchasePayloadModel {
+  const VerifyGooglePlayPurchasePayloadModel({
+    required this.productId,
+    required this.purchaseToken,
+    required this.transactionId,
+  });
+
+  final String productId;
+  final String purchaseToken;
+  final String transactionId;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'productId': productId,
+    'purchaseToken': purchaseToken,
+    if (transactionId.isNotEmpty) 'transactionId': transactionId,
   };
 }
 
@@ -524,6 +525,18 @@ double shopDouble(dynamic value, {double fallback = 0}) =>
     _double(value, fallback: fallback);
 bool shopBool(dynamic value) => _bool(value);
 DateTime? shopDate(dynamic value) => _date(value);
+
+StoreProviderProductModel _emptyProviderProduct() {
+  return const StoreProviderProductModel(
+    id: '',
+    provider: 'google_play',
+    productId: '',
+    productType: StoreProviderProductType.consumable,
+    basePlanId: '',
+    offerId: '',
+    isActive: false,
+  );
+}
 
 Map<String, dynamic> _map(dynamic value) {
   if (value is Map<String, dynamic>) return value;

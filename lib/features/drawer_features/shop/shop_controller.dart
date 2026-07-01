@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uuid/uuid.dart';
-
 import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/services/api_error_handler.dart';
 import '../../../routes/routes.dart';
+import 'controllers/google_play_purchase_controller.dart';
+import 'models/google_play_billing_models.dart';
 import 'models/shop_models.dart';
 import 'models/shop_order_models.dart';
+import 'services/google_play_billing_service.dart';
 import 'services/shop_api_service.dart';
 
 class OrderHistoryFilterTitles {
@@ -18,133 +20,145 @@ class OrderHistoryFilterTitles {
 }
 
 class ShopController extends GetxController {
-  ShopController({required ShopApiService apiService})
-    : _apiService = apiService;
-
+  ShopController({
+    required ShopApiService apiService,
+    GooglePlayBillingService? billingService,
+    GooglePlayPurchaseController? purchaseController,
+  })  : _apiService = apiService,
+        _billingService =
+            billingService ?? Get.find<GooglePlayBillingService>(),
+        _purchaseController =
+            purchaseController ?? Get.find<GooglePlayPurchaseController>();
   final ShopApiService _apiService;
-  static const Uuid _uuid = Uuid();
-
+  final GooglePlayBillingService _billingService;
+  final GooglePlayPurchaseController _purchaseController;
+  StreamSubscription<StorePurchaseCompletionModel>? _completionSubscription;
+  String _lastHandledOrderId = '';
   final RxBool isLoadingShop = false.obs;
   final RxBool isLoadingQuote = false.obs;
   final RxBool isCheckoutLoading = false.obs;
   final RxString shopError = ''.obs;
   final RxString checkoutError = ''.obs;
-
   final Rxn<StoreShopModel> shop = Rxn<StoreShopModel>();
   final Rxn<StoreBalancesModel> balances = Rxn<StoreBalancesModel>();
   final RxList<StorePackageModel> aiPackages = <StorePackageModel>[].obs;
   final RxList<StorePackageModel> streakPackages = <StorePackageModel>[].obs;
   final RxList<StorePackageModel> cvPackages = <StorePackageModel>[].obs;
-
   final RxString selectedAiPackageId = ''.obs;
   final RxString selectedStreakPackageId = ''.obs;
   final RxString selectedCvPackageId = ''.obs;
   final Rxn<StorePackageModel> activePackage = Rxn<StorePackageModel>();
-
   final Rx<RefillCurrency> selectedCurrency = RefillCurrency.eur.obs;
   final TextEditingController couponTextController = TextEditingController();
   final RxString couponCode = ''.obs;
   final RxBool isCouponApplied = false.obs;
   final Rxn<StoreQuoteResponseModel> quote = Rxn<StoreQuoteResponseModel>();
   final Rx<CheckoutPaymentMethod> selectedPaymentMethod =
-      CheckoutPaymentMethod.card.obs;
-
+      CheckoutPaymentMethod.googlePlay.obs;
   final Rxn<StorePurchaseCompletionModel> completedPurchase =
       Rxn<StorePurchaseCompletionModel>();
 
   @override
   void onInit() {
     super.onInit();
-    loadShop();
+    _completionSubscription = _purchaseController.completionStream.listen(
+      (StorePurchaseCompletionModel completion) =>
+          unawaited(_applyPurchaseCompletion(completion)),
+    );
+    unawaited(_initializeShop());
   }
-
+  Future<void> _initializeShop() async {
+    await loadShop();
+    await _purchaseController.retryPendingPurchase();
+    final StorePurchaseCompletionModel? recovered =
+        _purchaseController.lastCompletion.value;
+    if (recovered != null) await _applyPurchaseCompletion(recovered);
+  }
   StorePackageModel? get selectedAiPackage =>
       _findPackage(aiPackages, selectedAiPackageId.value);
   StorePackageModel? get selectedStreakPackage =>
       _findPackage(streakPackages, selectedStreakPackageId.value);
   StorePackageModel? get selectedCvPackage =>
       _findPackage(cvPackages, selectedCvPackageId.value);
-
   int get aiVoiceMinutes => balances.value?.aiVoiceMinutes ?? 0;
   int get aiTextTokens => balances.value?.aiTextTokens ?? 0;
   int get streakFreezeBalance => balances.value?.streakFreezeCount ?? 0;
   int get cvCreditBalance => balances.value?.cvCredits ?? 0;
-
   StoreShopSectionModel? sectionFor(StorePackageType type) {
     for (final StoreShopSectionModel item in shop.value?.sections ?? const []) {
       if (item.packageType == type) return item;
     }
     return null;
   }
-
   Future<void> loadShop() async {
     if (isLoadingShop.value) return;
     isLoadingShop.value = true;
     shopError.value = '';
-
-    final ApiResult<List<Object>> result =
-        await ApiErrorHandler.call<List<Object>>(() async {
-          final List<Object> values = await Future.wait<Object>(<Future<Object>>[
-            _apiService.getShop(),
-            _apiService.getPackages(packageType: StorePackageType.aiBundle),
-            _apiService.getPackages(
-              packageType: StorePackageType.streakFreeze,
-            ),
-            _apiService.getPackages(packageType: StorePackageType.cvCredit),
-          ]);
-          return values;
-        }, showError: false);
-
-    if (result.isSuccess && result.data != null) {
+    try {
+      final ApiResult<List<Object>> result =
+          await ApiErrorHandler.call<List<Object>>(() async {
+        return Future.wait<Object>(<Future<Object>>[
+          _apiService.getShop(),
+          _apiService.getPackages(packageType: StorePackageType.aiBundle),
+          _apiService.getPackages(packageType: StorePackageType.streakFreeze),
+          _apiService.getPackages(packageType: StorePackageType.cvCredit),
+        ]);
+      }, showError: false);
+      if (!result.isSuccess || result.data == null) {
+        shopError.value = result.error ?? 'Could not load the shop.';
+        return;
+      }
       final List<Object> data = result.data!;
       final StoreShopModel shopData = data[0] as StoreShopModel;
       shop.value = shopData;
       balances.value = shopData.balances;
       _syncUserSessionBalances(shopData.balances);
       aiPackages.assignAll((data[1] as StorePackageListResponseModel).items);
-      streakPackages.assignAll((data[2] as StorePackageListResponseModel).items);
+      streakPackages.assignAll(
+        (data[2] as StorePackageListResponseModel).items,
+      );
       cvPackages.assignAll((data[3] as StorePackageListResponseModel).items);
       _selectDefaults();
-    } else {
-      shopError.value = result.error ?? 'Could not load the shop.';
+      await _billingService.prepareProducts(
+        <StorePackageModel>[...aiPackages, ...streakPackages, ...cvPackages]
+            .map((StorePackageModel item) => item.storeProduct)
+            .whereType<StoreProviderProductModel>(),
+      );
+    } finally {
+      isLoadingShop.value = false;
     }
-    isLoadingShop.value = false;
   }
-
   Future<void> refreshBalances() async {
     final ApiResult<StoreBalancesModel> result =
         await ApiErrorHandler.call<StoreBalancesModel>(
-          _apiService.getBalances,
-          showError: false,
-        );
+      _apiService.getBalances,
+      showError: false,
+    );
     if (result.isSuccess && result.data != null) {
       balances.value = result.data;
       _syncUserSessionBalances(result.data!);
     }
   }
-
   void selectAiPackage(String packageId) {
     selectedAiPackageId.value = packageId;
     _resetQuote();
   }
-
   void selectStreakPackage(String packageId) {
     selectedStreakPackageId.value = packageId;
     _resetQuote();
   }
-
   void selectCvPackage(String packageId) {
     selectedCvPackageId.value = packageId;
     _resetQuote();
   }
-
   bool isAiPackageSelected(String id) => selectedAiPackageId.value == id;
   bool isStreakPackageSelected(String id) =>
       selectedStreakPackageId.value == id;
   bool isCvPackageSelected(String id) => selectedCvPackageId.value == id;
-
   String packagePriceText(StorePackageModel package) {
-    final String price = '€${package.priceEur.toStringAsFixed(2)}';
+    final String price =
+        _billingService.localizedPrice(package.storeProduct) ??
+            '€${package.priceEur.toStringAsFixed(2)}';
     return package.isMonthly ? '$price/mo' : price;
   }
 
@@ -190,7 +204,7 @@ class ShopController extends GetxController {
   double get discountAmount => pricing?.discountAmount ?? 0;
   double get payableAmount => pricing?.payableAmount ?? currentBasePrice;
   String get originalPriceText => formatPrice(currentBasePrice);
-  String get payablePriceText => formatPrice(payableAmount);
+  String get payablePriceText => _checkoutStorePrice ?? formatPrice(payableAmount);
   String get savedAmountText => formatPrice(discountAmount);
   String get orderSummaryPrice => payablePriceText;
   String get checkoutOriginalPriceText => originalPriceText;
@@ -203,6 +217,8 @@ class ShopController extends GetxController {
   String get cvCreditPayablePriceText => payablePriceText;
   String get cvCreditSavedAmountText => savedAmountText;
 
+  String? get _checkoutStorePrice =>
+      _billingService.localizedPrice(quote.value?.storeProduct);
   StorePackageModel? get checkoutPackage =>
       activePackage.value ?? selectedAiPackage;
   String get selectedPlanTitle => checkoutPackage?.name ?? 'Package';
@@ -247,20 +263,35 @@ class ShopController extends GetxController {
 
   Future<void> buySelectedPlan() async {
     if (quote.value == null && !await _loadQuote()) return;
-    _selectDefaultPaymentMethod();
+    selectedPaymentMethod.value = CheckoutPaymentMethod.googlePlay;
     Get.toNamed(AppRoutes.checkout);
   }
 
   List<CheckoutPaymentMethod> get availablePaymentMethods =>
-      quote.value?.supportedProviders
-          .map((StoreProviderOptionModel item) => item.method)
-          .toList(growable: false) ??
-      const <CheckoutPaymentMethod>[];
+      const <CheckoutPaymentMethod>[CheckoutPaymentMethod.googlePlay];
 
   StoreProviderOptionModel? paymentOption(CheckoutPaymentMethod method) {
     for (final StoreProviderOptionModel option
         in quote.value?.supportedProviders ?? const []) {
-      if (option.method == method) return option;
+      if (option.method != method) continue;
+      final StoreProviderProductModel product = quote.value!.storeProduct;
+      final bool storeReady = _billingService.isAvailable.value &&
+          _billingService.hasProduct(product);
+      return StoreProviderOptionModel(
+        provider: option.provider,
+        enabled: option.enabled && storeReady,
+        productId: option.productId,
+        productType: option.productType,
+        basePlanId: option.basePlanId,
+        offerId: option.offerId,
+        developmentVerification: option.developmentVerification,
+        label: option.label,
+        unavailableReason: storeReady
+            ? option.unavailableReason
+            : _billingService.lastError.value.isNotEmpty
+                ? _billingService.lastError.value
+                : 'The Google Play product is unavailable.',
+      );
     }
     return null;
   }
@@ -275,33 +306,18 @@ class ShopController extends GetxController {
         'Payment Unavailable',
         option?.unavailableReason.isNotEmpty == true
             ? option!.unavailableReason
-            : 'This payment method is unavailable.',
+            : 'Google Play Billing is unavailable.',
       );
       return;
     }
-    selectedPaymentMethod.value = method;
+    selectedPaymentMethod.value = CheckoutPaymentMethod.googlePlay;
     checkoutError.value = '';
   }
 
-  String paymentMethodTitle(CheckoutPaymentMethod method) {
-    final String apiLabel = paymentOption(method)?.label ?? '';
-    if (apiLabel.isNotEmpty) return apiLabel;
-    switch (method) {
-      case CheckoutPaymentMethod.googlePlay:
-        return 'Google Play';
-      case CheckoutPaymentMethod.card:
-        return 'Card';
-      case CheckoutPaymentMethod.paypal:
-        return 'PayPal';
-      case CheckoutPaymentMethod.applePay:
-        return 'Apple Pay';
-      case CheckoutPaymentMethod.bkash:
-        return 'Bkash';
-    }
-  }
+  String paymentMethodTitle(CheckoutPaymentMethod _) => 'Google Play';
 
   Future<void> confirmCheckout() async {
-    await _completeSelectedPurchase(selectedPaymentMethod.value);
+    await _completeSelectedPurchase();
   }
 
   Future<void> confirmStreakFreezePurchase() async {
@@ -327,8 +343,8 @@ class ShopController extends GetxController {
     }
   }
 
-  String get completedOrderId =>
-      completedPurchase.value?.orderNumber ?? '';
+  String get completedOrderId => completedPurchase.value?.orderNumber ?? '';
+
   String get completionFirstValue {
     final StorePurchaseCompletionModel? value = completedPurchase.value;
     if (value == null) return '0';
@@ -371,26 +387,15 @@ class ShopController extends GetxController {
   }
 
   String get completionSecondLabel {
-    switch (completedPurchase.value?.packageType) {
-      case StorePackageType.aiBundle:
-        return 'AI Smart Tokens';
-      case StorePackageType.streakFreeze:
-        return 'Current Balance';
-      case StorePackageType.cvCredit:
-        return 'Current Balance';
-      case null:
-        return 'Current Balance';
-    }
+    return completedPurchase.value?.packageType == StorePackageType.aiBundle
+        ? 'AI Smart Tokens'
+        : 'Current Balance';
   }
 
   void startLearningNow() => Get.offAllNamed(AppRoutes.wrapper);
-
   void onOrderHistoryTap() => Get.toNamed(AppRoutes.orderHistory);
 
-  Future<void> _openPackageList(
-    StorePackageType type,
-    String route,
-  ) async {
+  Future<void> _openPackageList(StorePackageType type, String route) async {
     if (_packagesFor(type).isEmpty) await loadShop();
     if (_packagesFor(type).isEmpty) {
       Get.snackbar('Unavailable', 'No published packages are available.');
@@ -417,96 +422,84 @@ class ShopController extends GetxController {
     final StorePackageModel? package = activePackage.value;
     if (package == null || isLoadingQuote.value) return false;
     isLoadingQuote.value = true;
-    final ApiResult<StoreQuoteResponseModel> result =
-        await ApiErrorHandler.call<StoreQuoteResponseModel>(
-          () => _apiService.getQuote(
-            packageId: package.id,
-            currency: selectedCurrency.value,
-            couponCode: coupon,
-          ),
-        );
-    isLoadingQuote.value = false;
-    if (!result.isSuccess || result.data == null) return false;
-    quote.value = result.data;
-    balances.value = result.data!.balances;
-    _syncUserSessionBalances(result.data!.balances);
-    _selectDefaultPaymentMethod();
-    return true;
+    try {
+      final ApiResult<StoreQuoteResponseModel> result =
+          await ApiErrorHandler.call<StoreQuoteResponseModel>(
+        () => _apiService.getQuote(
+          packageId: package.id,
+          currency: selectedCurrency.value,
+          couponCode: coupon,
+        ),
+      );
+      if (!result.isSuccess || result.data == null) return false;
+      quote.value = result.data;
+      balances.value = result.data!.balances;
+      _syncUserSessionBalances(result.data!.balances);
+      await _billingService.prepareProducts(
+        <StoreProviderProductModel>[result.data!.storeProduct],
+      );
+      selectedPaymentMethod.value = CheckoutPaymentMethod.googlePlay;
+      return true;
+    } finally {
+      isLoadingQuote.value = false;
+    }
   }
 
-  Future<void> _completeSelectedPurchase(
-    CheckoutPaymentMethod method,
-  ) async {
+  Future<void> _completeSelectedPurchase() async {
     if (isCheckoutLoading.value) return;
     final StorePackageModel? package = activePackage.value;
-    final StoreProviderOptionModel? provider = paymentOption(method);
-    if (package == null || provider == null || !provider.enabled) {
-      checkoutError.value = 'A valid package and payment method are required.';
-      return;
-    }
-    if (!provider.demo) {
-      const String message =
-          'The supplied backend does not include the production payment SDK flow yet.';
-      checkoutError.value = message;
-      Get.snackbar('Payment Setup Required', message);
+    final StoreQuoteResponseModel? currentQuote = quote.value;
+    if (package == null || currentQuote == null) {
+      checkoutError.value = 'A valid package is required.';
       return;
     }
 
     isCheckoutLoading.value = true;
     checkoutError.value = '';
-    final ApiResult<StorePurchaseCompletionModel> result =
-        await ApiErrorHandler.call<StorePurchaseCompletionModel>(() async {
-          final StoreOrderModel order = await _apiService.createOrder(
-            CreateStoreOrderPayloadModel(
-              packageId: package.id,
-              currency: selectedCurrency.value,
-              paymentProvider: provider.provider,
-              idempotencyKey: _uuid.v4(),
-              couponCode: isCouponApplied.value ? couponCode.value : '',
-            ),
-          );
-          final StoreCheckoutResponseModel checkout =
-              await _apiService.getCheckout(order.id);
-          final StoreProviderOptionModel checkoutMethod =
-              checkout.paymentMethods.firstWhere(
-                (StoreProviderOptionModel item) =>
-                    item.provider == provider.provider,
-                orElse: () => provider,
-              );
-
-          if (method == CheckoutPaymentMethod.googlePlay) {
-            final String productId = checkoutMethod.demoProductId.isNotEmpty
-                ? checkoutMethod.demoProductId
-                : provider.demoProductId;
-            if (productId.isEmpty) {
-              throw StateError('Google Play demo product ID is missing.');
-            }
-            return _apiService.confirmGooglePlayDemo(
-              orderId: order.id,
-              productId: productId,
-              purchaseToken: 'demo_${_uuid.v4()}',
-            );
+    try {
+      final GooglePlayPurchaseOutcome outcome =
+          await _purchaseController.startPurchase(
+        package: package,
+        storeProduct: currentQuote.storeProduct,
+        currency: selectedCurrency.value,
+        couponCode: isCouponApplied.value ? couponCode.value : '',
+      );
+      switch (outcome.status) {
+        case GooglePlayPurchaseOutcomeStatus.completed:
+          if (outcome.completion != null) {
+            await _applyPurchaseCompletion(outcome.completion!);
           }
-          return _apiService.confirmStripeDemo(
-            orderId: order.id,
-            paymentIntentId: 'pi_demo_${_uuid.v4().replaceAll('-', '')}',
-          );
-        });
-
-    isCheckoutLoading.value = false;
-    if (!result.isSuccess || result.data == null) {
-      checkoutError.value = result.error ?? 'Purchase could not be completed.';
-      return;
+          return;
+        case GooglePlayPurchaseOutcomeStatus.pending:
+          Get.snackbar('Payment Pending', outcome.message);
+          return;
+        case GooglePlayPurchaseOutcomeStatus.cancelled:
+          Get.snackbar('Purchase Cancelled', outcome.message);
+          return;
+        case GooglePlayPurchaseOutcomeStatus.failed:
+          checkoutError.value = outcome.message;
+          return;
+      }
+    } finally {
+      isCheckoutLoading.value = false;
     }
-    completedPurchase.value = result.data;
-    balances.value = result.data!.balances;
-    _syncUserSessionBalances(result.data!.balances);
+  }
+
+  Future<void> _applyPurchaseCompletion(
+    StorePurchaseCompletionModel completion,
+  ) async {
+    if (_lastHandledOrderId == completion.orderId) return;
+    _lastHandledOrderId = completion.orderId;
+    completedPurchase.value = completion;
+    balances.value = completion.balances;
+    _syncUserSessionBalances(completion.balances);
     if (Get.isRegistered<UserSessionController>()) {
       await Get.find<UserSessionController>().refreshAiBalances();
     }
-    Get.offNamed(AppRoutes.purchaseCompleted);
+    if (Get.currentRoute != AppRoutes.purchaseCompleted) {
+      Get.offNamed(AppRoutes.purchaseCompleted);
+    }
   }
-
 
   void _syncUserSessionBalances(StoreBalancesModel value) {
     if (!Get.isRegistered<UserSessionController>()) return;
@@ -531,23 +524,6 @@ class ShopController extends GetxController {
       }
     }
     return packages.first;
-  }
-
-  void _selectDefaultPaymentMethod() {
-    final List<StoreProviderOptionModel> providers =
-        quote.value?.supportedProviders ?? const [];
-    for (final StoreProviderOptionModel provider in providers) {
-      if (provider.enabled && provider.provider == 'stripe') {
-        selectedPaymentMethod.value = provider.method;
-        return;
-      }
-    }
-    for (final StoreProviderOptionModel provider in providers) {
-      if (provider.enabled) {
-        selectedPaymentMethod.value = provider.method;
-        return;
-      }
-    }
   }
 
   void _resetQuote({bool keepActivePackage = false}) {
@@ -581,23 +557,23 @@ class ShopController extends GetxController {
   }
 
   StorePackageModel _emptyPackage(StorePackageType type) => StorePackageModel(
-    id: '',
-    type: type,
-    name: 'Package',
-    description: '',
-    priceEur: 0,
-    billingModel: 'one_time',
-    marketingBadge: 'none',
-    aiVoiceMinutes: 0,
-    aiVoiceSeconds: 0,
-    aiTextTokens: 0,
-    cvCredits: 0,
-    streakFreezeCount: 0,
-    streakProtectionMode: '',
-    protectionDurationDays: null,
-    couponEnabled: false,
-    sortOrder: 0,
-  );
+        id: '',
+        type: type,
+        name: 'Package',
+        description: '',
+        priceEur: 0,
+        billingModel: 'one_time',
+        marketingBadge: 'none',
+        aiVoiceMinutes: 0,
+        aiVoiceSeconds: 0,
+        aiTextTokens: 0,
+        cvCredits: 0,
+        streakFreezeCount: 0,
+        streakProtectionMode: '',
+        protectionDurationDays: null,
+        couponEnabled: false,
+        sortOrder: 0,
+      );
 
   String _compact(int value) {
     if (value < 1000) return value.toString();
@@ -607,6 +583,7 @@ class ShopController extends GetxController {
 
   @override
   void onClose() {
+    unawaited(_completionSubscription?.cancel());
     couponTextController.dispose();
     super.onClose();
   }

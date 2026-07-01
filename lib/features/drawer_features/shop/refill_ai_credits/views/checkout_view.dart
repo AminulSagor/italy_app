@@ -110,7 +110,7 @@ class CheckoutPage extends StatelessWidget {
                   Icon(Icons.lock, size: 13, color: _bodyText),
                   SizedBox(width: 7),
                   Text(
-                    'SECURE SSL ENCRYPTION',
+                    'SECURE GOOGLE PLAY BILLING',
                     style: TextStyle(
                       color: _bodyText,
                       fontSize: 12,
@@ -439,35 +439,14 @@ class _PaymentMethodPill extends StatelessWidget {
   }
 
   _PaymentMethodUi _paymentMethodUi(CheckoutPaymentMethod method) {
-    switch (method) {
-      case CheckoutPaymentMethod.googlePlay:
-        return const _PaymentMethodUi(
-          title: 'Google Play',
-          icon: Icon(
-            Icons.play_arrow_rounded,
-            color: CheckoutPage._green,
-            size: 34,
-          ),
-        );
-      case CheckoutPaymentMethod.card:
-        return _PaymentMethodUi(
-          title: 'gen_card'.tr.tr,
-          icon: Icon(
-            Icons.credit_card_outlined,
-            color: CheckoutPage._green,
-            size: 30,
-          ),
-        );
-      case CheckoutPaymentMethod.paypal:
-        return _PaymentMethodUi(title: 'gen_paypal'.tr.tr, icon: _PaypalMark());
-      case CheckoutPaymentMethod.applePay:
-        return _PaymentMethodUi(
-          title: 'gen_apple_pay'.tr.tr,
-          icon: Icon(Icons.apple, color: Colors.black, size: 33),
-        );
-      case CheckoutPaymentMethod.bkash:
-        return _PaymentMethodUi(title: 'gen_bkash'.tr.tr, icon: _BkashMark());
-    }
+    return const _PaymentMethodUi(
+      title: 'Google Play',
+      icon: Icon(
+        Icons.play_arrow_rounded,
+        color: CheckoutPage._green,
+        size: 34,
+      ),
+    );
   }
 }
 
@@ -476,96 +455,4 @@ class _PaymentMethodUi {
 
   final String title;
   final Widget icon;
-}
-
-class _PaypalMark extends StatelessWidget {
-  const _PaypalMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 29,
-      width: 29,
-      child: Stack(
-        alignment: Alignment.center,
-        children: const [
-          Positioned(
-            left: 6,
-            top: 1,
-            child: Text(
-              'P',
-              style: TextStyle(
-                color: Color(0xFF253B80),
-                fontSize: 27,
-                height: 1,
-                fontWeight: FontWeight.w900,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 10,
-            top: 3,
-            child: Text(
-              'P',
-              style: TextStyle(
-                color: Color(0xFF179BD7),
-                fontSize: 24,
-                height: 1,
-                fontWeight: FontWeight.w900,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BkashMark extends StatelessWidget {
-  const _BkashMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 29,
-      width: 29,
-      child: CustomPaint(painter: _BkashPainter()),
-    );
-  }
-}
-
-class _BkashPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final pink = Paint()..color = const Color(0xFFE2136E);
-    final darkPink = Paint()..color = const Color(0xFFB90E59);
-    final white = Paint()..color = Colors.white;
-
-    final body = Path()
-      ..moveTo(size.width * .15, size.height * .14)
-      ..lineTo(size.width * .82, size.height * .44)
-      ..lineTo(size.width * .36, size.height * .86)
-      ..lineTo(size.width * .43, size.height * .54)
-      ..close();
-    canvas.drawPath(body, pink);
-
-    final wing = Path()
-      ..moveTo(size.width * .35, size.height * .08)
-      ..lineTo(size.width * .86, size.height * .40)
-      ..lineTo(size.width * .57, size.height * .45)
-      ..close();
-    canvas.drawPath(wing, darkPink);
-
-    final cut = Path()
-      ..moveTo(size.width * .34, size.height * .20)
-      ..lineTo(size.width * .55, size.height * .44)
-      ..lineTo(size.width * .40, size.height * .45)
-      ..close();
-    canvas.drawPath(cut, white);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -12,10 +12,12 @@ class ShopApiService {
   final ApiClient _apiClient;
 
   static const String _endpoint = '/package-store';
+  static const String _provider = 'google_play';
 
   Future<StoreShopModel> getShop() async {
     final Response<dynamic> response = await _apiClient.dio.get(
       '$_endpoint/shop',
+      queryParameters: const <String, dynamic>{'provider': _provider},
     );
     return StoreShopModel.fromJson(_responseMap(response));
   }
@@ -28,6 +30,7 @@ class ShopApiService {
     final Response<dynamic> response = await _apiClient.dio.get(
       '$_endpoint/packages',
       queryParameters: <String, dynamic>{
+        'provider': _provider,
         'packageType': packageType.apiValue,
         'page': page,
         'limit': limit,
@@ -41,6 +44,7 @@ class ShopApiService {
   Future<StorePackageModel> getPackage(String packageId) async {
     final Response<dynamic> response = await _apiClient.dio.get(
       '$_endpoint/packages/$packageId',
+      queryParameters: const <String, dynamic>{'provider': _provider},
     );
     return StorePackageModel.fromJson(_responseMap(response));
   }
@@ -60,6 +64,7 @@ class ShopApiService {
     final Response<dynamic> response = await _apiClient.dio.get(
       '$_endpoint/packages/$packageId/quote',
       queryParameters: <String, dynamic>{
+        'provider': _provider,
         'currency': currency.apiValue,
         if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
       },
@@ -84,31 +89,13 @@ class ShopApiService {
     return StoreCheckoutResponseModel.fromJson(_responseMap(response));
   }
 
-  Future<StorePurchaseCompletionModel> confirmStripeDemo({
+  Future<StorePurchaseCompletionModel> verifyGooglePlayPurchase({
     required String orderId,
-    required String paymentIntentId,
+    required VerifyGooglePlayPurchasePayloadModel payload,
   }) async {
     final Response<dynamic> response = await _apiClient.dio.post(
-      '$_endpoint/orders/$orderId/stripe/demo-confirm',
-      data: <String, dynamic>{
-        'paymentIntentId': paymentIntentId,
-        'demoResult': 'succeeded',
-      },
-    );
-    return StorePurchaseCompletionModel.fromJson(_responseMap(response));
-  }
-
-  Future<StorePurchaseCompletionModel> confirmGooglePlayDemo({
-    required String orderId,
-    required String productId,
-    required String purchaseToken,
-  }) async {
-    final Response<dynamic> response = await _apiClient.dio.post(
-      '$_endpoint/orders/$orderId/google-play/demo-confirm',
-      data: <String, dynamic>{
-        'productId': productId,
-        'purchaseToken': purchaseToken,
-      },
+      '$_endpoint/orders/$orderId/google-play/verify',
+      data: payload.toJson(),
     );
     return StorePurchaseCompletionModel.fromJson(_responseMap(response));
   }
