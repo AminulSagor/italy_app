@@ -98,7 +98,7 @@ class WebinarController extends GetxController {
   }
 
   Future<void> openLiveSession(WebinarItemModel webinar) async {
-    if (isJoining.value) return;
+    if (isJoining.value || !webinar.isEligible) return;
 
     isJoining.value = true;
     try {

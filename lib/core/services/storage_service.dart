@@ -42,12 +42,15 @@ class StorageService extends GetxService {
     await _prefs.remove(_appLocaleKey);
   }
 
-
   String? readString(String key) {
     return _prefs.getString(key);
   }
 
   Future<void> writeString(String key, String value) async {
     await _prefs.setString(key, value);
+  }
+
+  Future<void> remove(String key) async {
+    await _prefs.remove(key);
   }
 }

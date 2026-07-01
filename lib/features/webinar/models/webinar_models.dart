@@ -33,6 +33,38 @@ class WebinarPaginationModel {
   }
 }
 
+
+class WebinarAudienceSettingsModel {
+  const WebinarAudienceSettingsModel({
+    required this.isForAllUsers,
+    required this.courseIds,
+    required this.courseNames,
+  });
+
+  final bool isForAllUsers;
+  final List<String> courseIds;
+  final List<String> courseNames;
+
+  factory WebinarAudienceSettingsModel.fromJson(Map<String, dynamic> json) {
+    final List<String> courseIds = _stringList(json['courseIds']);
+
+    return WebinarAudienceSettingsModel(
+      isForAllUsers: json['isForAllUsers'] == true || courseIds.isEmpty,
+      courseIds: courseIds,
+      courseNames: _stringList(json['courseNames']),
+    );
+  }
+
+  static List<String> _stringList(dynamic value) {
+    if (value is! List) return const <String>[];
+
+    return value
+        .map((dynamic item) => item?.toString().trim() ?? '')
+        .where((String item) => item.isNotEmpty)
+        .toList(growable: false);
+  }
+}
+
 class WebinarItemModel {
   const WebinarItemModel({
     required this.id,
@@ -40,6 +72,8 @@ class WebinarItemModel {
     required this.dateTime,
     required this.hostTeacherName,
     required this.status,
+    required this.audienceSettings,
+    required this.isEligible,
     this.thumbnailImageUrl,
     this.agoraChannelName,
     this.liveStartedAt,
@@ -51,10 +85,14 @@ class WebinarItemModel {
   final DateTime? dateTime;
   final String hostTeacherName;
   final String status;
+  final WebinarAudienceSettingsModel audienceSettings;
+  final bool isEligible;
   final String? thumbnailImageUrl;
   final String? agoraChannelName;
   final DateTime? liveStartedAt;
   final DateTime? liveEndedAt;
+
+  bool get isCourseRestricted => !audienceSettings.isForAllUsers;
 
   factory WebinarItemModel.fromJson(Map<String, dynamic> json) {
     return WebinarItemModel(
@@ -63,6 +101,10 @@ class WebinarItemModel {
       dateTime: _parseDate(json['dateTime']),
       hostTeacherName: json['hostTeacherName']?.toString() ?? 'Not available',
       status: json['status']?.toString() ?? '',
+      audienceSettings: WebinarAudienceSettingsModel.fromJson(
+        _jsonMap(json['audienceSettings']),
+      ),
+      isEligible: json['isEligible'] != false,
       thumbnailImageUrl: _nullableString(json['thumbnailImageUrl']),
       agoraChannelName: _nullableString(json['agoraChannelName']),
       liveStartedAt: _parseDate(json['liveStartedAt']),
