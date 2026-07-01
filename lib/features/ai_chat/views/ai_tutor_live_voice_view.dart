@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_font.dart';
@@ -17,15 +18,45 @@ class AiTutorLiveVoiceView extends StatefulWidget {
   State<AiTutorLiveVoiceView> createState() => _AiTutorLiveVoiceViewState();
 }
 
-class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView> {
+class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
+    with WidgetsBindingObserver {
   AiChatController get controller => Get.find<AiChatController>();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(_setScreenAwake(true));
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(controller.ensureLiveVoiceConnected());
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_setScreenAwake(true));
+    }
+  }
+
+  Future<void> _setScreenAwake(bool enabled) async {
+    try {
+      if (enabled) {
+        await WakelockPlus.enable();
+      } else {
+        await WakelockPlus.disable();
+      }
+    } catch (error) {
+      debugPrint('[AiTutorVoice] Unable to update wakelock: $error');
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    unawaited(_setScreenAwake(false));
+    super.dispose();
   }
 
   @override

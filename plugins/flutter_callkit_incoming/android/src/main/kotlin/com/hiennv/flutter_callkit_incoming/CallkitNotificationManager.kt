@@ -233,10 +233,12 @@ class CallkitNotificationManager(
         )
         notificationBuilder?.setOnlyAlertOnce(true)
         notificationBuilder?.setSound(null)
-        notificationBuilder?.setFullScreenIntent(
-                getActivityPendingIntent(notificationId, data),
-                true
-        )
+        if (data.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_FULL_SCREEN, false)) {
+            notificationBuilder?.setFullScreenIntent(
+                    getActivityPendingIntent(notificationId, data),
+                    true
+            )
+        }
         notificationBuilder?.setContentIntent(getActivityPendingIntent(notificationId, data))
         notificationBuilder?.setDeleteIntent(getTimeOutPendingIntent(notificationId, data))
         val typeCall = data.getInt(CallkitConstants.EXTRA_CALLKIT_TYPE, -1)

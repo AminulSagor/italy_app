@@ -574,22 +574,18 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                 data
             )
 
-            if (incomingCall.isFullScreen) {
-                val activityIntent =
-                    CallkitIncomingActivity.getIntent(
-                        context,
-                        data
-                    )
-
-                context.startActivity(
-                    activityIntent
+            /*
+             * Always post the incoming-call notification. When full-screen
+             * mode is requested, CallkitNotificationManager attaches the
+             * CallkitIncomingActivity as the notification's full-screen
+             * intent. Starting the Activity directly from this receiver skips
+             * the notification and is blocked by newer Android background
+             * activity-launch rules.
+             */
+            getCallkitNotificationManager()
+                ?.showIncomingNotification(
+                    data
                 )
-            } else {
-                getCallkitNotificationManager()
-                    ?.showIncomingNotification(
-                        data
-                    )
-            }
         } catch (error: Exception) {
             Log.e(
                 TAG,
@@ -1058,15 +1054,17 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
         val missedCallNotification =
             mapOf(
                 "id" to
-                        data.getString(
-                            CallkitConstants
-                                .EXTRA_CALLKIT_MISSED_CALL_ID,
-                            data.getString(
-                                CallkitConstants
-                                    .EXTRA_CALLKIT_ID,
-                                ""
+                        if (
+                            data.containsKey(
+                                CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_ID
                             )
-                        ),
+                        ) {
+                            data.getInt(
+                                CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_ID
+                            )
+                        } else {
+                            null
+                        },
 
                 "showNotification" to
                         data.getBoolean(

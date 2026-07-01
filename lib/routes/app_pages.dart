@@ -142,7 +142,7 @@ import '../features/practice_hub/views/daily_challenges/daily_challenges_view.da
 class AppPages {
   AppPages._();
 
-  static const String initial = AppRoutes.login;
+  static const String initial = AppRoutes.bootstrap;
 
   static T _arguments<T>() => Get.arguments as T;
 

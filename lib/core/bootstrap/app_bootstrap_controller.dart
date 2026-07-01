@@ -3,20 +3,21 @@ import 'dart:developer' as dev;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 
+import '../../features/messages/services/chat_socket_service.dart';
+import '../../features/messages/services/presence_service.dart';
+import '../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import '../../routes/routes.dart';
+import '../controllers/user_session_controller.dart';
 import '../localization/translation_service.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
-import '../services/device_push_token_service.dart';
-import '../services/storage_service.dart';
-import '../services/token_service.dart';
-import '../controllers/user_session_controller.dart';
 import '../services/current_user_summary_service.dart';
+import '../services/device_push_token_service.dart';
 import '../services/learning_activity_api_service.dart';
 import '../services/learning_activity_tracker_service.dart';
 import '../services/notification_summary_service.dart';
-import '../../features/messages/services/chat_socket_service.dart';
-import '../../features/messages/services/presence_service.dart';
+import '../services/storage_service.dart';
+import '../services/token_service.dart';
 
 class AppBootstrapController extends GetxController {
   AppBootstrapController();
@@ -139,33 +140,8 @@ class AppBootstrapController extends GetxController {
         );
       }
     } catch (_) {}
-    // Try to establish the global chat socket as early as possible so the
-    // connection exists for presence and messaging across the app lifecycle.
-    try {
-      if (Get.isRegistered<ChatSocketService>()) {
-        final ChatSocketService socketSvc = Get.find<ChatSocketService>();
-        String? deviceId;
-        try {
-          if (Get.isRegistered<PresenceService>()) {
-            final PresenceService ps = Get.find<PresenceService>();
-            // best-effort: wait a short time for the presence service to
-            // initialize a device id (it's async). If not ready, connect
-            // without a deviceId — the socket will rejoin/emit on successful init.
-            for (int i = 0; i < 10 && ps.deviceId.isEmpty; i++) {
-              await Future<void>.delayed(const Duration(milliseconds: 50));
-            }
-            deviceId = ps.deviceId.isNotEmpty ? ps.deviceId : null;
-          }
-        } catch (_) {
-          deviceId = null;
-        }
-
-        // Fire-and-forget connect; failures should not stop bootstrap.
-        try {
-          await socketSvc.connect(deviceId: deviceId);
-        } catch (_) {}
-      }
-    } catch (_) {}
+    // Network connections are deferred to _bootstrap so a terminated-app
+    // CallKit accept can open the call screen before normal home loading.
   }
 
   @override
@@ -183,6 +159,14 @@ class AppBootstrapController extends GetxController {
           storageService.isLoggedIn && await tokenService.hasToken();
 
       if (hasValidLocalSession) {
+        if (Get.isRegistered<IncomingCallCoordinator>()) {
+          // Handle a native accepted call before user/profile/home requests.
+          // The accepted call route is awaited, so the bootstrap screen stays
+          // as a touch blocker behind the call instead of flashing the home UI.
+          await Get.find<IncomingCallCoordinator>()
+              .restorePendingAcceptedCall();
+        }
+
         // If there's a valid session, connect the global chat socket once
         try {
           final ChatSocketService socketSvc = Get.find<ChatSocketService>();
@@ -205,6 +189,7 @@ class AppBootstrapController extends GetxController {
         await Get.find<UserSessionController>().loadUser();
         await Get.find<LearningActivityTrackerService>().startSession();
         Get.offAllNamed(AppRoutes.wrapper);
+
         return;
       }
 

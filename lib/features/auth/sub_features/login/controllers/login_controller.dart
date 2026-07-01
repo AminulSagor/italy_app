@@ -1,13 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/controllers/user_session_controller.dart';
 import '../../../../../core/localization/translation_service.dart';
 import '../../../../../core/services/api_error_handler.dart';
-import '../../../../../core/controllers/user_session_controller.dart';
-import '../../../../../core/services/learning_activity_tracker_service.dart';
 import '../../../../../core/services/auth_service.dart';
-import '../../../../../features/messages/services/chat_socket_service.dart';
 import '../../../../../core/services/device_push_token_service.dart';
+import '../../../../../core/services/learning_activity_tracker_service.dart';
+import '../../../../../features/messages/services/chat_socket_service.dart';
+import '../../../../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import '../../../../../routes/routes.dart';
 import '../../../models/auth_models.dart';
 import '../models/login_models.dart';
@@ -119,7 +122,25 @@ class LoginController extends GetxController {
       if (Get.isRegistered<LearningActivityTrackerService>()) {
         await Get.find<LearningActivityTrackerService>().startSession();
       }
+      if (Get.isRegistered<IncomingCallCoordinator>()) {
+        try {
+          await Get.find<IncomingCallCoordinator>().reconnectAfterLogin();
+        } catch (_) {
+          // The REST fallback still allows background call actions.
+        }
+      }
+
       Get.offAllNamed(AppRoutes.wrapper);
+
+      if (Get.isRegistered<IncomingCallCoordinator>()) {
+        unawaited(
+          Future<void>(() async {
+            await Future<void>.delayed(const Duration(milliseconds: 300));
+            await Get.find<IncomingCallCoordinator>()
+                .restorePendingAcceptedCall();
+          }),
+        );
+      }
     } finally {
       form.value = form.value.copyWith(isLoading: false);
     }
