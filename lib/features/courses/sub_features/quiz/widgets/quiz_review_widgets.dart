@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -299,15 +300,15 @@ class _MatchingReview extends StatelessWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            Expanded(child: _GreyPairChip(label: 'Buongiorno')),
+            Expanded(child: _GreyPairChip(label: 'gen_buongiorno'.tr.tr)),
             Container(width: 44.w, height: 2.h, color: AppColors.primaryGreen),
-            Expanded(child: _GreyPairChip(label: 'Good\nmorning')),
+            Expanded(child: _GreyPairChip(label: 'gen_good_nmorning'.tr.tr)),
           ],
         ),
         SizedBox(height: 18.h),
         Row(
           children: <Widget>[
-            Expanded(child: _GreyPairChip(label: 'Ciao')),
+            Expanded(child: _GreyPairChip(label: 'gen_ciao'.tr.tr)),
             Container(
               width: 44.w,
               height: 2.h,

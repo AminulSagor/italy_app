@@ -92,25 +92,25 @@ class LeagueSystemPromotionView extends GetView<LeaderboardController> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Expanded(
+                      Expanded(
                         child: _ZoneCard(
                           bgColor: Color(0xFFE4F8D8),
                           icon: Icons.arrow_upward_rounded,
                           iconColor: Color(0xFF35C51E),
-                          title: 'Promotion',
-                          subtitle: 'Earn More\nXP to\nmove up.',
+                          title: 'gen_promotion'.tr.tr,
+                          subtitle: 'gen_earn_more_nxp_to_nmove_up'.tr.tr,
                           titleColor: Color(0xFF244D3A),
                           subtitleColor: Color(0xFF477159),
                         ),
                       ),
                       SizedBox(width: 14.w),
-                      const Expanded(
+                      Expanded(
                         child: _ZoneCard(
                           bgColor: Color(0xFFFCE4E8),
                           icon: Icons.arrow_downward_rounded,
                           iconColor: Color(0xFFFF4A47),
-                          title: 'Demotion',
-                          subtitle: 'Finish in the\nBottom 5 to\ndrop back.',
+                          title: 'gen_demotion'.tr.tr,
+                          subtitle: 'gen_finish_in_the_nbottom_5_to_ndr'.tr.tr,
                           titleColor: Color(0xFF9A2226),
                           subtitleColor: Color(0xFFB75E67),
                         ),

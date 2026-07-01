@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 enum FinalExamComponentTone { green, blue, orange, lime }
 
 class FinalExamComponentModel {
@@ -212,22 +213,22 @@ class FinalExamResultModel {
       verdict: verdict,
       stats: <FinalExamResultStatModel>[
         FinalExamResultStatModel(
-          label: 'Vocabulary',
+          label: 'gen_vocabulary'.tr.tr,
           value: '${_intValue(review['vocabularyUsageScore'])}',
           iconName: 'quiz',
         ),
         FinalExamResultStatModel(
-          label: 'Grammar',
+          label: 'gen_grammar'.tr.tr,
           value: '${_intValue(review['grammarAccuracyScore'])}',
           iconName: 'listening',
         ),
         FinalExamResultStatModel(
-          label: 'Writing',
+          label: 'gen_writing'.tr.tr,
           value: _scoreLabel(review['writingScore']),
           iconName: 'writing',
         ),
         FinalExamResultStatModel(
-          label: 'Speaking',
+          label: 'gen_speaking'.tr.tr,
           value: _scoreLabel(review['speakingScore']),
           iconName: 'speaking',
         ),

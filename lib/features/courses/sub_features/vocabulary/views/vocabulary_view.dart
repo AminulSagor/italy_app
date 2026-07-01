@@ -373,14 +373,14 @@ class _VocabularyStats extends StatelessWidget {
         Expanded(
           child: _VocabularyStatText(
             icon: Icons.local_fire_department_rounded,
-            label: '$streakDays DAY STREAK',
+            label: 'gen_streakdays_day_streak'.tr.tr,
             color: AppColors.vocabularyStreakText,
           ),
         ),
         Expanded(
           child: _VocabularyStatText(
             icon: Icons.emoji_events_outlined,
-            label: 'LEVEL $level',
+            label: 'gen_level_level'.tr.tr,
             color: AppColors.vocabularyBlueText,
             alignEnd: true,
           ),

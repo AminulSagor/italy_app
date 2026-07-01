@@ -552,7 +552,7 @@ class WebinarChatInput extends StatelessWidget {
               controller: controller.chatTextController,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'Write a message...',
+                hintText: 'gen_write_a_message'.tr.tr,
                 hintStyle: TextStyle(
                   color: AppColors.bodyText,
                   fontSize: 14.sp,

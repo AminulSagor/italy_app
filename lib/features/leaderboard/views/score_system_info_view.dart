@@ -23,7 +23,7 @@ class ScoreSystemInfoView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F7),
       appBar: SimpleAppbar(
-        title: 'Scoring Guide',
+        title: 'gen_scoring_guide'.tr.tr,
         onBackTap: () => Get.back<void>(),
       ),
       body: SingleChildScrollView(
@@ -298,9 +298,9 @@ class _StreakBonusCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
-          const _ScoreStreakRow(label: '3-STREAK', value: '+5 XP'),
+          _ScoreStreakRow(label: 'gen_3_streak'.tr.tr, value: '+5 XP'),
           SizedBox(height: 12.h),
-          const _ScoreStreakRow(label: '5-STREAK', value: '+10 XP'),
+          _ScoreStreakRow(label: 'gen_5_streak'.tr.tr, value: '+10 XP'),
         ],
       ),
     );
@@ -356,8 +356,8 @@ class _MasteryCard extends StatelessWidget {
       bgColor: const Color(0xFFF8E8DD),
       icon: Icons.workspace_premium_rounded,
       iconColor: const Color(0xFFD88A00),
-      title: '100% Mastery',
-      subtitle: 'Perfect score on\nfirst attempt.',
+      title: 'gen_100_mastery'.tr.tr,
+      subtitle: 'gen_perfect_score_on_nfirst_attemp'.tr.tr,
       value: '+20 XP',
       valueColor: const Color(0xFFA56400),
     );
@@ -373,8 +373,8 @@ class _SpeedBonusCard extends StatelessWidget {
       bgColor: const Color(0xFFDDE9F7),
       icon: Icons.timer_outlined,
       iconColor: const Color(0xFF2563EB),
-      title: 'Speed Bonus',
-      subtitle: 'Finish the quiz in\nunder 200s.',
+      title: 'gen_speed_bonus'.tr.tr,
+      subtitle: 'gen_finish_the_quiz_in_nunder_200s'.tr.tr,
       value: '+15 XP',
       valueColor: const Color(0xFF205EEA),
     );

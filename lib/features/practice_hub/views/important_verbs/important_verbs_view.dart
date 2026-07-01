@@ -53,7 +53,7 @@ class ImportantVerbsView extends GetView<ImportantVerbsController> {
                       () => VerbSearchField(
                         textController:
                             controller.importantVerbSearchController,
-                        hintText: 'Search for a verb (e.g., Avere)...',
+                        hintText: 'gen_search_for_a_verb_e_g_avere'.tr.tr,
                         query: controller.importantVerbSearchQuery.value,
                         onChanged: controller.onImportantVerbSearchChanged,
                         onClear: controller.clearImportantVerbSearch,

@@ -29,10 +29,10 @@ class ProPurchaseSuccessView extends GetView<ProCheckoutController> {
   Widget build(BuildContext context) {
     final ProPurchaseResultModel result =
         controller.purchaseResult.value ??
-        const ProPurchaseResultModel(
+        ProPurchaseResultModel(
           orderId: '#IT-SHK-1024',
           statusLabel: 'Status: Completed',
-          title: 'Congratulations!',
+          title: 'gen_congratulations'.tr.tr,
           description:
               'You now have full lifetime access to all\nItalian Shikhi features. Your journey to\nfluency starts today.',
           buttonLabel: 'Start Learning Now',

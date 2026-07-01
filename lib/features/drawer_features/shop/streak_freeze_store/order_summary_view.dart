@@ -364,7 +364,7 @@ class _CouponArea extends GetView<ShopController> {
               child: _CouponField(
                 enabled: false,
                 showAppliedBorder: true,
-                hintText: 'WELCOME10',
+                hintText: 'gen_welcome10'.tr.tr,
               ),
             ),
             SizedBox(width: 10.w),
@@ -529,9 +529,9 @@ class _TrustedBadge extends StatelessWidget {
             child: Stack(
               clipBehavior: Clip.none,
               children: <Widget>[
-                _AvatarDot(left: 0.w, label: '👨'),
-                _AvatarDot(left: 14.w, label: '👩'),
-                _AvatarDot(left: 28.w, label: '🧑'),
+                _AvatarDot(left: 0.w, label: '👨'.tr),
+                _AvatarDot(left: 14.w, label: '👩'.tr),
+                _AvatarDot(left: 28.w, label: '🧑'.tr),
               ],
             ),
           ),

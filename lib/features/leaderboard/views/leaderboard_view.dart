@@ -179,7 +179,7 @@ class _LeaderboardHeader extends StatelessWidget {
           Expanded(
             child: Center(
               child: Text(
-                'Leaderboard',
+                'leaderboard'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font20.sp,
                   fontWeight: FontWeight.w900,
@@ -197,7 +197,7 @@ class _LeaderboardHeader extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: Text(
-            'Leaderboard',
+            'leaderboard'.tr,
             style: TextStyle(
               fontSize: AppFont.font28.sp,
               fontWeight: FontWeight.w900,
@@ -253,13 +253,13 @@ class _LeaderboardTabBar extends StatelessWidget {
         child: Row(
           children: <Widget>[
             _TabItem(
-              title: 'My League',
+              title: 'gen_my_league'.tr.tr,
               isSelected: selectedIndex == 0,
               onTap: () => onChanged(0),
             ),
             SizedBox(width: 8.w),
             _TabItem(
-              title: 'Global',
+              title: 'gen_global'.tr.tr,
               isSelected: selectedIndex == 1,
               onTap: () => onChanged(1),
             ),
@@ -657,8 +657,8 @@ class _MilestoneCard extends StatelessWidget {
         children: <Widget>[
           Text(
             nextLeagueName.isNotEmpty
-                ? 'Milestone: $nextLeagueName'
-                : 'Milestone',
+                ? '${'leaderboard_milestone_title'.tr}: $nextLeagueName'
+                : 'leaderboard_milestone_title'.tr,
             style: TextStyle(
               fontSize: AppFont.font20.sp,
               fontWeight: FontWeight.w900,
@@ -668,9 +668,7 @@ class _MilestoneCard extends StatelessWidget {
           ),
           SizedBox(height: 6.h),
           Text(
-            message.isNotEmpty
-                ? message
-                : 'Earn more XP to reach the next league!',
+            message.isNotEmpty ? message : 'leaderboard_milestone_message'.tr,
             style: TextStyle(
               fontSize: AppFont.font15.sp,
               fontWeight: FontWeight.w600,
@@ -811,7 +809,7 @@ class _SearchField extends StatelessWidget {
         ),
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: 'Search users...',
+          hintText: 'gen_search_users'.tr.tr,
           hintStyle: TextStyle(
             fontSize: AppFont.font15.sp,
             fontWeight: FontWeight.w600,
@@ -1100,21 +1098,22 @@ class _MyRankFloatingCard extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 3.h),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF3D9416),
-                  borderRadius: BorderRadius.circular(100.r),
-                ),
-                child: Text(
-                  zoneLabel ?? 'PROMOTION ZONE',
-                  style: TextStyle(
-                    fontSize: AppFont.font9.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.limeTextColor,
+              if (zoneLabel != null && zoneLabel!.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3D9416),
+                    borderRadius: BorderRadius.circular(100.r),
+                  ),
+                  child: Text(
+                    zoneLabel!,
+                    style: TextStyle(
+                      fontSize: AppFont.font9.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.limeTextColor,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
           SizedBox(width: 14.w),

@@ -100,7 +100,7 @@ class AiTutorLevelTestResultView
               if (profile.strengths.isNotEmpty) ...<Widget>[
                 SizedBox(height: 22.h),
                 _ResultListCard(
-                  title: 'YOUR STRENGTHS',
+                  title: 'gen_your_strengths'.tr.tr,
                   icon: Icons.check_circle_rounded,
                   iconColor: AppColors.primaryGreen,
                   items: profile.strengths,
@@ -109,7 +109,7 @@ class AiTutorLevelTestResultView
               if (profile.focusAreas.isNotEmpty) ...<Widget>[
                 SizedBox(height: 16.h),
                 _ResultListCard(
-                  title: 'FOCUS NEXT',
+                  title: 'gen_focus_next'.tr.tr,
                   icon: Icons.track_changes_rounded,
                   iconColor: const Color(0xFFFF8A21),
                   items: profile.focusAreas,

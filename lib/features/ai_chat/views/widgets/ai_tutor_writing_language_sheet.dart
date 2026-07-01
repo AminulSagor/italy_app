@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -67,18 +68,18 @@ class AiTutorWritingLanguageDialog extends StatelessWidget {
               ),
               SizedBox(height: 20.h),
               _WritingLanguageOption(
-                title: 'English → Italian',
-                subtitle: 'Short English explanations for Italian writing',
-                leadingText: 'EN',
+                title: 'gen_english_italian'.tr.tr,
+                subtitle: 'gen_short_english_explanations_for'.tr.tr,
+                leadingText: 'gen_en'.tr.tr,
                 onTap: () => Navigator.of(context).pop(
                   AiTutorWritingSourceLanguage.english,
                 ),
               ),
               SizedBox(height: 12.h),
               _WritingLanguageOption(
-                title: 'Bangla → Italian',
-                subtitle: 'বাংলায় সংক্ষিপ্ত ব্যাখ্যাসহ ইতালীয় লেখা',
-                leadingText: 'বাং',
+                title: 'gen_bangla_italian'.tr.tr,
+                subtitle: 'বাংলায় সংক্ষিপ্ত ব্যাখ্যাসহ ইতালীয় লেখা'.tr,
+                leadingText: 'বাং'.tr,
                 onTap: () => Navigator.of(context).pop(
                   AiTutorWritingSourceLanguage.bangla,
                 ),

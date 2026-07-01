@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -306,19 +307,19 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
               child: Row(
                 children: <Widget>[
                   _SpeedPill(
-                    label: '0.75×',
+                    label: 'gen_0_75'.tr.tr,
                     isSelected: _speed == 0.75,
                     onTap: () => _setSpeed(0.75),
                   ),
                   4.w.horizontalSpace,
                   _SpeedPill(
-                    label: '1×',
+                    label: 'gen_1'.tr.tr,
                     isSelected: _speed == 1,
                     onTap: () => _setSpeed(1),
                   ),
                   4.w.horizontalSpace,
                   _SpeedPill(
-                    label: '1.25×',
+                    label: 'gen_1_25'.tr.tr,
                     isSelected: _speed == 1.25,
                     onTap: () => _setSpeed(1.25),
                   ),

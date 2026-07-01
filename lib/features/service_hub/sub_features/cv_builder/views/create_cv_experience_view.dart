@@ -30,8 +30,8 @@ class CreateCvExperienceView extends GetView<CreateCvExperienceController> {
                   children: <Widget>[
                     const _Header(),
                     SizedBox(height: 12.h),
-                    const CvStepProgress(
-                      title: 'Step 2: Work Experience',
+                    CvStepProgress(
+                      title: 'gen_step_2_work_experience'.tr.tr,
                       progressText: '33%',
                       progress: 0.33,
                     ),
@@ -46,7 +46,7 @@ class CreateCvExperienceView extends GetView<CreateCvExperienceController> {
               ),
             ),
             _BottomButton(
-              title: 'Continue to Education',
+              title: 'gen_continue_to_education'.tr.tr,
               onTap: controller.onContinueTap,
             ),
           ],
@@ -117,14 +117,14 @@ class _WorkExperienceCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           CvExperienceTextField(
-            label: 'JOB POSITION',
-            hintText: 'Pizza Maker',
+            label: 'gen_job_position'.tr.tr,
+            hintText: 'gen_pizza_maker'.tr.tr,
             controller: controller.jobPositionController,
           ),
           SizedBox(height: 14.h),
           CvExperienceTextField(
-            label: 'COMPANY NAME',
-            hintText: 'Pizzeria Da Michele',
+            label: 'gen_company_name'.tr.tr,
+            hintText: 'gen_pizzeria_da_michele'.tr.tr,
             controller: controller.companyNameController,
           ),
           SizedBox(height: 14.h),
@@ -132,16 +132,16 @@ class _WorkExperienceCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: CvExperienceTextField(
-                  label: 'START DATE',
-                  hintText: '01/01/2020',
+                  label: 'gen_start_date'.tr.tr,
+                  hintText: 'gen_01_01_2020'.tr.tr,
                   controller: controller.startDateController,
                 ),
               ),
               SizedBox(width: 12.w),
               Expanded(
                 child: CvExperienceTextField(
-                  label: 'END DATE',
-                  hintText: '10/01/2023',
+                  label: 'gen_end_date'.tr.tr,
+                  hintText: 'gen_10_01_2023'.tr.tr,
                   controller: controller.endDateController,
                 ),
               ),
@@ -205,23 +205,23 @@ class _WorkExperienceCard extends StatelessWidget {
             runSpacing: 8.h,
             children: <Widget>[
               CvSelectableChip(
-                title: 'Dough Preparation',
+                title: 'gen_dough_preparation'.tr.tr,
                 isSelected: true,
                 onTap: () {},
               ),
               CvSelectableChip(
-                title: 'Oven Handling',
+                title: 'gen_oven_handling'.tr.tr,
                 isSelected: true,
                 onTap: () {},
               ),
               CvSelectableChip(
-                title: 'Ingredient Prep',
+                title: 'gen_ingredient_prep'.tr.tr,
                 isSelected: false,
                 isAiSuggested: true,
                 onTap: () {},
               ),
               CvSelectableChip(
-                title: 'Kitchen Hygiene',
+                title: 'gen_kitchen_hygiene'.tr.tr,
                 isSelected: false,
                 isAiSuggested: true,
                 onTap: () {},
@@ -230,7 +230,7 @@ class _WorkExperienceCard extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           CvSelectableChip(
-            title: 'Add custom responsibility',
+            title: 'gen_add_custom_responsibility'.tr.tr,
             isSelected: false,
             isOutline: true,
             fullWidth: true,
@@ -334,11 +334,11 @@ class _HobbiesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return CvSmallSectionCard(
       icon: Icons.sports_esports_rounded,
-      title: 'Hobbies & Interests',
-      hintText: 'e.g. Photography...',
+      title: 'gen_hobbies_interests'.tr.tr,
+      hintText: 'gen_e_g_photography'.tr.tr,
       controller: controller.hobbyController,
       onAddTap: controller.addHobby,
-      footerText: 'Added hobbies will appear here.',
+      footerText: 'gen_added_hobbies_will_appear_here'.tr.tr,
       child: Obx(
             () => Wrap(
           spacing: 8.w,
@@ -370,11 +370,11 @@ class _DrivingLicenseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return CvSmallSectionCard(
       icon: Icons.directions_car_filled_rounded,
-      title: 'Driving License',
-      hintText: 'e.g. Category B, C',
+      title: 'gen_driving_license'.tr.tr,
+      hintText: 'gen_e_g_category_b_c'.tr.tr,
       controller: controller.licenseController,
       onAddTap: controller.addLicense,
-      footerText: 'Manage your driving categories here.',
+      footerText: 'gen_manage_your_driving_categories'.tr.tr,
       child: Obx(
             () => Wrap(
           spacing: 8.w,

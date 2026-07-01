@@ -150,7 +150,7 @@ class _SearchBox extends StatelessWidget {
               decoration: InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
-                hintText: 'Search template name...',
+                hintText: 'gen_search_template_name'.tr.tr,
                 hintStyle: TextStyle(
                   color: AppColors.homeSecondaryText.withOpacity(0.42),
                   fontSize: AppFont.font11.sp,

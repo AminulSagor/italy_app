@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -196,19 +197,19 @@ class AiTutorSkillChip extends StatelessWidget {
     final ({String label, IconData icon, Color color, Color background}) data =
         switch (skill) {
       AiTutorSkillType.speaking => (
-          label: 'SPEAKING',
+          label: 'gen_speaking_1'.tr.tr,
           icon: Icons.mic_rounded,
           color: const Color(0xFF09649F),
           background: const Color(0xFFDDF1FF),
         ),
       AiTutorSkillType.vocabulary => (
-          label: 'VOCABULARY',
+          label: 'gen_vocabulary_1'.tr.tr,
           icon: Icons.chat_bubble_rounded,
           color: const Color(0xFF8A4D00),
           background: const Color(0xFFFFEFD8),
         ),
       AiTutorSkillType.grammar => (
-          label: 'GRAMMAR',
+          label: 'gen_grammar_1'.tr.tr,
           icon: Icons.menu_book_rounded,
           color: AppColors.primaryGreen,
           background: const Color(0xFFDDFCE7),

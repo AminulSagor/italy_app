@@ -25,8 +25,8 @@ class PopupInsiderView extends StatelessWidget {
                   child: Column(
                     children: <Widget>[
                       SizedBox(height: 77.h),
-                      const _LeagueInfoCard(
-                        title: 'Bronze League',
+                      _LeagueInfoCard(
+                        title: 'gen_bronze_league'.tr.tr,
                         xp: '0 – 999 XP',
                         bgColor: Color(0xFFFFEDE2),
                         titleColor: Color(0xFF2B1608),
@@ -35,8 +35,8 @@ class PopupInsiderView extends StatelessWidget {
                         iconColor: Color(0xFF9A4E05),
                       ),
                       SizedBox(height: 17.h),
-                      const _LeagueInfoCard(
-                        title: 'Silver League',
+                      _LeagueInfoCard(
+                        title: 'gen_silver_league'.tr.tr,
                         xp: '1,000 – 4,999 XP',
                         bgColor: Color(0xFFADD0FB),
                         titleColor: Color(0xFF07365D),
@@ -45,8 +45,8 @@ class PopupInsiderView extends StatelessWidget {
                         iconColor: Color(0xFF075F9E),
                       ),
                       SizedBox(height: 17.h),
-                      const _LeagueInfoCard(
-                        title: 'Gold League',
+                      _LeagueInfoCard(
+                        title: 'gen_gold_league'.tr.tr,
                         xp: '5,000–9,999 XP',
                         bgColor: Color(0xFFFFF7DE),
                         titleColor: Color(0xFF3A2108),
@@ -55,8 +55,8 @@ class PopupInsiderView extends StatelessWidget {
                         iconColor: Color(0xFFFF8A00),
                       ),
                       SizedBox(height: 17.h),
-                      const _LeagueInfoCard(
-                        title: 'Diamond League',
+                      _LeagueInfoCard(
+                        title: 'gen_diamond_league'.tr.tr,
                         xp: '10,000+ XP',
                         bgColor: Color(0xFFD9F5F8),
                         titleColor: Color(0xFF006273),

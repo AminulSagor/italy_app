@@ -261,7 +261,7 @@ class _OpenAnswerField extends StatelessWidget {
           color: const Color(0xFF2D3935),
         ),
         decoration: InputDecoration(
-          hintText: 'Write your answer here...',
+          hintText: 'gen_write_your_answer_here'.tr.tr,
           border: InputBorder.none,
           counterStyle: TextStyle(
             fontSize: 10.sp,

@@ -43,7 +43,7 @@ class WebinarView extends GetView<WebinarController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   WebinarPageHeader(
-                    title: 'Live Webinars',
+                    title: 'gen_live_webinars'.tr.tr,
                     onBackTap: () => Get.back<void>(),
                   ),
                   SizedBox(height: 20.h),

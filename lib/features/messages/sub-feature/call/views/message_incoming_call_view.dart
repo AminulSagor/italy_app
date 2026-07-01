@@ -90,7 +90,7 @@ class MessageIncomingCallView extends StatelessWidget {
                   children: <Widget>[
                     _IncomingCallButton(
                       icon: Icons.call_end_rounded,
-                      label: 'Decline',
+                      label: 'gen_decline'.tr.tr,
                       backgroundColor: Colors.red,
                       isLoading:
                       controller.isProcessing.value,
@@ -101,7 +101,7 @@ class MessageIncomingCallView extends StatelessWidget {
                       icon: controller.callType.isVideo
                           ? Icons.videocam_rounded
                           : Icons.call_rounded,
-                      label: 'Answer',
+                      label: 'gen_answer'.tr.tr,
                       backgroundColor:
                       AppColors.primaryGreen,
                       isLoading:

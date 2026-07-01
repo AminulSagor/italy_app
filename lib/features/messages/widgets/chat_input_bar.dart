@@ -103,7 +103,7 @@ class ChatInputBar extends StatelessWidget {
                         horizontal: 24.w,
                         vertical: 17.h,
                       ),
-                      hintText: 'Type a message...',
+                      hintText: 'gen_type_a_message'.tr.tr,
                       hintStyle: TextStyle(
                         fontSize: AppFont.font16.sp,
                         fontWeight: FontWeight.w500,

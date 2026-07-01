@@ -29,9 +29,9 @@ class CreateCvContactView extends GetView<CreateCvContactController> {
                   children: <Widget>[
                     const _Header(),
                     SizedBox(height: 16.h),
-                    const CvStepProgress(
-                      title: 'Step 1: Identity & Contact',
-                      progressText: '33%',
+                    CvStepProgress(
+                      title: 'gen_step_1_identity_contact'.tr.tr,
+                      progressText: 'gen_33'.tr.tr,
                       progress: 0.33,
                     ),
                     SizedBox(height: 18.h),
@@ -45,23 +45,23 @@ class CreateCvContactView extends GetView<CreateCvContactController> {
                       child: Column(
                         children: <Widget>[
                           CvContactInputField(
-                            label: 'FULL NAME',
-                            hintText: 'e.g. Fahid Hasan',
+                            label: 'gen_full_name'.tr.tr,
+                            hintText: 'gen_e_g_fahid_hasan'.tr.tr,
                             icon: Icons.person_outline_rounded,
                             controller: controller.fullNameController,
                           ),
                           SizedBox(height: 14.h),
                           CvContactInputField(
-                            label: 'EMAIL ADDRESS',
-                            hintText: 'email@example.com',
+                            label: 'gen_email_address'.tr.tr,
+                            hintText: 'gen_email_example_com'.tr.tr,
                             icon: Icons.email_outlined,
                             controller: controller.emailController,
                             keyboardType: TextInputType.emailAddress,
                           ),
                           SizedBox(height: 14.h),
                           CvContactInputField(
-                            label: 'PHONE NUMBER',
-                            hintText: '+39 XXX XXX XXXX',
+                            label: 'gen_phone_number'.tr.tr,
+                            hintText: 'gen_39_xxx_xxx_xxxx'.tr.tr,
                             icon: Icons.call_outlined,
                             controller: controller.phoneController,
                             keyboardType: TextInputType.phone,
@@ -71,8 +71,8 @@ class CreateCvContactView extends GetView<CreateCvContactController> {
                     ),
                     SizedBox(height: 18.h),
                     CvContactInputField(
-                      label: 'CURRENT CITY IN ITALY',
-                      hintText: 'e.g. Milano, Roma...',
+                      label: 'gen_current_city_in_italy'.tr.tr,
+                      hintText: 'gen_e_g_milano_roma'.tr.tr,
                       icon: Icons.location_on_rounded,
                       controller: controller.cityController,
                       isStandalone: true,

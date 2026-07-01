@@ -186,7 +186,7 @@ class _SearchBox extends GetView<ShopOrderHistoryController> {
           color: const Color(0xFF333333),
         ),
         decoration: InputDecoration(
-          hintText: 'Search orders...',
+          hintText: 'gen_search_orders'.tr.tr,
           hintStyle: TextStyle(
             fontSize: 15.sp,
             fontWeight: FontWeight.w500,

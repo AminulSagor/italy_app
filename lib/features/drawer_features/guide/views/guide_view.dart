@@ -23,7 +23,7 @@ class GuideView extends GetView<GuideController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const _GuideTopBar(title: 'Guides'),
+              _GuideTopBar(title: 'gen_guides'.tr.tr),
               SizedBox(height: 36.h),
 
               Text(

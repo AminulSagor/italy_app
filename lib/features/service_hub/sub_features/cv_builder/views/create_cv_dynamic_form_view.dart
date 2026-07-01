@@ -401,7 +401,7 @@ class _Toolbar extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: _ListStyleButton(
-              label: 'Bullet list',
+              label: 'gen_bullet_list'.tr.tr,
               icon: Icons.format_list_bulleted_rounded,
               isSelected: listStyle == 'bullet',
               onTap: () => onListStyleChanged('bullet'),
@@ -410,7 +410,7 @@ class _Toolbar extends StatelessWidget {
           SizedBox(width: 8.w),
           Expanded(
             child: _ListStyleButton(
-              label: 'Number list',
+              label: 'gen_number_list'.tr.tr,
               icon: Icons.format_list_numbered_rounded,
               isSelected: listStyle == 'number',
               onTap: () => onListStyleChanged('number'),

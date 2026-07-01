@@ -1,29 +1,33 @@
+import 'package:get/get.dart';
+
 enum AiTutorGuidedMode {
   guided(
     apiValue: 'guided',
-    title: 'Guided Mode',
+    titleKey: 'gen_guided_mode',
     levelLabel: 'Beginner',
   ),
   assisted(
     apiValue: 'assisted',
-    title: 'Assisted Mode',
+    titleKey: 'gen_assisted_mode',
     levelLabel: 'Intermediate',
   ),
   free(
     apiValue: 'free',
-    title: 'Free Mode',
+    titleKey: 'gen_free_mode',
     levelLabel: 'Advanced',
   );
 
   const AiTutorGuidedMode({
     required this.apiValue,
-    required this.title,
+    required this.titleKey,
     required this.levelLabel,
   });
 
   final String apiValue;
-  final String title;
+  final String titleKey;
   final String levelLabel;
+
+  String get title => titleKey.tr;
 
   static AiTutorGuidedMode fromApiValue(String? value) {
     return AiTutorGuidedMode.values.firstWhere(
