@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../themes/app_colors.dart';
 import '../themes/app_constants.dart';
@@ -84,6 +85,7 @@ class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
               badgeCount: 0,
               showCount: false,
               onTap: onNotificationTap,
+              // onTap: () => Get.snackbar("In Progress", "Feature comming soon"),
             ),
             SizedBox(width: 16.w),
             _TopActionIcon(

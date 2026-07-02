@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
 import '../../../features/drawer_features/language/language_switch_dialogue.dart';
+import '../../../features/home/controllers/home_controller.dart';
 import '../../../features/messages/controllers/messages_controller.dart';
 import '../../../features/messages/controllers/message_chat_controller.dart';
 import '../../../features/messages/services/messages_service.dart';
@@ -40,7 +43,18 @@ class NavbarAndAppbarWrapperController extends GetxController
   void onBottomNavTap(int index) {
     isMessagesPageOpen.value = false;
 
+    // if (index == 4) {
+    //   Get.snackbar("In Progress", "Feature comming soon");
+    //   return;
+    // }
+
     if (index == currentIndex.value) {
+      if (Get.isRegistered<LearningActivityTrackerService>()) {
+        Get.find<LearningActivityTrackerService>().setShellTab(index);
+      }
+      if (index == 0) {
+        unawaited(refreshHomeDashboard());
+      }
       return;
     }
 
@@ -48,6 +62,16 @@ class NavbarAndAppbarWrapperController extends GetxController
     visitedTabs.add(index);
     if (Get.isRegistered<LearningActivityTrackerService>()) {
       Get.find<LearningActivityTrackerService>().setShellTab(index);
+    }
+    if (index == 0) {
+      unawaited(refreshHomeDashboard());
+    }
+  }
+
+  Future<void> refreshHomeDashboard() async {
+    await Future<void>.delayed(Duration.zero);
+    if (Get.isRegistered<HomeController>()) {
+      await Get.find<HomeController>().loadDashboard();
     }
   }
 
@@ -144,7 +168,9 @@ class NavbarAndAppbarWrapperController extends GetxController
       Get.find<UserSessionController>().loadUser();
     }
     if (Get.isRegistered<LearningActivityTrackerService>()) {
-      Get.find<LearningActivityTrackerService>().setShellTab(currentIndex.value);
+      Get.find<LearningActivityTrackerService>().setShellTab(
+        currentIndex.value,
+      );
     }
     refreshNotificationState();
   }

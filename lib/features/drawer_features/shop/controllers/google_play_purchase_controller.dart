@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as dev;
 
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
@@ -13,7 +14,8 @@ import '../models/shop_order_models.dart';
 import '../services/google_play_billing_service.dart';
 import '../services/shop_api_service.dart';
 
-class GooglePlayPurchaseController extends GetxController {
+class GooglePlayPurchaseController extends GetxController
+    with WidgetsBindingObserver {
   GooglePlayPurchaseController({
     required ShopApiService apiService,
     required GooglePlayBillingService billingService,
@@ -22,6 +24,7 @@ class GooglePlayPurchaseController extends GetxController {
 
   static const Uuid _uuid = Uuid();
   static const Duration _purchaseWait = Duration(minutes: 2);
+  static const Duration _billingReturnDelay = Duration(milliseconds: 900);
 
   final ShopApiService _apiService;
   final GooglePlayBillingService _billingService;
@@ -31,6 +34,8 @@ class GooglePlayPurchaseController extends GetxController {
 
   StreamSubscription<PurchaseDetails>? _purchaseSubscription;
   Completer<GooglePlayPurchaseOutcome>? _activeCompleter;
+  bool _billingFlowActive = false;
+  bool _resumeReconciliationRunning = false;
 
   final RxBool isProcessing = false.obs;
   final RxString errorMessage = ''.obs;
@@ -43,6 +48,7 @@ class GooglePlayPurchaseController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     _purchaseSubscription = _billingService.purchaseUpdates.listen(
       (PurchaseDetails purchase) => unawaited(_handlePurchase(purchase)),
       onError: (Object error, StackTrace stackTrace) {
@@ -62,6 +68,13 @@ class GooglePlayPurchaseController extends GetxController {
     unawaited(retryPendingPurchase());
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _billingFlowActive) {
+      unawaited(_reconcileReturnedBillingFlow());
+    }
+  }
+
   Future<GooglePlayPurchaseOutcome> startPurchase({
     required StorePackageModel package,
     required StoreProviderProductModel storeProduct,
@@ -78,7 +91,7 @@ class GooglePlayPurchaseController extends GetxController {
     final PendingGooglePlayPurchaseModel? existing =
         _billingService.loadPendingPurchase();
     if (existing != null) {
-      await retryPendingPurchase();
+      final bool purchaseFound = await retryPendingPurchase();
       final StorePurchaseCompletionModel? recovered = lastCompletion.value;
       if (recovered != null && recovered.orderId == existing.orderId) {
         return GooglePlayPurchaseOutcome(
@@ -87,10 +100,19 @@ class GooglePlayPurchaseController extends GetxController {
           completion: recovered,
         );
       }
-      return const GooglePlayPurchaseOutcome(
-        status: GooglePlayPurchaseOutcomeStatus.pending,
-        message: 'Your previous Google Play purchase is still pending.',
-      );
+      if (purchaseFound && _billingService.loadPendingPurchase() != null) {
+        return const GooglePlayPurchaseOutcome(
+          status: GooglePlayPurchaseOutcomeStatus.pending,
+          message: 'Your previous Google Play purchase is still pending.',
+        );
+      }
+      if (!purchaseFound && _billingService.pendingPurchaseQueryFailed) {
+        return const GooglePlayPurchaseOutcome(
+          status: GooglePlayPurchaseOutcomeStatus.pending,
+          message: 'Google Play could not confirm the previous purchase yet.',
+        );
+      }
+      await _billingService.clearPendingPurchase();
     }
 
     isProcessing.value = true;
@@ -140,8 +162,10 @@ class GooglePlayPurchaseController extends GetxController {
       final Completer<GooglePlayPurchaseOutcome> completer =
           Completer<GooglePlayPurchaseOutcome>();
       _activeCompleter = completer;
+      _billingFlowActive = true;
       final bool launched = await _billingService.launchPurchase(pending);
       if (!launched) {
+        _billingFlowActive = false;
         _clearActivePurchase();
         final String message = _billingService.lastError.value.isNotEmpty
             ? _billingService.lastError.value
@@ -155,25 +179,87 @@ class GooglePlayPurchaseController extends GetxController {
 
       return await completer.future.timeout(
         _purchaseWait,
-        onTimeout: () => const GooglePlayPurchaseOutcome(
-          status: GooglePlayPurchaseOutcomeStatus.pending,
-          message:
-              'The purchase is pending. It will be verified automatically.',
-        ),
+        onTimeout: () {
+          _billingFlowActive = false;
+          _clearActivePurchase();
+          return const GooglePlayPurchaseOutcome(
+            status: GooglePlayPurchaseOutcomeStatus.pending,
+            message:
+                'The purchase is pending. It will be verified automatically.',
+          );
+        },
       );
     } finally {
       isProcessing.value = false;
     }
   }
 
-  Future<void> retryPendingPurchase() async {
+  Future<bool> retryPendingPurchase() async {
     final PendingGooglePlayPurchaseModel? pending =
         _billingService.loadPendingPurchase();
-    if (pending == null) return;
+    if (pending == null) return false;
 
     final PurchaseDetails? purchase =
         await _billingService.queryPendingPurchase();
-    if (purchase != null) await _handlePurchase(purchase);
+    if (purchase == null) return false;
+    await _handlePurchase(purchase);
+    return true;
+  }
+
+  StorePurchaseCompletionModel? takeLastCompletion() {
+    final StorePurchaseCompletionModel? completion = lastCompletion.value;
+    lastCompletion.value = null;
+    return completion;
+  }
+
+  void resetTransientState({bool cancelActivePurchase = false}) {
+    lastCompletion.value = null;
+    errorMessage.value = '';
+    if (!cancelActivePurchase) return;
+
+    _billingFlowActive = false;
+    final Completer<GooglePlayPurchaseOutcome>? completer = _activeCompleter;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete(
+        const GooglePlayPurchaseOutcome(
+          status: GooglePlayPurchaseOutcomeStatus.cancelled,
+          message: 'The purchase flow was closed.',
+        ),
+      );
+    }
+    _clearActivePurchase();
+  }
+
+  Future<void> _reconcileReturnedBillingFlow() async {
+    if (_resumeReconciliationRunning || !_billingFlowActive) return;
+    _resumeReconciliationRunning = true;
+    try {
+      await Future<void>.delayed(_billingReturnDelay);
+      if (!_billingFlowActive) return;
+
+      PurchaseDetails? purchase = await _billingService.queryPendingPurchase();
+      if (purchase == null && !_billingService.pendingPurchaseQueryFailed) {
+        await Future<void>.delayed(_billingReturnDelay);
+        if (!_billingFlowActive) return;
+        purchase = await _billingService.queryPendingPurchase();
+      }
+      if (purchase != null) {
+        await _handlePurchase(purchase);
+        return;
+      }
+      if (_billingService.pendingPurchaseQueryFailed) return;
+
+      await _billingService.clearPendingPurchase();
+      _billingFlowActive = false;
+      _completeActive(
+        const GooglePlayPurchaseOutcome(
+          status: GooglePlayPurchaseOutcomeStatus.cancelled,
+          message: 'The Google Play purchase was cancelled.',
+        ),
+      );
+    } finally {
+      _resumeReconciliationRunning = false;
+    }
   }
 
   Future<void> _handlePurchase(PurchaseDetails purchase) async {
@@ -183,6 +269,7 @@ class GooglePlayPurchaseController extends GetxController {
 
     switch (purchase.status) {
       case PurchaseStatus.pending:
+        _billingFlowActive = false;
         _completeActive(
           const GooglePlayPurchaseOutcome(
             status: GooglePlayPurchaseOutcomeStatus.pending,
@@ -191,6 +278,7 @@ class GooglePlayPurchaseController extends GetxController {
         );
         return;
       case PurchaseStatus.canceled:
+        _billingFlowActive = false;
         await _billingService.clearPendingPurchase();
         _completeActive(
           const GooglePlayPurchaseOutcome(
@@ -200,6 +288,7 @@ class GooglePlayPurchaseController extends GetxController {
         );
         return;
       case PurchaseStatus.error:
+        _billingFlowActive = false;
         await _billingService.clearPendingPurchase();
         final String message =
             purchase.error?.message ?? 'The Google Play purchase failed.';
@@ -213,6 +302,7 @@ class GooglePlayPurchaseController extends GetxController {
         return;
       case PurchaseStatus.purchased:
       case PurchaseStatus.restored:
+        _billingFlowActive = false;
         await _verifyAndDeliver(purchase, pending);
         return;
     }
@@ -250,7 +340,7 @@ class GooglePlayPurchaseController extends GetxController {
         pending = pending.copyWith(verifiedCompletion: completion);
         await _billingService.savePendingPurchase(pending);
       }
-      final StorePurchaseCompletionModel verifiedCompletion = completion!;
+      final StorePurchaseCompletionModel verifiedCompletion = completion;
 
       await _billingService.finishVerifiedPurchase(
         purchase,
@@ -361,7 +451,9 @@ class GooglePlayPurchaseController extends GetxController {
 
   void _completeActive(GooglePlayPurchaseOutcome outcome) {
     final Completer<GooglePlayPurchaseOutcome>? completer = _activeCompleter;
-    if (completer != null && !completer.isCompleted) completer.complete(outcome);
+    if (completer != null && !completer.isCompleted) {
+      completer.complete(outcome);
+    }
     _clearActivePurchase();
   }
 
@@ -371,6 +463,7 @@ class GooglePlayPurchaseController extends GetxController {
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     unawaited(_purchaseSubscription?.cancel());
     unawaited(_completionController.close());
     super.onClose();

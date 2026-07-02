@@ -28,12 +28,14 @@ class GooglePlayBillingService extends GetxService {
 
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   Future<void>? _initialization;
+  bool _pendingPurchaseQueryFailed = false;
 
   final RxBool isAvailable = false.obs;
   final RxBool isLoadingProducts = false.obs;
   final RxString lastError = ''.obs;
 
   Stream<PurchaseDetails> get purchaseUpdates => _purchaseController.stream;
+  bool get pendingPurchaseQueryFailed => _pendingPurchaseQueryFailed;
 
   @override
   void onInit() {
@@ -149,6 +151,11 @@ class GooglePlayBillingService extends GetxService {
     return _productsBySelection[_selectionKey(mapping)]?.price;
   }
 
+  String? localizedCurrencyCode(StoreProviderProductModel? mapping) {
+    if (mapping == null) return null;
+    return _productsBySelection[_selectionKey(mapping)]?.currencyCode;
+  }
+
   bool hasProduct(StoreProviderProductModel mapping) {
     return _productsBySelection.containsKey(_selectionKey(mapping));
   }
@@ -215,6 +222,7 @@ class GooglePlayBillingService extends GetxService {
   }
 
   Future<PurchaseDetails?> queryPendingPurchase() async {
+    _pendingPurchaseQueryFailed = false;
     final PendingGooglePlayPurchaseModel? pending = loadPendingPurchase();
     if (pending == null || !Platform.isAndroid) return null;
     await initialize();
@@ -232,6 +240,7 @@ class GooglePlayBillingService extends GetxService {
         if (purchase.productID == pending.productId) return purchase;
       }
     } catch (error, stackTrace) {
+      _pendingPurchaseQueryFailed = true;
       dev.log(
         'Could not recover the pending Google Play purchase.',
         name: 'GooglePlayBillingService',

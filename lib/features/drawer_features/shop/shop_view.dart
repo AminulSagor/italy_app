@@ -15,7 +15,10 @@ class ShopView extends GetView<ShopController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8F8),
       appBar: SimpleAppbar(
-        onBackTap: () => Navigator.pop(context),
+        onBackTap: () {
+          controller.prepareForShopExit();
+          Navigator.pop(context);
+        },
         title: 'Shop',
       ),
       body: SafeArea(

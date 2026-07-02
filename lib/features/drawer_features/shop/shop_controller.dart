@@ -10,7 +10,6 @@ import 'models/shop_models.dart';
 import 'models/shop_order_models.dart';
 import 'services/google_play_billing_service.dart';
 import 'services/shop_api_service.dart';
-
 class OrderHistoryFilterTitles {
   static const String allOrders = 'All Orders';
   static const String courses = 'Courses';
@@ -18,7 +17,6 @@ class OrderHistoryFilterTitles {
   static const String streakFreezes = 'Streak Freezes';
   static const String cvCredits = 'CV Credits';
 }
-
 class ShopController extends GetxController {
   ShopController({
     required ShopApiService apiService,
@@ -57,7 +55,6 @@ class ShopController extends GetxController {
       CheckoutPaymentMethod.googlePlay.obs;
   final Rxn<StorePurchaseCompletionModel> completedPurchase =
       Rxn<StorePurchaseCompletionModel>();
-
   @override
   void onInit() {
     super.onInit();
@@ -71,7 +68,7 @@ class ShopController extends GetxController {
     await loadShop();
     await _purchaseController.retryPendingPurchase();
     final StorePurchaseCompletionModel? recovered =
-        _purchaseController.lastCompletion.value;
+        _purchaseController.takeLastCompletion();
     if (recovered != null) await _applyPurchaseCompletion(recovered);
   }
   StorePackageModel? get selectedAiPackage =>
@@ -161,19 +158,23 @@ class ShopController extends GetxController {
             '€${package.priceEur.toStringAsFixed(2)}';
     return package.isMonthly ? '$price/mo' : price;
   }
-
+  bool get isGooglePlaySelected =>
+      selectedPaymentMethod.value == CheckoutPaymentMethod.googlePlay;
+  bool get canChangeCurrency => !isGooglePlaySelected;
+  bool get canUseCoupon =>
+      !isGooglePlaySelected && (activePackage.value?.couponEnabled ?? false);
+  bool get hasDiscount => isCouponApplied.value && discountAmount > 0;
   Future<void> selectCurrency(RefillCurrency currency) async {
-    if (selectedCurrency.value == currency) return;
+    if (!canChangeCurrency || selectedCurrency.value == currency) return;
     selectedCurrency.value = currency;
     await _loadQuote(coupon: isCouponApplied.value ? couponCode.value : '');
   }
-
   void onCouponChanged(String value) {
     couponCode.value = value.trim();
     if (isCouponApplied.value) isCouponApplied.value = false;
   }
-
   Future<void> applyCoupon() async {
+    if (!canUseCoupon) return;
     final String code = couponTextController.text.trim();
     if (code.isEmpty) {
       Get.snackbar('Coupon Required', 'Please enter a coupon code.');
@@ -185,19 +186,16 @@ class ShopController extends GetxController {
       isCouponApplied.value = true;
     }
   }
-
   Future<void> clearCoupon() async {
     couponTextController.clear();
     couponCode.value = '';
     isCouponApplied.value = false;
     if (activePackage.value != null) await _loadQuote();
   }
-
   String formatPrice(double value) {
     final bool eur = selectedCurrency.value == RefillCurrency.eur;
     return eur ? '€${value.toStringAsFixed(2)}' : '৳${value.toStringAsFixed(0)}';
   }
-
   StoreQuotePricingModel? get pricing => quote.value?.pricing;
   double get currentBasePrice =>
       pricing?.originalAmount ?? activePackage.value?.priceEur ?? 0;
@@ -216,7 +214,6 @@ class ShopController extends GetxController {
   String get cvCreditOriginalPriceText => originalPriceText;
   String get cvCreditPayablePriceText => payablePriceText;
   String get cvCreditSavedAmountText => savedAmountText;
-
   String? get _checkoutStorePrice =>
       _billingService.localizedPrice(quote.value?.storeProduct);
   StorePackageModel? get checkoutPackage =>
@@ -233,43 +230,35 @@ class ShopController extends GetxController {
       selectedCvPackage ?? _emptyPackage(StorePackageType.cvCredit);
   String get selectedCvCreditOfferSummary =>
       selectedCvPackage?.entitlementSummary ?? '';
-
   Future<void> onRefillCreditTap() async {
     await _openPackageList(StorePackageType.aiBundle, AppRoutes.aiRefillCenter);
   }
-
   Future<void> onStreakFreezeTap() async {
     await _openPackageList(StorePackageType.streakFreeze, AppRoutes.streakFreeze);
   }
-
   Future<void> onCvCreditTap() async {
     await _openPackageList(StorePackageType.cvCredit, AppRoutes.cvCreditStore);
   }
-
   Future<void> confirmPurchase() async {
     await _openSummary(selectedAiPackage, AppRoutes.orderSummary);
   }
-
   Future<void> goToStreakFreezeOrderSummary() async {
     await _openSummary(
       selectedStreakPackage,
       AppRoutes.streakFreezeOrderSummary,
     );
   }
-
   Future<void> goToCvCreditOrderSummary() async {
     await _openSummary(selectedCvPackage, AppRoutes.cvCreditOrderSummary);
   }
-
   Future<void> buySelectedPlan() async {
     if (quote.value == null && !await _loadQuote()) return;
     selectedPaymentMethod.value = CheckoutPaymentMethod.googlePlay;
+    _resetCouponState();
     Get.toNamed(AppRoutes.checkout);
   }
-
   List<CheckoutPaymentMethod> get availablePaymentMethods =>
       const <CheckoutPaymentMethod>[CheckoutPaymentMethod.googlePlay];
-
   StoreProviderOptionModel? paymentOption(CheckoutPaymentMethod method) {
     for (final StoreProviderOptionModel option
         in quote.value?.supportedProviders ?? const []) {
@@ -295,10 +284,8 @@ class ShopController extends GetxController {
     }
     return null;
   }
-
   bool isPaymentMethodSelected(CheckoutPaymentMethod method) =>
       selectedPaymentMethod.value == method;
-
   void selectPaymentMethod(CheckoutPaymentMethod method) {
     final StoreProviderOptionModel? option = paymentOption(method);
     if (option == null || !option.enabled) {
@@ -310,26 +297,22 @@ class ShopController extends GetxController {
       );
       return;
     }
-    selectedPaymentMethod.value = CheckoutPaymentMethod.googlePlay;
+    selectedPaymentMethod.value = method;
+    if (method == CheckoutPaymentMethod.googlePlay) _resetCouponState();
     checkoutError.value = '';
   }
-
   String paymentMethodTitle(CheckoutPaymentMethod _) => 'Google Play';
-
   Future<void> confirmCheckout() async {
     await _completeSelectedPurchase();
   }
-
   Future<void> confirmStreakFreezePurchase() async {
     activePackage.value = selectedStreakPackage;
     await buySelectedPlan();
   }
-
   Future<void> confirmCvCreditPurchase() async {
     activePackage.value = selectedCvPackage;
     await buySelectedPlan();
   }
-
   String get completedMessage {
     final StorePurchaseCompletionModel? value = completedPurchase.value;
     if (value == null) return 'Your purchase is now active.';
@@ -342,9 +325,7 @@ class ShopController extends GetxController {
         return "Your '${value.packageName}' credits are active and ready for CV generation.";
     }
   }
-
   String get completedOrderId => completedPurchase.value?.orderNumber ?? '';
-
   String get completionFirstValue {
     final StorePurchaseCompletionModel? value = completedPurchase.value;
     if (value == null) return '0';
@@ -359,7 +340,6 @@ class ShopController extends GetxController {
         return '${value.creditedCvCredits}×';
     }
   }
-
   String get completionFirstLabel {
     switch (completedPurchase.value?.packageType) {
       case StorePackageType.aiBundle:
@@ -372,7 +352,6 @@ class ShopController extends GetxController {
         return 'Credits Added';
     }
   }
-
   String get completionSecondValue {
     final StorePurchaseCompletionModel? value = completedPurchase.value;
     if (value == null) return '0';
@@ -385,16 +364,24 @@ class ShopController extends GetxController {
         return '${value.balances.cvCredits}×';
     }
   }
-
   String get completionSecondLabel {
     return completedPurchase.value?.packageType == StorePackageType.aiBundle
         ? 'AI Smart Tokens'
         : 'Current Balance';
   }
-
-  void startLearningNow() => Get.offAllNamed(AppRoutes.wrapper);
+  void closePurchaseCompleted() {
+    _resetCompletedPurchase();
+    Get.back();
+  }
+  void startLearningNow() {
+    _resetCompletedPurchase();
+    Get.offAllNamed(AppRoutes.wrapper);
+  }
+  void prepareForShopExit() {
+    _resetCompletedPurchase();
+    _purchaseController.resetTransientState(cancelActivePurchase: true);
+  }
   void onOrderHistoryTap() => Get.toNamed(AppRoutes.orderHistory);
-
   Future<void> _openPackageList(StorePackageType type, String route) async {
     if (_packagesFor(type).isEmpty) await loadShop();
     if (_packagesFor(type).isEmpty) {
@@ -404,7 +391,6 @@ class ShopController extends GetxController {
     _resetQuote();
     Get.toNamed(route);
   }
-
   Future<void> _openSummary(
     StorePackageModel? package,
     String route,
@@ -417,7 +403,6 @@ class ShopController extends GetxController {
     _resetQuote(keepActivePackage: true);
     if (await _loadQuote()) Get.toNamed(route);
   }
-
   Future<bool> _loadQuote({String coupon = ''}) async {
     final StorePackageModel? package = activePackage.value;
     if (package == null || isLoadingQuote.value) return false;
@@ -439,12 +424,13 @@ class ShopController extends GetxController {
         <StoreProviderProductModel>[result.data!.storeProduct],
       );
       selectedPaymentMethod.value = CheckoutPaymentMethod.googlePlay;
+      _syncCurrencyFromGooglePlay(result.data!.storeProduct);
+      _resetCouponState();
       return true;
     } finally {
       isLoadingQuote.value = false;
     }
   }
-
   Future<void> _completeSelectedPurchase() async {
     if (isCheckoutLoading.value) return;
     final StorePackageModel? package = activePackage.value;
@@ -453,7 +439,6 @@ class ShopController extends GetxController {
       checkoutError.value = 'A valid package is required.';
       return;
     }
-
     isCheckoutLoading.value = true;
     checkoutError.value = '';
     try {
@@ -462,7 +447,9 @@ class ShopController extends GetxController {
         package: package,
         storeProduct: currentQuote.storeProduct,
         currency: selectedCurrency.value,
-        couponCode: isCouponApplied.value ? couponCode.value : '',
+        couponCode: canUseCoupon && isCouponApplied.value
+            ? couponCode.value
+            : '',
       );
       switch (outcome.status) {
         case GooglePlayPurchaseOutcomeStatus.completed:
@@ -484,13 +471,13 @@ class ShopController extends GetxController {
       isCheckoutLoading.value = false;
     }
   }
-
   Future<void> _applyPurchaseCompletion(
     StorePurchaseCompletionModel completion,
   ) async {
     if (_lastHandledOrderId == completion.orderId) return;
     _lastHandledOrderId = completion.orderId;
     completedPurchase.value = completion;
+    _purchaseController.takeLastCompletion();
     balances.value = completion.balances;
     _syncUserSessionBalances(completion.balances);
     if (Get.isRegistered<UserSessionController>()) {
@@ -500,7 +487,6 @@ class ShopController extends GetxController {
       Get.offNamed(AppRoutes.purchaseCompleted);
     }
   }
-
   void _syncUserSessionBalances(StoreBalancesModel value) {
     if (!Get.isRegistered<UserSessionController>()) return;
     Get.find<UserSessionController>().updateAiBalances(
@@ -508,13 +494,11 @@ class ShopController extends GetxController {
       textTokens: value.aiTextTokens,
     );
   }
-
   void _selectDefaults() {
     selectedAiPackageId.value = _preferred(aiPackages)?.id ?? '';
     selectedStreakPackageId.value = _preferred(streakPackages)?.id ?? '';
     selectedCvPackageId.value = _preferred(cvPackages)?.id ?? '';
   }
-
   StorePackageModel? _preferred(List<StorePackageModel> packages) {
     if (packages.isEmpty) return null;
     for (final StorePackageModel item in packages) {
@@ -525,16 +509,31 @@ class ShopController extends GetxController {
     }
     return packages.first;
   }
-
   void _resetQuote({bool keepActivePackage = false}) {
     quote.value = null;
-    couponTextController.clear();
-    couponCode.value = '';
-    isCouponApplied.value = false;
+    _resetCouponState();
     checkoutError.value = '';
     if (!keepActivePackage) activePackage.value = null;
   }
-
+  void _resetCouponState() {
+    couponTextController.clear();
+    couponCode.value = '';
+    isCouponApplied.value = false;
+  }
+  void _syncCurrencyFromGooglePlay(StoreProviderProductModel product) {
+    final String currency =
+        (_billingService.localizedCurrencyCode(product) ?? '').toUpperCase();
+    if (currency == RefillCurrency.bdt.apiValue) {
+      selectedCurrency.value = RefillCurrency.bdt;
+    } else if (currency == RefillCurrency.eur.apiValue) {
+      selectedCurrency.value = RefillCurrency.eur;
+    }
+  }
+  void _resetCompletedPurchase() {
+    completedPurchase.value = null;
+    _lastHandledOrderId = '';
+    _purchaseController.resetTransientState();
+  }
   List<StorePackageModel> _packagesFor(StorePackageType type) {
     switch (type) {
       case StorePackageType.aiBundle:
@@ -545,7 +544,6 @@ class ShopController extends GetxController {
         return cvPackages;
     }
   }
-
   StorePackageModel? _findPackage(
     List<StorePackageModel> packages,
     String id,
@@ -555,7 +553,6 @@ class ShopController extends GetxController {
     }
     return packages.isEmpty ? null : packages.first;
   }
-
   StorePackageModel _emptyPackage(StorePackageType type) => StorePackageModel(
         id: '',
         type: type,
@@ -574,15 +571,14 @@ class ShopController extends GetxController {
         couponEnabled: false,
         sortOrder: 0,
       );
-
   String _compact(int value) {
     if (value < 1000) return value.toString();
     if (value % 1000 == 0) return '${value ~/ 1000}k';
     return '${(value / 1000).toStringAsFixed(1)}k';
   }
-
   @override
   void onClose() {
+    prepareForShopExit();
     unawaited(_completionSubscription?.cancel());
     couponTextController.dispose();
     super.onClose();

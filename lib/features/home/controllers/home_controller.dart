@@ -58,10 +58,10 @@ class HomeController extends GetxController {
 
       if (Get.isRegistered<LearningActivityTrackerService>()) {
         try {
-          await Get.find<LearningActivityTrackerService>().syncPending();
+          await Get.find<LearningActivityTrackerService>().flushAndSync();
         } catch (error, stackTrace) {
           dev.log(
-            'Unable to sync pending learning activity',
+            'Unable to flush and sync learning activity',
             error: error,
             stackTrace: stackTrace,
             name: 'HomeController',

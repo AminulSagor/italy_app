@@ -40,8 +40,7 @@ class HomeView extends GetView<HomeController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  if (controller.isLoading.value &&
-                      data.overview.days.isEmpty)
+                  if (controller.isLoading.value && data.overview.days.isEmpty)
                     const LinearProgressIndicator(
                       color: AppColors.primaryGreen,
                       backgroundColor: AppColors.homeProgressTrack,
@@ -69,6 +68,8 @@ class HomeView extends GetView<HomeController> {
                   SupportCommunityCard(
                     support: data.support,
                     onTap: () => controller.openCommunity(),
+                    // onTap: () =>
+                    //     Get.snackbar("In Progress", "Feature comming soon"),
                   ),
                   if (data.webinar != null) ...<Widget>[
                     SizedBox(height: 26.h),

@@ -25,8 +25,6 @@ class CvCreditOrderSummaryView extends GetView<ShopController> {
               const _CurrencyToggle(),
               SizedBox(height: 32.h),
               const _SelectedCvPackCard(),
-              SizedBox(height: 34.h),
-              const _CouponSection(),
               SizedBox(height: 54.h),
               const _BuyButton(),
               SizedBox(height: 30.h),
@@ -88,33 +86,41 @@ class _SummaryTopBar extends StatelessWidget {
 class _CurrencyToggle extends GetView<ShopController> {
   const _CurrencyToggle();
 
-  static const Color _green = Color(0xFF267A05);
   static const Color _toggleBg = Color(0xFFE0E1E1);
 
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Container(
-        height: 46.h,
-        width: double.infinity,
-        padding: EdgeInsets.all(4.r),
-        decoration: BoxDecoration(
-          color: _toggleBg,
-          borderRadius: BorderRadius.circular(100.r),
-        ),
-        child: Row(
-          children: <Widget>[
-            _CurrencyItem(
-              title: 'gen_eur'.tr.tr,
-              selected: controller.selectedCurrency.value == RefillCurrency.eur,
-              onTap: () => controller.selectCurrency(RefillCurrency.eur),
+      () => IgnorePointer(
+        ignoring: !controller.canChangeCurrency,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 180),
+          opacity: controller.canChangeCurrency ? 1 : 0.6,
+          child: Container(
+            height: 46.h,
+            width: double.infinity,
+            padding: EdgeInsets.all(4.r),
+            decoration: BoxDecoration(
+              color: _toggleBg,
+              borderRadius: BorderRadius.circular(100.r),
             ),
-            _CurrencyItem(
-              title: 'gen_bdt'.tr.tr,
-              selected: controller.selectedCurrency.value == RefillCurrency.bdt,
-              onTap: () => controller.selectCurrency(RefillCurrency.bdt),
+            child: Row(
+              children: <Widget>[
+                _CurrencyItem(
+                  title: 'gen_eur'.tr.tr,
+                  selected:
+                      controller.selectedCurrency.value == RefillCurrency.eur,
+                  onTap: () => controller.selectCurrency(RefillCurrency.eur),
+                ),
+                _CurrencyItem(
+                  title: 'gen_bdt'.tr.tr,
+                  selected:
+                      controller.selectedCurrency.value == RefillCurrency.bdt,
+                  onTap: () => controller.selectCurrency(RefillCurrency.bdt),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -243,7 +249,7 @@ class _SelectedCvPackCard extends GetView<ShopController> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
-                if (controller.isCouponApplied.value) ...<Widget>[
+                if (controller.hasDiscount) ...<Widget>[
                   Padding(
                     padding: EdgeInsets.only(bottom: 5.h),
                     child: Text(
@@ -275,127 +281,6 @@ class _SelectedCvPackCard extends GetView<ShopController> {
         ),
       ),
     );
-  }
-}
-
-class _CouponSection extends GetView<ShopController> {
-  const _CouponSection();
-
-  static const Color _green = Color(0xFF267A05);
-  static const Color _greenLight = Color(0xFFD4E8CC);
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final bool applied = controller.isCouponApplied.value;
-
-      if (applied) {
-        return Row(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                height: 64.h,
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                alignment: Alignment.centerLeft,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(34.r),
-                  border: Border.all(color: _greenLight, width: 2.w),
-                ),
-                child: Text(
-                  controller.couponCode.value.isEmpty
-                      ? 'WELCOME10'
-                      : controller.couponCode.value.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF2D3032),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 10.w),
-            GestureDetector(
-              onTap: controller.clearCoupon,
-              child: Container(
-                width: 70.r,
-                height: 70.r,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: _green, width: 3.w),
-                ),
-                child: Icon(Icons.check_rounded, size: 24.r, color: _green),
-              ),
-            ),
-          ],
-        );
-      }
-
-      return Column(
-        children: <Widget>[
-          Container(
-            height: 60.h,
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(34.r),
-              border: Border.all(color: const Color(0xFFE0E1E1), width: 1.5.w),
-            ),
-            child: TextField(
-              controller: controller.couponTextController,
-              onChanged: controller.onCouponChanged,
-              textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
-                isDense: true,
-                border: InputBorder.none,
-                hintText: 'gen_enter_coupon_code'.tr.tr,
-                hintStyle: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFFB0B0B0),
-                ),
-              ),
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w900,
-                color: const Color(0xFF2D3032),
-              ),
-            ),
-          ),
-          SizedBox(height: 14.h),
-          GestureDetector(
-            onTap: controller.applyCoupon,
-            child: Container(
-              height: 64.h,
-              width: double.infinity,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(34.r),
-                border: Border.all(color: _green, width: 2.4.w),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: _green,
-                    blurRadius: 0,
-                    offset: Offset(0, 4.h),
-                  ),
-                ],
-              ),
-              child: Text(
-                'APPLY',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
-                  color: _green,
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    });
   }
 }
 

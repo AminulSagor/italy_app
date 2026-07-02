@@ -59,6 +59,8 @@ class ContactSupportView extends GetView<ContactController> {
               SizedBox(height: 35.h),
               GestureDetector(
                 onTap: controller.chatOnWhatsapp,
+                // onTap: () =>
+                //     Get.snackbar("In Progress", "Feature comming soon"),
                 child: SizedBox(
                   height: 210.h,
                   width: double.infinity,
@@ -87,6 +89,8 @@ class ContactSupportView extends GetView<ContactController> {
                       iconColor: _green,
                       subtitleColor: _green,
                       onTap: controller.callSupport,
+                      // onTap: () =>
+                      //     Get.snackbar("In Progress", "Feature comming soon"),
                     ),
                   ),
                   SizedBox(width: 18.w),
@@ -100,6 +104,8 @@ class ContactSupportView extends GetView<ContactController> {
                       iconColor: const Color(0xFF4C4C4C),
                       subtitleColor: const Color(0xFF555555),
                       onTap: controller.sendEmail,
+                      // onTap: () =>
+                      //     Get.snackbar("In Progress", "Feature comming soon"),
                     ),
                   ),
                 ],
@@ -107,7 +113,11 @@ class ContactSupportView extends GetView<ContactController> {
 
               SizedBox(height: 31.h),
 
-              _FacebookCommunityCard(onTap: controller.joinFacebookCommunity),
+              _FacebookCommunityCard(
+                onTap: controller.joinFacebookCommunity,
+                // onTap: () =>
+                //     Get.snackbar("In Progress", "Feature comming soon"),
+              ),
 
               SizedBox(height: 62.h),
 
