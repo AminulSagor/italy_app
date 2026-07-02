@@ -16,6 +16,8 @@ import 'core/services/callkit_incoming_service.dart';
 import 'core/services/local_notification_service.dart';
 import 'core/services/learning_activity_tracker_service.dart';
 import 'core/themes/app_theme.dart';
+import 'core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
+import 'features/home/controllers/home_controller.dart';
 import 'features/messages/sub-feature/call/service/call_socket_service.dart';
 import 'features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import 'routes/routes.dart';
@@ -244,9 +246,22 @@ class ItalyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           getPages: AppPages.pages,
           routingCallback: (routing) {
+            final String? currentRoute = routing?.current;
             if (Get.isRegistered<LearningActivityTrackerService>()) {
               Get.find<LearningActivityTrackerService>().handleRoute(
-                routing?.current,
+                currentRoute,
+              );
+            }
+            if (currentRoute == AppRoutes.wrapper &&
+                Get.isRegistered<NavbarAndAppbarWrapperController>() &&
+                Get.find<NavbarAndAppbarWrapperController>()
+                        .currentIndex
+                        .value ==
+                    0 &&
+                Get.isRegistered<HomeController>()) {
+              unawaited(
+                Get.find<NavbarAndAppbarWrapperController>()
+                    .refreshHomeDashboard(),
               );
             }
           },

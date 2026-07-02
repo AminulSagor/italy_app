@@ -10,6 +10,7 @@ import '../../routes/app_routes.dart';
 import '../models/learning_activity_models.dart';
 import 'api_error_handler.dart';
 import 'learning_activity_api_service.dart';
+import 'learning_activity_route_resolver.dart';
 import 'storage_service.dart';
 
 class LearningActivityTrackerService extends GetxService
@@ -21,60 +22,107 @@ class LearningActivityTrackerService extends GetxService
        _storageService = storageService;
 
   static const String _pendingStorageKey = 'pendingLearningActivityTime';
-  static const Duration _heartbeatDuration = Duration(seconds: 60);
-  static const int _minimumRecordSeconds = 5;
+  static const Duration _heartbeatDuration = Duration(seconds: 10);
+  static const int _minimumRecordSeconds = 1;
 
   final LearningActivityApiService _apiService;
   final StorageService _storageService;
   final Uuid _uuid = const Uuid();
+  final LearningActivityRouteResolver _routeResolver =
+      const LearningActivityRouteResolver();
 
   Timer? _heartbeat;
+  Future<void> _operationQueue = Future<void>.value();
   LearningActivityKind? _currentKind;
   String? _currentSourceId;
   DateTime? _startedAt;
   int _shellTabIndex = 0;
-  bool _isSyncing = false;
+  bool _isForeground = true;
+  bool _isClosed = false;
 
   Future<LearningActivityTrackerService> init() async {
     WidgetsBinding.instance.addObserver(this);
     _heartbeat = Timer.periodic(
       _heartbeatDuration,
-      (_) => _runInBackground(_flushCurrent()),
+      (_) => unawaited(flushAndSync()),
     );
     return this;
   }
 
   Future<void> startSession() {
-    return _handleBackgroundOperation(syncPending());
+    return _enqueue(() async {
+      await _syncPendingInternal();
+      _restoreCurrentActivity();
+    });
   }
 
-  Future<void> endSession() async {
-    await _flushCurrent(clearActivity: true);
-    await syncPending();
-    await discardSession();
+  Future<void> endSession() {
+    return _enqueue(() async {
+      await _flushCurrentInternal(clearActivity: true);
+      await _syncPendingInternal();
+      _currentKind = null;
+      _currentSourceId = null;
+      _startedAt = null;
+      await _writePending(<LearningActivityTimeEntryModel>[]);
+    });
   }
 
-  Future<void> discardSession() async {
-    _currentKind = null;
-    _currentSourceId = null;
-    _startedAt = null;
-    await _writePending(<LearningActivityTimeEntryModel>[]);
+  Future<void> discardSession() {
+    return _enqueue(() async {
+      _currentKind = null;
+      _currentSourceId = null;
+      _startedAt = null;
+      await _writePending(<LearningActivityTimeEntryModel>[]);
+    });
+  }
+
+  Future<void> flushAndSync() {
+    return _enqueue(() async {
+      await _flushCurrentInternal(clearActivity: false);
+      await _syncPendingInternal();
+    });
+  }
+
+  Future<void> syncPending() {
+    return _enqueue(_syncPendingInternal);
   }
 
   void setShellTab(int index) {
     _shellTabIndex = index;
-    if (Get.currentRoute == AppRoutes.wrapper || Get.currentRoute.isEmpty) {
-      _setActivity(_shellActivity(index));
-    }
+
+    // The shell uses nested Navigators, so Get.currentRoute can remain on a
+    // previous root route while the selected tab has already changed. Tab
+    // selection itself is the authoritative learning context here.
+    _queueActivity(
+      _routeResolver.forShellTab(index),
+      sourceId: 'shell-tab-$index',
+    );
   }
 
   void handleRoute(String? routeName) {
-    if (routeName == null || routeName.isEmpty) return;
-    if (routeName == AppRoutes.wrapper) {
-      _setActivity(_shellActivity(_shellTabIndex));
+    final String route = _routeResolver.normalize(routeName);
+    if (route.isEmpty) return;
+
+    if (route == AppRoutes.wrapper) {
+      _queueActivity(
+        _routeResolver.forShellTab(_shellTabIndex),
+        sourceId: 'shell-tab-$_shellTabIndex',
+      );
       return;
     }
-    _setActivity(_routeActivity(routeName), sourceId: routeName);
+
+    final LearningActivityKind? activity = _routeResolver.forRoute(route);
+    if (activity != null) {
+      _queueActivity(activity, sourceId: route);
+      return;
+    }
+
+    if (_routeResolver.isKnownNonLearningRoute(route)) {
+      _queueActivity(null);
+    }
+    // Unnamed Get.to() child routes are intentionally ignored. They are
+    // commonly fullscreen lesson media, survival Italian details, saved verb
+    // pages, or AI tutor flows and should inherit the active learning session.
   }
 
   @override
@@ -82,25 +130,57 @@ class LearningActivityTrackerService extends GetxService
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached ||
         state == AppLifecycleState.inactive) {
-      _runInBackground(_flushCurrent(clearActivity: false));
+      _isForeground = false;
+      unawaited(
+        _enqueue(() async {
+          await _flushCurrentInternal(clearActivity: false);
+          await _syncPendingInternal();
+        }),
+      );
       return;
     }
 
-    if (state == AppLifecycleState.resumed && _currentKind != null) {
-      _startedAt = DateTime.now();
-      _runInBackground(syncPending());
+    if (state == AppLifecycleState.resumed) {
+      _isForeground = true;
+      unawaited(
+        _enqueue(() async {
+          if (_currentKind != null) {
+            _startedAt = DateTime.now();
+          }
+          await _syncPendingInternal();
+        }),
+      );
     }
   }
 
-  void _setActivity(LearningActivityKind? kind, {String? sourceId}) {
-    if (kind == _currentKind && sourceId == _currentSourceId) return;
-    _runInBackground(_flushCurrent(clearActivity: true));
-    _currentKind = kind;
-    _currentSourceId = sourceId;
-    _startedAt = kind == null ? null : DateTime.now();
+  void _queueActivity(
+    LearningActivityKind? kind, {
+    String? sourceId,
+  }) {
+    unawaited(
+      _enqueue(() => _transitionTo(kind, sourceId: sourceId)),
+    );
   }
 
-  Future<void> _flushCurrent({bool clearActivity = false}) async {
+  Future<void> _transitionTo(
+    LearningActivityKind? kind, {
+    String? sourceId,
+  }) async {
+    if (kind == _currentKind && sourceId == _currentSourceId) {
+      if (kind != null && _isForeground && _startedAt == null) {
+        _startedAt = DateTime.now();
+      }
+      return;
+    }
+
+    await _flushCurrentInternal(clearActivity: true);
+    await _syncPendingInternal();
+    _currentKind = kind;
+    _currentSourceId = sourceId;
+    _startedAt = kind != null && _isForeground ? DateTime.now() : null;
+  }
+
+  Future<void> _flushCurrentInternal({required bool clearActivity}) async {
     final LearningActivityKind? kind = _currentKind;
     final DateTime? startedAt = _startedAt;
     final String? sourceId = _currentSourceId;
@@ -110,8 +190,8 @@ class LearningActivityTrackerService extends GetxService
       _currentKind = null;
       _currentSourceId = null;
       _startedAt = null;
-    } else if (kind != null) {
-      _startedAt = endedAt;
+    } else {
+      _startedAt = kind != null && _isForeground ? endedAt : null;
     }
 
     if (kind == null || startedAt == null) return;
@@ -131,31 +211,55 @@ class LearningActivityTrackerService extends GetxService
         );
 
     await _appendPending(entry);
-    await syncPending();
   }
 
-  Future<void> syncPending() async {
-    if (_isSyncing) return;
-    _isSyncing = true;
-    try {
-      final List<LearningActivityTimeEntryModel> pending = _readPending();
-      if (pending.isEmpty) return;
+  Future<void> _syncPendingInternal() async {
+    final List<LearningActivityTimeEntryModel> pending = _readPending();
+    if (pending.isEmpty) return;
 
-      final List<LearningActivityTimeEntryModel> remaining =
-          <LearningActivityTimeEntryModel>[];
-      for (final LearningActivityTimeEntryModel entry in pending) {
-        final ApiResult<bool> result = await ApiErrorHandler.call<bool>(
-          () => _apiService.recordTime(entry),
-          showError: false,
+    final List<LearningActivityTimeEntryModel> remaining =
+        <LearningActivityTimeEntryModel>[];
+
+    for (final LearningActivityTimeEntryModel entry in pending) {
+      final ApiResult<bool> result = await ApiErrorHandler.call<bool>(
+        () => _apiService.recordTime(entry),
+        showError: false,
+      );
+      if (!result.isSuccess) {
+        remaining.add(entry);
+        dev.log(
+          'Unable to upload learning activity: ${result.error}',
+          name: 'LearningActivityTracker',
         );
-        if (!result.isSuccess) {
-          remaining.add(entry);
+      }
+    }
+
+    await _writePending(remaining);
+  }
+
+  Future<void> _enqueue(Future<void> Function() operation) {
+    final Completer<void> completer = Completer<void>();
+    _operationQueue = _operationQueue.then((_) async {
+      if (_isClosed) {
+        completer.complete();
+        return;
+      }
+      try {
+        await operation();
+      } catch (error, stackTrace) {
+        dev.log(
+          'Learning activity operation failed',
+          error: error,
+          stackTrace: stackTrace,
+          name: 'LearningActivityTracker',
+        );
+      } finally {
+        if (!completer.isCompleted) {
+          completer.complete();
         }
       }
-      await _writePending(remaining);
-    } finally {
-      _isSyncing = false;
-    }
+    });
+    return completer.future;
   }
 
   List<LearningActivityTimeEntryModel> _readPending() {
@@ -180,23 +284,6 @@ class LearningActivityTrackerService extends GetxService
     }
   }
 
-  void _runInBackground(Future<void> operation) {
-    unawaited(_handleBackgroundOperation(operation));
-  }
-
-  Future<void> _handleBackgroundOperation(Future<void> operation) async {
-    try {
-      await operation;
-    } catch (error, stackTrace) {
-      dev.log(
-        'Learning activity background operation failed',
-        error: error,
-        stackTrace: stackTrace,
-        name: 'LearningActivityTracker',
-      );
-    }
-  }
-
   Future<void> _appendPending(
     LearningActivityTimeEntryModel entry,
   ) async {
@@ -218,48 +305,22 @@ class LearningActivityTrackerService extends GetxService
     );
   }
 
-  LearningActivityKind? _shellActivity(int index) {
-    switch (index) {
-      case 1:
-        return LearningActivityKind.practiceHub;
-      case 2:
-        return LearningActivityKind.aiTutor;
-      default:
-        return null;
+  void _restoreCurrentActivity() {
+    final String route = _routeResolver.normalize(Get.currentRoute);
+    if (route == AppRoutes.wrapper || route.isEmpty) {
+      final LearningActivityKind? kind = _routeResolver.forShellTab(_shellTabIndex);
+      _currentKind = kind;
+      _currentSourceId = 'shell-tab-$_shellTabIndex';
+      _startedAt = kind != null && _isForeground ? DateTime.now() : null;
+      return;
     }
-  }
 
-  LearningActivityKind? _routeActivity(String route) {
-    if (route.startsWith(AppRoutes.chapterDetail)) {
-      if (route.contains('/quiz')) return LearningActivityKind.quiz;
-      if (route.contains('/vocabulary')) {
-        return LearningActivityKind.vocabulary;
-      }
-      return LearningActivityKind.lesson;
+    final LearningActivityKind? kind = _routeResolver.forRoute(route);
+    if (kind != null) {
+      _currentKind = kind;
+      _currentSourceId = route;
+      _startedAt = _isForeground ? DateTime.now() : null;
     }
-    if (route.startsWith('/courses/final-exam')) {
-      return LearningActivityKind.exam;
-    }
-    if (route == AppRoutes.courseDetail) return LearningActivityKind.course;
-    if (route == AppRoutes.practiceHubPdfViewer) {
-      return LearningActivityKind.pdf;
-    }
-    if (route.startsWith('/practice-hub/job')) {
-      return LearningActivityKind.jobSentences;
-    }
-    if (route == AppRoutes.survivalItalian) {
-      return LearningActivityKind.survivalItalian;
-    }
-    if (route == AppRoutes.verbDetails) {
-      return LearningActivityKind.importantVerbs;
-    }
-    if (route == AppRoutes.dailyChallenges) {
-      return LearningActivityKind.practiceHub;
-    }
-    if (route.startsWith(AppRoutes.webinar)) {
-      return LearningActivityKind.webinar;
-    }
-    return null;
   }
 
   String _dateOnly(DateTime date) {
@@ -272,7 +333,11 @@ class LearningActivityTrackerService extends GetxService
   void onClose() {
     _heartbeat?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    _runInBackground(_flushCurrent(clearActivity: true));
+    unawaited(
+      flushAndSync().whenComplete(() {
+        _isClosed = true;
+      }),
+    );
     super.onClose();
   }
 }

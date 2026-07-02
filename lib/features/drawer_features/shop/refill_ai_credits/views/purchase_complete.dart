@@ -25,7 +25,7 @@ class PurchaseCompletedPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: bg,
       appBar: SimpleAppbar(
-        onBackTap: () => Get.back(),
+        onBackTap: controller.closePurchaseCompleted,
         title: 'Purchase Completed',
         icon: Icons.close,
       ),

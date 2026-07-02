@@ -38,6 +38,7 @@ class CheckoutPage extends StatelessWidget {
             Obx(
               () => _CurrencySelector(
                 selectedCurrency: controller.selectedCurrency.value,
+                enabled: controller.canChangeCurrency,
                 onChanged: controller.selectCurrency,
               ),
             ),
@@ -50,6 +51,7 @@ class CheckoutPage extends StatelessWidget {
                 originalAmount: controller.checkoutOriginalPriceText,
                 savedAmount: controller.checkoutSavedAmountText,
                 billingLabel: controller.checkoutBillingLabel,
+                hasDiscount: controller.hasDiscount,
               ),
             ),
             const SizedBox(height: 36),
@@ -83,6 +85,14 @@ class CheckoutPage extends StatelessWidget {
                     )
                     .toList(),
               ),
+            ),
+            Obx(
+              () => controller.canUseCoupon
+                  ? const Padding(
+                      padding: EdgeInsets.only(bottom: 28),
+                      child: _CheckoutCouponSection(),
+                    )
+                  : const SizedBox.shrink(),
             ),
             const SizedBox(height: 16),
             Obx(
@@ -149,40 +159,48 @@ class CheckoutPage extends StatelessWidget {
 class _CurrencySelector extends StatelessWidget {
   const _CurrencySelector({
     required this.selectedCurrency,
+    required this.enabled,
     required this.onChanged,
   });
 
   final RefillCurrency selectedCurrency;
+  final bool enabled;
   final ValueChanged<RefillCurrency> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 44,
-      //elevation: 0,
-      width: double.infinity,
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: CheckoutPage._tabGray,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _CurrencyTab(
-              label: 'EUR',
-              isSelected: selectedCurrency == RefillCurrency.eur,
-              onTap: () => onChanged(RefillCurrency.eur),
-            ),
+    return IgnorePointer(
+      ignoring: !enabled,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: enabled ? 1 : 0.6,
+        child: Container(
+          height: 44,
+          width: double.infinity,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: CheckoutPage._tabGray,
+            borderRadius: BorderRadius.circular(24),
           ),
-          Expanded(
-            child: _CurrencyTab(
-              label: 'BDT',
-              isSelected: selectedCurrency == RefillCurrency.bdt,
-              onTap: () => onChanged(RefillCurrency.bdt),
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _CurrencyTab(
+                  label: 'EUR',
+                  isSelected: selectedCurrency == RefillCurrency.eur,
+                  onTap: () => onChanged(RefillCurrency.eur),
+                ),
+              ),
+              Expanded(
+                child: _CurrencyTab(
+                  label: 'BDT',
+                  isSelected: selectedCurrency == RefillCurrency.bdt,
+                  onTap: () => onChanged(RefillCurrency.bdt),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -235,6 +253,7 @@ class _OrderSummaryCard extends StatelessWidget {
     required this.originalAmount,
     required this.savedAmount,
     required this.billingLabel,
+    required this.hasDiscount,
   });
 
   final String title;
@@ -243,6 +262,7 @@ class _OrderSummaryCard extends StatelessWidget {
   final String originalAmount;
   final String savedAmount;
   final String billingLabel;
+  final bool hasDiscount;
 
   @override
   Widget build(BuildContext context) {
@@ -317,55 +337,59 @@ class _OrderSummaryCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    originalAmount,
-                    style: const TextStyle(
-                      color: Color(0xFF9E9E9E),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      decoration: TextDecoration.lineThrough,
-                      decorationColor: Color(0xFF8E8E8E),
-                      decorationThickness: 2,
+                if (hasDiscount) ...[
+                  const SizedBox(width: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      originalAmount,
+                      style: const TextStyle(
+                        color: Color(0xFF9E9E9E),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        decoration: TextDecoration.lineThrough,
+                        decorationColor: Color(0xFF8E8E8E),
+                        decorationThickness: 2,
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
             const SizedBox(height: 10),
             Row(
               children: [
-                Container(
-                  height: 18,
-                  padding: const EdgeInsets.symmetric(horizontal: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE4F3DC),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.redeem_outlined,
-                        size: 11,
-                        color: CheckoutPage._green,
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        'YOU SAVED $savedAmount',
-                        style: const TextStyle(
+                if (hasDiscount) ...[
+                  Container(
+                    height: 18,
+                    padding: const EdgeInsets.symmetric(horizontal: 7),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE4F3DC),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.redeem_outlined,
+                          size: 11,
                           color: CheckoutPage._green,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: .25,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 3),
+                        Text(
+                          'YOU SAVED $savedAmount',
+                          style: const TextStyle(
+                            color: CheckoutPage._green,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: .25,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
+                  const SizedBox(width: 10),
+                ],
                 Text(
                   billingLabel,
                   style: const TextStyle(
@@ -380,6 +404,76 @@ class _OrderSummaryCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+
+class _CheckoutCouponSection extends GetView<ShopController> {
+  const _CheckoutCouponSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final bool applied = controller.isCouponApplied.value;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'COUPON',
+            style: TextStyle(
+              color: CheckoutPage._bodyText,
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.15,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller.couponTextController,
+                  onChanged: controller.onCouponChanged,
+                  readOnly: applied,
+                  decoration: InputDecoration(
+                    hintText: 'Enter Coupon Code',
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28),
+                      borderSide: const BorderSide(color: Color(0xFFD9DBDB)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28),
+                      borderSide: BorderSide(
+                        color: applied
+                            ? CheckoutPage._green
+                            : const Color(0xFFD9DBDB),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                height: 56,
+                child: OutlinedButton(
+                  onPressed:
+                      applied ? controller.clearCoupon : controller.applyCoupon,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: CheckoutPage._green,
+                    side: const BorderSide(color: CheckoutPage._green),
+                    shape: const StadiumBorder(),
+                  ),
+                  child: Text(applied ? 'REMOVE' : 'APPLY'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    });
   }
 }
 
