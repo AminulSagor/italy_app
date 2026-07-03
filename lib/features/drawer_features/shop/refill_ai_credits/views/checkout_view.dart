@@ -38,6 +38,7 @@ class CheckoutPage extends StatelessWidget {
             Obx(
               () => _CurrencySelector(
                 selectedCurrency: controller.selectedCurrency.value,
+                enabled: controller.canChangeCurrency,
                 onChanged: controller.selectCurrency,
               ),
             ),
@@ -50,6 +51,7 @@ class CheckoutPage extends StatelessWidget {
                 originalAmount: controller.checkoutOriginalPriceText,
                 savedAmount: controller.checkoutSavedAmountText,
                 billingLabel: controller.checkoutBillingLabel,
+                hasDiscount: controller.hasDiscount,
               ),
             ),
             const SizedBox(height: 36),
@@ -84,6 +86,14 @@ class CheckoutPage extends StatelessWidget {
                     .toList(),
               ),
             ),
+            Obx(
+              () => controller.canUseCoupon
+                  ? const Padding(
+                      padding: EdgeInsets.only(bottom: 28),
+                      child: _CheckoutCouponSection(),
+                    )
+                  : const SizedBox.shrink(),
+            ),
             const SizedBox(height: 16),
             Obx(
               () => CustomButton.primary(
@@ -110,7 +120,7 @@ class CheckoutPage extends StatelessWidget {
                   Icon(Icons.lock, size: 13, color: _bodyText),
                   SizedBox(width: 7),
                   Text(
-                    'SECURE SSL ENCRYPTION',
+                    'SECURE GOOGLE PLAY BILLING',
                     style: TextStyle(
                       color: _bodyText,
                       fontSize: 12,
@@ -149,40 +159,48 @@ class CheckoutPage extends StatelessWidget {
 class _CurrencySelector extends StatelessWidget {
   const _CurrencySelector({
     required this.selectedCurrency,
+    required this.enabled,
     required this.onChanged,
   });
 
   final RefillCurrency selectedCurrency;
+  final bool enabled;
   final ValueChanged<RefillCurrency> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 44,
-      //elevation: 0,
-      width: double.infinity,
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: CheckoutPage._tabGray,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _CurrencyTab(
-              label: 'EUR',
-              isSelected: selectedCurrency == RefillCurrency.eur,
-              onTap: () => onChanged(RefillCurrency.eur),
-            ),
+    return IgnorePointer(
+      ignoring: !enabled,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: enabled ? 1 : 0.6,
+        child: Container(
+          height: 44,
+          width: double.infinity,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: CheckoutPage._tabGray,
+            borderRadius: BorderRadius.circular(24),
           ),
-          Expanded(
-            child: _CurrencyTab(
-              label: 'BDT',
-              isSelected: selectedCurrency == RefillCurrency.bdt,
-              onTap: () => onChanged(RefillCurrency.bdt),
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _CurrencyTab(
+                  label: 'EUR',
+                  isSelected: selectedCurrency == RefillCurrency.eur,
+                  onTap: () => onChanged(RefillCurrency.eur),
+                ),
+              ),
+              Expanded(
+                child: _CurrencyTab(
+                  label: 'BDT',
+                  isSelected: selectedCurrency == RefillCurrency.bdt,
+                  onTap: () => onChanged(RefillCurrency.bdt),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -235,6 +253,7 @@ class _OrderSummaryCard extends StatelessWidget {
     required this.originalAmount,
     required this.savedAmount,
     required this.billingLabel,
+    required this.hasDiscount,
   });
 
   final String title;
@@ -243,6 +262,7 @@ class _OrderSummaryCard extends StatelessWidget {
   final String originalAmount;
   final String savedAmount;
   final String billingLabel;
+  final bool hasDiscount;
 
   @override
   Widget build(BuildContext context) {
@@ -317,55 +337,59 @@ class _OrderSummaryCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    originalAmount,
-                    style: const TextStyle(
-                      color: Color(0xFF9E9E9E),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      decoration: TextDecoration.lineThrough,
-                      decorationColor: Color(0xFF8E8E8E),
-                      decorationThickness: 2,
+                if (hasDiscount) ...[
+                  const SizedBox(width: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      originalAmount,
+                      style: const TextStyle(
+                        color: Color(0xFF9E9E9E),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        decoration: TextDecoration.lineThrough,
+                        decorationColor: Color(0xFF8E8E8E),
+                        decorationThickness: 2,
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
             const SizedBox(height: 10),
             Row(
               children: [
-                Container(
-                  height: 18,
-                  padding: const EdgeInsets.symmetric(horizontal: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE4F3DC),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.redeem_outlined,
-                        size: 11,
-                        color: CheckoutPage._green,
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        'YOU SAVED $savedAmount',
-                        style: const TextStyle(
+                if (hasDiscount) ...[
+                  Container(
+                    height: 18,
+                    padding: const EdgeInsets.symmetric(horizontal: 7),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE4F3DC),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.redeem_outlined,
+                          size: 11,
                           color: CheckoutPage._green,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: .25,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 3),
+                        Text(
+                          'YOU SAVED $savedAmount',
+                          style: const TextStyle(
+                            color: CheckoutPage._green,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: .25,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
+                  const SizedBox(width: 10),
+                ],
                 Text(
                   billingLabel,
                   style: const TextStyle(
@@ -380,6 +404,76 @@ class _OrderSummaryCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+
+class _CheckoutCouponSection extends GetView<ShopController> {
+  const _CheckoutCouponSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final bool applied = controller.isCouponApplied.value;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'COUPON',
+            style: TextStyle(
+              color: CheckoutPage._bodyText,
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.15,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller.couponTextController,
+                  onChanged: controller.onCouponChanged,
+                  readOnly: applied,
+                  decoration: InputDecoration(
+                    hintText: 'Enter Coupon Code',
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28),
+                      borderSide: const BorderSide(color: Color(0xFFD9DBDB)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28),
+                      borderSide: BorderSide(
+                        color: applied
+                            ? CheckoutPage._green
+                            : const Color(0xFFD9DBDB),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                height: 56,
+                child: OutlinedButton(
+                  onPressed:
+                      applied ? controller.clearCoupon : controller.applyCoupon,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: CheckoutPage._green,
+                    side: const BorderSide(color: CheckoutPage._green),
+                    shape: const StadiumBorder(),
+                  ),
+                  child: Text(applied ? 'REMOVE' : 'APPLY'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    });
   }
 }
 
@@ -439,35 +533,14 @@ class _PaymentMethodPill extends StatelessWidget {
   }
 
   _PaymentMethodUi _paymentMethodUi(CheckoutPaymentMethod method) {
-    switch (method) {
-      case CheckoutPaymentMethod.googlePlay:
-        return const _PaymentMethodUi(
-          title: 'Google Play',
-          icon: Icon(
-            Icons.play_arrow_rounded,
-            color: CheckoutPage._green,
-            size: 34,
-          ),
-        );
-      case CheckoutPaymentMethod.card:
-        return _PaymentMethodUi(
-          title: 'gen_card'.tr.tr,
-          icon: Icon(
-            Icons.credit_card_outlined,
-            color: CheckoutPage._green,
-            size: 30,
-          ),
-        );
-      case CheckoutPaymentMethod.paypal:
-        return _PaymentMethodUi(title: 'gen_paypal'.tr.tr, icon: _PaypalMark());
-      case CheckoutPaymentMethod.applePay:
-        return _PaymentMethodUi(
-          title: 'gen_apple_pay'.tr.tr,
-          icon: Icon(Icons.apple, color: Colors.black, size: 33),
-        );
-      case CheckoutPaymentMethod.bkash:
-        return _PaymentMethodUi(title: 'gen_bkash'.tr.tr, icon: _BkashMark());
-    }
+    return const _PaymentMethodUi(
+      title: 'Google Play',
+      icon: Icon(
+        Icons.play_arrow_rounded,
+        color: CheckoutPage._green,
+        size: 34,
+      ),
+    );
   }
 }
 
@@ -476,96 +549,4 @@ class _PaymentMethodUi {
 
   final String title;
   final Widget icon;
-}
-
-class _PaypalMark extends StatelessWidget {
-  const _PaypalMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 29,
-      width: 29,
-      child: Stack(
-        alignment: Alignment.center,
-        children: const [
-          Positioned(
-            left: 6,
-            top: 1,
-            child: Text(
-              'P',
-              style: TextStyle(
-                color: Color(0xFF253B80),
-                fontSize: 27,
-                height: 1,
-                fontWeight: FontWeight.w900,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 10,
-            top: 3,
-            child: Text(
-              'P',
-              style: TextStyle(
-                color: Color(0xFF179BD7),
-                fontSize: 24,
-                height: 1,
-                fontWeight: FontWeight.w900,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BkashMark extends StatelessWidget {
-  const _BkashMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 29,
-      width: 29,
-      child: CustomPaint(painter: _BkashPainter()),
-    );
-  }
-}
-
-class _BkashPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final pink = Paint()..color = const Color(0xFFE2136E);
-    final darkPink = Paint()..color = const Color(0xFFB90E59);
-    final white = Paint()..color = Colors.white;
-
-    final body = Path()
-      ..moveTo(size.width * .15, size.height * .14)
-      ..lineTo(size.width * .82, size.height * .44)
-      ..lineTo(size.width * .36, size.height * .86)
-      ..lineTo(size.width * .43, size.height * .54)
-      ..close();
-    canvas.drawPath(body, pink);
-
-    final wing = Path()
-      ..moveTo(size.width * .35, size.height * .08)
-      ..lineTo(size.width * .86, size.height * .40)
-      ..lineTo(size.width * .57, size.height * .45)
-      ..close();
-    canvas.drawPath(wing, darkPink);
-
-    final cut = Path()
-      ..moveTo(size.width * .34, size.height * .20)
-      ..lineTo(size.width * .55, size.height * .44)
-      ..lineTo(size.width * .40, size.height * .45)
-      ..close();
-    canvas.drawPath(cut, white);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

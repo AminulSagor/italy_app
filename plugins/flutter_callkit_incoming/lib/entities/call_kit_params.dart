@@ -6,6 +6,31 @@ import 'ios_params.dart';
 
 part 'call_kit_params.g.dart';
 
+int? callKitIntFromJson(Object? value) {
+  if (value is int) {
+    return value;
+  }
+
+  if (value is num) {
+    return value.toInt();
+  }
+
+  return int.tryParse(value?.toString().trim() ?? '');
+}
+
+Map<String, dynamic>? callKitMapFromJson(Object? value) {
+  if (value is Map<String, dynamic>) {
+    return value;
+  }
+
+  if (value is Map) {
+    return Map<String, dynamic>.from(value);
+  }
+
+  return null;
+}
+
+
 /// Object config for General.
 @JsonSerializable(explicitToJson: true)
 class CallKitParams {

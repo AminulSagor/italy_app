@@ -8,13 +8,13 @@ part of 'call_kit_params.dart';
 
 CallKitParams _$CallKitParamsFromJson(Map<String, dynamic> json) =>
     CallKitParams(
-      id: json['id'] as String,
+      id: json['id']?.toString() ?? '',
       nameCaller: json['nameCaller'] as String?,
       appName: json['appName'] as String?,
       avatar: json['avatar'] as String?,
       handle: json['handle'] as String?,
-      type: (json['type'] as num?)?.toInt(),
-      duration: (json['duration'] as num?)?.toInt(),
+      type: callKitIntFromJson(json['type']),
+      duration: callKitIntFromJson(json['duration']),
       isAccepted: json['isAccepted'] as bool? ?? false,
       missedCallNotification: json['missedCallNotification'] == null
           ? null
@@ -24,8 +24,8 @@ CallKitParams _$CallKitParamsFromJson(Map<String, dynamic> json) =>
           ? null
           : NotificationParams.fromJson(
               json['callingNotification'] as Map<String, dynamic>),
-      extra: json['extra'] as Map<String, dynamic>?,
-      headers: json['headers'] as Map<String, dynamic>?,
+      extra: callKitMapFromJson(json['extra']),
+      headers: callKitMapFromJson(json['headers']),
       android: json['android'] == null
           ? null
           : AndroidParams.fromJson(json['android'] as Map<String, dynamic>),

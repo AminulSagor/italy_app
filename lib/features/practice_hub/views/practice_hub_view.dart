@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
-import '../../../core/themes/app_font.dart';
+// import '../../../core/themes/app_font.dart';
 import '../../courses/services/courses_api_service.dart';
 import '../controllers/practice_hub_controller.dart';
 import '../models/practice_hub_models.dart';
@@ -47,52 +47,53 @@ class PracticeHubView extends GetView<PracticeHubController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-            _HorizontalPadding(
-              child: _SectionTitleRow(
-                title: 'Practice Hub – Courses',
-                actionText: 'View All',
-                onActionTap: controller.onViewAllCoursesTap,
+              _HorizontalPadding(
+                child: _SectionTitleRow(
+                  title: 'Practice Hub – Courses',
+                  actionText: 'View All',
+                  onActionTap: controller.onViewAllCoursesTap,
+                ),
               ),
-            ),
-            SizedBox(height: 24.h),
-            const PracticeHubCourseCarousel(),
-            SizedBox(height: 47.h),
+              SizedBox(height: 24.h),
+              const PracticeHubCourseCarousel(),
+              SizedBox(height: 47.h),
 
-            const _HorizontalPadding(
-              child: _SectionTitleOnly(title: 'Skill Builders'),
-            ),
-            SizedBox(height: 24.h),
-            const _HorizontalPadding(child: PracticeHubSkillBuilderGrid()),
-            SizedBox(height: 46.h),
+              const _HorizontalPadding(
+                child: _SectionTitleOnly(title: 'Skill Builders'),
+              ),
+              SizedBox(height: 24.h),
+              const _HorizontalPadding(child: PracticeHubSkillBuilderGrid()),
+              SizedBox(height: 46.h),
 
-            Obx(() {
-              if (controller.isFinalExamsLoading.value &&
-                  controller.finalExamCourses.isEmpty) {
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 22.h),
-                  child: const _HorizontalPadding(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primaryGreen,
+              Obx(() {
+                if (controller.isFinalExamsLoading.value &&
+                    controller.finalExamCourses.isEmpty) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 22.h),
+                    child: const _HorizontalPadding(
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryGreen,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }
+                  );
+                }
 
-              if (controller.finalExamCourses.isEmpty) {
-                return const SizedBox.shrink();
-              }
+                if (controller.finalExamCourses.isEmpty) {
+                  return const SizedBox.shrink();
+                }
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const _HorizontalPadding(
-                    child: _SectionTitleOnly(title: 'Specialized Learning'),
-                  ),
-                  SizedBox(height: 24.h),
-                  ...controller.finalExamCourses.map(
-                    (PracticeFinalExamCourseModel exam) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const _HorizontalPadding(
+                      child: _SectionTitleOnly(title: 'Specialized Learning'),
+                    ),
+                    SizedBox(height: 24.h),
+                    ...controller.finalExamCourses.map((
+                      PracticeFinalExamCourseModel exam,
+                    ) {
                       return Padding(
                         padding: EdgeInsets.fromLTRB(
                           kHomeHorizontalPadding.w,
@@ -127,18 +128,17 @@ class PracticeHubView extends GetView<PracticeHubController> {
                           },
                         ),
                       );
-                    },
-                  ),
-                  SizedBox(height: 2.h),
-                ],
-              );
-            }),
+                    }),
+                    SizedBox(height: 2.h),
+                  ],
+                );
+              }),
 
-            const _HorizontalPadding(
-              child: _SectionTitleOnly(title: 'Upcoming Webinars'),
-            ),
-            SizedBox(height: 20.h),
-            const _HorizontalPadding(child: PracticeHubWebinarCard()),
+              const _HorizontalPadding(
+                child: _SectionTitleOnly(title: 'Upcoming Webinars'),
+              ),
+              SizedBox(height: 20.h),
+              const _HorizontalPadding(child: PracticeHubWebinarCard()),
             ],
           ),
         ),
@@ -192,21 +192,21 @@ class _SectionTitleRow extends StatelessWidget {
           ),
         ),
         SizedBox(width: 14.w),
-        GestureDetector(
-          onTap: onActionTap,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 1.h),
-            child: Text(
-              actionText,
-              style: TextStyle(
-                fontSize: AppFont.font14.sp,
-                height: 1,
-                fontWeight: FontWeight.w900,
-                color: AppColors.primaryGreen,
-              ),
-            ),
-          ),
-        ),
+        // GestureDetector(
+        //   onTap: onActionTap,
+        //   child: Padding(
+        //     padding: EdgeInsets.only(bottom: 1.h),
+        //     child: Text(
+        //       actionText,
+        //       style: TextStyle(
+        //         fontSize: AppFont.font14.sp,
+        //         height: 1,
+        //         fontWeight: FontWeight.w900,
+        //         color: AppColors.primaryGreen,
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

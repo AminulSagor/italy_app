@@ -12,6 +12,9 @@ import '../../features/courses/services/courses_mock_service.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/home/services/home_api_service.dart';
 import '../../features/drawer_features/settings/services/user_settings_service.dart';
+import '../../features/drawer_features/shop/controllers/google_play_purchase_controller.dart';
+import '../../features/drawer_features/shop/services/google_play_billing_service.dart';
+import '../../features/drawer_features/shop/services/shop_api_service.dart';
 import '../../features/home/services/home_mock_service.dart';
 import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/messages/controllers/messages_controller.dart';
@@ -33,6 +36,7 @@ import '../services/learning_activity_api_service.dart';
 import '../services/current_user_summary_service.dart';
 import '../widgets/app_drawer_controller.dart';
 import '../services/token_service.dart';
+import '../services/storage_service.dart';
 import '../../features/practice_hub/controllers/job_sentences_controller.dart';
 import '../../features/practice_hub/controllers/important_verbs_controller.dart';
 import '../../features/practice_hub/services/job_sentences_api_service.dart';
@@ -53,6 +57,27 @@ class InitialBindings extends Bindings {
       Get.put<UserSessionController>(
         UserSessionController(
           currentUserSummaryService: Get.find<CurrentUserSummaryService>(),
+        ),
+        permanent: true,
+      );
+    }
+    if (!Get.isRegistered<ShopApiService>()) {
+      Get.put<ShopApiService>(
+        ShopApiService(apiClient: Get.find<ApiClient>()),
+        permanent: true,
+      );
+    }
+    if (!Get.isRegistered<GooglePlayBillingService>()) {
+      Get.put<GooglePlayBillingService>(
+        GooglePlayBillingService(storageService: Get.find<StorageService>()),
+        permanent: true,
+      );
+    }
+    if (!Get.isRegistered<GooglePlayPurchaseController>()) {
+      Get.put<GooglePlayPurchaseController>(
+        GooglePlayPurchaseController(
+          apiService: Get.find<ShopApiService>(),
+          billingService: Get.find<GooglePlayBillingService>(),
         ),
         permanent: true,
       );

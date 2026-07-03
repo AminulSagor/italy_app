@@ -170,6 +170,12 @@ class FlutterCallkitIncoming {
     await _channel.invokeMethod("endCall", {'id': id});
   }
 
+  /// Clears Android incoming-call UI and ringtone without emitting another
+  /// accept, decline, or ended event back to Flutter.
+  static Future<void> endNativeSubsystemOnly(String id) async {
+    await _channel.invokeMethod("endNativeSubsystemOnly", {'id': id});
+  }
+
   /// Set call has been connected successfully.
   /// On iOS, using Callkit(update a history into the Phone app).
   /// On Android, Nothing(only callback event listener).

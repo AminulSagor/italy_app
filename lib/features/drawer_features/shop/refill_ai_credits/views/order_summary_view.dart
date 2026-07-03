@@ -42,6 +42,7 @@ class OrderSummaryPage extends StatelessWidget {
                       Obx(
                         () => _currencySwitcher(
                           selectedCurrency: controller.selectedCurrency.value,
+                          enabled: controller.canChangeCurrency,
                           onEurTap: () =>
                               controller.selectCurrency(RefillCurrency.eur),
                           onBdtTap: () =>
@@ -58,20 +59,11 @@ class OrderSummaryPage extends StatelessWidget {
                           price: controller.payablePriceText,
                           originalPrice: controller.originalPriceText,
                           savedAmount: controller.savedAmountText,
-                          isCouponApplied: controller.isCouponApplied.value,
+                          isCouponApplied: controller.hasDiscount,
                         ),
                       ),
 
                       SizedBox(height: 34.h),
-
-                      Obx(
-                        () => _couponSection(
-                          controller: controller,
-                          isCouponApplied: controller.isCouponApplied.value,
-                        ),
-                      ),
-
-                      SizedBox(height: 24.h),
 
                       CustomButton.primary(
                         text: 'Continue to Checkout  ▶',
@@ -109,21 +101,27 @@ class OrderSummaryPage extends StatelessWidget {
 
   Widget _currencySwitcher({
     required RefillCurrency selectedCurrency,
+    required bool enabled,
     required VoidCallback onEurTap,
     required VoidCallback onBdtTap,
   }) {
     final bool isEur = selectedCurrency == RefillCurrency.eur;
 
-    return Container(
-      height: 42.h,
-      width: double.infinity,
-      padding: EdgeInsets.all(4.r),
-      decoration: BoxDecoration(
-        color: const Color(0xFFDADCDC),
-        borderRadius: BorderRadius.circular(26.r),
-      ),
-      child: Row(
-        children: [
+    return IgnorePointer(
+      ignoring: !enabled,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: enabled ? 1 : 0.6,
+        child: Container(
+          height: 42.h,
+          width: double.infinity,
+          padding: EdgeInsets.all(4.r),
+          decoration: BoxDecoration(
+            color: const Color(0xFFDADCDC),
+            borderRadius: BorderRadius.circular(26.r),
+          ),
+          child: Row(
+            children: [
           Expanded(
             child: GestureDetector(
               onTap: onEurTap,
@@ -168,7 +166,9 @@ class OrderSummaryPage extends StatelessWidget {
               ),
             ),
           ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -314,105 +314,6 @@ class OrderSummaryPage extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-
-  Widget _couponSection({
-    required ShopController controller,
-    required bool isCouponApplied,
-  }) {
-    if (isCouponApplied) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: _couponField(
-              controller: controller.couponTextController,
-              onChanged: controller.onCouponChanged,
-              readOnly: true,
-              fillColor: const Color(0xFFF1F4F0),
-              borderColor: green.withValues(alpha: .25),
-            ),
-          ),
-          SizedBox(width: 10.w),
-          CustomButton(
-            onPressed: controller.clearCoupon,
-            text: '',
-            height: 60.h,
-            width: 82.w,
-            showShadow: true,
-            btnColor: Colors.white,
-            btnShadowColor: darkGreen,
-            borderColor: green,
-            borderRadius: 31,
-            borderWidth: 2,
-            textColor: green,
-            icon: Icons.close_rounded,
-          ),
-          //_couponCheckButton(),
-        ],
-      );
-    }
-
-    return Column(
-      children: [
-        _couponField(
-          controller: controller.couponTextController,
-          onChanged: controller.onCouponChanged,
-        ),
-        SizedBox(height: 12.h),
-        CustomButton.primary(
-          // height: 62,
-          onPressed: controller.applyCoupon,
-          text: 'APPLY',
-          textColor: AppColors.primaryGreen,
-          // showShadow: true,
-          btnColor: bg,
-        ),
-        //_applyButton(onTap: controller.applyCoupon),
-      ],
-    );
-  }
-
-  Widget _couponField({
-    required TextEditingController controller,
-    required ValueChanged<String> onChanged,
-    bool readOnly = false,
-    Color fillColor = Colors.white,
-    Color borderColor = const Color(0xFFD8D8D8),
-  }) {
-    return SizedBox(
-      height: 50.h,
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        readOnly: readOnly,
-        cursorColor: green,
-        style: TextStyle(
-          color: textDark,
-          fontSize: 18.sp,
-          fontWeight: FontWeight.w800,
-        ),
-        decoration: InputDecoration(
-          hintText: 'Enter Coupon Code',
-          hintStyle: TextStyle(
-            color: const Color(0xFFA5A5A5),
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-          ),
-          filled: true,
-          fillColor: fillColor,
-          contentPadding: EdgeInsets.symmetric(horizontal: 24.w),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30.r),
-            borderSide: BorderSide(color: borderColor, width: 1.6.w),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30.r),
-            borderSide: BorderSide(color: green, width: 1.8.w),
-          ),
-        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/android_params.dart';
@@ -8,108 +9,148 @@ import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 
+
 typedef CallkitActionCallback = Future<void> Function(
-    String callId,
-    Map<String, dynamic> data,
-    );
+  String callId,
+  Map<String, dynamic> data,
+);
 
 class CallkitIncomingService {
   static StreamSubscription<RemoteMessage>? _foregroundSubscription;
   static StreamSubscription<dynamic>? _callkitSubscription;
+  static final Set<String> _remoteTerminationCallIds = <String>{};
+  static final Set<String> _shownCallIds = <String>{};
 
   static Future<void> initialize({
     required CallkitActionCallback onAccept,
     required CallkitActionCallback onDecline,
     required CallkitActionCallback onEnded,
+    required CallkitActionCallback onTimeout,
   }) async {
     await _foregroundSubscription?.cancel();
     await _callkitSubscription?.cancel();
 
     _foregroundSubscription = FirebaseMessaging.onMessage.listen(
-      showIncomingCallFromMessage,
+      showIncomingCallFromForegroundMessage,
     );
 
-    _callkitSubscription =
-        FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
-          if (event == null) {
-            return;
-          }
+    _callkitSubscription = FlutterCallkitIncoming.onEvent.listen(
+      (CallEvent? event) async {
+        if (event == null) {
+          return;
+        }
 
-          if (event is CallEventActionCallAccept) {
-            final Map<String, dynamic> extra = _extractExtra(
-              event.callKitParams.extra,
+        if (event is CallEventActionCallAccept) {
+          final Map<String, dynamic> extra = _extractExtra(
+            event.callKitParams.extra,
+          );
+          final String callId = _eventCallId(
+            extra: extra,
+            fallbackId: event.callKitParams.id,
+          );
+
+          if (callId.isNotEmpty) {
+            _shownCallIds.remove(callId);
+            await onAccept(callId, extra);
+          }
+          return;
+        }
+
+        if (event is CallEventActionCallDecline) {
+          final Map<String, dynamic> extra = _extractExtra(
+            event.callKitParams.extra,
+          );
+          final String callId = _eventCallId(
+            extra: extra,
+            fallbackId: event.callKitParams.id,
+          );
+
+          if (callId.isNotEmpty) {
+            _shownCallIds.remove(callId);
+            await onDecline(callId, extra);
+          }
+          return;
+        }
+
+        if (event is CallEventActionCallEnded) {
+          final Map<String, dynamic> extra = _extractExtra(
+            event.callKitParams.extra,
+          );
+          final String callId = _eventCallId(
+            extra: extra,
+            fallbackId: event.callKitParams.id,
+          );
+
+          if (callId.isNotEmpty) {
+            _shownCallIds.remove(callId);
+            await onEnded(callId, extra);
+          }
+          return;
+        }
+
+        if (event is CallEventActionCallTimeout) {
+          final String callId = event.id.trim();
+          if (callId.isNotEmpty) {
+            _shownCallIds.remove(callId);
+            await onTimeout(
+              callId,
+              <String, dynamic>{
+                'callId': callId,
+                'reason': 'timeout',
+              },
             );
-
-            final String callId =
-                extra['callId']?.toString() ??
-                    event.callKitParams.id?.toString() ??
-                    '';
-
-            if (callId.isNotEmpty) {
-              await onAccept(callId, extra);
-            }
-
-            return;
           }
-
-          if (event is CallEventActionCallDecline) {
-            final Map<String, dynamic> extra = _extractExtra(
-              event.callKitParams.extra,
-            );
-
-            final String callId =
-                extra['callId']?.toString() ??
-                    event.callKitParams.id?.toString() ??
-                    '';
-
-            if (callId.isNotEmpty) {
-              await onDecline(callId, extra);
-            }
-
-            return;
-          }
-
-          if (event is CallEventActionCallEnded) {
-            final Map<String, dynamic> extra = _extractExtra(
-              event.callKitParams.extra,
-            );
-
-            final String callId =
-                extra['callId']?.toString() ??
-                    event.callKitParams.id?.toString() ??
-                    '';
-
-            if (callId.isNotEmpty) {
-              await onEnded(callId, extra);
-            }
-
-            return;
-          }
-
-          if (event is CallEventActionCallTimeout) {
-            final String callId = event.id;
-
-            if (callId.isNotEmpty) {
-              await onEnded(
-                callId,
-                <String, dynamic>{
-                  'callId': callId,
-                  'reason': 'timeout',
-                },
-              );
-            }
-          }
-        });
+        }
+      },
+    );
   }
 
-  static Future<void> showIncomingCallFromMessage(
-      RemoteMessage message,
-      ) async {
-    final Map<String, dynamic> data =
-    Map<String, dynamic>.from(message.data);
+  static Future<void> showIncomingCallFromForegroundMessage(
+    RemoteMessage message,
+  ) async {
+    final Map<String, dynamic> data = Map<String, dynamic>.from(message.data);
+    await _handleIncomingData(data, showFullScreen: false);
+  }
 
+  static Future<void> showIncomingCallFromBackgroundMessage(
+    RemoteMessage message,
+  ) async {
+    final Map<String, dynamic> data = Map<String, dynamic>.from(message.data);
+
+    // Background and terminated-state calls must be posted as a call
+    // notification with a full-screen intent. Android then keeps the
+    // notification visible and opens the native incoming-call activity when
+    // full-screen intent access is allowed for the app.
+    await _handleIncomingData(data, showFullScreen: true);
+  }
+
+  static Future<void> showIncomingCallFromSocketPayload(
+    Map<String, dynamic> payload,
+  ) async {
+    final Map<String, dynamic> call = _extractExtra(payload['call']);
+    final Map<String, dynamic> caller = _extractExtra(payload['caller']);
+
+    final Map<String, dynamic> data = <String, dynamic>{
+      'type': 'incoming_call',
+      'callId': call['id']?.toString() ?? '',
+      'conversationId': call['directConversationId']?.toString() ?? '',
+      'callType': call['callType']?.toString() ?? 'audio',
+      'callerId': caller['id']?.toString() ?? call['callerId']?.toString() ?? '',
+      'callerName': caller['fullName']?.toString() ?? 'Incoming call',
+      'callerAvatarUrl': caller['avatarUrl']?.toString() ?? '',
+    };
+
+    // The Flutter incoming-call page is already visible in foreground. The
+    // native notification is used here for the real device ringtone only.
+    await _handleIncomingData(data, showFullScreen: false);
+  }
+
+  static Future<void> _handleIncomingData(
+    Map<String, dynamic> data, {
+    required bool showFullScreen,
+  }) async {
     final String type = data['type']?.toString() ?? '';
-    final String callId = data['callId']?.toString() ?? '';
+    final String callId = data['callId']?.toString().trim() ?? '';
 
     if (callId.isEmpty) {
       return;
@@ -118,19 +159,25 @@ class CallkitIncomingService {
     if (type == 'call_cancelled' ||
         type == 'call_rejected' ||
         type == 'call_ended') {
-      await FlutterCallkitIncoming.endCall(callId);
+      _shownCallIds.remove(callId);
+      _remoteTerminationCallIds.add(callId);
+      Timer(
+        const Duration(seconds: 30),
+        () => _remoteTerminationCallIds.remove(callId),
+      );
+      await endNativeSubsystemOnly(callId);
       return;
     }
 
-    if (type != 'incoming_call') {
+    if (type != 'incoming_call' || !_shownCallIds.add(callId)) {
       return;
     }
 
     final String callerName =
-        data['callerName']?.toString() ?? 'Incoming call';
-
-    final String callType =
-        data['callType']?.toString() ?? 'audio';
+        data['callerName']?.toString().trim().isNotEmpty == true
+        ? data['callerName'].toString().trim()
+        : 'Incoming call';
+    final String callType = data['callType']?.toString() ?? 'audio';
 
     final CallKitParams params = CallKitParams(
       id: callId,
@@ -148,7 +195,7 @@ class CallkitIncomingService {
         subtitle: 'Missed call',
         callbackText: 'Call back',
       ),
-      android: const AndroidParams(
+      android: AndroidParams(
         isCustomNotification: true,
         isShowLogo: false,
         ringtonePath: 'system_ringtone_default',
@@ -160,6 +207,9 @@ class CallkitIncomingService {
         incomingCallNotificationChannelName: 'Incoming Calls',
         missedCallNotificationChannelName: 'Missed Calls',
         isShowCallID: false,
+        isShowFullLockedScreen: true,
+        isImportant: true,
+        isFullScreen: showFullScreen,
       ),
       ios: IOSParams(
         iconName: 'CallKitLogo',
@@ -173,21 +223,60 @@ class CallkitIncomingService {
       ),
     );
 
-    await FlutterCallkitIncoming.showCallkitIncoming(params);
+    try {
+      await FlutterCallkitIncoming.showCallkitIncoming(params);
+    } catch (_) {
+      _shownCallIds.remove(callId);
+      rethrow;
+    }
+  }
+
+  static bool consumeRemoteTermination(String callId) {
+    return _remoteTerminationCallIds.remove(callId.trim());
+  }
+
+  static Future<List<CallKitParams>> acceptedNativeCalls() async {
+    final List<CallKitParams> calls = await FlutterCallkitIncoming.activeCalls();
+    return calls
+        .where((CallKitParams call) => call.isAccepted)
+        .toList(growable: false);
   }
 
   static Future<void> markCallConnected(String callId) async {
     await FlutterCallkitIncoming.setCallConnected(callId);
   }
 
+  static Future<void> endNativeSubsystemOnly(String callId) async {
+    final String normalizedCallId = callId.trim();
+    if (normalizedCallId.isEmpty) {
+      return;
+    }
+
+    _shownCallIds.remove(normalizedCallId);
+    if (Platform.isAndroid) {
+      await FlutterCallkitIncoming.endNativeSubsystemOnly(normalizedCallId);
+    } else {
+      await FlutterCallkitIncoming.endCall(normalizedCallId);
+    }
+  }
+
   static Future<void> endCall(String callId) async {
+    _shownCallIds.remove(callId.trim());
     await FlutterCallkitIncoming.endCall(callId);
   }
 
   static Future<void> endAllCalls() async {
+    _shownCallIds.clear();
     await FlutterCallkitIncoming.endAllCalls();
   }
 
+  static String _eventCallId({
+    required Map<String, dynamic> extra,
+    required String fallbackId,
+  }) {
+    final String extraCallId = extra['callId']?.toString().trim() ?? '';
+    return extraCallId.isNotEmpty ? extraCallId : fallbackId.trim();
+  }
 
   static Map<String, dynamic> _extractExtra(dynamic value) {
     if (value is Map<String, dynamic>) {

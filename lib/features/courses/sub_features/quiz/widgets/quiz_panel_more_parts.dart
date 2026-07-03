@@ -156,11 +156,12 @@ class _ReorderablePairColumn extends StatelessWidget {
       buildDefaultDragHandles: false,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: words.length,
-      onReorderItem: isLocked
-          ? null
-          : (int oldIndex, int newIndex) {
-              onReorder(oldIndex, newIndex);
-            },
+      onReorder: (int oldIndex, int newIndex) {
+        if (isLocked) {
+          return;
+        }
+        onReorder(oldIndex, newIndex);
+      },
       proxyDecorator: (Widget child, int index, Animation<double> animation) {
         return Material(
           color: AppColors.transparent,

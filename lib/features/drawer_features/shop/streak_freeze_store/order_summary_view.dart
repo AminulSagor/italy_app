@@ -27,8 +27,6 @@ class StreakOrderSummaryView extends GetView<ShopController> {
               const _CurrencySwitch(),
               SizedBox(height: 32.h),
               const _SelectedPackCard(),
-              SizedBox(height: 33.h),
-              const _CouponArea(),
               SizedBox(height: 52.h),
               Obx(
                 () => CustomButton.primary(
@@ -124,27 +122,36 @@ class _CurrencySwitch extends GetView<ShopController> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Container(
-        width: double.infinity,
-        height: 45.h,
-        padding: EdgeInsets.all(4.r),
-        decoration: BoxDecoration(
-          color: AppColors.legacyColorFFE0E1E1,
-          borderRadius: BorderRadius.circular(kRadius60.r),
-        ),
-        child: Row(
-          children: <Widget>[
-            _CurrencyPill(
-              label: 'EUR',
-              selected: controller.selectedCurrency.value == RefillCurrency.eur,
-              onTap: () => controller.selectCurrency(RefillCurrency.eur),
+      () => IgnorePointer(
+        ignoring: !controller.canChangeCurrency,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 180),
+          opacity: controller.canChangeCurrency ? 1 : 0.6,
+          child: Container(
+            width: double.infinity,
+            height: 45.h,
+            padding: EdgeInsets.all(4.r),
+            decoration: BoxDecoration(
+              color: AppColors.legacyColorFFE0E1E1,
+              borderRadius: BorderRadius.circular(kRadius60.r),
             ),
-            _CurrencyPill(
-              label: 'BDT',
-              selected: controller.selectedCurrency.value == RefillCurrency.bdt,
-              onTap: () => controller.selectCurrency(RefillCurrency.bdt),
+            child: Row(
+              children: <Widget>[
+                _CurrencyPill(
+                  label: 'EUR',
+                  selected:
+                      controller.selectedCurrency.value == RefillCurrency.eur,
+                  onTap: () => controller.selectCurrency(RefillCurrency.eur),
+                ),
+                _CurrencyPill(
+                  label: 'BDT',
+                  selected:
+                      controller.selectedCurrency.value == RefillCurrency.bdt,
+                  onTap: () => controller.selectCurrency(RefillCurrency.bdt),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -246,7 +253,7 @@ class _SelectedPackCard extends GetView<ShopController> {
               ),
             ),
             SizedBox(height: 32.h),
-            _PriceLine(isCouponApplied: controller.isCouponApplied.value),
+            _PriceLine(isCouponApplied: controller.hasDiscount),
           ],
         ),
       ),
@@ -347,163 +354,6 @@ class _PriceLine extends GetView<ShopController> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _CouponArea extends GetView<ShopController> {
-  const _CouponArea();
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      if (controller.isCouponApplied.value) {
-        return Row(
-          children: <Widget>[
-            Expanded(
-              child: _CouponField(
-                enabled: false,
-                showAppliedBorder: true,
-                hintText: 'gen_welcome10'.tr.tr,
-              ),
-            ),
-            SizedBox(width: 10.w),
-            GestureDetector(
-              onTap: controller.applyCoupon,
-              child: Container(
-                width: 82.w,
-                height: 68.h,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(kRadius30.r),
-                  border: Border.all(color: AppColors.primaryGreen, width: 2.w),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: AppColors.primaryGreen.withValues(alpha: 0.95),
-                      offset: Offset(0, 5.h),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.check_rounded,
-                  size: 24.r,
-                  color: AppColors.primaryGreen,
-                ),
-              ),
-            ),
-          ],
-        );
-      }
-
-      return Column(
-        children: <Widget>[
-          _CouponField(
-            enabled: true,
-            showAppliedBorder: false,
-            hintText: 'Enter Coupon Code',
-          ),
-          SizedBox(height: 13.h),
-          GestureDetector(
-            onTap: controller.applyCoupon,
-            child: Container(
-              width: double.infinity,
-              height: 64.h,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(kRadius30.r),
-                border: Border.all(color: AppColors.primaryGreen, width: 2.w),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: AppColors.primaryGreen.withValues(alpha: 0.95),
-                    offset: Offset(0, 5.h),
-                  ),
-                ],
-              ),
-              child: Text(
-                'APPLY',
-                style: TextStyle(
-                  fontSize: AppFont.font16.sp,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.2,
-                  color: AppColors.primaryGreen,
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    });
-  }
-}
-
-class _CouponField extends GetView<ShopController> {
-  final bool enabled;
-  final bool showAppliedBorder;
-  final String hintText;
-
-  const _CouponField({
-    required this.enabled,
-    required this.showAppliedBorder,
-    required this.hintText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 59.h,
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: showAppliedBorder ? AppColors.safetyBlockedBg : AppColors.white,
-        borderRadius: BorderRadius.circular(kRadius30.r),
-        border: Border.all(
-          color: showAppliedBorder
-              ? AppColors.safetyBlockedBorder
-              : AppColors.legacyColorFFE0E1E1,
-          width: showAppliedBorder ? 2.w : 1.5.w,
-        ),
-      ),
-      child: enabled
-          ? TextField(
-              controller: controller.couponTextController,
-              onChanged: controller.onCouponChanged,
-              textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
-                hintText: hintText,
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                isCollapsed: true,
-                hintStyle: TextStyle(
-                  fontSize: AppFont.font16.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.bodyText.withValues(alpha: 0.48),
-                ),
-              ),
-              style: TextStyle(
-                fontSize: AppFont.font16.sp,
-                fontWeight: FontWeight.w800,
-                color: AppColors.headerText,
-              ),
-            )
-          : Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                controller.couponTextController.text.trim().isEmpty
-                    ? hintText
-                    : controller.couponTextController.text.trim().toUpperCase(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: AppFont.font16.sp,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.2,
-                  color: AppColors.headerText,
-                ),
-              ),
-            ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
@@ -7,11 +8,7 @@ import '../../../core/themes/app_font.dart';
 import '../models/home_models.dart';
 
 class QuickToolsSection extends StatelessWidget {
-  const QuickToolsSection({
-    super.key,
-    required this.tools,
-    this.onToolTap,
-  });
+  const QuickToolsSection({super.key, required this.tools, this.onToolTap});
 
   final List<HomeToolModel> tools;
   final void Function(HomeToolModel tool)? onToolTap;
@@ -37,6 +34,7 @@ class QuickToolsSection extends StatelessWidget {
             child: _QuickToolCard(
               tool: tool,
               onTap: () => onToolTap?.call(tool),
+              // onTap: () => Get.snackbar("In Progress", "Feature coming soon"),
             ),
           ),
         ),

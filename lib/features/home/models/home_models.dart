@@ -106,7 +106,8 @@ class HomeOverviewModel {
     final int minutes = (totalSeconds % 3600) ~/ 60;
     if (hours > 0 && minutes > 0) return '${hours}h ${minutes}m';
     if (hours > 0) return '${hours}h';
-    return '${minutes}m';
+    if (minutes > 0) return '${minutes}m';
+    return '${totalSeconds}s';
   }
 }
 
@@ -122,6 +123,15 @@ class HomeActivityModel {
   final String dayLabel;
   final int durationSeconds;
   final bool isToday;
+
+  String get durationLabel {
+    if (durationSeconds <= 0) return '0s';
+    final int hours = durationSeconds ~/ 3600;
+    final int minutes = (durationSeconds % 3600) ~/ 60;
+    if (hours > 0) return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
+    if (minutes > 0) return '${minutes}m';
+    return '${durationSeconds}s';
+  }
 }
 
 class HomeChapterModel {

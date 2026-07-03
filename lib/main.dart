@@ -16,6 +16,8 @@ import 'core/services/callkit_incoming_service.dart';
 import 'core/services/local_notification_service.dart';
 import 'core/services/learning_activity_tracker_service.dart';
 import 'core/themes/app_theme.dart';
+import 'core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
+import 'features/home/controllers/home_controller.dart';
 import 'features/messages/sub-feature/call/service/call_socket_service.dart';
 import 'features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import 'routes/routes.dart';
@@ -26,7 +28,7 @@ Future<void> firebaseMessagingBackgroundHandler(
     ) async {
   await Firebase.initializeApp();
 
-  await CallkitIncomingService.showIncomingCallFromMessage(
+  await CallkitIncomingService.showIncomingCallFromBackgroundMessage(
     message,
   );
 }
@@ -106,6 +108,8 @@ Future<void> _initializeCallKit() async {
         final IncomingCallCoordinator coordinator =
         Get.find<IncomingCallCoordinator>();
 
+        await CallkitIncomingService.markCallConnected(callId);
+
         unawaited(
           coordinator
               .openAcceptedCall(
@@ -115,7 +119,7 @@ Future<void> _initializeCallKit() async {
           )
               .catchError(
                 (Object error, StackTrace stackTrace) async {
-              await CallkitIncomingService.endCall(callId);
+              await CallkitIncomingService.endNativeSubsystemOnly(callId);
 
               Get.snackbar(
                 'Call failed',
@@ -125,12 +129,8 @@ Future<void> _initializeCallKit() async {
             },
           ),
         );
-
-        await CallkitIncomingService.markCallConnected(
-          callId,
-        );
       } catch (error) {
-        await CallkitIncomingService.endCall(callId);
+        await CallkitIncomingService.endNativeSubsystemOnly(callId);
 
         Get.snackbar(
           'Call failed',
@@ -156,6 +156,10 @@ Future<void> _initializeCallKit() async {
           callId: callId,
         );
 
+        if (Get.isRegistered<IncomingCallCoordinator>()) {
+          Get.find<IncomingCallCoordinator>().dismissIncomingCall(callId);
+        }
+
         debugPrint(
           '[CallKit] Receiver rejection completed '
               'callId=$callId',
@@ -170,21 +174,46 @@ Future<void> _initializeCallKit() async {
         );
       }
     },
+    onTimeout: (
+      String callId,
+      Map<String, dynamic> data,
+    ) async {
+      try {
+        await Get.find<CallSocketService>().timeoutCall(callId: callId);
+      } catch (error, stackTrace) {
+        debugPrint('[CallKit] Timeout synchronization failed: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      } finally {
+        if (Get.isRegistered<IncomingCallCoordinator>()) {
+          Get.find<IncomingCallCoordinator>().dismissIncomingCall(callId);
+        }
+        await CallkitIncomingService.endNativeSubsystemOnly(callId);
+      }
+    },
     onEnded: (
-        String callId,
-        Map<String, dynamic> data,
-        ) async {
+      String callId,
+      Map<String, dynamic> data,
+    ) async {
+      if (CallkitIncomingService.consumeRemoteTermination(callId)) {
+        return;
+      }
+
       try {
         final CallSocketService socketService =
-        Get.find<CallSocketService>();
+            Get.find<CallSocketService>();
+        final Map<String, dynamic> statusResponse =
+            await socketService.fetchCall(callId: callId);
+        final dynamic rawCall = statusResponse['call'];
+        final Map<String, dynamic> call = rawCall is Map
+            ? Map<String, dynamic>.from(rawCall)
+            : <String, dynamic>{};
 
-        await socketService.endCall(
-          callId: callId,
-        );
-      } finally {
-        await CallkitIncomingService.endCall(
-          callId,
-        );
+        if (call['status']?.toString() == 'active') {
+          await socketService.endCall(callId: callId);
+        }
+      } catch (error, stackTrace) {
+        debugPrint('[CallKit] End synchronization failed: $error');
+        debugPrintStack(stackTrace: stackTrace);
       }
     },
   );
@@ -217,9 +246,22 @@ class ItalyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           getPages: AppPages.pages,
           routingCallback: (routing) {
+            final String? currentRoute = routing?.current;
             if (Get.isRegistered<LearningActivityTrackerService>()) {
               Get.find<LearningActivityTrackerService>().handleRoute(
-                routing?.current,
+                currentRoute,
+              );
+            }
+            if (currentRoute == AppRoutes.wrapper &&
+                Get.isRegistered<NavbarAndAppbarWrapperController>() &&
+                Get.find<NavbarAndAppbarWrapperController>()
+                        .currentIndex
+                        .value ==
+                    0 &&
+                Get.isRegistered<HomeController>()) {
+              unawaited(
+                Get.find<NavbarAndAppbarWrapperController>()
+                    .refreshHomeDashboard(),
               );
             }
           },

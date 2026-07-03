@@ -19,68 +19,67 @@ class MessageReportSuccessView extends GetView<MessageReportController> {
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
-        child: Obx(
-          () {
-            final MessageReportResultModel report = controller.reportResult.value ??
-                const MessageReportResultModel(
-                  referenceId: '#SHK-REP-4922',
-                  statusLabel: 'Under\nReview',
-                  reviewSteps: <String>[
-                    'Our team has been notified',
-                    'Manual review is in progress',
-                    'You will be notified once a decision is made',
-                  ],
-                );
-
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(28.w, 28.h, 28.w, 42.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const _BackButton(),
-                  SizedBox(height: 56.h),
-                  const Center(child: _ReportSuccessHero()),
-                  SizedBox(height: 70.h),
-                  Center(
-                    child: Text(
-                      'Report Received',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: AppFont.font46.sp,
-                        fontWeight: FontWeight.w900,
-                        height: 1,
-                        color: AppColors.primaryGreen,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 32.h),
-                  Center(
-                    child: Text(
-                      'Thank you for keeping our community\nsafe. Our admin team will review your\nreport shortly.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: AppFont.font24.sp,
-                        fontWeight: FontWeight.w500,
-                        height: 1.45,
-                        color: AppColors.modalTextGrey,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 64.h),
-                  _ReportReferenceCard(report: report),
-                  SizedBox(height: 50.h),
-                  _ReviewProcessCard(steps: report.reviewSteps),
-                  SizedBox(height: 62.h),
-                  CustomButton.primary(
-                    text: 'Back To Messages',
-                    onPressed: controller.backToMessages,
-                  ),
+        child: Obx(() {
+          final MessageReportResultModel report =
+              controller.reportResult.value ??
+              const MessageReportResultModel(
+                referenceId: '#SHK-REP-4922',
+                statusLabel: 'Under\nReview',
+                reviewSteps: <String>[
+                  'Our team has been notified',
+                  'Manual review is in progress',
+                  'You will be notified once a decision is made',
                 ],
-              ),
-            );
-          },
-        ),
+              );
+
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(28.w, 28.h, 28.w, 42.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const _BackButton(),
+                SizedBox(height: 56.h),
+                const Center(child: _ReportSuccessHero()),
+                SizedBox(height: 70.h),
+                Center(
+                  child: Text(
+                    'Report Received',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: AppFont.font46.sp,
+                      fontWeight: FontWeight.w900,
+                      height: 1,
+                      color: AppColors.primaryGreen,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 32.h),
+                Center(
+                  child: Text(
+                    'Thank you for keeping our community\nsafe. Our admin team will review your\nreport shortly.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: AppFont.font24.sp,
+                      fontWeight: FontWeight.w500,
+                      height: 1.45,
+                      color: AppColors.modalTextGrey,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 64.h),
+                _ReportReferenceCard(report: report),
+                SizedBox(height: 50.h),
+                _ReviewProcessCard(steps: report.reviewSteps),
+                SizedBox(height: 62.h),
+                CustomButton.primary(
+                  text: 'Back To Messages',
+                  onPressed: controller.backToMessages,
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
@@ -128,7 +127,10 @@ class _ReportSuccessHero extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.blockSuccessIconBg,
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.reportSuccessOuterGreen, width: 12.w),
+        border: Border.all(
+          color: AppColors.reportSuccessOuterGreen,
+          width: 12.w,
+        ),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.blockSuccessGlow,
@@ -308,7 +310,11 @@ class _ReviewStep extends StatelessWidget {
               color: AppColors.profileBlueText,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.check_rounded, color: AppColors.white, size: 18.w),
+            child: Icon(
+              Icons.check_rounded,
+              color: AppColors.white,
+              size: 18.w,
+            ),
           ),
           SizedBox(width: 24.w),
           Expanded(

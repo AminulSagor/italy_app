@@ -119,29 +119,21 @@ class StoreOrderModel {
 class StoreCheckoutResponseModel {
   const StoreCheckoutResponseModel({
     required this.order,
-    required this.paymentMethods,
+    required this.paymentMethod,
   });
 
   final StoreOrderModel order;
-  final List<StoreProviderOptionModel> paymentMethods;
+  final StoreProviderOptionModel paymentMethod;
+
+  List<StoreProviderOptionModel> get paymentMethods =>
+      <StoreProviderOptionModel>[paymentMethod];
 
   factory StoreCheckoutResponseModel.fromJson(Map<String, dynamic> json) {
     return StoreCheckoutResponseModel(
       order: StoreOrderModel.fromJson(shopJsonMap(json['order'])),
-      paymentMethods: shopJsonList(json['paymentMethods'])
-          .map((Map<String, dynamic> item) {
-            final StoreProviderOptionModel base =
-                StoreProviderOptionModel.fromJson(item);
-            return StoreProviderOptionModel(
-              provider: base.provider,
-              enabled: base.enabled,
-              demo: base.demo,
-              demoProductId: base.demoProductId,
-              label: shopString(item['label']),
-              unavailableReason: shopString(item['unavailableReason']),
-            );
-          })
-          .toList(growable: false),
+      paymentMethod: StoreProviderOptionModel.fromJson(
+        shopJsonMap(json['paymentMethod']),
+      ),
     );
   }
 }

@@ -9,6 +9,18 @@ import '../models/webinar_models.dart';
 import '../widgets/webinar_common_widgets.dart';
 import '../widgets/webinar_home_widgets.dart';
 
+void _showCourseAccessDialog(
+  BuildContext context,
+  WebinarItemModel webinar,
+) {
+  showDialog<void>(
+    context: context,
+    builder: (_) => WebinarCourseAccessDialog(
+      courseNames: webinar.audienceSettings.courseNames,
+    ),
+  );
+}
+
 class WebinarView extends GetView<WebinarController> {
   const WebinarView({super.key});
 
@@ -67,13 +79,19 @@ class WebinarView extends GetView<WebinarController> {
                               controller.selectedWebinar.value?.id ==
                                   webinar.id,
                           onJoinTap: () => controller.openLiveSession(webinar),
+                          onRestrictionTap: () =>
+                              _showCourseAccessDialog(context, webinar),
                         );
                       },
                     ),
                   SizedBox(height: 30.h),
                   const WebinarSectionHeader(),
                   SizedBox(height: 24.h),
-                  _UpcomingList(webinars: controller.upcomingWebinars),
+                  _UpcomingList(
+                    webinars: controller.upcomingWebinars,
+                    onRestrictionTap: (WebinarItemModel webinar) =>
+                        _showCourseAccessDialog(context, webinar),
+                  ),
                 ],
               ),
             ),
@@ -85,9 +103,13 @@ class WebinarView extends GetView<WebinarController> {
 }
 
 class _UpcomingList extends StatelessWidget {
-  const _UpcomingList({required this.webinars});
+  const _UpcomingList({
+    required this.webinars,
+    required this.onRestrictionTap,
+  });
 
   final List<WebinarItemModel> webinars;
+  final ValueChanged<WebinarItemModel> onRestrictionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +123,11 @@ class _UpcomingList extends StatelessWidget {
       itemCount: webinars.length,
       separatorBuilder: (_, _) => SizedBox(height: 20.h),
       itemBuilder: (_, int index) {
-        return WebinarSessionCard(webinar: webinars[index]);
+        final WebinarItemModel webinar = webinars[index];
+        return WebinarSessionCard(
+          webinar: webinar,
+          onRestrictionTap: () => onRestrictionTap(webinar),
+        );
       },
     );
   }

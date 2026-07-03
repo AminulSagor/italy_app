@@ -79,7 +79,7 @@ class DailyOverviewSection extends StatelessWidget {
             // Keep a dedicated footer for the gap and day label. The previous
             // height was smaller than the scaled children by a fraction of a
             // pixel, which produced one RenderFlex exception for every bar.
-            height: (kHomeChartHeight + 26).h,
+            height: (kHomeChartHeight + 42).h,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: overview.days
@@ -111,14 +111,37 @@ class _DailyActivityBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double fraction = maxSeconds <= 0
+    final double rawFraction = maxSeconds <= 0
         ? 0
-        : (activity.durationSeconds / maxSeconds).clamp(0.0, 1.0);
+        : (activity.durationSeconds / maxSeconds)
+              .clamp(0.0, 1.0)
+              .toDouble();
+    final double fraction = activity.durationSeconds > 0
+        ? rawFraction.clamp(0.08, 1.0).toDouble()
+        : 0;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 3.w),
       child: Column(
         children: <Widget>[
+          SizedBox(
+            height: 16.h,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                activity.durationLabel,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: AppFont.font9.sp,
+                  fontWeight: FontWeight.w700,
+                  color: activity.durationSeconds > 0
+                      ? AppColors.homePrimaryText
+                      : AppColors.homeSecondaryText,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 4.h),
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,

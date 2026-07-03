@@ -474,8 +474,18 @@ class LocalNotificationService {
             return;
           }
         }
-      } catch (e) {
-        dev.log('Error parsing notification payload: $e');
+      } catch (e, stackTrace) {
+        dev.log(
+          'Error parsing notification payload',
+          error: e,
+          stackTrace: stackTrace,
+          name: 'LocalNotificationService',
+        );
+      }
+
+      final Uri? deepLink = Uri.tryParse(payloadStr);
+      if (deepLink != null && deepLink.path.startsWith('/')) {
+        Get.toNamed<void>(deepLink.path, parameters: deepLink.queryParameters);
       }
     }
   }

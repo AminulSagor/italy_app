@@ -1,8 +1,9 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../../../../core/services/token_service.dart';
@@ -226,43 +227,220 @@ class CallSocketService extends GetxService {
     );
   }
 
-  Future<Map<String, dynamic>> answerCall({
-    required String callId,
-  }) {
-    return _emitCallAction(
-      event: 'call:answer',
-      payload: <String, dynamic>{'callId': callId},
-      timeoutCode: 'CALL_ANSWER_TIMEOUT',
-      timeoutMessage: 'The server did not respond to the answer request.',
+  Future<Map<String, dynamic>> answerCall({required String callId}) {
+    return _runSocketActionWithHttpFallback(
+      socketAction: () => _emitCallAction(
+        event: 'call:answer',
+        payload: <String, dynamic>{'callId': callId},
+        timeoutCode: 'CALL_ANSWER_TIMEOUT',
+        timeoutMessage: 'The server did not respond to the answer request.',
+      ),
+      httpAction: () => answerCallOverHttp(callId: callId),
     );
   }
 
-  Future<Map<String, dynamic>> rejectCall({
-    required String callId,
-  }) {
-    return _emitCallAction(
-      event: 'call:reject',
-      payload: <String, dynamic>{'callId': callId},
-      timeoutCode: 'CALL_REJECT_TIMEOUT',
-      timeoutMessage: 'The server did not respond to the rejection request.',
+  Future<Map<String, dynamic>> rejectCall({required String callId}) {
+    return _runSocketActionWithHttpFallback(
+      socketAction: () => _emitCallAction(
+        event: 'call:reject',
+        payload: <String, dynamic>{'callId': callId},
+        timeoutCode: 'CALL_REJECT_TIMEOUT',
+        timeoutMessage: 'The server did not respond to the rejection request.',
+      ),
+      httpAction: () => rejectCallOverHttp(callId: callId),
     );
   }
 
   Future<Map<String, dynamic>> cancelCall({required String callId}) {
-    return _emitCallAction(
-      event: 'call:cancel',
-      payload: <String, dynamic>{'callId': callId},
-      timeoutCode: 'CALL_CANCEL_TIMEOUT',
-      timeoutMessage: 'The server did not respond to the cancellation request.',
+    return _runSocketActionWithHttpFallback(
+      socketAction: () => _emitCallAction(
+        event: 'call:cancel',
+        payload: <String, dynamic>{'callId': callId},
+        timeoutCode: 'CALL_CANCEL_TIMEOUT',
+        timeoutMessage:
+            'The server did not respond to the cancellation request.',
+      ),
+      httpAction: () => cancelCallOverHttp(callId: callId),
     );
   }
 
   Future<Map<String, dynamic>> endCall({required String callId}) {
-    return _emitCallAction(
-      event: 'call:end',
-      payload: <String, dynamic>{'callId': callId},
-      timeoutCode: 'CALL_END_TIMEOUT',
-      timeoutMessage: 'The server did not respond to the end call request.',
+    return _runSocketActionWithHttpFallback(
+      socketAction: () => _emitCallAction(
+        event: 'call:end',
+        payload: <String, dynamic>{'callId': callId},
+        timeoutCode: 'CALL_END_TIMEOUT',
+        timeoutMessage: 'The server did not respond to the end call request.',
+      ),
+      httpAction: () => endCallOverHttp(callId: callId),
+    );
+  }
+
+  Future<Map<String, dynamic>> timeoutCall({required String callId}) {
+    return _runSocketActionWithHttpFallback(
+      socketAction: () => _emitCallAction(
+        event: 'call:timeout',
+        payload: <String, dynamic>{'callId': callId},
+        timeoutCode: 'CALL_TIMEOUT_TIMEOUT',
+        timeoutMessage: 'The server did not respond to the timeout request.',
+      ),
+      httpAction: () => timeoutCallOverHttp(callId: callId),
+    );
+  }
+
+  Future<Map<String, dynamic>> answerCallOverHttp({required String callId}) {
+    return _sendHttpCallAction(
+      method: 'POST',
+      path: '/calls/${callId.trim()}/answer',
+    );
+  }
+
+  Future<Map<String, dynamic>> rejectCallOverHttp({required String callId}) {
+    return _sendHttpCallAction(
+      method: 'POST',
+      path: '/calls/${callId.trim()}/reject',
+    );
+  }
+
+  Future<Map<String, dynamic>> cancelCallOverHttp({required String callId}) {
+    return _sendHttpCallAction(
+      method: 'POST',
+      path: '/calls/${callId.trim()}/cancel',
+    );
+  }
+
+  Future<Map<String, dynamic>> endCallOverHttp({required String callId}) {
+    return _sendHttpCallAction(
+      method: 'POST',
+      path: '/calls/${callId.trim()}/end',
+    );
+  }
+
+  Future<Map<String, dynamic>> timeoutCallOverHttp({required String callId}) {
+    return _sendHttpCallAction(
+      method: 'POST',
+      path: '/calls/${callId.trim()}/timeout',
+    );
+  }
+
+  Future<Map<String, dynamic>> fetchCall({required String callId}) {
+    return _sendHttpCallAction(method: 'GET', path: '/calls/${callId.trim()}');
+  }
+
+  Future<Map<String, dynamic>> _runSocketActionWithHttpFallback({
+    required Future<Map<String, dynamic>> Function() socketAction,
+    required Future<Map<String, dynamic>> Function() httpAction,
+  }) async {
+    try {
+      return await socketAction();
+    } on CallSocketException catch (error) {
+      if (!_isSocketTransportFailure(error)) {
+        rethrow;
+      }
+
+      debugPrint(
+        '[CallSocket] ${error.code}; retrying the call action over HTTP',
+      );
+
+      return httpAction();
+    }
+  }
+
+  bool _isSocketTransportFailure(CallSocketException error) {
+    return error.code == 'CALL_SOCKET_CONNECTION_FAILED' ||
+        error.code == 'CALL_SOCKET_TIMEOUT' ||
+        error.code == 'CALL_SOCKET_NOT_CONNECTED' ||
+        error.code == 'CALL_ANSWER_TIMEOUT' ||
+        error.code == 'CALL_REJECT_TIMEOUT' ||
+        error.code == 'CALL_CANCEL_TIMEOUT' ||
+        error.code == 'CALL_END_TIMEOUT' ||
+        error.code == 'CALL_TIMEOUT_TIMEOUT';
+  }
+
+  Future<Map<String, dynamic>> _sendHttpCallAction({
+    required String method,
+    required String path,
+  }) async {
+    final String normalizedPath = path.trim();
+    if (normalizedPath.isEmpty || normalizedPath.contains('/calls//')) {
+      throw const CallSocketException(
+        code: 'INVALID_CALL_ID',
+        message: 'A valid call ID is required.',
+      );
+    }
+
+    final String? token = await _tokenService.getAccessToken();
+    if (token == null || token.trim().isEmpty) {
+      throw const CallSocketException(
+        code: 'TOKEN_MISSING',
+        message: 'Login token was not found.',
+      );
+    }
+
+    final String tokenType = await _tokenService.getTokenType();
+    final Dio client = Dio(
+      BaseOptions(
+        baseUrl: _apiBaseUrl,
+        connectTimeout: const Duration(seconds: 12),
+        receiveTimeout: const Duration(seconds: 12),
+        sendTimeout: const Duration(seconds: 12),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': '$tokenType ${token.trim()}',
+        },
+      ),
+    );
+
+    try {
+      final Response<dynamic> response;
+      if (method == 'GET') {
+        response = await client.get<dynamic>(normalizedPath);
+      } else {
+        response = await client.post<dynamic>(normalizedPath);
+      }
+
+      final Map<String, dynamic> body = _toMap(response.data);
+      final dynamic rawData = body['ok'] == true ? body['data'] : body;
+
+      if (rawData is! Map) {
+        throw const CallSocketException(
+          code: 'INVALID_CALL_RESPONSE',
+          message: 'The server returned an invalid call response.',
+        );
+      }
+
+      return Map<String, dynamic>.from(rawData);
+    } on DioException catch (error) {
+      throw _callExceptionFromDio(error);
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  CallSocketException _callExceptionFromDio(DioException error) {
+    final Map<String, dynamic> body = _toMap(error.response?.data);
+    final dynamic rawMessage = body['message'];
+
+    if (rawMessage is Map) {
+      final Map<String, dynamic> message = Map<String, dynamic>.from(
+        rawMessage,
+      );
+      return CallSocketException(
+        code: message['code']?.toString() ?? 'CALL_HTTP_ERROR',
+        message:
+            message['message']?.toString() ??
+            'Unable to complete the call request.',
+      );
+    }
+
+    return CallSocketException(
+      code: body['code']?.toString() ?? 'CALL_HTTP_ERROR',
+      message: rawMessage is List
+          ? rawMessage.map((dynamic value) => value.toString()).join(', ')
+          : rawMessage?.toString() ??
+                error.message ??
+                'Unable to complete the call request.',
     );
   }
 
@@ -521,7 +699,7 @@ class CallSocketService extends GetxService {
     return <String, dynamic>{};
   }
 
-  String get _socketUrl {
+  String get _apiBaseUrl {
     final String apiBaseUrl = dotenv.env['API_BASE_URL']?.trim() ?? '';
 
     if (apiBaseUrl.isEmpty) {
@@ -531,7 +709,13 @@ class CallSocketService extends GetxService {
       );
     }
 
-    final Uri uri = Uri.parse(apiBaseUrl);
+    return apiBaseUrl.endsWith('/')
+        ? apiBaseUrl.substring(0, apiBaseUrl.length - 1)
+        : apiBaseUrl;
+  }
+
+  String get _socketUrl {
+    final Uri uri = Uri.parse(_apiBaseUrl);
 
     return uri.replace(path: '/calls', query: null, fragment: null).toString();
   }
