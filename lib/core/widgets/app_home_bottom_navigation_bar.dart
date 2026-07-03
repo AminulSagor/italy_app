@@ -18,7 +18,10 @@ class AppHomeBottomNavigationBar extends StatelessWidget {
     AppBottomNavItem(icon: Icons.menu_book_outlined, semanticLabel: 'Courses'),
     AppBottomNavItem(icon: Icons.auto_awesome_rounded, semanticLabel: 'AI Tutor'),
     AppBottomNavItem(icon: Icons.emoji_events_outlined, semanticLabel: 'Progress'),
-    AppBottomNavItem(icon: Icons.handyman_outlined, semanticLabel: 'Tools'),
+    AppBottomNavItem(
+      icon: Icons.description_outlined,
+      semanticLabel: 'CV Builder',
+    ),
   ];
 
   final int selectedIndex;
