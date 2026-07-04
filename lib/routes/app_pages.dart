@@ -33,6 +33,7 @@ import '../features/courses/sub_features/final_exam/views/final_exam_speaking_vi
 import '../features/courses/sub_features/final_exam/views/final_exam_success_view.dart';
 import '../features/courses/sub_features/final_exam/views/final_exam_writing_view.dart';
 import '../features/courses/sub_features/pro_checkout/controllers/pro_checkout_controller.dart';
+import '../features/courses/sub_features/pro_checkout/services/course_google_play_billing_service.dart';
 import '../features/courses/sub_features/pro_checkout/services/pro_checkout_api_service.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_checkout_view.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_order_summary_view.dart';
@@ -54,7 +55,7 @@ import '../features/home/services/home_api_service.dart';
 import '../features/home/views/home_view.dart';
 import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_service.dart';
-import '../features/notifications/services/notifications_mock_service.dart';
+import '../features/notifications/services/notifications_api_service.dart';
 import '../features/practice_hub/services/job_sentences_api_service.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_contact_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_dynamic_form_controller.dart';
@@ -71,6 +72,7 @@ import '../core/controllers/user_session_controller.dart';
 import '../core/services/learning_activity_api_service.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/token_service.dart';
+import '../core/services/storage_service.dart';
 import '../features/messages/services/chat_socket_service.dart';
 import '../features/messages/services/presence_service.dart';
 import '../features/service_hub/sub_features/cv_builder/views/choose_cv_template_view.dart';
@@ -344,9 +346,10 @@ class AppPages {
             ),
           );
         }
-        if (!Get.isRegistered<NotificationsMockService>()) {
-          Get.lazyPut<NotificationsMockService>(
-            () => NotificationsMockService(),
+        if (!Get.isRegistered<NotificationsApiService>()) {
+          Get.lazyPut<NotificationsApiService>(
+            () => NotificationsApiService(apiClient: Get.find<ApiClient>()),
+            fenix: true,
           );
         }
         if (!Get.isRegistered<NavbarAndAppbarWrapperController>()) {
@@ -613,9 +616,18 @@ class AppPages {
           () => ProCheckoutApiService(apiClient: Get.find<ApiClient>()),
           tag: args.controllerTag,
         );
+        Get.lazyPut<CourseGooglePlayBillingService>(
+          () => CourseGooglePlayBillingService(
+            storageService: Get.find<StorageService>(),
+          ),
+          tag: args.controllerTag,
+        );
         Get.lazyPut<ProCheckoutController>(
           () => ProCheckoutController(
             proCheckoutApiService: Get.find<ProCheckoutApiService>(
+              tag: args.controllerTag,
+            ),
+            billingService: Get.find<CourseGooglePlayBillingService>(
               tag: args.controllerTag,
             ),
             courseId: args.courseId,

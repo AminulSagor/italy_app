@@ -133,40 +133,31 @@ class _CallerAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String firstLetter =
-    name.trim().isNotEmpty
-        ? name.trim()[0].toUpperCase()
-        : '?';
+    final Uri? uri = Uri.tryParse(avatarUrl.trim());
+    final bool canLoadAvatar =
+        uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
 
     return Container(
       width: 132.w,
       height: 132.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.primaryGreen
-            .withValues(alpha: 0.15),
+        color: AppColors.primaryGreen.withValues(alpha: 0.15),
         border: Border.all(
           color: AppColors.primaryGreen,
           width: 3.w,
         ),
       ),
       child: ClipOval(
-        child: avatarUrl.trim().isNotEmpty
-            ? Image.network(
-          avatarUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (
-              BuildContext context,
-              Object error,
-              StackTrace? stackTrace,
-              ) {
-            return _AvatarFallback(
-              firstLetter: firstLetter,
-            );
-          },
-        )
-            : _AvatarFallback(
-          firstLetter: firstLetter,
+        child: ColoredBox(
+          color: AppColors.white,
+          child: canLoadAvatar
+              ? Image.network(
+                  avatarUrl.trim(),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const _AvatarFallback(),
+                )
+              : const _AvatarFallback(),
         ),
       ),
     );
@@ -174,22 +165,15 @@ class _CallerAvatar extends StatelessWidget {
 }
 
 class _AvatarFallback extends StatelessWidget {
-  const _AvatarFallback({
-    required this.firstLetter,
-  });
-
-  final String firstLetter;
+  const _AvatarFallback();
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        firstLetter,
-        style: TextStyle(
-          fontSize: 48.sp,
-          fontWeight: FontWeight.w800,
-          color: AppColors.primaryGreen,
-        ),
+    return const Center(
+      child: Icon(
+        Icons.person_rounded,
+        color: AppColors.primaryGreen,
+        size: 64,
       ),
     );
   }

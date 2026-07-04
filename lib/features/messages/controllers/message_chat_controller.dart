@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
@@ -39,6 +40,7 @@ class MessageChatController extends GetxController
   bool _shouldAutoScrollChat = true;
   String? _currentUserId;
   ChatSocketService? _socketService;
+  CallSocketService? _callHistorySocketService;
   final List<Map<String, String>> _pendingSends = <Map<String, String>>[];
   final RxBool isSending = false.obs;
   final RxBool isLoadingMore = false.obs;
@@ -54,10 +56,47 @@ class MessageChatController extends GetxController
     chatScrollController.addListener(_handleChatScroll);
     _initSocket();
     _initPresenceSync();
+    _initCallHistorySync();
 
     // Suppress local notifications for this conversation while the user is
     // actively viewing it (client-side safety net).
     LocalNotificationService.instance.suppressConversation(thread.id);
+  }
+
+  void _initCallHistorySync() {
+    try {
+      if (!Get.isRegistered<CallSocketService>()) return;
+      final CallSocketService service = Get.find<CallSocketService>();
+      _callHistorySocketService = service;
+      service
+        ..addRejectedCallListener(_handleCallHistoryChanged)
+        ..addCancelledCallListener(_handleCallHistoryChanged)
+        ..addEndedCallListener(_handleCallHistoryChanged);
+    } catch (_) {}
+  }
+
+  void _removeCallHistorySync() {
+    final CallSocketService? service = _callHistorySocketService;
+    if (service == null) return;
+    service
+      ..removeRejectedCallListener(_handleCallHistoryChanged)
+      ..removeCancelledCallListener(_handleCallHistoryChanged)
+      ..removeEndedCallListener(_handleCallHistoryChanged);
+    _callHistorySocketService = null;
+  }
+
+  void _handleCallHistoryChanged(Map<String, dynamic> payload) {
+    final dynamic rawCall = payload['call'] ?? payload;
+    if (rawCall is! Map) return;
+    final String conversationId =
+        rawCall['directConversationId']?.toString() ?? '';
+    if (conversationId != thread.id) return;
+    unawaited(
+      Future<void>.delayed(
+        const Duration(milliseconds: 250),
+        refreshChat,
+      ),
+    );
   }
 
   void _initPresenceSync() {
@@ -94,6 +133,7 @@ class MessageChatController extends GetxController
         _socketService?.leaveConversation(thread.id);
       }
     } catch (_) {}
+    _removeCallHistorySync();
     // Remove client-side notification suppression
     LocalNotificationService.instance.unsuppressConversation(thread.id);
     super.onClose();
@@ -106,6 +146,7 @@ class MessageChatController extends GetxController
       try {
         _socketService?.enterInbox(thread.id);
         LocalNotificationService.instance.suppressConversation(thread.id);
+        unawaited(refreshChat());
       } catch (_) {}
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
@@ -670,7 +711,15 @@ class MessageChatController extends GetxController
     _openCall(MessageCallType.video);
   }
 
-  void _openCall(MessageCallType callType) {
+  void callBack(MessageChatItemModel item) {
+    final MessageCallType callType =
+        item.callType == MessageChatCallType.video
+        ? MessageCallType.video
+        : MessageCallType.audio;
+    _openCall(callType);
+  }
+
+  Future<void> _openCall(MessageCallType callType) async {
     if (blockStatus.value != 'none') {
       Get.snackbar(
         'Blocked',
@@ -697,8 +746,8 @@ class MessageChatController extends GetxController
     final String participantId =
         currentChat.contactId ?? thread.contactId ?? '';
 
-    Get.to<void>(
-          () => const MessageCallView(),
+    await Get.to<void>(
+      () => const MessageCallView(),
       binding: BindingsBuilder(() {
         Get.put<MessageCallController>(
           MessageCallController(
@@ -721,6 +770,8 @@ class MessageChatController extends GetxController
       }),
       transition: Transition.rightToLeft,
     );
+
+    await refreshChat();
   }
 
   void openUserInfo() {

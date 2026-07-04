@@ -2,6 +2,8 @@ import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -20,7 +22,10 @@ class FinalExamSpeakingView extends GetView<FinalExamController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.exam,
+      sourceId: 'final_exam_speaking_view',
+      child: Scaffold(
       backgroundColor: AppColors.coursesDetailBg,
       bottomNavigationBar: Obx(
         () => FinalExamBottomButton(
@@ -73,6 +78,7 @@ class FinalExamSpeakingView extends GetView<FinalExamController> {
           );
         }),
       ),
+    ),
     );
   }
 }

@@ -138,13 +138,21 @@ class _ProfileHero extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: ClipOval(
-                  child: Image.network(
-                    profile.avatarUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Icon(
-                      Icons.person_rounded,
-                      color: AppColors.primaryGreen,
-                    ),
+                  child: ColoredBox(
+                    color: AppColors.white,
+                    child: _canLoadAvatar(profile.avatarUrl)
+                        ? Image.network(
+                            profile.avatarUrl.trim(),
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => const Icon(
+                              Icons.person_rounded,
+                              color: AppColors.primaryGreen,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.person_rounded,
+                            color: AppColors.primaryGreen,
+                          ),
                   ),
                 ),
               ),
@@ -282,4 +290,10 @@ class _SafetyActions extends GetView<MessageUserInfoController> {
       );
     });
   }
+}
+
+
+bool _canLoadAvatar(String value) {
+  final Uri? uri = Uri.tryParse(value.trim());
+  return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
 }

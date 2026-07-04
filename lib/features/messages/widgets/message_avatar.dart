@@ -35,13 +35,21 @@ class MessageAvatar extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: ClipOval(
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const Icon(
-                  Icons.person_rounded,
-                  color: AppColors.primaryGreen,
-                ),
+              child: ColoredBox(
+                color: AppColors.white,
+                child: _canLoadImage(imageUrl)
+                    ? Image.network(
+                        imageUrl.trim(),
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.person_rounded,
+                          color: AppColors.primaryGreen,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.person_rounded,
+                        color: AppColors.primaryGreen,
+                      ),
               ),
             ),
           ),
@@ -64,5 +72,10 @@ class MessageAvatar extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  bool _canLoadImage(String value) {
+    final Uri? uri = Uri.tryParse(value.trim());
+    return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
   }
 }

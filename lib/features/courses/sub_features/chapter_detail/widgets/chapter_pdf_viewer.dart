@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
@@ -44,7 +46,10 @@ class _ChapterPdfViewerState extends State<ChapterPdfViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.pdf,
+      sourceId: 'chapter_pdf_viewer',
+      child: Scaffold(
       backgroundColor: const Color(0xFF10201B),
       body: Stack(
         children: <Widget>[
@@ -107,6 +112,7 @@ class _ChapterPdfViewerState extends State<ChapterPdfViewer> {
           ),
         ],
       ),
+    ),
     );
   }
 }

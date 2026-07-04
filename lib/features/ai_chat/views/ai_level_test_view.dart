@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../controllers/ai_tutor_level_test_controller.dart';
@@ -21,7 +23,10 @@ class AiLevelTestView extends GetView<AiTutorLevelTestController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.aiTutor,
+      sourceId: 'ai_level_test_view',
+      child: Scaffold(
       backgroundColor: const Color(0xFFF8FAFA),
       body: SafeArea(
         bottom: false,
@@ -160,6 +165,7 @@ class AiLevelTestView extends GetView<AiTutorLevelTestController> {
           ],
         ),
       ),
+    ),
     );
   }
 }

@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/widgets/app_drawer_controller.dart';
 import '../views/league_system_promotion_view.dart';
 import '../views/popup_insider_view.dart';
 import '../views/score_system_info_view.dart';
@@ -201,17 +205,14 @@ class LeaderboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // initial load
-    loadLeaderboard();
-    // load league configuration
-    loadLeagues();
-    
-    loadScoringGuide();
-    loadPendingPromotion();
+    unawaited(loadLeaderboard());
+    unawaited(loadLeagues());
+    unawaited(loadScoringGuide());
+    unawaited(loadPendingPromotion());
 
     // debounce the search query and call the backend search when user pauses typing
-    debounce<String>(searchQuery, (String val) {
-      loadLeaderboard(page: 1, search: val);
+    debounce<String>(searchQuery, (String value) {
+      unawaited(loadLeaderboard(page: 1, search: value));
     }, time: const Duration(milliseconds: 400));
   }
   
@@ -300,11 +301,21 @@ class LeaderboardController extends GetxController {
     }
   }
 
+
+  Future<void> refreshLeaderboard() async {
+    final String search = searchQuery.value.trim();
+    await Future.wait<void>(<Future<void>>[
+      loadLeaderboard(page: 1, search: search),
+      loadLeagues(),
+      loadScoringGuide(),
+    ]);
+  }
+
   void onTabChanged(int index) {
     selectedTabIndex.value = index;
     searchQuery.value = '';
     searchController.clear();
-    loadLeaderboard(page: 1, search: '');
+    unawaited(loadLeaderboard(page: 1, search: ''));
   }
 
   void onSearchChanged(String value) {
@@ -361,20 +372,27 @@ class LeaderboardController extends GetxController {
         limit: 20,
         search: search.isNotEmpty ? search : null,
       );
-      // Debug output to help diagnose why fallback data may be shown
-      print('[Leaderboard] fetching with params: ${dto.toQueryParameters()}');
-
-
+      dev.log(
+        'Fetching leaderboard with ${dto.toQueryParameters()}',
+        name: 'LeaderboardController',
+      );
 
       final LeaderboardResponseModel resp = await _leaderboardService
           .fetchLeaderboard(dto: dto);
+      final ProfileModel? profile =
+          resp.currentUser ?? await _leaderboardService.fetchMe();
 
-      print(
-        '[Leaderboard] fetched: podium=${resp.podium.length} entries=${resp.entries.length}',
+      dev.log(
+        'Fetched podium=${resp.podium.length} entries=${resp.entries.length}',
+        name: 'LeaderboardController',
       );
 
       meta.value = resp.meta;
-      currentUser.value = resp.currentUser;
+      currentUser.value = profile;
+      currentUser.refresh();
+      if (profile != null && Get.isRegistered<AppDrawerController>()) {
+        Get.find<AppDrawerController>().updateLeague(profile.league.name);
+      }
       milestoneData.value = resp.milestone;
 
       // Map podium and entries to the small map shape the view expects

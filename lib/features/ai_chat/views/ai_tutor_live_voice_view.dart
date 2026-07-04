@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_font.dart';
@@ -48,7 +51,11 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
         await WakelockPlus.disable();
       }
     } catch (error) {
-      debugPrint('[AiTutorVoice] Unable to update wakelock: $error');
+      dev.log(
+        'Unable to update wakelock',
+        error: error,
+        name: 'AiTutorVoice',
+      );
     }
   }
 
@@ -61,7 +68,10 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.aiTutor,
+      sourceId: 'ai_tutor_live_voice_view',
+      child: WillPopScope(
       onWillPop: controller.handleLiveVoiceSystemBack,
       child: Scaffold(
         backgroundColor: const Color(0xFFEFFFF0),
@@ -193,6 +203,7 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
           ),
         ),
       ),
+    ),
     );
   }
 }

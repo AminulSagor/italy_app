@@ -63,7 +63,7 @@ class AppDrawer extends GetView<AppDrawerController> {
                       Obx(
                         () => _DrawerProfileHeader(
                           name: controller.displayName,
-                          level: controller.levelLabel,
+                          league: controller.leagueLabel,
                           avatarUrl: controller.avatarUrl,
                           onRefresh: controller.refreshProfile,
                         ),
@@ -160,13 +160,13 @@ class AppDrawer extends GetView<AppDrawerController> {
 class _DrawerProfileHeader extends StatelessWidget {
   const _DrawerProfileHeader({
     required this.name,
-    required this.level,
+    required this.league,
     required this.avatarUrl,
     required this.onRefresh,
   });
 
   final String name;
-  final String level;
+  final String league;
   final String? avatarUrl;
   final Future<void> Function({bool showError}) onRefresh;
 
@@ -217,7 +217,7 @@ class _DrawerProfileHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(100.r),
             ),
             child: Text(
-              'LEVEL $level',
+              league,
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w900,

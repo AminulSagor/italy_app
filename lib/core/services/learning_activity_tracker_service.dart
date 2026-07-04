@@ -6,11 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../routes/app_routes.dart';
 import '../models/learning_activity_models.dart';
 import 'api_error_handler.dart';
 import 'learning_activity_api_service.dart';
-import 'learning_activity_route_resolver.dart';
 import 'storage_service.dart';
 
 class LearningActivityTrackerService extends GetxService
@@ -28,15 +26,14 @@ class LearningActivityTrackerService extends GetxService
   final LearningActivityApiService _apiService;
   final StorageService _storageService;
   final Uuid _uuid = const Uuid();
-  final LearningActivityRouteResolver _routeResolver =
-      const LearningActivityRouteResolver();
+  final List<_LearningPageScope> _visibleScopes = <_LearningPageScope>[];
 
   Timer? _heartbeat;
   Future<void> _operationQueue = Future<void>.value();
   LearningActivityKind? _currentKind;
   String? _currentSourceId;
+  String? _currentScopeToken;
   DateTime? _startedAt;
-  int _shellTabIndex = 0;
   bool _isForeground = true;
   bool _isClosed = false;
 
@@ -52,7 +49,7 @@ class LearningActivityTrackerService extends GetxService
   Future<void> startSession() {
     return _enqueue(() async {
       await _syncPendingInternal();
-      _restoreCurrentActivity();
+      await _activateVisibleScopeInternal();
     });
   }
 
@@ -60,9 +57,7 @@ class LearningActivityTrackerService extends GetxService
     return _enqueue(() async {
       await _flushCurrentInternal(clearActivity: true);
       await _syncPendingInternal();
-      _currentKind = null;
-      _currentSourceId = null;
-      _startedAt = null;
+      _visibleScopes.clear();
       await _writePending(<LearningActivityTimeEntryModel>[]);
     });
   }
@@ -71,7 +66,9 @@ class LearningActivityTrackerService extends GetxService
     return _enqueue(() async {
       _currentKind = null;
       _currentSourceId = null;
+      _currentScopeToken = null;
       _startedAt = null;
+      _visibleScopes.clear();
       await _writePending(<LearningActivityTimeEntryModel>[]);
     });
   }
@@ -83,46 +80,70 @@ class LearningActivityTrackerService extends GetxService
     });
   }
 
-  Future<void> syncPending() {
-    return _enqueue(_syncPendingInternal);
-  }
+  Future<void> syncPending() => _enqueue(_syncPendingInternal);
 
-  void setShellTab(int index) {
-    _shellTabIndex = index;
-
-    // The shell uses nested Navigators, so Get.currentRoute can remain on a
-    // previous root route while the selected tab has already changed. Tab
-    // selection itself is the authoritative learning context here.
-    _queueActivity(
-      _routeResolver.forShellTab(index),
-      sourceId: 'shell-tab-$index',
+  void setPageScope({
+    required String token,
+    required LearningActivityKind activityKind,
+    required String sourceId,
+    required bool isVisible,
+  }) {
+    unawaited(
+      _enqueue(() async {
+        _visibleScopes.removeWhere(
+          (_LearningPageScope scope) => scope.token == token,
+        );
+        if (isVisible) {
+          _visibleScopes.add(
+            _LearningPageScope(
+              token: token,
+              activityKind: activityKind,
+              sourceId: sourceId,
+            ),
+          );
+        }
+        await _activateVisibleScopeInternal();
+      }),
     );
   }
 
-  void handleRoute(String? routeName) {
-    final String route = _routeResolver.normalize(routeName);
-    if (route.isEmpty) return;
+  void removePageScope(String token) {
+    unawaited(
+      _enqueue(() async {
+        _visibleScopes.removeWhere(
+          (_LearningPageScope scope) => scope.token == token,
+        );
+        await _activateVisibleScopeInternal();
+      }),
+    );
+  }
 
-    if (route == AppRoutes.wrapper) {
-      _queueActivity(
-        _routeResolver.forShellTab(_shellTabIndex),
-        sourceId: 'shell-tab-$_shellTabIndex',
-      );
+  // Learning time is controlled exclusively by LearningActivityPageScope.
+  // These methods remain for existing navigation callers but do not infer
+  // activity from shell tabs or broad route prefixes.
+  void setShellTab(int _) {}
+
+  void handleRoute(String? _) {}
+
+  Future<void> _activateVisibleScopeInternal() async {
+    final _LearningPageScope? scope = _isForeground && _visibleScopes.isNotEmpty
+        ? _visibleScopes.last
+        : null;
+
+    if (scope?.token == _currentScopeToken &&
+        scope?.activityKind == _currentKind &&
+        scope?.sourceId == _currentSourceId) {
+      if (scope != null && _startedAt == null) {
+        _startedAt = DateTime.now();
+      }
       return;
     }
 
-    final LearningActivityKind? activity = _routeResolver.forRoute(route);
-    if (activity != null) {
-      _queueActivity(activity, sourceId: route);
-      return;
-    }
-
-    if (_routeResolver.isKnownNonLearningRoute(route)) {
-      _queueActivity(null);
-    }
-    // Unnamed Get.to() child routes are intentionally ignored. They are
-    // commonly fullscreen lesson media, survival Italian details, saved verb
-    // pages, or AI tutor flows and should inherit the active learning session.
+    await _flushCurrentInternal(clearActivity: true);
+    _currentScopeToken = scope?.token;
+    _currentKind = scope?.activityKind;
+    _currentSourceId = scope?.sourceId;
+    _startedAt = scope == null ? null : DateTime.now();
   }
 
   @override
@@ -133,7 +154,7 @@ class LearningActivityTrackerService extends GetxService
       _isForeground = false;
       unawaited(
         _enqueue(() async {
-          await _flushCurrentInternal(clearActivity: false);
+          await _flushCurrentInternal(clearActivity: true);
           await _syncPendingInternal();
         }),
       );
@@ -144,40 +165,11 @@ class LearningActivityTrackerService extends GetxService
       _isForeground = true;
       unawaited(
         _enqueue(() async {
-          if (_currentKind != null) {
-            _startedAt = DateTime.now();
-          }
+          await _activateVisibleScopeInternal();
           await _syncPendingInternal();
         }),
       );
     }
-  }
-
-  void _queueActivity(
-    LearningActivityKind? kind, {
-    String? sourceId,
-  }) {
-    unawaited(
-      _enqueue(() => _transitionTo(kind, sourceId: sourceId)),
-    );
-  }
-
-  Future<void> _transitionTo(
-    LearningActivityKind? kind, {
-    String? sourceId,
-  }) async {
-    if (kind == _currentKind && sourceId == _currentSourceId) {
-      if (kind != null && _isForeground && _startedAt == null) {
-        _startedAt = DateTime.now();
-      }
-      return;
-    }
-
-    await _flushCurrentInternal(clearActivity: true);
-    await _syncPendingInternal();
-    _currentKind = kind;
-    _currentSourceId = sourceId;
-    _startedAt = kind != null && _isForeground ? DateTime.now() : null;
   }
 
   Future<void> _flushCurrentInternal({required bool clearActivity}) async {
@@ -189,6 +181,7 @@ class LearningActivityTrackerService extends GetxService
     if (clearActivity) {
       _currentKind = null;
       _currentSourceId = null;
+      _currentScopeToken = null;
       _startedAt = null;
     } else {
       _startedAt = kind != null && _isForeground ? endedAt : null;
@@ -199,18 +192,17 @@ class LearningActivityTrackerService extends GetxService
     final int durationSeconds = endedAt.difference(startedAt).inSeconds;
     if (durationSeconds < _minimumRecordSeconds) return;
 
-    final LearningActivityTimeEntryModel entry =
-        LearningActivityTimeEntryModel(
-          eventId: _uuid.v4(),
-          activityKind: kind,
-          sourceId: sourceId,
-          durationSeconds: durationSeconds.clamp(1, 3600).toInt(),
-          startedAt: startedAt,
-          endedAt: endedAt,
-          clientActivityDate: _dateOnly(startedAt.toLocal()),
-        );
-
-    await _appendPending(entry);
+    await _appendPending(
+      LearningActivityTimeEntryModel(
+        eventId: _uuid.v4(),
+        activityKind: kind,
+        sourceId: sourceId,
+        durationSeconds: durationSeconds.clamp(1, 3600).toInt(),
+        startedAt: startedAt,
+        endedAt: endedAt,
+        clientActivityDate: _dateOnly(startedAt.toLocal()),
+      ),
+    );
   }
 
   Future<void> _syncPendingInternal() async {
@@ -254,9 +246,7 @@ class LearningActivityTrackerService extends GetxService
           name: 'LearningActivityTracker',
         );
       } finally {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
+        if (!completer.isCompleted) completer.complete();
       }
     });
     return completer.future;
@@ -284,9 +274,7 @@ class LearningActivityTrackerService extends GetxService
     }
   }
 
-  Future<void> _appendPending(
-    LearningActivityTimeEntryModel entry,
-  ) async {
+  Future<void> _appendPending(LearningActivityTimeEntryModel entry) async {
     final List<LearningActivityTimeEntryModel> pending = _readPending();
     pending.add(entry);
     await _writePending(pending);
@@ -303,24 +291,6 @@ class LearningActivityTrackerService extends GetxService
             .toList(growable: false),
       ),
     );
-  }
-
-  void _restoreCurrentActivity() {
-    final String route = _routeResolver.normalize(Get.currentRoute);
-    if (route == AppRoutes.wrapper || route.isEmpty) {
-      final LearningActivityKind? kind = _routeResolver.forShellTab(_shellTabIndex);
-      _currentKind = kind;
-      _currentSourceId = 'shell-tab-$_shellTabIndex';
-      _startedAt = kind != null && _isForeground ? DateTime.now() : null;
-      return;
-    }
-
-    final LearningActivityKind? kind = _routeResolver.forRoute(route);
-    if (kind != null) {
-      _currentKind = kind;
-      _currentSourceId = route;
-      _startedAt = _isForeground ? DateTime.now() : null;
-    }
   }
 
   String _dateOnly(DateTime date) {
@@ -340,4 +310,16 @@ class LearningActivityTrackerService extends GetxService
     );
     super.onClose();
   }
+}
+
+class _LearningPageScope {
+  const _LearningPageScope({
+    required this.token,
+    required this.activityKind,
+    required this.sourceId,
+  });
+
+  final String token;
+  final LearningActivityKind activityKind;
+  final String sourceId;
 }

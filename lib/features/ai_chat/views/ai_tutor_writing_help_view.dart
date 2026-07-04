@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../controllers/ai_chat_controller.dart';
 import 'ai_tutor_chat_view.dart';
@@ -31,7 +33,10 @@ class _AiTutorWritingHelpViewState extends State<AiTutorWritingHelpView> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.aiTutor,
+      sourceId: 'ai_tutor_writing_help_view',
+      child: WillPopScope(
       onWillPop: _controller.handleWritingHelpSystemBack,
       child: Scaffold(
         backgroundColor: const Color(0xFFF4F6F1),
@@ -77,6 +82,7 @@ class _AiTutorWritingHelpViewState extends State<AiTutorWritingHelpView> {
           ),
         ),
       ),
+    ),
     );
   }
 }

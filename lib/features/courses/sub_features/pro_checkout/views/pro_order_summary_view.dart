@@ -70,22 +70,10 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
                 ),
                 SizedBox(height: 30.h),
                 ProFeatureGrid(features: order.features),
-                ProCurrencyToggle(
-                  selectedCurrency: controller.selectedCurrency.value,
-                  onChanged: controller.setCurrency,
-                ),
-                SizedBox(height: 30.h),
                 ProPlanCard(
                   plan: order.plan,
                   currency: controller.selectedCurrency.value,
-                  isCouponApplied: controller.isCouponApplied.value,
-                ),
-                SizedBox(height: 30.h),
-                ProCouponInput(
-                  controller: controller.couponController,
-                  isCouponApplied: controller.isCouponApplied.value,
-                  isLoading: controller.isCouponApplying.value,
-                  onApplyTap: controller.applyCoupon,
+                  isCouponApplied: false,
                 ),
                 SizedBox(height: 42.h),
                 CustomButton.primary(

@@ -26,7 +26,7 @@ import '../../features/messages/sub-feature/call/service/call_agora_service.dart
 import '../../features/messages/sub-feature/call/service/call_socket_service.dart';
 import '../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import '../../features/messages/sub-feature/call/views/message_call_view.dart';
-import '../../features/notifications/services/notifications_mock_service.dart';
+import '../../features/notifications/services/notifications_api_service.dart';
 
 import '../../features/leaderboard/services/leaderboard_service.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
@@ -85,6 +85,7 @@ class InitialBindings extends Bindings {
     Get.lazyPut<AppDrawerController>(
       () => AppDrawerController(
         userSessionController: Get.find<UserSessionController>(),
+        leaderboardService: Get.find<LeaderboardService>(),
       ),
       fenix: true,
     );
@@ -255,8 +256,11 @@ class InitialBindings extends Bindings {
       );
     }
 
-    if (!Get.isRegistered<NotificationsMockService>()) {
-      Get.lazyPut<NotificationsMockService>(NotificationsMockService.new);
+    if (!Get.isRegistered<NotificationsApiService>()) {
+      Get.lazyPut<NotificationsApiService>(
+        () => NotificationsApiService(apiClient: Get.find<ApiClient>()),
+        fenix: true,
+      );
     }
 
     if (!Get.isRegistered<LeaderboardService>()) {

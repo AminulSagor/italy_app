@@ -194,9 +194,7 @@ class MessagesController extends GetxController {
           blockStatus: 'none',
           isHighlighted: true,
           isDelivered: true,
-          avatarUrl: avatar.isNotEmpty
-              ? avatar
-              : 'https://i.pravatar.cc/120?img=12',
+          avatarUrl: avatar,
           contactId: senderId.isNotEmpty ? senderId : null,
         );
         // prevent duplicates
@@ -430,8 +428,7 @@ class MessagesController extends GetxController {
       blockStatus: user['blockStatus']?.toString() ?? 'none',
       isHighlighted: false,
       isDelivered: true,
-      avatarUrl:
-          user['avatarUrl']?.toString() ?? 'https://i.pravatar.cc/120?img=12',
+      avatarUrl: user['avatarUrl']?.toString() ?? '',
       contactId: otherUserId,
     );
 

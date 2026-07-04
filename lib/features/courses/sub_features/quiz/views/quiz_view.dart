@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -22,7 +24,10 @@ class QuizView extends GetView<QuizController> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.quiz,
+      sourceId: 'quiz_view',
+      child: Material(
       color: AppColors.coursesDetailBg,
       child: SafeArea(
         bottom: false,
@@ -104,6 +109,7 @@ class QuizView extends GetView<QuizController> {
           );
         }),
       ),
+    ),
     );
   }
 

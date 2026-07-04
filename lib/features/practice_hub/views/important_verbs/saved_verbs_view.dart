@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -13,7 +15,10 @@ class SavedVerbsView extends GetView<ImportantVerbsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.importantVerbs,
+      sourceId: 'saved_verbs_view',
+      child: Scaffold(
       backgroundColor: AppColors.homeBackground,
       appBar: SimpleAppbar(
         title: 'gen_saved_verbs'.tr.tr,
@@ -71,6 +76,7 @@ class SavedVerbsView extends GetView<ImportantVerbsController> {
           ),
         ),
       ),
+    ),
     );
   }
 }
