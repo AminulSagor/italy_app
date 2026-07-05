@@ -56,16 +56,6 @@ import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_service.dart';
 import '../features/notifications/services/notifications_mock_service.dart';
 import '../features/practice_hub/services/job_sentences_api_service.dart';
-import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_contact_controller.dart';
-import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_dynamic_form_controller.dart';
-import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_theme_controller.dart';
-import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_education_controller.dart';
-import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_experience_controller.dart';
-import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_summary_controller.dart';
-import '../features/service_hub/sub_features/cv_builder/controllers/cv_ready_controller.dart';
-import '../features/service_hub/sub_features/cv_builder/controllers/cv_template_controller.dart';
-import '../features/service_hub/sub_features/cv_builder/services/cv_builder_api_service.dart';
-import '../features/service_hub/sub_features/cv_builder/services/cv_pdf_download_service.dart';
 import '../core/services/api_client.dart';
 import '../core/controllers/user_session_controller.dart';
 import '../core/services/learning_activity_api_service.dart';
@@ -73,16 +63,6 @@ import '../core/services/auth_service.dart';
 import '../core/services/token_service.dart';
 import '../features/messages/services/chat_socket_service.dart';
 import '../features/messages/services/presence_service.dart';
-import '../features/service_hub/sub_features/cv_builder/views/choose_cv_template_view.dart';
-import '../features/service_hub/sub_features/cv_builder/views/create_cv_choice_view.dart';
-import '../features/service_hub/sub_features/cv_builder/views/create_cv_contact_view.dart';
-import '../features/service_hub/sub_features/cv_builder/views/create_cv_dynamic_form_view.dart';
-import '../features/service_hub/sub_features/cv_builder/views/create_cv_theme_view.dart';
-import '../features/service_hub/sub_features/cv_builder/views/create_cv_education_view.dart';
-import '../features/service_hub/sub_features/cv_builder/views/create_cv_experience_view.dart';
-import '../features/service_hub/sub_features/cv_builder/views/create_cv_summary_view.dart';
-import '../features/service_hub/sub_features/cv_builder/views/cv_builder_view.dart';
-import '../features/service_hub/sub_features/cv_builder/views/cv_ready_view.dart';
 import '../features/splash/splash_view.dart';
 import '../features/splash/splash_controller.dart';
 import '../features/webinar/controllers/webinar_controller.dart';
@@ -379,66 +359,9 @@ class AppPages {
       }),
     ),
 
-    GetPage(name: AppRoutes.cvBuilder, page: () => const CvBuilderView()),
-    GetPage(
-      name: AppRoutes.createCvChoice,
-      page: () => const CreateCvChoiceView(),
-    ),
-    GetPage(
-      name: AppRoutes.chooseCvTemplate,
-      page: () => const ChooseCvTemplateView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<CvBuilderApiService>(
-          () => CvBuilderApiService(apiClient: Get.find<ApiClient>()),
-        );
-        Get.lazyPut<CvTemplateController>(
-          () => CvTemplateController(
-            cvBuilderApiService: Get.find<CvBuilderApiService>(),
-          ),
-        );
-      }),
-    ),
-    GetPage(
-      name: AppRoutes.createCvContact,
-      page: () => const CreateCvContactView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<CreateCvContactController>(
-          () => CreateCvContactController(),
-        );
-      }),
-    ),
-    GetPage(
-      name: AppRoutes.createCvDynamicForm,
-      page: () => const CreateCvDynamicFormView(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<CvBuilderApiService>()) {
-          Get.lazyPut<CvBuilderApiService>(
-            () => CvBuilderApiService(apiClient: Get.find<ApiClient>()),
-          );
-        }
-        Get.lazyPut<CreateCvDynamicFormController>(
-          () => CreateCvDynamicFormController(
-            cvBuilderApiService: Get.find<CvBuilderApiService>(),
-          ),
-        );
-      }),
-    ),
-    GetPage(
-      name: AppRoutes.createCvTheme,
-      page: () => const CreateCvThemeView(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<CvBuilderApiService>()) {
-          Get.lazyPut<CvBuilderApiService>(
-            () => CvBuilderApiService(apiClient: Get.find<ApiClient>()),
-          );
-        }
-        Get.lazyPut<CreateCvThemeController>(
-          () => CreateCvThemeController(
-            cvBuilderApiService: Get.find<CvBuilderApiService>(),
-          ),
-        );
-      }),
-    ),
+
+
+
     GetPage(
       name: AppRoutes.chapterDetail,
       page: () {
@@ -524,15 +447,7 @@ class AppPages {
         );
       }),
     ),
-    GetPage(
-      name: AppRoutes.createCvExperience,
-      page: () => const CreateCvExperienceView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<CreateCvExperienceController>(
-          () => CreateCvExperienceController(),
-        );
-      }),
-    ),
+
     GetPage(
       name: AppRoutes.quiz,
       page: () {
@@ -574,15 +489,7 @@ class AppPages {
         );
       }),
     ),
-    GetPage(
-      name: AppRoutes.createCvEducation,
-      page: () => const CreateCvEducationView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<CreateCvEducationController>(
-          () => CreateCvEducationController(),
-        );
-      }),
-    ),
+
     GetPage(
       name: AppRoutes.quizCompletion,
       page: () {
@@ -629,20 +536,7 @@ class AppPages {
         );
       }),
     ),
-    GetPage(
-      name: AppRoutes.createCvSummary,
-      page: () => const CreateCvSummaryView(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<CvBuilderApiService>()) {
-          Get.lazyPut<CvBuilderApiService>(
-            () => CvBuilderApiService(apiClient: Get.find<ApiClient>()),
-          );
-        }
-        Get.lazyPut<CreateCvSummaryController>(
-          () => CreateCvSummaryController(),
-        );
-      }),
-    ),
+
     GetPage(
       name: AppRoutes.proCheckout,
       page: () {
@@ -1169,19 +1063,6 @@ class AppPages {
         Get.find<PracticeHubController>().loadDailyChallenges(showError: false);
       }),
     ),
-    GetPage(
-      name: AppRoutes.cvReady,
-      page: () => const CvReadyView(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<CvPdfDownloadService>()) {
-          Get.lazyPut<CvPdfDownloadService>(() => CvPdfDownloadService());
-        }
-        Get.lazyPut<CvReadyController>(
-          () => CvReadyController(
-            cvPdfDownloadService: Get.find<CvPdfDownloadService>(),
-          ),
-        );
-      }),
-    ),
+
   ];
 }

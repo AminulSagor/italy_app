@@ -3,6 +3,247 @@
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
+    'cv_preview_load_failed':
+    'CV preview could not be loaded.',
+    'cv_validation_title': 'Complete your CV',
+    'cv_validation_subtitle':
+    'Resolve the remaining items before generating.',
+
+    'cv_validation_generation_requirements':
+    'Generation requirements',
+    'cv_validation_required_information':
+    'Required information',
+    'cv_validation_template_sections':
+    'Template sections',
+    'cv_validation_optional_sections':
+    'Optional sections',
+    'cv_validation_suggestions': 'Suggestions',
+
+    'cv_validation_one_suggestion':
+    'One suggestion needs Accept, Edit, or Reject.',
+    'cv_validation_multiple_suggestions':
+    '@count suggestions need Accept, Edit, or Reject.',
+
+    'cv_validation_profile_photo': 'Profile photo',
+    'cv_validation_photo_instruction':
+    'Choose a photo or continue without one.',
+    'cv_validation_quality_issues': 'Quality issues',
+
+    'cv_validation_remaining_steps':
+    'Complete the remaining assistant steps before generating your CV.',
+    'cv_thinking_default': 'Thinking…',
+    'cv_template_card_use_template':
+    'Use this template',
+    'cv_template_card_analyzing':
+    'Analyzing template…',
+    'cv_template_card_analysis_failed':
+    'Template analysis failed',
+    'cv_template_card_analysis_default_error':
+    'The template could not be analyzed.',
+    'cv_template_card_retry':
+    'Retry',
+    'cv_selected_template_label':
+    'Selected template',
+    'cv_photo_decision_title':
+    'আপনি কি একটি ছবি যোগ করতে চান?',
+    'cv_photo_decision_description':
+    'একটি পেশাদার প্রোফাইল ছবি নির্বাচন করুন অথবা ছবি ছাড়াই চালিয়ে যান।',
+    'cv_photo_decision_without_photo':
+    'ছবি ছাড়া',
+    'cv_photo_decision_upload_photo':
+    'ছবি আপলোড করুন',
+    'cv_edit_options_title': 'Edit Your CV',
+    'cv_edit_options_subtitle':
+    'Choose what you want to update.',
+
+    'cv_edit_options_information_title':
+    'Edit information',
+    'cv_edit_options_information_description':
+    'Update CV facts while preserving the existing design.',
+
+    'cv_edit_options_information_design_title':
+    'Edit information and design',
+    'cv_edit_options_information_design_description':
+    'Update CV facts and then provide a new design instruction.',
+
+    'cv_edit_options_design_only_title':
+    'Change design only',
+    'cv_edit_options_design_only_description':
+    'Keep all existing information and change only the design.',
+
+    'cv_edit_options_version_notice':
+    'A new CV version will be created. Your original CV will remain unchanged.',
+    'cv_design_title': 'Change CV Design',
+    'cv_design_description':
+    'Describe the visual change. Your existing CV information will be preserved.',
+    'cv_design_hint':
+    'Example: Use a clean dark-blue design with stronger headings.',
+    'cv_design_examples': 'Examples',
+    'cv_design_generate': 'Generate New Design',
+    'cv_design_empty_error':
+    'Describe how you want the design to change.',
+
+    'cv_design_example_dark_blue':
+    'Use a dark-blue professional theme.',
+    'cv_design_example_minimal':
+    'Make the layout more minimal.',
+    'cv_design_example_two_column':
+    'Use a modern two-column design.',
+    'cv_chat_message_sending': 'Sending',
+    'cv_chat_message_failed': 'Failed',
+    'cv_chat_message_retry': 'Retry',
+    'cv_chat_input_email_hint':
+    'Enter your email address',
+    'cv_chat_input_phone_hint':
+    'Enter your phone number',
+    'cv_chat_input_url_hint':
+    'Enter the website URL',
+    'cv_chat_input_list_hint':
+    'Enter items separated by commas',
+    'cv_chat_input_choice_hint':
+    'Select or type your answer',
+    'cv_chat_input_long_text_hint':
+    'Write your answer',
+    'cv_chat_input_default_hint':
+    'Type your answer...',
+    'cv_chat_action_generating': 'Generating CV...',
+    'cv_chat_action_generate': 'Generate CV',
+    'cv_attachment_title': 'Add CV Image',
+    'cv_attachment_profile_photo':
+    'Upload Profile Photo',
+    'cv_attachment_profile_photo_description':
+    'Add the candidate photo that should appear in the CV.',
+    'cv_attachment_reference':
+    'Upload Reference CV or Design',
+    'cv_attachment_reference_description':
+    'Add a CV, layout, color, or design image for visual reference.',
+    'cv_generation_title': 'Generated CV',
+    'cv_generation_image_unavailable':
+    'The generated CV image is unavailable.',
+
+    'cv_generation_opening_information_editor':
+    'Opening information editor',
+    'cv_generation_preparing_information_editor':
+    'Preparing your existing CV details for editing. Please wait…',
+    'cv_generation_preparing_cv_editor':
+    'Preparing CV editor',
+    'cv_generation_loading_information_design':
+    'Loading your information and design settings. Please wait…',
+    'cv_generation_opening_design_editor':
+    'Opening design editor',
+    'cv_generation_preparing_design_form':
+    'Preparing the design instruction form…',
+
+    'cv_generation_creating_title':
+    'Creating Your CV',
+    'cv_generation_creating_description':
+    'AI generation may take a few minutes. Please stay on this page while we create your CV.',
+    'cv_generation_do_not_leave':
+    'Do not close the app or leave this screen.',
+
+    'cv_generation_open_fullscreen':
+    'Open full-screen preview',
+    'cv_generation_reset_zoom':
+    'Reset zoom',
+
+    'cv_generation_new_version_notice':
+    'This is a new CV version. The original CV remains unchanged.',
+    'cv_generation_edit_version_notice':
+    'Editing or changing the design will create a new CV version. Your original CV will remain unchanged.',
+    'cv_generation_review_notice':
+    'Review the spelling, dates, phone number, email, and all other details before using this CV.',
+
+    'cv_generation_download_started':
+    'Download started',
+    'cv_generation_applying_design':
+    'Applying your design changes',
+    'cv_generation_opening_editor':
+    'Opening the CV editor',
+
+    'cv_generation_pdf_preparing_saving':
+    'Your A4 PDF is being prepared and saved directly to your phone.',
+    'cv_generation_ai_creating_version':
+    'AI is creating a new CV version with your requested design changes.',
+    'cv_generation_preparing_edit_information':
+    'Please wait while we prepare your CV information for editing.',
+
+    'cv_generation_opening_editor_button':
+    'Opening editor...',
+    'cv_generation_applying_design_button':
+    'Applying design changes...',
+    'cv_generation_edit_design_button':
+    'Edit or Change Design',
+
+    'cv_generation_download_snackbar':
+    'Preparing your A4 PDF. It will be saved directly to your phone.',
+    'cv_generation_preparing_download':
+    'Preparing download...',
+    'cv_generation_download_pdf':
+    'Download A4 PDF',
+
+    'cv_generation_close_preview':
+    'Close preview',
+    'cv_generation_zoom_in':
+    'Zoom in',
+    'cv_generation_zoom_out':
+    'Zoom out',
+
+    'cv_generation_failed':
+    'CV Generation Failed',
+    'cv_generation_try_again':
+    'Try Again',
+    'cv_generation_do_not_close_page':
+    'Please do not close this page',
+    'cv_chat_assistant_title': 'CV Assistant',
+    'cv_chat_reviewing_information':
+    'Reviewing your CV information…',
+
+    'cv_chat_edit_facts_title': 'Update CV Information',
+    'cv_chat_edit_design_title': 'Update Information and Design',
+    'cv_chat_edit_facts_description':
+    'Update your information. The existing design will be preserved.',
+    'cv_chat_edit_design_description':
+    'Update your information first, then provide the new design instruction.',
+
+    'cv_chat_mode_one_by_one': 'One by One',
+    'cv_chat_mode_all_at_once': 'All at Once',
+
+    'cv_chat_status_collecting':
+    'Collecting CV information',
+    'cv_chat_status_ready':
+    'Ready to generate',
+    'cv_chat_status_generating':
+    'Generating CV',
+    'cv_chat_status_completed': 'Completed',
+    'cv_chat_status_cancelled': 'Cancelled',
+
+    'cv_chat_starting_assistant':
+    'Starting CV Assistant',
+    'cv_chat_starting_description':
+    'The assistant will ask for the information needed to create your CV.',
+    'cv_home_create_your_cv': 'Create Your CV',
+    'cv_home_description':
+    'Choose a CV template or let the CV assistant create a design from scratch.',
+    'cv_home_choose_template': 'Choose a Template',
+    'cv_home_search_templates': 'Search CV templates...',
+    'cv_home_could_not_load_templates': 'Could not load templates',
+    'cv_home_try_again': 'Try Again',
+    'cv_home_no_templates_found': 'No templates found',
+    'cv_home_no_templates_available':
+    'No CV templates are currently available.',
+    'cv_home_no_search_match':
+    'No template matches your search.',
+    'cv_home_clear_search': 'Clear Search',
+    'cv_home_load_more': 'Load More',
+    'cv_home_analyzing_template': 'Analyzing Template',
+    'cv_home_analyzing_description':
+    'The CV assistant is reviewing the layout, sections, colors, and design of this template.',
+    'cv_home_assistant_open_automatically':
+    'The CV Assistant will open automatically when the analysis is complete.',
+    'cv_home_stay_on_page': 'Please stay on this page.',
+    'cv_home_build_from_scratch': 'Build From Scratch',
+    'cv_home_build_from_scratch_description':
+    'Chat with the CV assistant, share your preferences, and generate a professional CV.',
     'discover_your_exact_level': 'Discover your exact\nlevel.',
     'climb_the_tiers_and_become_an_italian_master':
         'Climb the tiers and become\nan Italian Master.',
@@ -1966,6 +2207,63 @@ appTranslations = <String, Map<String, String>>{
     'score_xp_delta': '+@xp XP',
   },
   'bn_BD': <String, String>{
+    'cv_chat_assistant_title': 'সিভি অ্যাসিস্ট্যান্ট',
+    'cv_chat_reviewing_information':
+    'আপনার সিভির তথ্য পর্যালোচনা করা হচ্ছে…',
+
+    'cv_chat_edit_facts_title':
+    'সিভির তথ্য আপডেট করুন',
+    'cv_chat_edit_design_title':
+    'তথ্য ও ডিজাইন আপডেট করুন',
+    'cv_chat_edit_facts_description':
+    'আপনার তথ্য আপডেট করুন। বর্তমান ডিজাইন অপরিবর্তিত রাখা হবে।',
+    'cv_chat_edit_design_description':
+    'প্রথমে আপনার তথ্য আপডেট করুন, তারপর নতুন ডিজাইনের নির্দেশনা দিন।',
+
+    'cv_chat_mode_one_by_one': 'একটি একটি করে',
+    'cv_chat_mode_all_at_once': 'সব একসঙ্গে',
+
+    'cv_chat_status_collecting':
+    'সিভির তথ্য সংগ্রহ করা হচ্ছে',
+    'cv_chat_status_ready':
+    'তৈরি করার জন্য প্রস্তুত',
+    'cv_chat_status_generating':
+    'সিভি তৈরি করা হচ্ছে',
+    'cv_chat_status_completed': 'সম্পন্ন হয়েছে',
+    'cv_chat_status_cancelled': 'বাতিল করা হয়েছে',
+
+    'cv_chat_starting_assistant':
+    'সিভি অ্যাসিস্ট্যান্ট চালু হচ্ছে',
+    'cv_chat_starting_description':
+    'আপনার সিভি তৈরি করার জন্য প্রয়োজনীয় তথ্য অ্যাসিস্ট্যান্ট জিজ্ঞাসা করবে।',
+    'cv_home_create_your_cv': 'আপনার সিভি তৈরি করুন',
+    'cv_home_description':
+    'একটি সিভি টেমপ্লেট বেছে নিন অথবা সিভি অ্যাসিস্ট্যান্টকে শুরু থেকে একটি ডিজাইন তৈরি করতে দিন।',
+    'cv_home_choose_template': 'একটি টেমপ্লেট বেছে নিন',
+    'cv_home_search_templates': 'সিভি টেমপ্লেট খুঁজুন...',
+    'cv_home_could_not_load_templates':
+    'টেমপ্লেট লোড করা যায়নি',
+    'cv_home_try_again': 'আবার চেষ্টা করুন',
+    'cv_home_no_templates_found':
+    'কোনো টেমপ্লেট পাওয়া যায়নি',
+    'cv_home_no_templates_available':
+    'বর্তমানে কোনো সিভি টেমপ্লেট উপলভ্য নেই।',
+    'cv_home_no_search_match':
+    'আপনার অনুসন্ধানের সঙ্গে মিলছে এমন কোনো টেমপ্লেট নেই।',
+    'cv_home_clear_search': 'অনুসন্ধান পরিষ্কার করুন',
+    'cv_home_load_more': 'আরও লোড করুন',
+    'cv_home_analyzing_template':
+    'টেমপ্লেট বিশ্লেষণ করা হচ্ছে',
+    'cv_home_analyzing_description':
+    'সিভি অ্যাসিস্ট্যান্ট এই টেমপ্লেটের লেআউট, সেকশন, রং এবং ডিজাইন পর্যালোচনা করছে।',
+    'cv_home_assistant_open_automatically':
+    'বিশ্লেষণ সম্পূর্ণ হলে সিভি অ্যাসিস্ট্যান্ট স্বয়ংক্রিয়ভাবে খুলবে।',
+    'cv_home_stay_on_page':
+    'অনুগ্রহ করে এই পেজে থাকুন।',
+    'cv_home_build_from_scratch':
+    'শুরু থেকে তৈরি করুন',
+    'cv_home_build_from_scratch_description':
+    'সিভি অ্যাসিস্ট্যান্টের সঙ্গে চ্যাট করুন, আপনার পছন্দগুলো জানান এবং একটি পেশাদার সিভি তৈরি করুন।',
     'fill_form_and_submit':
         'সঠিকভাবে ফরম পূরণ করুন এবং প্রয়োজনীয় কাগজপত্র জমা সংযুক্ত করুন।',
     'course_resources': 'কোর্স রিসোর্স',
@@ -2527,6 +2825,203 @@ appTranslations = <String, Map<String, String>>{
     'gen_support': 'সমর্থন',
     'gen_language': 'ভাষা',
     'gen_settings': 'সেটিংস',
+    'cv_generation_title': 'তৈরি করা সিভি',
+    'cv_generation_image_unavailable':
+    'তৈরি করা সিভির ছবিটি পাওয়া যাচ্ছে না।',
+
+    'cv_generation_opening_information_editor':
+    'তথ্য সম্পাদনা পৃষ্ঠা খোলা হচ্ছে',
+    'cv_generation_preparing_information_editor':
+    'সম্পাদনার জন্য আপনার বর্তমান সিভির তথ্য প্রস্তুত করা হচ্ছে। অনুগ্রহ করে অপেক্ষা করুন…',
+    'cv_generation_preparing_cv_editor':
+    'সিভি এডিটর প্রস্তুত করা হচ্ছে',
+    'cv_generation_loading_information_design':
+    'আপনার তথ্য ও ডিজাইন সেটিংস লোড করা হচ্ছে। অনুগ্রহ করে অপেক্ষা করুন…',
+    'cv_generation_opening_design_editor':
+    'ডিজাইন এডিটর খোলা হচ্ছে',
+    'cv_generation_preparing_design_form':
+    'ডিজাইন নির্দেশনার ফর্ম প্রস্তুত করা হচ্ছে…',
+
+    'cv_generation_creating_title':
+    'আপনার সিভি তৈরি করা হচ্ছে',
+    'cv_generation_creating_description':
+    'এআই দিয়ে সিভি তৈরি করতে কয়েক মিনিট সময় লাগতে পারে। আমরা আপনার সিভি তৈরি করার সময় এই পেজে থাকুন।',
+    'cv_generation_do_not_leave':
+    'অ্যাপ বন্ধ করবেন না বা এই স্ক্রিন থেকে বের হবেন না।',
+
+    'cv_generation_open_fullscreen':
+    'পূর্ণস্ক্রিন প্রিভিউ খুলুন',
+    'cv_generation_reset_zoom':
+    'জুম রিসেট করুন',
+
+    'cv_generation_new_version_notice':
+    'এটি সিভির একটি নতুন সংস্করণ। মূল সিভি অপরিবর্তিত থাকবে।',
+    'cv_generation_edit_version_notice':
+    'তথ্য সম্পাদনা বা ডিজাইন পরিবর্তন করলে সিভির একটি নতুন সংস্করণ তৈরি হবে। আপনার মূল সিভি অপরিবর্তিত থাকবে।',
+    'cv_generation_review_notice':
+    'এই সিভি ব্যবহারের আগে বানান, তারিখ, ফোন নম্বর, ইমেইল এবং অন্যান্য সব তথ্য যাচাই করুন।',
+
+    'cv_generation_download_started':
+    'ডাউনলোড শুরু হয়েছে',
+    'cv_generation_applying_design':
+    'আপনার ডিজাইন পরিবর্তন প্রয়োগ করা হচ্ছে',
+    'cv_generation_opening_editor':
+    'সিভি এডিটর খোলা হচ্ছে',
+
+    'cv_generation_pdf_preparing_saving':
+    'আপনার A4 PDF প্রস্তুত করে সরাসরি ফোনে সংরক্ষণ করা হচ্ছে।',
+    'cv_generation_ai_creating_version':
+    'আপনার চাওয়া ডিজাইন পরিবর্তনসহ এআই সিভির একটি নতুন সংস্করণ তৈরি করছে।',
+    'cv_generation_preparing_edit_information':
+    'সম্পাদনার জন্য আপনার সিভির তথ্য প্রস্তুত করা হচ্ছে। অনুগ্রহ করে অপেক্ষা করুন।',
+
+    'cv_generation_opening_editor_button':
+    'এডিটর খোলা হচ্ছে...',
+    'cv_generation_applying_design_button':
+    'ডিজাইন পরিবর্তন প্রয়োগ করা হচ্ছে...',
+    'cv_generation_edit_design_button':
+    'সম্পাদনা করুন বা ডিজাইন পরিবর্তন করুন',
+
+    'cv_generation_download_snackbar':
+    'আপনার A4 PDF প্রস্তুত করা হচ্ছে। এটি সরাসরি আপনার ফোনে সংরক্ষণ করা হবে।',
+    'cv_generation_preparing_download':
+    'ডাউনলোড প্রস্তুত করা হচ্ছে...',
+    'cv_generation_download_pdf':
+    'A4 PDF ডাউনলোড করুন',
+
+    'cv_generation_close_preview':
+    'প্রিভিউ বন্ধ করুন',
+    'cv_generation_zoom_in':
+    'জুম বড় করুন',
+    'cv_generation_zoom_out':
+    'জুম ছোট করুন',
+
+    'cv_generation_failed':
+    'সিভি তৈরি ব্যর্থ হয়েছে',
+    'cv_generation_try_again':
+    'আবার চেষ্টা করুন',
+    'cv_generation_do_not_close_page':
+    'অনুগ্রহ করে এই পেজটি বন্ধ করবেন না',
+    'cv_attachment_title': 'সিভির ছবি যোগ করুন',
+    'cv_attachment_profile_photo':
+    'প্রোফাইল ছবি আপলোড করুন',
+    'cv_attachment_profile_photo_description':
+    'সিভিতে প্রদর্শনের জন্য প্রার্থীর ছবি যোগ করুন।',
+    'cv_attachment_reference':
+    'রেফারেন্স সিভি বা ডিজাইন আপলোড করুন',
+    'cv_attachment_reference_description':
+    'ভিজ্যুয়াল রেফারেন্স হিসেবে একটি সিভি, লেআউট, রং বা ডিজাইনের ছবি যোগ করুন।',
+    'cv_chat_action_generating':
+    'সিভি তৈরি করা হচ্ছে...',
+    'cv_chat_action_generate':
+    'সিভি তৈরি করুন',
+    'cv_chat_input_email_hint':
+    'আপনার ইমেইল ঠিকানা লিখুন',
+    'cv_chat_input_phone_hint':
+    'আপনার ফোন নম্বর লিখুন',
+    'cv_chat_input_url_hint':
+    'ওয়েবসাইটের URL লিখুন',
+    'cv_chat_input_list_hint':
+    'কমা দিয়ে আলাদা করে আইটেমগুলো লিখুন',
+    'cv_chat_input_choice_hint':
+    'আপনার উত্তর নির্বাচন করুন অথবা লিখুন',
+    'cv_chat_input_long_text_hint':
+    'আপনার উত্তর লিখুন',
+    'cv_chat_input_default_hint':
+    'আপনার উত্তর টাইপ করুন...',
+    'cv_chat_message_sending': 'পাঠানো হচ্ছে',
+    'cv_chat_message_failed': 'পাঠানো ব্যর্থ হয়েছে',
+    'cv_chat_message_retry': 'আবার চেষ্টা করুন',
+    'cv_design_title': 'সিভির ডিজাইন পরিবর্তন করুন',
+    'cv_design_description':
+    'আপনি কী ধরনের ভিজ্যুয়াল পরিবর্তন চান তা লিখুন। আপনার বর্তমান সিভির তথ্য অপরিবর্তিত থাকবে।',
+    'cv_design_hint':
+    'উদাহরণ: আরও স্পষ্ট শিরোনামসহ একটি পরিষ্কার গাঢ় নীল ডিজাইন ব্যবহার করুন।',
+    'cv_design_examples': 'উদাহরণ',
+    'cv_design_generate': 'নতুন ডিজাইন তৈরি করুন',
+    'cv_design_empty_error':
+    'আপনি কীভাবে ডিজাইন পরিবর্তন করতে চান তা লিখুন।',
+
+    'cv_design_example_dark_blue':
+    'একটি পেশাদার গাঢ় নীল থিম ব্যবহার করুন।',
+    'cv_design_example_minimal':
+    'লেআউটটি আরও মিনিমাল করুন।',
+    'cv_design_example_two_column':
+    'একটি আধুনিক দুই-কলামের ডিজাইন ব্যবহার করুন।',
+    'cv_edit_options_title':
+    'আপনার সিভি সম্পাদনা করুন',
+    'cv_edit_options_subtitle':
+    'আপনি কী আপডেট করতে চান তা নির্বাচন করুন।',
+
+    'cv_edit_options_information_title':
+    'তথ্য সম্পাদনা করুন',
+    'cv_edit_options_information_description':
+    'বর্তমান ডিজাইন অপরিবর্তিত রেখে সিভির তথ্য আপডেট করুন।',
+
+    'cv_edit_options_information_design_title':
+    'তথ্য ও ডিজাইন সম্পাদনা করুন',
+    'cv_edit_options_information_design_description':
+    'সিভির তথ্য আপডেট করুন এবং এরপর নতুন ডিজাইনের নির্দেশনা দিন।',
+
+    'cv_edit_options_design_only_title':
+    'শুধু ডিজাইন পরিবর্তন করুন',
+    'cv_edit_options_design_only_description':
+    'বর্তমান সব তথ্য অপরিবর্তিত রেখে শুধু ডিজাইন পরিবর্তন করুন।',
+
+    'cv_edit_options_version_notice':
+    'সিভির একটি নতুন সংস্করণ তৈরি হবে। আপনার মূল সিভি অপরিবর্তিত থাকবে।',
+    'cv_photo_decision_title':
+    'আপনি কি একটি ছবি যোগ করতে চান?',
+    'cv_photo_decision_description':
+    'একটি পেশাদার প্রোফাইল ছবি নির্বাচন করুন অথবা ছবি ছাড়াই চালিয়ে যান।',
+    'cv_photo_decision_without_photo':
+    'ছবি ছাড়া',
+    'cv_photo_decision_upload_photo':
+    'ছবি আপলোড করুন',
+    'cv_selected_template_label':
+    'নির্বাচিত টেমপ্লেট',
+    'cv_template_card_use_template':
+    'এই টেমপ্লেটটি ব্যবহার করুন',
+    'cv_template_card_analyzing':
+    'টেমপ্লেট বিশ্লেষণ করা হচ্ছে…',
+    'cv_template_card_analysis_failed':
+    'টেমপ্লেট বিশ্লেষণ ব্যর্থ হয়েছে',
+    'cv_template_card_analysis_default_error':
+    'টেমপ্লেটটি বিশ্লেষণ করা যায়নি।',
+    'cv_template_card_retry':
+    'আবার চেষ্টা করুন',
+    'cv_thinking_default': 'ভাবা হচ্ছে…',
+    'cv_validation_title':
+    'আপনার সিভি সম্পূর্ণ করুন',
+    'cv_validation_subtitle':
+    'সিভি তৈরি করার আগে বাকি বিষয়গুলো সম্পন্ন করুন।',
+
+    'cv_validation_generation_requirements':
+    'সিভি তৈরির প্রয়োজনীয়তা',
+    'cv_validation_required_information':
+    'প্রয়োজনীয় তথ্য',
+    'cv_validation_template_sections':
+    'টেমপ্লেট সেকশন',
+    'cv_validation_optional_sections':
+    'ঐচ্ছিক সেকশন',
+    'cv_validation_suggestions': 'পরামর্শ',
+
+    'cv_validation_one_suggestion':
+    'একটি পরামর্শ গ্রহণ, সম্পাদনা অথবা প্রত্যাখ্যান করতে হবে।',
+    'cv_validation_multiple_suggestions':
+    '@countটি পরামর্শ গ্রহণ, সম্পাদনা অথবা প্রত্যাখ্যান করতে হবে।',
+
+    'cv_validation_profile_photo':
+    'প্রোফাইল ছবি',
+    'cv_validation_photo_instruction':
+    'একটি ছবি নির্বাচন করুন অথবা ছবি ছাড়াই চালিয়ে যান।',
+    'cv_validation_quality_issues':
+    'গুণগত সমস্যাগুলো',
+
+    'cv_validation_remaining_steps':
+    'সিভি তৈরি করার আগে অ্যাসিস্ট্যান্টের বাকি ধাপগুলো সম্পন্ন করুন।',
+    'cv_preview_load_failed':
+    'সিভির প্রিভিউ লোড করা যায়নি।',
 
     // ── Cleaned synchronized translations ──
     '10_intellectual_property': '10. মেধাস্বত্ব',
@@ -3940,6 +4435,261 @@ appTranslations = <String, Map<String, String>>{
     'score_xp_delta': '+@xp XP',
   },
   'it_IT': <String, String>{
+    'cv_preview_load_failed':
+    'Impossibile caricare l’anteprima del CV.',
+    'cv_validation_title':
+    'Completa il tuo CV',
+    'cv_validation_subtitle':
+    'Risolvi gli elementi rimanenti prima di generare il CV.',
+
+    'cv_validation_generation_requirements':
+    'Requisiti di generazione',
+    'cv_validation_required_information':
+    'Informazioni obbligatorie',
+    'cv_validation_template_sections':
+    'Sezioni del modello',
+    'cv_validation_optional_sections':
+    'Sezioni facoltative',
+    'cv_validation_suggestions':
+    'Suggerimenti',
+
+    'cv_validation_one_suggestion':
+    'Un suggerimento deve essere accettato, modificato o rifiutato.',
+    'cv_validation_multiple_suggestions':
+    '@count suggerimenti devono essere accettati, modificati o rifiutati.',
+
+    'cv_validation_profile_photo':
+    'Foto del profilo',
+    'cv_validation_photo_instruction':
+    'Scegli una foto oppure continua senza foto.',
+    'cv_validation_quality_issues':
+    'Problemi di qualità',
+
+    'cv_validation_remaining_steps':
+    'Completa i passaggi rimanenti dell’assistente prima di generare il CV.',
+    'cv_thinking_default': 'Elaborazione in corso…',
+    'cv_template_card_use_template':
+    'Usa questo modello',
+    'cv_template_card_analyzing':
+    'Analisi del modello in corso…',
+    'cv_template_card_analysis_failed':
+    'Analisi del modello non riuscita',
+    'cv_template_card_analysis_default_error':
+    'Non è stato possibile analizzare il modello.',
+    'cv_template_card_retry':
+    'Riprova',
+    'cv_selected_template_label':
+    'Modello selezionato',
+    'cv_photo_decision_title':
+    'Vuoi aggiungere una foto?',
+    'cv_photo_decision_description':
+    'Scegli una foto profilo professionale oppure continua senza foto.',
+    'cv_photo_decision_without_photo':
+    'Senza foto',
+    'cv_photo_decision_upload_photo':
+    'Carica foto',
+    'cv_edit_options_title':
+    'Modifica il tuo CV',
+    'cv_edit_options_subtitle':
+    'Scegli cosa desideri aggiornare.',
+
+    'cv_edit_options_information_title':
+    'Modifica le informazioni',
+    'cv_edit_options_information_description':
+    'Aggiorna le informazioni del CV mantenendo il design esistente.',
+
+    'cv_edit_options_information_design_title':
+    'Modifica informazioni e design',
+    'cv_edit_options_information_design_description':
+    'Aggiorna le informazioni del CV e poi fornisci le istruzioni per un nuovo design.',
+
+    'cv_edit_options_design_only_title':
+    'Modifica solo il design',
+    'cv_edit_options_design_only_description':
+    'Mantieni tutte le informazioni esistenti e modifica solamente il design.',
+
+    'cv_edit_options_version_notice':
+    'Verrà creata una nuova versione del CV. Il CV originale rimarrà invariato.',
+    'cv_design_title': 'Modifica il design del CV',
+    'cv_design_description':
+    'Descrivi la modifica visiva desiderata. Le informazioni esistenti del CV verranno mantenute.',
+    'cv_design_hint':
+    'Esempio: usa un design pulito blu scuro con titoli più evidenti.',
+    'cv_design_examples': 'Esempi',
+    'cv_design_generate': 'Genera un nuovo design',
+    'cv_design_empty_error':
+    'Descrivi come desideri modificare il design.',
+
+    'cv_design_example_dark_blue':
+    'Usa un tema professionale blu scuro.',
+    'cv_design_example_minimal':
+    'Rendi il layout più minimalista.',
+    'cv_design_example_two_column':
+    'Usa un moderno design a due colonne.',
+    'cv_chat_message_sending': 'Invio in corso',
+    'cv_chat_message_failed': 'Invio non riuscito',
+    'cv_chat_message_retry': 'Riprova',
+    'cv_chat_input_email_hint':
+    'Inserisci il tuo indirizzo e-mail',
+    'cv_chat_input_phone_hint':
+    'Inserisci il tuo numero di telefono',
+    'cv_chat_input_url_hint':
+    'Inserisci l’URL del sito web',
+    'cv_chat_input_list_hint':
+    'Inserisci gli elementi separati da virgole',
+    'cv_chat_input_choice_hint':
+    'Seleziona o scrivi la tua risposta',
+    'cv_chat_input_long_text_hint':
+    'Scrivi la tua risposta',
+    'cv_chat_input_default_hint':
+    'Digita la tua risposta...',
+    'cv_chat_action_generating':
+    'Generazione del CV...',
+    'cv_chat_action_generate':
+    'Genera CV',
+    'cv_attachment_title':
+    'Aggiungi un’immagine al CV',
+    'cv_attachment_profile_photo':
+    'Carica la foto del profilo',
+    'cv_attachment_profile_photo_description':
+    'Aggiungi la foto del candidato da mostrare nel CV.',
+    'cv_attachment_reference':
+    'Carica un CV o un design di riferimento',
+    'cv_attachment_reference_description':
+    'Aggiungi un’immagine di un CV, layout, colore o design come riferimento visivo.',
+    'cv_generation_title': 'CV generato',
+    'cv_generation_image_unavailable':
+    'L’immagine del CV generato non è disponibile.',
+
+    'cv_generation_opening_information_editor':
+    'Apertura dell’editor delle informazioni',
+    'cv_generation_preparing_information_editor':
+    'Preparazione dei dati esistenti del CV per la modifica. Attendi…',
+    'cv_generation_preparing_cv_editor':
+    'Preparazione dell’editor del CV',
+    'cv_generation_loading_information_design':
+    'Caricamento delle informazioni e delle impostazioni di design. Attendi…',
+    'cv_generation_opening_design_editor':
+    'Apertura dell’editor del design',
+    'cv_generation_preparing_design_form':
+    'Preparazione del modulo per le istruzioni di design…',
+
+    'cv_generation_creating_title':
+    'Creazione del tuo CV',
+    'cv_generation_creating_description':
+    'La generazione con l’IA può richiedere alcuni minuti. Rimani su questa pagina mentre creiamo il tuo CV.',
+    'cv_generation_do_not_leave':
+    'Non chiudere l’app e non uscire da questa schermata.',
+
+    'cv_generation_open_fullscreen':
+    'Apri l’anteprima a schermo intero',
+    'cv_generation_reset_zoom':
+    'Reimposta zoom',
+
+    'cv_generation_new_version_notice':
+    'Questa è una nuova versione del CV. Il CV originale rimane invariato.',
+    'cv_generation_edit_version_notice':
+    'La modifica delle informazioni o del design creerà una nuova versione del CV. Il CV originale rimarrà invariato.',
+    'cv_generation_review_notice':
+    'Controlla ortografia, date, numero di telefono, e-mail e tutti gli altri dettagli prima di utilizzare questo CV.',
+
+    'cv_generation_download_started':
+    'Download avviato',
+    'cv_generation_applying_design':
+    'Applicazione delle modifiche al design',
+    'cv_generation_opening_editor':
+    'Apertura dell’editor del CV',
+
+    'cv_generation_pdf_preparing_saving':
+    'Il PDF A4 è in preparazione e verrà salvato direttamente sul telefono.',
+    'cv_generation_ai_creating_version':
+    'L’IA sta creando una nuova versione del CV con le modifiche al design richieste.',
+    'cv_generation_preparing_edit_information':
+    'Attendi mentre prepariamo le informazioni del CV per la modifica.',
+
+    'cv_generation_opening_editor_button':
+    'Apertura editor...',
+    'cv_generation_applying_design_button':
+    'Applicazione modifiche al design...',
+    'cv_generation_edit_design_button':
+    'Modifica o cambia design',
+
+    'cv_generation_download_snackbar':
+    'Preparazione del PDF A4. Verrà salvato direttamente sul telefono.',
+    'cv_generation_preparing_download':
+    'Preparazione download...',
+    'cv_generation_download_pdf':
+    'Scarica PDF A4',
+
+    'cv_generation_close_preview':
+    'Chiudi anteprima',
+    'cv_generation_zoom_in':
+    'Ingrandisci',
+    'cv_generation_zoom_out':
+    'Riduci',
+
+    'cv_generation_failed':
+    'Generazione del CV non riuscita',
+    'cv_generation_try_again':
+    'Riprova',
+    'cv_generation_do_not_close_page':
+    'Non chiudere questa pagina',
+    'cv_chat_assistant_title': 'Assistente CV',
+    'cv_chat_reviewing_information':
+    'Revisione delle informazioni del tuo CV…',
+
+    'cv_chat_edit_facts_title':
+    'Aggiorna le informazioni del CV',
+    'cv_chat_edit_design_title':
+    'Aggiorna informazioni e design',
+    'cv_chat_edit_facts_description':
+    'Aggiorna le tue informazioni. Il design esistente verrà mantenuto.',
+    'cv_chat_edit_design_description':
+    'Aggiorna prima le tue informazioni, quindi fornisci le istruzioni per il nuovo design.',
+
+    'cv_chat_mode_one_by_one': 'Una alla volta',
+    'cv_chat_mode_all_at_once': 'Tutte insieme',
+
+    'cv_chat_status_collecting':
+    'Raccolta delle informazioni del CV',
+    'cv_chat_status_ready':
+    'Pronto per la generazione',
+    'cv_chat_status_generating':
+    'Generazione del CV',
+    'cv_chat_status_completed': 'Completato',
+    'cv_chat_status_cancelled': 'Annullato',
+
+    'cv_chat_starting_assistant':
+    'Avvio dell’Assistente CV',
+    'cv_chat_starting_description':
+    'L’assistente ti chiederà le informazioni necessarie per creare il tuo CV.',
+    'cv_home_create_your_cv': 'Crea il tuo CV',
+    'cv_home_description':
+    'Scegli un modello di CV oppure lascia che l’assistente CV crei un design da zero.',
+    'cv_home_choose_template': 'Scegli un modello',
+    'cv_home_search_templates': 'Cerca modelli di CV...',
+    'cv_home_could_not_load_templates':
+    'Impossibile caricare i modelli',
+    'cv_home_try_again': 'Riprova',
+    'cv_home_no_templates_found':
+    'Nessun modello trovato',
+    'cv_home_no_templates_available':
+    'Al momento non sono disponibili modelli di CV.',
+    'cv_home_no_search_match':
+    'Nessun modello corrisponde alla tua ricerca.',
+    'cv_home_clear_search': 'Cancella ricerca',
+    'cv_home_load_more': 'Carica altro',
+    'cv_home_analyzing_template':
+    'Analisi del modello in corso',
+    'cv_home_analyzing_description':
+    'L’assistente CV sta esaminando il layout, le sezioni, i colori e il design di questo modello.',
+    'cv_home_assistant_open_automatically':
+    'L’Assistente CV si aprirà automaticamente al termine dell’analisi.',
+    'cv_home_stay_on_page':
+    'Rimani su questa pagina.',
+    'cv_home_build_from_scratch': 'Crea da zero',
+    'cv_home_build_from_scratch_description':
+    'Chatta con l’assistente CV, condividi le tue preferenze e genera un CV professionale.',
     'fill_form_and_submit':
         'Compila correttamente il modulo e allega i documenti richiesti.',
     'course_resources': 'Risorse del corso',
