@@ -110,7 +110,7 @@ class AiSpeakingLabCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'AI Speaking Lab',
+                  'ai_speaking_lab'.tr,
                   style: TextStyle(
                     fontSize: 24.sp,
                     height: 1.06,
@@ -121,7 +121,7 @@ class AiSpeakingLabCard extends StatelessWidget {
                 ),
                 SizedBox(height: 10.h),
                 Text(
-                  'Practice real world\nconversations with 24/7\nfeedback.',
+                  'ai_speaking_lab_description'.tr,
                   style: TextStyle(
                     fontSize: 15.sp,
                     height: 1.55,
@@ -131,7 +131,7 @@ class AiSpeakingLabCard extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'এআই স্পিকিং ল্যাব',
+                  'ai_speaking_lab_badge'.tr,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
@@ -140,7 +140,7 @@ class AiSpeakingLabCard extends StatelessWidget {
                 ),
                 SizedBox(height: 22.h),
                 CustomButton(
-                  text: 'Enter Lab',
+                  text: 'enter_lab'.tr,
                   onPressed: onTap,
                   width: 157,
                   height: 43,
@@ -149,7 +149,7 @@ class AiSpeakingLabCard extends StatelessWidget {
                   fontSize: 14,
                   icon: Icons.play_arrow_rounded,
                 ),
-                // _WhiteActionButton(text: 'Enter Lab', width: 157, onTap: onTap),
+                // _WhiteActionButton(text: 'enter_lab'.tr, width: 157, onTap: onTap),
               ],
             ),
           ),
@@ -215,7 +215,7 @@ class AiGuidedLearningCard extends StatelessWidget {
                 SizedBox(width: 24.w),
                 Expanded(
                   child: Text(
-                    'AI Guided\nLearning',
+                    'ai_guided_learning_title'.tr,
                     style: TextStyle(
                       fontSize: 29.sp,
                       height: 1,
@@ -229,7 +229,7 @@ class AiGuidedLearningCard extends StatelessWidget {
             ),
             SizedBox(height: 10.h),
             Text(
-              'Embark on a personalized structured\njourney. Master grammar, vocabulary, and\ncontext with your private AI tutor.',
+              'ai_guided_learning_description'.tr,
               style: TextStyle(
                 fontSize: 15.sp,
                 height: 1.55,
@@ -239,7 +239,7 @@ class AiGuidedLearningCard extends StatelessWidget {
             ),
             SizedBox(height: 6.h),
             Text(
-              'এআই গাইডিং লার্নিং',
+              'ai_guided_learning_badge'.tr,
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w700,
@@ -248,7 +248,7 @@ class AiGuidedLearningCard extends StatelessWidget {
             ),
             const Spacer(),
             CustomButton(
-              text: 'Start Guided Learning',
+              text: 'start_guided_learning'.tr,
               onPressed: onTap,
               width: 222,
               height: 43,
@@ -258,7 +258,7 @@ class AiGuidedLearningCard extends StatelessWidget {
               //icon: Icons.play_arrow_rounded,
             ),
             // _WhiteActionButton(
-            //   text: 'Start Guided Learning',
+            //   text: 'start_guided_learning'.tr,
             //   width: 222,
             //   onTap: onTap,
             // ),
@@ -416,7 +416,7 @@ class AiRecentSessionCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'RECENT SESSION',
+                    'recent_session'.tr,
                     style: TextStyle(
                       fontSize: 12.sp,
                       height: 1,
@@ -427,7 +427,7 @@ class AiRecentSessionCard extends StatelessWidget {
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    '92% Pronunciation',
+                    '92_pronunciation'.tr,
                     style: TextStyle(
                       fontSize: 19.sp,
                       height: 1,
@@ -482,17 +482,16 @@ class AiProTipCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF51606E),
                 ),
-                children: const <TextSpan>[
+                children: <TextSpan>[
                   TextSpan(
-                    text: 'Pro Tip: ',
+                    text: 'pro_tip'.tr,
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       color: Color(0xFF153F35),
                     ),
                   ),
                   TextSpan(
-                    text:
-                        'Using the speaking daily improves\nyour learning faster than typing alone.',
+                    text: 'ai_pro_tip_speaking_daily'.tr,
                   ),
                 ],
               ),

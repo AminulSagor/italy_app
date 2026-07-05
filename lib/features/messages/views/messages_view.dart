@@ -55,7 +55,7 @@ class MessagesView extends GetView<MessagesController> {
                       foregroundColor: AppColors.white,
                     ),
                     onPressed: controller.refreshMessages,
-                    child: const Text('Retry'),
+                    child: Text('retry'.tr),
                   ),
                 ],
               ),
@@ -139,7 +139,7 @@ class MessagesView extends GetView<MessagesController> {
                           ),
                           SizedBox(height: 16.h),
                           Text(
-                            'No conversations yet',
+                            'no_conversations_yet'.tr,
                             style: TextStyle(
                               fontSize: AppFont.font18.sp,
                               color: AppColors.bodyText,
@@ -206,7 +206,7 @@ class _MessagesHeader extends StatelessWidget {
             SizedBox(width: 24.w),
             Expanded(
               child: Text(
-                'Messages',
+                'messages'.tr,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -262,7 +262,7 @@ class _SearchUserItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String name =
-        user['fullName']?.toString() ?? user['name']?.toString() ?? 'User';
+        user['fullName']?.toString() ?? user['name']?.toString() ?? 'user'.tr;
     final String avatar =
         user['avatarUrl']?.toString() ?? 'https://i.pravatar.cc/120?img=12';
     final bool isOnline = user['isOnline'] as bool? ?? false;
@@ -289,7 +289,7 @@ class _SearchUserItem extends StatelessWidget {
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    isOnline ? 'Online' : 'Offline',
+                    isOnline ? 'online'.tr : 'offline'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font12.sp,
                       color: AppColors.bodyText,

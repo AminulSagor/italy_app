@@ -17,11 +17,11 @@ class CvLanguageSkillsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return _BaseCard(
       icon: Icons.language_rounded,
-      title: 'gen_language_skills'.tr.tr,
+      title: 'gen_language_skills'.tr,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _LabelText('Native Language (Mother Tongue)'),
+          _LabelText('native_language_mother_tongue'.tr),
           SizedBox(height: 8.h),
           Obx(() {
             final List<String> languages = controller.nativeLanguages.toList();
@@ -44,11 +44,11 @@ class CvLanguageSkillsCard extends StatelessWidget {
           SizedBox(height: 10.h),
           _AddInput(
             controller: controller.nativeLanguageController,
-            hintText: 'gen_set_native_language'.tr.tr,
+            hintText: 'gen_set_native_language'.tr,
             onTap: controller.addNativeLanguage,
           ),
           SizedBox(height: 16.h),
-          _LabelText('Other Languages'),
+          _LabelText('other_languages'.tr),
           SizedBox(height: 8.h),
           Obx(() {
             final List<String> languages = controller.otherLanguages.toList();
@@ -80,7 +80,7 @@ class CvLanguageSkillsCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
               ),
               child: Text(
-                '+ Add Another Language',
+                'add_another_language'.tr,
                 style: TextStyle(
                   color: AppColors.primaryGreen,
                   fontSize: AppFont.font9.sp,

@@ -47,7 +47,7 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
                 final UserSessionController session =
                     Get.find<UserSessionController>();
                 return AppHomeTopBar(
-                  greeting: 'Buongiorno,',
+                  greeting: 'buongiorno'.tr,
                   userName: session.displayName,
                   avatarUrl: session.avatarUrl,
                   streakLabel: '${session.currentStreakDays}d',
@@ -156,12 +156,12 @@ class _CallTransitionBlocker extends StatelessWidget {
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                CircularProgressIndicator(),
-                SizedBox(height: 14),
-                Text('Connecting your call...'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 14),
+                Text('loading'.tr),
               ],
             ),
           ),
@@ -191,6 +191,6 @@ class CustomPlaceHolder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Placeholder'));
+    return Center(child: Text('placeholder'.tr));
   }
 }

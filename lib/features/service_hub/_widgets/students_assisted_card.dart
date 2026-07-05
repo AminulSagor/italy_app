@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class StudentsAssistedCard extends StatelessWidget {
   const StudentsAssistedCard({super.key});
@@ -21,7 +22,7 @@ class StudentsAssistedCard extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Text(
-            '50k+',
+            '50k'.tr,
             style: TextStyle(
               color: AppColors.primaryGreen,
               fontSize: AppFont.font26.sp,
@@ -32,7 +33,7 @@ class StudentsAssistedCard extends StatelessWidget {
           ),
           SizedBox(height: 6.h),
           Text(
-            'Students Assisted',
+            'students_assisted'.tr,
             style: TextStyle(
               color: AppColors.homeSecondaryText,
               fontSize: AppFont.font10.sp,

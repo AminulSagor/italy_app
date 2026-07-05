@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../widgets/status_error_widgets.dart';
+import 'package:get/get.dart';
 
 class NoSearchResultStatusView extends StatelessWidget {
   final VoidCallback? onClearSearchTap;
@@ -50,7 +51,7 @@ class NoSearchResultStatusView extends StatelessWidget {
                     SizedBox(height: 45.h),
 
                     Text(
-                      'No results found.',
+                      'no_results_found'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: const Color(0xFF194D34),
@@ -80,7 +81,7 @@ class NoSearchResultStatusView extends StatelessWidget {
                     GreenOutlineActionButton(
                       width: 263.w,
                       height: 55.h,
-                      text: 'CLEAR SEARCH',
+                      text: 'clear_search'.tr,
                       onTap: onClearSearchTap,
                     ),
                   ],

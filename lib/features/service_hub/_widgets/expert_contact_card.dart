@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class ExpertContactCard extends StatelessWidget {
   const ExpertContactCard({super.key});
@@ -45,7 +46,7 @@ class ExpertContactCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Confused? Speak to an expert.',
+                  'confused_speak_to_an_expert'.tr,
                   style: TextStyle(
                     color: AppColors.homePrimaryText,
                     fontSize: AppFont.font14.sp,
@@ -58,7 +59,7 @@ class ExpertContactCard extends StatelessWidget {
                 GestureDetector(
                   onTap: () {},
                   child: Text(
-                    'Contact Us →',
+                    'contact_us'.tr,
                     style: TextStyle(
                       color: AppColors.primaryGreen,
                       fontSize: AppFont.font10.sp,

@@ -26,6 +26,7 @@ migrate_working_dir/
 
 # Flutter/Dart/Pub related
 **/doc/api/
+**/.gradle/
 **/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins-dependencies
@@ -47,3 +48,21 @@ app.*.map.json
 
 
 /demos
+
+# Local scratch tooling and generated reports
+/*.py
+/lib/tmp_*.py
+/*_output*.txt
+/analysis_result.txt
+/build_output.txt
+/dry_run_output.txt
+/localization_update_preview.txt
+/remaining_*.txt
+/temp_block_*.txt
+/tmp_*.txt
+/untranslated_*.txt
+/unused_keys.txt
+/missing_keys_analysis.json
+/new_translations*.json
+/remaining_*.json
+/scratch_results.json

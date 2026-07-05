@@ -7,6 +7,7 @@ import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../../../../courses/sub_features/chapter_detail/widgets/chapter_video_fullscreen_view.dart';
 import '../../../../courses/sub_features/chapter_detail/widgets/chapter_video_player_surface.dart';
+import 'package:get/get.dart';
 
 class JobIntroVideoCard extends StatefulWidget {
   const JobIntroVideoCard({
@@ -266,7 +267,7 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
         builder: (_) => ChapterVideoFullscreenView(
           controller: controller,
           hasWatchedFullyListenable: _hasWatchedFullyNotifier,
-          progressLabel: 'Career introduction',
+          progressLabel: 'career_introduction'.tr,
           fallbackPositionLabel: '0:00',
           fallbackDurationLabel: '0:00',
         ),
@@ -297,7 +298,7 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
             ? ChapterVideoPlayerSurface(
                 controller: controller,
                 hasWatchedFullyListenable: _hasWatchedFullyNotifier,
-                progressLabel: 'Career introduction',
+                progressLabel: 'career_introduction'.tr,
                 fallbackPositionLabel: '0:00',
                 fallbackDurationLabel: '0:00',
                 onFullscreenTap: _openFullscreen,

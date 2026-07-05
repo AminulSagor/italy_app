@@ -65,7 +65,7 @@ class CourseExamSuccessView extends StatelessWidget {
               ),
               SizedBox(height: 34.h),
               Text(
-                'Congratulations! You finished the final exam and earned your Level A1 certificate.',
+                'congratulations_you_finished_the_final_exam_and_ea'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font20.sp,
@@ -101,7 +101,7 @@ class CourseExamSuccessView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            'Certificate Ready',
+                            'certificate_ready'.tr,
                             style: TextStyle(
                               fontSize: AppFont.font24.sp,
                               fontWeight: FontWeight.w900,
@@ -111,7 +111,7 @@ class CourseExamSuccessView extends StatelessWidget {
                           ),
                           SizedBox(height: 8.h),
                           Text(
-                            'Your learning milestone is saved.',
+                            'your_learning_milestone_is_saved'.tr,
                             style: TextStyle(
                               fontSize: AppFont.font18.sp,
                               fontWeight: FontWeight.w500,
@@ -128,7 +128,7 @@ class CourseExamSuccessView extends StatelessWidget {
               const Spacer(),
               CustomButton.primary(
                 onPressed: () => Get.until((Route<dynamic> route) => route.isFirst),
-                text: 'Back To Courses',
+                text: 'back_to_courses'.tr,
               ),
             ],
           ),

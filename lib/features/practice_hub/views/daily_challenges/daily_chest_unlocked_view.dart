@@ -80,7 +80,7 @@ class DailyChestUnlockedView extends GetView<PracticeHubController> {
               SafeArea(
                 top: false,
                 child: CustomButton.primary(
-                  text: 'Back to Practice',
+                  text: 'back_to_practice'.tr,
                   onPressed: Get.back,
                 ),
               ),
@@ -111,7 +111,7 @@ class _ChestUnlockedHeader extends GetView<PracticeHubController> {
           ),
           Expanded(
             child: Text(
-              'Daily Quests',
+              'daily_quests'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font17.sp,
@@ -163,7 +163,9 @@ class XpBoostButton extends GetView<PracticeHubController> {
               ),
               child: Center(
                 child: Text(
-                  '${_formatMultiplier(multiplier)}×',
+                  'formatmultiplier_multiplier'.trParams(<String, String>{
+                    'multiplier': _formatMultiplier(multiplier).toString(),
+                  }),
                   style: TextStyle(
                     fontSize: 18.sp,
                     height: 1,
@@ -180,7 +182,7 @@ class XpBoostButton extends GetView<PracticeHubController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    boost?.isActive == true ? 'Boost Active:' : 'XP Boost:',
+                    boost?.isActive == true ? 'boost_active'.tr : 'xp_boost'.tr,
                     style: TextStyle(
                       fontSize: 13.sp,
                       height: 1,
@@ -192,7 +194,7 @@ class XpBoostButton extends GetView<PracticeHubController> {
                   Text(
                     boost?.isActive == true
                         ? '$remaining remaining'
-                        : 'No active boost',
+                        : 'no_active_boost'.tr,
                     style: TextStyle(
                       fontSize: 13.sp,
                       height: 1,
@@ -210,12 +212,18 @@ class XpBoostButton extends GetView<PracticeHubController> {
   }
 
   String _formatDuration(int seconds) {
-    final Duration duration = Duration(seconds: seconds.clamp(0, 864000).toInt());
+    final Duration duration = Duration(
+      seconds: seconds.clamp(0, 864000).toInt(),
+    );
     final String hours = duration.inHours.toString().padLeft(2, '0');
-    final String minutes =
-        duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final String remainingSeconds =
-        duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final String minutes = duration.inMinutes
+        .remainder(60)
+        .toString()
+        .padLeft(2, '0');
+    final String remainingSeconds = duration.inSeconds
+        .remainder(60)
+        .toString()
+        .padLeft(2, '0');
     return '$hours:$minutes:$remainingSeconds';
   }
 
@@ -255,7 +263,7 @@ class _XpRewardCard extends GetView<PracticeHubController> {
           ),
           SizedBox(height: 22.h),
           Text(
-            'XP EARNED',
+            'xp_earned'.tr,
             style: TextStyle(
               fontSize: AppFont.font11.sp,
               height: 1,
@@ -266,7 +274,13 @@ class _XpRewardCard extends GetView<PracticeHubController> {
           SizedBox(height: 10.h),
           Obx(
             () => Text(
-              '+${controller.lastDailyChestReward.value?.totalXpAwarded ?? 0} XP',
+              'controller_lastdailychestreward_value_totalxpawarded_0_xp'
+                  .trParams(<String, String>{
+                    'totalxpawarded':
+                        controller.lastDailyChestReward.value?.totalXpAwarded
+                            ?.toString() ??
+                        '0',
+                  }),
               style: TextStyle(
                 fontSize: AppFont.font22.sp,
                 height: 1,
@@ -310,7 +324,7 @@ class _FreezeRewardCard extends GetView<PracticeHubController> {
           ),
           SizedBox(height: 20.h),
           Text(
-            'STREAK FREEZE',
+            'streak_freeze'.tr,
             style: TextStyle(
               fontSize: AppFont.font11.sp,
               height: 1,
@@ -321,7 +335,13 @@ class _FreezeRewardCard extends GetView<PracticeHubController> {
           SizedBox(height: 10.h),
           Obx(
             () => Text(
-              '${controller.lastDailyChestReward.value?.streakFreezeCount ?? 0}× Awarded',
+              'controller_lastdailychestreward_value_streakfreezecount_0_awarded'
+                  .trParams(<String, String>{
+                    'streakfreezecount':
+                        controller.lastDailyChestReward.value?.streakFreezeCount
+                            ?.toString() ??
+                        '0',
+                  }),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font20.sp,
@@ -369,7 +389,11 @@ class _StreakIncreasePill extends GetView<PracticeHubController> {
           Expanded(
             child: Obx(
               () => Text(
-                'Your streak is ${controller.dailyStreakDays} Days!',
+                'your_streak_is_controller_dailystreakdays_days'.trParams(
+                  <String, String>{
+                    'dailystreakdays': controller.dailyStreakDays.toString(),
+                  },
+                ),
                 style: TextStyle(
                   fontSize: AppFont.font13.sp,
                   height: 1,
@@ -413,7 +437,7 @@ class _BackToPracticeButton extends GetView<PracticeHubController> {
         ),
         child: Center(
           child: Text(
-            'Back to Practice',
+            'back_to_practice'.tr,
             style: TextStyle(
               fontSize: AppFont.font21.sp,
               height: 1,

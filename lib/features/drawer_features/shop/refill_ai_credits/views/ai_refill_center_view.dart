@@ -27,7 +27,7 @@ class AiRefillCenterPage extends StatelessWidget {
       backgroundColor: bg,
       appBar: SimpleAppbar(
         onBackTap: () => Navigator.maybePop(context),
-        title: 'AI Refill Center',
+        title: 'gen_ai_refill_center'.tr,
       ),
       body: SafeArea(
         child: Column(
@@ -43,9 +43,9 @@ class AiRefillCenterPage extends StatelessWidget {
                     const SizedBox(height: 24),
                     Obx(() {
                       if (controller.aiPackages.isEmpty) {
-                        return const Padding(
+                        return Padding(
                           padding: EdgeInsets.symmetric(vertical: 40),
-                          child: Text('No AI refill packages are available.'),
+                          child: Text('no_ai_refill_packages_are_available'.tr),
                         );
                       }
                       return Column(
@@ -101,8 +101,8 @@ class AiRefillCenterPage extends StatelessWidget {
               child: Obx(
                 () => CustomButton.primary(
                   text: controller.isLoadingQuote.value
-                      ? 'Loading...'
-                      : 'Confirm Purchase  ▶',
+                      ? 'loading'.tr
+                      : 'confirm_purchase_1'.tr,
                   onPressed: controller.isLoadingQuote.value ||
                           controller.aiPackages.isEmpty
                       ? () {}
@@ -198,14 +198,14 @@ class AiRefillCenterPage extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          const Positioned(
+          Positioned(
             left: 32,
             top: 31,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'AI Mastery',
+                  'ai_mastery'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 31,
@@ -316,9 +316,9 @@ class AiRefillCenterPage extends StatelessWidget {
                   color: const Color(0xFFFF9300),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    'MOST POPULAR',
+                    'most_popular'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -424,7 +424,7 @@ class AiRefillCenterPage extends StatelessWidget {
             icon: Icons.mic,
             iconBg: const Color(0xFFEAF5E4),
             iconColor: green,
-            title: 'Voice Minutes',
+            title: 'gen_voice_minutes'.tr,
             desc:
                 'Consumed during live conversation\nsessions with your AI Speaking Partner.',
           ),
@@ -433,7 +433,7 @@ class AiRefillCenterPage extends StatelessWidget {
             icon: Icons.chat_bubble,
             iconBg: const Color(0xFFE9F5FF),
             iconColor: const Color(0xFF006BAA),
-            title: 'Text Tokens',
+            title: 'gen_text_tokens'.tr,
             desc:
                 'Used for text based chat, grammar\ncorrections, and writing feedback.',
           ),

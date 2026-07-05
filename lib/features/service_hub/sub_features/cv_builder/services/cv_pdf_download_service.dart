@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../models/cv_builder_models.dart';
@@ -9,10 +10,11 @@ import 'cv_visual_pdf_renderer.dart';
 
 class CvPdfDownloadService {
   CvPdfDownloadService({CvVisualPdfRenderer? visualPdfRenderer})
-      : _visualPdfRenderer = visualPdfRenderer ?? CvVisualPdfRenderer();
+    : _visualPdfRenderer = visualPdfRenderer ?? CvVisualPdfRenderer();
 
-  static const MethodChannel _downloadChannel =
-      MethodChannel('italir_pothe/downloads');
+  static const MethodChannel _downloadChannel = MethodChannel(
+    'italir_pothe/downloads',
+  );
 
   final CvVisualPdfRenderer _visualPdfRenderer;
 
@@ -33,11 +35,9 @@ class CvPdfDownloadService {
     required CvTemplateModel template,
     Uint8List? pdfBytes,
   }) async {
-    final Uint8List bytes = pdfBytes ??
-        await buildCreatedCvPdfBytes(
-          document: document,
-          template: template,
-        );
+    final Uint8List bytes =
+        pdfBytes ??
+        await buildCreatedCvPdfBytes(document: document, template: template);
 
     return _savePdfToDevice(
       fileName: _safeFileName(document.title),
@@ -57,7 +57,8 @@ class CvPdfDownloadService {
       return await _savePdfWithAndroidChannel(fileName: fileName, bytes: bytes);
     } on PlatformException catch (error) {
       if (error.code == 'permission_denied') {
-        final PermissionStatus permissionStatus = await Permission.storage.request();
+        final PermissionStatus permissionStatus = await Permission.storage
+            .request();
         if (permissionStatus.isGranted) {
           return _savePdfWithAndroidChannel(fileName: fileName, bytes: bytes);
         }
@@ -74,14 +75,11 @@ class CvPdfDownloadService {
   }) async {
     final String? savedPath = await _downloadChannel.invokeMethod<String>(
       'savePdfToDownloads',
-      <String, dynamic>{
-        'fileName': fileName,
-        'bytes': bytes,
-      },
+      <String, dynamic>{'fileName': fileName, 'bytes': bytes},
     );
 
     if (savedPath == null || savedPath.trim().isEmpty) {
-      throw const FileSystemException('Unable to save PDF file.');
+      throw FileSystemException('unable_to_save_pdf_file'.tr);
     }
 
     return savedPath;
@@ -101,7 +99,9 @@ class CvPdfDownloadService {
         .trim()
         .replaceAll(RegExp(r'[^a-zA-Z0-9 _-]'), '')
         .replaceAll(RegExp(r'\s+'), '_');
-    final String safeTitle = normalizedTitle.isEmpty ? 'my_cv' : normalizedTitle;
+    final String safeTitle = normalizedTitle.isEmpty
+        ? 'my_cv'
+        : normalizedTitle;
     return '$safeTitle.pdf';
   }
 }

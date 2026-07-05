@@ -39,7 +39,7 @@ class SearchSuggestionOverlay extends GetView<ImportantVerbsController> {
                   height: 88.h,
                   child: Center(
                     child: Text(
-                      'No verbs found',
+                      'no_verbs_found'.tr,
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
@@ -62,7 +62,7 @@ class SearchSuggestionOverlay extends GetView<ImportantVerbsController> {
                         height: 40.h,
                         alignment: Alignment.center,
                         child: Text(
-                          'VIEW ALL RESULTS',
+                          'view_all_results'.tr,
                           style: TextStyle(
                             fontSize: 9.5.sp,
                             height: 1,
@@ -133,7 +133,7 @@ class _SearchSuggestionTile extends StatelessWidget {
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    '${verb.englishMeaning} • ${verb.banglaMeaning}',
+                    'verb_englishmeaning_verb_banglameaning_1'.trParams(<String, String>{'englishmeaning': verb.englishMeaning.toString(), 'banglameaning': verb.banglaMeaning.toString()}),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -171,7 +171,7 @@ class _CompactVerbBadge extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          '${verb.endingLabel} / ${verb.isIrregular ? 'IRREG' : 'REG'}',
+          '${verb.endingLabel} / ${verb.isIrregular ? 'irreg'.tr : 'reg'.tr}',
           style: TextStyle(
             fontSize: 9.5.sp,
             height: 1,
@@ -269,12 +269,12 @@ class VerbLibraryList extends StatelessWidget {
     if (error.isNotEmpty && verbs.isEmpty) {
       return _VerbListMessage(
         message: error,
-        actionLabel: 'RETRY',
+        actionLabel: 'retry'.tr,
         onAction: onRetry,
       );
     }
     if (verbs.isEmpty) {
-      return const _VerbListMessage(message: 'No verbs found');
+      return _VerbListMessage(message: 'no_verbs_found'.tr);
     }
 
     return Column(
@@ -333,7 +333,7 @@ class _VerbListMessage extends StatelessWidget {
           ),
           if (onAction != null) ...<Widget>[
             SizedBox(height: 12.h),
-            TextButton(onPressed: onAction, child: Text(actionLabel ?? 'RETRY')),
+            TextButton(onPressed: onAction, child: Text(actionLabel ?? 'retry'.tr)),
           ],
         ],
       ),
@@ -374,7 +374,7 @@ class VerbLibraryCard extends GetView<ImportantVerbsController> {
                   Row(
                     children: <Widget>[
                       VerbBadge(
-                        label: verb.isIrregular ? 'IRREGULAR' : 'REGULAR',
+                        label: verb.isIrregular ? 'irregular'.tr : 'regular'.tr,
                         dark: verb.isIrregular,
                       ),
                       SizedBox(width: 7.w),
@@ -396,7 +396,7 @@ class VerbLibraryCard extends GetView<ImportantVerbsController> {
                   ),
                   SizedBox(height: 7.h),
                   Text(
-                    '${verb.englishMeaning} /',
+                    'verb_englishmeaning'.trParams(<String, String>{'englishmeaning': verb.englishMeaning.toString()}),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

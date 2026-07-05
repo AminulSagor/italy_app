@@ -5,6 +5,7 @@ import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../../../../../core/widgets/custom_button.dart';
+import 'package:get/get.dart';
 
 class VocabularyExitDialog extends StatelessWidget {
   final VoidCallback onKeepGoingTap;
@@ -73,7 +74,7 @@ class VocabularyExitDialog extends StatelessWidget {
             ),
             SizedBox(height: 32.h),
             Text(
-              'Wait! Are you sure?',
+              'wait_are_you_sure'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font28.sp,
@@ -83,7 +84,7 @@ class VocabularyExitDialog extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
             Text(
-              "If you quit now, you'll lose your progress.",
+              "if_you_quit_now_you_ll_lose_your_progress".tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font18.sp,
@@ -95,13 +96,13 @@ class VocabularyExitDialog extends StatelessWidget {
             SizedBox(height: 68.h),
             CustomButton.primary(
               onPressed: onKeepGoingTap,
-              text: 'Keep Going',
+              text: 'keep_going_1'.tr,
               icon: Icons.play_arrow_rounded,
             ),
             SizedBox(height: 16.h),
             CustomButton(
               onPressed: onQuitTap,
-              text: 'Quit Vocabulary',
+              text: 'quit_vocabulary'.tr,
               textColor: AppColors.blockDangerRed,
               btnColor: AppColors.transparent,
               borderColor: AppColors.blockDangerRed,

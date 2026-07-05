@@ -467,7 +467,7 @@ class AppPages {
                 subtitle: homeArgs.subtitle,
                 progress: homeArgs.progress,
                 state: CourseChapterState.current,
-                statusLabel: 'CURRENT',
+                statusLabel: 'current_study'.tr,
               );
         Get.lazyPut<ChapterDetailApiService>(
           () => ChapterDetailApiService(apiClient: Get.find<ApiClient>()),

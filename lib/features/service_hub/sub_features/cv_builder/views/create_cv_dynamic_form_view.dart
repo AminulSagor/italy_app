@@ -58,7 +58,7 @@ class CreateCvDynamicFormView extends GetView<CreateCvDynamicFormController> {
                         ),
                         SizedBox(height: 10.h),
                         Text(
-                          'Step ${controller.currentStepIndex.value + 1} of ${controller.sections.length}',
+                          '${'step'.tr} ${controller.currentStepIndex.value + 1} ${'of'.tr} ${controller.sections.length}',
                           style: TextStyle(
                             color: AppColors.homeSecondaryText,
                             fontSize: AppFont.font11.sp,
@@ -173,7 +173,7 @@ class _DynamicField extends GetView<CreateCvDynamicFormController> {
               ),
               if (field.required)
                 Text(
-                  'Required',
+                  'required'.tr,
                   style: TextStyle(
                     color: AppColors.primaryGreen,
                     fontSize: AppFont.font9.sp,
@@ -339,8 +339,8 @@ class _FormattedTextFieldState extends State<_FormattedTextField> {
           SizedBox(height: 8.h),
           Text(
             _listStyle == 'number'
-                ? 'Press Enter to create the next numbered list item.'
-                : 'Press Enter to create the next bullet item.',
+                ? 'press_enter_to_create_the_next_numbered_list_item'.tr
+                : 'press_enter_to_create_the_next_bullet_item_1'.tr,
             style: TextStyle(
               color: AppColors.homeSecondaryText.withOpacity(0.65),
               fontSize: AppFont.font9.sp,
@@ -401,7 +401,7 @@ class _Toolbar extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: _ListStyleButton(
-              label: 'gen_bullet_list'.tr.tr,
+              label: 'gen_bullet_list'.tr,
               icon: Icons.format_list_bulleted_rounded,
               isSelected: listStyle == 'bullet',
               onTap: () => onListStyleChanged('bullet'),
@@ -410,7 +410,7 @@ class _Toolbar extends StatelessWidget {
           SizedBox(width: 8.w),
           Expanded(
             child: _ListStyleButton(
-              label: 'gen_number_list'.tr.tr,
+              label: 'gen_number_list'.tr,
               icon: Icons.format_list_numbered_rounded,
               isSelected: listStyle == 'number',
               onTap: () => onListStyleChanged('number'),
@@ -465,7 +465,6 @@ class _Toolbar extends StatelessWidget {
   }
 }
 
-
 class _ListStyleButton extends StatelessWidget {
   const _ListStyleButton({
     required this.label,
@@ -487,7 +486,9 @@ class _ListStyleButton extends StatelessWidget {
         height: 38.h,
         padding: EdgeInsets.symmetric(horizontal: 10.w),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.homePaleGreen : AppColors.homeBackground,
+          color: isSelected
+              ? AppColors.homePaleGreen
+              : AppColors.homeBackground,
           borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
           border: Border.all(
             color: isSelected ? AppColors.primaryGreen : AppColors.transparent,
@@ -498,7 +499,9 @@ class _ListStyleButton extends StatelessWidget {
           children: <Widget>[
             Icon(
               icon,
-              color: isSelected ? AppColors.primaryGreen : AppColors.homeSecondaryText,
+              color: isSelected
+                  ? AppColors.primaryGreen
+                  : AppColors.homeSecondaryText,
               size: AppFont.font15.sp,
             ),
             SizedBox(width: 6.w),
@@ -507,7 +510,9 @@ class _ListStyleButton extends StatelessWidget {
                 label,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: isSelected ? AppColors.primaryGreen : AppColors.homeSecondaryText,
+                  color: isSelected
+                      ? AppColors.primaryGreen
+                      : AppColors.homeSecondaryText,
                   fontSize: AppFont.font10.sp,
                   fontWeight: FontWeight.w800,
                 ),
@@ -640,7 +645,10 @@ class _DynamicItemsField extends GetView<CreateCvDynamicFormController> {
                     children: <Widget>[
                       Expanded(
                         child: Text(
-                          '${field.label} ${entry.key + 1}',
+                          'field_label_entry_key_1'.trParams(<String, String>{
+                            'label': field.label.toString(),
+                            'key': (entry.key + 1).toString(),
+                          }),
                           style: TextStyle(
                             color: AppColors.homePrimaryText,
                             fontSize: AppFont.font11.sp,
@@ -667,17 +675,23 @@ class _DynamicItemsField extends GetView<CreateCvDynamicFormController> {
                   ...field.itemFields.map((
                     CvTemplateDynamicItemFieldModel itemField,
                   ) {
-                    final String itemType = _normalizeFieldType(
-                      itemField.type,
-                    );
+                    final String itemType = _normalizeFieldType(itemField.type);
                     final bool isLong =
                         _isTextareaType(itemType) || _isListType(itemType);
                     return Padding(
                       padding: EdgeInsets.only(bottom: 10.h),
                       child: TextField(
                         controller: entry.value[itemField.key],
-                        minLines: _isListType(itemType) ? 5 : isLong ? 3 : 1,
-                        maxLines: _isListType(itemType) ? 9 : isLong ? 5 : 1,
+                        minLines: _isListType(itemType)
+                            ? 5
+                            : isLong
+                            ? 3
+                            : 1,
+                        maxLines: _isListType(itemType)
+                            ? 9
+                            : isLong
+                            ? 5
+                            : 1,
                         keyboardType: isLong
                             ? TextInputType.multiline
                             : TextInputType.text,
@@ -704,7 +718,7 @@ class _DynamicItemsField extends GetView<CreateCvDynamicFormController> {
           OutlinedButton.icon(
             onPressed: () => controller.addDynamicItem(section, field),
             icon: Icon(Icons.add_rounded, size: AppFont.font17.sp),
-            label: Text('Add ${field.label}'),
+            label: Text('${'gen_add'.tr} ${field.label}'),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primaryGreen,
               side: BorderSide(color: AppColors.primaryGreen, width: 1.w),
@@ -750,7 +764,7 @@ class _BottomActions extends StatelessWidget {
               ),
             ),
             child: Text(
-              'Back',
+              'back'.tr,
               style: TextStyle(
                 color: AppColors.primaryGreen,
                 fontSize: AppFont.font12.sp,
@@ -773,7 +787,7 @@ class _BottomActions extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  controller.isFirstStep ? 'Back' : 'Previous',
+                  controller.isFirstStep ? 'back'.tr : 'previous'.tr,
                   style: TextStyle(
                     color: AppColors.primaryGreen,
                     fontSize: AppFont.font12.sp,
@@ -799,10 +813,10 @@ class _BottomActions extends StatelessWidget {
                 ),
                 child: Text(
                   controller.isSaving.value
-                      ? 'Saving...'
+                      ? 'saving'.tr
                       : controller.isLastStep
-                      ? 'Choose Theme'
-                      : 'Continue',
+                      ? 'choose_theme'.tr
+                      : 'continue'.tr,
                   style: TextStyle(
                     color: AppColors.white,
                     fontSize: AppFont.font12.sp,
@@ -850,7 +864,6 @@ InputDecoration _inputDecoration(String hintText, bool isLongInput) {
   );
 }
 
-
 String _normalizeFieldType(String value) {
   return value.trim().toLowerCase().replaceAll('-', '_');
 }
@@ -874,9 +887,10 @@ String _hintText(CvTemplateFieldModel field, String type) {
     return _stripHtml(field.placeholder!);
   }
 
-  if (type == 'photourl' || type == 'imageurl' || type == 'photo_url') return 'Select a photo';
+  if (type == 'photourl' || type == 'imageurl' || type == 'photo_url')
+    return 'select_a_photo_1'.tr;
   if (type == 'website' || type == 'url') return 'https://example.com';
-  if (_isListType(type)) return 'First item\nSecond item\nThird item';
+  if (_isListType(type)) return 'first_item_nsecond_item_nthird_item'.tr;
 
   return 'Enter ${field.label.toLowerCase()}';
 }

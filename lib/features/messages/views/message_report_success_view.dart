@@ -22,9 +22,9 @@ class MessageReportSuccessView extends GetView<MessageReportController> {
         child: Obx(() {
           final MessageReportResultModel report =
               controller.reportResult.value ??
-              const MessageReportResultModel(
+              MessageReportResultModel(
                 referenceId: '#SHK-REP-4922',
-                statusLabel: 'Under\nReview',
+                statusLabel: 'under_nreview'.tr,
                 reviewSteps: <String>[
                   'Our team has been notified',
                   'Manual review is in progress',
@@ -44,7 +44,7 @@ class MessageReportSuccessView extends GetView<MessageReportController> {
                 SizedBox(height: 70.h),
                 Center(
                   child: Text(
-                    'Report Received',
+                    'report_received'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: AppFont.font46.sp,
@@ -73,7 +73,7 @@ class MessageReportSuccessView extends GetView<MessageReportController> {
                 _ReviewProcessCard(steps: report.reviewSteps),
                 SizedBox(height: 62.h),
                 CustomButton.primary(
-                  text: 'Back To Messages',
+                  text: 'back_to_messages'.tr,
                   onPressed: controller.backToMessages,
                 ),
               ],
@@ -173,7 +173,7 @@ class _ReportReferenceCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'REFERENCE ID',
+                    'reference_id'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font16.sp,
                       fontWeight: FontWeight.w900,
@@ -273,7 +273,7 @@ class _ReviewProcessCard extends StatelessWidget {
               ),
               SizedBox(width: 24.w),
               Text(
-                'Review Process',
+                'review_process'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font28.sp,
                   fontWeight: FontWeight.w900,

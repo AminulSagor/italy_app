@@ -77,7 +77,7 @@ class JobSentencesController extends GetxController {
             showError: showError,
           );
       if (!result.isSuccess || result.data == null) {
-        tracksError.value = result.error ?? 'Unable to load career tracks.';
+        tracksError.value = result.error ?? 'unable_to_load_career_tracks'.tr;
         return;
       }
       careerTracks.assignAll(result.data!.items);
@@ -122,7 +122,7 @@ class JobSentencesController extends GetxController {
           );
       if (!result.isSuccess || result.data == null) {
         trackDetailsError.value =
-            result.error ?? 'Unable to load career track details.';
+            result.error ?? 'unable_to_load_career_track_details'.tr;
         return;
       }
       trackDetails.value = result.data;
@@ -164,7 +164,7 @@ class JobSentencesController extends GetxController {
           );
       if (requestId != _sentenceRequestId) return;
       if (!result.isSuccess || result.data == null) {
-        sentencesError.value = result.error ?? 'Unable to load sentences.';
+        sentencesError.value = result.error ?? 'unable_to_load_sentences'.tr;
         return;
       }
       moduleSummary.value = result.data!.module;
@@ -201,9 +201,7 @@ class JobSentencesController extends GetxController {
     isAudioLoading.value = true;
     currentAudioSentenceId.value = sentence.id;
     audioPosition.value = Duration.zero;
-    audioDuration.value = Duration(
-      seconds: sentence.voiceDurationSeconds,
-    );
+    audioDuration.value = Duration(seconds: sentence.voiceDurationSeconds);
     try {
       await _audioPlayer.stop();
       final Duration? loadedDuration = await _audioPlayer.setUrl(media.url);
@@ -211,7 +209,7 @@ class JobSentencesController extends GetxController {
       await _audioPlayer.play();
     } catch (error) {
       currentAudioSentenceId.value = '';
-      Get.snackbar('Audio', ApiErrorHandler.getErrorMessage(error));
+      Get.snackbar('audio'.tr, ApiErrorHandler.getErrorMessage(error));
     } finally {
       isAudioLoading.value = false;
     }
@@ -226,7 +224,7 @@ class JobSentencesController extends GetxController {
     final JobCareerTrackDetailsModel? details = trackDetails.value;
     final JobMediaFileModel? resource = details?.theoryResource;
     if (details == null || resource == null || !resource.isAvailable) {
-      Get.snackbar('Theory Book', 'Theory resource is not available.');
+      Get.snackbar('gen_theory_book'.tr, 'theory_resource_is_not_available'.tr);
       return;
     }
 
@@ -235,7 +233,7 @@ class JobSentencesController extends GetxController {
       AppRoutes.practiceHubPdfViewer,
       arguments: PracticeHubPdfDocumentModel(
         title: resource.originalName.isEmpty
-            ? '${details.title} Theory Book'
+            ? '${details.title} ${'gen_theory_book'.tr}'
             : resource.originalName,
         source: resource.url,
         sourceType: PracticeHubPdfSourceType.network,
@@ -279,7 +277,6 @@ class JobSentencesController extends GetxController {
 
   void onBackTap() => Get.back<void>();
 
-
   Future<void> onPhraseBackTap() async {
     await _stopAudio();
     Get.back<void>();
@@ -295,21 +292,25 @@ class JobSentencesController extends GetxController {
   }
 
   void _listenToAudioPlayer() {
-    _positionSubscription = _audioPlayer.positionStream.listen((Duration value) {
+    _positionSubscription = _audioPlayer.positionStream.listen((
+      Duration value,
+    ) {
       audioPosition.value = value;
     });
-    _durationSubscription = _audioPlayer.durationStream.listen((Duration? value) {
+    _durationSubscription = _audioPlayer.durationStream.listen((
+      Duration? value,
+    ) {
       if (value != null) audioDuration.value = value;
     });
-    _playerStateSubscription = _audioPlayer.playerStateStream.listen(
-      (PlayerState state) {
-        isAudioPlaying.value =
-            state.playing && state.processingState != ProcessingState.completed;
-        if (state.processingState == ProcessingState.completed) {
-          unawaited(_handleAudioCompleted());
-        }
-      },
-    );
+    _playerStateSubscription = _audioPlayer.playerStateStream.listen((
+      PlayerState state,
+    ) {
+      isAudioPlaying.value =
+          state.playing && state.processingState != ProcessingState.completed;
+      if (state.processingState == ProcessingState.completed) {
+        unawaited(_handleAudioCompleted());
+      }
+    });
   }
 
   Future<void> _handleAudioCompleted() async {
@@ -322,9 +323,7 @@ class JobSentencesController extends GetxController {
     await _reviewSentence(sentenceId);
   }
 
-  Future<bool> markSentenceLearnedWhenVisible(
-    JobSentenceModel sentence,
-  ) async {
+  Future<bool> markSentenceLearnedWhenVisible(JobSentenceModel sentence) async {
     if (sentence.hasAudio || sentence.isLearned) {
       return sentence.isLearned;
     }
@@ -402,10 +401,9 @@ class JobSentencesController extends GetxController {
     );
     updatedModules[moduleIndex] = updatedModule;
     selectedModule.value = updatedModule;
-    final int updatedLearnedTotal =
-        (details.progress.learnedSentences + 1)
-            .clamp(0, details.progress.totalSentences)
-            .toInt();
+    final int updatedLearnedTotal = (details.progress.learnedSentences + 1)
+        .clamp(0, details.progress.totalSentences)
+        .toInt();
     trackDetails.value = details.copyWith(
       modules: updatedModules,
       progress: details.progress.copyWith(

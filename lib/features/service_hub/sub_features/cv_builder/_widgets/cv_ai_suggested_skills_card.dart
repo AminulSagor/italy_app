@@ -42,7 +42,7 @@ class CvAiSuggestedSkillsCard extends StatelessWidget {
               ),
               SizedBox(width: 9.w),
               Text(
-                'Skills',
+                'skills'.tr,
                 style: TextStyle(
                   color: AppColors.homePrimaryText,
                   fontSize: AppFont.font11.sp,
@@ -89,7 +89,7 @@ class CvAiSuggestedSkillsCard extends StatelessWidget {
                   height: 1,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'gen_type_skill_here'.tr.tr,
+                  hintText: 'gen_type_skill_here'.tr,
                   hintStyle: TextStyle(
                     color: AppColors.homeSecondaryText.withValues(alpha: 0.55),
                     fontSize: AppFont.font8.sp,

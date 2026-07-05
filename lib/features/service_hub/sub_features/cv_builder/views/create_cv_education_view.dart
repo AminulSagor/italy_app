@@ -32,7 +32,7 @@ class CreateCvEducationView extends GetView<CreateCvEducationController> {
                     const _Header(),
                     SizedBox(height: 12.h),
                     CvStepProgress(
-                      title: 'gen_step_3_skills_education'.tr.tr,
+                      title: 'gen_step_3_skills_education'.tr,
                       progressText: '33%',
                       progress: 0.33,
                     ),
@@ -41,11 +41,11 @@ class CreateCvEducationView extends GetView<CreateCvEducationController> {
                     SizedBox(height: 18.h),
                     CvLanguageSkillsCard(controller: controller),
                     SizedBox(height: 22.h),
-                    _SectionTitle(title: 'gen_your_skills'.tr.tr),
+                    _SectionTitle(title: 'gen_your_skills'.tr),
                     SizedBox(height: 10.h),
                     CvSkillSectionCard(controller: controller),
                     SizedBox(height: 22.h),
-                    _SectionTitle(title: 'gen_ai_suggested_skills'.tr.tr),
+                    _SectionTitle(title: 'gen_ai_suggested_skills'.tr),
                     SizedBox(height: 10.h),
                     CvAiSuggestedSkillsCard(controller: controller),
                   ],
@@ -53,7 +53,7 @@ class CreateCvEducationView extends GetView<CreateCvEducationController> {
               ),
             ),
             _BottomButton(
-              title: 'gen_continue_to_summary'.tr.tr,
+              title: 'gen_continue_to_summary'.tr,
               onTap: controller.onContinueTap,
             ),
           ],
@@ -90,7 +90,7 @@ class _Header extends StatelessWidget {
           ),
           SizedBox(width: 10.w),
           Text(
-            'Create CV',
+            'create_cv'.tr,
             style: TextStyle(
               color: AppColors.homePrimaryText,
               fontSize: AppFont.font13.sp,
@@ -138,7 +138,7 @@ class _EducationProfileCard extends StatelessWidget {
               ),
               SizedBox(width: 10.w),
               Text(
-                'Education Profile',
+                'education_profile'.tr,
                 style: TextStyle(
                   color: AppColors.homePrimaryText,
                   fontSize: AppFont.font13.sp,
@@ -151,8 +151,8 @@ class _EducationProfileCard extends StatelessWidget {
           SizedBox(height: 18.h),
           Obx(
             () => CvEducationDropdownField(
-              label: 'gen_type_of_education'.tr.tr,
-              hintText: 'gen_select_type'.tr.tr,
+              label: 'gen_type_of_education'.tr,
+              hintText: 'gen_select_type'.tr,
               value: controller.selectedEducationType.value.isEmpty
                   ? null
                   : controller.selectedEducationType.value,
@@ -163,8 +163,8 @@ class _EducationProfileCard extends StatelessWidget {
           SizedBox(height: 14.h),
           Obx(
             () => CvEducationDropdownField(
-              label: 'gen_level'.tr.tr,
-              hintText: 'gen_select_level'.tr.tr,
+              label: 'gen_level'.tr,
+              hintText: 'gen_select_level'.tr,
               value: controller.selectedLevel.value.isEmpty
                   ? null
                   : controller.selectedLevel.value,
@@ -193,7 +193,7 @@ class _SchoolField extends StatelessWidget {
         Row(
           children: <Widget>[
             Text(
-              'SCHOOL OR INSTITUTION NAME',
+              'school_or_institution_name'.tr,
               style: TextStyle(
                 color: AppColors.homeSecondaryText,
                 fontSize: AppFont.font8.sp,
@@ -204,7 +204,7 @@ class _SchoolField extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              'Optional',
+              'optional'.tr,
               style: TextStyle(
                 color: AppColors.homeSecondaryText.withValues(alpha: 0.7),
                 fontSize: AppFont.font8.sp,
@@ -231,7 +231,7 @@ class _SchoolField extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
             decoration: InputDecoration(
-              hintText: 'gen_e_g_politecnico_di_milano'.tr.tr,
+              hintText: 'gen_e_g_politecnico_di_milano'.tr,
               hintStyle: TextStyle(
                 color: AppColors.homeSecondaryText.withValues(alpha: 0.55),
                 fontSize: AppFont.font9.sp,

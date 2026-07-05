@@ -73,7 +73,7 @@ class MessageChatController extends GetxController
             if (current != null && current.isOnline != p.isOnline) {
               chat.value = current.copyWith(
                 isOnline: p.isOnline,
-                contactStatus: p.isOnline ? 'Online' : 'Offline',
+                contactStatus: p.isOnline ? 'online'.tr : 'offline'.tr,
               );
             }
           }
@@ -143,20 +143,20 @@ class MessageChatController extends GetxController
       if (res.success) {
         blockStatus.value = 'none';
         Get.snackbar(
-          'Unblocked',
+          'unblocked'.tr,
           'You can now message this user.',
           snackPosition: SnackPosition.BOTTOM,
         );
       } else {
         Get.snackbar(
-          'Failed',
+          'failed_1'.tr,
           'Could not unblock user. Please try again.',
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (_) {
       Get.snackbar(
-        'Error',
+        'error'.tr,
         'Something went wrong. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -218,7 +218,7 @@ class MessageChatController extends GetxController
           if (p != null && chat.value != null) {
             chat.value = chat.value!.copyWith(
               isOnline: p.isOnline,
-              contactStatus: p.isOnline ? 'Online' : 'Offline',
+              contactStatus: p.isOnline ? 'online'.tr : 'offline'.tr,
             );
           }
         }
@@ -246,7 +246,7 @@ class MessageChatController extends GetxController
 
           chat.value = chat.value!.copyWith(
             isOnline: isOnline,
-            contactStatus: isOnline ? 'Online' : 'Offline',
+            contactStatus: isOnline ? 'online'.tr : 'offline'.tr,
             contactAvatarUrl: profile.avatarUrl,
             contactName: profile.name,
           );
@@ -319,8 +319,8 @@ class MessageChatController extends GetxController
                   contactStatus: status == 'none'
                       ? (current.contactStatus)
                       : (status == 'blocked_by_me'
-                            ? 'You blocked this user'
-                            : 'You cannot message this user.'),
+                            ? 'you_blocked_this_user_1'.tr
+                            : 'you_cannot_message_this_user'.tr),
                 );
               } catch (_) {}
             }
@@ -475,7 +475,7 @@ class MessageChatController extends GetxController
         timeLabel: _formatTimeLabel(createdAt),
         createdAtIso: createdAt,
         statusLabel: senderId == _currentUserId
-            ? (statusFromServer.isNotEmpty ? statusFromServer : 'Delivered')
+            ? (statusFromServer.isNotEmpty ? statusFromServer : 'delivered'.tr)
             : '',
         isMine: senderId == _currentUserId,
       );
@@ -553,7 +553,7 @@ class MessageChatController extends GetxController
       text: text,
       timeLabel: _formatTimeLabel(DateTime.now().toIso8601String()),
       createdAtIso: DateTime.now().toIso8601String(),
-      statusLabel: 'Sending',
+      statusLabel: 'sending_1'.tr,
       isMine: true,
     );
 
@@ -594,7 +594,7 @@ class MessageChatController extends GetxController
           (MessageChatItemModel m) => m.id == clientMessageId,
         );
         if (idx >= 0) {
-          updated[idx] = updated[idx].copyWith(statusLabel: 'Queued');
+          updated[idx] = updated[idx].copyWith(statusLabel: 'queued'.tr);
           chat.value = current.copyWith(messages: updated);
         }
         isSending.value = false;
@@ -604,7 +604,7 @@ class MessageChatController extends GetxController
         (MessageChatItemModel m) => m.id == clientMessageId,
       );
       if (idx >= 0) {
-        updated[idx] = updated[idx].copyWith(statusLabel: 'Failed');
+        updated[idx] = updated[idx].copyWith(statusLabel: 'failed'.tr);
         chat.value = current.copyWith(messages: updated);
       }
     } finally {
@@ -636,7 +636,7 @@ class MessageChatController extends GetxController
         if (idx >= 0) {
           final List<MessageChatItemModel> updated =
               List<MessageChatItemModel>.from(current.messages);
-          updated[idx] = updated[idx].copyWith(statusLabel: 'Sending');
+          updated[idx] = updated[idx].copyWith(statusLabel: 'sending_1'.tr);
           chat.value = current.copyWith(messages: updated);
         }
       } catch (_) {
@@ -654,7 +654,7 @@ class MessageChatController extends GetxController
       final int hour = dt.hour == 0
           ? 12
           : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
-      final String ampm = dt.hour >= 12 ? 'PM' : 'AM';
+      final String ampm = dt.hour >= 12 ? 'pm'.tr : 'am'.tr;
       final String minute = dt.minute.toString().padLeft(2, '0');
       return '$hour:$minute $ampm';
     } catch (_) {
@@ -673,7 +673,7 @@ class MessageChatController extends GetxController
   void _openCall(MessageCallType callType) {
     if (blockStatus.value != 'none') {
       Get.snackbar(
-        'Blocked',
+        'blocked'.tr,
         'You cannot call this user.',
       );
       return;
@@ -687,7 +687,7 @@ class MessageChatController extends GetxController
 
     if (!Get.isRegistered<CallSocketService>()) {
       Get.snackbar(
-        'Call unavailable',
+        'call_unavailable'.tr,
         'The call service is not initialized.',
         snackPosition: SnackPosition.BOTTOM,
       );

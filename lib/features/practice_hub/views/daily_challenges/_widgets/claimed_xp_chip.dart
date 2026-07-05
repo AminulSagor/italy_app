@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class ClaimedXpChip extends StatelessWidget {
   const ClaimedXpChip({super.key, required this.rewardXp});
@@ -18,7 +19,7 @@ class ClaimedXpChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(999.r),
       ),
       child: Text(
-        'CLAIMED +$rewardXp XP',
+        'claimed_rewardxp_xp'.trParams(<String, String>{'rewardxp': rewardXp.toString()}),
         style: TextStyle(
           fontSize: AppFont.font11.sp,
           fontWeight: FontWeight.w900,

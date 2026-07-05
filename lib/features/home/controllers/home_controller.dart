@@ -170,9 +170,9 @@ class HomeController extends GetxController {
   HomeInfoCardModel _buildStreakCard() {
     final int days = _userSessionController.currentStreakDays;
     return HomeInfoCardModel(
-      eyebrow: 'DAY STREAK',
-      title: '$days ${days == 1 ? 'Day' : 'Days'}',
-      body: days > 0 ? 'Keep learning today!' : 'Start learning today!',
+      eyebrow: 'day_streak'.tr,
+      title: '$days ${days == 1 ? 'day'.tr : 'gen_days'.tr}',
+      body: days > 0 ? 'keep_learning_today'.tr : 'start_learning_today'.tr,
       actionLabel: '',
     );
   }
@@ -221,7 +221,7 @@ class HomeController extends GetxController {
       mode: LaunchMode.externalApplication,
     );
     if (!launched) {
-      Get.snackbar('Community', 'Unable to open the Facebook community.');
+      Get.snackbar('community'.tr, 'unable_to_open_the_facebook_community'.tr);
     }
   }
 

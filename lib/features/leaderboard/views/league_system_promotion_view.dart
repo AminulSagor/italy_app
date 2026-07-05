@@ -48,7 +48,7 @@ class LeagueSystemPromotionView extends GetView<LeaderboardController> {
                     children: <Widget>[
                       Expanded(
                         child: Text(
-                          'The League\nSystem',
+                          'the_league_system'.tr,
                           style: TextStyle(
                             fontSize: 29.sp,
                             height: 1.18,
@@ -70,7 +70,7 @@ class LeagueSystemPromotionView extends GetView<LeaderboardController> {
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    'Climb the tiers and become\nan Italian Master.',
+                    'climb_the_tiers_and_become_an_italian_master'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font18.sp,
                       height: 1.42,
@@ -97,8 +97,8 @@ class LeagueSystemPromotionView extends GetView<LeaderboardController> {
                           bgColor: Color(0xFFE4F8D8),
                           icon: Icons.arrow_upward_rounded,
                           iconColor: Color(0xFF35C51E),
-                          title: 'gen_promotion'.tr.tr,
-                          subtitle: 'gen_earn_more_nxp_to_nmove_up'.tr.tr,
+                          title: 'gen_promotion'.tr,
+                          subtitle: 'gen_earn_more_nxp_to_nmove_up'.tr,
                           titleColor: Color(0xFF244D3A),
                           subtitleColor: Color(0xFF477159),
                         ),
@@ -109,8 +109,8 @@ class LeagueSystemPromotionView extends GetView<LeaderboardController> {
                           bgColor: Color(0xFFFCE4E8),
                           icon: Icons.arrow_downward_rounded,
                           iconColor: Color(0xFFFF4A47),
-                          title: 'gen_demotion'.tr.tr,
-                          subtitle: 'gen_finish_in_the_nbottom_5_to_ndr'.tr.tr,
+                          title: 'gen_demotion'.tr,
+                          subtitle: 'gen_finish_in_the_nbottom_5_to_ndr'.tr,
                           titleColor: Color(0xFF9A2226),
                           subtitleColor: Color(0xFFB75E67),
                         ),
@@ -398,7 +398,7 @@ class _EarnXpCard extends StatelessWidget {
               SizedBox(width: 14.w),
               Expanded(
                 child: Text(
-                  'HOW TO EARN XP',
+                  'how_to_earn_xp'.tr,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -412,11 +412,11 @@ class _EarnXpCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 28.h),
-          const _EarnXpRow(text: 'Complete Video\nLessons'),
+          _EarnXpRow(text: 'complete_video_nlessons'.tr),
           SizedBox(height: 16.h),
-          const _EarnXpRow(text: 'Pass Chapter Quizzes'),
+          _EarnXpRow(text: 'pass_chapter_quizzes'.tr),
           SizedBox(height: 16.h),
-          const _EarnXpRow(text: 'Maintain Answer\nStreaks'),
+          _EarnXpRow(text: 'maintain_answer_nstreaks'.tr),
         ],
       ),
     );

@@ -26,7 +26,7 @@ class CreateCvChoiceView extends StatelessWidget {
               SizedBox(height: 30.h),
               Center(
                 child: Text(
-                  'Create Your CV',
+                  'create_your_cv'.tr,
                   style: TextStyle(
                     color: AppColors.homePrimaryText,
                     fontSize: AppFont.font24.sp,
@@ -39,7 +39,7 @@ class CreateCvChoiceView extends StatelessWidget {
               SizedBox(height: 10.h),
               Center(
                 child: Text(
-                  'Choose how to start your professional\njourney.',
+                  'choose_how_to_start_your_professional_journey'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppColors.homeSecondaryText,
@@ -51,7 +51,7 @@ class CreateCvChoiceView extends StatelessWidget {
               ),
               SizedBox(height: 26.h),
               CvChoiceOptionCard(
-                title: 'gen_create_a_new_cv'.tr.tr,
+                title: 'gen_create_a_new_cv'.tr,
                 icon: Icons.note_add_rounded,
                 backgroundColor: AppColors.primaryGreen,
                 iconBackgroundColor: AppColors.serviceHubGreenStart,
@@ -62,8 +62,8 @@ class CreateCvChoiceView extends StatelessWidget {
               ),
               SizedBox(height: 14.h),
               CvChoiceOptionCard(
-                title: 'gen_use_existing_cv'.tr.tr,
-                subtitle: 'gen_duplicate_or_edit_your_previou'.tr.tr,
+                title: 'gen_use_existing_cv'.tr,
+                subtitle: 'gen_duplicate_or_edit_your_previou'.tr,
                 icon: Icons.copy_rounded,
                 backgroundColor: AppColors.white,
                 iconBackgroundColor: AppColors.homePaleGreen,
@@ -74,7 +74,7 @@ class CreateCvChoiceView extends StatelessWidget {
               ),
               SizedBox(height: 28.h),
               Text(
-                'Recent CVs',
+                'recent_cvs_1'.tr,
                 style: TextStyle(
                   color: AppColors.homePrimaryText,
                   fontSize: AppFont.font13.sp,
@@ -83,38 +83,38 @@ class CreateCvChoiceView extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 22.h),
-              _SectionLabel(title: 'gen_drafts'.tr.tr),
+              _SectionLabel(title: 'gen_drafts'.tr),
               SizedBox(height: 10.h),
               RecentCvTile(
-                title: 'gen_kitchen_assistant'.tr.tr,
-                subtitle: 'gen_last_edited_2_days_ago'.tr.tr,
-                status: 'DRAFT',
+                title: 'gen_kitchen_assistant'.tr,
+                subtitle: 'gen_last_edited_2_days_ago'.tr,
+                status: 'draft'.tr,
                 isCompleted: false,
                 onTap: () {},
               ),
               SizedBox(height: 10.h),
               RecentCvTile(
-                title: 'gen_delivery_driver'.tr.tr,
-                subtitle: 'gen_last_edited_5_days_ago'.tr.tr,
-                status: 'DRAFT',
+                title: 'gen_delivery_driver'.tr,
+                subtitle: 'gen_last_edited_5_days_ago'.tr,
+                status: 'draft'.tr,
                 isCompleted: false,
                 onTap: () {},
               ),
               SizedBox(height: 22.h),
-              _SectionLabel(title: 'gen_completed'.tr.tr),
+              _SectionLabel(title: 'gen_completed'.tr),
               SizedBox(height: 10.h),
               RecentCvTile(
-                title: 'gen_restaurant_waiter'.tr.tr,
-                subtitle: 'gen_oct_2023'.tr.tr,
-                status: 'COMPLETED',
+                title: 'gen_restaurant_waiter'.tr,
+                subtitle: 'gen_oct_2023'.tr,
+                status: 'completed'.tr,
                 isCompleted: true,
                 onTap: () {},
               ),
               SizedBox(height: 10.h),
               RecentCvTile(
-                title: 'gen_cleaning_staff'.tr.tr,
-                subtitle: 'gen_sept_2023'.tr.tr,
-                status: 'COMPLETED',
+                title: 'gen_cleaning_staff'.tr,
+                subtitle: 'gen_sept_2023'.tr,
+                status: 'completed'.tr,
                 isCompleted: true,
                 onTap: () {},
               ),
@@ -156,7 +156,7 @@ class _Header extends StatelessWidget {
             ),
           ),
           Text(
-            'Your Future',
+            'your_future'.tr,
             style: TextStyle(
               color: AppColors.primaryGreen,
               fontSize: AppFont.font11.sp,

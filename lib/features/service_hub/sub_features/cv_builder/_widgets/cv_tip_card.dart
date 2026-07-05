@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -38,7 +39,7 @@ class CvTipCard extends StatelessWidget {
           SizedBox(width: 10.w),
           Expanded(
             child: Text(
-              'Pro Tip: Create different CVs for different\njobs to increase your hiring chances!',
+              'pro_tips_cv'.tr,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:get/get.dart' hide Response;
 
 import '../../../core/models/learning_activity_models.dart';
 import '../../../core/services/api_client.dart';
@@ -16,10 +17,8 @@ class HomeApiService {
   final LearningActivityApiService _learningActivityApiService;
 
   Future<HomeOverviewModel> fetchWeeklyOverview() async {
-    final WeeklyLearningActivityModel result =
-        await _learningActivityApiService.getWeeklySummary(
-          weekStart: _currentWeekStart(),
-        );
+    final WeeklyLearningActivityModel result = await _learningActivityApiService
+        .getWeeklySummary(weekStart: _currentWeekStart());
     final String today = _dateOnly(DateTime.now());
     return HomeOverviewModel(
       totalSeconds: result.totalSeconds,
@@ -55,9 +54,8 @@ class HomeApiService {
     return rawItems
         .whereType<Map>()
         .map(
-          (Map item) => HomeWorkItemModel.fromJson(
-            Map<String, dynamic>.from(item),
-          ),
+          (Map item) =>
+              HomeWorkItemModel.fromJson(Map<String, dynamic>.from(item)),
         )
         .toList(growable: false);
   }
@@ -89,7 +87,7 @@ class HomeApiService {
       return status == 'completed' || status == 'claimed';
     }).length;
     return HomeDailyChallengesModel(
-      label: 'DAILY CHALLENGES',
+      label: 'gen_daily_challenges_1'.tr,
       completed: completed,
       total: tasks.length,
     );
@@ -101,7 +99,7 @@ class HomeApiService {
     if (data is Map) return Map<String, dynamic>.from(data);
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object.',
+      message: 'response_is_not_a_valid_json_object_1'.tr,
     );
   }
 

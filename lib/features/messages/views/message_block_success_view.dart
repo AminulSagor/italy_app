@@ -20,7 +20,7 @@ class MessageBlockSuccessView extends GetView<MessageUserInfoController> {
         child: Obx(
           () {
             final MessageUserProfileModel? profile = controller.profile.value;
-            final String userName = profile?.name ?? 'User';
+            final String userName = profile?.name ?? 'user'.tr;
 
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -30,7 +30,7 @@ class MessageBlockSuccessView extends GetView<MessageUserInfoController> {
                   const _BlockedHeroIcon(),
                   SizedBox(height: 64.h),
                   Text(
-                    'User Blocked',
+                    'user_blocked'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: AppFont.font40.sp,
@@ -41,7 +41,7 @@ class MessageBlockSuccessView extends GetView<MessageUserInfoController> {
                   ),
                   SizedBox(height: 22.h),
                   Text(
-                    'Safe learning environment restored',
+                    'safe_learning_environment_restored'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: AppFont.font24.sp,
@@ -55,12 +55,12 @@ class MessageBlockSuccessView extends GetView<MessageUserInfoController> {
                   const _SafetyStatusCards(),
                   SizedBox(height: 64.h),
                   CustomButton.primary(
-                    text: 'BACK TO MESSAGE',
+                    text: 'back_to_message'.tr,
                     onPressed: controller.backToMessage,
                   ),
                   SizedBox(height: 28.h),
                   CustomButton(
-                    text: 'UNBLOCK USER',
+                    text: 'unblock_user'.tr,
                     width: double.infinity,
                     height: kButtonDefaultHeight,
                     btnColor: AppColors.white,
@@ -144,7 +144,7 @@ class _PrivacyInfoCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  '$userName has been hidden from your app.',
+                  'username_has_been_hidden_from_your_app'.trParams(<String, String>{'username': userName.toString()}),
                   style: TextStyle(
                     fontSize: AppFont.font22.sp,
                     fontWeight: FontWeight.w900,
@@ -154,7 +154,7 @@ class _PrivacyInfoCard extends StatelessWidget {
                 ),
                 SizedBox(height: 18.h),
                 Text(
-                  'They will not be notified that you blocked them. Your privacy is our priority.',
+                  'they_will_not_be_notified_that_you_blocked_them_yo'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font20.sp,
                     fontWeight: FontWeight.w500,
@@ -181,14 +181,14 @@ class _SafetyStatusCards extends StatelessWidget {
         Expanded(
           child: _SafetyStatusCard(
             icon: Icons.lock_outline_rounded,
-            title: 'gen_secure'.tr.tr,
+            title: 'gen_secure'.tr,
           ),
         ),
         SizedBox(width: 26.w),
         Expanded(
           child: _SafetyStatusCard(
             icon: Icons.shield_outlined,
-            title: 'gen_private'.tr.tr,
+            title: 'gen_private'.tr,
           ),
         ),
       ],

@@ -37,7 +37,7 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
           top: false,
           child: CustomButton.primary(
             onPressed: () => Get.offAllNamed(AppRoutes.wrapper),
-            text: 'Back To Practice HUB',
+            text: 'back_to_practice_hub'.tr,
           ),
         ),
       ),
@@ -61,7 +61,7 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                     ),
                     Expanded(
                       child: Text(
-                        'Exam Success',
+                        'exam_success'.tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: AppFont.font16.sp,
@@ -77,7 +77,7 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                 Image.asset('assets/decor_png/achievement_2.png'),
                 SizedBox(height: 36.h),
                 Text(
-                  'Exam Submitted!',
+                  'exam_submitted'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: AppFont.font34.sp,
@@ -87,7 +87,7 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                 ),
                 SizedBox(height: 12.h),
                 Text(
-                  "Bravissimo! You've done the hard work. Now, it's our turn.",
+                  "bravissimo_you_ve_done_the_hard_work_now_it_s_our_turn".tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
@@ -120,7 +120,7 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                       ),
                       SizedBox(width: 10.w),
                       Text(
-                        'Reference ID: ${controller.referenceId.value}',
+                        'reference_id_controller_referenceid_value'.trParams(<String, String>{'value': controller.referenceId.value.toString()}),
                         style: TextStyle(
                           fontSize: AppFont.font14.sp,
                           fontWeight: FontWeight.w700,
@@ -176,7 +176,7 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                       SizedBox(width: 20.w),
                       Expanded(
                         child: Text(
-                          'While you wait, why not try a Daily Challenge or start Level A2 for free?',
+                          'while_you_wait_why_not_try_a_daily_challenge_or_st'.tr,
                           style: TextStyle(
                             fontSize: AppFont.font16.sp,
                             fontWeight: FontWeight.w500,
@@ -230,7 +230,7 @@ class _TimelineCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'EVALUATION TIMELINE',
+            'evaluation_timeline'.tr,
             style: TextStyle(
               fontSize: AppFont.font12.sp,
               fontWeight: FontWeight.w700,
@@ -242,26 +242,26 @@ class _TimelineCard extends StatelessWidget {
           _TimelineStep(
             isDone: true,
             isActive: true,
-            title: 'gen_exam_received'.tr.tr,
-            subtitle: 'gen_successfully_uploaded_to_serve'.tr.tr,
+            title: 'gen_exam_received'.tr,
+            subtitle: 'gen_successfully_uploaded_to_serve'.tr,
             icon: Icons.check_rounded,
           ),
           _TimelineStep(
             isDone: teacherDone,
             isActive: teacherDone,
-            title: 'gen_teacher_review'.tr.tr,
+            title: 'gen_teacher_review'.tr,
             subtitle: teacherDone
-                ? 'Manual review completed'
-                : 'Reviewing Speaking & Writing...',
+                ? 'manual_review_completed'.tr
+                : 'reviewing_speaking_writing'.tr,
             icon: teacherDone ? Icons.check_rounded : Icons.circle,
           ),
           _TimelineStep(
             isDone: resultDone,
             isActive: resultDone,
-            title: 'gen_result_certificate'.tr.tr,
+            title: 'gen_result_certificate'.tr,
             subtitle: resultDone
-                ? 'Result is ready'
-                : 'Unlock your achievement',
+                ? 'result_is_ready'.tr
+                : 'unlock_your_achievement'.tr,
             icon: resultDone ? Icons.check_rounded : Icons.lock_outline_rounded,
             showConnector: false,
           ),
@@ -278,7 +278,7 @@ class _TimelineCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(kHomePillRadius.r),
                 ),
                 child: Text(
-                  'View Result',
+                  'view_result'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w700,
@@ -306,7 +306,7 @@ class _TimelineCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       estimatedResult.isEmpty
-                          ? 'Estimated result time is not available'
+                          ? 'estimated_result_time_is_not_available'.tr
                           : 'Estimated Result: $estimatedResult',
                       style: TextStyle(
                         fontSize: AppFont.font16.sp,

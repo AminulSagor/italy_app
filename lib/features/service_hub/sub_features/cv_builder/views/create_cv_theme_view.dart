@@ -29,7 +29,7 @@ class CreateCvThemeView extends GetView<CreateCvThemeController> {
                     const _Header(),
                     SizedBox(height: 22.h),
                     Text(
-                      'Choose Theme Colors',
+                      'choose_theme_colors'.tr,
                       style: TextStyle(
                         color: AppColors.homePrimaryText,
                         fontSize: AppFont.font23.sp,
@@ -40,7 +40,7 @@ class CreateCvThemeView extends GetView<CreateCvThemeController> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Only template colors marked as Primary or Accent will change. Custom colors from the admin template will stay fixed.',
+                      'only_template_colors_marked_as_primary_or_accent_will_change_custom_colors_from_the_admin_template_will_stay_fixed'.tr,
                       style: TextStyle(
                         color: AppColors.homeSecondaryText,
                         fontSize: AppFont.font11.sp,
@@ -61,13 +61,13 @@ class CreateCvThemeView extends GetView<CreateCvThemeController> {
                     ),
                     SizedBox(height: 18.h),
                     _ColorSelector(
-                      title: 'gen_primary_color'.tr.tr,
+                      title: 'primary'.tr,
                       selectedHex: controller.selectedPrimaryColor,
                       onSelected: controller.selectPrimaryColor,
                     ),
                     SizedBox(height: 16.h),
                     _ColorSelector(
-                      title: 'gen_accent_color'.tr.tr,
+                      title: 'accent'.tr,
                       selectedHex: controller.selectedAccentColor,
                       onSelected: controller.selectAccentColor,
                     ),
@@ -77,7 +77,7 @@ class CreateCvThemeView extends GetView<CreateCvThemeController> {
             ),
             Obx(
               () => CvBottomButton(
-                title: controller.isSaving.value ? 'Creating...' : 'Create CV',
+                title: controller.isSaving.value ? 'creating'.tr : 'create_cv'.tr,
                 onTap: controller.isSaving.value
                     ? () {}
                     : controller.saveCvDocument,
@@ -162,7 +162,7 @@ class _ThemePreview extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Final CV Theme',
+                  'final_cv_theme'.tr,
                   style: TextStyle(
                     color: AppColors.homePrimaryText,
                     fontSize: AppFont.font14.sp,
@@ -265,7 +265,7 @@ class _ColorSelector extends GetView<CreateCvThemeController> {
                         ),
                         SizedBox(width: 6.w),
                         Text(
-                          'Custom',
+                          'custom'.tr,
                           style: TextStyle(
                             color: AppColors.primaryGreen,
                             fontSize: AppFont.font10.sp,

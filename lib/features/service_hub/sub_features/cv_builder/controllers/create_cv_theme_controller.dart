@@ -10,7 +10,7 @@ import '../services/cv_builder_api_service.dart';
 
 class CreateCvThemeController extends GetxController {
   CreateCvThemeController({required CvBuilderApiService cvBuilderApiService})
-      : _cvBuilderApiService = cvBuilderApiService;
+    : _cvBuilderApiService = cvBuilderApiService;
 
   final CvBuilderApiService _cvBuilderApiService;
 
@@ -53,14 +53,15 @@ class CreateCvThemeController extends GetxController {
   void _readArguments() {
     final Object? rawArguments = Get.arguments;
     if (rawArguments is! CvThemeRouteArguments) {
-      throw Exception('CV theme data is required.');
+      throw Exception('cv_theme_data_is_required'.tr);
     }
 
     template = rawArguments.template;
     documentTitle = rawArguments.documentTitle;
     formData = rawArguments.formData;
     pendingPhotoFiles = rawArguments.pendingPhotoFiles;
-    selectedPrimaryColor.value = _normalizeHex(rawArguments.primaryColor).isEmpty
+    selectedPrimaryColor.value =
+        _normalizeHex(rawArguments.primaryColor).isEmpty
         ? _normalizeHex(template.primaryColor)
         : _normalizeHex(rawArguments.primaryColor);
     selectedAccentColor.value = _normalizeHex(rawArguments.accentColor).isEmpty
@@ -74,7 +75,6 @@ class CreateCvThemeController extends GetxController {
     final int? parsed = int.tryParse(normalizedHex, radix: 16);
     return Color(0xFF000000 | (parsed ?? 0x006B3F));
   }
-
 
   String hexFromColor(Color color) {
     return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
@@ -139,10 +139,9 @@ class CreateCvThemeController extends GetxController {
         entry.value,
       );
 
-      final Map<String, dynamic> sectionData =
-          nextFormData[sectionKey] is Map
-              ? Map<String, dynamic>.from(nextFormData[sectionKey] as Map)
-              : <String, dynamic>{};
+      final Map<String, dynamic> sectionData = nextFormData[sectionKey] is Map
+          ? Map<String, dynamic>.from(nextFormData[sectionKey] as Map)
+          : <String, dynamic>{};
       sectionData[fieldKey] = uploadedUrl;
       nextFormData[sectionKey] = sectionData;
     }

@@ -42,7 +42,7 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
             child: Column(
               children: <Widget>[
                 ProBackHeader(
-                  title: 'Order Summary',
+                  title: 'gen_order_summary'.tr,
                   onBackTap: () => Get.back<void>(),
                 ),
                 SizedBox(height: 10.h),
@@ -89,7 +89,7 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
                 ),
                 SizedBox(height: 42.h),
                 CustomButton.primary(
-                  text: 'Buy Full Course Now',
+                  text: 'buy_full_course_now'.tr,
                   icon: Icons.play_arrow_rounded,
                   onPressed: () => controller.openCheckout(controllerTag),
                 ),
@@ -97,7 +97,7 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
                 GestureDetector(
                   onTap: () => Get.back<void>(),
                   child: Text(
-                    'Maybe later',
+                    'maybe_later'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font16.sp,
                       fontWeight: FontWeight.w700,

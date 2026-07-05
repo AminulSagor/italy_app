@@ -21,7 +21,7 @@ class ProfilePhotoView extends GetView<SettingsController> {
           padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 28.h),
           child: Column(
             children: <Widget>[
-              const SettingsTopBar(title: 'Profile Photo'),
+              SettingsTopBar(title: 'gen_profile_photo'.tr),
               SizedBox(height: 61.h),
               Obx(
                 () => _PhotoPreview(
@@ -31,7 +31,7 @@ class ProfilePhotoView extends GetView<SettingsController> {
               ),
               SizedBox(height: 34.h),
               Text(
-                'Say Cheese!',
+                'say_cheese'.tr,
                 style: TextStyle(
                   fontSize: 25.sp,
                   fontWeight: FontWeight.w900,
@@ -55,7 +55,7 @@ class ProfilePhotoView extends GetView<SettingsController> {
                 children: <Widget>[
                   Expanded(
                     child: _PhotoOptionCard(
-                      title: 'Take a Photo',
+                      title: 'gen_take_a_photo'.tr,
                       icon: Icons.camera_alt_outlined,
                       bgColor: const Color(0xFFD7FFC6),
                       iconBgColor: SettingsUi.lightGreen,
@@ -66,7 +66,7 @@ class ProfilePhotoView extends GetView<SettingsController> {
                   SizedBox(width: 16.w),
                   Expanded(
                     child: _PhotoOptionCard(
-                      title: 'Choose from\nGallery',
+                      title: 'gen_choose_from_ngallery'.tr,
                       icon: Icons.image_rounded,
                       bgColor: const Color(0xFFDCEBFF),
                       iconBgColor: const Color(0xFFA9D0FF),
@@ -81,7 +81,7 @@ class ProfilePhotoView extends GetView<SettingsController> {
               SizedBox(height: 39.h),
               Obx(
                 () => SettingsPrimaryButton(
-                  text: 'CONFIRM PHOTO',
+                  text: 'confirm_photo'.tr,
                   enabled: controller.selectedAvatar.value != null,
                   isLoading: controller.isUploadingAvatar.value,
                   onTap: () async {
@@ -90,9 +90,9 @@ class ProfilePhotoView extends GetView<SettingsController> {
                     if (!uploaded) return;
 
                     await SettingsSuccessBottomSheet.show(
-                      title: 'Profile Picture Updated!',
+                      title: 'gen_profile_picture_updated'.tr,
                       subtitle:
-                          'Your profile picture has been updated successfully.',
+                          'your_profile_picture_has_been_updated_successfully'.tr,
                       onDone: () {
                         Get.back<void>();
                         Get.back<void>();
@@ -293,7 +293,7 @@ class _PhotoTipCard extends StatelessWidget {
           SizedBox(width: 17.w),
           Expanded(
             child: Text(
-              'Use a clear JPG, PNG, or WEBP image smaller than 5 MB.',
+              'use_a_clear_jpg_png_or_webp_image_smaller_than_5_m'.tr,
               style: TextStyle(
                 fontSize: 14.sp,
                 height: 1.35,

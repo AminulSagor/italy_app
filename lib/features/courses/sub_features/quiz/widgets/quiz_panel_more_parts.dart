@@ -235,7 +235,7 @@ class _WritingWordPanel extends StatelessWidget {
           ),
           readOnly: showWrongResult,
           decoration: InputDecoration(
-            hintText: 'gen_type_your_answer_in_italian'.tr.tr,
+            hintText: 'gen_type_your_answer_in_italian'.tr,
             hintStyle: TextStyle(
               fontSize: AppFont.font18.sp,
               fontWeight: FontWeight.w800,

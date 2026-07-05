@@ -17,12 +17,12 @@ class UserSessionController extends GetxService {
 
   String get displayName {
     final String value = user.value?.fullName.trim() ?? '';
-    return value.isEmpty ? 'Italian Learner' : value;
+    return value.isEmpty ? 'italian_learner'.tr : value;
   }
 
   String get levelLabel {
     final String value = user.value?.learnerLevel.trim() ?? '';
-    return value.isEmpty ? 'A1' : value.toUpperCase();
+    return value.isEmpty ? 'a1'.tr : value.toUpperCase();
   }
 
   String? get avatarUrl => user.value?.avatarUrl;
@@ -74,7 +74,7 @@ class UserSessionController extends GetxService {
           await ApiErrorHandler.call<CurrentUserSummary>(
             _currentUserSummaryService.getCurrentUser,
             showError: showError,
-            errorTitle: 'Profile',
+            errorTitle: 'gen_profile'.tr,
           );
 
       if (result.isSuccess && result.data != null) {
@@ -118,7 +118,7 @@ class UserSessionController extends GetxService {
         await ApiErrorHandler.call<Map<String, int>>(
       _currentUserSummaryService.getAiBalances,
       showError: showError,
-      errorTitle: 'AI Balance',
+      errorTitle: 'ai_balance'.tr,
     );
     if (!result.isSuccess || result.data == null || user.value == null) return;
 

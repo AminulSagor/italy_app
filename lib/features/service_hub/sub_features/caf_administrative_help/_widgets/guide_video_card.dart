@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class GuideVideoCard extends StatelessWidget {
   const GuideVideoCard({super.key});
@@ -60,7 +61,7 @@ class GuideVideoCard extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  'VIDEO GUIDE',
+                  'video_guide'.tr,
                   style: TextStyle(
                     color: AppColors.serviceHubLightGreen,
                     fontSize: AppFont.font8.sp,

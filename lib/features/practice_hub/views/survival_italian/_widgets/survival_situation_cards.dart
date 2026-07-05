@@ -117,7 +117,7 @@ class SurvivalHeroSituationCard extends GetView<PracticeHubController> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        item.isCompleted ? 'Review' : 'Start Here',
+                        item.isCompleted ? 'review'.tr : 'start_here'.tr,
                         style: TextStyle(
                           fontSize: AppFont.font15.sp,
                           fontWeight: FontWeight.w900,

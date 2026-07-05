@@ -253,13 +253,13 @@ class _LeaderboardTabBar extends StatelessWidget {
         child: Row(
           children: <Widget>[
             _TabItem(
-              title: 'gen_my_league'.tr.tr,
+              title: 'gen_my_league'.tr,
               isSelected: selectedIndex == 0,
               onTap: () => onChanged(0),
             ),
             SizedBox(width: 8.w),
             _TabItem(
-              title: 'gen_global'.tr.tr,
+              title: 'gen_global'.tr,
               isSelected: selectedIndex == 1,
               onTap: () => onChanged(1),
             ),
@@ -442,7 +442,7 @@ class _PodiumUserCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(100.r),
             ),
             child: Text(
-              isCenter && !isGlobal ? 'SILVER' : league,
+              isCenter && !isGlobal ? 'silver'.tr : league,
               style: TextStyle(
                 fontSize: AppFont.font10.sp,
                 fontWeight: FontWeight.w900,
@@ -483,7 +483,10 @@ class _PodiumUserCard extends StatelessWidget {
               ),
               SizedBox(height: 2.h),
               Text(
-                '$rank${_rankSuffix(rank)}',
+                'ordinal_rank_label'.trParams(<String, String>{
+                  'rank': rank.toString(),
+                  'suffix': _rankSuffix(rank),
+                }),
                 style: TextStyle(
                   fontSize: AppFont.font15.sp,
                   fontWeight: FontWeight.w900,
@@ -514,10 +517,10 @@ class _PodiumUserCard extends StatelessWidget {
   }
 
   String _rankSuffix(int rank) {
-    if (rank == 1) return 'st';
-    if (rank == 2) return 'nd';
-    if (rank == 3) return 'rd';
-    return 'th';
+    if (rank == 1) return 'ordinal_suffix_first'.tr;
+    if (rank == 2) return 'ordinal_suffix_second'.tr;
+    if (rank == 3) return 'ordinal_suffix_third'.tr;
+    return 'ordinal_suffix_other'.tr;
   }
 }
 
@@ -574,7 +577,7 @@ class _PodiumAvatar extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(top: 9.h),
                   child: Text(
-                    'st',
+                    'ordinal_suffix_first'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font9.sp,
                       fontWeight: FontWeight.w900,
@@ -809,7 +812,7 @@ class _SearchField extends StatelessWidget {
         ),
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: 'gen_search_users'.tr.tr,
+          hintText: 'gen_search_users'.tr,
           hintStyle: TextStyle(
             fontSize: AppFont.font15.sp,
             fontWeight: FontWeight.w600,
@@ -895,7 +898,7 @@ class _LeaderboardUserTile extends StatelessWidget {
             SizedBox(
               width: 38.w,
               child: Text(
-                '#$rank',
+                'rank'.trParams(<String, String>{'rank': rank.toString()}),
                 style: TextStyle(
                   fontSize: AppFont.font17.sp,
                   fontWeight: FontWeight.w900,
@@ -1065,7 +1068,7 @@ class _MyRankFloatingCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'YOUR RANK',
+                  'your_rank'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font10.sp,
                     fontWeight: FontWeight.w900,
@@ -1140,7 +1143,7 @@ class _EmptyLeaderboard extends StatelessWidget {
       height: 110.h,
       alignment: Alignment.center,
       child: Text(
-        'No users found',
+        'no_users_found'.tr,
         style: TextStyle(
           fontSize: AppFont.font16.sp,
           fontWeight: FontWeight.w700,

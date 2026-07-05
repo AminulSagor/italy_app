@@ -169,11 +169,11 @@ class _DateChipLabel extends StatelessWidget {
         now.day,
       ).difference(DateTime(dt.year, dt.month, dt.day));
       final int days = -diff.inDays;
-      if (days == 0) return 'TODAY';
-      if (days == 1) return 'YESTERDAY';
+      if (days == 0) return 'today'.tr;
+      if (days == 1) return 'yesterday'.tr;
       return '${dt.day} ${_monthName(dt.month)} ${dt.year}';
     } catch (_) {
-      return 'TODAY';
+      return 'today'.tr;
     }
   }
 

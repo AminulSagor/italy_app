@@ -49,7 +49,7 @@ class CvAiSummaryGeneratorCard extends StatelessWidget {
               SizedBox(width: 12.w),
               Expanded(
                 child: Text(
-                  'AI Summary\nGenerator',
+                  'ai_summary_generator_title'.tr,
                   style: TextStyle(
                     color: AppColors.white,
                     fontSize: AppFont.font18.sp,
@@ -76,7 +76,7 @@ class CvAiSummaryGeneratorCard extends StatelessWidget {
               ),
             ),
             child: Text(
-              '"Tell us what types of job\nyou are looking for..."',
+              'ai_summary_generator_hint'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.white.withValues(alpha: 0.64),
@@ -120,7 +120,7 @@ class CvAiSummaryGeneratorCard extends StatelessWidget {
                             ),
                             SizedBox(width: 10.w),
                             Text(
-                              'Generate Summary',
+                              'generate_summary'.tr,
                               style: TextStyle(
                                 color: AppColors.primaryGreen,
                                 fontSize: AppFont.font12.sp,

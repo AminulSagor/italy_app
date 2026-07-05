@@ -34,7 +34,7 @@ class AiLevelTestView extends GetView<AiTutorLevelTestController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   AiTutorLevelTestHeader(
-                    title: 'Level Test',
+                    title: 'gen_level_test'.tr,
                     onBackTap: () => Get.back<void>(),
                   ),
                   SizedBox(height: 29.h),
@@ -74,7 +74,7 @@ class AiLevelTestView extends GetView<AiTutorLevelTestController> {
                   ),
                   SizedBox(height: 35.h),
                   Text(
-                    'WHAT WE MEASURE:',
+                    'what_we_measure'.tr,
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w900,
@@ -87,24 +87,24 @@ class AiLevelTestView extends GetView<AiTutorLevelTestController> {
                     icon: Icons.mic_rounded,
                     iconColor: Color(0xFF1376FF),
                     iconBackground: Color(0xFFE7F0FF),
-                    title: 'Speaking',
-                    subtitle: 'gen_communication_fluency'.tr.tr,
+                    title: 'gen_speaking'.tr,
+                    subtitle: 'gen_communication_fluency'.tr,
                   ),
                   SizedBox(height: 17.h),
                   AiTutorLevelMeasureCard(
                     icon: Icons.chat_bubble_rounded,
                     iconColor: Color(0xFFE93838),
                     iconBackground: Color(0xFFFFE5E5),
-                    title: 'Vocabulary',
-                    subtitle: 'gen_word_knowledge_context'.tr.tr,
+                    title: 'gen_vocabulary'.tr,
+                    subtitle: 'gen_word_knowledge_context'.tr,
                   ),
                   SizedBox(height: 17.h),
                   AiTutorLevelMeasureCard(
                     icon: Icons.menu_book_rounded,
                     iconColor: Color(0xFF24A75A),
                     iconBackground: Color(0xFFDDF9E7),
-                    title: 'Grammar',
-                    subtitle: 'gen_sentence_structure_verbs'.tr.tr,
+                    title: 'gen_grammar'.tr,
+                    subtitle: 'gen_sentence_structure_verbs'.tr,
                   ),
                 ],
               ),
@@ -130,7 +130,7 @@ class AiLevelTestView extends GetView<AiTutorLevelTestController> {
                 child: Column(
                   children: <Widget>[
                     AiTutorLevelPrimaryButton(
-                      text: 'Start 10-Question Test',
+                      text: 'start_10_question_test'.tr,
                       onTap: controller.startTest,
                     ),
                     SizedBox(height: 18.h),
@@ -144,7 +144,7 @@ class AiLevelTestView extends GetView<AiTutorLevelTestController> {
                         ),
                         SizedBox(width: 5.w),
                         Text(
-                          'Takes about 5 minutes. Results stay private.',
+                          'takes_about_5_minutes_results_stay_private'.tr,
                           style: TextStyle(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w500,

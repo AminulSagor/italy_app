@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../../core/services/api_client.dart';
 import '../models/quiz_models.dart';
+import 'package:get/get.dart' hide Response;
 
 class QuizApiCheckResult {
   final bool isCorrect;
@@ -352,7 +353,7 @@ class QuizApiService {
       case QuizQuestionType.sentenceTranslation:
         return 'TRANSLATE THIS SENTENCE';
       case QuizQuestionType.trueFalse:
-        return 'FIND OUT TRUE OR FALSE';
+        return 'Find out true or false';
       default:
         return '';
     }
@@ -411,7 +412,7 @@ class QuizApiService {
 
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object',
+      message: 'response_is_not_a_valid_json_object'.tr,
     );
   }
 

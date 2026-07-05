@@ -294,7 +294,7 @@ class MessagesMockService {
             fallbackName ??
             'User';
         final bool isOnline = map['isOnline'] as bool? ?? false;
-        final String statusLabel = isOnline ? 'ONLINE' : 'OFFLINE';
+        final String statusLabel = isOnline ? 'Online' : 'Offline';
 
         String avatarUrl = '';
         if (map['avatarUrl'] != null &&
@@ -333,7 +333,7 @@ class MessagesMockService {
 
     return MessageUserProfileModel(
       name: fallbackName ?? 'User',
-      statusLabel: 'OFFLINE',
+      statusLabel: 'Offline',
       avatarUrl: fallbackAvatarUrl ?? '',
       streakValue: '0 Days',
       xpValue: '0 XP',

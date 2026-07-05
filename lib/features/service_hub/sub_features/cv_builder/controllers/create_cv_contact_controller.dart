@@ -17,8 +17,8 @@ class CreateCvContactController extends GetxController {
 
   void onUploadPhotoTap() {
     Get.snackbar(
-      'Upload Photo',
-      'Photo upload will be connected later.',
+      'upload_photo'.tr,
+      'photo_upload_will_be_connected_later'.tr,
       snackPosition: SnackPosition.BOTTOM,
     );
   }

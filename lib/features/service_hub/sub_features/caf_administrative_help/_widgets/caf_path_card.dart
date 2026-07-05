@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class CafPathCard extends StatelessWidget {
   final double minHeight;
@@ -148,7 +149,7 @@ class _CardButton extends StatelessWidget {
           alignment: Alignment.center,
           padding: EdgeInsets.symmetric(horizontal: 18.w),
           child: Text(
-            '$text  ›',
+            'text_1'.trParams(<String, String>{'text': text.toString()}),
             style: TextStyle(
               color: color,
               fontSize: AppFont.font12.sp,

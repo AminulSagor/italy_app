@@ -197,19 +197,19 @@ class AiTutorSkillChip extends StatelessWidget {
     final ({String label, IconData icon, Color color, Color background}) data =
         switch (skill) {
       AiTutorSkillType.speaking => (
-          label: 'gen_speaking_1'.tr.tr,
+          label: 'gen_speaking_1'.tr,
           icon: Icons.mic_rounded,
           color: const Color(0xFF09649F),
           background: const Color(0xFFDDF1FF),
         ),
       AiTutorSkillType.vocabulary => (
-          label: 'gen_vocabulary_1'.tr.tr,
+          label: 'gen_vocabulary_1'.tr,
           icon: Icons.chat_bubble_rounded,
           color: const Color(0xFF8A4D00),
           background: const Color(0xFFFFEFD8),
         ),
       AiTutorSkillType.grammar => (
-          label: 'gen_grammar_1'.tr.tr,
+          label: 'gen_grammar_1'.tr,
           icon: Icons.menu_book_rounded,
           color: AppColors.primaryGreen,
           background: const Color(0xFFDDFCE7),

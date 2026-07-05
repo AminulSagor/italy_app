@@ -78,7 +78,7 @@ class RewardController extends GetxController {
         selectedChest.value = result.data!.pendingChest;
       }
     } else {
-      dashboardError.value = result.error ?? 'Could not load rewards.';
+      dashboardError.value = result.error ?? 'could_not_load_rewards'.tr;
     }
 
     isLoadingDashboard.value = false;
@@ -114,7 +114,7 @@ class RewardController extends GetxController {
         await ApiErrorHandler.call<RewardOpenResponseModel>(
           () => _apiService.openReward(chest.id),
           showError: true,
-          errorTitle: 'Could not open reward',
+          errorTitle: 'could_not_open_reward'.tr,
         );
 
     if (result.isSuccess && result.data != null) {
@@ -122,7 +122,7 @@ class RewardController extends GetxController {
       _showMessage(
         'Reward unlocked',
         result.data!.message.isEmpty
-            ? 'Your reward has been added successfully.'
+            ? 'your_reward_has_been_added_successfully'.tr
             : result.data!.message,
       );
       await _reloadAfterMutation();
@@ -157,7 +157,7 @@ class RewardController extends GetxController {
       historyTotalPages.value = result.data!.totalPages;
       historyTotal.value = result.data!.total;
     } else {
-      historyError.value = result.error ?? 'Could not load reward history.';
+      historyError.value = result.error ?? 'could_not_load_reward_history'.tr;
     }
     isLoadingHistory.value = false;
   }
@@ -203,7 +203,7 @@ class RewardController extends GetxController {
     if (result.isSuccess && result.data != null) {
       selectedReward.value = result.data;
     } else {
-      detailsError.value = result.error ?? 'Could not load reward details.';
+      detailsError.value = result.error ?? 'could_not_load_reward_details'.tr;
     }
     isLoadingDetails.value = false;
     return result.data;
@@ -250,7 +250,7 @@ class RewardController extends GetxController {
             rewardId: rewardId,
             payload: payload,
           ),
-          errorTitle: 'Could not save shipping address',
+          errorTitle: 'could_not_save_shipping_address'.tr,
         );
 
     if (result.isSuccess && result.data != null) {
@@ -271,7 +271,7 @@ class RewardController extends GetxController {
 
     final ApiResult<void> result = await ApiErrorHandler.call<void>(
       () => _apiService.confirmDelivery(reward.id),
-      errorTitle: 'Could not confirm delivery',
+      errorTitle: 'could_not_confirm_delivery'.tr,
     );
 
     if (result.isSuccess) {
@@ -289,7 +289,7 @@ class RewardController extends GetxController {
     final ApiResult<RewardDownloadModel> result =
         await ApiErrorHandler.call<RewardDownloadModel>(
           () => _apiService.getDownload(reward.id),
-          errorTitle: 'Download unavailable',
+          errorTitle: 'download_unavailable'.tr,
         );
 
     if (result.isSuccess && result.data != null) {
@@ -339,13 +339,13 @@ class RewardController extends GetxController {
 
   String? _validateShippingAddress() {
     if (fullNameController.text.trim().length < 2) {
-      return 'Enter the recipient full name.';
+      return 'enter_the_recipient_full_name'.tr;
     }
     if (whatsappController.text.trim().length < 6) {
-      return 'Enter a valid WhatsApp number.';
+      return 'enter_a_valid_whatsapp_number'.tr;
     }
     if (addressController.text.trim().length < 8) {
-      return 'Enter the complete delivery address.';
+      return 'enter_the_complete_delivery_address'.tr;
     }
     return null;
   }

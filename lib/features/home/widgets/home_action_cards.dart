@@ -6,6 +6,7 @@ import '../models/home_models.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_font.dart';
 import '../../../core/themes/app_constants.dart';
+import 'package:get/get.dart';
 
 class SupportCommunityCard extends StatelessWidget {
   final HomeSupportModel support;
@@ -106,7 +107,7 @@ class WebinarCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(kHomePillRadius.r),
               ),
               child: Text(
-                'UPCOMING WEBINAR',
+                'upcoming_webinar'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font9.sp,
                   fontWeight: FontWeight.w900,
@@ -182,7 +183,7 @@ class WebinarCard extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'View',
+                      'view'.tr,
                       style: TextStyle(
                         fontSize: AppFont.font13.sp,
                         fontWeight: FontWeight.w900,

@@ -6,6 +6,7 @@ import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../models/home_models.dart';
+import 'package:get/get.dart';
 
 class QuickToolsSection extends StatelessWidget {
   const QuickToolsSection({super.key, required this.tools, this.onToolTap});
@@ -20,7 +21,7 @@ class QuickToolsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Quick Tools',
+          'quick_tools'.tr,
           style: TextStyle(
             fontSize: AppFont.font20.sp,
             fontWeight: FontWeight.w800,

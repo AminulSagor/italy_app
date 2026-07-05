@@ -24,7 +24,7 @@ class FinalExamListeningView extends GetView<FinalExamController> {
       backgroundColor: AppColors.coursesDetailBg,
       bottomNavigationBar: Obx(
         () => FinalExamBottomButton(
-          label: 'gen_submit_answer'.tr.tr,
+          label: 'gen_submit_answer'.tr,
           onTap: controller.submitListeningAnswer,
           isLoading: controller.isSubmitting.value,
         ),
@@ -59,9 +59,9 @@ class FinalExamListeningView extends GetView<FinalExamController> {
                 ),
                 SizedBox(height: 26.h),
                 ExamInfoTip(
-                  text: 'STRICT EXAM MODE',
+                  text: 'strict_exam_mode'.tr,
                   subText:
-                      'gen_once_the_audio_finishes_you_ca'.tr.tr,
+                      'gen_once_the_audio_finishes_you_ca'.tr,
                   bg: AppColors.coursesCreamLightBg,
                   borderColor: AppColors.vocabularyOrangeShadow,
                   color: AppColors.profileOrangeText,
@@ -126,7 +126,7 @@ class _ExamProgressHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999.r),
               ),
               child: Text(
-                '⏱ 00:15:00',
+                '00:15:00',
                 style: TextStyle(
                   fontSize: AppFont.font16.sp,
                   fontWeight: FontWeight.w700,
@@ -136,7 +136,7 @@ class _ExamProgressHeader extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              '2 of 4',
+              '2_of_4'.tr,
               style: TextStyle(
                 fontSize: AppFont.font14.sp,
                 fontWeight: FontWeight.w600,
@@ -187,7 +187,7 @@ class _AudioClipCard extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Text(
-            'Press play to start the clip',
+            'press_play_to_start_the_clip'.tr,
             style: TextStyle(
               fontSize: AppFont.font14.sp,
               fontWeight: FontWeight.w500,

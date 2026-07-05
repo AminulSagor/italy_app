@@ -89,7 +89,7 @@ class CreateCvDynamicFormController extends GetxController {
       }
     }
 
-    throw Exception('CV template is required to start the form.');
+    throw Exception('cv_template_is_required_to_start_the_form'.tr);
   }
 
   void _createFieldControllers() {
@@ -142,8 +142,8 @@ class CreateCvDynamicFormController extends GetxController {
     final CvTemplateSectionModel? section = currentSectionOrNull;
     if (section == null) {
       Get.snackbar(
-        'CV Template',
-        'No fields are available for this template.',
+        'cv_template'.tr,
+        'no_fields_are_available_for_this_template'.tr,
         snackPosition: SnackPosition.BOTTOM,
       );
       return false;
@@ -162,7 +162,9 @@ class CreateCvDynamicFormController extends GetxController {
         if (!hasAnyItem) {
           Get.snackbar(
             section.title,
-            '${field.label} is required.',
+            'field_is_required'.trParams(<String, String>{
+              'field': field.label,
+            }),
             snackPosition: SnackPosition.BOTTOM,
           );
           return false;
@@ -178,7 +180,7 @@ class CreateCvDynamicFormController extends GetxController {
       if (isEmptyValue) {
         Get.snackbar(
           section.title,
-          '${field.label} is required.',
+          'field_is_required'.trParams(<String, String>{'field': field.label}),
           snackPosition: SnackPosition.BOTTOM,
         );
         return false;

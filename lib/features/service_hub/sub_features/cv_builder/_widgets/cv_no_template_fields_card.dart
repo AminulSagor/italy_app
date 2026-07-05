@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -21,7 +22,7 @@ class CvNoTemplateFieldsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'No fields available',
+            'no_fields_available'.tr,
             style: TextStyle(
               color: AppColors.homePrimaryText,
               fontSize: AppFont.font16.sp,
@@ -30,7 +31,7 @@ class CvNoTemplateFieldsCard extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
           Text(
-            'This template has no backend form fields, so no extra fields are shown here.',
+            'this_template_has_no_backend_form_fields_so_no_ext'.tr,
             style: TextStyle(
               color: AppColors.homeSecondaryText,
               fontSize: AppFont.font11.sp,

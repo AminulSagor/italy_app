@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 
 class ApiHandledResponse<T> {
   const ApiHandledResponse({
@@ -101,40 +101,40 @@ class ApiErrorHandler {
 
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
-        return 'Connection timeout. Please try again.';
+        return 'connection_timeout_please_try_again'.tr;
       case DioExceptionType.sendTimeout:
-        return 'Request timeout. Please try again.';
+        return 'request_timeout_please_try_again'.tr;
       case DioExceptionType.receiveTimeout:
-        return 'Response timeout. Please try again.';
+        return 'response_timeout_please_try_again'.tr;
       case DioExceptionType.badCertificate:
-        return 'Bad SSL certificate.';
+        return 'bad_ssl_certificate'.tr;
       case DioExceptionType.badResponse:
         return _httpMessage(error.response?.statusCode);
       case DioExceptionType.cancel:
-        return 'Request cancelled.';
+        return 'request_cancelled'.tr;
       case DioExceptionType.connectionError:
-        return 'Connection error. Please check your internet.';
+        return 'connection_error_please_check_your_internet'.tr;
       case DioExceptionType.unknown:
-        return error.message ?? 'Something went wrong. Please try again.';
+        return error.message ?? 'something_went_wrong_please_try_again'.tr;
     }
   }
 
   static String _httpMessage(int? statusCode) {
     switch (statusCode) {
       case 400:
-        return 'Bad request.';
+        return 'bad_request'.tr;
       case 401:
-        return 'Unauthorized. Please login again.';
+        return 'unauthorized_please_login_again'.tr;
       case 403:
-        return 'Forbidden.';
+        return 'forbidden'.tr;
       case 404:
-        return 'Not found.';
+        return 'not_found'.tr;
       case 409:
-        return 'Already exists.';
+        return 'already_exists'.tr;
       case 422:
-        return 'Validation failed.';
+        return 'validation_failed'.tr;
       case 500:
-        return 'Server error. Please try again later.';
+        return 'server_error_please_try_again_later'.tr;
       default:
         return 'HTTP error. Please try again.';
     }

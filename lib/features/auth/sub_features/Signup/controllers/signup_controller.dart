@@ -164,7 +164,7 @@ class SignupController extends GetxController {
       );
 
       if (signupResult.devOtp != null && signupResult.devOtp!.isNotEmpty) {
-        Get.snackbar('OTP', signupResult.devOtp!);
+        Get.snackbar('otp'.tr, signupResult.devOtp!);
       }
 
       Get.toNamed(AppRoutes.signupOtp);

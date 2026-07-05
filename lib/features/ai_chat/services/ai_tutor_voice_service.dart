@@ -101,8 +101,8 @@ class AiTutorVoiceService extends GetxService {
     for (int attempt = 1; attempt <= _roomConnectionAttempts; attempt++) {
       try {
         status.value = attempt == 1
-            ? 'Connecting to your AI tutor...'
-            : 'Reconnecting to your AI tutor...';
+            ? 'connecting_to_your_ai_tutor'.tr
+            : 'reconnecting_to_your_ai_tutor'.tr;
         await _connectRoom(session);
         return;
       } catch (error, stackTrace) {
@@ -123,7 +123,7 @@ class AiTutorVoiceService extends GetxService {
     status.value = 'Unable to connect';
     await disconnect(preserveErrorState: true);
     Error.throwWithStackTrace(
-      lastError ?? StateError('Unable to connect to the AI tutor'),
+      lastError ?? StateError('unable_to_connect_to_the_ai_tutor'.tr),
       lastStackTrace ?? StackTrace.current,
     );
   }
@@ -196,10 +196,10 @@ class AiTutorVoiceService extends GetxService {
     }
 
     status.value = assistantSpeaking.value
-        ? 'AI tutor is speaking'
+        ? 'ai_tutor_is_speaking'.tr
         : assistantThinking.value
-            ? 'AI tutor is thinking'
-            : 'Listening';
+            ? 'ai_tutor_is_thinking'.tr
+            : 'gen_listening'.tr;
     await _ensureMicrophonePublished();
   }
 
@@ -282,8 +282,8 @@ class AiTutorVoiceService extends GetxService {
       })
       ..on<lk.RoomReconnectedEvent>((_) {
         status.value = assistantReady.value
-            ? (isMuted.value ? 'Microphone muted' : 'Listening')
-            : 'Waiting for AI tutor...';
+            ? (isMuted.value ? 'microphone_muted'.tr : 'gen_listening'.tr)
+            : 'waiting_for_ai_tutor'.tr;
         _startMicrophoneHealthCheck();
         if (!isMuted.value) {
           unawaited(_ensureMicrophonePublished());
@@ -333,7 +333,7 @@ class AiTutorVoiceService extends GetxService {
     }
 
     assistantReady.value = true;
-    status.value = isMuted.value ? 'Microphone muted' : 'AI tutor is preparing';
+    status.value = isMuted.value ? 'microphone_muted'.tr : 'ai_tutor_is_preparing'.tr;
     final Completer<void>? completer = _assistantReadyCompleter;
     if (completer != null && !completer.isCompleted) {
       completer.complete();
@@ -421,7 +421,7 @@ class AiTutorVoiceService extends GetxService {
         userSpeaking.value = false;
         assistantSpeaking.value = false;
         assistantThinking.value = false;
-        status.value = isMuted.value ? 'Microphone muted' : 'Listening';
+        status.value = isMuted.value ? 'microphone_muted'.tr : 'gen_listening'.tr;
         if (!isMuted.value) {
           unawaited(_ensureMicrophonePublished());
         }

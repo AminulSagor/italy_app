@@ -78,7 +78,7 @@ class FinalExamGatewayDialogUnlocked extends StatelessWidget {
                       //const _UnlockedIllustration(),
                       //SizedBox(height: 27.h),
                       Text(
-                        "You're Ready!",
+                        "you_re_ready".tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 30.sp,
@@ -104,7 +104,7 @@ class FinalExamGatewayDialogUnlocked extends StatelessWidget {
                       SizedBox(height: 37.h),
                       CustomButton(
                         onPressed: _handleStartExam,
-                        text: 'Start Final Exam',
+                        text: 'start_final_exam'.tr,
                         icon: Icons.play_arrow_rounded,
                         height: 58,
                         width: double.infinity,
@@ -194,7 +194,7 @@ class _UnlockedProgressCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'COURSE GOAL REACHED!',
+            'course_goal_reached'.tr,
             style: TextStyle(
               fontSize: AppFont.font10.sp,
               height: 1,
@@ -271,7 +271,7 @@ class _BackToChapterButton extends StatelessWidget {
           ),
           SizedBox(width: 7.w),
           Text(
-            'Back to Chapter',
+            'back_to_chapter'.tr,
             style: TextStyle(
               fontSize: AppFont.font14.sp,
               height: 1,

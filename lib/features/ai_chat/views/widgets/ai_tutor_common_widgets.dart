@@ -146,7 +146,7 @@ class AiTutorDateChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(13.r),
         ),
         child: Text(
-          'TODAY',
+          'today'.tr,
           style: TextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.w800,

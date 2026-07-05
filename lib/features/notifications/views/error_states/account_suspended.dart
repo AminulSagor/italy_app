@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../widgets/status_error_widgets.dart';
+import 'package:get/get.dart';
 
 class AccountSuspendedView extends StatelessWidget {
   final VoidCallback? onContactSupportTap;
@@ -27,7 +28,7 @@ class AccountSuspendedView extends StatelessWidget {
                 SizedBox(height: 137.h),
 
                 Text(
-                  'Account Suspended',
+                  'account_suspended'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: StatusColors.darkText,
@@ -82,7 +83,7 @@ class AccountSuspendedView extends StatelessWidget {
                             SizedBox(width: 10.w),
                             Expanded(
                               child: Text(
-                                'REASON FOR SUSPENSION:',
+                                'reason_for_suspension'.tr,
                                 style: TextStyle(
                                   color: const Color(0xFFC52B0B),
                                   fontSize: 14.sp,
@@ -118,7 +119,7 @@ class AccountSuspendedView extends StatelessWidget {
                         SizedBox(height: 12.h),
 
                         Text(
-                          'Effective as of: Oct 24, 2023',
+                          'effective_as_of_oct_24_2023'.tr,
                           style: TextStyle(
                             color: const Color(0xFF999999),
                             fontSize: 12.5.sp,
@@ -165,7 +166,7 @@ class AccountSuspendedView extends StatelessWidget {
                       GreenShadowButton(
                         height: 66.h,
                         radius: 34.r,
-                        text: 'Contact Support',
+                        text: 'gen_contact_support'.tr,
                         icon: Icons.chat_bubble_outline_rounded,
                         onTap: onContactSupportTap,
                       ),
@@ -179,7 +180,7 @@ class AccountSuspendedView extends StatelessWidget {
                   width: 244.w,
                   height: 47.h,
                   radius: 24.r,
-                  text: 'Log Out of This Account',
+                  text: 'log_out_of_this_account'.tr,
                   icon: Icons.logout_rounded,
                   onTap: onLogoutTap,
                 ),

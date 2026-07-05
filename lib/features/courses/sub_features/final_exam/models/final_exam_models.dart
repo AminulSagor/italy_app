@@ -65,7 +65,7 @@ class FinalExamOverviewModel {
     return FinalExamOverviewModel(
       title: json['title']?.toString() ?? '',
       heroTitle: json['heroTitle']?.toString() ?? '',
-      heroSubtitle: json['heroSubtitle']?.toString() ?? '',
+      heroSubtitle: json['herosubtitle'.tr]?.toString() ?? '',
       components: ((json['components'] as List<dynamic>?) ?? <dynamic>[])
           .whereType<Map>()
           .map(
@@ -213,22 +213,22 @@ class FinalExamResultModel {
       verdict: verdict,
       stats: <FinalExamResultStatModel>[
         FinalExamResultStatModel(
-          label: 'gen_vocabulary'.tr.tr,
+          label: 'gen_vocabulary'.tr,
           value: '${_intValue(review['vocabularyUsageScore'])}',
           iconName: 'quiz',
         ),
         FinalExamResultStatModel(
-          label: 'gen_grammar'.tr.tr,
+          label: 'gen_grammar'.tr,
           value: '${_intValue(review['grammarAccuracyScore'])}',
           iconName: 'listening',
         ),
         FinalExamResultStatModel(
-          label: 'gen_writing'.tr.tr,
+          label: 'gen_writing'.tr,
           value: _scoreLabel(review['writingScore']),
           iconName: 'writing',
         ),
         FinalExamResultStatModel(
-          label: 'gen_speaking'.tr.tr,
+          label: 'gen_speaking'.tr,
           value: _scoreLabel(review['speakingScore']),
           iconName: 'speaking',
         ),

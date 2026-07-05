@@ -5,6 +5,7 @@ import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../models/chapter_detail_models.dart';
+import 'package:get/get.dart';
 
 class ChapterQuizCard extends StatelessWidget {
   final ChapterQuizModel quiz;
@@ -44,7 +45,7 @@ class ChapterQuizCard extends StatelessWidget {
             SizedBox(height: _isCompleted ? 22.h : 20.h),
             if (_isCompleted) ...<Widget>[
               Text(
-                'COMPLETED',
+                'gen_completed'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font12.sp,
                   fontWeight: FontWeight.w800,
@@ -176,7 +177,7 @@ class _CompletedStats extends StatelessWidget {
 
     if (stats.isEmpty) {
       return Text(
-        'Completed successfully',
+        'completed_successfully'.tr,
         style: TextStyle(
           fontSize: AppFont.font14.sp,
           fontWeight: FontWeight.w800,

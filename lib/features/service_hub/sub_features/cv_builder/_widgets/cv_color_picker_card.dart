@@ -101,7 +101,7 @@ class CvColorPickerCard extends StatelessWidget {
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  'Custom',
+                  'custom'.tr,
                   style: TextStyle(
                     color: AppColors.homeSecondaryText,
                     fontSize: AppFont.font10.sp,

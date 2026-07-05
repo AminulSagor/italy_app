@@ -20,7 +20,7 @@ class AiTutorLevelTestResultView
         body: SafeArea(
           child: Center(
             child: AiTutorLevelPrimaryButton(
-              text: 'Retake Level Test',
+              text: 'retake_level_test'.tr,
               onTap: controller.retakeTest,
             ),
           ),
@@ -61,7 +61,7 @@ class AiTutorLevelTestResultView
               _FinalLevelCard(profile: profile),
               SizedBox(height: 31.h),
               Text(
-                'DETAILED SKILL BREAKDOWN',
+                'detailed_skill_breakdown'.tr,
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w900,
@@ -77,7 +77,7 @@ class AiTutorLevelTestResultView
                       color: const Color(0xFFDDF1FF),
                       iconColor: const Color(0xFF09649F),
                       icon: Icons.mic_rounded,
-                      label: 'Speaking',
+                      label: 'gen_speaking'.tr,
                       level: profile.speakingLevel,
                     ),
                   ),
@@ -87,7 +87,7 @@ class AiTutorLevelTestResultView
                       color: const Color(0xFFFFEFD8),
                       iconColor: const Color(0xFF8A4D00),
                       icon: Icons.chat_bubble_rounded,
-                      label: 'Vocabulary',
+                      label: 'gen_vocabulary'.tr,
                       level: profile.vocabularyLevel,
                     ),
                   ),
@@ -100,7 +100,7 @@ class AiTutorLevelTestResultView
               if (profile.strengths.isNotEmpty) ...<Widget>[
                 SizedBox(height: 22.h),
                 _ResultListCard(
-                  title: 'gen_your_strengths'.tr.tr,
+                  title: 'gen_your_strengths'.tr,
                   icon: Icons.check_circle_rounded,
                   iconColor: AppColors.primaryGreen,
                   items: profile.strengths,
@@ -109,7 +109,7 @@ class AiTutorLevelTestResultView
               if (profile.focusAreas.isNotEmpty) ...<Widget>[
                 SizedBox(height: 16.h),
                 _ResultListCard(
-                  title: 'gen_focus_next'.tr.tr,
+                  title: 'gen_focus_next'.tr,
                   icon: Icons.track_changes_rounded,
                   iconColor: const Color(0xFFFF8A21),
                   items: profile.focusAreas,
@@ -117,7 +117,7 @@ class AiTutorLevelTestResultView
               ],
               SizedBox(height: 30.h),
               AiTutorLevelPrimaryButton(
-                text: 'Continue To Adaptive AI Chat',
+                text: 'continue_to_adaptive_ai_chat'.tr,
                 onTap: controller.continueToAiChat,
               ),
               SizedBox(height: 13.h),
@@ -125,7 +125,7 @@ class AiTutorLevelTestResultView
                 child: TextButton(
                   onPressed: controller.retakeTest,
                   child: Text(
-                    'Retake test',
+                    'retake_test'.tr,
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w800,
@@ -166,7 +166,7 @@ class _FinalLevelCard extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Text(
-            'YOUR FINAL LEVEL',
+            'your_final_level'.tr,
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w900,
@@ -187,7 +187,7 @@ class _FinalLevelCard extends StatelessWidget {
           ),
           SizedBox(height: 17.h),
           Text(
-            'তোমার AI Tutor এখন এই লেভেল অনুযায়ী গতি, শব্দ এবং ব্যাখ্যা পরিবর্তন করবে।',
+            'ai_tutor'.tr,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13.sp,
@@ -289,7 +289,7 @@ class _GrammarResultCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'GRAMMAR',
+                  'gen_grammar_1'.tr,
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w900,

@@ -37,16 +37,16 @@ class RewardsView extends GetView<RewardController> {
               ),
               padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 52.h),
               children: <Widget>[
-                const RewardTopBar(title: 'Rewards'),
+                RewardTopBar(title: 'gen_rewards'.tr),
                 SizedBox(height: 24.h),
                 if (dashboard == null)
                   RewardStateMessage(
                     icon: Icons.error_outline_rounded,
-                    title: 'Rewards unavailable',
+                    title: 'rewards_unavailable'.tr,
                     message: controller.dashboardError.value.isEmpty
-                        ? 'Could not load your rewards.'
+                        ? 'could_not_load_your_rewards'.tr
                         : controller.dashboardError.value,
-                    buttonText: 'Retry',
+                    buttonText: 'retry'.tr,
                     onTap: controller.loadDashboard,
                   )
                 else ...<Widget>[
@@ -56,21 +56,21 @@ class RewardsView extends GetView<RewardController> {
                       onOpenChest: controller.openChest,
                     )
                   else
-                    const RewardStateMessage(
+                    RewardStateMessage(
                       icon: Icons.inventory_2_outlined,
-                      title: 'No unopened chest',
+                      title: 'no_unopened_chest'.tr,
                       message:
-                          'Keep learning and climbing the leaderboard to unlock your next reward.',
+                          'keep_learning_and_climbing_the_leaderboard_to_unlo'.tr,
                     ),
                   SizedBox(height: 34.h),
                   _HistoryHeader(onSeeAll: controller.openRewardsHistory),
                   SizedBox(height: 20.h),
                   if (dashboard.recentRewards.isEmpty)
-                    const RewardStateMessage(
+                    RewardStateMessage(
                       icon: Icons.emoji_events_outlined,
-                      title: 'No rewards yet',
+                      title: 'no_rewards_yet'.tr,
                       message:
-                          'Your claimed and unlocked rewards will appear here.',
+                          'your_claimed_and_unlocked_rewards_will_appear_here'.tr,
                     )
                   else
                     GridView.builder(
@@ -129,7 +129,7 @@ class _HistoryHeader extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: Text(
-            'Reward History',
+            'reward_history'.tr,
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w900,
@@ -141,7 +141,7 @@ class _HistoryHeader extends StatelessWidget {
         GestureDetector(
           onTap: onSeeAll,
           child: Text(
-            'See all',
+            'see_all'.tr,
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w900,
@@ -228,7 +228,7 @@ class _WinnerCard extends StatelessWidget {
             right: 45.w,
             child: Text(
               chest.congratulatoryNote.isEmpty
-                  ? 'You unlocked a special reward for your progress.'
+                  ? 'you_unlocked_a_special_reward_for_your_progress'.tr
                   : chest.congratulatoryNote,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -256,7 +256,7 @@ class _WinnerCard extends StatelessWidget {
                 child: Text(
                   chest.action?.label.isNotEmpty == true
                       ? chest.action!.label
-                      : 'Open Chest',
+                      : 'open_chest'.tr,
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w900,

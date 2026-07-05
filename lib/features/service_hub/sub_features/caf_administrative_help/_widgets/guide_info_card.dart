@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -52,17 +53,17 @@ class GuideInfoCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12.h),
-          const _RequirementItem(
-            title: 'খোলা Passport',
-            subtitle: 'পাসপোর্টের ফটোকপি',
+          _RequirementItem(
+            title: 'gen_passport'.tr,
+            subtitle: 'passport_photocopy'.tr,
           ),
-          const _RequirementItem(
-            title: 'Revenue Stamp (€16.00)',
-            subtitle: 'সু marca da bollo',
+          _RequirementItem(
+            title: 'gen_revenue_stamp_16_00'.tr,
+            subtitle: 'gen_marca_da_bollo'.tr,
           ),
-          const _RequirementItem(
-            title: 'Proof of Residence',
-            subtitle: 'রেসিডেন্সির প্রমাণপত্র',
+          _RequirementItem(
+            title: 'gen_proof_of_residence'.tr,
+            subtitle: 'proof_of_residence_bn'.tr,
           ),
           SizedBox(height: 12.h),
           Divider(
@@ -71,7 +72,7 @@ class GuideInfoCard extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           Text(
-            'আবেদন পদ্ধতি / Come Fare',
+            'come_fare'.tr,
             style: TextStyle(
               color: AppColors.homePrimaryText,
               fontSize: AppFont.font15.sp,
@@ -81,14 +82,14 @@ class GuideInfoCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 14.h),
-          const GuideStepTile(
+          GuideStepTile(
             number: '1',
-            text: 'কিট সংগ্রহ করুন নিকটস্থ পোস্ট অফিস\n(Poste Italiane) থেকে',
+            text: 'collect_kit_from_post_office'.tr,
           ),
           SizedBox(height: 10.h),
-          const GuideStepTile(
+          GuideStepTile(
             number: '2',
-            text: 'সঠিকভাবে ফরম পূরণ করুন এবং\nপ্রয়োজনীয় কাগজপত্র জমা সংযুক্ত করুন।',
+            text: 'fill_form_and_submit'.tr,
           ),
         ],
       ),
@@ -100,10 +101,7 @@ class _RequirementItem extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const _RequirementItem({
-    required this.title,
-    required this.subtitle,
-  });
+  const _RequirementItem({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {

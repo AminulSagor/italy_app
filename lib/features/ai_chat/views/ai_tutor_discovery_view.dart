@@ -106,8 +106,8 @@ class _AiTutorDiscoveryViewState extends State<AiTutorDiscoveryView> {
                             ? null
                             : () => _controller.openLiveVoiceSession(),
                         hint: active
-                            ? 'Ask your Italian tutor...'
-                            : 'Type or speak a phrase...',
+                            ? 'ask_your_italian_tutor'.tr
+                            : 'type_or_speak_a_phrase'.tr,
                       ),
                     ),
                   );
@@ -141,7 +141,7 @@ class _DiscoveryStarterContent extends StatelessWidget {
           const _HeroIcon(),
           SizedBox(height: 22.h),
           Text(
-            'Ciao!',
+            'ciao'.tr,
             style: TextStyle(
               fontSize: 30.sp,
               height: 1,
@@ -165,7 +165,7 @@ class _DiscoveryStarterContent extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'CONVERSATION STARTERS',
+              'conversation_starters'.tr,
               style: TextStyle(
                 fontSize: 9.sp,
                 fontWeight: FontWeight.w900,

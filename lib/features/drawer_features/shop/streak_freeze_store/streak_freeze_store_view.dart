@@ -26,7 +26,7 @@ class StreakFreezeView extends GetView<ShopController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Streak Freeze Store',
+                'streak_freeze_store'.tr,
                 style: TextStyle(
                   fontSize: 35.sp,
                   fontWeight: FontWeight.w900,
@@ -38,7 +38,7 @@ class StreakFreezeView extends GetView<ShopController> {
               SizedBox(height: 7.h),
               Center(
                 child: Text(
-                  'Protect your progress in Italian',
+                  'protect_your_progress_in_italian'.tr,
                   style: TextStyle(
                     fontSize: 17.sp,
                     fontWeight: FontWeight.w600,
@@ -51,10 +51,10 @@ class StreakFreezeView extends GetView<ShopController> {
               SizedBox(height: 32.h),
               Obx(() {
                 if (controller.streakPackages.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 32),
-                      child: Text('No streak freeze packages are available.'),
+                      child: Text('no_streak_freeze_packages_are_available'.tr),
                     ),
                   );
                 }
@@ -73,8 +73,8 @@ class StreakFreezeView extends GetView<ShopController> {
               Obx(
                 () => CustomButton.primary(
                   text: controller.isLoadingQuote.value
-                      ? 'Loading...'
-                      : 'Confirm Purchase',
+                      ? 'loading'.tr
+                      : 'confirm_purchase'.tr,
                   icon: Icons.play_arrow_rounded,
                   onPressed: controller.isLoadingQuote.value ||
                           controller.streakPackages.isEmpty
@@ -134,7 +134,7 @@ class _StoreTopBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
               Text(
-                'Streak Freeze Refiller',
+                'streak_freeze_refiller'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font20.sp,
                   fontWeight: FontWeight.w900,
@@ -170,7 +170,7 @@ class _InventoryCard extends GetView<ShopController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'YOUR INVENTORY',
+                  'your_inventory'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w900,
@@ -181,7 +181,7 @@ class _InventoryCard extends GetView<ShopController> {
                 SizedBox(height: 6.h),
                 Obx(
                   () => Text(
-                    'Freezes: ${controller.streakFreezeBalance}',
+                    'freezes_controller_streakfreezebalance'.trParams(<String, String>{'streakfreezebalance': controller.streakFreezeBalance.toString()}),
                     style: TextStyle(
                       fontSize: 30.sp,
                       fontWeight: FontWeight.w900,

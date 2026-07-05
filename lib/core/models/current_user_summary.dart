@@ -21,7 +21,7 @@ class CurrentUserSummary {
     return CurrentUserSummary(
       id: json['id']?.toString().trim() ?? '',
       fullName: json['fullName']?.toString().trim() ?? '',
-      learnerLevel: json['learnerLevel']?.toString().trim() ?? 'A1',
+      learnerLevel: json['learnerLevel']?.toString().trim() ?? 'a1',
       currentStreakDays: _intValue(json['currentStreakDays']),
       aiVoiceSeconds: _intValue(json['aiVoiceSeconds']),
       aiTextTokens: _intValue(json['aiTextTokens']),

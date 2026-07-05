@@ -79,7 +79,7 @@ class LeaguePromotionScreen extends StatelessWidget {
                     SizedBox(height: 36.h),
 
                     Text(
-                      "You've been promoted to",
+                      "you_ve_been_promoted_to".tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 24.sp,
@@ -90,7 +90,7 @@ class LeaguePromotionScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      '$leagueName League!',
+                      'leaguename_league'.trParams(<String, String>{'leaguename': leagueName.toString()}),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 34.sp,
@@ -167,7 +167,7 @@ class _TopBar extends StatelessWidget {
           Expanded(
             child: Center(
               child: Text(
-                'Congratulations!',
+                'gen_congratulations'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font18.sp,
                   fontWeight: FontWeight.w900,
@@ -227,7 +227,7 @@ class _PromotionBadge extends StatelessWidget {
           ),
           SizedBox(width: 8.w),
           Text(
-            'LEAGUE PROMOTION',
+            'league_promotion'.tr,
             style: TextStyle(
               fontSize: AppFont.font11.sp,
               fontWeight: FontWeight.w900,
@@ -329,7 +329,7 @@ class _LeagueCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100.r),
                 ),
                 child: Text(
-                  'NEW LEAGUE',
+                  'new_league'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font10.sp,
                     fontWeight: FontWeight.w900,
@@ -350,7 +350,7 @@ class _LeagueCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'YOUR NEW BENEFITS',
+                'your_new_benefits'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font12.sp,
                   fontWeight: FontWeight.w900,
@@ -491,7 +491,7 @@ class _TopLearnerCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  "You're in the top 20% of learners!",
+                  "you_re_in_the_top_20_of_learners".tr,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -502,7 +502,7 @@ class _TopLearnerCard extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Keep going to reach Diamond League',
+                  'keep_going_to_reach_diamond_league'.tr,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -549,7 +549,7 @@ class _ContinueButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'Continue Learning',
+              'continue_learning'.tr,
               style: TextStyle(
                 fontSize: AppFont.font18.sp,
                 fontWeight: FontWeight.w900,

@@ -31,7 +31,7 @@ class VerbDetailsTopBar extends GetView<ImportantVerbsController> {
           ),
           SizedBox(width: 8.w),
           Text(
-            'Coniugazione',
+            'coniugazione'.tr,
             style: TextStyle(
               fontSize: 17.sp,
               height: 1,
@@ -93,7 +93,7 @@ class VerbHeroCard extends GetView<ImportantVerbsController> {
           ),
           SizedBox(height: 8.h),
           Text(
-            '(${verb.englishMeaning} / ${verb.banglaMeaning})',
+            'verb_englishmeaning_verb_banglameaning'.trParams(<String, String>{'englishmeaning': verb.englishMeaning.toString(), 'banglameaning': verb.banglaMeaning.toString()}),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -469,7 +469,7 @@ class _ExpandedVerbForm extends StatelessWidget {
                   SizedBox(height: 19.h),
                   if (form.conjugations.isEmpty)
                     Text(
-                      'No conjugations available.',
+                      'no_conjugations_available'.tr,
                       style: TextStyle(
                         fontSize: 13.sp,
                         color: const Color(0xFF777D82),

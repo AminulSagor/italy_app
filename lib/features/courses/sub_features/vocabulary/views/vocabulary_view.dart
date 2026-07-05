@@ -78,7 +78,7 @@ class VocabularyView extends GetView<VocabularyController> {
                 else
                   CustomButton.primary(
                     onPressed: controller.revealAnswer,
-                    text: 'Reveal Answer',
+                    text: 'reveal_answer'.tr,
                     icon: Icons.visibility_outlined,
                   ),
                 SizedBox(height: 20.h),
@@ -295,7 +295,7 @@ class _VocabularyFrontSide extends StatelessWidget {
         ),
         SizedBox(height: 8.h),
         Text(
-          'TAP CARD TO FLIP',
+          'tap_card_to_flip'.tr,
           style: TextStyle(
             fontSize: AppFont.font16.sp,
             fontWeight: FontWeight.w900,
@@ -373,14 +373,14 @@ class _VocabularyStats extends StatelessWidget {
         Expanded(
           child: _VocabularyStatText(
             icon: Icons.local_fire_department_rounded,
-            label: 'gen_streakdays_day_streak'.tr.tr,
+            label: 'gen_streakdays_day_streak'.tr,
             color: AppColors.vocabularyStreakText,
           ),
         ),
         Expanded(
           child: _VocabularyStatText(
             icon: Icons.emoji_events_outlined,
-            label: 'gen_level_level'.tr.tr,
+            label: 'gen_level_level'.tr,
             color: AppColors.vocabularyBlueText,
             alignEnd: true,
           ),
@@ -445,7 +445,7 @@ class _VocabularyRevealedActions extends StatelessWidget {
         Expanded(
           child: CustomButton(
             onPressed: onStudyAgainTap,
-            text: 'Study Again',
+            text: 'study_again'.tr,
             icon: Icons.refresh_rounded,
             showShadow: true,
             btnColor: AppColors.vocabularyOrange,
@@ -461,7 +461,7 @@ class _VocabularyRevealedActions extends StatelessWidget {
           child: CustomButton.primary(
             fontSize: 14.sp,
             onPressed: onKnownTap,
-            text: 'I Know\nThis',
+            text: 'i_know_nthis'.tr,
             icon: Icons.check_circle_rounded,
             borderRadius: kRadius42,
           ),

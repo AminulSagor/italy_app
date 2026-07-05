@@ -13,8 +13,7 @@ class CreateCvSummaryController extends GetxController {
   final RxBool isGenerating = false.obs;
   final RxBool isSaving = false.obs;
 
-  final String generatedSummary =
-      'Experienced worker with strong communication, teamwork, and customer service skills. Able to work efficiently in fast paced environments and adapt quickly to new responsibilities.';
+  final String generatedSummary = 'professional_summary_placeholder'.tr;
 
   Future<void> generateSummary() async {
     isGenerating.value = true;
@@ -29,8 +28,8 @@ class CreateCvSummaryController extends GetxController {
 
   void editText() {
     Get.snackbar(
-      'Edit Text',
-      'Manual editing will be added later.',
+      'gen_edit_text'.tr,
+      'manual_editing_will_be_added_later'.tr,
       snackPosition: SnackPosition.BOTTOM,
     );
   }
@@ -42,7 +41,7 @@ class CreateCvSummaryController extends GetxController {
         Get.find<CvTemplateController>();
     final CvTemplateModel? template = templateController.selectedTemplate.value;
     if (template == null) {
-      Get.snackbar('Template', 'Please select a CV template first.');
+      Get.snackbar('template'.tr, 'please_select_a_cv_template_first'.tr);
       return;
     }
 
@@ -69,7 +68,7 @@ class CreateCvSummaryController extends GetxController {
           .fullNameController
           .text
           .trim();
-      if (fullName.isNotEmpty) return '$fullName CV';
+      if (fullName.isNotEmpty) return '$fullName ${'gen_cv'.tr}';
     }
     return templateTitle;
   }

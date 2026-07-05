@@ -55,13 +55,13 @@ class WebinarView extends GetView<WebinarController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   WebinarPageHeader(
-                    title: 'gen_live_webinars'.tr.tr,
+                    title: 'gen_live_webinars'.tr,
                     onBackTap: () => Get.back<void>(),
                   ),
                   SizedBox(height: 20.h),
                   if (controller.liveWebinars.isEmpty)
-                    const WebinarEmptyState(
-                      message: 'No live webinars are available right now.',
+                    WebinarEmptyState(
+                      message: 'no_live_webinars_are_available_right_now'.tr,
                     )
                   else
                     ListView.separated(
@@ -114,7 +114,7 @@ class _UpcomingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (webinars.isEmpty) {
-      return const WebinarEmptyState(message: 'No upcoming webinars found.');
+      return WebinarEmptyState(message: 'no_upcoming_webinars_found'.tr);
     }
 
     return ListView.separated(
