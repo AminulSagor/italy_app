@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -8,10 +9,7 @@ import '../../../../../core/themes/app_font.dart';
 class CvProfilePhotoCard extends StatelessWidget {
   final VoidCallback onUploadTap;
 
-  const CvProfilePhotoCard({
-    super.key,
-    required this.onUploadTap,
-  });
+  const CvProfilePhotoCard({super.key, required this.onUploadTap});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +29,7 @@ class CvProfilePhotoCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.legacyColorFFE0E1E1,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.white,
-                width: 2.w,
-              ),
+              border: Border.all(color: AppColors.white, width: 2.w),
             ),
             child: Icon(
               Icons.account_circle_outlined,
@@ -49,7 +44,7 @@ class CvProfilePhotoCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Professional Profile',
+                  'professional_profile'.tr,
                   style: TextStyle(
                     color: AppColors.homePrimaryText,
                     fontSize: AppFont.font11.sp,
@@ -77,7 +72,7 @@ class CvProfilePhotoCard extends StatelessWidget {
                           ),
                           SizedBox(width: 6.w),
                           Text(
-                            'Upload Professional Photo',
+                            'upload_professional_photo'.tr,
                             style: TextStyle(
                               color: AppColors.white,
                               fontSize: AppFont.font9.sp,

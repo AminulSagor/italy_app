@@ -19,13 +19,13 @@ class ContactController extends GetxController {
       'wa.me',
       '/391234567890',
       <String, String>{
-        'text': 'Hello, I need help with Italir Pothe.',
+        'text': 'hello_i_need_help_with_italir_pothe'.tr,
       },
     );
 
     await _launchExternal(
       whatsappUri,
-      failureTitle: 'WhatsApp unavailable',
+      failureTitle: 'whatsapp_unavailable'.tr,
       failureMessage:
           'Could not open WhatsApp. Please contact $supportPhoneDisplay.',
     );
@@ -34,8 +34,8 @@ class ContactController extends GetxController {
   Future<void> callSupport() async {
     await _launchExternal(
       Uri(scheme: 'tel', path: _supportPhoneInternational),
-      failureTitle: 'Phone unavailable',
-      failureMessage: 'No phone app is available on this device.',
+      failureTitle: 'phone_unavailable'.tr,
+      failureMessage: 'no_phone_app_is_available_on_this_device'.tr,
     );
   }
 
@@ -45,10 +45,10 @@ class ContactController extends GetxController {
         scheme: 'mailto',
         path: supportEmail,
         queryParameters: <String, String>{
-          'subject': 'Italir Pothe support request',
+          'subject': 'italir_pothe_support_request'.tr,
         },
       ),
-      failureTitle: 'Email unavailable',
+      failureTitle: 'email_unavailable'.tr,
       failureMessage:
           'No email app is available. You can email $supportEmail manually.',
     );
@@ -57,8 +57,8 @@ class ContactController extends GetxController {
   Future<void> joinFacebookCommunity() async {
     await _launchExternal(
       Uri.parse(facebookCommunityUrl),
-      failureTitle: 'Facebook unavailable',
-      failureMessage: 'Could not open the Facebook community link.',
+      failureTitle: 'facebook_unavailable'.tr,
+      failureMessage: 'could_not_open_the_facebook_community_link'.tr,
     );
   }
 

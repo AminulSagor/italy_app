@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class OfficialChecklistCard extends StatelessWidget {
   const OfficialChecklistCard({super.key});
@@ -44,7 +45,7 @@ class OfficialChecklistCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Official Checklist (PDF)',
+                  'official_checklist_pdf'.tr,
                   style: TextStyle(
                     color: AppColors.homePrimaryText,
                     fontSize: AppFont.font11.sp,
@@ -55,7 +56,7 @@ class OfficialChecklistCard extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'পূর্ণাঙ্গ তালিকা',
+                  'label_lib_features_service_hub_sub_features_caf_administrative_help__widgets_official_checklist_card_59'.tr,
                   style: TextStyle(
                     color: AppColors.homeSecondaryText,
                     fontSize: AppFont.font8.sp,

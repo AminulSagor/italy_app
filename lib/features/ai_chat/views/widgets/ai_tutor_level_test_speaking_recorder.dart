@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/themes/app_colors.dart';
+import 'package:get/get.dart';
 
 class AiTutorLevelTestSpeakingRecorder extends StatelessWidget {
   const AiTutorLevelTestSpeakingRecorder({
@@ -40,12 +41,12 @@ class AiTutorLevelTestSpeakingRecorder extends StatelessWidget {
         children: <Widget>[
           Text(
             isPreparing
-                ? 'Preparing microphone...'
+                ? 'preparing_microphone'.tr
                 : isRecording
                     ? 'Listening... ${_formatDuration(recordedSeconds)}'
                     : isTranscribing
-                        ? 'Turning your voice into text...'
-                        : 'Hold the microphone and speak',
+                        ? 'turning_your_voice_into_text'.tr
+                        : 'hold_the_microphone_and_speak'.tr,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14.sp,
@@ -125,9 +126,9 @@ class AiTutorLevelTestSpeakingRecorder extends StatelessWidget {
           SizedBox(height: 12.h),
           Text(
             isPreparing
-                ? 'Keep holding the microphone'
+                ? 'keep_holding_the_microphone'.tr
                 : isRecording
-                    ? 'Release to use this answer'
+                    ? 'release_to_use_this_answer'.tr
                     : 'চেপে ধরে কথা বলুন',
             style: TextStyle(
               fontSize: 11.sp,
@@ -148,7 +149,7 @@ class AiTutorLevelTestSpeakingRecorder extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'YOUR SPOKEN ANSWER',
+                    'your_spoken_answer'.tr,
                     style: TextStyle(
                       fontSize: 9.sp,
                       letterSpacing: .8,

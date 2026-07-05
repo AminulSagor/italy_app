@@ -24,7 +24,7 @@ class OrderSummaryPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: bg,
       appBar: SimpleAppbar(
-        title: 'gen_order_summary'.tr.tr,
+        title: 'gen_order_summary'.tr,
         onBackTap: () => Navigator.maybePop(context),
       ),
       body: SafeArea(
@@ -66,7 +66,7 @@ class OrderSummaryPage extends StatelessWidget {
                       SizedBox(height: 34.h),
 
                       CustomButton.primary(
-                        text: 'Continue to Checkout  ▶',
+                        text: 'continue_to_checkout'.tr,
                         onPressed: controller.buySelectedPlan,
                         btnColor: green,
                         borderRadius: 30,
@@ -77,7 +77,7 @@ class OrderSummaryPage extends StatelessWidget {
 
                       CustomButton(
                         onPressed: () => Get.back(),
-                        text: 'Maybe later',
+                        text: 'maybe_later'.tr,
                         height: 44,
                         showShadow: false,
                         btnColor: Colors.transparent,
@@ -133,7 +133,7 @@ class OrderSummaryPage extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'EUR',
+                    'gen_eur'.tr,
                     style: TextStyle(
                       color: isEur ? green : const Color(0xFF666A6D),
                       fontSize: 14.sp,
@@ -155,7 +155,7 @@ class OrderSummaryPage extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'BDT',
+                    'gen_bdt'.tr,
                     style: TextStyle(
                       color: !isEur ? green : const Color(0xFF666A6D),
                       fontSize: 14.sp,
@@ -197,7 +197,7 @@ class OrderSummaryPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ORDER SUMMARY',
+            'gen_order_summary'.tr,
             style: TextStyle(
               color: green,
               fontSize: 13.sp,
@@ -252,7 +252,7 @@ class OrderSummaryPage extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(bottom: 4.h),
                   child: Text(
-                    '/ one-time',
+                    'one_time'.tr,
                     style: TextStyle(
                       color: const Color(0xFF575A60),
                       fontSize: 14.sp,
@@ -291,7 +291,7 @@ class OrderSummaryPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(7.r),
                   ),
                   child: Text(
-                    '💵 YOU SAVED $savedAmount',
+                    savedAmount,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -303,7 +303,7 @@ class OrderSummaryPage extends StatelessWidget {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  '/ one-time',
+                  'one_time'.tr,
                   style: TextStyle(
                     color: const Color(0xFF575A60),
                     fontSize: 14.sp,
@@ -342,7 +342,7 @@ class OrderSummaryPage extends StatelessWidget {
           ),
           SizedBox(width: 8.w),
           Text(
-            'TRUSTED BY 5K+ LEARNERS',
+            'trusted_by_5k_learners'.tr,
             style: TextStyle(
               color: Color(0xFF5B5E63),
               fontSize: 12.sp,

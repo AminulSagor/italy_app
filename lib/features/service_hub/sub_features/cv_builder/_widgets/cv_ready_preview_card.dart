@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../../../../../core/themes/app_colors.dart';
@@ -29,9 +30,7 @@ class CvReadyPreviewCard extends StatelessWidget {
         onTap: pdfBytes == null || isLoading ? null : onTap,
         borderRadius: BorderRadius.circular(kRadius26.r),
         child: Container(
-          constraints: BoxConstraints(
-            minHeight: 292.h,
-          ),
+          constraints: BoxConstraints(minHeight: 292.h),
           width: double.infinity,
           padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
           decoration: BoxDecoration(
@@ -64,9 +63,7 @@ class CvReadyPreviewCard extends StatelessWidget {
                     Positioned.fill(
                       child: Container(
                         color: AppColors.white.withOpacity(0.72),
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        child: const Center(child: CircularProgressIndicator()),
                       ),
                     ),
                   Positioned(
@@ -79,7 +76,9 @@ class CvReadyPreviewCard extends StatelessWidget {
                         padding: EdgeInsets.symmetric(horizontal: 14.w),
                         decoration: BoxDecoration(
                           color: AppColors.white,
-                          borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+                          borderRadius: BorderRadius.circular(
+                            kButtonDefaultRadius.r,
+                          ),
                           boxShadow: <BoxShadow>[
                             BoxShadow(
                               color: AppColors.homeNeutralShadow,
@@ -98,7 +97,9 @@ class CvReadyPreviewCard extends StatelessWidget {
                             ),
                             SizedBox(width: 5.w),
                             Text(
-                              isLoading ? 'Preparing PDF' : 'Tap to Open PDF',
+                              isLoading
+                                  ? 'preparing_pdf'.tr
+                                  : 'tap_to_open_pdf'.tr,
                               style: TextStyle(
                                 color: AppColors.primaryGreen,
                                 fontSize: AppFont.font9.sp,
@@ -221,11 +222,7 @@ class _PreviewLine extends StatelessWidget {
   final double height;
   final Color? color;
 
-  const _PreviewLine({
-    required this.width,
-    required this.height,
-    this.color,
-  });
+  const _PreviewLine({required this.width, required this.height, this.color});
 
   @override
   Widget build(BuildContext context) {

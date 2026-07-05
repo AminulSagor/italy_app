@@ -5,6 +5,7 @@ import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../models/pro_checkout_models.dart';
+import 'package:get/get.dart';
 
 class ProPlanCard extends StatelessWidget {
   final ProPlanModel plan;
@@ -244,7 +245,7 @@ class ProCouponInput extends StatelessWidget {
             color: AppColors.homePrimaryText,
           ),
           decoration: InputDecoration(
-            hintText: 'Enter Coupon Code',
+            hintText: 'gen_enter_coupon_code'.tr,
             hintStyle: TextStyle(
               fontSize: AppFont.font16.sp,
               fontWeight: FontWeight.w700,
@@ -294,7 +295,7 @@ class ProCouponInput extends StatelessWidget {
                     ),
                   )
                 : Text(
-                    'APPLY',
+                    'apply'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font16.sp,
                       fontWeight: FontWeight.w900,

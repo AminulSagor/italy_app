@@ -5,6 +5,7 @@ import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../../../../../core/widgets/custom_button.dart';
+import 'package:get/get.dart';
 
 class UnlockChapterDialog extends StatelessWidget {
   final String courseName;
@@ -112,7 +113,7 @@ class UnlockChapterDialog extends StatelessWidget {
                 ),
                 SizedBox(height: 10.h),
                 Text(
-                  'Unlock $courseName to access all $lessonCount lessons and the linked course features.',
+                  'unlock_coursename_to_access_all_lessoncount_lessons_and_the_linked_course_features'.trParams(<String, String>{'coursename': courseName.toString(), 'lessoncount': lessonCount.toString()}),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
@@ -123,21 +124,21 @@ class UnlockChapterDialog extends StatelessWidget {
                 ),
                 SizedBox(height: 26.h),
                 _DialogBenefitWide(
-                  text: 'All Chapters',
+                  text: 'all_chapters'.tr,
                   icon: Icons.menu_book_rounded,
                   iconBg: AppColors.proFeatureBlueBg,
                   iconColor: AppColors.coursesChapterBlue,
                 ),
                 SizedBox(height: 16.h),
                 _DialogBenefitWide(
-                  text: 'Certificates',
+                  text: 'gen_certificates'.tr,
                   icon: Icons.school_outlined,
                   iconBg: AppColors.homeLime,
                   iconColor: AppColors.primaryGreen,
                 ),
                 SizedBox(height: 36.h),
                 CustomButton.primary(
-                  text: 'Get Pro Now',
+                  text: 'get_pro_now'.tr,
                   icon: Icons.play_arrow_rounded,
                   onPressed: onGetProTap,
                 ),
@@ -145,7 +146,7 @@ class UnlockChapterDialog extends StatelessWidget {
                 GestureDetector(
                   onTap: onMaybeLaterTap,
                   child: Text(
-                    'Maybe later',
+                    'maybe_later'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font16.sp,
                       fontWeight: FontWeight.w700,

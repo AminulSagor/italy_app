@@ -1,24 +1,25 @@
 import 'legal_document_models.dart';
+import 'package:get/get.dart';
 
 class PrivacyPolicyContent {
   PrivacyPolicyContent._();
 
   static const String supportEmail = 'support@lumina.it';
 
-  static const LegalDocumentModel document = LegalDocumentModel(
-    title: 'Privacy Policy',
+  static LegalDocumentModel document = LegalDocumentModel(
+    title: 'gen_privacy_policy'.tr,
     effectiveDate: 'Effective June 27, 2026',
     introduction:
         'This Privacy Policy explains how Italir Pothe collects, uses, stores, and shares information when you use the mobile application, its backend services, and related support or administrative services.',
     sections: <LegalSectionModel>[
       LegalSectionModel(
-        title: '1. Who this policy applies to',
+        title: '1_who_this_policy_applies_to'.tr,
         paragraphs: <String>[
           'This policy applies to learners, community members, and other users of Italir Pothe. By using the service, you acknowledge the practices described here. Where consent is required by law, we request it before collecting or using the relevant data.',
         ],
       ),
       LegalSectionModel(
-        title: '2. Information we collect',
+        title: '2_information_we_collect'.tr,
         paragraphs: <String>[
           'We collect only information reasonably needed to provide, secure, personalize, and improve the service.',
         ],
@@ -33,14 +34,14 @@ class PrivacyPolicyContent {
         ],
       ),
       LegalSectionModel(
-        title: '3. Device permissions',
+        title: '3_device_permissions'.tr,
         paragraphs: <String>[
           'Depending on the feature you use, the app may request microphone, camera or photo access, notifications, network access, and limited file access. You can deny or later revoke optional permissions in your device settings, although the related feature may stop working.',
           'The current app does not request access to your precise device location or address book contacts.',
         ],
       ),
       LegalSectionModel(
-        title: '4. How we use information',
+        title: '4_how_we_use_information'.tr,
         bullets: <String>[
           'Create, verify, authenticate, and maintain your account.',
           'Deliver courses, practice activities, exams, certificates, CV tools, webinars, messaging, calls, notifications, rewards, purchases, and customer support.',
@@ -51,14 +52,14 @@ class PrivacyPolicyContent {
         ],
       ),
       LegalSectionModel(
-        title: '5. AI Tutor and voice processing',
+        title: '5_ai_tutor_and_voice_processing'.tr,
         paragraphs: <String>[
           'AI Tutor text, voice, writing-help, and level-test requests may be sent to AI, speech-to-text, text-to-speech, and real-time communication providers so they can generate a response. This can include your prompt, recent conversation context, selected learning topic, learner level, audio, and transcript.',
           'Live AI audio is generally processed as a stream. Some speaking-exam recordings, uploaded files, transcripts, level results, or conversation context may be stored when required to provide the feature. Do not submit highly sensitive information that is not needed for language learning.',
         ],
       ),
       LegalSectionModel(
-        title: '6. When information is shared',
+        title: '6_when_information_is_shared'.tr,
         paragraphs: <String>[
           'We do not sell personal information. The current version does not use personal information for cross-app behavioral advertising or tracking.',
           'We may share limited information with service providers only as needed to operate the service, including:',
@@ -74,7 +75,7 @@ class PrivacyPolicyContent {
         ],
       ),
       LegalSectionModel(
-        title: '7. Data retention and account deletion',
+        title: '7_data_retention_and_account_deletion'.tr,
         paragraphs: <String>[
           'We keep account and service data while your account is active and for as long as reasonably necessary for the purposes described in this policy. Retention periods vary by data type, operational need, legal obligations, fraud prevention, payment disputes, and backup cycles.',
           'You can initiate account deletion in Settings → Privacy & Legal → Delete Account. The app asks you to confirm using your full name. Account access is disabled and direct profile identifiers are removed or anonymized. Associated personal data is deleted or de-identified according to our operational retention process, except records we must retain for legal, accounting, security, fraud-prevention, or dispute-resolution reasons.',
@@ -82,7 +83,7 @@ class PrivacyPolicyContent {
         ],
       ),
       LegalSectionModel(
-        title: '8. Your choices and rights',
+        title: '8_your_choices_and_rights'.tr,
         bullets: <String>[
           'Review or update your name, profile photo, verified email, verified phone, and password from Settings, subject to verification requirements.',
           'Control microphone, camera, photo, and notification permissions through your device settings.',
@@ -92,31 +93,31 @@ class PrivacyPolicyContent {
         ],
       ),
       LegalSectionModel(
-        title: '9. Security',
+        title: '9_security'.tr,
         paragraphs: <String>[
           'We use reasonable administrative, technical, and organizational safeguards, including authenticated APIs, password hashing, access controls, secure token storage, and encrypted network connections in production. No service can guarantee absolute security, so keep your password private and contact us if you suspect unauthorized access.',
         ],
       ),
       LegalSectionModel(
-        title: '10. International processing',
+        title: '10_international_processing'.tr,
         paragraphs: <String>[
           'Our service providers may process information in countries other than your own. Where required, we use appropriate contractual, technical, or legal safeguards for international transfers.',
         ],
       ),
       LegalSectionModel(
-        title: '11. Children',
+        title: '11_children'.tr,
         paragraphs: <String>[
           'Italir Pothe is not directed to children under 13. If the law where you live requires a higher minimum age, you may use the service only with valid permission from a parent or legal guardian. Contact us if you believe a child provided personal information without appropriate authorization.',
         ],
       ),
       LegalSectionModel(
-        title: '12. Policy updates',
+        title: '12_policy_updates'.tr,
         paragraphs: <String>[
           'We may update this policy when features, providers, or legal requirements change. We will update the effective date and provide additional notice when a change is material. Continued use after the change takes effect means the updated policy applies, subject to any consent rights required by law.',
         ],
       ),
       LegalSectionModel(
-        title: '13. Contact us',
+        title: '13_contact_us'.tr,
         paragraphs: <String>[
           'For privacy questions, requests, or complaints, contact $supportEmail. Please include the email address or phone number connected to your account so we can securely verify and respond to your request.',
         ],

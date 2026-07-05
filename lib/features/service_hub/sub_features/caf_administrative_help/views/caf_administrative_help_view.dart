@@ -25,7 +25,7 @@ class CafAdministrativeHelpView extends StatelessWidget {
               _Header(),
               SizedBox(height: 26.h),
               Text(
-                'Welcome to the Gateway',
+                'welcome_to_the_gateway'.tr,
                 style: TextStyle(
                   color: AppColors.homeSecondaryText,
                   fontSize: AppFont.font10.sp,
@@ -35,7 +35,7 @@ class CafAdministrativeHelpView extends StatelessWidget {
               ),
               SizedBox(height: 5.h),
               Text(
-                'Choose Your Path',
+                'choose_your_path'.tr,
                 style: TextStyle(
                   color: AppColors.homePrimaryText,
                   fontSize: AppFont.font22.sp,
@@ -53,10 +53,10 @@ class CafAdministrativeHelpView extends StatelessWidget {
                 ],
                 leadingIcon: Icons.school_rounded,
                 trailingIcon: Icons.menu_book_rounded,
-                title: 'CAF Courses',
+                title: 'gen_caf_courses'.tr,
                 description:
-                    'Learn how the Italian tax and legal system works.',
-                buttonText: 'START LEARNING',
+                    'learn_how_the_italian_tax_and_legal_system_works'.tr,
+                buttonText: 'gen_start_learning'.tr,
                 onTap: () {
                   Get.to(() => const PermessoSoggiornoGuideView());
                 },
@@ -70,11 +70,11 @@ class CafAdministrativeHelpView extends StatelessWidget {
                 ],
                 leadingIcon: Icons.description_rounded,
                 trailingIcon: Icons.verified_rounded,
-                title: 'CAF Services & Guides',
+                title: 'gen_caf_services_guides'.tr,
                 description:
                     'Step-by-step help for your documents.\nপ্রশাসনিক সহায়তা এবং গাইড',
                 descriptionMaxLines: 3,
-                buttonText: 'EXPLORE SERVICES',
+                buttonText: 'gen_explore_services'.tr,
                 onTap: () {
                   Get.to(() => const AdministrativeServicesView());
                 },
@@ -115,7 +115,7 @@ class _Header extends StatelessWidget {
             ),
           ),
           Text(
-            'CAF & Legal Hub',
+            'caf_legal_hub'.tr,
             style: TextStyle(
               color: AppColors.primaryGreen,
               fontSize: AppFont.font11.sp,

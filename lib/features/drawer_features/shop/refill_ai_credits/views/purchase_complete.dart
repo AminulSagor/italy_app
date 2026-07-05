@@ -26,7 +26,7 @@ class PurchaseCompletedPage extends StatelessWidget {
       backgroundColor: bg,
       appBar: SimpleAppbar(
         onBackTap: controller.closePurchaseCompleted,
-        title: 'Purchase Completed',
+        title: 'purchase_completed'.tr,
         icon: Icons.close,
       ),
       body: SafeArea(
@@ -46,7 +46,7 @@ class PurchaseCompletedPage extends StatelessWidget {
                     SizedBox(height: 36.h),
 
                     Text(
-                      'Congratulations!',
+                      'gen_congratulations'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: textDark,
@@ -120,7 +120,7 @@ class PurchaseCompletedPage extends StatelessWidget {
             Padding(
               padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 30.h),
               child: CustomButton.primary(
-                text: 'Start Learning Now',
+                text: 'start_learning_now'.tr,
                 icon: Icons.arrow_forward,
                 onPressed: controller.startLearningNow,
                 btnColor: green,
@@ -154,7 +154,7 @@ class PurchaseCompletedPage extends StatelessWidget {
             ),
           ),
           Text(
-            'Purchase Completed',
+            'purchase_completed'.tr,
             style: TextStyle(
               color: green,
               fontSize: 18.sp,
@@ -263,7 +263,7 @@ class PurchaseCompletedPage extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _orderInfo(label: 'ORDER ID', value: orderId),
+            child: _orderInfo(label: 'gen_order_id'.tr, value: orderId),
           ),
           Container(height: 34.h, width: 1.w, color: const Color(0xFFE1E1E1)),
           SizedBox(width: 12.w),
@@ -275,7 +275,7 @@ class PurchaseCompletedPage extends StatelessWidget {
                 SizedBox(width: 8.w),
                 Flexible(
                   child: Text(
-                    'Status: Completed',
+                    'status_completed'.tr,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

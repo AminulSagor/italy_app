@@ -8,37 +8,40 @@ class CreateCvEducationController extends GetxController {
   final RxString selectedLevel = ''.obs;
 
   final TextEditingController schoolController = TextEditingController();
-  final TextEditingController nativeLanguageController = TextEditingController();
+  final TextEditingController nativeLanguageController =
+      TextEditingController();
   final TextEditingController otherLanguageController = TextEditingController();
   final TextEditingController skillController = TextEditingController();
 
-  final RxList<String> nativeLanguages = <String>['Bengali (Native)'].obs;
-  final RxList<String> otherLanguages = <String>['English (B2)'].obs;
+  final RxList<String> nativeLanguages = <String>[
+    'language_bengali_native'.tr,
+  ].obs;
+  final RxList<String> otherLanguages = <String>['language_english_b2'.tr].obs;
 
   final RxList<String> skills = <String>[
-    'Project Management',
-    'Italian (C1)',
-    'Problem Solving',
+    'skill_project_management'.tr,
+    'skill_italian_c1'.tr,
+    'skill_problem_solving'.tr,
   ].obs;
 
   final List<String> educationTypes = <String>[
-    'High School',
-    'Diploma',
-    'Bachelor',
-    'Master',
-    'Other',
+    'education_high_school'.tr,
+    'education_diploma'.tr,
+    'education_bachelor'.tr,
+    'education_master'.tr,
+    'education_other'.tr,
   ];
 
   final List<String> educationLevels = <String>[
-    'Basic',
-    'Intermediate',
-    'Advanced',
-    'Professional',
+    'level_basic'.tr,
+    'level_intermediate'.tr,
+    'level_advanced'.tr,
+    'level_professional'.tr,
   ];
 
   final List<String> aiSuggestedSkills = <String>[
-    'MS Excel',
-    'CNC Programming',
+    'skill_ms_excel'.tr,
+    'skill_cnc_programming'.tr,
   ];
 
   void selectEducationType(String? value) {

@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 class StatusColors {
   static const Color pageBg = Color(0xFFF6F7F6);
@@ -445,7 +446,7 @@ class SkipPillButton extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      'Skip',
+                      'skip'.tr,
                       style: TextStyle(
                         color: const Color(0xFF707070),
                         fontSize: 13.5.sp,

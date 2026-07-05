@@ -5,6 +5,7 @@ import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../models/course_models.dart';
+import 'package:get/get.dart';
 
 class CourseChapterCard extends StatelessWidget {
   final CourseChapterModel chapter;
@@ -161,7 +162,7 @@ class _CurrentChapterCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        chapter.statusLabel ?? 'CURRENT STUDY',
+                        chapter.statusLabel ?? 'current_study'.tr,
                         style: TextStyle(
                           fontSize: AppFont.font12.sp,
                           fontWeight: FontWeight.w700,
@@ -189,7 +190,7 @@ class _CurrentChapterCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  'Progress',
+                  'progress'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font12.sp,
                     fontWeight: FontWeight.w700,
@@ -197,7 +198,7 @@ class _CurrentChapterCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${(chapter.progress * 100).round()}%',
+                  'chapter_progress_100_round'.trParams(<String, String>{'progress': (chapter.progress * 100).round().toString()}),
                   style: TextStyle(
                     fontSize: AppFont.font12.sp,
                     fontWeight: FontWeight.w700,

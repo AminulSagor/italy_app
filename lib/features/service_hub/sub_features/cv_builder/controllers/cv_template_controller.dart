@@ -26,7 +26,11 @@ class CvTemplateController extends GetxController {
   final RxList<CvTemplateModel> templates = <CvTemplateModel>[].obs;
   final Rxn<CvTemplateModel> selectedTemplate = Rxn<CvTemplateModel>();
 
-  final List<String> categories = <String>['All', 'Classic', 'Modern Column'];
+  final List<String> categories = <String>[
+    'gen_all'.tr,
+    'classic'.tr,
+    'modern_column'.tr,
+  ];
 
   final List<Color> colors = <Color>[
     AppColors.primaryGreen,
@@ -129,7 +133,7 @@ class CvTemplateController extends GetxController {
   void useSelectedTemplate() {
     final CvTemplateModel? template = selectedTemplate.value;
     if (template == null) {
-      Get.snackbar('Template', 'Please select a CV template first.');
+      Get.snackbar('template'.tr, 'please_select_a_cv_template_first'.tr);
       return;
     }
 

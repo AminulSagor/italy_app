@@ -29,7 +29,7 @@ class CvReadyView extends GetView<CvReadyController> {
                     const _Header(),
                     SizedBox(height: 28.h),
                     Text(
-                      'Your CV is Ready!',
+                      'your_cv_is_ready'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppColors.primaryGreen,
@@ -41,7 +41,7 @@ class CvReadyView extends GetView<CvReadyController> {
                     ),
                     SizedBox(height: 10.h),
                     Text(
-                      'Professionally formatted and ready to send.',
+                      'professionally_formatted_and_ready_to_send'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppColors.homeSecondaryText,
@@ -65,8 +65,8 @@ class CvReadyView extends GetView<CvReadyController> {
                           child: Obx(
                             () => CvReadyActionCard(
                               title: controller.isDownloading.value
-                                  ? 'Downloading...'
-                                  : 'Download PDF',
+                                  ? 'downloading'.tr
+                                  : "${'download'.tr} ${'pdf'.tr}",
                               icon: Icons.download_rounded,
                               backgroundColor: AppColors.homePaleGreen,
                               iconBackgroundColor: AppColors.safetyBlockedBg,
@@ -80,7 +80,7 @@ class CvReadyView extends GetView<CvReadyController> {
                         SizedBox(width: 14.w),
                         Expanded(
                           child: CvReadyActionCard(
-                            title: 'gen_share_to_nwhatsapp'.tr.tr,
+                            title: 'gen_share_to_nwhatsapp'.tr,
                             icon: Icons.chat_rounded,
                             backgroundColor: AppColors.messageOnlineGreen,
                             iconBackgroundColor: AppColors.white.withValues(
@@ -100,7 +100,7 @@ class CvReadyView extends GetView<CvReadyController> {
               ),
             ),
             _BottomButton(
-              title: 'gen_finish_go_to_dashboard'.tr.tr,
+              title: 'gen_finish_go_to_dashboard'.tr,
               onTap: controller.onFinishTap,
             ),
           ],

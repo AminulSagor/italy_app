@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -85,7 +86,7 @@ class CvPhotoUrlUploadField extends StatelessWidget {
                             ),
                             SizedBox(width: 8.w),
                             Text(
-                              hasPhoto ? 'Change Photo' : 'Select Photo',
+                              hasPhoto ? 'change_photo'.tr : 'select_photo'.tr,
                               style: TextStyle(
                                 color: AppColors.white,
                                 fontSize: AppFont.font11.sp,
@@ -100,7 +101,7 @@ class CvPhotoUrlUploadField extends StatelessWidget {
             if (hasPhoto) ...<Widget>[
               SizedBox(height: 8.h),
               Text(
-                'Photo selected. It will upload when you create the CV.',
+                'photo_selected_it_will_upload_when_you_create_the'.tr,
                 style: TextStyle(
                   color: AppColors.primaryGreen,
                   fontSize: AppFont.font9.sp,
@@ -163,7 +164,7 @@ class _Placeholder extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
           Text(
-            isUploading ? 'Uploading photo...' : 'No photo selected',
+            isUploading ? 'uploading_photo'.tr : 'no_photo_selected'.tr,
             style: TextStyle(
               color: AppColors.homeSecondaryText,
               fontSize: AppFont.font10.sp,

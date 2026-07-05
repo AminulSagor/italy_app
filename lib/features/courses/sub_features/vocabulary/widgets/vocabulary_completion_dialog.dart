@@ -46,7 +46,7 @@ class VocabularyCompletionDialog extends StatelessWidget {
                       ),
                       Expanded(
                         child: Text(
-                          'Lesson Complete',
+                          'lesson_complete'.tr,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: AppFont.font18.sp,
@@ -103,7 +103,7 @@ class VocabularyCompletionDialog extends StatelessWidget {
                           width: 188.w,
                         ),
                         Text(
-                          'Great Job!',
+                          'great_job'.tr,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: AppFont.font42.sp,
@@ -113,7 +113,7 @@ class VocabularyCompletionDialog extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'You reviewed ${complete.reviewedCount} words',
+                          'you_reviewed_complete_reviewedcount_words'.trParams(<String, String>{'reviewedcount': complete.reviewedCount.toString()}),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: AppFont.font16.sp,
@@ -128,7 +128,7 @@ class VocabularyCompletionDialog extends StatelessWidget {
                               child: _VocabularyResultPill(
                                 icon: Icons.check_circle_rounded,
                                 value: '${complete.rightCount} Words',
-                                label: 'gen_right'.tr.tr,
+                                label: 'gen_right'.tr,
                                 color: AppColors.vocabularyCompletionRightBg,
                                 textColor: AppColors.primaryGreen,
                               ),
@@ -138,7 +138,7 @@ class VocabularyCompletionDialog extends StatelessWidget {
                               child: _VocabularyResultPill(
                                 icon: Icons.refresh_rounded,
                                 value: '${complete.wrongCount} Words',
-                                label: 'gen_wrong'.tr.tr,
+                                label: 'gen_wrong'.tr,
                                 color: AppColors.vocabularyCompletionWrongBg,
                                 textColor: AppColors.vocabularyStreakText,
                               ),
@@ -148,7 +148,7 @@ class VocabularyCompletionDialog extends StatelessWidget {
                         SizedBox(height: 20.h),
                         CustomButton(
                           onPressed: onCloseTap,
-                          text: 'Join the Italian journey!',
+                          text: 'join_the_italian_journey'.tr,
                           height: 44.h,
                           showShadow: false,
                           fontSize: 14.sp,
@@ -167,7 +167,7 @@ class VocabularyCompletionDialog extends StatelessWidget {
                     child: Column(
                       children: <Widget>[
                         Text(
-                          'SHARE YOUR VICTORY',
+                          'share_your_victory'.tr,
                           style: TextStyle(
                             fontSize: AppFont.font14.sp,
                             fontWeight: FontWeight.w800,

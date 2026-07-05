@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -58,7 +59,7 @@ class CvCreateCard extends StatelessWidget {
                     ),
                     SizedBox(width: 7.w),
                     Text(
-                      'CREATE NEW CV',
+                      'create_new_cv'.tr,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -76,7 +77,7 @@ class CvCreateCard extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           Text(
-            'You have used 2 out of 3 free CV\ngenerations.',
+            'you_have_used_2_out_of_3_free_cv_generations'.tr,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/services/api_client.dart';
 import '../models/reward_models.dart';
 import '../models/reward_response_models.dart';
+import 'package:get/get.dart' hide Response;
 
 class RewardApiService {
   RewardApiService({required ApiClient apiClient}) : _apiClient = apiClient;
@@ -90,7 +91,7 @@ class RewardApiService {
 
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object.',
+      message: 'response_is_not_a_valid_json_object_1'.tr,
     );
   }
 }

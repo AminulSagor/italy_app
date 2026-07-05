@@ -31,11 +31,11 @@ class ProPurchaseSuccessView extends GetView<ProCheckoutController> {
         controller.purchaseResult.value ??
         ProPurchaseResultModel(
           orderId: '#IT-SHK-1024',
-          statusLabel: 'Status: Completed',
-          title: 'gen_congratulations'.tr.tr,
+          statusLabel: 'status_completed'.tr,
+          title: 'gen_congratulations'.tr,
           description:
               'You now have full lifetime access to all\nItalian Shikhi features. Your journey to\nfluency starts today.',
-          buttonLabel: 'Start Learning Now',
+          buttonLabel: 'start_learning_now'.tr,
         );
 
     return Material(
@@ -62,7 +62,7 @@ class ProPurchaseSuccessView extends GetView<ProCheckoutController> {
                     ),
                   ),
                   Text(
-                    'Course Unlocked',
+                    'course_unlocked_1'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font16.sp,
                       fontWeight: FontWeight.w700,
@@ -166,7 +166,7 @@ class _OrderStatusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'ORDER ID',
+                  'gen_order_id'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font10.sp,
                     fontWeight: FontWeight.w700,

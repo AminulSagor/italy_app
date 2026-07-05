@@ -26,7 +26,7 @@ class PopupInsiderView extends StatelessWidget {
                     children: <Widget>[
                       SizedBox(height: 77.h),
                       _LeagueInfoCard(
-                        title: 'gen_bronze_league'.tr.tr,
+                        title: 'gen_bronze_league'.tr,
                         xp: '0 – 999 XP',
                         bgColor: Color(0xFFFFEDE2),
                         titleColor: Color(0xFF2B1608),
@@ -36,7 +36,7 @@ class PopupInsiderView extends StatelessWidget {
                       ),
                       SizedBox(height: 17.h),
                       _LeagueInfoCard(
-                        title: 'gen_silver_league'.tr.tr,
+                        title: 'gen_silver_league'.tr,
                         xp: '1,000 – 4,999 XP',
                         bgColor: Color(0xFFADD0FB),
                         titleColor: Color(0xFF07365D),
@@ -46,7 +46,7 @@ class PopupInsiderView extends StatelessWidget {
                       ),
                       SizedBox(height: 17.h),
                       _LeagueInfoCard(
-                        title: 'gen_gold_league'.tr.tr,
+                        title: 'gen_gold_league'.tr,
                         xp: '5,000–9,999 XP',
                         bgColor: Color(0xFFFFF7DE),
                         titleColor: Color(0xFF3A2108),
@@ -56,7 +56,7 @@ class PopupInsiderView extends StatelessWidget {
                       ),
                       SizedBox(height: 17.h),
                       _LeagueInfoCard(
-                        title: 'gen_diamond_league'.tr.tr,
+                        title: 'gen_diamond_league'.tr,
                         xp: '10,000+ XP',
                         bgColor: Color(0xFFD9F5F8),
                         titleColor: Color(0xFF006273),
@@ -67,7 +67,7 @@ class PopupInsiderView extends StatelessWidget {
                       ),
                       SizedBox(height: 48.h),
                       _DeepGreenButton(
-                        text: 'GOT IT',
+                        text: 'got_it'.tr,
                         onTap: () => Get.back<void>(),
                       ),
                       SizedBox(height: 34.h),

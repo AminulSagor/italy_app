@@ -88,7 +88,7 @@ class FinalExamController extends GetxController {
       final ApiResult<FinalExamGatewayModel> result =
           await ApiErrorHandler.call<FinalExamGatewayModel>(
         () => _finalExamApiService.fetchGateway(courseId: courseId),
-        errorTitle: 'Final Exam',
+        errorTitle: 'gen_final_exam'.tr,
       );
       if (!result.isSuccess || result.data == null) return;
 
@@ -103,7 +103,7 @@ class FinalExamController extends GetxController {
     final FinalExamOverviewModel? currentOverview = overview.value;
     if (isSubmitting.value || currentOverview == null) return;
     if (!currentOverview.canStart) {
-      Get.snackbar('Final Exam', currentOverview.startMessage);
+      Get.snackbar('gen_final_exam'.tr, currentOverview.startMessage);
       return;
     }
 
@@ -113,7 +113,7 @@ class FinalExamController extends GetxController {
       final ApiResult<FinalExamAttemptModel> result =
           await ApiErrorHandler.call<FinalExamAttemptModel>(
         () => _finalExamApiService.startAttempt(courseId: courseId),
-        errorTitle: 'Start Final Exam',
+        errorTitle: 'start_final_exam'.tr,
       );
       if (!result.isSuccess || result.data == null) return;
 
@@ -238,7 +238,7 @@ class FinalExamController extends GetxController {
           input,
         ),
       ),
-      errorTitle: 'Final Exam Answer',
+      errorTitle: 'final_exam_answer'.tr,
     );
     if (!response.isSuccess || response.data == null) {
       throw StateError('Final exam answer could not be submitted.');
@@ -279,7 +279,7 @@ class FinalExamController extends GetxController {
     if (currentAttempt == null || task == null || isSubmitting.value) return;
     if (selectedListeningOption.value < 0 ||
         selectedListeningOption.value >= task.optionIds.length) {
-      Get.snackbar('Listening', 'Please select an answer.');
+      Get.snackbar('gen_listening'.tr, 'please_select_an_answer'.tr);
       return;
     }
 
@@ -297,7 +297,7 @@ class FinalExamController extends GetxController {
             'selectedOptionId': task.optionIds[selectedListeningOption.value],
           },
         ),
-        errorTitle: 'Listening',
+        errorTitle: 'gen_listening'.tr,
       );
       submitted = result.isSuccess;
     } finally {
@@ -318,12 +318,12 @@ class FinalExamController extends GetxController {
     final String answer = writingController.text.trim();
     final int words = answer.isEmpty ? 0 : answer.split(RegExp(r'\s+')).length;
     if (answer.isEmpty) {
-      Get.snackbar('Writing Task', 'Please write your answer first.');
+      Get.snackbar('writing_task'.tr, 'please_write_your_answer_first'.tr);
       return;
     }
     if (task.minWords > 0 && words < task.minWords) {
       Get.snackbar(
-        'Writing Task',
+        'writing_task_1'.tr,
         'Please write at least ${task.minWords} words.',
       );
       return;
@@ -343,7 +343,7 @@ class FinalExamController extends GetxController {
             'textAnswer': answer,
           },
         ),
-        errorTitle: 'Writing Task',
+        errorTitle: 'writing_task'.tr,
       );
       submitted = result.isSuccess;
     } finally {
@@ -362,7 +362,7 @@ class FinalExamController extends GetxController {
 
     if (isRecording.value) await _media.stopRecording();
     if (!hasRecording.value || recordedAudioPath.value.isEmpty) {
-      Get.snackbar('Speaking Task', 'Please record your answer first.');
+      Get.snackbar('speaking_task'.tr, 'please_record_your_answer_first'.tr);
       return;
     }
 
@@ -375,7 +375,7 @@ class FinalExamController extends GetxController {
           filePath: recordedAudioPath.value,
           durationSeconds: recordedSeconds.value,
         ),
-        errorTitle: 'Speaking Audio',
+        errorTitle: 'speaking_audio'.tr,
       );
       if (!uploadResult.isSuccess || uploadResult.data == null) return;
 
@@ -391,7 +391,7 @@ class FinalExamController extends GetxController {
             'durationSeconds': recordedSeconds.value,
           },
         ),
-        errorTitle: 'Speaking Task',
+        errorTitle: 'speaking_task'.tr,
       );
       submitted = result.isSuccess;
     } finally {
@@ -418,7 +418,7 @@ class FinalExamController extends GetxController {
           attemptId: currentAttempt.id,
           totalDurationSeconds: durationSeconds,
         ),
-        errorTitle: 'Submit Final Exam',
+        errorTitle: 'submit_final_exam'.tr,
       );
       if (!result.isSuccess || result.data == null) return;
 
@@ -446,7 +446,7 @@ class FinalExamController extends GetxController {
           await ApiErrorHandler.call<FinalExamResultResponseModel>(
         () => _finalExamApiService.fetchResult(attemptId: currentAttempt.id),
         showError: showPendingMessage,
-        errorTitle: 'Final Exam Result',
+        errorTitle: 'gen_final_exam_result'.tr,
       );
       if (!response.isSuccess || response.data == null) return;
 
@@ -456,7 +456,7 @@ class FinalExamController extends GetxController {
       teacherReviewComplete.value = data.resultReady;
       if (!data.resultReady) {
         if (showPendingMessage) {
-          Get.snackbar('Final Exam Result', data.message);
+          Get.snackbar('gen_final_exam_result'.tr, data.message);
         }
         return;
       }

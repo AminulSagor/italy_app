@@ -25,9 +25,7 @@ class CvColorBottomSheet extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 12.h),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(kRadius24.r),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(kRadius24.r)),
       ),
       child: SafeArea(
         top: false,
@@ -54,7 +52,7 @@ class CvColorBottomSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    '⊕  SELECT COLOR',
+                    'select_color'.tr,
                     style: TextStyle(
                       color: AppColors.homePrimaryText,
                       fontSize: AppFont.font8.sp,
@@ -96,7 +94,7 @@ class CvColorBottomSheet extends StatelessWidget {
                   Row(
                     children: <Widget>[
                       Text(
-                        'Hue',
+                        'hue'.tr,
                         style: TextStyle(
                           color: AppColors.homePrimaryText,
                           fontSize: AppFont.font9.sp,
@@ -105,7 +103,7 @@ class CvColorBottomSheet extends StatelessWidget {
                       ),
                       const Spacer(),
                       Text(
-                        '#3C6A12',
+                        '#3c6a12',
                         style: TextStyle(
                           color: AppColors.homePrimaryText,
                           fontSize: AppFont.font9.sp,
@@ -118,7 +116,9 @@ class CvColorBottomSheet extends StatelessWidget {
                   Container(
                     height: 7.h,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
+                      borderRadius: BorderRadius.circular(
+                        kButtonDefaultRadius.r,
+                      ),
                       gradient: const LinearGradient(
                         colors: <Color>[
                           Colors.red,
@@ -164,7 +164,7 @@ class CvColorBottomSheet extends StatelessWidget {
             ),
             SizedBox(height: 14.h),
             CvBottomButton(
-              title: 'gen_confirm_color'.tr.tr,
+              title: 'gen_confirm_color'.tr,
               onTap: Get.back,
               hasOuterPadding: false,
             ),
@@ -178,19 +178,14 @@ class CvColorBottomSheet extends StatelessWidget {
 class _SheetColorDot extends StatelessWidget {
   final Color color;
 
-  const _SheetColorDot({
-    required this.color,
-  });
+  const _SheetColorDot({required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 28.w,
       height: 28.w,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }

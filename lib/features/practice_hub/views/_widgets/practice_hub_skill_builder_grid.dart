@@ -26,7 +26,7 @@ class PracticeHubSkillBuilderGrid extends GetView<PracticeHubController> {
       if (controller.skillBuilders.isEmpty) {
         return PracticeHubSectionMessage(
           message: controller.practiceHubOverviewError.value.isEmpty
-              ? 'No skill builders are available.'
+              ? 'no_skill_builders_are_available'.tr
               : controller.practiceHubOverviewError.value,
           onRetry: () => controller.loadPracticeHubOverview(showError: true),
         );
@@ -223,7 +223,7 @@ class PracticeHubSectionMessage extends StatelessWidget {
           SizedBox(height: 12.h),
           TextButton(
             onPressed: onRetry,
-            child: const Text('Retry'),
+            child: Text('retry'.tr),
           ),
         ],
       ),

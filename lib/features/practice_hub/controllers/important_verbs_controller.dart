@@ -138,7 +138,7 @@ class ImportantVerbsController extends GetxController {
           );
       if (requestId != _verbsRequestId) return;
       if (!result.isSuccess || result.data == null) {
-        verbsError.value = result.error ?? 'Unable to load important verbs.';
+        verbsError.value = result.error ?? 'unable_to_load_important_verbs'.tr;
         return;
       }
       final ImportantVerbListResponseModel response = result.data!;
@@ -221,7 +221,7 @@ class ImportantVerbsController extends GetxController {
       if (requestId != _savedVerbsRequestId) return;
       if (!result.isSuccess || result.data == null) {
         savedVerbsError.value =
-            result.error ?? 'Unable to load saved verbs.';
+            result.error ?? 'unable_to_load_saved_verbs'.tr;
         return;
       }
       final ImportantVerbListResponseModel response = result.data!;
@@ -414,7 +414,7 @@ class ImportantVerbsController extends GetxController {
       if (requestId != _detailsRequestId) return;
       if (!result.isSuccess || result.data == null) {
         verbDetailsError.value =
-            result.error ?? 'Unable to load verb details.';
+            result.error ?? 'unable_to_load_verb_details'.tr;
         return;
       }
 
@@ -475,7 +475,7 @@ class ImportantVerbsController extends GetxController {
       await _ttsService.speak(tts);
     } catch (_) {
       Get.snackbar(
-        'Pronunciation unavailable',
+        'pronunciation_unavailable'.tr,
         'Install or enable an Italian voice on this device and try again.',
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -564,19 +564,18 @@ class ImportantVerbsController extends GetxController {
   }
 
   _VerbFilterQuery _filterFor(String label) {
-    switch (label) {
-      case 'Regular':
-        return const _VerbFilterQuery(regularity: 'regular');
-      case 'Irregular':
-        return const _VerbFilterQuery(regularity: 'irregular');
-      case '-ARE':
-        return const _VerbFilterQuery(endingType: '-are');
-      case '-ERE':
-        return const _VerbFilterQuery(endingType: '-ere');
-      case '-IRE':
-        return const _VerbFilterQuery(endingType: '-ire');
-      default:
-        return const _VerbFilterQuery();
+    if (label == 'regular'.tr) {
+      return _VerbFilterQuery(regularity: 'regular');
+    } else if (label == 'irregular'.tr) {
+      return const _VerbFilterQuery(regularity: 'irregular');
+    } else if (label == '-ARE') {
+      return const _VerbFilterQuery(endingType: '-are');
+    } else if (label == '-ERE') {
+      return const _VerbFilterQuery(endingType: '-ere');
+    } else if (label == '-IRE') {
+      return const _VerbFilterQuery(endingType: '-ire');
+    } else {
+      return const _VerbFilterQuery();
     }
   }
 

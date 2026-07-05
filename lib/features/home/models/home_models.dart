@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+
 class HomeDashboardModel {
   const HomeDashboardModel({
     required this.overview,
@@ -53,42 +55,42 @@ class HomeDashboardModel {
     );
   }
 
-  static const HomeDashboardModel initial = HomeDashboardModel(
+  static HomeDashboardModel get initial => HomeDashboardModel(
     overview: HomeOverviewModel(totalSeconds: 0, days: <HomeActivityModel>[]),
     currentChapter: null,
     quickTools: <HomeToolModel>[
       HomeToolModel(
-        title: 'CV Services',
-        subtitle: 'Create a professional Italian CV',
+        title: 'cv_services'.tr,
+        subtitle: 'create_a_professional_italian_cv'.tr,
         iconKey: 'document',
       ),
     ],
     workItems: <HomeWorkItemModel>[],
     support: HomeSupportModel(
-      title: 'Need Help?',
-      subtitle: 'Join our Facebook community',
+      title: 'gen_need_help'.tr,
+      subtitle: 'join_our_facebook_community'.tr,
     ),
     webinar: null,
     culturalTip: HomeInfoCardModel(
-      eyebrow: 'CULTURAL TIP',
-      title: 'A little Italian goes a long way',
-      body: 'Practice a few useful phrases every day to build confidence.',
+      eyebrow: 'gen_cultural_tip_of_the_day'.tr,
+      title: 'a_little_italian_goes_a_long_way'.tr,
+      body: 'practice_a_few_useful_phrases_every_day_to_build_confidence'.tr,
       actionLabel: '',
     ),
     streak: HomeInfoCardModel(
-      eyebrow: 'DAY STREAK',
-      title: '0 Days',
-      body: 'Start learning today!',
+      eyebrow: 'day_streak'.tr,
+      title: '0 ${'gen_days'.tr}',
+      body: 'start_learning_today'.tr,
       actionLabel: '',
     ),
     aiTutor: HomeInfoCardModel(
-      eyebrow: 'AI TUTOR',
-      title: 'Practice Italian anytime',
-      body: 'Chat or speak with your AI tutor and get instant support.',
-      actionLabel: 'Start Chatting',
+      eyebrow: 'ai_tutor_1'.tr,
+      title: 'practice_italian_anytime'.tr,
+      body: 'chat_or_speak_with_your_ai_tutor_and_get_instant_support'.tr,
+      actionLabel: 'start_chatting'.tr,
     ),
     dailyChallenges: HomeDailyChallengesModel(
-      label: 'DAILY CHALLENGES',
+      label: 'gen_daily_challenges_1'.tr,
       completed: 0,
       total: 0,
     ),
@@ -276,9 +278,8 @@ class HomeDailyChallengesModel {
   final int completed;
   final int total;
 
-  double get progress => total == 0
-      ? 0
-      : (completed / total).clamp(0, 1).toDouble();
+  double get progress =>
+      total == 0 ? 0 : (completed / total).clamp(0, 1).toDouble();
   String get valueLabel => '$completed / $total';
 }
 
@@ -297,8 +298,18 @@ double _doubleValue(dynamic value) {
 
 String _formatDateTime(DateTime value) {
   const List<String> months = <String>[
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   final int hour = value.hour == 0
       ? 12

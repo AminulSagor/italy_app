@@ -34,7 +34,7 @@ class UnblockUserBottomSheet extends GetView<MessageUserInfoController> {
               _UnlockIcon(),
               SizedBox(height: 42.h),
               Text(
-                'Unblock $userName?',
+                'unblock_username'.trParams(<String, String>{'username': userName.toString()}),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font30.sp,
@@ -45,7 +45,7 @@ class UnblockUserBottomSheet extends GetView<MessageUserInfoController> {
               ),
               SizedBox(height: 24.h),
               Text(
-                'This user will be able to message you again and see your profile on the Leaderboard.',
+                'this_user_will_be_able_to_message_you_again_and_se'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font20.sp,
@@ -56,13 +56,13 @@ class UnblockUserBottomSheet extends GetView<MessageUserInfoController> {
               ),
               SizedBox(height: 48.h),
               CustomButton.primary(
-                text: 'Yes, Unblock',
+                text: 'yes_unblock'.tr,
                 isLoading: controller.isSubmitting.value,
                 onPressed: controller.unblockUser,
               ),
               SizedBox(height: 24.h),
               CustomButton(
-                text: 'Cancel',
+                text: 'cancel'.tr,
                 width: double.infinity,
                 height: kButtonDefaultHeight,
                 btnColor: AppColors.white,

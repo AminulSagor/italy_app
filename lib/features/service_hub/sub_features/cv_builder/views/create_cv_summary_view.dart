@@ -30,19 +30,17 @@ class CreateCvSummaryView extends GetView<CreateCvSummaryController> {
                     const _Header(),
                     SizedBox(height: 12.h),
                     CvStepProgress(
-                      title: 'gen_step_4_professional_summary'.tr.tr,
+                      title: 'gen_step_4_professional_summary'.tr,
                       progressText: '33%',
                       progress: 0.33,
                     ),
                     SizedBox(height: 22.h),
-                    CvAiSummaryGeneratorCard(
-                      controller: controller,
-                    ),
+                    CvAiSummaryGeneratorCard(controller: controller),
                     SizedBox(height: 26.h),
                     Obx(
-                          () => CvSummaryPreviewCard(
+                      () => CvSummaryPreviewCard(
                         hasGeneratedSummary:
-                        controller.hasGeneratedSummary.value,
+                            controller.hasGeneratedSummary.value,
                         summary: controller.generatedSummary,
                         onRegenerateTap: controller.regenerateSummary,
                         onEditTap: controller.editText,
@@ -53,7 +51,7 @@ class CreateCvSummaryView extends GetView<CreateCvSummaryController> {
               ),
             ),
             _BottomButton(
-              title: 'gen_save_continue'.tr.tr,
+              title: 'gen_save_continue'.tr,
               onTap: controller.onSaveContinueTap,
             ),
           ],
@@ -90,7 +88,7 @@ class _Header extends StatelessWidget {
           ),
           SizedBox(width: 10.w),
           Text(
-            'Create CV',
+            'create_cv'.tr,
             style: TextStyle(
               color: AppColors.homePrimaryText,
               fontSize: AppFont.font18.sp,
@@ -109,10 +107,7 @@ class _BottomButton extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-  const _BottomButton({
-    required this.title,
-    required this.onTap,
-  });
+  const _BottomButton({required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

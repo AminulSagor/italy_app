@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:get/get.dart' hide Response;
 
 import '../../features/auth/models/auth_models.dart';
 import 'api_client.dart';
 import 'storage_service.dart';
 import 'token_service.dart';
+import 'package:get/get.dart' hide Response;
 
 class AuthService {
   AuthService({
@@ -36,7 +38,7 @@ class AuthService {
     if (result.identifier.isEmpty) {
       throw DioException(
         requestOptions: response.requestOptions,
-        message: 'Signup response missing identifier',
+        message: 'signup_response_missing_identifier'.tr,
       );
     }
 
@@ -82,7 +84,6 @@ class AuthService {
     return OtpResponseModel.fromJson(_responseMap(response));
   }
 
-
   Future<bool> validateStoredSession() async {
     if (!await _tokenService.hasLocallyValidAccessToken()) {
       return false;
@@ -98,7 +99,8 @@ class AuthService {
       }
 
       // Keep a locally valid session during temporary network/server failures.
-      return error.response == null || (error.response?.statusCode ?? 500) >= 500;
+      return error.response == null ||
+          (error.response?.statusCode ?? 500) >= 500;
     }
   }
 
@@ -114,7 +116,7 @@ class AuthService {
     if (result.accessToken.trim().isEmpty) {
       throw DioException(
         requestOptions: requestOptions,
-        message: 'Auth response missing accessToken',
+        message: 'auth_response_missing_accesstoken'.tr,
       );
     }
 
@@ -136,7 +138,7 @@ class AuthService {
 
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object',
+      message: 'response_is_not_a_valid_json_object'.tr,
     );
   }
 

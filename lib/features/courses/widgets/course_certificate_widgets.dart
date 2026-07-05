@@ -98,7 +98,7 @@ class CourseCertificateCard extends StatelessWidget {
           ),
           SizedBox(height: 10.h),
           Text(
-            'ITALIR POTHE',
+            'gen_italir_pothe'.tr,
             style: TextStyle(
               fontSize: AppFont.font10.sp,
               fontWeight: FontWeight.w700,
@@ -119,7 +119,7 @@ class CourseCertificateCard extends StatelessWidget {
           ),
           SizedBox(height: 30.h),
           Text(
-            'THIS CERTIFIES THAT',
+            'this_certifies_that'.tr,
             style: TextStyle(
               fontSize: AppFont.font12.sp,
               fontWeight: FontWeight.w700,
@@ -172,7 +172,7 @@ class CourseCertificateCard extends StatelessWidget {
               mainAxisAlignment: .spaceBetween,
               children: <Widget>[
                 _CertificateMeta(
-                  label: 'gen_issue_date'.tr.tr,
+                  label: 'gen_issue_date'.tr,
                   value: certificate.issueDate,
                 ),
                 Container(
@@ -185,7 +185,7 @@ class CourseCertificateCard extends StatelessWidget {
                   child: SvgPicture.asset('assets/icons_svg/app_icon.svg'),
                 ),
                 _CertificateMeta(
-                  label: 'gen_final_score'.tr.tr,
+                  label: 'gen_final_score'.tr,
                   value: '${certificate.finalScore} / 100',
                   alignEnd: true,
                 ),
@@ -193,7 +193,7 @@ class CourseCertificateCard extends StatelessWidget {
             ),
             SizedBox(height: 60.h),
             Text(
-              'VERIFIED DIGITAL SIGNATURE',
+              'verified_digital_signature'.tr,
               style: TextStyle(
                 fontSize: AppFont.font9.sp,
                 fontWeight: FontWeight.w900,
@@ -222,7 +222,7 @@ class CourseCertificateStatsRow extends StatelessWidget {
             icon: Icons.menu_book_rounded,
             iconColor: AppColors.reportReviewText,
             value: _formatNumber(certificate.wordsLearned),
-            label: 'gen_words'.tr.tr,
+            label: 'gen_words'.tr,
           ),
         ),
         SizedBox(width: 16.w),
@@ -231,7 +231,7 @@ class CourseCertificateStatsRow extends StatelessWidget {
             icon: Icons.local_fire_department_rounded,
             iconColor: AppColors.blockDangerRed,
             value: '${certificate.streakDays}',
-            label: 'gen_days'.tr.tr,
+            label: 'gen_days'.tr,
           ),
         ),
         SizedBox(width: 16.w),
@@ -240,7 +240,7 @@ class CourseCertificateStatsRow extends StatelessWidget {
             icon: Icons.check_circle_rounded,
             iconColor: AppColors.primaryGreen,
             value: '${certificate.quizzesCompleted}',
-            label: 'gen_quizzes'.tr.tr,
+            label: 'gen_quizzes'.tr,
           ),
         ),
       ],
@@ -298,7 +298,7 @@ class CourseCertificateActions extends StatelessWidget {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  'Download PDF Certificate',
+                  'download_pdf_certificate'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w700,
@@ -312,7 +312,7 @@ class CourseCertificateActions extends StatelessWidget {
         SizedBox(height: 22.h),
         CustomButton.primary(
           onPressed: onStartLevelTap,
-          text: 'Start Level A2',
+          text: 'start_level_a2'.tr,
           icon: Icons.play_arrow_rounded,
         ),
       ],

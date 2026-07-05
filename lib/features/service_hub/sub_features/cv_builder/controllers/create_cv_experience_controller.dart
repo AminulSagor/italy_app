@@ -14,20 +14,17 @@ class CreateCvExperienceController extends GetxController {
   final RxBool isPresent = true.obs;
 
   final RxList<String> responsibilities = <String>[
-    'Dought Preparation',
-    'Oven Handling',
-    'Ingredient Prep',
-    'Kitchen Hygiene',
+    'gen_dough_preparation'.tr,
+    'gen_oven_handling'.tr,
+    'gen_ingredient_prep'.tr,
+    'gen_kitchen_hygiene'.tr,
   ].obs;
 
-  final RxList<String> hobbies = <String>[
-    'Reading',
-    'Cooking',
-  ].obs;
+  final RxList<String> hobbies = <String>['reading'.tr, 'cooking'.tr].obs;
 
   final RxList<String> licenses = <String>[
-    'Category B',
-    'Category A1',
+    'gen_e_g_category_b_c'.tr,
+    'category_a1'.tr,
   ].obs;
 
   void togglePresent(bool? value) {
@@ -35,7 +32,7 @@ class CreateCvExperienceController extends GetxController {
   }
 
   void addCustomResponsibility() {
-    responsibilities.add('Custom Task');
+    responsibilities.add('gen_add_custom_responsibility'.tr);
   }
 
   void addHobby() {
@@ -54,7 +51,6 @@ class CreateCvExperienceController extends GetxController {
     licenseController.clear();
   }
 
-
   void removeHobby(String value) {
     hobbies.remove(value);
   }
@@ -65,8 +61,8 @@ class CreateCvExperienceController extends GetxController {
 
   void onAddAnotherExperienceTap() {
     Get.snackbar(
-      'Experience',
-      'Another experience section will be added later.',
+      'Experience'.tr,
+      'another_experience_section_will_be_added_later'.tr,
       snackPosition: SnackPosition.BOTTOM,
     );
   }

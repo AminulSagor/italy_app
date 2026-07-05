@@ -36,7 +36,7 @@ class ChooseCvTemplateView extends GetView<CvTemplateController> {
                       const _Header(),
                       SizedBox(height: 26.h),
                       Text(
-                        'Choose a Template',
+                        'choose_a_template'.tr,
                         style: TextStyle(
                           color: AppColors.homePrimaryText,
                           fontSize: AppFont.font22.sp,
@@ -47,7 +47,7 @@ class ChooseCvTemplateView extends GetView<CvTemplateController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'Pick an active CV template. You can customize colors before creating the final CV.',
+                        'pick_an_active_cv_template_you_can_customize_color'.tr,
                         style: TextStyle(
                           color: AppColors.homeSecondaryText,
                           fontSize: AppFont.font11.sp,
@@ -72,8 +72,8 @@ class ChooseCvTemplateView extends GetView<CvTemplateController> {
             Obx(
               () => CvBottomButton(
                 title: controller.selectedTemplate.value == null
-                    ? 'Select a Template'
-                    : 'Use This Template',
+                    ? 'select_a_template'.tr
+                    : 'use_this_template'.tr,
                 onTap: controller.isLoading.value
                     ? () {}
                     : controller.useSelectedTemplate,
@@ -150,7 +150,7 @@ class _SearchBox extends StatelessWidget {
               decoration: InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
-                hintText: 'gen_search_template_name'.tr.tr,
+                hintText: 'gen_search_template_name'.tr,
                 hintStyle: TextStyle(
                   color: AppColors.homeSecondaryText.withOpacity(0.42),
                   fontSize: AppFont.font11.sp,
@@ -224,12 +224,12 @@ class _TemplateGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       if (controller.isLoading.value) {
-        return const _TemplateMessage(message: 'Loading CV templates...');
+        return _TemplateMessage(message: 'loading_cv_templates'.tr);
       }
 
       if (controller.templates.isEmpty) {
-        return const _TemplateMessage(
-          message: 'No active CV templates match your filter yet.',
+        return _TemplateMessage(
+          message: 'no_active_cv_templates_match_your_filter_yet'.tr,
         );
       }
 
@@ -272,7 +272,9 @@ class _TemplateGrid extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  controller.isLoadingMore.value ? 'Loading...' : 'Load More',
+                  controller.isLoadingMore.value
+                      ? 'loading'.tr
+                      : 'load_more'.tr,
                   style: TextStyle(
                     color: AppColors.primaryGreen,
                     fontSize: AppFont.font11.sp,

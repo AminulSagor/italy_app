@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -43,7 +44,7 @@ class CvNextStepCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Next Step',
+                  'next_step'.tr,
                   style: TextStyle(
                     color: AppColors.primaryGreen,
                     fontSize: AppFont.font12.sp,
@@ -53,7 +54,8 @@ class CvNextStepCard extends StatelessWidget {
                 ),
                 SizedBox(height: 7.h),
                 Text(
-                  'Send this CV to local restaurants\nor agencies in your area to start\nyour journey!',
+                  'send_this_cv_to_local_restaurants_or_agencies_in_your_area_to_start_your_journey'
+                      .tr,
                   style: TextStyle(
                     color: AppColors.homeSecondaryText,
                     fontSize: AppFont.font10.sp,

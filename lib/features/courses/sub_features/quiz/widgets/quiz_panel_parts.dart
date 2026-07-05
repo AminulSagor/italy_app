@@ -126,7 +126,9 @@ class _SentenceTranslationPanel extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 26.h),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
+                  borderRadius: BorderRadius.circular(
+                    kCourseDetailCardRadius.r,
+                  ),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
                       color: AppColors.homeNeutralShadow,
@@ -235,7 +237,7 @@ class _TrueFalsePanel extends StatelessWidget {
               child: CustomQuizButton(
                 label: question.options.isNotEmpty
                     ? question.options[0]
-                    : 'True',
+                    : 'true'.tr,
                 height: kQuizTrueFalseButtonHeight,
                 isSelected: !showWrongResult && selectedIndex == 0,
                 isWrong: showWrongResult && selectedIndex == 0,
@@ -247,7 +249,7 @@ class _TrueFalsePanel extends StatelessWidget {
               child: CustomQuizButton(
                 label: question.options.length > 1
                     ? question.options[1]
-                    : 'False',
+                    : 'false'.tr,
                 height: kQuizTrueFalseButtonHeight,
                 isSelected: !showWrongResult && selectedIndex == 1,
                 isWrong: showWrongResult && selectedIndex == 1,

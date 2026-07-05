@@ -47,7 +47,7 @@ class CvSkillSectionCard extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Skills you selected or confirmed appear here.',
+              'skills_you_selected_or_confirmed_appear_here'.tr,
               style: TextStyle(
                 color: AppColors.homeSecondaryText,
                 fontSize: AppFont.font8.sp,

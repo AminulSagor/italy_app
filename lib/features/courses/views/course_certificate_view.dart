@@ -52,7 +52,7 @@ class CourseCertificateView extends GetView<CourseCertificateController> {
                     ),
                     Expanded(
                       child: Text(
-                        'Achievement Unlocked',
+                        'achievement_unlocked'.tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: AppFont.font16.sp,
@@ -73,7 +73,7 @@ class CourseCertificateView extends GetView<CourseCertificateController> {
                 ),
                 const CourseCertificateHero(),
                 Text(
-                  'Congratulazioni!',
+                  'congratulazioni'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: AppFont.font36.sp,
@@ -82,7 +82,7 @@ class CourseCertificateView extends GetView<CourseCertificateController> {
                   ),
                 ),
                 Text(
-                  "You've reached a new milestone",
+                  "you_ve_reached_a_new_milestone".tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,

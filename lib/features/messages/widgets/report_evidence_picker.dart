@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class ReportEvidencePicker extends StatelessWidget {
   final XFile? selectedImage;
@@ -53,7 +54,7 @@ class ReportEvidencePicker extends StatelessWidget {
               ),
               SizedBox(height: 28.h),
               Text(
-                'Add Screenshot Evidence',
+                'add_screenshot_evidence'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font20.sp,
@@ -63,7 +64,7 @@ class ReportEvidencePicker extends StatelessWidget {
               ),
               SizedBox(height: 12.h),
               Text(
-                'PNG or JPG, max 5MB.',
+                'png_or_jpg_max_5mb'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font16.sp,

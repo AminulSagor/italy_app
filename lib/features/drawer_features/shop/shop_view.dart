@@ -19,7 +19,7 @@ class ShopView extends GetView<ShopController> {
           controller.prepareForShopExit();
           Navigator.pop(context);
         },
-        title: 'Shop',
+        title: 'gen_shop'.tr,
       ),
       body: SafeArea(
         child: Obx(() {
@@ -55,15 +55,15 @@ class ShopView extends GetView<ShopController> {
                   GestureDetector(
                     onTap: controller.onRefillCreditTap,
                     child: ShopRefillCreditCard(
-                      title: ai?.title ?? 'Refill AI Credits',
-                      subtitle: ai?.subtitle ?? 'Buy more minutes and tokens.',
+                      title: ai?.title ?? 'refill_ai_credits'.tr,
+                      subtitle: ai?.subtitle ?? 'buy_more_minutes_and_tokens'.tr,
                       priceText: _startingPrice(ai),
                     ),
                   ),
                   SizedBox(height: 32.h),
                   ShopCvCreditPackCard(
                     onTap: controller.onCvCreditTap,
-                    title: cv?.title ?? 'CV Credit Pack',
+                    title: cv?.title ?? 'cv_credit_pack'.tr,
                     subtitle:
                         cv?.subtitle ??
                         'Generate and export professional resumes.',
@@ -72,12 +72,12 @@ class ShopView extends GetView<ShopController> {
                   SizedBox(height: 32.h),
                   ShopStreakFreezeCard(
                     onTap: controller.onStreakFreezeTap,
-                    title: streak?.title ?? 'Buy Streak Freeze',
+                    title: streak?.title ?? 'buy_streak_freeze'.tr,
                     priceText: _startingPrice(streak),
                   ),
                   SizedBox(height: 36.h),
                   Text(
-                    'CURRENT BALANCE',
+                    'current_balance'.tr,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w900,
@@ -91,7 +91,7 @@ class ShopView extends GetView<ShopController> {
                       Expanded(
                         child: ShopBalanceCard(
                           icon: Icons.view_in_ar_outlined,
-                          title: 'TOKENS',
+                          title: 'gen_tokens'.tr,
                           value: _compact(controller.aiTextTokens),
                           bgColor: const Color(0xFFFFF4E9),
                           borderColor: const Color(0xFFFF9D55),
@@ -102,7 +102,7 @@ class ShopView extends GetView<ShopController> {
                       Expanded(
                         child: ShopBalanceCard(
                           icon: Icons.mic_none_rounded,
-                          title: 'MINUTES',
+                          title: 'gen_minutes'.tr,
                           value: '${controller.aiVoiceMinutes}m',
                           bgColor: const Color(0xFFEFFFF7),
                           borderColor: const Color(0xFF20E5A2),
@@ -113,7 +113,7 @@ class ShopView extends GetView<ShopController> {
                       Expanded(
                         child: ShopBalanceCard(
                           icon: Icons.ac_unit_rounded,
-                          title: 'STREAK\nFREEZES',
+                          title: 'gen_streak_nfreezes'.tr,
                           value: '${controller.streakFreezeBalance}×',
                           bgColor: const Color(0xFFE8F5FF),
                           borderColor: const Color(0xFF91CFFF),
@@ -137,7 +137,7 @@ class ShopView extends GetView<ShopController> {
 
   String _startingPrice(StoreShopSectionModel? section) {
     final double? price = section?.startingPriceEur;
-    return price == null ? 'View packages' : 'From €${price.toStringAsFixed(2)}';
+    return price == null ? 'view_packages'.tr : '€${price.toStringAsFixed(2)}';
   }
 
   String _compact(int value) {

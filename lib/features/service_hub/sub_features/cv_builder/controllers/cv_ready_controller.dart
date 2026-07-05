@@ -10,7 +10,7 @@ import '../views/cv_ready_pdf_viewer_view.dart';
 
 class CvReadyController extends GetxController {
   CvReadyController({required CvPdfDownloadService cvPdfDownloadService})
-      : _cvPdfDownloadService = cvPdfDownloadService;
+    : _cvPdfDownloadService = cvPdfDownloadService;
 
   final CvPdfDownloadService _cvPdfDownloadService;
   final RxBool isDownloading = false.obs;
@@ -59,8 +59,8 @@ class CvReadyController extends GetxController {
     if (isDownloading.value) return;
     if (currentDocument == null || currentTemplate == null) {
       Get.snackbar(
-        'Download PDF',
-        'CV data is not available for download.',
+        'gen_download_pdf'.tr,
+        'cv_data_is_not_available_for_download'.tr,
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -77,14 +77,14 @@ class CvReadyController extends GetxController {
           template: currentTemplate,
           pdfBytes: bytes,
         ),
-        errorTitle: 'Download PDF',
+        errorTitle: 'gen_download_pdf'.tr,
       );
 
       if (result.isSuccess) {
         _openPdfViewer(bytes);
         Get.snackbar(
-          'Download PDF',
-          'CV PDF downloaded successfully.',
+          'gen_download_pdf'.tr,
+          'cv_pdf_downloaded_successfully'.tr,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
@@ -95,8 +95,8 @@ class CvReadyController extends GetxController {
 
   void onShareWhatsAppTap() {
     Get.snackbar(
-      'Share',
-      'WhatsApp sharing will be connected later.',
+      'share'.tr,
+      'whatsapp_sharing_will_be_connected_later'.tr,
       snackPosition: SnackPosition.BOTTOM,
     );
   }
@@ -115,8 +115,8 @@ class CvReadyController extends GetxController {
     if (currentDocument == null || currentTemplate == null) {
       if (showErrors) {
         Get.snackbar(
-          'CV Preview',
-          'CV data is not available for preview.',
+          'cv_preview'.tr,
+          'cv_data_is_not_available_for_preview'.tr,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
@@ -127,10 +127,12 @@ class CvReadyController extends GetxController {
       for (int index = 0; index < 30; index += 1) {
         await Future<void>.delayed(const Duration(milliseconds: 100));
         final Uint8List? preparedBytes = pdfBytes.value;
-        if (preparedBytes != null && preparedBytes.isNotEmpty) return preparedBytes;
+        if (preparedBytes != null && preparedBytes.isNotEmpty)
+          return preparedBytes;
         if (!isPreparingPdf.value) break;
       }
-      if (pdfBytes.value != null && pdfBytes.value!.isNotEmpty) return pdfBytes.value;
+      if (pdfBytes.value != null && pdfBytes.value!.isNotEmpty)
+        return pdfBytes.value;
       return null;
     }
 
@@ -142,7 +144,7 @@ class CvReadyController extends GetxController {
           template: currentTemplate,
         ),
         showError: showErrors,
-        errorTitle: 'CV Preview',
+        errorTitle: 'cv_preview'.tr,
       );
 
       if (result.isSuccess && result.data != null) {
@@ -156,12 +158,7 @@ class CvReadyController extends GetxController {
   }
 
   void _openPdfViewer(Uint8List bytes) {
-    final String title = document?.title ?? 'CV Preview';
-    Get.to<void>(
-      () => CvReadyPdfViewerView(
-        title: title,
-        pdfBytes: bytes,
-      ),
-    );
+    final String title = document?.title ?? 'cv_preview'.tr;
+    Get.to<void>(() => CvReadyPdfViewerView(title: title, pdfBytes: bytes));
   }
 }

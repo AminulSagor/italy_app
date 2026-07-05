@@ -122,7 +122,7 @@ Future<void> _initializeCallKit() async {
               await CallkitIncomingService.endNativeSubsystemOnly(callId);
 
               Get.snackbar(
-                'Call failed',
+                'call_failed'.tr,
                 error.toString(),
                 snackPosition: SnackPosition.BOTTOM,
               );
@@ -133,7 +133,7 @@ Future<void> _initializeCallKit() async {
         await CallkitIncomingService.endNativeSubsystemOnly(callId);
 
         Get.snackbar(
-          'Call failed',
+          'call_failed'.tr,
           error.toString(),
           snackPosition: SnackPosition.BOTTOM,
         );
@@ -239,7 +239,7 @@ class ItalyApp extends StatelessWidget {
 
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'gen_italir_pothe'.tr.tr,
+          title: 'gen_italir_pothe'.tr,
           translations: translationService,
           locale: translationService.currentLocale,
           fallbackLocale: TranslationService.fallbackLocale,

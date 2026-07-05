@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/services/api_client.dart';
 import '../models/user_settings_models.dart';
+import 'package:get/get.dart' hide Response;
 
 class UserSettingsService {
   UserSettingsService({required ApiClient apiClient}) : _apiClient = apiClient;
@@ -163,7 +164,7 @@ class UserSettingsService {
 
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object.',
+      message: 'response_is_not_a_valid_json_object_1'.tr,
     );
   }
 

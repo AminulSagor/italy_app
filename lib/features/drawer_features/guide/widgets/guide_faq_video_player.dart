@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
+import 'package:get/get.dart';
 
 class GuideFaqVideoPlayer extends StatefulWidget {
   final String assetPath;
@@ -155,8 +156,8 @@ class _GuideFaqVideoPlayerState extends State<GuideFaqVideoPlayer> {
                 child: Semantics(
                   button: true,
                   label: value.isPlaying
-                      ? 'Pause guide video'
-                      : 'Play guide video',
+                      ? 'pause_guide_video'.tr
+                      : 'play_guide_video'.tr,
                   child: GestureDetector(
                     onTap: _togglePlayback,
                     child: AnimatedOpacity(

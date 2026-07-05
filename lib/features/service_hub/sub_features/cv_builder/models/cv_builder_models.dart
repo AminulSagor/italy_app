@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+
 class CvTemplateDynamicItemFieldModel {
   const CvTemplateDynamicItemFieldModel({
     required this.key,
@@ -60,31 +61,32 @@ class CvTemplateFieldModel {
           .map((String item) => item.split('|'))
           .where((List<String> parts) => parts.isNotEmpty)
           .map((List<String> parts) {
-        final String key = parts[0].trim();
-        final String label = parts.length > 1 ? parts[1].trim() : key;
-        final String type = parts.length > 2 ? parts[2].trim() : 'text';
-        return CvTemplateDynamicItemFieldModel(
-          key: key.isEmpty ? label : key,
-          label: label.isEmpty ? key : label,
-          type: type == 'textarea' ? 'textarea' : 'text',
-          required: false,
-          placeholder: label.isEmpty ? key : label,
-        );
-      }).toList(growable: false);
+            final String key = parts[0].trim();
+            final String label = parts.length > 1 ? parts[1].trim() : key;
+            final String type = parts.length > 2 ? parts[2].trim() : 'text';
+            return CvTemplateDynamicItemFieldModel(
+              key: key.isEmpty ? label : key,
+              label: label.isEmpty ? key : label,
+              type: type == 'textarea' ? 'textarea' : 'text',
+              required: false,
+              placeholder: label.isEmpty ? key : label,
+            );
+          })
+          .toList(growable: false);
     }
 
     final List<CvTemplateDynamicItemFieldModel> parsedItemFields =
         rawItemFields is List
-            ? rawItemFields
-                .whereType<Map>()
-                .map(
-                  (Map<dynamic, dynamic> item) =>
-                      CvTemplateDynamicItemFieldModel.fromJson(
-                    Map<String, dynamic>.from(item),
-                  ),
-                )
-                .toList(growable: false)
-            : parseOptionItemFields();
+        ? rawItemFields
+              .whereType<Map>()
+              .map(
+                (Map<dynamic, dynamic> item) =>
+                    CvTemplateDynamicItemFieldModel.fromJson(
+                      Map<String, dynamic>.from(item),
+                    ),
+              )
+              .toList(growable: false)
+        : parseOptionItemFields();
 
     return CvTemplateFieldModel(
       key: json['key']?.toString() ?? '',
@@ -101,31 +103,31 @@ class CvTemplateFieldModel {
           ? <CvTemplateDynamicItemFieldModel>[
               CvTemplateDynamicItemFieldModel(
                 key: 'title',
-                label: 'gen_title'.tr.tr,
+                label: 'gen_title'.tr,
                 type: 'text',
                 required: false,
-                placeholder: 'Senior Software Developer',
+                placeholder: 'gen_senior_software_developer'.tr,
               ),
               CvTemplateDynamicItemFieldModel(
                 key: 'subtitle',
-                label: 'gen_company_institution'.tr.tr,
+                label: 'gen_company_institution'.tr,
                 type: 'text',
                 required: false,
-                placeholder: 'Company - Country',
+                placeholder: 'gen_company_country'.tr,
               ),
               CvTemplateDynamicItemFieldModel(
                 key: 'dateRange',
-                label: 'gen_date_range'.tr.tr,
+                label: 'gen_date_range'.tr,
                 type: 'text',
                 required: false,
-                placeholder: 'Jan 2022 - Dec 2023',
+                placeholder: 'gen_jan_2022_dec_2023'.tr,
               ),
               CvTemplateDynamicItemFieldModel(
                 key: 'description',
-                label: 'gen_description'.tr.tr,
+                label: 'gen_description'.tr,
                 type: 'textarea',
                 required: false,
-                placeholder: 'Describe the role or achievement',
+                placeholder: 'gen_describe_the_role_or_achievement'.tr,
               ),
             ]
           : parsedItemFields,
@@ -160,13 +162,13 @@ class CvTemplateSectionModel {
       designerJson: parsedDesignerJson,
       fields: rawFields is List
           ? rawFields
-              .whereType<Map>()
-              .map(
-                (Map<dynamic, dynamic> item) => CvTemplateFieldModel.fromJson(
-                  Map<String, dynamic>.from(item),
-                ),
-              )
-              .toList()
+                .whereType<Map>()
+                .map(
+                  (Map<dynamic, dynamic> item) => CvTemplateFieldModel.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList()
           : <CvTemplateFieldModel>[],
     );
   }
@@ -198,13 +200,14 @@ class CvTemplateSchemaModel {
     return CvTemplateSchemaModel(
       sections: rawSections is List
           ? rawSections
-              .whereType<Map>()
-              .map(
-                (Map<dynamic, dynamic> item) => CvTemplateSectionModel.fromJson(
-                  Map<String, dynamic>.from(item),
-                ),
-              )
-              .toList()
+                .whereType<Map>()
+                .map(
+                  (Map<dynamic, dynamic> item) =>
+                      CvTemplateSectionModel.fromJson(
+                        Map<String, dynamic>.from(item),
+                      ),
+                )
+                .toList()
           : <CvTemplateSectionModel>[],
       colorOptions: rawColors is List
           ? rawColors.map((dynamic item) => item.toString()).toList()
@@ -310,13 +313,12 @@ class CvTemplateListResponseModel {
     return CvTemplateListResponseModel(
       templates: rawTemplates is List
           ? rawTemplates
-              .whereType<Map>()
-              .map(
-                (Map<dynamic, dynamic> item) => CvTemplateModel.fromJson(
-                  Map<String, dynamic>.from(item),
-                ),
-              )
-              .toList()
+                .whereType<Map>()
+                .map(
+                  (Map<dynamic, dynamic> item) =>
+                      CvTemplateModel.fromJson(Map<String, dynamic>.from(item)),
+                )
+                .toList()
           : <CvTemplateModel>[],
       pagination: CvPaginationModel.fromJson(
         rawPagination is Map

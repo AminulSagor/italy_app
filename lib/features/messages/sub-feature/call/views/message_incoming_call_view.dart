@@ -72,8 +72,8 @@ class MessageIncomingCallView extends StatelessWidget {
 
                 Text(
                   controller.callType.isVideo
-                      ? 'Incoming video call'
-                      : 'Incoming voice call',
+                      ? 'incoming_video_call'.tr
+                      : 'incoming_voice_call'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w500,
@@ -90,7 +90,7 @@ class MessageIncomingCallView extends StatelessWidget {
                   children: <Widget>[
                     _IncomingCallButton(
                       icon: Icons.call_end_rounded,
-                      label: 'gen_decline'.tr.tr,
+                      label: 'gen_decline'.tr,
                       backgroundColor: Colors.red,
                       isLoading:
                       controller.isProcessing.value,
@@ -101,7 +101,7 @@ class MessageIncomingCallView extends StatelessWidget {
                       icon: controller.callType.isVideo
                           ? Icons.videocam_rounded
                           : Icons.call_rounded,
-                      label: 'gen_answer'.tr.tr,
+                      label: 'gen_answer'.tr,
                       backgroundColor:
                       AppColors.primaryGreen,
                       isLoading:

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class ServiceActionCard extends StatelessWidget {
   final double height;
@@ -120,7 +121,7 @@ class ServiceActionCard extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 18.w),
                   alignment: Alignment.center,
                   child: Text(
-                    '$buttonText  ›',
+                    'buttontext'.trParams(<String, String>{'buttontext': buttonText.toString()}),
                     style: TextStyle(
                       color: gradientColors.last,
                       fontSize: AppFont.font10.sp,

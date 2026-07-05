@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../../../core/themes/app_colors.dart';
 import '../../../../../../../core/themes/app_constants.dart';
 import '../../../../../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class AdministrativeSearchBar extends StatelessWidget {
   const AdministrativeSearchBar({super.key});
@@ -35,7 +36,7 @@ class AdministrativeSearchBar extends StatelessWidget {
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
-              'Find specific office or service...',
+              'find_specific_office_or_service'.tr,
               style: TextStyle(
                 color: AppColors.homeSecondaryText,
                 fontSize: AppFont.font9.sp,

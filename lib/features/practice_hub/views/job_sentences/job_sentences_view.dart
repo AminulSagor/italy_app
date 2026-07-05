@@ -30,7 +30,7 @@ class JobSentencesView extends GetView<JobSentencesController> {
                 const _JobSentencesTopBar(),
                 SizedBox(height: 28.h),
                 Text(
-                  'Career Tracks',
+                  'career_tracks'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 35.sp,
@@ -42,7 +42,7 @@ class JobSentencesView extends GetView<JobSentencesController> {
                 ),
                 SizedBox(height: 10.h),
                 Text(
-                  'ইতালিতে আপনার পছন্দের কর্মজীবন শুরু করুন',
+                  'label_lib_features_practice_hub_views_job_sentences_job_sentences_view_45'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15.sp,
@@ -118,7 +118,7 @@ class _CareerTrackList extends GetView<JobSentencesController> {
       }
 
       if (controller.careerTracks.isEmpty) {
-        return const _MessageState(message: 'No career tracks are available.');
+        return _MessageState(message: 'no_career_tracks_are_available'.tr);
       }
 
       return Column(
@@ -209,7 +209,7 @@ class _CareerTrackCard extends GetView<JobSentencesController> {
                   ],
                   SizedBox(height: 9.h),
                   Text(
-                    '${item.learnedSentenceCount}/${item.sentenceCount} sentences learned',
+                    'item_learnedsentencecount_item_sentencecount_sentences_learned'.trParams(<String, String>{'learnedsentencecount': item.learnedSentenceCount.toString(), 'sentencecount': item.sentenceCount.toString()}),
                     style: TextStyle(
                       fontSize: AppFont.font11.sp,
                       fontWeight: FontWeight.w800,
@@ -276,7 +276,7 @@ class _MessageState extends StatelessWidget {
             SizedBox(height: 10.h),
             TextButton(
               onPressed: onRetry,
-              child: const Text('Retry'),
+              child: Text('retry'.tr),
             ),
           ],
         ],
@@ -311,7 +311,7 @@ class _JobTipCard extends StatelessWidget {
             child: Center(
               widthFactor: 1,
               child: Text(
-                'TIP OF THE DAY',
+                'tip_of_the_day'.tr,
                 style: TextStyle(
                   fontSize: 11.sp,
                   height: 1,
@@ -324,7 +324,7 @@ class _JobTipCard extends StatelessWidget {
           ),
           SizedBox(height: 19.h),
           Text(
-            'Speak Like a Local',
+            'speak_like_a_local'.tr,
             style: TextStyle(
               fontSize: 24.sp,
               height: 1,
@@ -334,7 +334,7 @@ class _JobTipCard extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           Text(
-            'Practice workplace phrases and replay their native audio before your interview or first day at work.',
+            'practice_workplace_phrases_and_replay_their_native'.tr,
             style: TextStyle(
               fontSize: 16.sp,
               height: 1.55,

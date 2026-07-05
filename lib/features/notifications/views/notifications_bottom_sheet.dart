@@ -101,7 +101,7 @@ class _NotificationsHeader extends StatelessWidget {
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
-              'Notifications',
+              'notifications'.tr,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -115,7 +115,7 @@ class _NotificationsHeader extends StatelessWidget {
           GestureDetector(
             onTap: onMarkAllRead,
             child: Text(
-              'Mark all as read',
+              'mark_all_as_read'.tr,
               style: TextStyle(
                 fontSize: AppFont.font14.sp,
                 fontWeight: FontWeight.w600,

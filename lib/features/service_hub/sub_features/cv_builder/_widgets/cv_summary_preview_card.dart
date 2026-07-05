@@ -56,7 +56,7 @@ class CvSummaryPreviewCard extends StatelessWidget {
               ),
               SizedBox(height: 14.h),
               Text(
-                'Result Preview',
+                'result_preview'.tr,
                 style: TextStyle(
                   color: AppColors.homePrimaryText,
                   fontSize: AppFont.font15.sp,
@@ -66,7 +66,7 @@ class CvSummaryPreviewCard extends StatelessWidget {
               ),
               SizedBox(height: 10.h),
               Text(
-                'Your professional Italian summary will\nappear here once generated.',
+                'professional_summary_placeholder'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.homeSecondaryText,
@@ -105,7 +105,7 @@ class CvSummaryPreviewCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
             ),
             child: Text(
-              'Professional Summary',
+              'professional_summary'.tr,
               style: TextStyle(
                 color: AppColors.primaryGreen,
                 fontSize: AppFont.font9.sp,
@@ -132,13 +132,13 @@ class CvSummaryPreviewCard extends StatelessWidget {
             children: <Widget>[
               _SummaryActionButton(
                 icon: Icons.refresh_rounded,
-                title: 'gen_regenerate'.tr.tr,
+                title: 'gen_regenerate'.tr,
                 onTap: onRegenerateTap,
               ),
               SizedBox(width: 10.w),
               _SummaryActionButton(
                 icon: Icons.edit_rounded,
-                title: 'gen_edit_text'.tr.tr,
+                title: 'gen_edit_text'.tr,
                 onTap: onEditTap,
               ),
             ],

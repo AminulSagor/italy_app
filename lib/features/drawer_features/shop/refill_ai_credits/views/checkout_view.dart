@@ -24,7 +24,7 @@ class CheckoutPage extends StatelessWidget {
       backgroundColor: _bg,
       appBar: SimpleAppbar(
         onBackTap: () => Navigator.maybePop(context),
-        title: 'gen_checkout'.tr.tr,
+        title: 'gen_checkout'.tr,
         icon: Icons.arrow_back,
       ),
       body: SingleChildScrollView(
@@ -55,8 +55,8 @@ class CheckoutPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 36),
-            const Text(
-              'PAYMENT METHOD',
+            Text(
+              'payment_method'.tr,
               style: TextStyle(
                 color: _bodyText,
                 fontSize: 14,
@@ -98,8 +98,8 @@ class CheckoutPage extends StatelessWidget {
             Obx(
               () => CustomButton.primary(
                 text: controller.isCheckoutLoading.value
-                    ? 'Processing...'
-                    : 'Complete Purchase',
+                    ? 'processing'.tr
+                    : 'complete_purchase'.tr,
                 onPressed: controller.isCheckoutLoading.value
                     ? () {}
                     : controller.confirmCheckout,
@@ -113,14 +113,14 @@ class CheckoutPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Center(
+            Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.lock, size: 13, color: _bodyText),
-                  SizedBox(width: 7),
+                  const Icon(Icons.lock, size: 13, color: _bodyText),
+                  const SizedBox(width: 7),
                   Text(
-                    'SECURE GOOGLE PLAY BILLING',
+                    'secure_ssl_encryption'.tr,
                     style: TextStyle(
                       color: _bodyText,
                       fontSize: 12,
@@ -186,14 +186,14 @@ class _CurrencySelector extends StatelessWidget {
             children: [
               Expanded(
                 child: _CurrencyTab(
-                  label: 'EUR',
+                  label: 'gen_eur'.tr,
                   isSelected: selectedCurrency == RefillCurrency.eur,
                   onTap: () => onChanged(RefillCurrency.eur),
                 ),
               ),
               Expanded(
                 child: _CurrencyTab(
-                  label: 'BDT',
+                  label: 'gen_bdt'.tr,
                   isSelected: selectedCurrency == RefillCurrency.bdt,
                   onTap: () => onChanged(RefillCurrency.bdt),
                 ),
@@ -286,8 +286,8 @@ class _OrderSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'ORDER SUMMARY',
+            Text(
+              'gen_order_summary'.tr,
               style: TextStyle(
                 color: CheckoutPage._green,
                 fontSize: 12,
@@ -377,7 +377,7 @@ class _OrderSummaryCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 3),
                         Text(
-                          'YOU SAVED $savedAmount',
+                          savedAmount,
                           style: const TextStyle(
                             color: CheckoutPage._green,
                             fontSize: 9,
@@ -418,8 +418,8 @@ class _CheckoutCouponSection extends GetView<ShopController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'COUPON',
+          Text(
+            'coupon'.tr,
             style: TextStyle(
               color: CheckoutPage._bodyText,
               fontSize: 14,
@@ -436,7 +436,7 @@ class _CheckoutCouponSection extends GetView<ShopController> {
                   onChanged: controller.onCouponChanged,
                   readOnly: applied,
                   decoration: InputDecoration(
-                    hintText: 'Enter Coupon Code',
+                    hintText: 'gen_enter_coupon_code'.tr,
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -466,7 +466,7 @@ class _CheckoutCouponSection extends GetView<ShopController> {
                     side: const BorderSide(color: CheckoutPage._green),
                     shape: const StadiumBorder(),
                   ),
-                  child: Text(applied ? 'REMOVE' : 'APPLY'),
+                  child: Text(applied ? 'cancel'.tr : 'apply'.tr),
                 ),
               ),
             ],
@@ -533,9 +533,9 @@ class _PaymentMethodPill extends StatelessWidget {
   }
 
   _PaymentMethodUi _paymentMethodUi(CheckoutPaymentMethod method) {
-    return const _PaymentMethodUi(
-      title: 'Google Play',
-      icon: Icon(
+    return _PaymentMethodUi(
+      title: 'google_play'.tr,
+      icon: const Icon(
         Icons.play_arrow_rounded,
         color: CheckoutPage._green,
         size: 34,

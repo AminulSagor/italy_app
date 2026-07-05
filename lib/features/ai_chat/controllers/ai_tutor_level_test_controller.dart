@@ -19,11 +19,11 @@ class AiTutorLevelTestController extends GetxController {
     AiTutorApiService? apiService,
     AiTutorPreferencesService? preferencesService,
     AiTutorLevelTestRecordingService? recordingService,
-  })  : _apiService = apiService ?? Get.find<AiTutorApiService>(),
-        _preferencesService =
-            preferencesService ?? Get.find<AiTutorPreferencesService>(),
-        _recordingService =
-            recordingService ?? AiTutorLevelTestRecordingService();
+  }) : _apiService = apiService ?? Get.find<AiTutorApiService>(),
+       _preferencesService =
+           preferencesService ?? Get.find<AiTutorPreferencesService>(),
+       _recordingService =
+           recordingService ?? AiTutorLevelTestRecordingService();
 
   final AiTutorApiService _apiService;
   final AiTutorPreferencesService _preferencesService;
@@ -56,8 +56,7 @@ class AiTutorLevelTestController extends GetxController {
 
   bool get isFirstQuestion => currentQuestionIndex.value == 0;
 
-  bool get isLastQuestion =>
-      currentQuestionIndex.value == questions.length - 1;
+  bool get isLastQuestion => currentQuestionIndex.value == questions.length - 1;
 
   bool get isSpeakingQuestion =>
       currentQuestion.skill == AiTutorSkillType.speaking;
@@ -68,8 +67,7 @@ class AiTutorLevelTestController extends GetxController {
       isRecording.value ||
       isTranscribing.value;
 
-  double get progress =>
-      (currentQuestionIndex.value + 1) / questions.length;
+  double get progress => (currentQuestionIndex.value + 1) / questions.length;
 
   bool get canContinue {
     if (isBusy) {
@@ -93,9 +91,9 @@ class AiTutorLevelTestController extends GetxController {
   Future<void> refreshProfile({bool showError = true}) async {
     final ApiResult<AiTutorLevelProfileResponseModel> result =
         await ApiErrorHandler.call<AiTutorLevelProfileResponseModel>(
-      _apiService.getLevelTestProfile,
-      showError: showError,
-    );
+          _apiService.getLevelTestProfile,
+          showError: showError,
+        );
     if (!result.isSuccess || result.data == null) {
       return;
     }
@@ -138,8 +136,8 @@ class AiTutorLevelTestController extends GetxController {
       final String? path = await _recordingService.start();
       if (path == null) {
         Get.snackbar(
-          'Microphone permission required',
-          'Please allow microphone access to answer speaking questions.',
+          'microphone_permission_required'.tr,
+          'please_allow_microphone_access_to_answer_speaking_questions'.tr,
         );
         return;
       }
@@ -153,8 +151,8 @@ class AiTutorLevelTestController extends GetxController {
     } catch (_) {
       await _recordingService.cancel();
       Get.snackbar(
-        'Recording failed',
-        'Unable to start the microphone. Please try again.',
+        'unable_to_start_the_microphone_please_try_again'.tr,
+        'please_hold_the_microphone_and_try_again'.tr,
       );
     } finally {
       isPreparingRecording.value = false;
@@ -185,8 +183,8 @@ class AiTutorLevelTestController extends GetxController {
     }
     if (path == null || path.trim().isEmpty) {
       Get.snackbar(
-        'Recording failed',
-        'Please hold the microphone and try again.',
+        'recording_failed'.tr,
+        'please_hold_the_microphone_and_try_again'.tr,
       );
       return;
     }
@@ -195,11 +193,11 @@ class AiTutorLevelTestController extends GetxController {
     try {
       final ApiResult<AiTutorLevelTranscriptionResponseModel> result =
           await ApiErrorHandler.call<AiTutorLevelTranscriptionResponseModel>(
-        () => _apiService.transcribeLevelTestAnswer(
-          question: currentQuestion.prompt,
-          audioPath: path!,
-        ),
-      );
+            () => _apiService.transcribeLevelTestAnswer(
+              question: currentQuestion.prompt,
+              audioPath: path!,
+            ),
+          );
       final String transcript = result.data?.transcript.trim() ?? '';
       if (!result.isSuccess || transcript.isEmpty) {
         return;
@@ -222,10 +220,10 @@ class AiTutorLevelTestController extends GetxController {
   Future<void> submitCurrentAnswer() async {
     if (!canContinue) {
       Get.snackbar(
-        'Answer required',
+        'answer_required'.tr,
         isSpeakingQuestion
-            ? 'Hold the microphone and speak your answer before continuing.'
-            : 'Please answer this question before continuing.',
+            ? 'hold_the_microphone_and_speak_your_answer_before_c'.tr
+            : 'please_answer_this_question_before_continuing'.tr,
       );
       return;
     }
@@ -280,8 +278,8 @@ class AiTutorLevelTestController extends GetxController {
     final String answer = question.type == AiTutorQuestionType.singleChoice
         ? selectedOption.value?.trim() ?? ''
         : isSpeakingQuestion
-            ? answerText.value.trim()
-            : answerController.text.trim();
+        ? answerText.value.trim()
+        : answerController.text.trim();
     if (answer.isEmpty && !allowEmpty) {
       return;
     }
@@ -327,7 +325,7 @@ class AiTutorLevelTestController extends GetxController {
         .whereType<AiTutorLevelAnswerModel>()
         .toList(growable: false);
     if (answers.length != questions.length) {
-      Get.snackbar('Test incomplete', 'Please answer all ten questions.');
+      Get.snackbar('test_incomplete'.tr, 'please_answer_all_ten_questions'.tr);
       return;
     }
 
@@ -335,8 +333,8 @@ class AiTutorLevelTestController extends GetxController {
     try {
       final ApiResult<AiTutorLevelTestResponseModel> result =
           await ApiErrorHandler.call<AiTutorLevelTestResponseModel>(
-        () => _apiService.evaluateLevelTest(answers: answers),
-      );
+            () => _apiService.evaluateLevelTest(answers: answers),
+          );
       if (!result.isSuccess || result.data == null) {
         return;
       }

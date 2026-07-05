@@ -44,7 +44,7 @@ class LanguageSwitchDialogue extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'Select Language',
+                      'select_language'.tr,
                       style: TextStyle(
                         fontSize: AppFont.font24.sp,
                         fontWeight: FontWeight.w900,
@@ -88,7 +88,7 @@ class LanguageSwitchDialogue extends StatelessWidget {
                 ),
                 SizedBox(height: 46.h),
                 CustomButton.primary(
-                  text: 'CONFIRM',
+                  text: 'confirm'.tr,
                   onPressed: controller.confirmLanguage,
                 ),
               ],

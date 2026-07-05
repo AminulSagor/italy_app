@@ -27,52 +27,52 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
 
   static List<_GuidedTopic> _topics = <_GuidedTopic>[
     _GuidedTopic(
-      title: 'gen_comprare_un_nbiglietto'.tr.tr,
+      title: 'gen_comprare_un_nbiglietto'.tr,
       subtitle: 'বাসের টিকিট কেনা'.tr,
       icon: Icons.directions_bus_rounded,
     ),
     _GuidedTopic(
-      title: 'gen_ordinare_al_bar'.tr.tr,
+      title: 'gen_ordinare_al_bar'.tr,
       subtitle: 'বারে কফি অর্ডার করা'.tr,
       icon: Icons.local_cafe_rounded,
     ),
     _GuidedTopic(
-      title: 'gen_fare_la_spesa'.tr.tr,
+      title: 'gen_fare_la_spesa'.tr,
       subtitle: 'সুপারমার্কেটে কেনাকাটা'.tr,
       icon: Icons.shopping_cart_rounded,
     ),
     _GuidedTopic(
-      title: 'gen_chiedere_nindicazioni'.tr.tr,
+      title: 'gen_chiedere_nindicazioni'.tr,
       subtitle: 'রাস্তা জিজ্ঞাসা করা'.tr,
       icon: Icons.map_outlined,
     ),
     _GuidedTopic(
-      title: 'gen_dal_dottore'.tr.tr,
+      title: 'gen_dal_dottore'.tr,
       subtitle: 'ডাক্তারের কাছে'.tr,
       icon: Icons.medical_services_outlined,
     ),
     _GuidedTopic(
-      title: 'gen_prenotare_un_nhotel'.tr.tr,
+      title: 'gen_prenotare_un_nhotel'.tr,
       subtitle: 'হোটেল বুক করা'.tr,
       icon: Icons.hotel_rounded,
     ),
     _GuidedTopic(
-      title: 'gen_in_posta'.tr.tr,
+      title: 'gen_in_posta'.tr,
       subtitle: 'পোস্ট অফিসে'.tr,
       icon: Icons.email_outlined,
     ),
     _GuidedTopic(
-      title: 'gen_incontrare_namici'.tr.tr,
+      title: 'gen_incontrare_namici'.tr,
       subtitle: 'বন্ধুদের সাথে দেখা'.tr,
       icon: Icons.group_outlined,
     ),
     _GuidedTopic(
-      title: 'gen_al_lavoro'.tr.tr,
+      title: 'gen_al_lavoro'.tr,
       subtitle: 'কাজের জায়গায়'.tr,
       icon: Icons.work_outline_rounded,
     ),
     _GuidedTopic(
-      title: 'Al ristorante',
+      title: 'gen_al_ristorante'.tr,
       subtitle: 'রেস্টুরেন্টে'.tr,
       icon: Icons.restaurant_rounded,
     ),
@@ -81,12 +81,12 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
   String get _lessonDescription {
     switch (mode) {
       case AiTutorGuidedMode.guided:
-        return 'Listen to one Italian phrase and repeat it\n'
+        return 'listen_to_one_italian_phrase_and_repeat_it_n'.tr +
             'exactly before moving to the next phrase.';
       case AiTutorGuidedMode.assisted:
-        return 'Answer the AI questions in Italian and get\nsimple help when you make a mistake.';
+        return 'answer_the_ai_questions_in_italian_and_get_nsimple'.tr;
       case AiTutorGuidedMode.free:
-        return 'Practice a natural real-life Italian\nconversation for the selected scenario.';
+        return 'practice_a_natural_real_life_italian_nconversation'.tr;
     }
   }
 
@@ -113,7 +113,7 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
               SizedBox(height: 28.h),
               Center(
                 child: Text(
-                  'Level $level Topics',
+                  'level_level_topics'.trParams(<String, String>{'level': level.toString()}),
                   style: TextStyle(
                     fontSize: 24.sp,
                     height: 1,
@@ -292,7 +292,7 @@ class _TipCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Tip for chatting',
+                  'tip_for_chatting'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w900,

@@ -77,7 +77,7 @@ class _EmptyCoursesCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE4E4E4), width: 1.2.w),
       ),
       child: Text(
-        'No active courses found.',
+        'no_active_courses_found'.tr,
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: AppFont.font16.sp,
@@ -212,7 +212,7 @@ class _CourseCard extends StatelessWidget {
                   Row(
                     children: <Widget>[
                       Text(
-                        'PROGRESS',
+                        'progress'.tr,
                         style: TextStyle(
                           fontSize: AppFont.font10.sp,
                           height: 1,
@@ -223,7 +223,7 @@ class _CourseCard extends StatelessWidget {
                       ),
                       const Spacer(),
                       Text(
-                        '${(progress * 100).round()}%',
+                        'progress_100_round'.trParams(<String, String>{'progress': (progress * 100).round().toString()}),
                         style: TextStyle(
                           fontSize: AppFont.font11.sp,
                           height: 1,

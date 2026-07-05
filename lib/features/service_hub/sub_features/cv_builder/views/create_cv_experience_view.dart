@@ -31,7 +31,7 @@ class CreateCvExperienceView extends GetView<CreateCvExperienceController> {
                     const _Header(),
                     SizedBox(height: 12.h),
                     CvStepProgress(
-                      title: 'gen_step_2_work_experience'.tr.tr,
+                      title: 'gen_step_2_work_experience'.tr,
                       progressText: '33%',
                       progress: 0.33,
                     ),
@@ -46,7 +46,7 @@ class CreateCvExperienceView extends GetView<CreateCvExperienceController> {
               ),
             ),
             _BottomButton(
-              title: 'gen_continue_to_education'.tr.tr,
+              title: 'gen_continue_to_education'.tr,
               onTap: controller.onContinueTap,
             ),
           ],
@@ -83,7 +83,7 @@ class _Header extends StatelessWidget {
           ),
           SizedBox(width: 10.w),
           Text(
-            'Create CV',
+            'create_cv'.tr,
             style: TextStyle(
               color: AppColors.homePrimaryText,
               fontSize: AppFont.font13.sp,
@@ -100,9 +100,7 @@ class _Header extends StatelessWidget {
 class _WorkExperienceCard extends StatelessWidget {
   final CreateCvExperienceController controller;
 
-  const _WorkExperienceCard({
-    required this.controller,
-  });
+  const _WorkExperienceCard({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -117,14 +115,14 @@ class _WorkExperienceCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           CvExperienceTextField(
-            label: 'gen_job_position'.tr.tr,
-            hintText: 'gen_pizza_maker'.tr.tr,
+            label: 'gen_job_position'.tr,
+            hintText: 'gen_pizza_maker'.tr,
             controller: controller.jobPositionController,
           ),
           SizedBox(height: 14.h),
           CvExperienceTextField(
-            label: 'gen_company_name'.tr.tr,
-            hintText: 'gen_pizzeria_da_michele'.tr.tr,
+            label: 'gen_company_name'.tr,
+            hintText: 'gen_pizzeria_da_michele'.tr,
             controller: controller.companyNameController,
           ),
           SizedBox(height: 14.h),
@@ -132,16 +130,16 @@ class _WorkExperienceCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: CvExperienceTextField(
-                  label: 'gen_start_date'.tr.tr,
-                  hintText: 'gen_01_01_2020'.tr.tr,
+                  label: 'gen_start_date'.tr,
+                  hintText: 'gen_01_01_2020'.tr,
                   controller: controller.startDateController,
                 ),
               ),
               SizedBox(width: 12.w),
               Expanded(
                 child: CvExperienceTextField(
-                  label: 'gen_end_date'.tr.tr,
-                  hintText: 'gen_10_01_2023'.tr.tr,
+                  label: 'gen_end_date'.tr,
+                  hintText: 'gen_10_01_2023'.tr,
                   controller: controller.endDateController,
                 ),
               ),
@@ -149,7 +147,7 @@ class _WorkExperienceCard extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
           Obx(
-                () => Row(
+            () => Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 SizedBox(
@@ -170,7 +168,7 @@ class _WorkExperienceCard extends StatelessWidget {
                 ),
                 SizedBox(width: 5.w),
                 Text(
-                  'Present',
+                  'present'.tr,
                   style: TextStyle(
                     color: AppColors.primaryGreen,
                     fontSize: AppFont.font8.sp,
@@ -189,7 +187,7 @@ class _WorkExperienceCard extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           Text(
-            'Select your responsibilities',
+            'select_your_responsibilities'.tr,
             style: TextStyle(
               color: AppColors.homePrimaryText,
               fontSize: AppFont.font9.sp,
@@ -205,23 +203,23 @@ class _WorkExperienceCard extends StatelessWidget {
             runSpacing: 8.h,
             children: <Widget>[
               CvSelectableChip(
-                title: 'gen_dough_preparation'.tr.tr,
+                title: 'gen_dough_preparation'.tr,
                 isSelected: true,
                 onTap: () {},
               ),
               CvSelectableChip(
-                title: 'gen_oven_handling'.tr.tr,
+                title: 'gen_oven_handling'.tr,
                 isSelected: true,
                 onTap: () {},
               ),
               CvSelectableChip(
-                title: 'gen_ingredient_prep'.tr.tr,
+                title: 'gen_ingredient_prep'.tr,
                 isSelected: false,
                 isAiSuggested: true,
                 onTap: () {},
               ),
               CvSelectableChip(
-                title: 'gen_kitchen_hygiene'.tr.tr,
+                title: 'gen_kitchen_hygiene'.tr,
                 isSelected: false,
                 isAiSuggested: true,
                 onTap: () {},
@@ -230,7 +228,7 @@ class _WorkExperienceCard extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           CvSelectableChip(
-            title: 'gen_add_custom_responsibility'.tr.tr,
+            title: 'gen_add_custom_responsibility'.tr,
             isSelected: false,
             isOutline: true,
             fullWidth: true,
@@ -260,7 +258,7 @@ class _AiSuggestedBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(kButtonDefaultRadius.r),
       ),
       child: Text(
-        'AI SUGGESTED',
+        'ai_suggested'.tr,
         style: TextStyle(
           color: AppColors.primaryGreen,
           fontSize: AppFont.font7.sp,
@@ -276,9 +274,7 @@ class _AiSuggestedBadge extends StatelessWidget {
 class _AddAnotherExperienceButton extends StatelessWidget {
   final VoidCallback onTap;
 
-  const _AddAnotherExperienceButton({
-    required this.onTap,
-  });
+  const _AddAnotherExperienceButton({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -294,10 +290,7 @@ class _AddAnotherExperienceButton extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.white,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.primaryGreen,
-                  width: 1.2.w,
-                ),
+                border: Border.all(color: AppColors.primaryGreen, width: 1.2.w),
               ),
               child: Icon(
                 Icons.add_rounded,
@@ -307,7 +300,7 @@ class _AddAnotherExperienceButton extends StatelessWidget {
             ),
             SizedBox(width: 12.w),
             Text(
-              'Add another\nexperience',
+              'add_another_experience'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.primaryGreen,
@@ -326,32 +319,30 @@ class _AddAnotherExperienceButton extends StatelessWidget {
 class _HobbiesCard extends StatelessWidget {
   final CreateCvExperienceController controller;
 
-  const _HobbiesCard({
-    required this.controller,
-  });
+  const _HobbiesCard({required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return CvSmallSectionCard(
       icon: Icons.sports_esports_rounded,
-      title: 'gen_hobbies_interests'.tr.tr,
-      hintText: 'gen_e_g_photography'.tr.tr,
+      title: 'gen_hobbies_interests'.tr,
+      hintText: 'gen_e_g_photography'.tr,
       controller: controller.hobbyController,
       onAddTap: controller.addHobby,
-      footerText: 'gen_added_hobbies_will_appear_here'.tr.tr,
+      footerText: 'gen_added_hobbies_will_appear_here'.tr,
       child: Obx(
-            () => Wrap(
+        () => Wrap(
           spacing: 8.w,
           runSpacing: 8.h,
           children: controller.hobbies
               .map(
                 (String item) => CvSelectableChip(
-              title: item,
-              isSelected: true,
-              showCloseIcon: true,
-              onTap: () => controller.removeHobby(item),
-            ),
-          )
+                  title: item,
+                  isSelected: true,
+                  showCloseIcon: true,
+                  onTap: () => controller.removeHobby(item),
+                ),
+              )
               .toList(),
         ),
       ),
@@ -362,32 +353,30 @@ class _HobbiesCard extends StatelessWidget {
 class _DrivingLicenseCard extends StatelessWidget {
   final CreateCvExperienceController controller;
 
-  const _DrivingLicenseCard({
-    required this.controller,
-  });
+  const _DrivingLicenseCard({required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return CvSmallSectionCard(
       icon: Icons.directions_car_filled_rounded,
-      title: 'gen_driving_license'.tr.tr,
-      hintText: 'gen_e_g_category_b_c'.tr.tr,
+      title: 'gen_driving_license'.tr,
+      hintText: 'gen_e_g_category_b_c'.tr,
       controller: controller.licenseController,
       onAddTap: controller.addLicense,
-      footerText: 'gen_manage_your_driving_categories'.tr.tr,
+      footerText: 'gen_manage_your_driving_categories'.tr,
       child: Obx(
-            () => Wrap(
+        () => Wrap(
           spacing: 8.w,
           runSpacing: 8.h,
           children: controller.licenses
               .map(
                 (String item) => CvSelectableChip(
-              title: item,
-              isSelected: true,
-              showCloseIcon: true,
-              onTap: () => controller.removeLicense(item),
-            ),
-          )
+                  title: item,
+                  isSelected: true,
+                  showCloseIcon: true,
+                  onTap: () => controller.removeLicense(item),
+                ),
+              )
               .toList(),
         ),
       ),
@@ -399,10 +388,7 @@ class _BottomButton extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-  const _BottomButton({
-    required this.title,
-    required this.onTap,
-  });
+  const _BottomButton({required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

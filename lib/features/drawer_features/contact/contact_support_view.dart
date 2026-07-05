@@ -34,7 +34,7 @@ class ContactSupportView extends GetView<ContactController> {
               // SizedBox(height: 23.h),
 
               // Text(
-              //   'How can we help you?',
+              //   'how_can_we_help_you'.tr,
               //   textAlign: TextAlign.center,
               //   style: TextStyle(
               //     fontSize: 30.sp,
@@ -82,7 +82,7 @@ class ContactSupportView extends GetView<ContactController> {
                   Expanded(
                     child: _SmallContactCard(
                       icon: Icons.call_rounded,
-                      title: 'gen_call_support'.tr.tr,
+                      title: 'gen_call_support'.tr,
                       subtitle: ContactController.supportPhoneDisplay,
                       bgColor: const Color(0xFFE8FFDD),
                       iconBgColor: Colors.white,
@@ -97,7 +97,7 @@ class ContactSupportView extends GetView<ContactController> {
                   Expanded(
                     child: _SmallContactCard(
                       icon: Icons.email_rounded,
-                      title: 'gen_send_email'.tr.tr,
+                      title: 'gen_send_email'.tr,
                       subtitle: ContactController.supportEmail,
                       bgColor: Colors.white,
                       iconBgColor: const Color(0xFFF1F1F1),
@@ -178,7 +178,7 @@ class _ContactTopBar extends StatelessWidget {
             ),
           ),
           Text(
-            'Help & Support',
+            'help_support'.tr,
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w900,

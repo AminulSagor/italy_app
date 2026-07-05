@@ -37,7 +37,7 @@ class PermessoSoggiornoGuideView extends StatelessWidget {
               ),
             ),
             GuideBottomActionButton(
-              title: 'Go To official Website',
+              title: 'gen_go_to_official_website'.tr,
               onTap: () {},
             ),
           ],
@@ -77,7 +77,7 @@ class _Header extends StatelessWidget {
             ),
           ),
           Text(
-            'Permesso di Soggiorno Guide',
+            'permesso_di_soggiorno_guide'.tr,
             style: TextStyle(
               color: AppColors.primaryGreen,
               fontSize: AppFont.font11.sp,

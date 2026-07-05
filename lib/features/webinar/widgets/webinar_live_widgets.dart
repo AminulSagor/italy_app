@@ -60,7 +60,7 @@ class WebinarLiveHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(kHomePillRadius.r),
             ),
             child: Text(
-              '${controller.participantsTotal.value} Watching',
+              'controller_participantstotal_value_watching'.trParams(<String, String>{'value': controller.participantsTotal.value.toString()}),
               style: TextStyle(
                 fontSize: AppFont.font14.sp,
                 fontWeight: FontWeight.w600,
@@ -137,7 +137,7 @@ class _RemoteAgoraVideo extends StatelessWidget {
       final int? remoteUid = controller.agoraService.activeRemoteVideoUid;
       final String? channelName = controller.agoraService.activeChannelName;
       if (engine == null || remoteUid == null || channelName == null) {
-        return const _VideoPlaceholder(text: 'Waiting for host video');
+        return _VideoPlaceholder(text: 'waiting_for_host_video'.tr);
       }
 
       return AgoraVideoView(
@@ -373,7 +373,7 @@ class WebinarLiveChatSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Live Chat',
+            'live_chat'.tr,
             style: TextStyle(
               fontSize: AppFont.font20.sp,
               fontWeight: FontWeight.w600,
@@ -462,7 +462,7 @@ class WebinarChatBubble extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Text(
-                          'HOST',
+                          'host'.tr,
                           style: TextStyle(
                             fontSize: 9.sp,
                             fontWeight: FontWeight.w800,
@@ -518,7 +518,7 @@ class WebinarChatBubble extends StatelessWidget {
     if (value == null) return '';
     final int hour = value.hour;
     final int minute = value.minute;
-    final String suffix = hour >= 12 ? 'PM' : 'AM';
+    final String suffix = hour >= 12 ? 'pm'.tr : 'am'.tr;
     final int displayHour = hour % 12 == 0 ? 12 : hour % 12;
     return '$displayHour:${minute.toString().padLeft(2, '0')} $suffix';
   }
@@ -552,7 +552,7 @@ class WebinarChatInput extends StatelessWidget {
               controller: controller.chatTextController,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'gen_write_a_message'.tr.tr,
+                hintText: 'gen_write_a_message'.tr,
                 hintStyle: TextStyle(
                   color: AppColors.bodyText,
                   fontSize: 14.sp,

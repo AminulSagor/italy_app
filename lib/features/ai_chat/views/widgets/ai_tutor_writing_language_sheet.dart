@@ -33,7 +33,7 @@ class AiTutorWritingLanguageDialog extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'Choose your help language',
+                          'choose_your_help_language'.tr,
                           style: TextStyle(
                             fontSize: 19.sp,
                             fontWeight: FontWeight.w900,
@@ -42,7 +42,7 @@ class AiTutorWritingLanguageDialog extends StatelessWidget {
                         ),
                         SizedBox(height: 7.h),
                         Text(
-                          'The tutor will explain briefly in this language '
+                          'the_tutor_will_explain_briefly_in_this_language'.tr +
                           'and help you write natural Italian.',
                           style: TextStyle(
                             fontSize: 11.sp,
@@ -68,16 +68,16 @@ class AiTutorWritingLanguageDialog extends StatelessWidget {
               ),
               SizedBox(height: 20.h),
               _WritingLanguageOption(
-                title: 'gen_english_italian'.tr.tr,
-                subtitle: 'gen_short_english_explanations_for'.tr.tr,
-                leadingText: 'gen_en'.tr.tr,
+                title: 'gen_english_italian'.tr,
+                subtitle: 'gen_short_english_explanations_for'.tr,
+                leadingText: 'gen_en'.tr,
                 onTap: () => Navigator.of(context).pop(
                   AiTutorWritingSourceLanguage.english,
                 ),
               ),
               SizedBox(height: 12.h),
               _WritingLanguageOption(
-                title: 'gen_bangla_italian'.tr.tr,
+                title: 'gen_bangla_italian'.tr,
                 subtitle: 'বাংলায় সংক্ষিপ্ত ব্যাখ্যাসহ ইতালীয় লেখা'.tr,
                 leadingText: 'বাং'.tr,
                 onTap: () => Navigator.of(context).pop(

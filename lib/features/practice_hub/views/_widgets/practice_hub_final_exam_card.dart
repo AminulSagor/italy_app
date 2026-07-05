@@ -5,6 +5,7 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../models/practice_hub_models.dart';
+import 'package:get/get.dart';
 
 class PracticeHubFinalExamCard extends StatelessWidget {
   const PracticeHubFinalExamCard({
@@ -120,7 +121,7 @@ class _LockedFinalExamCard extends StatelessWidget {
             ),
             SizedBox(height: 10.h),
             Text(
-              '${exam.courseProgressPercent}% completed • ${exam.unlockCompletionPercent}% required',
+              'exam_courseprogresspercent_completed_exam_unlockcompletionpercent_required'.trParams(<String, String>{'courseprogresspercent': exam.courseProgressPercent.toString(), 'unlockcompletionpercent': exam.unlockCompletionPercent.toString()}),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font13.sp,
@@ -133,13 +134,15 @@ class _LockedFinalExamCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 _ExamMiniPill(
-                  text: '${exam.unlockCompletionPercent}% Required',
+                  text: 'percent_required'.trParams(<String, String>{
+                    'percent': exam.unlockCompletionPercent.toString(),
+                  }),
                   icon: Icons.info_outline_rounded,
                   active: true,
                 ),
                 SizedBox(width: 12.w),
                 _ExamMiniPill(
-                  text: 'Locked',
+                  text: 'locked'.tr,
                   icon: Icons.lock_rounded,
                   active: false,
                   onTap: onLockedButtonTap,
@@ -249,7 +252,7 @@ class _ReadyFinalExamCard extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Ready for your final challenge!',
+              'ready_for_your_final_challenge'.tr,
               style: TextStyle(
                 fontSize: AppFont.font18.sp,
                 fontWeight: FontWeight.w900,
@@ -259,7 +262,7 @@ class _ReadyFinalExamCard extends StatelessWidget {
             SizedBox(height: 28.h),
             CustomButton(
               onPressed: onStartTap,
-              text: 'START FINAL EXAM',
+              text: 'start_final_exam'.tr,
               height: 60,
               width: double.infinity,
               showShadow: true,

@@ -63,7 +63,8 @@ class LocalNotificationService {
     await _plugin.initialize(
       settings: settings,
       onDidReceiveNotificationResponse: _handleNotificationTap,
-      onDidReceiveBackgroundNotificationResponse: onDidReceiveBackgroundNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse:
+          onDidReceiveBackgroundNotificationResponse,
     );
 
     await _plugin
@@ -99,8 +100,8 @@ class LocalNotificationService {
 
         // Skip displaying the notification if the user is currently viewing
         // the conversation that this message belongs to.
-        final String? conversationId =
-            message.data['conversationId']?.toString();
+        final String? conversationId = message.data['conversationId']
+            ?.toString();
         if (conversationId != null &&
             _suppressedConversationIds.contains(conversationId)) {
           dev.log(
@@ -124,7 +125,10 @@ class LocalNotificationService {
     );
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      dev.log('FCM Notification tapped from background: data=${message.data}', name: 'LocalNotificationService');
+      dev.log(
+        'FCM Notification tapped from background: data=${message.data}',
+        name: 'LocalNotificationService',
+      );
       _handleFCMTap(message);
     });
 
@@ -133,9 +137,13 @@ class LocalNotificationService {
 
   Future<void> _checkInitialMessage() async {
     try {
-      final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+      final RemoteMessage? initialMessage = await FirebaseMessaging.instance
+          .getInitialMessage();
       if (initialMessage != null) {
-        dev.log('FCM Notification tapped from terminated state: data=${initialMessage.data}', name: 'LocalNotificationService');
+        dev.log(
+          'FCM Notification tapped from terminated state: data=${initialMessage.data}',
+          name: 'LocalNotificationService',
+        );
         // Add a slight delay to allow the app to finish bootstrapping before navigating
         Future.delayed(const Duration(milliseconds: 500), () {
           _handleFCMTap(initialMessage);
@@ -148,10 +156,12 @@ class LocalNotificationService {
 
   void _handleFCMTap(RemoteMessage message) {
     final String deepLink = message.data['deepLink']?.toString().trim() ?? '';
-    final String conversationId = message.data['conversationId']?.toString().trim() ?? '';
+    final String conversationId =
+        message.data['conversationId']?.toString().trim() ?? '';
     final String contactId = message.data['senderId']?.toString().trim() ?? '';
-    final String contactName = message.data['senderName']?.toString().trim() ?? 'User';
-    
+    final String contactName =
+        message.data['senderName']?.toString().trim() ?? 'User';
+
     if (conversationId.isNotEmpty) {
       final String payloadString = jsonEncode({
         'conversationId': conversationId,
@@ -160,15 +170,21 @@ class LocalNotificationService {
         'deepLink': deepLink,
       });
       // Mock a NotificationResponse with the payload and call our existing handler
-      _handleNotificationTap(NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotification,
-        payload: payloadString,
-      ));
+      _handleNotificationTap(
+        NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          payload: payloadString,
+        ),
+      );
     } else if (deepLink.isNotEmpty) {
-      _handleNotificationTap(NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotification,
-        payload: deepLink,
-      ));
+      _handleNotificationTap(
+        NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          payload: deepLink,
+        ),
+      );
     }
   }
 
@@ -214,10 +230,12 @@ class LocalNotificationService {
     );
 
     final String deepLink = message.data['deepLink']?.toString().trim() ?? '';
-    final String conversationId = message.data['conversationId']?.toString().trim() ?? '';
+    final String conversationId =
+        message.data['conversationId']?.toString().trim() ?? '';
     final String contactId = message.data['senderId']?.toString().trim() ?? '';
-    final String contactName = message.data['senderName']?.toString().trim() ?? title;
-    
+    final String contactName =
+        message.data['senderName']?.toString().trim() ?? title;
+
     // We pass a JSON payload if we have a conversationId, otherwise just the deepLink
     String? payloadString;
     if (conversationId.isNotEmpty) {
@@ -251,11 +269,9 @@ class LocalNotificationService {
         'Reply',
         icon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
         inputs: [
-          const AndroidNotificationActionInput(
-            label: 'Type a message...',
-          ),
+          AndroidNotificationActionInput(label: 'gen_type_a_message'.tr),
         ],
-      )
+      ),
     ];
 
     if (localImagePath == null) {
@@ -441,11 +457,13 @@ class LocalNotificationService {
       try {
         if (payloadStr.startsWith('{')) {
           final Map<String, dynamic> data = jsonDecode(payloadStr);
-          final String conversationId = data['conversationId']?.toString() ?? '';
+          final String conversationId =
+              data['conversationId']?.toString() ?? '';
           if (conversationId.isNotEmpty) {
             final String contactId = data['contactId']?.toString() ?? '';
-            final String contactName = data['contactName']?.toString() ?? 'User';
-            
+            final String contactName =
+                data['contactName']?.toString() ?? 'User';
+
             final MessageThreadModel thread = MessageThreadModel(
               id: conversationId,
               learnerName: contactName,
@@ -458,7 +476,7 @@ class LocalNotificationService {
               avatarUrl: '',
               contactId: contactId,
             );
-            
+
             Get.to<void>(
               () => const MessageChatView(),
               binding: BindingsBuilder(() {

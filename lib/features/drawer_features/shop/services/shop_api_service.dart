@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/services/api_client.dart';
 import '../models/shop_models.dart';
 import '../models/shop_order_models.dart';
+import 'package:get/get.dart' hide Response;
 
 class ShopApiService {
   ShopApiService({required ApiClient apiClient}) : _apiClient = apiClient;
@@ -142,7 +143,7 @@ class ShopApiService {
 
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object.',
+      message: 'response_is_not_a_valid_json_object_1'.tr,
     );
   }
 }

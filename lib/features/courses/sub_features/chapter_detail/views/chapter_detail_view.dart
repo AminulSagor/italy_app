@@ -199,7 +199,7 @@ class _BottomActions extends StatelessWidget {
     if (status == ChapterQuizStatus.disabled) {
       return CustomButton.primary(
         onPressed: hasVideo ? onResumeTap : () {},
-        text: hasVideo ? 'Resume Video' : 'Video Not Given',
+        text: hasVideo ? 'resume_video'.tr : 'video_not_given'.tr,
         isLoading: isLoading,
         icon: hasVideo ? Icons.play_arrow_rounded : Icons.lock_outline_rounded,
       );
@@ -209,7 +209,7 @@ class _BottomActions extends StatelessWidget {
       children: <Widget>[
         CustomButton(
           onPressed: hasVideo ? onResumeTap : () {},
-          text: hasVideo ? '▶  Resume' : 'Video Not Given',
+          text: hasVideo ? 'resume_video'.tr : 'video_not_given'.tr,
           height: kChapterBottomButtonHeight,
           showShadow: true,
           btnColor: AppColors.white,
@@ -222,7 +222,7 @@ class _BottomActions extends StatelessWidget {
         Expanded(
           child: CustomButton(
             onPressed: onQuizTap,
-            text: 'Take Quiz',
+            text: 'take_quiz'.tr,
             icon: Icons.bolt_rounded,
             height: kChapterBottomButtonHeight,
             showShadow: true,

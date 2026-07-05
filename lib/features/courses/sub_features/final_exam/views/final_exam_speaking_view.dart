@@ -24,7 +24,7 @@ class FinalExamSpeakingView extends GetView<FinalExamController> {
       backgroundColor: AppColors.coursesDetailBg,
       bottomNavigationBar: Obx(
         () => FinalExamBottomButton(
-          label: 'Submit Answer',
+          label: 'gen_submit_answer'.tr,
           onTap: controller.submitSpeakingAnswer,
           isLoading: controller.isSubmitting.value,
         ),
@@ -114,7 +114,7 @@ class _SpeakingHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(kHomePillRadius.r),
               ),
               child: Text(
-                '⏱ 28:05',
+                '28_05'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font14.sp,
                   fontWeight: FontWeight.w700,
@@ -291,7 +291,7 @@ class _RecordingCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  '00:$seconds',
+                  '00_seconds'.trParams(<String, String>{'seconds': seconds.toString()}),
                   style: TextStyle(
                     fontSize: AppFont.font32.sp,
                     fontWeight: FontWeight.w900,
@@ -303,8 +303,8 @@ class _RecordingCard extends StatelessWidget {
                   isRecording
                       ? '● RECORDING...'
                       : hasRecording
-                      ? 'RECORDED'
-                      : 'READY',
+                      ? 'recorded'.tr
+                      : 'ready'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font12.sp,
                     fontWeight: FontWeight.w900,
@@ -362,7 +362,7 @@ class _RecordingCard extends StatelessWidget {
           ),
           SizedBox(height: 22.h),
           Text(
-            'HOLD TO RECORD',
+            'hold_to_record'.tr,
             style: TextStyle(
               fontSize: AppFont.font12.sp,
               fontWeight: FontWeight.w700,
@@ -370,7 +370,7 @@ class _RecordingCard extends StatelessWidget {
             ),
           ),
           Text(
-            'চেপে ধরে কথা বলুন',
+            'label_lib_features_courses_sub_features_final_exam_views_final_exam_speaking_view_373'.tr,
             style: TextStyle(
               fontSize: AppFont.font10.sp,
               color: AppColors.bodyText,

@@ -79,23 +79,23 @@ class ReviewAnswerCard extends StatelessWidget {
   String _labelForType(QuizQuestionType type) {
     switch (type) {
       case QuizQuestionType.listening:
-        return 'LISTENING';
+        return 'gen_listening'.tr;
       case QuizQuestionType.wordTranslation:
-        return 'WORD TRANSLATION';
+        return 'word_translation'.tr;
       case QuizQuestionType.sentenceTranslation:
-        return 'SENTENCE TRANSLATION';
+        return 'sentence_translation'.tr;
       case QuizQuestionType.trueFalse:
-        return 'TRUE / FALSE';
+        return 'true_false'.tr;
       case QuizQuestionType.fillBlank:
-        return 'FILL IN THE BLANKS';
+        return 'fill_in_the_blanks'.tr;
       case QuizQuestionType.listeningAssembly:
-        return 'AUDIO TRANSCRIPTION';
+        return 'audio_transcription'.tr;
       case QuizQuestionType.matchingPairs:
-        return 'MATCH THE PAIRS';
+        return 'match_the_pairs'.tr;
       case QuizQuestionType.writingWordTranslation:
-        return 'WRITING TRANSLATION';
+        return 'writing_translation'.tr;
       case QuizQuestionType.identifyImage:
-        return 'IDENTIFY IMAGE';
+        return 'identify_image'.tr;
     }
   }
 }
@@ -184,7 +184,7 @@ class _ChoiceReview extends StatelessWidget {
       children: <Widget>[
         Text(
           question.type == QuizQuestionType.identifyImage
-              ? '🍎  ${question.objectLabel ?? 'Apple'}'
+              ? '🍎  ${question.objectLabel ?? 'apple'.tr}'
               : question.title.replaceAll('\n', ' '),
           style: TextStyle(
             fontSize: AppFont.font16.sp,
@@ -205,7 +205,9 @@ class _ChoiceReview extends StatelessWidget {
               ),
             if (review != null && !review!.isCorrect)
               _AnswerChip(
-                label: 'Correct: ${review!.correctAnswer}',
+                label: 'correct_answer_value'.trParams(<String, String>{
+                  'answer': review!.correctAnswer,
+                }),
                 isCorrect: true,
               ),
           ],
@@ -274,7 +276,7 @@ class _FillBlankReview extends StatelessWidget {
           color: AppColors.homePrimaryText,
         ),
         children: <InlineSpan>[
-          const TextSpan(text: 'Io  '),
+          TextSpan(text: 'io'.tr),
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
             child: _AnswerChip(
@@ -282,7 +284,7 @@ class _FillBlankReview extends StatelessWidget {
               isCorrect: review?.isCorrect ?? true,
             ),
           ),
-          const TextSpan(text: '  un caffè.'),
+          TextSpan(text: 'un_caff'.tr),
         ],
       ),
     );
@@ -300,15 +302,15 @@ class _MatchingReview extends StatelessWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            Expanded(child: _GreyPairChip(label: 'gen_buongiorno'.tr.tr)),
+            Expanded(child: _GreyPairChip(label: 'gen_buongiorno'.tr)),
             Container(width: 44.w, height: 2.h, color: AppColors.primaryGreen),
-            Expanded(child: _GreyPairChip(label: 'gen_good_nmorning'.tr.tr)),
+            Expanded(child: _GreyPairChip(label: 'gen_good_nmorning'.tr)),
           ],
         ),
         SizedBox(height: 18.h),
         Row(
           children: <Widget>[
-            Expanded(child: _GreyPairChip(label: 'gen_ciao'.tr.tr)),
+            Expanded(child: _GreyPairChip(label: 'gen_ciao'.tr)),
             Container(
               width: 44.w,
               height: 2.h,
@@ -316,9 +318,9 @@ class _MatchingReview extends StatelessWidget {
             ),
             Expanded(
               child: _GreyPairChip(
-                label: review?.selectedAnswer.contains('Hello') ?? false
-                    ? 'Hello'
-                    : 'Thank you',
+                label: review?.selectedAnswer.contains('hello'.tr) ?? false
+                    ? 'hello'.tr
+                    : 'thank_you'.tr,
               ),
             ),
           ],

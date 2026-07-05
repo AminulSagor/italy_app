@@ -94,7 +94,7 @@ class VerifyContactView extends GetView<SettingsController> {
                           ),
                           SizedBox(height: 28.h),
                           Text(
-                            'Verify Code',
+                            'verify_code'.tr,
                             style: TextStyle(
                               fontSize: 30.sp,
                               fontWeight: FontWeight.w900,
@@ -120,14 +120,14 @@ class VerifyContactView extends GetView<SettingsController> {
                     _OtpInputRow(controller: controller),
                     SizedBox(height: 40.h),
                     SettingsPrimaryButton(
-                      text: 'Verify & Continue  →',
+                      text: 'verify_continue_1'.tr,
                       height: 68,
                       isLoading: controller.isVerifyingContactOtp.value,
                       onTap: controller.verifyPendingContact,
                     ),
                     SizedBox(height: 28.h),
                     Text(
-                      "Didn't receive the code?",
+                      "didn_t_receive_the_code".tr,
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -141,8 +141,8 @@ class VerifyContactView extends GetView<SettingsController> {
                           : controller.resendPendingContactOtp,
                       child: Text(
                         controller.isResendingContactOtp.value
-                            ? 'Sending...'
-                            : 'Resend Code',
+                            ? 'sending'.tr
+                            : 'resend_code_1'.tr,
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w900,
@@ -170,8 +170,8 @@ class VerifyContactView extends GetView<SettingsController> {
                           Expanded(
                             child: Text(
                               isEmail
-                                  ? "Check your spam folder if the email does not arrive within 2 minutes. The code is valid for 10 minutes."
-                                  : 'The SMS code is valid for 10 minutes. Confirm that your phone has network coverage.',
+                                  ? 'check_your_spam_folder_if_the_email_does_not_arriv'.tr
+                                  : 'the_sms_code_is_valid_for_10_minutes_confirm_that'.tr,
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 height: 1.25,

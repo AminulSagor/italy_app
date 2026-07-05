@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../themes/app_colors.dart';
 import '../themes/app_constants.dart';
 import '../themes/app_font.dart';
+import 'package:get/get.dart';
 
 class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
   const AppHomeTopBar({
@@ -66,7 +67,7 @@ class AppHomeTopBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   SizedBox(height: 3.h),
                   Text(
-                    'Ciao, $userName',
+                    'Hi, '+ userName.toString(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
