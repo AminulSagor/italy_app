@@ -31,15 +31,15 @@ class MessageReportView extends GetView<MessageReportController> {
                   SizedBox(height: 44.h),
                   ReportProfileCard(profile: controller.profile),
                   SizedBox(height: 42.h),
-                  const _SectionLabel(text: 'Why are you reporting this user?'),
+                  _SectionLabel(text: 'why_are_you_reporting_this_user'.tr),
                   SizedBox(height: 22.h),
                   const _ReasonSelector(),
                   SizedBox(height: 42.h),
-                  const _SectionLabel(text: 'Detailed Description'),
+                  _SectionLabel(text: 'detailed_description'.tr),
                   SizedBox(height: 20.h),
                   const _DescriptionField(),
                   SizedBox(height: 42.h),
-                  const _SectionLabel(text: 'Evidence (Optional)'),
+                  _SectionLabel(text: 'evidence_optional'.tr),
                   SizedBox(height: 20.h),
                   Obx(
                     () => ReportEvidencePicker(
@@ -96,7 +96,7 @@ class _ReportHeader extends StatelessWidget {
             ),
           ),
           Text(
-            'Report User',
+            'report_user'.tr,
             style: TextStyle(
               fontSize: AppFont.font24.sp,
               fontWeight: FontWeight.w900,
@@ -148,7 +148,7 @@ class _ReasonSelector extends GetView<MessageReportController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Could not load report reasons. Please check your connection and try again.',
+              'could_not_load_report_reasons_please_check_your_co'.tr,
               style: TextStyle(
                 fontSize: AppFont.font16.sp,
                 color: AppColors.bodyText,
@@ -164,7 +164,7 @@ class _ReasonSelector extends GetView<MessageReportController> {
                   borderRadius: BorderRadius.circular(30.r),
                 ),
                 child: Text(
-                  'Reload reasons',
+                  'reload_reasons'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w700,
@@ -184,7 +184,7 @@ class _ReasonSelector extends GetView<MessageReportController> {
             .map(
               (Map<String, dynamic> r) => ReportReasonChip(
                 label:
-                    r['title']?.toString() ?? r['name']?.toString() ?? 'Reason',
+                    r['title']?.toString() ?? r['name']?.toString() ?? 'reason'.tr,
                 isSelected:
                     controller.selectedReasonId.value ==
                     (r['id']?.toString() ?? ''),
@@ -231,7 +231,7 @@ class _DescriptionField extends GetView<MessageReportController> {
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText:
-              'gen_describe_what_happened_e_g_n_t'.tr.tr,
+              'gen_describe_what_happened_e_g_n_t'.tr,
           hintStyle: TextStyle(
             fontSize: AppFont.font20.sp,
             fontWeight: FontWeight.w500,
@@ -268,7 +268,7 @@ class _SubmitFooter extends GetView<MessageReportController> {
           padding: EdgeInsets.only(top: 26.h),
           child: Obx(
             () => CustomButton.primary(
-              text: 'Submit Report',
+              text: 'submit_report'.tr,
               isLoading: controller.isSubmitting.value,
               onPressed: controller.submitReport,
             ),

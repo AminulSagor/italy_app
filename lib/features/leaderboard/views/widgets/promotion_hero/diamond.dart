@@ -10,14 +10,14 @@ class DiamondLeaguePromotionView extends StatelessWidget {
   Widget build(BuildContext context) {
     return LeaguePromotionScreen(
       headerAssetPath: 'assets/images/promotion/diamond_promotion_header.png',
-      leagueName: 'Diamond',
+      leagueName: 'diamond'.tr,
       xpRange: '10000+ XP',
       accentColor: Color(0xFF009AAA),
       lightAccentColor: Color(0xFFD8FAFA),
       leagueIcon: Icons.diamond_rounded,
       hasBenefit: true,
       boostTitle: '3.0× XP Boost',
-      boostSubtitle: 'gen_earn_xp_faster'.tr.tr,
+      boostSubtitle: 'gen_earn_xp_faster'.tr,
       boostFooter: '3 days',
     );
   }

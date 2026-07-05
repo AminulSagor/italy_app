@@ -90,10 +90,10 @@ class _ChatBody extends StatelessWidget {
   }
 
   String _requestButtonText() {
-    if (controller.isRequesting.value) return 'Requesting...';
-    if (controller.isSpeakerPending) return 'Pending';
-    if (controller.isSpeakerGranted) return 'Approved';
-    return 'Request To Participate';
+    if (controller.isRequesting.value) return 'requesting'.tr;
+    if (controller.isSpeakerPending) return 'pending'.tr;
+    if (controller.isSpeakerGranted) return 'approved'.tr;
+    return 'request_to_participate'.tr;
   }
 }
 
@@ -121,8 +121,8 @@ class _ParticipationBody extends StatelessWidget {
                 controller.isLeaving.value ? () {} : controller.stopParticipation,
             isLoading: controller.isLeaving.value,
             text: controller.isLeaving.value
-                ? 'Leaving Stage...'
-                : 'Stop and Leave the Stage',
+                ? 'leaving_stage'.tr
+                : 'stop_and_leave_the_stage'.tr,
             btnColor: AppColors.white,
             textColor: AppColors.profileRedText,
             borderColor: AppColors.profileRedText,

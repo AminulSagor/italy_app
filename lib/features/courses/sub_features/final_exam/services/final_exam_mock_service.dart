@@ -7,9 +7,9 @@ import '../models/final_exam_models.dart';
 class FinalExamMockService {
   Future<FinalExamOverviewModel> fetchOverview() async {
     return FinalExamOverviewModel(
-      title: 'gen_final_exam'.tr.tr,
+      title: 'gen_final_exam'.tr,
       heroTitle: 'Ready to Graduate?',
-      heroSubtitle: 'gen_complete_the_final_exam_to_ear'.tr.tr,
+      heroSubtitle: 'gen_complete_the_final_exam_to_ear'.tr,
       components: <FinalExamComponentModel>[],
       noteBangla: '',
       noteEnglish: '',
@@ -22,7 +22,7 @@ class FinalExamMockService {
     return FinalExamListeningModel(
       sectionId: '',
       questionId: '',
-      title: 'gen_listening'.tr.tr,
+      title: 'gen_listening'.tr,
       clipTitle: '',
       questionTag: '',
       question: '',
@@ -35,10 +35,10 @@ class FinalExamMockService {
   }
 
   Future<FinalExamWritingModel> fetchWritingTask() async {
-    return const FinalExamWritingModel(
+    return FinalExamWritingModel(
       sectionId: '',
       questionId: '',
-      title: 'Writing',
+      title: 'gen_writing'.tr,
       taskTitle: '',
       instruction: '',
       banglaInstruction: '',
@@ -48,10 +48,10 @@ class FinalExamMockService {
   }
 
   Future<FinalExamSpeakingModel> fetchSpeakingTask() async {
-    return const FinalExamSpeakingModel(
+    return FinalExamSpeakingModel(
       sectionId: '',
       questionId: '',
-      title: 'Speaking',
+      title: 'gen_speaking'.tr,
       taskTitle: '',
       instruction: '',
       banglaInstruction: '',
@@ -66,8 +66,8 @@ class FinalExamMockService {
   Future<FinalExamResultModel> fetchResult() async {
     return FinalExamResultModel(
       markPercent: 0,
-      title: 'gen_final_exam_result'.tr.tr,
-      subtitle: 'gen_result_unavailable'.tr.tr,
+      title: 'gen_final_exam_result'.tr,
+      subtitle: 'gen_result_unavailable'.tr,
       xpAwarded: 0,
       teacherComment: '',
       teacherCommentBangla: '',

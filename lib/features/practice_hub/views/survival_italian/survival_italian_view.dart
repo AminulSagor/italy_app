@@ -36,7 +36,7 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
                 if (controller.survivalItalianItems.isEmpty) {
                   return _SurvivalEmptyView(
                     message: controller.survivalError.value.isEmpty
-                        ? 'No Survival Italian situations are available.'
+                        ? 'no_survival_italian_situations_are_available'.tr
                         : controller.survivalError.value,
                     onRetry: () =>
                         controller.loadSurvivalItalian(showError: true),
@@ -191,7 +191,7 @@ class _SurvivalEmptyView extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 14.h),
-                TextButton(onPressed: onRetry, child: const Text('Retry')),
+                TextButton(onPressed: onRetry, child: Text('retry'.tr)),
                 const Spacer(),
               ],
             ),
@@ -236,11 +236,11 @@ class _SurvivalHeader extends GetView<PracticeHubController> {
           ),
           SizedBox(width: 14.w),
           Expanded(
-            child: Column(
+            child:                                                                                                                                                               Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'Survival Italian',
+                  'gen_survival_italian'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: AppFont.font20.sp,
@@ -252,7 +252,7 @@ class _SurvivalHeader extends GetView<PracticeHubController> {
                 ),
                 SizedBox(height: 7.h),
                 Text(
-                  'ইতালিতে আসার পর পর যা শিখতে হবে',
+                  'label_lib_features_practice_hub_views_survival_italian_survival_italian_view_249'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: AppFont.font11.sp,
@@ -340,7 +340,7 @@ class _SurvivalProgressBar extends GetView<PracticeHubController> {
                           text: TextSpan(
                             children: <InlineSpan>[
                               TextSpan(
-                                text: 'Total Situations Learned: ',
+                                text: 'total_situations_learned'.tr,
                                 style: TextStyle(
                                   fontSize: AppFont.font15.sp,
                                   fontWeight: FontWeight.w800,

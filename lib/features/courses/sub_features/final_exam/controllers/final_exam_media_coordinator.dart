@@ -120,7 +120,7 @@ class FinalExamMediaCoordinator {
           .checkPermission();
       if (!hasPermission) {
         Get.snackbar(
-          'Permission needed',
+          'permission_needed'.tr,
           'Please allow microphone permission to record your answer.',
         );
         return;

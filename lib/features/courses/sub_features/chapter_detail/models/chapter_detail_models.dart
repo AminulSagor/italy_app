@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+
 enum ChapterQuizStatus { disabled, enabled, completed }
 
 enum ChapterMediaType { video, audio, pdf }
@@ -39,14 +40,14 @@ class ChapterDetailModel {
   });
 
   factory ChapterDetailModel.fromJson(Map<String, dynamic> json) {
-    final List<ChapterResourceModel> resources = _jsonList(json['resources'])
-        .map(ChapterResourceModel.fromJson)
-        .toList(growable: false);
+    final List<ChapterResourceModel> resources = _jsonList(
+      json['resources'],
+    ).map(ChapterResourceModel.fromJson).toList(growable: false);
 
     return ChapterDetailModel(
       id: _stringValue(json['id']),
       courseId: _stringValue(json['courseId']),
-      title: _fallbackString(json['title'], 'Lesson Details'),
+      title: _fallbackString(json['title'], 'lesson_details'.tr),
       videoProgressLabel: _stringValue(json['videoProgressLabel']),
       watchedTimeLabel: _stringValue(json['watchedTimeLabel']),
       totalTimeLabel: _stringValue(json['totalTimeLabel']),
@@ -63,19 +64,19 @@ class ChapterDetailModel {
       theoryBook: json['theoryBook'] is Map
           ? ChapterResourceModel.fromJson(_jsonMap(json['theoryBook']))
           : resources.isNotEmpty
-              ? resources.first
-              : ChapterResourceModel.notGiven(
-                  title: 'gen_theory_book'.tr.tr,
-                  iconName: 'book',
-                ),
+          ? resources.first
+          : ChapterResourceModel.notGiven(
+              title: 'gen_theory_book'.tr,
+              iconName: 'book',
+            ),
       vocabulary: json['vocabulary'] is Map
           ? ChapterResourceModel.fromJson(_jsonMap(json['vocabulary']))
           : resources.length > 1
-              ? resources.last
-              : ChapterResourceModel.notGiven(
-                  title: 'Vocabulary',
-                  iconName: 'cards',
-                ),
+          ? resources.last
+          : ChapterResourceModel.notGiven(
+              title: 'gen_vocabulary'.tr,
+              iconName: 'cards',
+            ),
       quiz: json['quiz'] is Map
           ? ChapterQuizModel.fromJson(_jsonMap(json['quiz']))
           : null,
@@ -209,11 +210,14 @@ class LessonContentModel {
 
   factory LessonContentModel.fromJson(Map<String, dynamic> json) {
     return LessonContentModel(
-      title: _fallbackString(json['title'], 'Lesson Theory'),
+      title: _fallbackString(json['title'], 'lesson_theory'.tr),
       italianText: _stringValue(json['italianText']),
       italianHighlightText: _stringValue(json['italianHighlightText']),
       italianMissingText: _stringValue(json['italianMissingText']),
-      translationLabel: _fallbackString(json['translationLabel'], 'বাংলা অনুবাদ'),
+      translationLabel: _fallbackString(
+        json['translationLabel'],
+        'translation_label'.tr,
+      ),
       banglaText: _stringValue(json['banglaText']),
       banglaHighlightText: _stringValue(json['banglaHighlightText']),
     );
@@ -265,7 +269,7 @@ class ChapterResourceModel {
   }) {
     return ChapterResourceModel(
       title: title,
-      subtitle: 'gen_not_given'.tr.tr,
+      subtitle: 'gen_not_given'.tr,
       iconName: iconName,
       isAvailable: false,
     );
@@ -274,7 +278,7 @@ class ChapterResourceModel {
   factory ChapterResourceModel.fromJson(Map<String, dynamic> json) {
     return ChapterResourceModel(
       title: _stringValue(json['title']),
-      subtitle: _fallbackString(json['subtitle'], 'Not given'),
+      subtitle: _fallbackString(json['subtitle'], 'gen_not_given'.tr),
       iconName: _stringValue(json['iconName']),
       fileId: _emptyToNull(json['fileId']),
       fileUrl: _emptyToNull(json['fileUrl']),
@@ -341,8 +345,11 @@ class ChapterQuizModel {
 
   factory ChapterQuizModel.fromJson(Map<String, dynamic> json) {
     return ChapterQuizModel(
-      title: _fallbackString(json['title'], 'Chapter Quiz'),
-      subtitle: _fallbackString(json['subtitle'], 'Test your knowledge of this chapter'),
+      title: _fallbackString(json['title'], 'chapter_quiz'.tr),
+      subtitle: _fallbackString(
+        json['subtitle'],
+        'chapter_quiz_description'.tr,
+      ),
       status: ChapterQuizStatus.values.firstWhere(
         (ChapterQuizStatus item) => item.name == _stringValue(json['status']),
         orElse: () => ChapterQuizStatus.disabled,
@@ -403,9 +410,9 @@ class LessonProgressModel {
   });
 
   const LessonProgressModel.empty()
-      : videoWatchPercent = 0,
-        isTheoryRead = false,
-        isCompleted = false;
+    : videoWatchPercent = 0,
+      isTheoryRead = false,
+      isCompleted = false;
 
   factory LessonProgressModel.fromJson(Map<String, dynamic> json) {
     return LessonProgressModel(

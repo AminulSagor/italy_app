@@ -50,8 +50,8 @@ class PracticeHubView extends GetView<PracticeHubController> {
             children: <Widget>[
               _HorizontalPadding(
                 child: _SectionTitleRow(
-                  title: 'Practice Hub – Courses',
-                  actionText: 'View All',
+                  title: 'gen_practice_hub_courses'.tr,
+                  actionText: 'gen_view_all'.tr,
                   onActionTap: controller.onViewAllCoursesTap,
                 ),
               ),
@@ -59,8 +59,8 @@ class PracticeHubView extends GetView<PracticeHubController> {
               const PracticeHubCourseCarousel(),
               SizedBox(height: 47.h),
 
-              const _HorizontalPadding(
-                child: _SectionTitleOnly(title: 'Skill Builders'),
+              _HorizontalPadding(
+                child: _SectionTitleOnly(title: 'gen_skill_builders'.tr),
               ),
               SizedBox(height: 24.h),
               const _HorizontalPadding(child: PracticeHubSkillBuilderGrid()),
@@ -88,8 +88,10 @@ class PracticeHubView extends GetView<PracticeHubController> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    const _HorizontalPadding(
-                      child: _SectionTitleOnly(title: 'Specialized Learning'),
+                    _HorizontalPadding(
+                      child: _SectionTitleOnly(
+                        title: 'gen_specialized_learning'.tr,
+                      ),
                     ),
                     SizedBox(height: 24.h),
                     ...controller.finalExamCourses.map((
@@ -135,8 +137,8 @@ class PracticeHubView extends GetView<PracticeHubController> {
                 );
               }),
 
-              const _HorizontalPadding(
-                child: _SectionTitleOnly(title: 'Upcoming Webinars'),
+              _HorizontalPadding(
+                child: _SectionTitleOnly(title: 'gen_upcoming_webinars'.tr),
               ),
               SizedBox(height: 20.h),
               const _HorizontalPadding(child: PracticeHubWebinarCard()),

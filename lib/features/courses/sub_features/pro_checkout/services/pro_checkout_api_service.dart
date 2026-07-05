@@ -5,9 +5,11 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../../core/services/api_client.dart';
 import '../models/pro_checkout_models.dart';
+import 'package:get/get.dart' hide Response;
 
 class ProCheckoutApiService {
-  ProCheckoutApiService({required ApiClient apiClient}) : _apiClient = apiClient;
+  ProCheckoutApiService({required ApiClient apiClient})
+    : _apiClient = apiClient;
 
   static const Uuid _uuid = Uuid();
   final ApiClient _apiClient;
@@ -44,38 +46,62 @@ class ProCheckoutApiService {
       courseId: courseId,
       courseName: courseName,
       lessonCount: lessonCount,
-      appName: 'Italir Pothe',
-      headline: 'Unlock $courseName',
-      description: 'Get full access to all $lessonCount lessons in $courseName.',
-      trustedLabel: 'SECURE GOOGLE PLAY PURCHASE',
+      appName: 'gen_italir_pothe'.tr,
+      headline: 'unlock_course_name'.trParams(<String, String>{
+        'course': courseName,
+      }),
+      description: 'full_access_course_lessons'.trParams(<String, String>{
+        'count': lessonCount.toString(),
+        'course': courseName,
+      }),
+      trustedLabel: 'secure_course_purchase'.tr,
       plan: ProPlanModel(
         title: courseName,
-        subtitle: '$lessonCount lessons • lifetime access',
-        eurPrice: _formatPrice(ProCurrency.eur, eur['payableAmount']),
-        eurOldPrice: _formatPrice(ProCurrency.eur, eur['originalAmount']),
-        bdtPrice: _formatPrice(ProCurrency.bdt, bdt['payableAmount']),
-        bdtOldPrice: _formatPrice(ProCurrency.bdt, bdt['originalAmount']),
-        discountLabel:
-            discountPercentage > 0 ? '$discountPercentage% OFF' : 'GOOGLE PLAY',
+        subtitle: 'lessons_course_access'.trParams(<String, String>{
+          'count': lessonCount.toString(),
+        }),
+        eurPrice: _formatPrice(
+          ProCurrency.eur,
+          _stringValue(eur['payableAmount']),
+        ),
+        eurOldPrice: _formatPrice(
+          ProCurrency.eur,
+          _stringValue(eur['originalAmount']),
+        ),
+        bdtPrice: _formatPrice(
+          ProCurrency.bdt,
+          _stringValue(bdt['payableAmount']),
+        ),
+        bdtOldPrice: _formatPrice(
+          ProCurrency.bdt,
+          _stringValue(bdt['originalAmount']),
+        ),
+        discountLabel: discountPercentage > 0
+            ? 'discount_off'.trParams(<String, String>{
+                'discount': discountPercentage.toString(),
+              })
+            : 'course_price'.tr,
       ),
       features: <ProFeatureModel>[
         ProFeatureModel(
-          title: 'All $lessonCount\nLessons',
+          title: 'all_lessons_count'.trParams(<String, String>{
+            'count': lessonCount.toString(),
+          }),
           iconName: 'school',
           tone: 'green',
         ),
-        const ProFeatureModel(
-          title: 'Course\nResources',
+        ProFeatureModel(
+          title: 'course_resources'.tr,
           iconName: 'description',
           tone: 'blue',
         ),
-        const ProFeatureModel(
-          title: 'Progress\nTracking',
+        ProFeatureModel(
+          title: 'progress_tracking'.tr,
           iconName: 'smart_toy',
           tone: 'orange',
         ),
-        const ProFeatureModel(
-          title: 'Final Exam &\nCertificate',
+        ProFeatureModel(
+          title: 'final_exam_certificate'.tr,
           iconName: 'workspace_premium',
           tone: 'purple',
         ),
@@ -200,7 +226,7 @@ class ProCheckoutApiService {
     if (data is Map) return Map<String, dynamic>.from(data);
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object.',
+      message: 'response_is_not_a_valid_json_object_1'.tr,
     );
   }
 
@@ -224,7 +250,7 @@ class ProCheckoutApiService {
 
   String _titleCase(String value) {
     final String clean = value.trim();
-    if (clean.isEmpty) return 'Completed';
+    if (clean.isEmpty) return 'COMPLETED';
     return '${clean[0].toUpperCase()}${clean.substring(1).toLowerCase()}';
   }
 }

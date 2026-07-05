@@ -11,10 +11,7 @@ import 'widgets/ai_tutor_common_widgets.dart';
 import 'widgets/ai_tutor_message_bubble.dart';
 
 class AiTutorChatContent extends StatefulWidget {
-  const AiTutorChatContent({
-    super.key,
-    this.showWritingHelpStatus = false,
-  });
+  const AiTutorChatContent({super.key, this.showWritingHelpStatus = false});
 
   final bool showWritingHelpStatus;
 
@@ -112,7 +109,6 @@ class _AiTutorChatContentState extends State<AiTutorChatContent> {
   }
 }
 
-
 class _WritingHelpStatusCard extends StatelessWidget {
   const _WritingHelpStatusCard({required this.controller});
 
@@ -120,7 +116,8 @@ class _WritingHelpStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isBangla = controller.writingSourceLanguage.value ==
+    final bool isBangla =
+        controller.writingSourceLanguage.value ==
         AiTutorWritingSourceLanguage.bangla;
 
     return Container(
@@ -167,7 +164,7 @@ class _WritingHelpStatusCard extends StatelessWidget {
                 Text(
                   isBangla
                       ? 'বাংলায় ব্যাখ্যা পেয়ে স্বাভাবিক ইতালীয় লেখা তৈরি করুন।'
-                      : 'Get English guidance while creating natural Italian writing.',
+                      : 'get_english_guidance_while_creating_natural_italia'.tr,
                   style: TextStyle(
                     fontSize: 10.sp,
                     height: 1.35,
@@ -228,7 +225,11 @@ class _AdaptiveTutorStatusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  level == null ? 'Adaptive tutor active' : 'Level $level tutor',
+                  level == null
+                      ? 'adaptive_tutor_active'.tr
+                      : 'level_tutor'.trParams(<String, String>{
+                          'level': level.toString(),
+                        }),
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w900,
@@ -254,12 +255,12 @@ class _AdaptiveTutorStatusCard extends StatelessWidget {
                       if (memoryCount > 0)
                         _StatusPill(
                           icon: Icons.memory_rounded,
-                          label: 'gen_memorycount_remembered'.tr.tr,
+                          label: 'gen_memorycount_remembered'.tr,
                         ),
                       if (mistakeCount > 0)
                         _StatusPill(
                           icon: Icons.auto_fix_high_rounded,
-                          label: 'gen_mistakecount_focus_areas'.tr.tr,
+                          label: 'gen_mistakecount_focus_areas'.tr,
                         ),
                     ],
                   ),
@@ -305,4 +306,3 @@ class _StatusPill extends StatelessWidget {
     );
   }
 }
-

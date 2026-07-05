@@ -5,6 +5,7 @@ import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../models/pro_checkout_models.dart';
+import 'package:get/get.dart';
 
 class ProBackHeader extends StatelessWidget {
   final String title;
@@ -253,12 +254,12 @@ class ProCurrencyToggle extends StatelessWidget {
       child: Row(
         children: <Widget>[
           _CurrencySegment(
-            label: 'EUR',
+            label: 'gen_eur'.tr,
             isSelected: selectedCurrency == ProCurrency.eur,
             onTap: () => onChanged(ProCurrency.eur),
           ),
           _CurrencySegment(
-            label: 'BDT',
+            label: 'gen_bdt'.tr,
             isSelected: selectedCurrency == ProCurrency.bdt,
             onTap: () => onChanged(ProCurrency.bdt),
           ),

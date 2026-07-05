@@ -73,7 +73,7 @@ class QuizCompletionView extends GetView<QuizController> {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'You completed ${complete.chapterTitle}!',
+                  'you_completed_complete_chaptertitle'.trParams(<String, String>{'chaptertitle': complete.chapterTitle.toString()}),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
@@ -90,7 +90,7 @@ class QuizCompletionView extends GetView<QuizController> {
                       child: LessonMetricCard(
                         icon: Icons.track_changes_rounded,
                         value: '${complete.accuracyPercent}%',
-                        label: 'gen_accuracy'.tr.tr,
+                        label: 'gen_accuracy'.tr,
                         backgroundColor: AppColors.lessonAccuracyBg,
                         iconBackgroundColor: AppColors.homeLime,
                         valueColor: AppColors.primaryGreen,
@@ -101,7 +101,7 @@ class QuizCompletionView extends GetView<QuizController> {
                       child: LessonMetricCard(
                         icon: Icons.local_fire_department_rounded,
                         value: complete.timeTaken,
-                        label: 'gen_time_taken'.tr.tr,
+                        label: 'gen_time_taken'.tr,
                         backgroundColor: AppColors.lessonTimeBg,
                         iconBackgroundColor: AppColors.reportReviewIconBg,
                         valueColor: AppColors.lessonTimeText,
@@ -122,8 +122,10 @@ class QuizCompletionView extends GetView<QuizController> {
                 SizedBox(height: 24.h),
                 LessonSimplePill(
                   icon: Icons.local_fire_department_rounded,
-                  subtitle: 'gen_daily_streak'.tr.tr,
-                  title: '${complete.streakDays} Days',
+                  subtitle: 'gen_daily_streak'.tr,
+                  title: 'days_value'.trParams(<String, String>{
+                    'days': complete.streakDays.toString(),
+                  }),
                   iconColor: AppColors.blockDangerRed,
                   backgroundColor: AppColors.lessonStreakBg,
                 ),
@@ -140,7 +142,7 @@ class QuizCompletionView extends GetView<QuizController> {
                       ),
                       SizedBox(width: 10.w),
                       Text(
-                        'Review Answers',
+                        'review_answers'.tr,
                         style: TextStyle(
                           fontSize: AppFont.font14.sp,
                           fontWeight: FontWeight.w700,
@@ -153,7 +155,7 @@ class QuizCompletionView extends GetView<QuizController> {
                 SizedBox(height: 24.h),
                 CustomButton.primary(
                   onPressed: () => _showMilestoneDialog(complete),
-                  text: 'CONTINUE',
+                  text: 'continue'.tr,
                 ),
                 SizedBox(height: 24.h),
               ],

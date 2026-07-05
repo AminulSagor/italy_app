@@ -30,7 +30,7 @@ class CvCreditStoreView extends GetView<ShopController> {
                 child: Column(
                   children: <Widget>[
                     Text(
-                      'CV Credit Store',
+                      'cv_credit_store'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 36.sp,
@@ -42,7 +42,7 @@ class CvCreditStoreView extends GetView<ShopController> {
                     ),
                     SizedBox(height: 10.h),
                     Text(
-                      'Never pause your career growth',
+                      'never_pause_your_career_growth'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 17.sp,
@@ -60,10 +60,10 @@ class CvCreditStoreView extends GetView<ShopController> {
 
               Obx(() {
                 if (controller.cvPackages.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 32),
-                      child: Text('No CV credit packages are available.'),
+                      child: Text('no_cv_credit_packages_are_available'.tr),
                     ),
                   );
                 }
@@ -131,7 +131,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           Text(
-            'CV Credit Refiller',
+            'cv_credit_refiller'.tr,
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w900,
@@ -169,7 +169,7 @@ class _InventoryCard extends GetView<ShopController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'YOUR INVENTORY',
+                  'your_inventory'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w900,
@@ -393,7 +393,7 @@ class _ConfirmButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                isLoading ? 'Loading...' : 'Confirm Purchase',
+                isLoading ? 'loading'.tr : 'confirm_purchase'.tr,
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w900,

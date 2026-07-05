@@ -81,7 +81,7 @@ class _HistoryTopBar extends StatelessWidget {
             ),
           ),
           Text(
-            'Order History',
+            'order_history'.tr,
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w900,
@@ -186,7 +186,7 @@ class _SearchBox extends GetView<ShopOrderHistoryController> {
           color: const Color(0xFF333333),
         ),
         decoration: InputDecoration(
-          hintText: 'gen_search_orders'.tr.tr,
+          hintText: 'gen_search_orders'.tr,
           hintStyle: TextStyle(
             fontSize: 15.sp,
             fontWeight: FontWeight.w500,
@@ -256,7 +256,7 @@ class _OrdersList extends GetView<ShopOrderHistoryController> {
                         height: 22.r,
                         child: const CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Load More'),
+                    : Text('load_more'.tr),
               ),
             ),
           ],
@@ -279,7 +279,7 @@ class _EmptyOrdersCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(34.r),
       ),
       child: Text(
-        'No orders found',
+        'no_orders_found'.tr,
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 16.sp,
@@ -379,7 +379,7 @@ class _OrderCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text.rich(
               TextSpan(
-                text: 'ID : ',
+                text: 'id'.tr,
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
@@ -471,7 +471,7 @@ class _StatusLabel extends StatelessWidget {
         ),
         SizedBox(width: 6.w),
         Text(
-          status.isEmpty ? 'Pending' : status.capitalizeFirst ?? status,
+          status.isEmpty ? 'pending'.tr : status.capitalizeFirst ?? status,
           style: TextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.w900,
@@ -513,7 +513,7 @@ class _SupportCard extends GetView<ShopOrderHistoryController> {
           Column(
             children: <Widget>[
               Text(
-                'Questions about an order?',
+                'questions_about_an_order'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20.sp,
@@ -544,7 +544,7 @@ class _SupportCard extends GetView<ShopOrderHistoryController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        'Contact Support',
+                        'gen_contact_support'.tr,
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w900,

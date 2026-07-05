@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
@@ -138,7 +139,7 @@ class WebinarLiveHeroCard extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
                                     Text(
-                                      isLocked ? 'Locked' : 'Join Now',
+                                      isLocked ? 'locked'.tr : 'join_now'.tr,
                                       style: TextStyle(
                                         fontSize: AppFont.font14.sp,
                                         fontWeight: FontWeight.w900,
@@ -215,7 +216,7 @@ class WebinarSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'Upcoming Sessions',
+      'upcoming_sessions'.tr,
       style: TextStyle(
         fontSize: AppFont.font20.sp,
         fontWeight: FontWeight.w700,
@@ -353,29 +354,29 @@ class WebinarSessionCard extends StatelessWidget {
   }
 
   String _monthLabel(DateTime? dateTime) {
-    if (dateTime == null) return 'N/A';
-    const List<String> months = <String>[
-      'JAN',
-      'FEB',
-      'MAR',
-      'APR',
-      'MAY',
-      'JUN',
-      'JUL',
-      'AUG',
-      'SEP',
-      'OCT',
-      'NOV',
-      'DEC',
+    if (dateTime == null) return 'n_a'.tr;
+    final List<String> months = <String>[
+      'month_jan'.tr,
+      'month_feb'.tr,
+      'month_mar'.tr,
+      'month_apr'.tr,
+      'month_may'.tr,
+      'month_jun'.tr,
+      'month_jul'.tr,
+      'month_aug'.tr,
+      'month_sep'.tr,
+      'month_oct'.tr,
+      'month_nov'.tr,
+      'month_dec'.tr,
     ];
     return months[dateTime.month - 1];
   }
 
   String _timeLabel(DateTime? dateTime) {
-    if (dateTime == null) return 'Not available';
+    if (dateTime == null) return 'not_available'.tr;
     final int hour = dateTime.hour;
     final int minute = dateTime.minute;
-    final String suffix = hour >= 12 ? 'PM' : 'AM';
+    final String suffix = hour >= 12 ? 'pm'.tr : 'am'.tr;
     final int displayHour = hour % 12 == 0 ? 12 : hour % 12;
     return '$displayHour:${minute.toString().padLeft(2, '0')} $suffix';
   }
@@ -394,7 +395,7 @@ class WebinarCourseAccessDialog extends StatelessWidget {
         borderRadius: BorderRadius.circular(kRadius24.r),
       ),
       title: Text(
-        'Selected course webinar',
+        'course_details'.tr,
         style: TextStyle(
           fontSize: AppFont.font18.sp,
           fontWeight: FontWeight.w700,
@@ -411,7 +412,7 @@ class WebinarCourseAccessDialog extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           if (courseNames.isEmpty)
-            const Text('Course details are not available.')
+            Text('not_available'.tr)
           else
             ...courseNames.map(
               (String courseName) => Padding(
@@ -441,7 +442,7 @@ class WebinarCourseAccessDialog extends StatelessWidget {
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text('done'.tr),
         ),
       ],
     );

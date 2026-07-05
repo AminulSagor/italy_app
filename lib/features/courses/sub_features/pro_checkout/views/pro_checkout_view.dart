@@ -39,7 +39,7 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 ProBackHeader(
-                  title: 'Checkout',
+                  title: 'gen_checkout'.tr,
                   onBackTap: () => Get.back<void>(),
                 ),
                 SizedBox(height: 20.h),
@@ -54,7 +54,7 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
                 Padding(
                   padding: EdgeInsets.only(left: 12.w),
                   child: Text(
-                    'PAYMENT METHOD',
+                    'payment_method'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font14.sp,
                       fontWeight: FontWeight.w700,
@@ -73,7 +73,7 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
                 ),
                 SizedBox(height: 58.h),
                 CustomButton.primary(
-                  text: 'Complete Purchase',
+                  text: 'complete_purchase'.tr,
                   isLoading: controller.isPurchasing.value,
                   onPressed: () => controller.completePurchase(controllerTag),
                 ),
@@ -85,7 +85,7 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
                       Icon(Icons.lock, size: 16.w, color: AppColors.bodyText),
                       SizedBox(width: 8.w),
                       Text(
-                        'SECURE SSL ENCRYPTION',
+                        'secure_ssl_encryption'.tr,
                         style: TextStyle(
                           fontSize: AppFont.font12.sp,
                           fontWeight: FontWeight.w800,

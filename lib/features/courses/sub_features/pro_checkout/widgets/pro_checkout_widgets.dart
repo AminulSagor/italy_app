@@ -5,6 +5,7 @@ import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../models/pro_checkout_models.dart';
+import 'package:get/get.dart';
 
 class CheckoutProductCard extends StatelessWidget {
   final String courseName;
@@ -51,7 +52,7 @@ class CheckoutProductCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      'ITALIR POTHE',
+                      'gen_italir_pothe'.tr,
                       style: TextStyle(
                         fontSize: AppFont.font12.sp,
                         fontWeight: FontWeight.w700,
@@ -206,9 +207,9 @@ class CheckoutPaymentMethodCard extends StatelessWidget {
   String _label(ProPaymentMethod method) {
     switch (method) {
       case ProPaymentMethod.googlePlay:
-        return 'Google Play';
+        return 'google_play'.tr;
       case ProPaymentMethod.card:
-        return 'Card / Stripe';
+        return 'card_stripe'.tr;
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/services/api_client.dart';
 import '../models/important_verb_detail_models.dart';
 import '../models/important_verb_models.dart';
+import 'package:get/get.dart' hide Response;
 
 class ImportantVerbsApiService {
   ImportantVerbsApiService({required ApiClient apiClient})
@@ -189,7 +190,7 @@ class ImportantVerbsApiService {
     if (data is Map) return Map<String, dynamic>.from(data);
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object',
+      message: 'response_is_not_a_valid_json_object'.tr,
     );
   }
 

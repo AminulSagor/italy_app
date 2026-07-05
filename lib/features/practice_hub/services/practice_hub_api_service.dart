@@ -191,7 +191,7 @@ class PracticeHubApiService {
     if (data is Map) return Map<String, dynamic>.from(data);
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object',
+      message: 'response_is_not_a_valid_json_object'.tr,
     );
   }
 

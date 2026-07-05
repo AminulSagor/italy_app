@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import '../../../../../core/services/api_client.dart';
@@ -75,7 +76,7 @@ class ChapterDetailApiService {
       title: _fallbackString(lesson['title'], fallbackTitle),
       videoProgressLabel: hasVideo
           ? _videoProgressLabel(progress.videoWatchPercent)
-          : 'Video not given',
+          : 'video_not_given'.tr,
       watchedTimeLabel: _durationLabelFromPercent(
         percent: progress.videoWatchPercent,
         durationSeconds: video?.durationSeconds ?? 0,
@@ -92,22 +93,22 @@ class ChapterDetailApiService {
       audio: audio,
       theoryBook: pdfFileId.isEmpty
           ? ChapterResourceModel.notGiven(
-              title: 'Theory Book',
+              title: 'gen_theory_book'.tr,
               iconName: 'book',
             )
           : ChapterResourceModel(
-              title: 'Theory Book',
-              subtitle: '...',
+              title: 'gen_theory_book'.tr,
+              subtitle: 'gen_not_given'.tr,
               iconName: 'book',
               fileId: pdfFileId,
               isAvailable: true,
               count: 0,
             ),
       vocabulary: ChapterResourceModel(
-        title: 'Vocabulary',
+        title: 'gen_vocabulary'.tr,
         subtitle: vocabularyCount > 0
-            ? '$vocabularyCount Flashcards'
-            : 'Not given',
+            ? '$vocabularyCount ${'flashcards'.tr}'
+            : 'gen_not_given'.tr,
         iconName: 'cards',
         isAvailable: vocabularyCount > 0,
         count: vocabularyCount,
@@ -116,17 +117,19 @@ class ChapterDetailApiService {
       quiz: quiz == null || !_boolValue(quiz!['hasQuiz'], fallback: false)
           ? null
           : ChapterQuizModel(
-              title: _fallbackString(quiz!['title'], 'Chapter Quiz'),
+              title: _fallbackString(quiz!['title'], 'chapter_quiz'.tr),
               subtitle: _fallbackString(
                 quiz!['description'],
-                'Test your knowledge of this chapter',
+                'chapter_quiz_description'.tr,
               ),
               status: progress.isCompleted
                   ? ChapterQuizStatus.completed
                   : canStartQuiz
                   ? ChapterQuizStatus.enabled
                   : ChapterQuizStatus.disabled,
-              actionLabel: canStartQuiz ? 'Start Quiz →' : 'REQUIRES 80% VIDEO',
+              actionLabel: canStartQuiz
+                  ? 'start_quiz'.tr
+                  : 'requires_80_video'.tr,
               scoreLabel: '',
               xpLabel: '',
               timeLabel: '',
@@ -325,19 +328,21 @@ class ChapterDetailApiService {
     }
 
     return LessonContentModel(
-      title: _fallbackString(lesson['title'], 'Lesson Theory'),
+      title: _fallbackString(lesson['title'], 'lesson_theory'.tr),
       italianText: theory,
       italianHighlightText: '',
       italianMissingText: '',
-      translationLabel: 'বাংলা অনুবাদ',
+      translationLabel: 'translation_label'.tr,
       banglaText: translation,
       banglaHighlightText: '',
     );
   }
 
   String _videoProgressLabel(int percent) {
-    if (percent >= 80) return '$percent% Watched – Quiz Unlocked!';
-    return '$percent% Watched – Keep Going!';
+    if (percent >= 80) {
+      return '$percent% ${'watched'.tr} – ${'quiz_unlocked'.tr}';
+    }
+    return '$percent% ${'watched'.tr} – ${'keep_going_1'.tr}';
   }
 
   String _durationLabelFromPercent({
@@ -371,7 +376,7 @@ class ChapterDetailApiService {
 
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object',
+      message: 'response_is_not_a_valid_json_object'.tr,
     );
   }
 

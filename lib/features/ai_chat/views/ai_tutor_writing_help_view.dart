@@ -47,7 +47,7 @@ class _AiTutorWritingHelpViewState extends State<AiTutorWritingHelpView> {
               Column(
                 children: <Widget>[
                   AiTutorHeader(
-                    title: 'gen_italian_writing_help'.tr.tr,
+                    title: 'gen_italian_writing_help'.tr,
                     onBackTap: _controller.closeWritingHelpPage,
                   ),
                   const Expanded(

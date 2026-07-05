@@ -34,7 +34,7 @@ class BlockUserBottomSheet extends GetView<MessageUserInfoController> {
               _WarningIcon(),
               SizedBox(height: 34.h),
               Text(
-                'Block $userName?',
+                'block_username'.trParams(<String, String>{'username': userName.toString()}),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font30.sp,
@@ -47,11 +47,11 @@ class BlockUserBottomSheet extends GetView<MessageUserInfoController> {
               Text.rich(
                 TextSpan(
                   children: <InlineSpan>[
-                    const TextSpan(
-                      text: 'You will no longer be able to message or see each other\'s profile. This action will also hide them from your ',
+                    TextSpan(
+                      text: 'block_user_warning_prefix'.tr,
                     ),
                     TextSpan(
-                      text: 'Leaderboard.',
+                      text: 'leaderboard_1'.tr,
                       style: TextStyle(color: AppColors.profileOrangeText),
                     ),
                   ],
@@ -66,7 +66,7 @@ class BlockUserBottomSheet extends GetView<MessageUserInfoController> {
               ),
               SizedBox(height: 44.h),
               CustomButton.primary(
-                text: 'YES, BLOCK USER',
+                text: 'yes_block_user'.tr,
                 isLoading: controller.isSubmitting.value,
                 btnColor: AppColors.blockDangerRed,
                 btnShadowColor: AppColors.blockDangerShadow,
@@ -75,7 +75,7 @@ class BlockUserBottomSheet extends GetView<MessageUserInfoController> {
               ),
               SizedBox(height: 24.h),
               CustomButton(
-                text: 'Cancel',
+                text: 'cancel'.tr,
                 width: double.infinity,
                 height: kButtonDefaultHeight,
                 btnColor: AppColors.white,

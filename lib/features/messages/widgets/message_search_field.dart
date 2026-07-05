@@ -36,7 +36,7 @@ class MessageSearchField extends StatelessWidget {
         ).copyWith(color: AppColors.homePrimaryText),
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: 'gen_search_learners'.tr.tr,
+          hintText: 'gen_search_learners'.tr,
           hintStyle: TextStyle(
             fontSize: AppFont.font18.sp,
             fontWeight: FontWeight.w400,

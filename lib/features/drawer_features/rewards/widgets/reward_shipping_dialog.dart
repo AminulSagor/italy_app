@@ -77,7 +77,7 @@ class RewardShippingDialog extends GetView<RewardController> {
                     SizedBox(height: 27.h),
                     Text(
                       isLocked
-                          ? 'Shipping Address Locked'
+                          ? 'shipping_address_locked'.tr
                           : 'Where should we send\n${reward?.title ?? 'your reward'}?',
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
@@ -93,14 +93,14 @@ class RewardShippingDialog extends GetView<RewardController> {
                     SizedBox(height: 27.h),
                     _ShippingField(
                       controller: controller.fullNameController,
-                      hint: 'Full Name',
+                      hint: 'gen_full_name_1'.tr,
                       icon: Icons.person_outline_rounded,
                       enabled: !isLocked,
                     ),
                     SizedBox(height: 15.h),
                     _ShippingField(
                       controller: controller.whatsappController,
-                      hint: 'WhatsApp Number',
+                      hint: 'whatsapp_number'.tr,
                       icon: Icons.phone_in_talk_outlined,
                       keyboardType: TextInputType.phone,
                       enabled: !isLocked,
@@ -108,7 +108,7 @@ class RewardShippingDialog extends GetView<RewardController> {
                     SizedBox(height: 15.h),
                     _ShippingField(
                       controller: controller.addressController,
-                      hint: 'Italian Home Address',
+                      hint: 'italian_home_address'.tr,
                       icon: Icons.location_on_outlined,
                       maxLines: 3,
                       height: 78,
@@ -116,7 +116,7 @@ class RewardShippingDialog extends GetView<RewardController> {
                     ),
                     SizedBox(height: 28.h),
                     RewardPrimaryButton(
-                      text: isLocked ? 'Address Locked' : 'Save Address',
+                      text: isLocked ? 'address_locked'.tr : 'save_address'.tr,
                       suffixIcon: Icons.local_shipping_outlined,
                       onTap: isLocked ? null : controller.submitShippingAddress,
                       isLoading: controller.isSavingShippingAddress.value,
@@ -136,8 +136,8 @@ class RewardShippingDialog extends GetView<RewardController> {
                           Expanded(
                             child: Text(
                               isLocked
-                                  ? 'The address can no longer be changed after dispatch.'
-                                  : 'Our team will contact you on WhatsApp with tracking information.',
+                                  ? 'the_address_can_no_longer_be_changed_after_dispatc'.tr
+                                  : 'our_team_will_contact_you_on_whatsapp_with_trackin'.tr,
                               style: TextStyle(
                                 fontSize: 12.sp,
                                 height: 1.35,

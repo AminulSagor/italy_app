@@ -100,7 +100,8 @@ class _NotificationList extends StatelessWidget {
             parent: BouncingScrollPhysics(),
           ),
           padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 34.h),
-          itemCount: controller.notifications.length +
+          itemCount:
+              controller.notifications.length +
               (controller.isLoadingMore.value ? 1 : 0),
           separatorBuilder: (_, _) => SizedBox(height: 24.h),
           itemBuilder: (BuildContext context, int index) {
@@ -169,7 +170,7 @@ class _NotificationsHeader extends StatelessWidget {
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
-              'Notifications',
+              'notifications'.tr,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -192,7 +193,7 @@ class _NotificationsHeader extends StatelessWidget {
                     ),
                   )
                 : Text(
-                    'Mark all as read',
+                    'mark_all_as_read'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font14.sp,
                       fontWeight: FontWeight.w600,
@@ -245,8 +246,7 @@ class _FilterList extends StatelessWidget {
           return Obx(
             () => NotificationFilterChip(
               filter: filter,
-              isSelected:
-                  controller.selectedCategory.value == filter.category,
+              isSelected: controller.selectedCategory.value == filter.category,
               onTap: controller.selectCategory,
             ),
           );

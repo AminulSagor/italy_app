@@ -72,12 +72,12 @@ class AppDrawer extends GetView<AppDrawerController> {
                       SizedBox(height: 35.h),
                       _DrawerItem(
                         icon: Icons.shopping_bag_outlined,
-                        title: 'Shop',
+                        title: 'gen_shop'.tr,
                         onTap: onShopTap,
                       ),
                       _DrawerItem(
                         icon: Icons.menu_book_outlined,
-                        title: 'Guide',
+                        title: 'gen_guide'.tr,
                         onTap:
                             onGuideTap ??
                             () {
@@ -87,7 +87,7 @@ class AppDrawer extends GetView<AppDrawerController> {
                       ),
                       _DrawerItem(
                         icon: Icons.card_giftcard_outlined,
-                        title: 'Reward',
+                        title: 'gen_reward'.tr,
                         onTap:
                             onRewardTap ??
                             () {
@@ -97,7 +97,7 @@ class AppDrawer extends GetView<AppDrawerController> {
                       ),
                       _DrawerItem(
                         icon: Icons.help_outline,
-                        title: 'Support',
+                        title: 'gen_support'.tr,
                         onTap:
                             onSupportTap ??
                             () {
@@ -107,12 +107,12 @@ class AppDrawer extends GetView<AppDrawerController> {
                       ),
                       _DrawerItem(
                         icon: Icons.translate,
-                        title: 'Language',
+                        title: 'gen_language'.tr,
                         onTap: onLanguageTap,
                       ),
                       _DrawerItem(
                         icon: Icons.settings_outlined,
-                        title: 'Settings',
+                        title: 'gen_settings'.tr,
                         onTap:
                             onSettingsTap ??
                             () {
@@ -126,7 +126,7 @@ class AppDrawer extends GetView<AppDrawerController> {
                       ),
                       SizedBox(height: 24.h),
                       CustomButton(
-                        text: 'Log Out',
+                        text: 'log_out'.tr,
                         height: 56.h,
                         isLoading: false,
                         showShadow: false,
@@ -138,7 +138,7 @@ class AppDrawer extends GetView<AppDrawerController> {
                       ),
                       SizedBox(height: 18.h),
                       Text(
-                        'VERSION 1.0.2',
+                        'version_1_0_2'.tr,
                         style: TextStyle(
                           fontSize: 10.sp,
                           letterSpacing: 1.3,
@@ -220,7 +220,11 @@ class _DrawerProfileHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(100.r),
             ),
             child: Text(
+<<<<<<< HEAD
               league,
+=======
+              'level_level'.trParams(<String, String>{'level': level.toString()}),
+>>>>>>> main
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w900,

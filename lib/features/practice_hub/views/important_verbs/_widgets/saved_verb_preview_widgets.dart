@@ -26,7 +26,7 @@ class SavedVerbPreviewSection extends GetView<ImportantVerbsController> {
                 child: Row(
                   children: <Widget>[
                     Text(
-                      'Saved Verbs',
+                      'gen_saved_verbs'.tr,
                       style: TextStyle(
                         fontSize: 20.sp,
                         height: 1,
@@ -61,7 +61,7 @@ class SavedVerbPreviewSection extends GetView<ImportantVerbsController> {
                 child: Row(
                   children: <Widget>[
                     Text(
-                      'VIEW ALL',
+                      'gen_view_all'.tr,
                       style: TextStyle(
                         fontSize: 11.sp,
                         height: 1,
@@ -93,7 +93,7 @@ class SavedVerbPreviewSection extends GetView<ImportantVerbsController> {
                 height: 72.h,
                 child: Center(
                   child: Text(
-                    'No saved verbs yet',
+                    'no_saved_verbs_yet'.tr,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,

@@ -357,7 +357,7 @@ class RewardVisuals {
 }
 
 String formatRewardDate(DateTime? date) {
-  if (date == null) return 'Date unavailable';
+  if (date == null) return 'date_unavailable'.tr;
   const List<String> months = <String>[
     'Jan',
     'Feb',

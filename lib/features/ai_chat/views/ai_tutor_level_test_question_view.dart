@@ -28,7 +28,10 @@ class AiTutorLevelTestQuestionView
               Padding(
                 padding: EdgeInsets.fromLTRB(24.w, 22.h, 24.w, 0),
                 child: AiTutorLevelTestHeader(
-                  title: 'Question $number of ${controller.questions.length}',
+                  title: 'question_x_of_y'.trParams(<String, String>{
+                    'current': number.toString(),
+                    'total': controller.questions.length.toString(),
+                  }),
                   onBackTap: controller.handleBack,
                 ),
               ),
@@ -133,8 +136,8 @@ class AiTutorLevelTestQuestionView
                 ),
                 child: AiTutorLevelPrimaryButton(
                   text: controller.isLastQuestion
-                      ? 'Analyze My Level'
-                      : 'Continue',
+                      ? 'analyze_my_level'.tr
+                      : 'continue_1'.tr,
                   onTap: controller.submitCurrentAnswer,
                   isLoading: controller.isSubmitting.value,
                   isEnabled: controller.canContinue,
@@ -261,7 +264,7 @@ class _OpenAnswerField extends StatelessWidget {
           color: const Color(0xFF2D3935),
         ),
         decoration: InputDecoration(
-          hintText: 'gen_write_your_answer_here'.tr.tr,
+          hintText: 'gen_write_your_answer_here'.tr,
           border: InputBorder.none,
           counterStyle: TextStyle(
             fontSize: 10.sp,

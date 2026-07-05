@@ -30,7 +30,7 @@ class VerbDetailsView extends GetView<ImportantVerbsController> {
 
           if (summary == null) {
             return _VerbDetailsMessage(
-              message: 'Verb information is unavailable.',
+              message: 'verb_information_is_unavailable'.tr,
               onBack: controller.onVerbDetailBackTap,
             );
           }
@@ -64,7 +64,7 @@ class VerbDetailsView extends GetView<ImportantVerbsController> {
                     VerbInformationCard(information: details.information),
                     SizedBox(height: 32.h),
                     Text(
-                      'Verb Forms & Tenses',
+                      'verb_forms_tenses'.tr,
                       style: TextStyle(
                         fontSize: 20.sp,
                         height: 1,
@@ -76,7 +76,7 @@ class VerbDetailsView extends GetView<ImportantVerbsController> {
                     SizedBox(height: 24.h),
                     if (details.forms.isEmpty)
                       Text(
-                        'No verb forms are available.',
+                        'no_verb_forms_are_available'.tr,
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
@@ -130,7 +130,7 @@ class _VerbDetailsRetry extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12.h),
-            TextButton(onPressed: onRetry, child: const Text('RETRY')),
+            TextButton(onPressed: onRetry, child: Text('retry'.tr)),
           ],
         ),
       ),
@@ -158,7 +158,7 @@ class _VerbDetailsMessage extends StatelessWidget {
               style: TextStyle(fontSize: 15.sp, color: const Color(0xFF747A80)),
             ),
             SizedBox(height: 12.h),
-            TextButton(onPressed: onBack, child: const Text('GO BACK')),
+            TextButton(onPressed: onBack, child: Text('go_back'.tr)),
           ],
         ),
       ),

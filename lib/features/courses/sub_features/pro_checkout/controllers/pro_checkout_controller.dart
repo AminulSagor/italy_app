@@ -21,8 +21,8 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
     required this.courseName,
     required this.lessonCount,
     required this.onPurchaseCompleted,
-  })  : _proCheckoutApiService = proCheckoutApiService,
-        _billingService = billingService;
+  }) : _proCheckoutApiService = proCheckoutApiService,
+       _billingService = billingService;
 
   static const Duration _purchaseTimeout = Duration(minutes: 2);
   static const Duration _billingReturnDelay = Duration(milliseconds: 900);
@@ -91,13 +91,13 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
     try {
       final ApiResult<ProOrderModel> result =
           await ApiErrorHandler.call<ProOrderModel>(
-        () => _proCheckoutApiService.fetchOrderSummary(
-          courseId: courseId,
-          fallbackCourseName: courseName,
-          lessonCount: lessonCount,
-        ),
-        errorTitle: 'Course Purchase',
-      );
+            () => _proCheckoutApiService.fetchOrderSummary(
+              courseId: courseId,
+              fallbackCourseName: courseName,
+              lessonCount: lessonCount,
+            ),
+            errorTitle: 'course_purchase'.tr,
+          );
       if (!result.isSuccess || result.data == null) return;
 
       order.value = result.data;
@@ -175,8 +175,8 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
     isPurchasing.value = true;
     billingError.value = '';
     try {
-      final ProPendingGooglePlayPurchaseModel? existing =
-          _billingService.loadPendingPurchase();
+      final ProPendingGooglePlayPurchaseModel? existing = _billingService
+          .loadPendingPurchase();
       if (existing != null && existing.courseId != courseId) {
         await _billingService.clearPendingPurchase();
       } else if (existing != null) {
@@ -210,12 +210,12 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
 
       final ApiResult<ProPendingGooglePlayPurchaseModel> orderResult =
           await ApiErrorHandler.call<ProPendingGooglePlayPurchaseModel>(
-        () => _proCheckoutApiService.createGooglePlayOrder(
-          order: currentOrder,
-          currency: selectedCurrency.value,
-        ),
-        errorTitle: 'Course Purchase',
-      );
+            () => _proCheckoutApiService.createGooglePlayOrder(
+              order: currentOrder,
+              currency: selectedCurrency.value,
+            ),
+            errorTitle: 'course_purchase'.tr,
+          );
       if (!orderResult.isSuccess || orderResult.data == null) return;
 
       final ProPendingGooglePlayPurchaseModel pending = orderResult.data!;
@@ -278,12 +278,12 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<bool> _retryPendingPurchase() async {
-    final ProPendingGooglePlayPurchaseModel? pending =
-        _billingService.loadPendingPurchase();
+    final ProPendingGooglePlayPurchaseModel? pending = _billingService
+        .loadPendingPurchase();
     if (pending == null || pending.courseId != courseId) return false;
 
-    final PurchaseDetails? purchase =
-        await _billingService.queryPendingPurchase();
+    final PurchaseDetails? purchase = await _billingService
+        .queryPendingPurchase();
     if (purchase == null) return false;
     await _handlePurchase(purchase);
     return true;
@@ -322,8 +322,8 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<void> _handlePurchase(PurchaseDetails purchase) async {
-    final ProPendingGooglePlayPurchaseModel? pending =
-        _billingService.loadPendingPurchase();
+    final ProPendingGooglePlayPurchaseModel? pending = _billingService
+        .loadPendingPurchase();
     if (pending == null || purchase.productID != pending.productId) return;
 
     switch (purchase.status) {
@@ -377,15 +377,15 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       ProPurchaseResultModel? completed;
       final ApiResult<ProPurchaseResultModel> verification =
           await ApiErrorHandler.call<ProPurchaseResultModel>(
-        () => _proCheckoutApiService.verifyGooglePlayPurchase(
-          pending: pending,
-          purchaseToken: token,
-          transactionId: _transactionId(purchase),
-          courseName: courseName,
-          lessonCount: lessonCount,
-        ),
-        showError: false,
-      );
+            () => _proCheckoutApiService.verifyGooglePlayPurchase(
+              pending: pending,
+              purchaseToken: token,
+              transactionId: _transactionId(purchase),
+              courseName: courseName,
+              lessonCount: lessonCount,
+            ),
+            showError: false,
+          );
       if (verification.isSuccess && verification.data != null) {
         completed = verification.data;
       } else {

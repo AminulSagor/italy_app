@@ -10,7 +10,7 @@ class SettingsSuccessView extends StatelessWidget {
   String get _type {
     final args = Get.arguments;
     if (args is Map && args['type'] is String) return args['type'] as String;
-    return 'emailUpdated';
+    return 'emailupdated'.tr;
   }
 
   @override
@@ -58,10 +58,10 @@ class SettingsSuccessView extends StatelessWidget {
                   SizedBox(height: isDelete ? 39.h : 45.h),
                   Text(
                     isDelete
-                        ? 'Account Deleted'
+                        ? 'account_deleted'.tr
                         : isPhone
-                        ? 'Phone Updated'
-                        : 'Email Updated',
+                        ? 'phone_updated'.tr
+                        : 'email_updated'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: isDelete ? 29.sp : 37.sp,
@@ -73,10 +73,10 @@ class SettingsSuccessView extends StatelessWidget {
                   SizedBox(height: 25.h),
                   Text(
                     isDelete
-                        ? 'Your data, progress, and certificates\nhave been permanently removed.\nArrivederci!'
+                        ? 'your_data_progress_and_certificates_nhave_been_per'.tr
                         : isPhone
-                        ? 'Your Phone Number has been\nsuccessfully updated. You can now\nlog in with your new credentials.'
-                        : 'Your Email ID has been\nsuccessfully updated. You can now\nlog in with your new credentials.',
+                        ? 'your_phone_number_has_been_nsuccessfully_updated_y'.tr
+                        : 'your_email_id_has_been_nsuccessfully_updated_you_c'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18.sp,
@@ -93,7 +93,7 @@ class SettingsSuccessView extends StatelessWidget {
                   SettingsPrimaryButton(
                     text: isDelete
                         ? 'back_to_login'.tr.toUpperCase()
-                        : 'Back to Edit Profile  →',
+                        : 'back_to_edit_profile'.tr,
                     height: isDelete ? 62 : 68,
                     onTap: () {
                       if (isDelete) {
@@ -172,7 +172,7 @@ class _SecureHeroIcon extends StatelessWidget {
                 borderRadius: BorderRadius.circular(100.r),
               ),
               child: Text(
-                '🛡 SECURE',
+                'secure'.tr,
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w900,
@@ -255,7 +255,7 @@ class _LoginReadyCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Login Ready',
+                'login_ready'.tr,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w900,
@@ -264,7 +264,7 @@ class _LoginReadyCard extends StatelessWidget {
               ),
               SizedBox(height: 3.h),
               Text(
-                'Access your Italian lessons instantly.',
+                'login_ready_desc'.tr,
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,

@@ -26,7 +26,7 @@ class DailyChallengesView extends GetView<PracticeHubController> {
             if (controller.dailyChallengeDashboard.value == null) {
               return _DailyChallengesEmptyView(
                 message: controller.dailyChallengesError.value.isEmpty
-                    ? 'Daily challenges are not available right now.'
+                    ? 'daily_challenges_are_not_available_right_now'.tr
                     : controller.dailyChallengesError.value,
                 onRetry: () => controller.loadDailyChallenges(showError: true),
               );
@@ -128,7 +128,7 @@ class _DailyChallengesEmptyView extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 14.h),
-                TextButton(onPressed: onRetry, child: const Text('Retry')),
+                TextButton(onPressed: onRetry, child: Text('retry'.tr)),
                 const Spacer(),
               ],
             ),
@@ -158,7 +158,7 @@ class _DailyChallengeHeader extends GetView<PracticeHubController> {
           SizedBox(width: 24.w),
           Expanded(
             child: Text(
-              'Daily Challenges',
+              'gen_daily_challenges'.tr,
               style: TextStyle(
                 fontSize: AppFont.font20.sp,
                 height: 1,
@@ -192,7 +192,7 @@ class _DailyChallengeHeader extends GetView<PracticeHubController> {
                   ),
                   SizedBox(width: 5.w),
                   Text(
-                    '${controller.dailyChallengeXp} XP',
+                    'controller_dailychallengexp_xp'.trParams(<String, String>{'dailychallengexp': controller.dailyChallengeXp.toString()}),
                     style: TextStyle(
                       fontSize: AppFont.font16.sp,
                       fontWeight: FontWeight.w900,
@@ -362,7 +362,7 @@ class _DailyTaskCard extends GetView<PracticeHubController> {
                 Row(
                   children: <Widget>[
                     Text(
-                      '${task.progressValue} / ${task.targetValue}${task.unit}',
+                      'task_progressvalue_task_targetvalue_task_unit'.trParams(<String, String>{'progressvalue': task.progressValue.toString(), 'targetvalue': task.targetValue.toString(), 'unit': task.unit.toString()}),
                       style: TextStyle(
                         fontSize: AppFont.font14.sp,
                         fontWeight: FontWeight.w900,
@@ -542,10 +542,10 @@ class _DailyChestCard extends GetView<PracticeHubController> {
                   children: <Widget>[
                     Text(
                       opened
-                          ? 'Daily Chest\nOpened'
+                          ? 'daily_chest_nopened'.tr
                           : unlocked
-                          ? 'Daily Chest\nUnlocked'
-                          : 'Unlock the\nDaily Chest',
+                          ? 'daily_chest_nunlocked'.tr
+                          : 'unlock_the_ndaily_chest'.tr,
                       style: TextStyle(
                         fontSize: AppFont.font18.sp,
                         fontWeight: FontWeight.w900,
@@ -556,9 +556,9 @@ class _DailyChestCard extends GetView<PracticeHubController> {
                     SizedBox(height: 4.h),
                     Text(
                       opened
-                          ? 'Tap to view your reward'
+                          ? 'tap_to_view_your_reward'.tr
                           : unlocked
-                          ? 'Tap to open your reward'
+                          ? 'tap_to_open_your_reward'.tr
                           : 'Complete all $taskCount tasks to open',
                       style: TextStyle(
                         fontSize: AppFont.font13.sp,

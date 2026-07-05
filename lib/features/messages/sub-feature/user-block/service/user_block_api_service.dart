@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../../../core/services/api_client.dart';
 import '../../../../../core/services/api_error_handler.dart';
 import '../models/user_block_models.dart';
+import 'package:get/get.dart' hide Response;
 
 class UserBlockApiService {
   UserBlockApiService({required ApiClient apiClient}) : _apiClient = apiClient;
@@ -131,7 +132,7 @@ class UserBlockApiService {
     if (data is Map) return Map<String, dynamic>.from(data);
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object',
+      message: 'response_is_not_a_valid_json_object'.tr,
     );
   }
 
@@ -143,7 +144,7 @@ class UserBlockApiService {
     }
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON array',
+      message: 'response_is_not_a_valid_json_array'.tr,
     );
   }
 }

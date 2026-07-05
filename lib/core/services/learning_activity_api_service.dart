@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../models/learning_activity_models.dart';
 import 'api_client.dart';
+import 'package:get/get.dart' hide Response;
 
 class LearningActivityApiService {
   LearningActivityApiService({required ApiClient apiClient})
@@ -33,7 +34,7 @@ class LearningActivityApiService {
     if (data is Map) return Map<String, dynamic>.from(data);
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object.',
+      message: 'response_is_not_a_valid_json_object_1'.tr,
     );
   }
 }

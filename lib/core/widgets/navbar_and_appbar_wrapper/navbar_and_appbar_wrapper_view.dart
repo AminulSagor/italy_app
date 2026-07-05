@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../features/ai_chat/ai_chat_view.dart';
+import '../../../features/cv_generation/views/cv_home_view.dart';
 import '../../../features/home/views/home_view.dart';
 import '../../../features/leaderboard/views/leaderboard_view.dart';
 import '../../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import '../../../features/messages/views/messages_view.dart';
 import '../../../features/practice_hub/views/practice_hub_view.dart';
-import '../../../features/service_hub/views/service_hub_view.dart';
+
 import '../../controllers/user_session_controller.dart';
 import '../app_home_bottom_navigation_bar.dart';
 import '../app_home_top_bar.dart';
@@ -47,7 +48,7 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
                 final UserSessionController session =
                     Get.find<UserSessionController>();
                 return AppHomeTopBar(
-                  greeting: 'Buongiorno,',
+                  greeting: 'buongiorno'.tr,
                   userName: session.displayName,
                   avatarUrl: session.avatarUrl,
                   streakLabel: '${session.currentStreakDays}d',
@@ -134,9 +135,12 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
       case 3:
         return _TabNavigator(id: 3, content: const LeaderboardView());
       case 4:
-        return _TabNavigator(id: 4, content: const ServiceHubView());
+        return const _TabNavigator(
+          id: 4,
+          content: CvHomeView(),
+        );
       default:
-        return const CustomPlaceHolder();
+        return const SizedBox.shrink();
     }
   }
 }
@@ -156,12 +160,12 @@ class _CallTransitionBlocker extends StatelessWidget {
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                CircularProgressIndicator(),
-                SizedBox(height: 14),
-                Text('Connecting your call...'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 14),
+                Text('loading'.tr),
               ],
             ),
           ),
@@ -191,6 +195,6 @@ class CustomPlaceHolder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Placeholder'));
+    return Center(child: Text('placeholder'.tr));
   }
 }

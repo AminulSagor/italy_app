@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../../core/themes/app_colors.dart';
@@ -133,7 +134,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
         videoUrl = await widget.loadVideoUrl() ?? '';
       }
       if (videoUrl.isEmpty) {
-        throw StateError('Video URL is not available');
+        throw StateError('video_url_is_not_available'.tr);
       }
 
       controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
@@ -154,7 +155,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
 
       setState(() {
         _isInitializing = false;
-        _errorMessage = 'Video could not be loaded. Tap to retry.';
+        _errorMessage = 'video_could_not_be_loaded_tap_to_retry'.tr;
       });
     }
   }
@@ -203,15 +204,16 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     }
 
     final Duration remaining = duration - position;
-    final bool isComplete = position > Duration.zero &&
+    final bool isComplete =
+        position > Duration.zero &&
         (position >= duration ||
             remaining <= const Duration(milliseconds: 150));
     final int percent = isComplete
         ? 100
         : ((position.inMilliseconds / duration.inMilliseconds) * 100)
-            .floor()
-            .clamp(0, 99)
-            .toInt();
+              .floor()
+              .clamp(0, 99)
+              .toInt();
 
     if (isComplete && !_hasWatchedFullyNotifier.value) {
       _hasWatchedFullyNotifier.value = true;

@@ -244,16 +244,16 @@ class WebinarController extends GetxController {
   Future<bool> onWillPopLive() async {
     final bool? shouldLeave = await Get.dialog<bool>(
       AlertDialog(
-        title: const Text('Leave webinar?'),
-        content: const Text('Are you sure you want to leave this webinar?'),
+        title: Text('leave_webinar'.tr),
+        content: Text('are_you_sure_you_want_to_leave_this_webinar'.tr),
         actions: <Widget>[
           TextButton(
             onPressed: () => Get.back<bool>(result: false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr),
           ),
           TextButton(
             onPressed: () => Get.back<bool>(result: true),
-            child: const Text('Leave'),
+            child: Text('leave'.tr),
           ),
         ],
       ),

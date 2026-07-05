@@ -30,8 +30,8 @@ class FinalExamOverviewView extends GetView<FinalExamController> {
         final FinalExamOverviewModel? overview = controller.overview.value;
         return FinalExamBottomButton(
           label: overview?.canStart == true
-              ? 'Start The Exam'
-              : 'Final Exam Locked',
+              ? 'start_the_exam'.tr
+              : 'final_exam_locked'.tr,
           onTap: controller.startExam,
           isLoading: controller.isSubmitting.value,
         );
@@ -65,7 +65,7 @@ class FinalExamOverviewView extends GetView<FinalExamController> {
                 _HeroCard(overview: overview),
                 SizedBox(height: 30.h),
                 Text(
-                  'EXAM COMPONENTS',
+                  'exam_components'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font12.sp,
                     fontWeight: FontWeight.w700,

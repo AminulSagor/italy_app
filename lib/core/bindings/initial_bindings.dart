@@ -9,6 +9,8 @@ import '../../features/ai_chat/services/ai_tutor_voice_service.dart';
 import '../../features/courses/controllers/courses_controller.dart';
 import '../../features/courses/services/courses_api_service.dart';
 import '../../features/courses/services/courses_mock_service.dart';
+import '../../features/cv_generation/controllers/cv_home_controller.dart';
+import '../../features/cv_generation/services/cv_generation_api_service.dart';
 import '../../features/home/controllers/home_controller.dart';
 import '../../features/home/services/home_api_service.dart';
 import '../../features/drawer_features/settings/services/user_settings_service.dart';
@@ -183,7 +185,7 @@ class InitialBindings extends Bindings {
                 final MessageCallParticipantModel participant =
                     MessageCallParticipantModel(
                       id: callData['callerId']?.toString() ?? '',
-                      name: callData['callerName']?.toString() ?? 'Caller',
+                      name: callData['callerName']?.toString() ?? 'caller'.tr,
                       avatarUrl: callData['callerAvatarUrl']?.toString() ?? '',
                       isOnline: true,
                     );
@@ -334,5 +336,24 @@ class InitialBindings extends Bindings {
       ),
       fenix: true,
     );
+
+    if (!Get.isRegistered<CvGenerationApiService>()) {
+      Get.lazyPut<CvGenerationApiService>(
+            () => CvGenerationApiService(
+          apiClient: Get.find<ApiClient>(),
+        ),
+        fenix: true,
+      );
+    }
+
+    if (!Get.isRegistered<CvHomeController>()) {
+      Get.lazyPut<CvHomeController>(
+            () => CvHomeController(
+          apiService:
+          Get.find<CvGenerationApiService>(),
+        ),
+        fenix: true,
+      );
+    }
   }
 }

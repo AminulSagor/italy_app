@@ -89,7 +89,7 @@ class _QuotedPromptText extends StatelessWidget {
 
     if (match == null) {
       return Text(
-        '"$text"',
+        text,
         style: baseStyle.copyWith(color: AppColors.primaryGreen),
       );
     }

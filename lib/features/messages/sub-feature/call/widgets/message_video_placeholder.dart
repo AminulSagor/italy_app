@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class MessageVideoPlaceholder extends StatelessWidget {
   const MessageVideoPlaceholder({
@@ -29,7 +30,7 @@ class MessageVideoPlaceholder extends StatelessWidget {
           borderRadius: BorderRadius.circular(kRadius24.r),
         ),
         child: Text(
-          isCameraOff ? 'Camera off' : 'Waiting for video...',
+          isCameraOff ? 'camera_off'.tr : 'waiting_for_video'.tr,
           style: TextStyle(
             fontSize: AppFont.font16.sp,
             fontWeight: FontWeight.w700,

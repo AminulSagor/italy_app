@@ -86,14 +86,14 @@ class SettingsController extends GetxController {
 
   String get displayName {
     final String name = profile.value?.fullName.trim() ?? '';
-    return name.isEmpty ? 'Italian Learner' : name;
+    return name.isEmpty ? 'italian_learner'.tr : name;
   }
 
   int get streakFreezeCount => profile.value?.streakFreezeCount ?? 0;
 
   String get primaryContact {
     final UserSettingsProfileModel? value = profile.value;
-    return value?.email ?? value?.phone ?? 'No contact added';
+    return value?.email ?? value?.phone ?? 'no_contact_added'.tr;
   }
 
   bool get selectedContactIsEmail => editProfileTab.value == 'email';
@@ -163,7 +163,7 @@ class SettingsController extends GetxController {
           await ApiErrorHandler.call<UserSettingsProfileModel>(
             _userSettingsService.getProfile,
             showError: showError,
-            errorTitle: 'Profile',
+            errorTitle: 'gen_profile'.tr,
           );
 
       if (!result.isSuccess || result.data == null) return;
@@ -176,7 +176,7 @@ class SettingsController extends GetxController {
   Future<bool> saveFullName() async {
     final String fullName = fullNameController.text.trim();
     if (fullName.length < 2) {
-      Get.snackbar('Full Name', 'Please enter at least 2 characters.');
+      Get.snackbar('gen_full_name_1'.tr, 'please_enter_at_least_2_characters'.tr);
       return false;
     }
 
@@ -185,7 +185,7 @@ class SettingsController extends GetxController {
       final ApiResult<UserSettingsProfileResponseModel> result =
           await ApiErrorHandler.call<UserSettingsProfileResponseModel>(
             () => _userSettingsService.updateFullName(fullName),
-            errorTitle: 'Update Profile',
+            errorTitle: 'update_profile'.tr,
           );
 
       if (!result.isSuccess || result.data == null) return false;
@@ -238,7 +238,7 @@ class SettingsController extends GetxController {
             () => isEmail
                 ? _userSettingsService.requestEmailChangeOtp(value)
                 : _userSettingsService.requestPhoneChangeOtp(value),
-            errorTitle: 'Verify Contact',
+            errorTitle: 'verify_contact'.tr,
           );
 
       if (!result.isSuccess || result.data == null) return false;
@@ -249,7 +249,7 @@ class SettingsController extends GetxController {
 
       final String? devOtp = result.data!.devOtp;
       if (devOtp != null && devOtp.isNotEmpty) {
-        Get.snackbar('OTP', devOtp);
+        Get.snackbar('otp'.tr, devOtp);
       }
 
       Get.toNamed(AppRoutes.verifyContact);
@@ -261,14 +261,14 @@ class SettingsController extends GetxController {
 
   Future<bool> verifyPendingContact() async {
     if (!isOtpComplete) {
-      Get.snackbar('Verification Code', 'Enter the complete 4-digit code.');
+      Get.snackbar('verification_code'.tr, 'enter_the_complete_4_digit_code'.tr);
       return false;
     }
 
     final String type = pendingContactType.value;
     final String destination = pendingContactValue.value;
     if (type.isEmpty || destination.isEmpty) {
-      Get.snackbar('Verify Contact', 'The verification request has expired.');
+      Get.snackbar('verify_contact'.tr, 'the_verification_request_has_expired'.tr);
       return false;
     }
 
@@ -285,7 +285,7 @@ class SettingsController extends GetxController {
                     email: destination,
                     otp: otpCode,
                   ),
-            errorTitle: 'Verify Contact',
+            errorTitle: 'verify_contact'.tr,
           );
 
       if (!result.isSuccess || result.data == null) return false;
@@ -321,14 +321,14 @@ class SettingsController extends GetxController {
                 : _userSettingsService.requestEmailChangeOtp(
                     pendingContactValue.value,
                   ),
-            errorTitle: 'Resend Code',
+            errorTitle: 'resend_code_1'.tr,
           );
 
       if (!result.isSuccess || result.data == null) return;
       clearOtpFields();
       final String? devOtp = result.data!.devOtp;
       Get.snackbar(
-        'Verification Code',
+        'verification_code_1'.tr,
         devOtp == null || devOtp.isEmpty
             ? result.data!.message
             : '${result.data!.message}\nCode: $devOtp',
@@ -374,7 +374,7 @@ class SettingsController extends GetxController {
       selectedAvatar.value = image;
       return true;
     } catch (error) {
-      Get.snackbar('Profile Photo', ApiErrorHandler.getErrorMessage(error));
+      Get.snackbar('gen_profile_photo'.tr, ApiErrorHandler.getErrorMessage(error));
       return false;
     }
   }
@@ -382,7 +382,7 @@ class SettingsController extends GetxController {
   Future<bool> uploadSelectedAvatar() async {
     final XFile? image = selectedAvatar.value;
     if (image == null) {
-      Get.snackbar('Profile Photo', 'Please choose a photo first.');
+      Get.snackbar('gen_profile_photo'.tr, 'please_choose_a_photo_first'.tr);
       return false;
     }
 
@@ -391,7 +391,7 @@ class SettingsController extends GetxController {
       final ApiResult<UserSettingsProfileResponseModel> result =
           await ApiErrorHandler.call<UserSettingsProfileResponseModel>(
             () => _userSettingsService.uploadAvatar(image),
-            errorTitle: 'Profile Photo',
+            errorTitle: 'gen_profile_photo'.tr,
           );
 
       if (!result.isSuccess || result.data == null) return false;
@@ -409,18 +409,18 @@ class SettingsController extends GetxController {
     final String confirmPassword = confirmPasswordController.text;
 
     if (currentPassword.isEmpty) {
-      Get.snackbar('Change Password', 'Enter your current password.');
+      Get.snackbar('gen_change_password'.tr, 'enter_your_current_password'.tr);
       return false;
     }
     if (!hasValidNewPassword) {
       Get.snackbar(
-        'Change Password',
+        'change_password'.tr,
         'Use 8+ characters with an uppercase letter, number, and special character.',
       );
       return false;
     }
     if (newPassword != confirmPassword) {
-      Get.snackbar('Change Password', 'The new passwords do not match.');
+      Get.snackbar('gen_change_password'.tr, 'the_new_passwords_do_not_match'.tr);
       return false;
     }
 
@@ -436,7 +436,7 @@ class SettingsController extends GetxController {
       final ApiResult<UserSettingsMessageModel> result =
           await ApiErrorHandler.call<UserSettingsMessageModel>(
             () => _userSettingsService.changePassword(payload),
-            errorTitle: 'Change Password',
+            errorTitle: 'gen_change_password'.tr,
           );
 
       if (!result.isSuccess) return false;
@@ -455,7 +455,7 @@ class SettingsController extends GetxController {
       final ApiResult<UserSettingsMessageModel> result =
           await ApiErrorHandler.call<UserSettingsMessageModel>(
             () => _userSettingsService.deleteAccount(displayName),
-            errorTitle: 'Delete Account',
+            errorTitle: 'gen_delete_account'.tr,
           );
 
       if (!result.isSuccess) return;
@@ -467,7 +467,7 @@ class SettingsController extends GetxController {
         Get.find<AppDrawerController>().clear();
       }
       Get.offAllNamed(AppRoutes.login);
-      Get.snackbar('Account Deleted', result.data?.message ?? 'Account deleted.');
+      Get.snackbar('account_deleted'.tr, result.data?.message ?? 'account_deleted_1'.tr);
     } finally {
       isDeletingAccount.value = false;
     }
@@ -516,7 +516,7 @@ class SettingsController extends GetxController {
   }
 
   void rateUs() {
-    Get.snackbar('Rate Us', 'Store rating page will open here.');
+    Get.snackbar('rate_us'.tr, 'store_rating_page_will_open_here'.tr);
   }
 
   void openPrivacyPolicy() => Get.toNamed(AppRoutes.privacyPolicy);
@@ -526,7 +526,7 @@ class SettingsController extends GetxController {
   bool _validateContact(String value, {required bool isEmail}) {
     if (isEmail) {
       if (!GetUtils.isEmail(value)) {
-        Get.snackbar('Email', 'Enter a valid email address.');
+        Get.snackbar('email'.tr, 'enter_a_valid_email_address'.tr);
         return false;
       }
       return true;
@@ -534,7 +534,7 @@ class SettingsController extends GetxController {
 
     if (!RegExp(r'^(?:\+8801\d{9}|\+39\d{8,11})$').hasMatch(value)) {
       Get.snackbar(
-        'Phone Number',
+        'phone_number_1'.tr,
         'Use a valid number such as +8801XXXXXXXXX or +39XXXXXXXXXX.',
       );
       return false;

@@ -33,7 +33,7 @@ class MessageIncomingCallController extends GetxController {
   late final MessageCallType callType;
   late final MessageCallParticipantModel caller;
 
-  final RxString statusLabel = 'Incoming call'.obs;
+  final RxString statusLabel = 'incoming_call'.tr.obs;
   final RxBool isProcessing = false.obs;
 
   Timer? _timeoutTimer;
@@ -55,7 +55,7 @@ class MessageIncomingCallController extends GetxController {
     caller = MessageCallParticipantModel.fromJson(callerData);
 
     _setStatus(
-      callType.isVideo ? 'Incoming video call' : 'Incoming voice call',
+      callType.isVideo ? 'incoming_video_call'.tr : 'incoming_voice_call'.tr,
     );
 
     _cancelledCallListener = _handleRemoteCallClosed;
@@ -75,7 +75,7 @@ class MessageIncomingCallController extends GetxController {
     }
 
     isProcessing.value = true;
-    _setStatus('Checking permissions...');
+    _setStatus('loading'.tr);
 
     try {
       await _callAgoraService.ensurePermissionsForCall(
@@ -96,9 +96,9 @@ class MessageIncomingCallController extends GetxController {
       if (session.id.isEmpty ||
           session.media.token.isEmpty ||
           session.media.channelName.isEmpty) {
-        throw const CallSocketException(
-          code: 'INVALID_ANSWER_RESPONSE',
-          message: 'The server returned invalid call credentials.',
+        throw CallSocketException(
+          code: 'invalid_answer_response'.tr,
+          message: 'the_server_returned_invalid_call_credentials'.tr,
         );
       }
 
@@ -117,14 +117,14 @@ class MessageIncomingCallController extends GetxController {
     } on CallSocketException catch (error) {
       _resetIncomingStatus();
       Get.snackbar(
-        'Unable to answer',
+        'unable_to_answer'.tr,
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (error) {
       _resetIncomingStatus();
       Get.snackbar(
-        'Unable to answer',
+        'unable_to_answer'.tr,
         error.toString(),
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -137,7 +137,7 @@ class MessageIncomingCallController extends GetxController {
     }
 
     isProcessing.value = true;
-    _setStatus('Declining...');
+    _setStatus('gen_decline'.tr);
 
     try {
       await _callSocketService.rejectCall(callId: callId);
@@ -145,13 +145,13 @@ class MessageIncomingCallController extends GetxController {
       await _finishCall();
     } on CallSocketException catch (error) {
       Get.snackbar(
-        'Unable to decline',
+        'unable_to_decline'.tr,
         error.message,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (error) {
       Get.snackbar(
-        'Unable to decline',
+        'unable_to_decline'.tr,
         error.toString(),
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -166,7 +166,7 @@ class MessageIncomingCallController extends GetxController {
     }
 
     isProcessing.value = true;
-    _setStatus('Missed call');
+    _setStatus('missed_call'.tr);
 
     try {
       await _callSocketService.timeoutCall(callId: callId);
@@ -198,7 +198,7 @@ class MessageIncomingCallController extends GetxController {
 
   void _resetIncomingStatus() {
     _setStatus(
-      callType.isVideo ? 'Incoming video call' : 'Incoming voice call',
+      callType.isVideo ? 'incoming_video_call'.tr : 'incoming_voice_call'.tr,
     );
     isProcessing.value = false;
   }

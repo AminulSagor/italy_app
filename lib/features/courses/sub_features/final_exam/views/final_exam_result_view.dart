@@ -42,7 +42,7 @@ class FinalExamResultView extends GetView<FinalExamController> {
           top: false,
           child: CustomButton.primary(
             onPressed: controller.openCertificate,
-            text: 'View Official Certificate',
+            text: 'view_official_certificate'.tr,
             icon: Icons.article_outlined,
           ),
         ),
@@ -79,7 +79,7 @@ class FinalExamResultView extends GetView<FinalExamController> {
                     ),
                     Expanded(
                       child: Text(
-                        'Exam Results',
+                        'exam_results'.tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: AppFont.font16.sp,
@@ -111,7 +111,7 @@ class FinalExamResultView extends GetView<FinalExamController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        '${result.markPercent}%',
+                        'result_markpercent'.trParams(<String, String>{'markpercent': result.markPercent.toString()}),
                         style: TextStyle(
                           fontSize: AppFont.font36.sp,
                           fontWeight: FontWeight.w800,
@@ -119,7 +119,7 @@ class FinalExamResultView extends GetView<FinalExamController> {
                         ),
                       ),
                       Text(
-                        'MARK ACHIEVED',
+                        'mark_achieved'.tr,
                         style: TextStyle(
                           fontSize: AppFont.font14.sp,
                           fontWeight: FontWeight.w500,
@@ -170,7 +170,7 @@ class FinalExamResultView extends GetView<FinalExamController> {
                     ],
                   ),
                   child: Text(
-                    '⚡ +${result.xpAwarded} XP Awarded',
+                    'result_xpawarded_xp_awarded'.trParams(<String, String>{'xpawarded': result.xpAwarded.toString()}),
                     style: TextStyle(
                       fontSize: AppFont.font18.sp,
                       fontWeight: FontWeight.w900,
@@ -334,7 +334,7 @@ class _TeacherCommentCard extends StatelessWidget {
               ),
               SizedBox(width: 12.w),
               Text(
-                "Teacher's Comments",
+                "teacher_s_comments".tr,
                 style: TextStyle(
                   fontSize: AppFont.font20.sp,
                   fontWeight: FontWeight.w700,
@@ -345,7 +345,7 @@ class _TeacherCommentCard extends StatelessWidget {
           ),
           SizedBox(height: 22.h),
           Text(
-            '"${result.teacherComment}"',
+            'result_teachercomment'.trParams(<String, String>{'teachercomment': result.teacherComment.toString()}),
             style: TextStyle(
               fontSize: AppFont.font18.sp,
               fontStyle: FontStyle.italic,

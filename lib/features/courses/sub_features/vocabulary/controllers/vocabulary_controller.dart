@@ -175,12 +175,12 @@ class VocabularyController extends GetxController {
       () => _vocabularyApiService.fetchVocabularySession(
         lessonId: currentLessonId,
       ),
-      errorTitle: 'Vocabulary',
+      errorTitle: 'gen_vocabulary'.tr,
     );
 
     return result.dataOr(
       VocabularySessionModel.fromJson(<String, dynamic>{
-        'title': 'Vocabulary',
+        'title': 'gen_vocabulary'.tr,
         'currentCardIndex': 0,
         'streakDays': 0,
         'level': 1,
@@ -206,12 +206,12 @@ class VocabularyController extends GetxController {
         knownVocabularyIds: knownVocabularyIds.toList(),
         weakVocabularyIds: weakVocabularyIds.toList(),
       ),
-      errorTitle: 'Vocabulary',
+      errorTitle: 'gen_vocabulary'.tr,
     );
 
     return result.dataOr(
       VocabularyCompletionModel.fromJson(<String, dynamic>{
-        'appName': 'ItalirPothe',
+        'appName': 'italirpothe'.tr,
         'reviewedCount': totalCards,
         'rightCount': rightCount.value,
         'wrongCount': wrongCount.value,

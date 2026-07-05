@@ -25,14 +25,10 @@ import 'features/messages/sub-feature/call/service/incoming_call_coordinator.dar
 import 'routes/routes.dart';
 
 @pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(
-  RemoteMessage message,
-) async {
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
-  await CallkitIncomingService.showIncomingCallFromBackgroundMessage(
-    message,
-  );
+  await CallkitIncomingService.showIncomingCallFromBackgroundMessage(message);
 }
 
 Future<void> main() async {
@@ -60,11 +56,7 @@ Future<void> main() async {
   // so the first incoming call after installation cannot be missed.
   await _initializeCallKitListeners();
 
-  runApp(
-    ItalyApp(
-      initialRoute: AppPages.initial,
-    ),
-  );
+  runApp(ItalyApp(initialRoute: AppPages.initial));
 
   /*
    * Wait until GetMaterialApp and its navigator are mounted.
@@ -78,10 +70,7 @@ Future<void> main() async {
 
 Future<void> _initializeCallKitListeners() async {
   await CallkitIncomingService.initialize(
-    onIncoming: (
-      String callId,
-      Map<String, dynamic> data,
-    ) async {
+    onIncoming: (String callId, Map<String, dynamic> data) async {
       if (!Get.isRegistered<IncomingCallCoordinator>()) {
         return;
       }
@@ -93,10 +82,7 @@ Future<void> _initializeCallKitListeners() async {
         ),
       );
     },
-    onAccept: (
-      String callId,
-      Map<String, dynamic> data,
-    ) async {
+    onAccept: (String callId, Map<String, dynamic> data) async {
       if (!Get.isRegistered<IncomingCallCoordinator>()) {
         await CallkitIncomingService.endNativeSubsystemOnly(callId);
         return;
@@ -109,10 +95,7 @@ Future<void> _initializeCallKitListeners() async {
         ),
       );
     },
-    onDecline: (
-      String callId,
-      Map<String, dynamic> data,
-    ) async {
+    onDecline: (String callId, Map<String, dynamic> data) async {
       try {
         await Get.find<CallSocketService>().rejectCall(callId: callId);
 
@@ -128,10 +111,7 @@ Future<void> _initializeCallKitListeners() async {
         );
       }
     },
-    onTimeout: (
-      String callId,
-      Map<String, dynamic> data,
-    ) async {
+    onTimeout: (String callId, Map<String, dynamic> data) async {
       try {
         await Get.find<CallSocketService>().timeoutCall(callId: callId);
       } catch (error, stackTrace) {
@@ -148,18 +128,15 @@ Future<void> _initializeCallKitListeners() async {
         await CallkitIncomingService.endNativeSubsystemOnly(callId);
       }
     },
-    onEnded: (
-      String callId,
-      Map<String, dynamic> data,
-    ) async {
+    onEnded: (String callId, Map<String, dynamic> data) async {
       if (CallkitIncomingService.consumeRemoteTermination(callId)) {
         return;
       }
 
       try {
         final CallSocketService socketService = Get.find<CallSocketService>();
-        final Map<String, dynamic> statusResponse =
-            await socketService.fetchCall(callId: callId);
+        final Map<String, dynamic> statusResponse = await socketService
+            .fetchCall(callId: callId);
         final dynamic rawCall = statusResponse['call'];
         final Map<String, dynamic> call = rawCall is Map
             ? Map<String, dynamic>.from(rawCall)
@@ -220,10 +197,7 @@ Future<void> _requestFullScreenCallPermission() async {
 class ItalyApp extends StatelessWidget {
   final String initialRoute;
 
-  const ItalyApp({
-    super.key,
-    required this.initialRoute,
-  });
+  const ItalyApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -233,11 +207,11 @@ class ItalyApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         final TranslationService translationService =
-        Get.find<TranslationService>();
+            Get.find<TranslationService>();
 
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'gen_italir_pothe'.tr.tr,
+          title: 'gen_italir_pothe'.tr,
           translations: translationService,
           locale: translationService.currentLocale,
           fallbackLocale: TranslationService.fallbackLocale,
@@ -252,7 +226,8 @@ class ItalyApp extends StatelessWidget {
                 Get.find<IncomingCallCoordinator>();
 
             return Obx(() {
-              final bool showCallCard = coordinator.hasPresentedCall.value &&
+              final bool showCallCard =
+                  coordinator.hasPresentedCall.value &&
                   !coordinator.isPresentedCallScreenVisible.value;
 
               if (!showCallCard) {
@@ -264,9 +239,9 @@ class ItalyApp extends StatelessWidget {
                   const GlobalCallStatusCard(),
                   Expanded(
                     child: MediaQuery(
-                      data: MediaQuery.of(context).removePadding(
-                        removeTop: true,
-                      ),
+                      data: MediaQuery.of(
+                        context,
+                      ).removePadding(removeTop: true),
                       child: navigator ?? const SizedBox.shrink(),
                     ),
                   ),

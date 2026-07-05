@@ -70,7 +70,7 @@ class _EmptyCoursesCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE4E4E4), width: 1.2.w),
       ),
       child: Text(
-        'No active courses found.',
+        'no_active_courses_found'.tr,
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: AppFont.font16.sp,

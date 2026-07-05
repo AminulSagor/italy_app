@@ -85,7 +85,7 @@ class _PracticeHubPdfViewerState extends State<PracticeHubPdfViewer> {
         body: SafeArea(
           child: Center(
             child: Text(
-              'PDF resource is unavailable.',
+              'pdf_resource_is_unavailable'.tr,
               style: TextStyle(
                 fontSize: AppFont.font16.sp,
                 fontWeight: FontWeight.w700,
@@ -340,7 +340,7 @@ class _PdfBottomNavigation extends GetView<PracticeHubController> {
           children: <Widget>[
             _PdfSideNavButton(
               icon: Icons.chevron_left_rounded,
-              label: 'gen_previous'.tr.tr,
+              label: 'gen_previous'.tr,
               enabled: controller.canGoPreviousSurvivalPdfPage,
               onTap: onPreviousTap,
             ),
@@ -364,7 +364,7 @@ class _PdfBottomNavigation extends GetView<PracticeHubController> {
                   ),
                   SizedBox(width: 9.w),
                   Text(
-                    '${controller.currentSurvivalPdfPage.value} / ${controller.currentSurvivalPdfTotalPages.value}',
+                    'controller_currentsurvivalpdfpage_value_controller_currentsurvivalpdftotalpages_value'.trParams(<String, String>{'value': controller.currentSurvivalPdfPage.value.toString(), 'value': controller.currentSurvivalPdfTotalPages.value.toString()}),
                     style: TextStyle(
                       fontSize: AppFont.font16.sp,
                       fontWeight: FontWeight.w900,
@@ -379,7 +379,7 @@ class _PdfBottomNavigation extends GetView<PracticeHubController> {
 
             _PdfSideNavButton(
               icon: Icons.chevron_right_rounded,
-              label: 'gen_next'.tr.tr,
+              label: 'gen_next'.tr,
               enabled: controller.canGoNextSurvivalPdfPage,
               onTap: onNextTap,
               reversed: true,

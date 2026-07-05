@@ -10,11 +10,7 @@ import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 
 class ChatMessageBubble extends StatelessWidget {
-  const ChatMessageBubble({
-    super.key,
-    required this.message,
-    this.onTap,
-  });
+  const ChatMessageBubble({super.key, required this.message, this.onTap});
 
   final MessageChatItemModel message;
   final VoidCallback? onTap;
@@ -59,7 +55,7 @@ class ChatMessageBubble extends StatelessWidget {
                 style: TextStyle(
                   fontSize: AppFont.font10.sp,
                   fontWeight: FontWeight.w500,
-                  color: message.statusLabel == 'Seen'
+                  color: message.statusLabel == 'seen'.tr
                       ? AppColors.chatSeenText
                       : AppColors.bodyText,
                 ),

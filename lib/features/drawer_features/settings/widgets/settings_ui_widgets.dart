@@ -335,7 +335,7 @@ class SettingsSuccessBottomSheet extends StatelessWidget {
           ),
           SizedBox(height: 34.h),
           SettingsPrimaryButton(
-            text: 'DONE',
+            text: 'done'.tr,
             height: 58,
             onTap: onDone ?? Get.back,
           ),
@@ -384,7 +384,7 @@ class DeleteAccountDialog extends StatelessWidget {
             ),
             SizedBox(height: 28.h),
             Text(
-              'Delete Account?',
+              'delete_account'.tr,
               style: TextStyle(
                 fontSize: 28.sp,
                 fontWeight: FontWeight.w900,
@@ -405,7 +405,7 @@ class DeleteAccountDialog extends StatelessWidget {
             ),
             SizedBox(height: 34.h),
             SettingsPrimaryButton(
-              text: 'DELETE MY ACCOUNT',
+              text: 'delete_my_account'.tr,
               color: SettingsUi.red,
               shadowColor: const Color(0xFFE98A6F),
               height: 66,
@@ -418,7 +418,7 @@ class DeleteAccountDialog extends StatelessWidget {
             GestureDetector(
               onTap: Get.back,
               child: Text(
-                'Keep My Account',
+                'keep_my_account'.tr,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w900,

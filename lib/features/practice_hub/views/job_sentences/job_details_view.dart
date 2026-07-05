@@ -54,8 +54,8 @@ class JobDetailsView extends GetView<JobSentencesController> {
                   else if (details != null)
                     _CareerTrackContent(details: details)
                   else
-                    const _DetailsMessageState(
-                      message: 'Career track details are unavailable.',
+                    _DetailsMessageState(
+                      message: 'career_track_details_are_unavailable'.tr,
                     ),
                 ],
               ),
@@ -106,8 +106,8 @@ class _CareerTrackContent extends GetView<JobSentencesController> {
         _TrackProgressCard(progress: details.progress),
         SizedBox(height: 28.h),
         if (details.modules.isEmpty)
-          const _DetailsMessageState(
-            message: 'No sentence modules are available for this track.',
+          _DetailsMessageState(
+            message: 'no_sentence_modules_are_available_for_this_track'.tr,
           )
         else
           LayoutBuilder(
@@ -240,7 +240,7 @@ class _TrackProgressCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  '${progress.learnedSentences} of ${progress.totalSentences} sentences learned',
+                  'progress_learnedsentences_of_progress_totalsentences_sentences_learned'.trParams(<String, String>{'learnedsentences': progress.learnedSentences.toString(), 'totalsentences': progress.totalSentences.toString()}),
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w900,
@@ -264,7 +264,7 @@ class _TrackProgressCard extends StatelessWidget {
           ),
           SizedBox(width: 14.w),
           Text(
-            '${progress.completionPercent}%',
+            'progress_completionpercent'.trParams(<String, String>{'completionpercent': progress.completionPercent.toString()}),
             style: TextStyle(
               fontSize: AppFont.font16.sp,
               fontWeight: FontWeight.w900,
@@ -354,7 +354,7 @@ class _JobModuleCard extends GetView<JobSentencesController> {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                '${item.learnedSentenceCount}/${item.sentenceCount} learned',
+                'item_learnedsentencecount_item_sentencecount_learned'.trParams(<String, String>{'learnedsentencecount': item.learnedSentenceCount.toString(), 'sentencecount': item.sentenceCount.toString()}),
                 maxLines: 1,
                 style: TextStyle(
                   fontSize: AppFont.font11.sp,
@@ -416,7 +416,7 @@ class _TheoryBookCard extends GetView<JobSentencesController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Theory Book',
+                    'gen_theory_book'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font16.sp,
                       fontWeight: FontWeight.w900,
@@ -427,9 +427,9 @@ class _TheoryBookCard extends GetView<JobSentencesController> {
                   Text(
                     isAvailable
                         ? (resource!.originalName.isEmpty
-                              ? 'Open supplementary material'
+                              ? 'open_supplementary_material'.tr
                               : resource.originalName)
-                        : 'Theory resource not provided',
+                        : 'theory_resource_not_provided'.tr,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -497,7 +497,7 @@ class _DetailsMessageState extends StatelessWidget {
             SizedBox(height: 10.h),
             TextButton(
               onPressed: onRetry,
-              child: const Text('Retry'),
+              child: Text('retry'.tr),
             ),
           ],
         ],

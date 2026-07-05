@@ -48,7 +48,7 @@ class QuizReviewAnswersView extends GetView<QuizController> {
                     children: <Widget>[
                       SizedBox(height: 12.h),
                       Text(
-                        'Great Effort!',
+                        'great_effort'.tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: AppFont.font24.sp,
@@ -103,7 +103,7 @@ class QuizReviewAnswersView extends GetView<QuizController> {
                   top: false,
                   child: CustomButton.primary(
                     onPressed: () => Get.back<void>(),
-                    text: 'Done',
+                    text: 'done'.tr,
                   ),
                 ),
               ),
@@ -154,7 +154,7 @@ class _ReviewTopBar extends StatelessWidget {
         SizedBox(width: 18.w),
         Expanded(
           child: Text(
-            'Review Answers',
+            'review_answers'.tr,
             style: TextStyle(
               fontSize: AppFont.font16.sp,
               fontWeight: FontWeight.w900,

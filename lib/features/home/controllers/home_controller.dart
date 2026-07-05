@@ -92,7 +92,7 @@ class HomeController extends GetxController {
       mode: LaunchMode.externalApplication,
     );
     if (!launched) {
-      Get.snackbar('Community', 'Unable to open the Facebook community.');
+      Get.snackbar('community'.tr, 'unable_to_open_the_facebook_community'.tr);
     }
   }
 
@@ -103,6 +103,5 @@ class HomeController extends GetxController {
     Get.find<NavbarAndAppbarWrapperController>().onBottomNavTap(2);
   }
 
-  void openDailyChallenges() =>
-      Get.toNamed<void>(AppRoutes.dailyChallenges);
+  void openDailyChallenges() => Get.toNamed<void>(AppRoutes.dailyChallenges);
 }

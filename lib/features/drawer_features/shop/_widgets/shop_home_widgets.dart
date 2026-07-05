@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/themes/app_font.dart';
 import '../../../../core/widgets/widgets.dart';
+import 'package:get/get.dart';
 
 class ShopErrorView extends StatelessWidget {
   const ShopErrorView({required this.message, required this.onRetry});
@@ -20,7 +21,7 @@ class ShopErrorView extends StatelessWidget {
           children: <Widget>[
             Text(message, textAlign: TextAlign.center),
             SizedBox(height: 16.h),
-            FilledButton(onPressed: onRetry, child: const Text('Try Again')),
+            FilledButton(onPressed: onRetry, child: Text('try_again'.tr)),
           ],
         ),
       ),
@@ -198,7 +199,7 @@ class ShopCvCreditPackCard extends StatelessWidget {
             SizedBox(height: 22.h),
             CustomButton(
               height: 50.h,
-              text: 'BUY NOW',
+              text: 'buy_now'.tr,
               fontSize: 14.sp,
               fontWeight: FontWeight.w900,
               btnColor: const Color(0xFFA76500),
@@ -322,7 +323,7 @@ class _ShopBuyNowButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(100.r),
         ),
         child: Text(
-          'BUY NOW',
+          'buy_now'.tr,
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w900,
@@ -421,7 +422,7 @@ class ShopCvBalanceCard extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           Text(
-            'CV CREDITS',
+            'cv_credits'.tr,
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w900,
@@ -473,7 +474,7 @@ class ShopOrderHistoryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Order History',
+                    'order_history'.tr,
                     style: TextStyle(
                       fontSize: 24.sp,
                       fontWeight: FontWeight.w900,
@@ -482,7 +483,7 @@ class ShopOrderHistoryCard extends StatelessWidget {
                   ),
                   SizedBox(height: 10.h),
                   Text(
-                    'View your past purchases',
+                    'view_your_past_purchases'.tr,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,

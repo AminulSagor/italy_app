@@ -21,7 +21,7 @@ class SettingsView extends GetView<SettingsController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const SettingsTopBar(title: 'Settings'),
+              SettingsTopBar(title: 'gen_settings'.tr),
 
               SizedBox(height: 18.h),
 
@@ -37,7 +37,7 @@ class SettingsView extends GetView<SettingsController> {
 
               SizedBox(height: 36.h),
 
-              const _SectionTitle(title: 'PROFILE & SECURITY'),
+              _SectionTitle(title: 'gen_profile_security'.tr),
 
               SizedBox(height: 20.h),
 
@@ -55,7 +55,7 @@ class SettingsView extends GetView<SettingsController> {
                 icon: Icons.lock_outline_rounded,
                 iconBgColor: const Color(0xFFAED2FF),
                 iconColor: const Color(0xFF0065A8),
-                title: 'Change Password',
+                title: 'gen_change_password'.tr,
                 onTap: controller.changePassword,
               ),
 
@@ -65,7 +65,7 @@ class SettingsView extends GetView<SettingsController> {
 
               SizedBox(height: 48.h),
 
-              const _SectionTitle(title: 'PRIVACY & LEGAL'),
+              _SectionTitle(title: 'gen_privacy_legal'.tr),
 
               SizedBox(height: 19.h),
 
@@ -80,17 +80,17 @@ class SettingsView extends GetView<SettingsController> {
                   children: <Widget>[
                     _LegalTile(
                       icon: Icons.policy_outlined,
-                      title: 'Privacy Policy',
+                      title: 'gen_privacy_policy'.tr,
                       onTap: controller.openPrivacyPolicy,
                     ),
                     _LegalTile(
                       icon: Icons.description_outlined,
-                      title: 'Terms of Service',
+                      title: 'gen_terms_of_service'.tr,
                       onTap: controller.openTerms,
                     ),
                     _LegalTile(
                       icon: Icons.no_accounts_outlined,
-                      title: 'Delete Account',
+                      title: 'gen_delete_account'.tr,
                       isDanger: true,
                       onTap: controller.deleteAccount,
                     ),
@@ -102,7 +102,7 @@ class SettingsView extends GetView<SettingsController> {
 
               Center(
                 child: Text(
-                  'VERSION 1.0.0 (ITALIR POTHE)',
+                  'version_1_0_0_italir_pothe'.tr,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w800,
@@ -152,7 +152,7 @@ class _StreakFreezeCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  '$count Streak ${count == 1 ? 'Freeze' : 'Freezes'}',
+                  '$count Streak ${count == 1 ? 'freeze'.tr : 'freezes'.tr}',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w900,
@@ -162,7 +162,7 @@ class _StreakFreezeCard extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'AVAILABLE',
+                  'available'.tr,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
@@ -260,7 +260,7 @@ class _ProfileSecurityCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  'EMAIL/PHONE&NAME',
+                  'email_phone_name'.tr,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w900,
@@ -387,7 +387,7 @@ class _RateUsButton extends StatelessWidget {
             Icon(Icons.thumb_up_alt_rounded, size: 23.r, color: Colors.white),
             SizedBox(width: 14.w),
             Text(
-              'Rate us',
+              'rate_us'.tr,
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w900,

@@ -45,9 +45,9 @@ class CoursesApiService {
         await _safeFetchLessonProgressById(syllabus);
     final Map<String, dynamic>? finalExamGateway =
         await _safeFetchFinalExamGateway(
-      courseId: courseId,
-      hasLinkedExam: _stringValue(course['finalExamTemplateId']).isNotEmpty,
-    );
+          courseId: courseId,
+          hasLinkedExam: _stringValue(course['finalExamTemplateId']).isNotEmpty,
+        );
 
     return _courseDetailFromApi(
       course: course,
@@ -65,15 +65,13 @@ class CoursesApiService {
         '/course-enrollments/courses/$courseId/access',
       );
       final Map<String, dynamic> body = _responseMap(response);
-      return _boolValue(body['hasAccess'], fallback: false);
+      return _boolValue(body['hasaccess'.tr], fallback: false);
     } on DioException {
       return false;
     }
   }
 
-  Future<CourseCardModel> fetchCourseProgress(
-    CourseCardModel course,
-  ) async {
+  Future<CourseCardModel> fetchCourseProgress(CourseCardModel course) async {
     final CourseProgressModel? progress = await _safeFetchCourseProgress(
       courseId: course.courseId,
     );
@@ -117,12 +115,11 @@ class CoursesApiService {
     }
   }
 
-  Future<Map<String, CourseLessonProgressModel>>
-      _safeFetchLessonProgressById(Map<String, dynamic> syllabus) async {
+  Future<Map<String, CourseLessonProgressModel>> _safeFetchLessonProgressById(
+    Map<String, dynamic> syllabus,
+  ) async {
     final List<String> lessonIds = _jsonList(syllabus['chapters'])
-        .expand(
-          (Map<String, dynamic> chapter) => _jsonList(chapter['lessons']),
-        )
+        .expand((Map<String, dynamic> chapter) => _jsonList(chapter['lessons']))
         .map((Map<String, dynamic> lesson) => _stringValue(lesson['id']))
         .where((String lessonId) => lessonId.isNotEmpty)
         .toSet()
@@ -170,11 +167,11 @@ class CoursesApiService {
       id: id,
       courseId: _fallbackString(json['courseId'], id),
       chapterId: _stringValue(json['chapterId']),
-      title: _fallbackString(json['title'], 'Untitled Course'),
+      title: _fallbackString(json['title'], 'untitled_course'.tr),
       subtitle: subtitle,
       progressLabel: '-',
       progress: 0,
-      statusLabel: 'ACTIVE',
+      statusLabel: 'active'.tr,
       state: CourseCardState.active,
     );
   }
@@ -211,7 +208,7 @@ class CoursesApiService {
       id: sourceCourseId,
       courseId: _fallbackString(sourceCourse['courseId'], sourceCourseId),
       chapterId: _stringValue(sourceCourse['chapterId']),
-      title: _fallbackString(sourceCourse['title'], 'Course Details'),
+      title: _fallbackString(sourceCourse['title'], 'course_details'.tr),
       progressLabel: '$percent%',
       isProEnabled: isProEnabled || courseIsFree,
       isFree: courseIsFree,
@@ -245,10 +242,7 @@ class CoursesApiService {
 
     for (final Map<String, dynamic> chapter in chapters) {
       for (final Map<String, dynamic> lesson in _jsonList(chapter['lessons'])) {
-        final bool lessonIsFree = _boolValue(
-          lesson['isFree'],
-          fallback: true,
-        );
+        final bool lessonIsFree = _boolValue(lesson['isFree'], fallback: true);
         lessonEntries.add(
           _CourseLessonEntry(
             lesson: lesson,
@@ -354,10 +348,10 @@ class CoursesApiService {
       id: _stringValue(lesson['id']),
       courseId: _fallbackString(lesson['courseId'], fallbackCourseId),
       chapterId: chapterId,
-      title: _fallbackString(lesson['title'], 'Untitled Lesson'),
-      subtitle: chapterTitle.isEmpty ? 'Course lesson' : chapterTitle,
+      title: _fallbackString(lesson['title'], 'untitled_lesson'.tr),
+      subtitle: chapterTitle.isEmpty ? 'course_lesson'.tr : chapterTitle,
       statusLabel: _statusLabelForState(state, progress: progress),
-      tagLabel: isAccessible ? (lessonIsFree ? 'FREE' : null) : 'PRO',
+      tagLabel: isAccessible ? (lessonIsFree ? 'free_1'.tr : null) : 'pro'.tr,
       progress: progress.progress,
       state: state,
     );
@@ -370,9 +364,9 @@ class CoursesApiService {
       id: _stringValue(chapter['id']),
       courseId: _stringValue(chapter['courseId']),
       chapterId: _stringValue(chapter['id']),
-      title: _fallbackString(chapter['title'], 'Untitled Chapter'),
-      subtitle: 'gen_no_published_lesson_yet'.tr.tr,
-      statusLabel: 'NOT AVAILABLE',
+      title: _fallbackString(chapter['title'], 'untitled_chapter'.tr),
+      subtitle: 'gen_no_published_lesson_yet'.tr,
+      statusLabel: 'not_available'.tr,
       progress: 0,
       state: CourseChapterState.locked,
     );
@@ -399,11 +393,11 @@ class CoursesApiService {
         : _intValue(backendProgressValue);
     final bool thresholdReached =
         hasPublishedExam && backendProgressPercent >= unlockPercent;
-    final bool gatewayUnlocked = gateway != null &&
+    final bool gatewayUnlocked =
+        gateway != null &&
         (_boolValue(gateway['isUnlocked'], fallback: thresholdReached) ||
             thresholdReached);
-    final bool canStart =
-        hasLinkedExam && hasPublishedExam && gatewayUnlocked;
+    final bool canStart = hasLinkedExam && hasPublishedExam && gatewayUnlocked;
     final String gatewayMessage = gateway == null
         ? ''
         : _stringValue(gateway['message']);
@@ -420,17 +414,17 @@ class CoursesApiService {
     } else {
       helperLabel = gatewayMessage.isNotEmpty
           ? gatewayMessage
-          : 'Ready to start';
+          : 'ready_to_start'.tr;
     }
 
     return CourseFinalExamModel(
       examId: _stringValue(exam['id']),
-      title: _fallbackString(exam['title'], 'Final Exam'),
+      title: _fallbackString(exam['title'], 'gen_final_exam'.tr),
       description: _fallbackString(
         exam['description'],
         'Complete the final exam to earn your course certificate.',
       ),
-      actionLabel: canStart ? 'START FINAL EXAM' : 'NOT YET ELIGIBLE',
+      actionLabel: canStart ? 'start_final_exam'.tr : 'not_yet_eligible'.tr,
       helperLabel: helperLabel,
       isConfigured: hasLinkedExam,
       canStart: canStart,
@@ -458,7 +452,7 @@ class CoursesApiService {
     required CourseLessonProgressModel progress,
   }) {
     if (state == CourseChapterState.completed) return 'COMPLETED';
-    if (state == CourseChapterState.current) return 'CURRENT STUDY';
+    if (state == CourseChapterState.current) return 'current_study'.tr;
     if (progress.videoWatchPercent > 0) {
       return '${progress.videoWatchPercent}% WATCHED';
     }
@@ -480,7 +474,7 @@ class CoursesApiService {
 
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object',
+      message: 'response_is_not_a_valid_json_object'.tr,
     );
   }
 
@@ -494,7 +488,7 @@ class CoursesApiService {
 
     throw DioException(
       requestOptions: RequestOptions(path: '/courses'),
-      message: 'Response is not a valid JSON list',
+      message: 'response_is_not_a_valid_json_list'.tr,
     );
   }
 
@@ -535,13 +529,13 @@ class CoursesApiService {
     return fallback;
   }
 
-  static const List<SkillBuilderModel> _defaultSkillBuilders =
+  static List<SkillBuilderModel> get _defaultSkillBuilders =>
       <SkillBuilderModel>[
         SkillBuilderModel(
           id: 'verbs',
           courseId: 'courseId',
           chapterId: 'chapterId',
-          title: 'Important Verbs',
+          title: 'gen_important_verbs'.tr,
           iconName: 'bolt',
           tone: SkillBuilderTone.green,
         ),
@@ -549,7 +543,7 @@ class CoursesApiService {
           id: 'survival',
           courseId: 'courseId',
           chapterId: 'chapterId',
-          title: 'Survival Italian',
+          title: 'gen_survival_italian'.tr,
           iconName: 'work',
           tone: SkillBuilderTone.yellow,
         ),
@@ -557,7 +551,7 @@ class CoursesApiService {
           id: 'job',
           courseId: 'courseId',
           chapterId: 'chapterId',
-          title: 'Job Sentences',
+          title: 'gen_job_sentences'.tr,
           iconName: 'workbench',
           tone: SkillBuilderTone.blue,
         ),
@@ -565,7 +559,7 @@ class CoursesApiService {
           id: 'challenge',
           courseId: 'courseId',
           chapterId: 'chapterId',
-          title: 'Daily Challenges',
+          title: 'gen_daily_challenges'.tr,
           iconName: 'target',
           tone: SkillBuilderTone.pink,
         ),
@@ -573,10 +567,12 @@ class CoursesApiService {
 
   static SpecializedLearningModel _defaultSpecializedLearning =
       SpecializedLearningModel(
-        title: 'gen_final_exam_esame_finale'.tr.tr,
-        subtitle: 'gen_complete_the_course_to_unlock'.tr.tr,
-        requirementLabel: '80% Required',
-        lockedLabel: 'Locked',
+        title: 'gen_final_exam_esame_finale'.tr,
+        subtitle: 'gen_complete_the_course_to_unlock'.tr,
+        requirementLabel: 'percent_required'.trParams(<String, String>{
+          'percent': '80',
+        }),
+        lockedLabel: 'locked'.tr,
       );
 }
 
@@ -584,8 +580,5 @@ class _CourseLessonEntry {
   final Map<String, dynamic> lesson;
   final bool isAccessible;
 
-  const _CourseLessonEntry({
-    required this.lesson,
-    required this.isAccessible,
-  });
+  const _CourseLessonEntry({required this.lesson, required this.isAccessible});
 }

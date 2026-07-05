@@ -132,7 +132,7 @@ class QuizController extends GetxController {
         final ApiResult<QuizApiSessionModel> result =
             await ApiErrorHandler.call<QuizApiSessionModel>(
           () => _quizApiService.startLessonQuiz(lessonId: lessonId!.trim()),
-          errorTitle: 'Quiz',
+          errorTitle: 'quiz'.tr,
         );
 
         if (!result.isSuccess || result.data == null) {
@@ -168,9 +168,9 @@ class QuizController extends GetxController {
             await ApiErrorHandler.call<QuizLessonCompleteModel>(
           () => _quizApiService.completeSession(
             sessionId: _activeSessionId!,
-            chapterTitle: chapterTitle ?? 'Chapter Complete',
+            chapterTitle: chapterTitle ?? 'chapter_complete'.tr,
           ),
-          errorTitle: 'Quiz Complete',
+          errorTitle: 'quiz_complete'.tr,
         );
 
         if (result.isSuccess && result.data != null) {
@@ -202,7 +202,7 @@ class QuizController extends GetxController {
         return null;
       },
       showError: false,
-      errorTitle: 'Lesson Progress',
+      errorTitle: 'lesson_progress'.tr,
     );
   }
 
@@ -354,7 +354,7 @@ class QuizController extends GetxController {
           matchingRightOrder: matchingRightOrder.toList(),
           writtenAnswer: writingAnswerController.text.trim(),
         ),
-        errorTitle: 'Check Answer',
+        errorTitle: 'check_answer'.tr,
       );
 
       if (!result.isSuccess || result.data == null) {

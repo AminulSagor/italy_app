@@ -7,10 +7,7 @@ import '../../../../../core/themes/app_font.dart';
 import '../controllers/message_incoming_call_controller.dart';
 
 class MessageIncomingCallView extends StatelessWidget {
-  const MessageIncomingCallView({
-    required this.controller,
-    super.key,
-  });
+  const MessageIncomingCallView({required this.controller, super.key});
 
   final MessageIncomingCallController controller;
 
@@ -21,10 +18,7 @@ class MessageIncomingCallView extends StatelessWidget {
       body: SafeArea(
         child: Obx(
           () => Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 28.w,
-              vertical: 30.h,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 30.h),
             child: Column(
               children: <Widget>[
                 SizedBox(height: 40.h),
@@ -62,8 +56,8 @@ class MessageIncomingCallView extends StatelessWidget {
                 SizedBox(height: 10.h),
                 Text(
                   controller.callType.isVideo
-                      ? 'Incoming video call'
-                      : 'Incoming voice call',
+                      ? 'incoming_video_call'.tr
+                      : 'incoming_voice_call'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w500,
@@ -76,7 +70,7 @@ class MessageIncomingCallView extends StatelessWidget {
                   children: <Widget>[
                     _IncomingCallButton(
                       icon: Icons.call_end_rounded,
-                      label: 'gen_decline'.tr.tr,
+                      label: 'gen_decline'.tr,
                       backgroundColor: Colors.red,
                       isLoading: controller.isProcessing.value,
                       onPressed: controller.rejectCall,
@@ -85,7 +79,7 @@ class MessageIncomingCallView extends StatelessWidget {
                       icon: controller.callType.isVideo
                           ? Icons.videocam_rounded
                           : Icons.call_rounded,
-                      label: 'gen_answer'.tr.tr,
+                      label: 'gen_answer'.tr,
                       backgroundColor: AppColors.primaryGreen,
                       isLoading: controller.isProcessing.value,
                       onPressed: controller.answerCall,
@@ -103,10 +97,7 @@ class MessageIncomingCallView extends StatelessWidget {
 }
 
 class _CallerAvatar extends StatelessWidget {
-  const _CallerAvatar({
-    required this.avatarUrl,
-    required this.name,
-  });
+  const _CallerAvatar({required this.avatarUrl, required this.name});
 
   final String avatarUrl;
   final String name;
@@ -123,10 +114,7 @@ class _CallerAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.primaryGreen.withValues(alpha: 0.15),
-        border: Border.all(
-          color: AppColors.primaryGreen,
-          width: 3.w,
-        ),
+        border: Border.all(color: AppColors.primaryGreen, width: 3.w),
       ),
       child: ClipOval(
         child: ColoredBox(
@@ -197,11 +185,7 @@ class _IncomingCallButton extends StatelessWidget {
                           color: Colors.white,
                         ),
                       )
-                    : Icon(
-                        icon,
-                        size: 32.w,
-                        color: Colors.white,
-                      ),
+                    : Icon(icon, size: 32.w, color: Colors.white),
               ),
             ),
           ),

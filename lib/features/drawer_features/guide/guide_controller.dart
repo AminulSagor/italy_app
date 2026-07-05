@@ -12,35 +12,35 @@ class GuideController extends GetxController {
   static const Color _stepThreeColor = Color(0xFFFFC36A);
   static const Color _stepThreeTextColor = Color(0xFF5C3800);
 
-  final List<GuideFaqItem> faqItems = const <GuideFaqItem>[
+  final List<GuideFaqItem> faqItems = <GuideFaqItem>[
     GuideFaqItem(
       id: 'start-course',
-      title: 'How do I start or continue a course?',
-      category: 'COURSES',
+      title: 'how_do_i_start_or_continue_a_course'.tr,
+      category: 'courses'.tr,
       description:
-          'Open a course, choose an available chapter, and continue from the learning progress already saved to your account.',
+          'open_a_course_choose_an_available_chapter_and_cont'.tr,
       steps: <GuideStepItem>[
         GuideStepItem(
           number: '1',
-          title: 'Open Courses',
+          title: 'open_courses'.tr,
           description:
-              'Tap the Courses icon in the bottom navigation to see the available learning programs.',
+              'tap_the_courses_icon_in_the_bottom_navigation_to_s'.tr,
           color: _stepOneColor,
           textColor: _stepOneTextColor,
         ),
         GuideStepItem(
           number: '2',
-          title: 'Choose a Course',
+          title: 'choose_a_course'.tr,
           description:
-              'Open a course to view its chapters, current progress, locked content, and final exam status.',
+              'open_a_course_to_view_its_chapters_current_progres'.tr,
           color: _stepTwoColor,
           textColor: _stepTwoTextColor,
         ),
         GuideStepItem(
           number: '3',
-          title: 'Continue the Current Chapter',
+          title: 'continue_the_current_chapter'.tr,
           description:
-              'Select the current or unlocked chapter. The app uses your saved progress so you can continue learning.',
+              'select_the_current_or_unlocked_chapter_the_app_use'.tr,
           color: _stepThreeColor,
           textColor: _stepThreeTextColor,
         ),
@@ -50,32 +50,32 @@ class GuideController extends GetxController {
     ),
     GuideFaqItem(
       id: 'complete-chapter',
-      title: 'How is a course chapter completed?',
-      category: 'COURSES',
+      title: 'how_is_a_course_chapter_completed'.tr,
+      category: 'courses'.tr,
       description:
-          'Chapter completion is based on the learning resources and quiz configured for that chapter.',
+          'chapter_completion_is_based_on_the_learning_resour'.tr,
       steps: <GuideStepItem>[
         GuideStepItem(
           number: '1',
-          title: 'Use the Learning Resources',
+          title: 'use_the_learning_resources'.tr,
           description:
-              'Watch the video, listen to the audio, or open the theory PDF when those resources are available.',
+              'watch_the_video_listen_to_the_audio_or_open_the_th'.tr,
           color: _stepOneColor,
           textColor: _stepOneTextColor,
         ),
         GuideStepItem(
           number: '2',
-          title: 'Unlock the Quiz',
+          title: 'unlock_the_quiz'.tr,
           description:
-              'For chapters with a video, watching at least 80% unlocks the quiz. Chapters without a quiz use their available lesson content for completion.',
+              'for_chapters_with_a_video_watching_at_least_80_unl'.tr,
           color: _stepTwoColor,
           textColor: _stepTwoTextColor,
         ),
         GuideStepItem(
           number: '3',
-          title: 'Finish the Quiz',
+          title: 'finish_the_quiz'.tr,
           description:
-              'Complete the chapter quiz when it is available. Your result and chapter progress are then synced with the course.',
+              'complete_the_chapter_quiz_when_it_is_available_you'.tr,
           color: _stepThreeColor,
           textColor: _stepThreeTextColor,
         ),
@@ -83,32 +83,32 @@ class GuideController extends GetxController {
     ),
     GuideFaqItem(
       id: 'final-exam',
-      title: 'How do I unlock the final exam and certificate?',
-      category: 'COURSES',
+      title: 'how_do_i_unlock_the_final_exam_and_certificate'.tr,
+      category: 'courses'.tr,
       description:
-          'The final exam becomes available after enough of the selected course has been completed.',
+          'the_final_exam_becomes_available_after_enough_of_t'.tr,
       steps: <GuideStepItem>[
         GuideStepItem(
           number: '1',
-          title: 'Reach 80% Course Progress',
+          title: 'reach_80_course_progress'.tr,
           description:
-              'Complete at least 80% of the course to unlock its final exam card.',
+              'complete_at_least_80_of_the_course_to_unlock_its_f'.tr,
           color: _stepOneColor,
           textColor: _stepOneTextColor,
         ),
         GuideStepItem(
           number: '2',
-          title: 'Complete the Exam Sections',
+          title: 'complete_the_exam_sections'.tr,
           description:
-              'Follow the available quiz, listening, writing, and speaking sections shown for the exam.',
+              'follow_the_available_quiz_listening_writing_and_sp'.tr,
           color: _stepTwoColor,
           textColor: _stepTwoTextColor,
         ),
         GuideStepItem(
           number: '3',
-          title: 'Open Your Result',
+          title: 'open_your_result'.tr,
           description:
-              'After submission, open the result when processing is complete. A certificate can be opened from a successful result when available.',
+              'after_submission_open_the_result_when_processing_i'.tr,
           color: _stepThreeColor,
           textColor: _stepThreeTextColor,
         ),
@@ -118,32 +118,32 @@ class GuideController extends GetxController {
     ),
     GuideFaqItem(
       id: 'ai-tutor',
-      title: 'How do I use the AI Tutor?',
-      category: 'AI TUTOR',
+      title: 'how_do_i_use_the_ai_tutor'.tr,
+      category: 'ai_tutor_1'.tr,
       description:
-          'Use text chat, live voice, guided learning, writing help, or the level test from the AI Tutor area.',
+          'use_text_chat_live_voice_guided_learning_writing_h'.tr,
       steps: <GuideStepItem>[
         GuideStepItem(
           number: '1',
-          title: 'Open AI Tutor',
+          title: 'open_ai_tutor'.tr,
           description:
-              'Tap the AI Tutor icon in the bottom navigation and choose a suggested starter or enter your own message.',
+              'tap_the_ai_tutor_icon_in_the_bottom_navigation_and'.tr,
           color: _stepOneColor,
           textColor: _stepOneTextColor,
         ),
         GuideStepItem(
           number: '2',
-          title: 'Choose a Learning Mode',
+          title: 'choose_a_learning_mode'.tr,
           description:
-              'Start a text conversation, enter live voice, select a guided topic, request writing help, or take the level test.',
+              'start_a_text_conversation_enter_live_voice_select'.tr,
           color: _stepTwoColor,
           textColor: _stepTwoTextColor,
         ),
         GuideStepItem(
           number: '3',
-          title: 'Continue the Session',
+          title: 'continue_the_session'.tr,
           description:
-              'Type or speak naturally and follow the tutor response. End a live voice session when you have finished practicing.',
+              'type_or_speak_naturally_and_follow_the_tutor_respo'.tr,
           color: _stepThreeColor,
           textColor: _stepThreeTextColor,
         ),
@@ -153,32 +153,32 @@ class GuideController extends GetxController {
     ),
     GuideFaqItem(
       id: 'practice-hub',
-      title: 'What can I do in the Practice Hub?',
-      category: 'PRACTICE',
+      title: 'what_can_i_do_in_the_practice_hub'.tr,
+      category: 'practice'.tr,
       description:
-          'The Practice Hub brings together daily challenges, important verbs, survival Italian, and job-focused sentences.',
+          'the_practice_hub_brings_together_daily_challenges'.tr,
       steps: <GuideStepItem>[
         GuideStepItem(
           number: '1',
-          title: 'Open Progress',
+          title: 'open_progress'.tr,
           description:
-              'Tap the Progress icon in the bottom navigation to open the Practice Hub and view your active learning tools.',
+              'tap_the_progress_icon_in_the_bottom_navigation_to'.tr,
           color: _stepOneColor,
           textColor: _stepOneTextColor,
         ),
         GuideStepItem(
           number: '2',
-          title: 'Choose a Practice Tool',
+          title: 'choose_a_practice_tool'.tr,
           description:
-              'Study important verbs, open survival Italian PDFs, practice job sentences, or complete the daily tasks.',
+              'study_important_verbs_open_survival_italian_pdfs_p'.tr,
           color: _stepTwoColor,
           textColor: _stepTwoTextColor,
         ),
         GuideStepItem(
           number: '3',
-          title: 'Save and Claim Progress',
+          title: 'save_and_claim_progress'.tr,
           description:
-              'Save useful verbs, listen to available pronunciation, and claim XP after a daily challenge has been completed.',
+              'save_useful_verbs_listen_to_available_pronunciatio'.tr,
           color: _stepThreeColor,
           textColor: _stepThreeTextColor,
         ),
@@ -186,32 +186,32 @@ class GuideController extends GetxController {
     ),
     GuideFaqItem(
       id: 'daily-chest',
-      title: 'How do daily challenges and the chest work?',
-      category: 'REWARDS',
+      title: 'how_do_daily_challenges_and_the_chest_work'.tr,
+      category: 'gen_rewards'.tr,
       description:
-          'Daily tasks award XP, and completing all tasks unlocks the daily chest.',
+          'daily_tasks_award_xp_and_completing_all_tasks_unlo'.tr,
       steps: <GuideStepItem>[
         GuideStepItem(
           number: '1',
-          title: 'Complete Each Task',
+          title: 'complete_each_task'.tr,
           description:
-              'Open Daily Challenges and finish the lesson, quiz, or learning activity described by each task.',
+              'open_daily_challenges_and_finish_the_lesson_quiz_o'.tr,
           color: _stepOneColor,
           textColor: _stepOneTextColor,
         ),
         GuideStepItem(
           number: '2',
-          title: 'Claim the XP',
+          title: 'claim_the_xp'.tr,
           description:
-              'Use the claim button after a task is completed. XP cannot be claimed before the task requirement is met.',
+              'use_the_claim_button_after_a_task_is_completed_xp'.tr,
           color: _stepTwoColor,
           textColor: _stepTwoTextColor,
         ),
         GuideStepItem(
           number: '3',
-          title: 'Open the Chest',
+          title: 'open_the_chest'.tr,
           description:
-              'When every daily task is complete, tap the unlocked chest to reveal the reward.',
+              'when_every_daily_task_is_complete_tap_the_unlocked'.tr,
           color: _stepThreeColor,
           textColor: _stepThreeTextColor,
         ),
@@ -219,32 +219,32 @@ class GuideController extends GetxController {
     ),
     GuideFaqItem(
       id: 'create-cv',
-      title: 'How do I create and download a CV?',
-      category: 'CV BUILDER',
+      title: 'how_do_i_create_and_download_a_cv'.tr,
+      category: 'gen_cv_builder'.tr,
       description:
-          'Create a CV from an admin-provided template, complete its fields, choose theme colors, and generate the PDF.',
+          'create_a_cv_from_an_admin_provided_template_comple'.tr,
       steps: <GuideStepItem>[
         GuideStepItem(
           number: '1',
-          title: 'Open My CV Hub',
+          title: 'open_my_cv_hub'.tr,
           description:
-              'Open Tools, enter the CV Builder, and choose to create a new CV.',
+              'open_tools_enter_the_cv_builder_and_choose_to_crea'.tr,
           color: _stepOneColor,
           textColor: _stepOneTextColor,
         ),
         GuideStepItem(
           number: '2',
-          title: 'Choose and Complete a Template',
+          title: 'choose_and_complete_a_template'.tr,
           description:
-              'Select a template, fill in the requested profile and work details, and choose the available primary and accent colors.',
+              'select_a_template_fill_in_the_requested_profile_an'.tr,
           color: _stepTwoColor,
           textColor: _stepTwoTextColor,
         ),
         GuideStepItem(
           number: '3',
-          title: 'Preview or Download the PDF',
+          title: 'preview_or_download_the_pdf'.tr,
           description:
-              'Review the generated CV, open the PDF preview, or use Download PDF when the document is ready.',
+              'review_the_generated_cv_open_the_pdf_preview_or_us'.tr,
           color: _stepThreeColor,
           textColor: _stepThreeTextColor,
         ),
@@ -254,32 +254,32 @@ class GuideController extends GetxController {
     ),
     GuideFaqItem(
       id: 'messages-calls',
-      title: 'How do messages and calls work?',
-      category: 'MESSAGES',
+      title: 'how_do_messages_and_calls_work'.tr,
+      category: 'messages'.tr,
       description:
-          'Search for another user, open a conversation, exchange messages, and use calling when it is available for that conversation.',
+          'search_for_another_user_open_a_conversation_exchan'.tr,
       steps: <GuideStepItem>[
         GuideStepItem(
           number: '1',
-          title: 'Open Messages',
+          title: 'open_messages'.tr,
           description:
-              'Use the messages action from the main app area, then open an existing thread or search for a user.',
+              'use_the_messages_action_from_the_main_app_area_the'.tr,
           color: _stepOneColor,
           textColor: _stepOneTextColor,
         ),
         GuideStepItem(
           number: '2',
-          title: 'Start the Conversation',
+          title: 'start_the_conversation'.tr,
           description:
-              'Send messages from the chat screen. New messages and presence updates are synchronized while the app is connected.',
+              'send_messages_from_the_chat_screen_new_messages_an'.tr,
           color: _stepTwoColor,
           textColor: _stepTwoTextColor,
         ),
         GuideStepItem(
           number: '3',
-          title: 'Answer or End a Call',
+          title: 'answer_or_end_a_call'.tr,
           description:
-              'For an incoming call, accept or decline from the call screen. During a call, use the provided controls and end the call when finished.',
+              'for_an_incoming_call_accept_or_decline_from_the_ca'.tr,
           color: _stepThreeColor,
           textColor: _stepThreeTextColor,
         ),
@@ -287,32 +287,32 @@ class GuideController extends GetxController {
     ),
     GuideFaqItem(
       id: 'rewards',
-      title: 'Where can I find and use my rewards?',
-      category: 'REWARDS',
+      title: 'where_can_i_find_and_use_my_rewards'.tr,
+      category: 'gen_rewards'.tr,
       description:
-          'The Rewards area shows unopened chests, reward history, and the action required for each reward type.',
+          'the_rewards_area_shows_unopened_chests_reward_hist'.tr,
       steps: <GuideStepItem>[
         GuideStepItem(
           number: '1',
-          title: 'Open Reward from the Drawer',
+          title: 'open_reward_from_the_drawer'.tr,
           description:
-              'Open the app drawer and tap Reward to load the current dashboard and any unopened chest.',
+              'open_the_app_drawer_and_tap_reward_to_load_the_cur'.tr,
           color: _stepOneColor,
           textColor: _stepOneTextColor,
         ),
         GuideStepItem(
           number: '2',
-          title: 'Open or Review a Reward',
+          title: 'open_or_review_a_reward'.tr,
           description:
-              'Open an available chest or use Reward History to review previously unlocked items.',
+              'open_an_available_chest_or_use_reward_history_to_r'.tr,
           color: _stepTwoColor,
           textColor: _stepTwoTextColor,
         ),
         GuideStepItem(
           number: '3',
-          title: 'Complete the Reward Action',
+          title: 'complete_the_reward_action'.tr,
           description:
-              'Depending on the reward, download a file, open course access, or provide shipping information for a physical item.',
+              'depending_on_the_reward_download_a_file_open_cours'.tr,
           color: _stepThreeColor,
           textColor: _stepThreeTextColor,
         ),
@@ -320,32 +320,32 @@ class GuideController extends GetxController {
     ),
     GuideFaqItem(
       id: 'caf-services',
-      title: 'Where do I find CAF and administrative help?',
-      category: 'SERVICES',
+      title: 'where_do_i_find_caf_and_administrative_help'.tr,
+      category: 'services'.tr,
       description:
-          'Administrative guidance is available from the Tools area, including CAF paths, document checklists, and permit guidance.',
+          'administrative_guidance_is_available_from_the_tool'.tr,
       steps: <GuideStepItem>[
         GuideStepItem(
           number: '1',
-          title: 'Open Tools',
+          title: 'open_tools'.tr,
           description:
-              'Tap the Tools icon in the bottom navigation to open the service hub.',
+              'tap_the_tools_icon_in_the_bottom_navigation_to_ope'.tr,
           color: _stepOneColor,
           textColor: _stepOneTextColor,
         ),
         GuideStepItem(
           number: '2',
-          title: 'Choose Administrative Help',
+          title: 'choose_administrative_help'.tr,
           description:
-              'Open the CAF and administrative help section, then select the service or guide that matches your need.',
+              'open_the_caf_and_administrative_help_section_then'.tr,
           color: _stepTwoColor,
           textColor: _stepTwoTextColor,
         ),
         GuideStepItem(
           number: '3',
-          title: 'Follow the Guide or Contact Support',
+          title: 'follow_the_guide_or_contact_support'.tr,
           description:
-              'Review the listed steps and checklist. Use Support from the drawer when you need direct assistance.',
+              'review_the_listed_steps_and_checklist_use_support'.tr,
           color: _stepThreeColor,
           textColor: _stepThreeTextColor,
         ),
@@ -368,7 +368,7 @@ class GuideController extends GetxController {
 
   void joinFacebookCommunity() {
     Get.snackbar(
-      'Facebook Community',
+      'facebook_community'.tr,
       'Community link will open here.',
       snackPosition: SnackPosition.BOTTOM,
     );
@@ -376,7 +376,7 @@ class GuideController extends GetxController {
 
   void chatWithSupport() {
     Get.snackbar(
-      'Support',
+      'support'.tr,
       'Support chat will open here.',
       snackPosition: SnackPosition.BOTTOM,
     );

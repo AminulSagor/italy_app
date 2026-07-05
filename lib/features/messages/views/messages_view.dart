@@ -55,7 +55,7 @@ class MessagesView extends GetView<MessagesController> {
                       foregroundColor: AppColors.white,
                     ),
                     onPressed: controller.refreshMessages,
-                    child: const Text('Retry'),
+                    child: Text('retry'.tr),
                   ),
                 ],
               ),
@@ -139,7 +139,7 @@ class MessagesView extends GetView<MessagesController> {
                           ),
                           SizedBox(height: 16.h),
                           Text(
-                            'No conversations yet',
+                            'no_conversations_yet'.tr,
                             style: TextStyle(
                               fontSize: AppFont.font18.sp,
                               color: AppColors.bodyText,
@@ -206,7 +206,7 @@ class _MessagesHeader extends StatelessWidget {
             SizedBox(width: 24.w),
             Expanded(
               child: Text(
-                'Messages',
+                'messages'.tr,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -288,7 +288,7 @@ class _SearchUserItem extends StatelessWidget {
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    isOnline ? 'Online' : 'Offline',
+                    isOnline ? 'online'.tr : 'offline'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font12.sp,
                       color: AppColors.bodyText,

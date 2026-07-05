@@ -68,21 +68,22 @@ class ChapterDetailController extends GetxController {
     try {
       final ApiResult<ChapterDetailModel> result =
           await ApiErrorHandler.call<ChapterDetailModel>(
-        () => _chapterDetailApiService.fetchChapterDetail(
-          lessonId: chapter.id,
-          fallbackCourseId: chapter.courseId,
-          fallbackTitle: chapter.title,
-          initialVideoProgress: chapter.progress,
-        ),
-        errorTitle: 'Lesson Details',
-      );
+            () => _chapterDetailApiService.fetchChapterDetail(
+              lessonId: chapter.id,
+              fallbackCourseId: chapter.courseId,
+              fallbackTitle: chapter.title,
+              initialVideoProgress: chapter.progress,
+            ),
+            errorTitle: 'lesson_details'.tr,
+          );
 
       if (!result.isSuccess || result.data == null) {
         return;
       }
 
       detail.value = result.data;
-      quizStatus.value = result.data!.quiz?.status ?? ChapterQuizStatus.disabled;
+      quizStatus.value =
+          result.data!.quiz?.status ?? ChapterQuizStatus.disabled;
       _preloadChapterResources();
       _lastRecordedVideoPercent = result.data!.progress.videoWatchPercent;
       _isLessonCompletionSubmitted = result.data!.progress.isCompleted;
@@ -112,7 +113,7 @@ class ChapterDetailController extends GetxController {
     final Future<String?> future = _loadMediaUrl(
       media: detail.value?.video,
       type: ChapterMediaType.video,
-      errorTitle: 'Video',
+      errorTitle: 'video'.tr,
     );
     _videoUrlFuture = future;
     return future.then((String? url) {
@@ -132,7 +133,7 @@ class ChapterDetailController extends GetxController {
     final Future<String?> future = _loadMediaUrl(
       media: detail.value?.audio,
       type: ChapterMediaType.audio,
-      errorTitle: 'Audio',
+      errorTitle: 'audio'.tr,
     );
     _audioUrlFuture = future;
     return future.then((String? url) {
@@ -157,13 +158,13 @@ class ChapterDetailController extends GetxController {
 
     final ApiResult<ChapterMediaModel?> result =
         await ApiErrorHandler.call<ChapterMediaModel?>(
-      () => _chapterDetailApiService.fetchMedia(
-        fileId: media.fileId,
-        type: type,
-      ),
-      showError: false,
-      errorTitle: errorTitle,
-    );
+          () => _chapterDetailApiService.fetchMedia(
+            fileId: media.fileId,
+            type: type,
+          ),
+          showError: false,
+          errorTitle: errorTitle,
+        );
 
     return result.isSuccess ? result.data?.url : null;
   }
@@ -196,11 +197,8 @@ class ChapterDetailController extends GetxController {
       return Future<ChapterMediaModel?>.value(null);
     }
 
-    final Future<ChapterMediaModel?> future =
-        _chapterDetailApiService.fetchMedia(
-      fileId: fileId,
-      type: ChapterMediaType.pdf,
-    );
+    final Future<ChapterMediaModel?> future = _chapterDetailApiService
+        .fetchMedia(fileId: fileId, type: ChapterMediaType.pdf);
     _pdfMediaFuture = future;
     return future.then((ChapterMediaModel? media) {
       if (media == null || media.url.isEmpty) {
@@ -229,7 +227,7 @@ class ChapterDetailController extends GetxController {
       if (afterMedia != null && afterMedia.id == current.id) {
         detail.value = afterMedia.copyWith(
           theoryBook: afterMedia.theoryBook.copyWith(
-            subtitle: 'gen_pages_unavailable'.tr.tr,
+            subtitle: 'gen_pages_unavailable'.tr,
           ),
         );
       }
@@ -239,7 +237,7 @@ class ChapterDetailController extends GetxController {
     detail.value = afterMedia.copyWith(
       theoryBook: afterMedia.theoryBook.copyWith(
         fileUrl: media.url,
-        subtitle: '...'.tr,
+        subtitle: 'loading'.tr,
       ),
     );
 
@@ -259,8 +257,8 @@ class ChapterDetailController extends GetxController {
         fileUrl: media.url,
         count: pageCount,
         subtitle: pageCount > 0
-            ? '$pageCount ${pageCount == 1 ? 'Page' : 'Pages'}'
-            : 'Pages unavailable',
+            ? '$pageCount ${pageCount == 1 ? 'page'.tr : 'pages'.tr}'
+            : 'gen_pages_unavailable'.tr,
       ),
     );
   }
@@ -306,10 +304,11 @@ class ChapterDetailController extends GetxController {
       return;
     }
 
-    final int percent = ((position.inMilliseconds / duration.inMilliseconds) * 100)
-        .floor()
-        .clamp(0, 100)
-        .toInt();
+    final int percent =
+        ((position.inMilliseconds / duration.inMilliseconds) * 100)
+            .floor()
+            .clamp(0, 100)
+            .toInt();
 
     final bool reachedQuizThreshold =
         _lastRecordedVideoPercent < 80 && percent >= 80;
@@ -335,7 +334,7 @@ class ChapterDetailController extends GetxController {
         return null;
       },
       showError: false,
-      errorTitle: 'Video Progress',
+      errorTitle: 'video_progress'.tr,
     );
 
     if (result.isSuccess &&
@@ -368,7 +367,7 @@ class ChapterDetailController extends GetxController {
         return null;
       },
       showError: false,
-      errorTitle: 'Audio Progress',
+      errorTitle: 'audio_progress'.tr,
     );
 
     if (!result.isSuccess) {
@@ -388,7 +387,10 @@ class ChapterDetailController extends GetxController {
     final ChapterResourceModel? theoryBook = current?.theoryBook;
 
     if (current == null || theoryBook == null || !theoryBook.isAvailable) {
-      Get.snackbar('Theory Book', 'Theory book not given for this lesson.');
+      Get.snackbar(
+        'gen_theory_book'.tr,
+        'theory_book_not_given_for_this_lesson'.tr,
+      );
       return;
     }
 
@@ -399,7 +401,7 @@ class ChapterDetailController extends GetxController {
     }
 
     if (pdfUrl.isEmpty) {
-      Get.snackbar('Theory Book', 'Theory book could not be loaded.');
+      Get.snackbar('gen_theory_book'.tr, 'theory_book_could_not_be_loaded'.tr);
       return;
     }
 
@@ -412,14 +414,11 @@ class ChapterDetailController extends GetxController {
         return null;
       },
       showError: false,
-      errorTitle: 'Theory Book',
+      errorTitle: 'gen_theory_book'.tr,
     );
 
     Get.to<void>(
-      () => ChapterPdfViewer(
-        title: theoryBook.title,
-        pdfUrl: pdfUrl,
-      ),
+      () => ChapterPdfViewer(title: theoryBook.title, pdfUrl: pdfUrl),
     );
   }
 
@@ -428,11 +427,14 @@ class ChapterDetailController extends GetxController {
     final ChapterQuizModel? quiz = current?.quiz;
     final ChapterQuizStatus status = quiz?.status ?? quizStatus.value;
 
-    if (current == null || quiz == null || status == ChapterQuizStatus.disabled) {
+    if (current == null ||
+        quiz == null ||
+        status == ChapterQuizStatus.disabled) {
       return;
     }
 
-    final String tag = 'quiz_${chapter.id}_${DateTime.now().millisecondsSinceEpoch}';
+    final String tag =
+        'quiz_${chapter.id}_${DateTime.now().millisecondsSinceEpoch}';
 
     final Object? routeResult = await Get.toNamed(
       AppRoutes.quiz,
@@ -465,11 +467,15 @@ class ChapterDetailController extends GetxController {
   Future<void> openVocabulary() async {
     final ChapterDetailModel? current = detail.value;
     if (current == null || !current.vocabulary.isAvailable) {
-      Get.snackbar('Vocabulary', 'Vocabulary not given for this lesson.');
+      Get.snackbar(
+        'gen_vocabulary'.tr,
+        'vocabulary_not_given_for_this_lesson'.tr,
+      );
       return;
     }
 
-    final String tag = 'vocabulary_${chapter.id}_${DateTime.now().millisecondsSinceEpoch}';
+    final String tag =
+        'vocabulary_${chapter.id}_${DateTime.now().millisecondsSinceEpoch}';
 
     await Get.toNamed(
       AppRoutes.vocabulary,
@@ -508,7 +514,7 @@ class ChapterDetailController extends GetxController {
         return null;
       },
       showError: false,
-      errorTitle: 'Lesson Progress',
+      errorTitle: 'lesson_progress'.tr,
     );
 
     if (!result.isSuccess) {
@@ -544,7 +550,7 @@ class ChapterDetailController extends GetxController {
         ? null
         : quiz.copyWith(
             status: percent >= 80 ? ChapterQuizStatus.enabled : quiz.status,
-            actionLabel: percent >= 80 ? 'Start Quiz →' : quiz.actionLabel,
+            actionLabel: percent >= 80 ? 'start_quiz'.tr : quiz.actionLabel,
           );
 
     if (percent >= 80 && quizStatus.value == ChapterQuizStatus.disabled) {
@@ -554,8 +560,8 @@ class ChapterDetailController extends GetxController {
     detail.value = current.copyWith(
       videoProgress: (percent / 100).clamp(0.0, 1.0).toDouble(),
       videoProgressLabel: percent >= 80
-          ? '$percent% Watched – Quiz Unlocked!'
-          : '$percent% Watched – Keep Going!',
+          ? '$percent% ${'watched'.tr} – ${'quiz_unlocked'.tr}'
+          : '$percent% ${'watched'.tr} – ${'keep_going_1'.tr}',
       watchedTimeLabel: _durationLabel(
         Duration(
           milliseconds: (duration.inMilliseconds * (percent / 100)).round(),

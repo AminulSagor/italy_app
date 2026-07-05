@@ -13,6 +13,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   iris_method_channel
   livekit_client
   permission_handler_windows
+  printing
   syncfusion_pdfviewer_windows
   url_launcher_windows
 )

@@ -23,11 +23,11 @@ class GuideView extends GetView<GuideController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _GuideTopBar(title: 'gen_guides'.tr.tr),
+              _GuideTopBar(title: 'gen_guides'.tr),
               SizedBox(height: 36.h),
 
               Text(
-                'FREQUENTLY ASKED QUESTIONS',
+                'frequently_asked_questions'.tr,
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w900,
@@ -256,7 +256,7 @@ class _CommunityCard extends StatelessWidget {
                       ),
                       SizedBox(height: 6.h),
                       Text(
-                        'Connect with 10k+ Bengali learners in Italy.',
+                        'connect_with_10k_bengali_learners_in_italy'.tr,
                         style: TextStyle(
                           fontSize: 12.5.sp,
                           height: 1.25,

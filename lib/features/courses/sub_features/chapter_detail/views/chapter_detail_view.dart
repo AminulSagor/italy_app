@@ -52,105 +52,109 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
       activityKind: LearningActivityKind.lesson,
       sourceId: 'chapter_detail_view',
       child: Scaffold(
-      backgroundColor: AppColors.coursesDetailBg,
-      bottomNavigationBar: AppHomeBottomNavigationBar(
-        selectedIndex: 1,
-        items: AppHomeBottomNavigationBar.defaultItems,
-        onTap: _onBottomNavTap,
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: Obx(() {
-          final ChapterDetailModel? detail = controller.detail.value;
+        backgroundColor: AppColors.coursesDetailBg,
+        bottomNavigationBar: AppHomeBottomNavigationBar(
+          selectedIndex: 1,
+          items: AppHomeBottomNavigationBar.defaultItems,
+          onTap: _onBottomNavTap,
+        ),
+        body: SafeArea(
+          bottom: false,
+          child: Obx(() {
+            final ChapterDetailModel? detail = controller.detail.value;
 
-          if (controller.isLoading.value && detail == null) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen),
-            );
-          }
+            if (controller.isLoading.value && detail == null) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryGreen),
+              );
+            }
 
-          if (detail == null) {
-            return const SizedBox.shrink();
-          }
+            if (detail == null) {
+              return const SizedBox.shrink();
+            }
 
-          return SingleChildScrollView(
-            controller: controller.scrollController,
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              kChapterHorizontalPadding.w,
-              34.h,
-              kChapterHorizontalPadding.w,
-              160.h,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _Header(title: detail.title, onBackTap: () => Get.back<void>()),
-                SizedBox(height: 26.h),
-                if (detail.hasVideo) ...<Widget>[
-                  ChapterVideoCard(
-                    detail: detail,
-                    playbackCommand: controller.videoPlaybackCommand.value,
-                    shouldPlay: controller.shouldPlayVideo.value,
-                    loadVideoUrl: controller.loadVideoUrl,
-                    onPlaybackChanged: controller.onVideoPlaybackChanged,
-                    onProgressChanged: (Duration position, Duration duration) {
-                      controller.recordVideoProgress(
-                        position: position,
-                        duration: duration,
-                      );
-                    },
+            return SingleChildScrollView(
+              controller: controller.scrollController,
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(
+                kChapterHorizontalPadding.w,
+                34.h,
+                kChapterHorizontalPadding.w,
+                160.h,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _Header(
+                    title: detail.title,
+                    onBackTap: () => Get.back<void>(),
                   ),
-                  SizedBox(height: 38.h),
-                ],
-                if (detail.hasLessonContent) ...<Widget>[
-                  LessonContentCard(
-                    lesson: detail.lessonContent!,
-                    audio: detail.audio,
-                    loadAudioUrl: controller.loadAudioUrl,
-                    onAudioCompleted: controller.recordAudioCompleted,
-                  ),
-                  SizedBox(height: 38.h),
-                ],
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: ChapterResourceCard(
-                        resource: detail.theoryBook,
-                        onTap: controller.openTheoryBook,
-                      ),
+                  SizedBox(height: 26.h),
+                  if (detail.hasVideo) ...<Widget>[
+                    ChapterVideoCard(
+                      detail: detail,
+                      playbackCommand: controller.videoPlaybackCommand.value,
+                      shouldPlay: controller.shouldPlayVideo.value,
+                      loadVideoUrl: controller.loadVideoUrl,
+                      onPlaybackChanged: controller.onVideoPlaybackChanged,
+                      onProgressChanged:
+                          (Duration position, Duration duration) {
+                            controller.recordVideoProgress(
+                              position: position,
+                              duration: duration,
+                            );
+                          },
                     ),
-                    SizedBox(width: 24.w),
-                    Expanded(
-                      child: ChapterResourceCard(
-                        resource: detail.vocabulary,
-                        onTap: controller.openVocabulary,
+                    SizedBox(height: 38.h),
+                  ],
+                  if (detail.hasLessonContent) ...<Widget>[
+                    LessonContentCard(
+                      lesson: detail.lessonContent!,
+                      audio: detail.audio,
+                      loadAudioUrl: controller.loadAudioUrl,
+                      onAudioCompleted: controller.recordAudioCompleted,
+                    ),
+                    SizedBox(height: 38.h),
+                  ],
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: ChapterResourceCard(
+                          resource: detail.theoryBook,
+                          onTap: controller.openTheoryBook,
+                        ),
                       ),
+                      SizedBox(width: 24.w),
+                      Expanded(
+                        child: ChapterResourceCard(
+                          resource: detail.vocabulary,
+                          onTap: controller.openVocabulary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (detail.quiz != null) ...<Widget>[
+                    SizedBox(height: 40.h),
+                    ChapterQuizCard(
+                      quiz: detail.quiz!,
+                      onStartTap: controller.openQuiz,
+                    ),
+                    SizedBox(height: 40.h),
+                    _BottomActions(
+                      status: detail.quiz!.status,
+                      hasVideo: detail.hasVideo,
+                      isLoading: controller.isResumeSubmitting.value,
+                      isVideoPlaying: controller.isVideoPlaying.value,
+                      onResumeTap: controller.toggleVideoPlayback,
+                      onQuizTap: controller.openQuiz,
                     ),
                   ],
-                ),
-                if (detail.quiz != null) ...<Widget>[
-                  SizedBox(height: 40.h),
-                  ChapterQuizCard(
-                    quiz: detail.quiz!,
-                    onStartTap: controller.openQuiz,
-                  ),
-                  SizedBox(height: 40.h),
-                  _BottomActions(
-                    status: detail.quiz!.status,
-                    hasVideo: detail.hasVideo,
-                    isLoading: controller.isResumeSubmitting.value,
-                    isVideoPlaying: controller.isVideoPlaying.value,
-                    onResumeTap: controller.toggleVideoPlayback,
-                    onQuizTap: controller.openQuiz,
-                  ),
                 ],
-              ],
-            ),
-          );
-        }),
+              ),
+            );
+          }),
+        ),
       ),
-    ),
     );
   }
 }
@@ -214,8 +218,8 @@ class _BottomActions extends StatelessWidget {
         text: hasVideo
             ? isVideoPlaying
                   ? 'Pause'
-                  : 'Resume Video'
-            : 'Video Not Given',
+                  : 'resume_video'.tr
+            : 'video_not_given'.tr,
         isLoading: isLoading,
         icon: hasVideo
             ? isVideoPlaying
@@ -232,8 +236,8 @@ class _BottomActions extends StatelessWidget {
           text: hasVideo
               ? isVideoPlaying
                     ? '❚❚  Pause'
-                    : '▶  Resume'
-              : 'Video Not Given',
+                    : '▶  ${'resume_video'.tr}'
+              : 'video_not_given'.tr,
           height: kChapterBottomButtonHeight,
           showShadow: true,
           btnColor: AppColors.white,
@@ -246,7 +250,7 @@ class _BottomActions extends StatelessWidget {
         Expanded(
           child: CustomButton(
             onPressed: onQuizTap,
-            text: 'Take Quiz',
+            text: 'take_quiz'.tr,
             icon: Icons.bolt_rounded,
             height: kChapterBottomButtonHeight,
             showShadow: true,

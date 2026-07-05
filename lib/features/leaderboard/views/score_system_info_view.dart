@@ -24,7 +24,7 @@ class ScoreSystemInfoView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F7),
       appBar: SimpleAppbar(
-        title: 'gen_scoring_guide'.tr.tr,
+        title: 'gen_scoring_guide'.tr,
         onBackTap: () => Get.back<void>(),
       ),
       body: SingleChildScrollView(
@@ -79,7 +79,7 @@ class ScoreSystemInfoView extends StatelessWidget {
             const _ProTipCard(),
             SizedBox(height: 32.h),
             _DeepGreenButton(
-              text: 'Let’s Learn',
+              text: 'score_lets_learn'.tr,
               icon: Icons.play_arrow_rounded,
               onTap: () {
                 Get.back<void>();
@@ -117,7 +117,7 @@ class _ScoringTopBar extends StatelessWidget {
           Expanded(
             child: Center(
               child: Text(
-                'Scoring Guide',
+                'gen_scoring_guide'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font18.sp,
                   fontWeight: FontWeight.w900,
@@ -236,7 +236,7 @@ class _BasePointsCard extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            'Base Points',
+            'score_base_points_title'.tr,
             style: TextStyle(
               fontSize: AppFont.font20.sp,
               fontWeight: FontWeight.w900,
@@ -249,7 +249,7 @@ class _BasePointsCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'Earned for every\ncorrect answer.',
+                  'score_base_points_description'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font15.sp,
                     height: 1.35,
@@ -259,7 +259,7 @@ class _BasePointsCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '+10 XP',
+                'score_xp_value'.trParams(<String, String>{'xp': '10'}),
                 style: TextStyle(
                   fontSize: AppFont.font32.sp,
                   height: 1,
@@ -298,7 +298,7 @@ class _StreakBonusCard extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            'Streak Bonus',
+            'score_streak_bonus_title'.tr,
             style: TextStyle(
               fontSize: AppFont.font20.sp,
               fontWeight: FontWeight.w900,
@@ -306,9 +306,15 @@ class _StreakBonusCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
-          _ScoreStreakRow(label: 'gen_3_streak'.tr.tr, value: '+5 XP'),
+          _ScoreStreakRow(
+            label: 'score_three_streak'.tr,
+            value: 'score_xp_delta'.trParams(<String, String>{'xp': '5'}),
+          ),
           SizedBox(height: 12.h),
-          _ScoreStreakRow(label: 'gen_5_streak'.tr.tr, value: '+10 XP'),
+          _ScoreStreakRow(
+            label: 'score_five_streak'.tr,
+            value: 'score_xp_delta'.trParams(<String, String>{'xp': '10'}),
+          ),
         ],
       ),
     );
@@ -364,9 +370,9 @@ class _MasteryCard extends StatelessWidget {
       bgColor: const Color(0xFFF8E8DD),
       icon: Icons.workspace_premium_rounded,
       iconColor: const Color(0xFFD88A00),
-      title: 'gen_100_mastery'.tr.tr,
-      subtitle: 'gen_perfect_score_on_nfirst_attemp'.tr.tr,
-      value: '+20 XP',
+      title: 'score_mastery_title'.tr,
+      subtitle: 'score_mastery_description'.tr,
+      value: 'score_xp_delta'.trParams(<String, String>{'xp': '20'}),
       valueColor: const Color(0xFFA56400),
     );
   }
@@ -381,9 +387,9 @@ class _SpeedBonusCard extends StatelessWidget {
       bgColor: const Color(0xFFDDE9F7),
       icon: Icons.timer_outlined,
       iconColor: const Color(0xFF2563EB),
-      title: 'gen_speed_bonus'.tr.tr,
-      subtitle: 'gen_finish_the_quiz_in_nunder_200s'.tr.tr,
-      value: '+15 XP',
+      title: 'score_speed_bonus_title'.tr,
+      subtitle: 'score_speed_bonus_description'.tr,
+      value: 'score_xp_delta'.trParams(<String, String>{'xp': '15'}),
       valueColor: const Color(0xFF205EEA),
     );
   }
@@ -488,7 +494,7 @@ class _ProTipCard extends StatelessWidget {
               ),
               SizedBox(width: 12.w),
               Text(
-                'Pro Tip',
+                'score_pro_tip_title'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font15.sp,
                   fontWeight: FontWeight.w900,
@@ -506,20 +512,16 @@ class _ProTipCard extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 color: AppColors.white,
               ),
-              children: const <TextSpan>[
-                TextSpan(text: 'Accuracy is better than speed. User\n'),
-                TextSpan(text: 'B earned '),
+              children: <TextSpan>[
+                TextSpan(text: 'score_pro_tip_prefix'.tr),
                 TextSpan(
-                  text: '135 XP',
+                  text: 'score_xp_value'.trParams(<String, String>{'xp': '135'}),
                   style: TextStyle(
                     color: Color(0xFF1CDF65),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                TextSpan(
-                  text:
-                      ' by being careful,\nwhile User A only got 85 XP by\nrushing!',
-                ),
+                TextSpan(text: 'score_pro_tip_suffix'.tr),
               ],
             ),
           ),

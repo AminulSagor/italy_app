@@ -59,7 +59,7 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    'Practice Hub – Courses',
+                    'gen_practice_hub_courses'.tr,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -72,7 +72,7 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
                 ),
                 SizedBox(width: 12.w),
                 Text(
-                  'View All',
+                  'gen_view_all'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w900,
@@ -103,7 +103,7 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
             ),
           ),
           SizedBox(height: 58.h),
-          _SectionTitle(title: 'Skill Builders'),
+          _SectionTitle(title: 'gen_skill_builders'.tr),
           SizedBox(height: 26.h),
           Padding(
             padding: EdgeInsets.symmetric(
@@ -125,7 +125,7 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
             ),
           ),
           SizedBox(height: 54.h),
-          _SectionTitle(title: 'Specialized Learning'),
+          _SectionTitle(title: 'gen_specialized_learning'.tr),
           SizedBox(height: 28.h),
           Padding(
             padding: EdgeInsets.symmetric(

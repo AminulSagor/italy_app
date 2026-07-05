@@ -72,9 +72,9 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   String get adaptiveModeLabel {
     final AiTutorLearnerProfileModel? profile = learnerProfile.value;
     if (recentMistakeTags.isNotEmpty) {
-      return 'Simplified correction mode';
+      return 'simplified_correction_mode'.tr;
     }
-    return profile?.adaptiveLabel ?? 'Adaptive level detection';
+    return profile?.adaptiveLabel ?? 'adaptive_level_detection'.tr;
   }
 
   bool get isWritingHelpSession =>
@@ -82,16 +82,16 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
       writingSourceLanguage.value != null;
 
   String get writingHelpLanguageLabel =>
-      writingSourceLanguage.value?.displayName ?? 'Italian Writing Help';
+      writingSourceLanguage.value?.displayName ?? 'gen_italian_writing_help'.tr;
 
   String get writingHelpInputHint {
     switch (writingSourceLanguage.value) {
       case AiTutorWritingSourceLanguage.bangla:
         return 'শব্দ, বাক্য বা ইতালীয় খসড়া লিখুন...';
       case AiTutorWritingSourceLanguage.english:
-        return 'Enter a word, sentence, or Italian draft...';
+        return 'enter_a_word_sentence_or_italian_draft'.tr;
       case null:
-        return 'Write what you need help with...';
+        return 'write_what_you_need_help_with'.tr;
     }
   }
 
@@ -107,37 +107,37 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   final List<AiTutorStarterModel> _allStarters =
       <AiTutorStarterModel>[
         AiTutorStarterModel(
-          title: 'gen_practice_ordering_food'.tr.tr,
-          subtitle: 'gen_al_ristorante'.tr.tr,
-          prompt: 'Practice ordering food at an Italian restaurant.',
+          title: 'gen_practice_ordering_food'.tr,
+          subtitle: 'gen_al_ristorante'.tr,
+          prompt: 'practice_ordering_food_at_an_italian_restaurant'.tr,
           isVoice: true,
           icon: Icons.restaurant_rounded,
         ),
         AiTutorStarterModel(
-          title: 'gen_talk_about_my_day'.tr.tr,
-          subtitle: 'gen_la_mia_giornata'.tr.tr,
-          prompt: 'Help me talk about my day in Italian.',
+          title: 'gen_talk_about_my_day'.tr,
+          subtitle: 'gen_la_mia_giornata'.tr,
+          prompt: 'help_me_talk_about_my_day_in_italian'.tr,
           isVoice: false,
           icon: Icons.wb_sunny_rounded,
         ),
         AiTutorStarterModel(
-          title: 'gen_review_basic_greetings'.tr.tr,
-          subtitle: 'gen_i_saluti_base'.tr.tr,
-          prompt: 'Teach me basic Italian greetings.',
+          title: 'gen_review_basic_greetings'.tr,
+          subtitle: 'gen_i_saluti_base'.tr,
+          prompt: 'teach_me_basic_italian_greetings'.tr,
           isVoice: false,
           icon: Icons.school_rounded,
         ),
         AiTutorStarterModel(
-          title: 'gen_ask_for_directions'.tr.tr,
-          subtitle: 'gen_chiedere_indicazioni'.tr.tr,
-          prompt: 'Practice asking for directions in Italian.',
+          title: 'gen_ask_for_directions'.tr,
+          subtitle: 'gen_chiedere_indicazioni'.tr,
+          prompt: 'practice_asking_for_directions_in_italian'.tr,
           isVoice: false,
           icon: Icons.near_me_rounded,
         ),
         AiTutorStarterModel(
-          title: 'gen_coffee_shop_phrases'.tr.tr,
-          subtitle: 'gen_al_bar'.tr.tr,
-          prompt: 'Practice Italian coffee shop phrases with me.',
+          title: 'gen_coffee_shop_phrases'.tr,
+          subtitle: 'gen_al_bar'.tr,
+          prompt: 'practice_italian_coffee_shop_phrases_with_me'.tr,
           isVoice: true,
           icon: Icons.local_cafe_rounded,
         ),
@@ -340,7 +340,7 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
       await _ttsService.speakItalian(speechText);
     } catch (_) {
       Get.snackbar(
-        'Italian voice unavailable',
+        'italian_voice_unavailable'.tr,
         'Install or enable an Italian text-to-speech voice on this device.',
       );
     } finally {
@@ -390,7 +390,7 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
       voiceService.connectionState.value = AiTutorVoiceConnectionState.error;
       voiceService.status.value = 'No AI voice time remaining';
       Get.snackbar(
-        'AI Voice Balance',
+        'ai_voice_balance'.tr,
         'You do not have any AI voice time remaining.',
       );
       return;
@@ -468,7 +468,7 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     }
 
     Error.throwWithStackTrace(
-      lastError ?? StateError('Unable to create an AI voice session'),
+      lastError ?? StateError('unable_to_create_an_ai_voice_session'.tr),
       lastStackTrace ?? StackTrace.current,
     );
   }
@@ -599,7 +599,7 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
 
     final String prompt = _activeVoiceTopic?.trim().isNotEmpty == true
         ? _activeVoiceTopic!.trim()
-        : 'Continue helping me practice Italian.';
+        : 'continue_helping_me_practice_italian'.tr;
     await endLiveVoiceSession();
     _activeGuidedSession = null;
     _activeVoiceTopic = null;
@@ -680,7 +680,7 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   String _writingHelpWelcome(AiTutorWritingSourceLanguage sourceLanguage) {
     switch (sourceLanguage) {
       case AiTutorWritingSourceLanguage.english:
-        return 'Send a word, sentence, or Italian draft. I will show the '
+        return 'send_a_word_sentence_or_italian_draft_i_will_show'.tr +
             'natural Italian writing and explain the main point briefly in English.';
       case AiTutorWritingSourceLanguage.bangla:
         return 'একটি শব্দ, বাক্য বা ইতালীয় খসড়া লিখুন। আমি স্বাভাবিক '
@@ -700,19 +700,19 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
 
   String _invalidAssistantResponseMessage() {
     if (!isWritingHelpSession) {
-      return 'I could not prepare a response. Please try again.';
+      return 'i_could_not_prepare_a_response_please_try_again'.tr;
     }
     switch (writingSourceLanguage.value) {
       case AiTutorWritingSourceLanguage.bangla:
         return 'লেখার উত্তরটি তৈরি করা যায়নি। শব্দ বা বাক্যটি আবার পাঠান।';
       case AiTutorWritingSourceLanguage.english:
       case null:
-        return 'I could not prepare the writing answer. Please send the word or sentence again.';
+        return 'i_could_not_prepare_the_writing_answer_please_send'.tr;
     }
   }
 
   void onRecentSessionTap() {
-    Get.snackbar('Recent Sessions', 'This feature is coming soon.');
+    Get.snackbar('recent_sessions'.tr, 'this_feature_is_coming_soon'.tr);
   }
 
   @override

@@ -43,11 +43,11 @@ class LeaderboardController extends GetxController {
   bool get isMyLeagueSelected => selectedTabIndex.value == 0;
   bool get isGlobalSelected => selectedTabIndex.value == 1;
 
-  final List<Map<String, dynamic>> scoreInfoTabs = <Map<String, dynamic>>[
+  List<Map<String, dynamic>> get scoreInfoTabs => <Map<String, dynamic>>[
     {
-      'title': 'XP',
+      'title': 'xp'.tr,
       'icon': Icons.bolt_rounded,
-      'headline': 'XP decides your leaderboard position',
+      'headline': 'xp_decides_your_leaderboard_position'.tr,
       'description':
           'Complete lessons, quizzes, vocabulary cards, and speaking tasks to earn XP every day.',
       'points': <String>[
@@ -57,9 +57,9 @@ class LeaderboardController extends GetxController {
       ],
     },
     {
-      'title': 'Streak',
+      'title': 'streak'.tr,
       'icon': Icons.local_fire_department_rounded,
-      'headline': 'Daily streak gives bonus rewards',
+      'headline': 'daily_streak_gives_bonus_rewards'.tr,
       'description':
           'Keep learning daily to protect your streak and multiply your weekly progress.',
       'points': <String>[
@@ -69,9 +69,9 @@ class LeaderboardController extends GetxController {
       ],
     },
     {
-      'title': 'Bonus',
+      'title': 'bonus'.tr,
       'icon': Icons.stars_rounded,
-      'headline': 'Bonus XP helps you climb faster',
+      'headline': 'bonus_xp_helps_you_climb_faster'.tr,
       'description':
           'Extra XP appears from challenges, milestones, and special learning events.',
       'points': <String>[
@@ -82,23 +82,23 @@ class LeaderboardController extends GetxController {
     },
   ];
 
-  final List<Map<String, dynamic>> leagueCards = <Map<String, dynamic>>[
+  List<Map<String, dynamic>> get leagueCards => <Map<String, dynamic>>[
     {
-      'title': 'Bronze',
+      'title': 'bronze'.tr,
       'range': '0 - 2,499 XP',
       'icon': Icons.workspace_premium_rounded,
       'color': const Color(0xFFB66B24),
       'bg': const Color(0xFFFFE6CB),
     },
     {
-      'title': 'Silver',
+      'title': 'silver'.tr,
       'range': '2,500 - 4,999 XP',
       'icon': Icons.emoji_events_rounded,
       'color': AppColorsBridge.primaryGreen,
       'bg': const Color(0xFFE9FFDD),
     },
     {
-      'title': 'Gold',
+      'title': 'gold'.tr,
       'range': '5,000 - 8,999 XP',
       'icon': Icons.star_rounded,
       'color': const Color(0xFFFFA500),
@@ -107,53 +107,52 @@ class LeaderboardController extends GetxController {
   ];
 
   // Fallback static data shown when the service hasn't returned anything yet
-  final List<Map<String, dynamic>> _myLeaguePodiumUsers =
-      <Map<String, dynamic>>[
-        {'rank': 1, 'name': 'Sarah Ahmed', 'xp': '4.9k', 'league': 'SILVER'},
-        {'rank': 2, 'name': 'Rahul Dev', 'xp': '4.7k', 'league': 'SILVER'},
-        {'rank': 3, 'name': 'Nalia Khan', 'xp': '4.6k', 'league': 'SILVER'},
-      ];
-
-  final List<Map<String, dynamic>> _globalPodiumUsers = <Map<String, dynamic>>[
-    {'rank': 1, 'name': 'Sarah Ahmed', 'xp': '14.9k', 'league': 'GOLD'},
-    {'rank': 2, 'name': 'Rahul Dev', 'xp': '12.7k', 'league': 'GOLD'},
-    {'rank': 3, 'name': 'Nalia Khan', 'xp': '11.8k', 'league': 'SILVER'},
+  List<Map<String, dynamic>> get _myLeaguePodiumUsers => <Map<String, dynamic>>[
+    {'rank': 1, 'name': 'sarah_ahmed', 'xp': '4.9k', 'league': 'silver'.tr},
+    {'rank': 2, 'name': 'rahul_dev', 'xp': '4.7k', 'league': 'silver'.tr},
+    {'rank': 3, 'name': 'nalia_khan', 'xp': '4.6k', 'league': 'silver'.tr},
   ];
 
-  final List<Map<String, dynamic>> _users = <Map<String, dynamic>>[
+  List<Map<String, dynamic>> get _globalPodiumUsers => <Map<String, dynamic>>[
+    {'rank': 1, 'name': 'sarah_ahmed', 'xp': '14.9k', 'league': '1ST'},
+    {'rank': 2, 'name': 'rahul_dev', 'xp': '12.7k', 'league': '2ND'},
+    {'rank': 3, 'name': 'nalia_khan', 'xp': '11.8k', 'league': '3RD'},
+  ];
+
+  List<Map<String, dynamic>> get _users => <Map<String, dynamic>>[
     {
       'rank': 13,
-      'name': 'Sofia\nRossi',
+      'name': 'sofia_nrossi',
       'xp': '4,380',
-      'league': 'SILVER',
+      'league': 'silver'.tr,
       'isCurrentUser': false,
     },
     {
       'rank': 14,
-      'name': 'Arif (You)',
+      'name': 'arif_you',
       'xp': '4,299',
-      'league': 'SILVER',
+      'league': 'silver'.tr,
       'isCurrentUser': true,
     },
     {
       'rank': 15,
-      'name': 'Giulia\nBianchi',
+      'name': 'giulia_nbianchi',
       'xp': '3,380',
-      'league': 'SILVER',
+      'league': 'silver'.tr,
       'isCurrentUser': false,
     },
     {
       'rank': 16,
-      'name': 'Luca\nMoretti',
+      'name': 'luca_nmoretti',
       'xp': '2,380',
-      'league': 'SILVER',
+      'league': 'silver'.tr,
       'isCurrentUser': false,
     },
     {
       'rank': 17,
-      'name': 'Elena\nMoretti',
+      'name': 'elena_nmoretti',
       'xp': '1,380',
-      'league': 'SILVER',
+      'league': 'silver'.tr,
       'isCurrentUser': false,
     },
   ];
@@ -215,19 +214,21 @@ class LeaderboardController extends GetxController {
       unawaited(loadLeaderboard(page: 1, search: value));
     }, time: const Duration(milliseconds: 400));
   }
-  
+
   final Rxn<Map<String, dynamic>> scoringGuide = Rxn<Map<String, dynamic>>();
 
   Future<void> loadScoringGuide() async {
     try {
-      final Map<String, dynamic>? data = await _leaderboardService.fetchScoringGuide();
+      final Map<String, dynamic>? data = await _leaderboardService
+          .fetchScoringGuide();
       scoringGuide.value = data;
     } catch (_) {}
   }
 
   Future<void> loadPendingPromotion() async {
     try {
-      final Map<String, dynamic>? data = await _leaderboardService.fetchPendingPromotion();
+      final Map<String, dynamic>? data = await _leaderboardService
+          .fetchPendingPromotion();
       if (data != null && data['hasPendingPromotion'] == true) {
         final Map<String, dynamic>? promotion = data['promotion'];
         if (promotion != null) {
@@ -243,16 +244,24 @@ class LeaderboardController extends GetxController {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    const Icon(Icons.stars_rounded, color: Colors.orange, size: 64),
+                    const Icon(
+                      Icons.stars_rounded,
+                      color: Colors.orange,
+                      size: 64,
+                    ),
                     const SizedBox(height: 16),
                     Text(
-                      promotion['title'] as String? ?? 'Congratulations!',
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      promotion['title'] as String? ?? 'gen_congratulations'.tr,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      promotion['message'] as String? ?? 'You have been promoted!',
+                      promotion['message'] as String? ??
+                          'you_have_been_promoted'.tr,
                       style: const TextStyle(fontSize: 16),
                       textAlign: TextAlign.center,
                     ),
@@ -260,25 +269,50 @@ class LeaderboardController extends GetxController {
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         child: Text(
-                          (promotion['benefit'] as Map<String, dynamic>)['type'] == 'xp_boost' 
-                              ? 'Reward: ${(promotion['benefit'] as Map<String, dynamic>)['multiplier']}x XP Boost!' 
-                              : 'Reward: Bonus unlocked!',
-                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                          (promotion['benefit']
+                                      as Map<String, dynamic>)['type'] ==
+                                  'xp_boost'
+                              ? 'Reward: ${(promotion['benefit'] as Map<String, dynamic>)['multiplier']}x XP Boost!'
+                              : 'reward_bonus_unlocked'.tr,
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColorsBridge.primaryGreen, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999))),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColorsBridge.primaryGreen,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
                       onPressed: () {
                         Get.back<void>();
-                        _leaderboardService.acknowledgePromotion(promotion['id'].toString());
+                        _leaderboardService.acknowledgePromotion(
+                          promotion['id'].toString(),
+                        );
                       },
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        child: Text('Awesome!', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          'awesome'.tr,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -300,7 +334,6 @@ class LeaderboardController extends GetxController {
       // ignore league load failures for now
     }
   }
-
 
   Future<void> refreshLeaderboard() async {
     final String search = searchQuery.value.trim();
@@ -479,24 +512,31 @@ class LeaderboardController extends GetxController {
 
   void onMessageTap(Map<String, dynamic> user) async {
     if ((user['isCurrentUser'] as bool?) ?? false) return;
-    
+
     final String? userId = user['userId']?.toString();
     if (userId == null) return;
-    
-    final ProfileModel? preview = await _leaderboardService.fetchUserPreview(userId);
+
+    final ProfileModel? preview = await _leaderboardService.fetchUserPreview(
+      userId,
+    );
     if (preview != null && preview.canChat == true) {
       Get.dialog<void>(
-        LeaderboardChatDialog(user: <String, dynamic>{
-          ...user,
-          'chatTargetUserId': preview.chatTargetUserId,
-          'totalXp': preview.totalXp,
-          'streakDays': preview.streakDays,
-          'avatarUrl': preview.avatarUrl,
-        }),
+        LeaderboardChatDialog(
+          user: <String, dynamic>{
+            ...user,
+            'chatTargetUserId': preview.chatTargetUserId,
+            'totalXp': preview.totalXp,
+            'streakDays': preview.streakDays,
+            'avatarUrl': preview.avatarUrl,
+          },
+        ),
         barrierColor: Colors.black.withValues(alpha: 0.45),
       );
     } else {
-      Get.snackbar('Cannot Chat', 'This user cannot be messaged right now.');
+      Get.snackbar(
+        'cannot_chat'.tr,
+        'this_user_cannot_be_messaged_right_now'.tr,
+      );
     }
   }
 

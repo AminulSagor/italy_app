@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../models/legal_document_models.dart';
 import 'settings_ui_widgets.dart';
+import 'package:get/get.dart';
 
 class LegalDocumentView extends StatelessWidget {
   const LegalDocumentView({
@@ -42,7 +43,7 @@ class LegalDocumentView extends StatelessWidget {
               SizedBox(height: 6.h),
               Center(
                 child: Text(
-                  'ITALIR POTHE • ${document.effectiveDate.toUpperCase()}',
+                  'italir_pothe_document_effectivedate_touppercase'.trParams(<String, String>{'touppercase': document.effectiveDate.toUpperCase().toString()}),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11.sp,

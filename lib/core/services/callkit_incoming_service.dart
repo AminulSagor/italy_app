@@ -8,6 +8,7 @@ import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:get/get.dart';
 
 
 typedef CallkitActionCallback = Future<void> Function(
@@ -152,7 +153,7 @@ class CallkitIncomingService {
       'conversationId': call['directConversationId']?.toString() ?? '',
       'callType': call['callType']?.toString() ?? 'audio',
       'callerId': caller['id']?.toString() ?? call['callerId']?.toString() ?? '',
-      'callerName': caller['fullName']?.toString() ?? 'Incoming call',
+      'callerName': caller['fullName']?.toString() ?? 'incoming_call'.tr,
       'callerAvatarUrl': caller['avatarUrl']?.toString() ?? '',
     };
 
@@ -192,7 +193,7 @@ class CallkitIncomingService {
     final String callerName =
         data['callerName']?.toString().trim().isNotEmpty == true
         ? data['callerName'].toString().trim()
-        : 'Incoming call';
+        : 'incoming_call'.tr;
     final String callType = data['callType']?.toString() ?? 'audio';
 
     final CallKitParams params = CallKitParams(
@@ -205,11 +206,11 @@ class CallkitIncomingService {
       duration: 60000,
       isAccepted: false,
       extra: data,
-      missedCallNotification: const NotificationParams(
+      missedCallNotification: NotificationParams(
         showNotification: true,
         isShowCallback: false,
-        subtitle: 'Missed call',
-        callbackText: 'Call back',
+        subtitle: 'missed_call'.tr,
+        callbackText: 'call_back'.tr,
       ),
       android: AndroidParams(
         isCustomNotification: true,
@@ -218,10 +219,10 @@ class CallkitIncomingService {
         backgroundColor: '#0955FA',
         actionColor: '#4CAF50',
         textColor: '#FFFFFF',
-        textAccept: 'Answer',
-        textDecline: 'Decline',
-        incomingCallNotificationChannelName: 'Incoming Calls',
-        missedCallNotificationChannelName: 'Missed Calls',
+        textAccept: 'gen_answer'.tr,
+        textDecline: 'gen_decline'.tr,
+        incomingCallNotificationChannelName: 'incoming_call'.tr,
+        missedCallNotificationChannelName: 'missed_call'.tr,
         isShowCallID: false,
         isShowFullLockedScreen: true,
         isImportant: true,

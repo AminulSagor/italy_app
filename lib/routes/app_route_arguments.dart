@@ -1,6 +1,3 @@
-import 'package:image_picker/image_picker.dart';
-
-import '../features/service_hub/sub_features/cv_builder/models/cv_builder_models.dart';
 import '../features/courses/models/course_models.dart';
 import '../features/courses/sub_features/quiz/models/quiz_models.dart';
 
@@ -96,45 +93,11 @@ class CourseCertificateRouteArguments {
 }
 
 
-class CvTemplateFormRouteArguments {
-  final CvTemplateModel template;
-  final String themeColor;
-
-  const CvTemplateFormRouteArguments({
-    required this.template,
-    required this.themeColor,
-  });
-}
 
 
-class CvThemeRouteArguments {
-  final CvTemplateModel template;
-  final String documentTitle;
-  final String primaryColor;
-  final String accentColor;
-  final Map<String, dynamic> formData;
-  final Map<String, XFile> pendingPhotoFiles;
-
-  const CvThemeRouteArguments({
-    required this.template,
-    required this.documentTitle,
-    required this.primaryColor,
-    required this.accentColor,
-    required this.formData,
-    this.pendingPhotoFiles = const <String, XFile>{},
-  });
-}
 
 
-class CvReadyRouteArguments {
-  final CvDocumentModel document;
-  final CvTemplateModel template;
 
-  const CvReadyRouteArguments({
-    required this.document,
-    required this.template,
-  });
-}
 
 class HomeChapterRouteArguments {
   const HomeChapterRouteArguments({
