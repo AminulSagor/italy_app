@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../models/cv_template_model.dart';
@@ -61,7 +62,7 @@ class CvSelectedTemplateBanner
               CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Selected template',
+                  'cv_selected_template_label'.tr,
                   style: TextStyle(
                     fontSize: 11.sp,
                     color:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 
 import '../../../core/themes/app_colors.dart';
 
@@ -36,7 +37,7 @@ class CvAttachmentSheet extends StatelessWidget {
             ),
             SizedBox(height: 20.h),
             Text(
-              'Add CV Image',
+              'cv_attachment_title'.tr,
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w900,
@@ -46,9 +47,9 @@ class CvAttachmentSheet extends StatelessWidget {
             SizedBox(height: 18.h),
             _AttachmentOption(
               icon: Icons.person_outline_rounded,
-              title: 'Upload Profile Photo',
+              title: 'cv_attachment_profile_photo'.tr,
               description:
-              'Add the candidate photo that should appear in the CV.',
+              'cv_attachment_profile_photo_description'.tr,
               onTap: () {
                 Navigator.of(context).pop();
                 onProfilePhoto();
@@ -59,9 +60,9 @@ class CvAttachmentSheet extends StatelessWidget {
               icon: Icons
                   .collections_outlined,
               title:
-              'Upload Reference CV or Design',
+              'cv_attachment_reference'.tr,
               description:
-              'Add a CV, layout, color, or design image for visual reference.',
+              'cv_attachment_reference_description'.tr,
               onTap: () {
                 Navigator.of(context).pop();
                 onReferenceImages();

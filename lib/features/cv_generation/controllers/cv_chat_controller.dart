@@ -17,9 +17,11 @@ class CvChatController extends GetxController {
     required CvAssistantSessionModel initialSession,
     required this.selectedTemplate,
     ImagePicker? imagePicker,
-  }) : _apiService = apiService,
+  })  : _apiService = apiService,
         _imagePicker = imagePicker ?? ImagePicker(),
-        session = initialSession.obs;
+        session = initialSession.obs {
+    displayMessages.assignAll(initialSession.messages);
+  }
 
   final CvGenerationApiService _apiService;
   final ImagePicker _imagePicker;
@@ -27,7 +29,10 @@ class CvChatController extends GetxController {
   final CvTemplateModel? selectedTemplate;
 
   final Rx<CvAssistantSessionModel> session;
-  final RxBool isSwitchingMode = false.obs;
+
+  /// Includes backend messages and temporary optimistic messages.
+  final RxList<CvAssistantMessageModel> displayMessages =
+      <CvAssistantMessageModel>[].obs;
 
   final TextEditingController messageController =
   TextEditingController();
@@ -36,49 +41,122 @@ class CvChatController extends GetxController {
   ScrollController();
 
   final RxBool isSending = false.obs;
-  final RxBool isSkipping = false.obs;
+  final RxBool isAssistantThinking = false.obs;
   final RxBool isUploading = false.obs;
   final RxBool isGenerating = false.obs;
+  final RxBool isSwitchingMode = false.obs;
 
-  final Rxn<XFile> localProfilePhoto =
-  Rxn<XFile>();
+  /// The view can use this to show the validation panel.
+  final RxBool isValidationPanelVisible = false.obs;
+
+  final Rxn<XFile> localProfilePhoto = Rxn<XFile>();
 
   final RxList<XFile> localReferenceImages =
       <XFile>[].obs;
 
-  List<CvAssistantMessageModel> get messages =>
-      session.value.messages;
+  bool _generationRequestLocked = false;
 
-  CvAssistantQuestionModel? get currentQuestion =>
-      session.value.currentQuestion;
+  List<CvAssistantMessageModel> get messages {
+    return displayMessages;
+  }
 
-  bool get hasTemplate =>
-      selectedTemplate != null;
+  CvAssistantQuestionModel? get currentQuestion {
+    return session.value.currentQuestion;
+  }
 
-  bool get hasProfilePhoto =>
-      session.value.profilePhotoFileId != null;
+  List<CvPendingSuggestionModel>
+  get pendingSuggestions {
+    return session.value.pendingSuggestions;
+  }
 
-  int get referenceImageCount =>
-      session.value.referenceImageFileIds.length;
+  CvAssistantPhotoDecision get photoDecision {
+    return session.value.photoDecision;
+  }
 
-  bool get isBusy =>
-      isSending.value ||
-          isSkipping.value ||
-          isUploading.value ||
-          isGenerating.value ||
-          isSwitchingMode.value;
+  bool get hasTemplate {
+    return selectedTemplate != null;
+  }
 
-  CvAssistantConversationMode
-  get conversationMode =>
-      session.value.conversationMode;
+  bool get hasProfilePhoto {
+    return session.value.profilePhotoFileId != null;
+  }
 
-  bool get isOneByOneMode =>
-      conversationMode ==
-          CvAssistantConversationMode.oneByOne;
+  bool get hasPendingSuggestion {
+    return pendingSuggestions.isNotEmpty;
+  }
 
-  bool get isAllAtOnceMode =>
-      conversationMode ==
-          CvAssistantConversationMode.allAtOnce;
+  bool get hasUnresolvedPhotoDecision {
+    return session.value.hasUnresolvedPhotoDecision;
+  }
+
+  int get referenceImageCount {
+    return session.value.referenceImageFileIds.length;
+  }
+
+  bool get isBusy {
+    return isSending.value ||
+        isUploading.value ||
+        isGenerating.value ||
+        isSwitchingMode.value;
+  }
+
+  bool get canGenerateNow {
+    return session.value.isReadyToGenerate &&
+        !isBusy &&
+        !_generationRequestLocked;
+  }
+
+  CvAssistantConversationMode get conversationMode {
+    return session.value.conversationMode;
+  }
+
+  bool get isOneByOneMode {
+    return conversationMode ==
+        CvAssistantConversationMode.oneByOne;
+  }
+
+  bool get isAllAtOnceMode {
+    return conversationMode ==
+        CvAssistantConversationMode.allAtOnce;
+  }
+
+  /// Uses only blocker information returned by the backend.
+  List<String> get backendBlockers {
+    final List<String> blockers = <String>[
+      ...session.value.generationBlockers,
+      ...session.value.missingRequiredFields,
+      ...session.value.missingTemplateSections,
+      ...session.value.unresolvedOptionalSections,
+      ...session.value.qualityIssues,
+    ];
+
+    if (session.value.pendingSuggestions.isNotEmpty) {
+      blockers.add(
+        session.value.pendingSuggestions.length == 1
+            ? 'One suggestion needs your response.'
+            : '${session.value.pendingSuggestions.length} suggestions need your response.',
+      );
+    }
+
+    if (session.value.hasUnresolvedPhotoDecision) {
+      blockers.add(
+        'Choose whether to upload a photo or continue without one.',
+      );
+    }
+
+    final List<String> uniqueBlockers = <String>[];
+
+    for (final String blocker in blockers) {
+      final String normalized = blocker.trim();
+
+      if (normalized.isNotEmpty &&
+          !uniqueBlockers.contains(normalized)) {
+        uniqueBlockers.add(normalized);
+      }
+    }
+
+    return uniqueBlockers;
+  }
 
   Future<void> sendMessage() async {
     final String message =
@@ -90,7 +168,108 @@ class CvChatController extends GetxController {
 
     FocusManager.instance.primaryFocus?.unfocus();
 
+    /// Clear immediately because the optimistic bubble appears
+    /// immediately in the message list.
+    messageController.clear();
+
+    await _sendNaturalLanguageMessage(
+      message: message,
+      addOptimisticMessage: true,
+    );
+  }
+
+  Future<void> sendQuickReply(
+      String message,
+      ) async {
+    final String normalized = message.trim();
+
+    if (normalized.isEmpty || isBusy) {
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    await _sendNaturalLanguageMessage(
+      message: normalized,
+      addOptimisticMessage: true,
+    );
+  }
+
+  Future<void> acceptSuggestion() {
+    return sendQuickReply('Accept');
+  }
+
+  Future<void> rejectSuggestion() {
+    return sendQuickReply('Reject');
+  }
+
+  /// The UI should open an editable field containing the
+  /// suggested wording and pass the edited value here.
+  Future<void> submitEditedSuggestion(
+      String editedText,
+      ) async {
+    final String normalized = editedText.trim();
+
+    if (normalized.isEmpty) {
+      Get.snackbar(
+        'Edited suggestion required',
+        'Enter the wording you want to use.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    await sendQuickReply(normalized);
+  }
+
+  Future<void> continueWithoutPhoto() {
+    return sendQuickReply(
+      'Continue without a photo.',
+    );
+  }
+
+  Future<void> markCurrentStepDone() {
+    return sendQuickReply('Done');
+  }
+
+  Future<void> _sendNaturalLanguageMessage({
+    required String message,
+    required bool addOptimisticMessage,
+    String? existingOptimisticId,
+  }) async {
+    if (isSending.value) {
+      return;
+    }
+
+    final String optimisticId =
+        existingOptimisticId ??
+            'local-${DateTime.now().microsecondsSinceEpoch}';
+
+    if (addOptimisticMessage) {
+      displayMessages.add(
+        CvAssistantMessageModel(
+          id: optimisticId,
+          role: CvAssistantMessageRole.user,
+          text: message,
+          questionKey:
+          session.value.currentQuestionKey,
+          metadata: const <String, dynamic>{
+            'localState': 'sending',
+          },
+          createdAt: DateTime.now(),
+        ),
+      );
+    } else {
+      _replaceLocalMessageState(
+        messageId: optimisticId,
+        state: 'sending',
+      );
+    }
+
     isSending.value = true;
+    isAssistantThinking.value = true;
+
+    _scrollToBottom();
 
     try {
       final CvAssistantSessionModel updated =
@@ -99,44 +278,96 @@ class CvChatController extends GetxController {
         message: message,
       );
 
-      messageController.clear();
-      session.value = updated;
-
-      _scrollToBottom();
+      _applySession(updated);
     } catch (error) {
+      _replaceLocalMessageState(
+        messageId: optimisticId,
+        state: 'failed',
+      );
+
       _showError(
         'Message not sent',
         error,
       );
     } finally {
       isSending.value = false;
+      isAssistantThinking.value = false;
+      _scrollToBottom();
     }
   }
 
-  Future<void> skipCurrentQuestion() async {
+  Future<void> retryFailedMessage(
+      String messageId,
+      ) async {
     if (isBusy) {
       return;
     }
 
-    isSkipping.value = true;
+    CvAssistantMessageModel? failedMessage;
 
-    try {
-      final CvAssistantSessionModel updated =
-      await _apiService
-          .skipCvAssistantQuestion(
-        session.value.id,
-      );
-
-      session.value = updated;
-      _scrollToBottom();
-    } catch (error) {
-      _showError(
-        'Question could not be skipped',
-        error,
-      );
-    } finally {
-      isSkipping.value = false;
+    for (final CvAssistantMessageModel message
+    in displayMessages) {
+      if (message.id == messageId &&
+          isMessageFailed(message)) {
+        failedMessage = message;
+        break;
+      }
     }
+
+    if (failedMessage == null ||
+        failedMessage.text.trim().isEmpty) {
+      return;
+    }
+
+    await _sendNaturalLanguageMessage(
+      message: failedMessage.text,
+      addOptimisticMessage: false,
+      existingOptimisticId: failedMessage.id,
+    );
+  }
+
+  bool isMessagePending(
+      CvAssistantMessageModel message,
+      ) {
+    return message.metadata['localState'] ==
+        'sending';
+  }
+
+  bool isMessageFailed(
+      CvAssistantMessageModel message,
+      ) {
+    return message.metadata['localState'] ==
+        'failed';
+  }
+
+  void _replaceLocalMessageState({
+    required String messageId,
+    required String state,
+  }) {
+    final int index = displayMessages.indexWhere(
+          (CvAssistantMessageModel message) =>
+      message.id == messageId,
+    );
+
+    if (index < 0) {
+      return;
+    }
+
+    final CvAssistantMessageModel oldMessage =
+    displayMessages[index];
+
+    displayMessages[index] =
+        CvAssistantMessageModel(
+          id: oldMessage.id,
+          role: oldMessage.role,
+          text: oldMessage.text,
+          questionKey: oldMessage.questionKey,
+          metadata: <String, dynamic>{
+            ...oldMessage.metadata,
+            'localState': state,
+          },
+          createdAt: oldMessage.createdAt,
+        );
   }
 
   Future<void> pickProfilePhoto() async {
@@ -173,15 +404,13 @@ class CvChatController extends GetxController {
       );
 
       final CvAssistantSessionModel updated =
-      await _apiService
-          .attachCvAssistantAssets(
+      await _apiService.attachCvAssistantAssets(
         sessionId: session.value.id,
         profilePhotoFileId: fileId,
       );
 
       localProfilePhoto.value = image;
-      session.value = updated;
-      _scrollToBottom();
+      _applySession(updated);
     } catch (error) {
       _showError(
         'Profile photo upload failed',
@@ -189,6 +418,7 @@ class CvChatController extends GetxController {
       );
     } finally {
       isUploading.value = false;
+      _scrollToBottom();
     }
   }
 
@@ -253,16 +483,13 @@ class CvChatController extends GetxController {
       }
 
       final CvAssistantSessionModel updated =
-      await _apiService
-          .attachCvAssistantAssets(
+      await _apiService.attachCvAssistantAssets(
         sessionId: session.value.id,
-        referenceImageFileIds:
-        uploadedFileIds,
+        referenceImageFileIds: uploadedFileIds,
       );
 
       localReferenceImages.addAll(validImages);
-      session.value = updated;
-      _scrollToBottom();
+      _applySession(updated);
     } catch (error) {
       _showError(
         'Reference image upload failed',
@@ -270,14 +497,44 @@ class CvChatController extends GetxController {
       );
     } finally {
       isUploading.value = false;
+      _scrollToBottom();
     }
   }
 
+  void showGenerationBlockers() {
+    isValidationPanelVisible.value = true;
+  }
+
+  void hideGenerationBlockers() {
+    isValidationPanelVisible.value = false;
+  }
+
   Future<void> generateNow() async {
-    if (isBusy) {
+    if (_generationRequestLocked ||
+        isGenerating.value ||
+        isSending.value ||
+        isUploading.value ||
+        isSwitchingMode.value) {
       return;
     }
 
+    if (!session.value.isReadyToGenerate) {
+      showGenerationBlockers();
+
+      Get.snackbar(
+        'Complete your CV',
+        backendBlockers.isEmpty
+            ? 'Complete the remaining assistant steps before generating.'
+            : backendBlockers.first,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    _generationRequestLocked = true;
     isGenerating.value = true;
 
     try {
@@ -286,26 +543,21 @@ class CvChatController extends GetxController {
         session.value.id,
       );
 
-      if (Get.isRegistered<
-          CvGenerationController>()) {
-        await Get.delete<CvGenerationController>(
-          force: true,
+      await _openGeneration(
+        generationId,
+      );
+    } on CvGenerationAlreadyStartedException
+    catch (error) {
+      final bool recovered =
+      await _recoverGenerationAfterConflict();
+
+      if (!recovered) {
+        Get.snackbar(
+          'Generation already started',
+          error.message,
+          snackPosition: SnackPosition.BOTTOM,
         );
       }
-
-      await Get.to<void>(
-            () => const CvGenerationView(),
-        binding: BindingsBuilder(() {
-          Get.put<CvGenerationController>(
-            CvGenerationController(
-              apiService: _apiService,
-              initialGenerationId:
-              generationId,
-            ),
-          );
-        }),
-        transition: Transition.rightToLeft,
-      );
     } catch (error) {
       _showError(
         'CV generation could not start',
@@ -313,15 +565,110 @@ class CvChatController extends GetxController {
       );
     } finally {
       isGenerating.value = false;
+      _generationRequestLocked = false;
     }
+  }
+
+  Future<bool>
+  _recoverGenerationAfterConflict() async {
+    try {
+      await Future<void>.delayed(
+        const Duration(milliseconds: 700),
+      );
+
+      final CvAssistantSessionModel refreshed =
+      await _apiService.getCvAssistantSession(
+        session.value.id,
+      );
+
+      _applySession(refreshed);
+
+      final String generationId =
+          refreshed.generationId?.trim() ?? '';
+
+      if (generationId.isEmpty) {
+        return false;
+      }
+
+      await _openGeneration(generationId);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _openGeneration(
+      String generationId,
+      ) async {
+    final String controllerTag =
+        'cv-generation-$generationId';
+
+    await Get.to<void>(
+          () => CvGenerationView(
+        controllerTag: controllerTag,
+      ),
+      binding: BindingsBuilder(
+            () {
+          Get.put<CvGenerationController>(
+            CvGenerationController(
+              apiService: _apiService,
+              initialGenerationId: generationId,
+            ),
+            tag: controllerTag,
+          );
+        },
+      ),
+      transition: Transition.rightToLeft,
+    );
+  }
+
+  Future<void> switchConversationMode(
+      CvAssistantConversationMode mode,
+      ) async {
+    if (isBusy ||
+        session.value.isEditSession ||
+        session.value.conversationMode == mode) {
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    isSwitchingMode.value = true;
+
+    try {
+      final CvAssistantSessionModel updated =
+      await _apiService
+          .changeCvAssistantConversationMode(
+        sessionId: session.value.id,
+        mode: mode,
+      );
+
+      _applySession(updated);
+    } catch (error) {
+      _showError(
+        'Conversation mode could not be changed',
+        error,
+      );
+    } finally {
+      isSwitchingMode.value = false;
+      _scrollToBottom();
+    }
+  }
+
+  void _applySession(
+      CvAssistantSessionModel updated,
+      ) {
+    session.value = updated;
+    displayMessages.assignAll(updated.messages);
+    isValidationPanelVisible.value = false;
+    _scrollToBottom();
   }
 
   Future<String?> _validateImage(
       XFile file,
       ) async {
-    final String name = file.name
-        .trim()
-        .toLowerCase();
+    final String name =
+    file.name.trim().toLowerCase();
 
     final bool supported =
         name.endsWith('.jpg') ||
@@ -359,7 +706,9 @@ class CvChatController extends GetxController {
     );
   }
 
-  void _showValidationError(String message) {
+  void _showValidationError(
+      String message,
+      ) {
     Get.snackbar(
       'Invalid image',
       message,
@@ -376,38 +725,6 @@ class CvChatController extends GetxController {
       ApiErrorHandler.getErrorMessage(error),
       snackPosition: SnackPosition.BOTTOM,
     );
-  }
-
-  Future<void> switchConversationMode(
-      CvAssistantConversationMode mode,
-      ) async {
-    if (isBusy ||
-        session.value.conversationMode == mode) {
-      return;
-    }
-
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    isSwitchingMode.value = true;
-
-    try {
-      final CvAssistantSessionModel updated =
-      await _apiService
-          .changeCvAssistantConversationMode(
-        sessionId: session.value.id,
-        mode: mode,
-      );
-
-      session.value = updated;
-      _scrollToBottom();
-    } catch (error) {
-      _showError(
-        'Conversation mode could not be changed',
-        error,
-      );
-    } finally {
-      isSwitchingMode.value = false;
-    }
   }
 
   @override

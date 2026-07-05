@@ -15,8 +15,7 @@ class CvGenerationApiService {
 
   final ApiClient _apiClient;
 
-  Future<CvTemplateListResponseModel>
-  fetchTemplates({
+  Future<CvTemplateListResponseModel> fetchTemplates({
     int page = 1,
     int limit = 9,
     String search = '',
@@ -50,9 +49,57 @@ class CvGenerationApiService {
         if (templateId != null &&
             templateId.trim().isNotEmpty)
           'templateId': templateId.trim(),
-
         'conversationMode':
         conversationMode.apiValue,
+      },
+    );
+
+    return CvAssistantSessionModel.fromJson(
+      _responseMap(response),
+    );
+  }
+
+  Future<CvAssistantSessionModel>
+  startFactsOnlyEdit(
+      String generationId,
+      ) {
+    return startCvAssistantEdit(
+      generationId: generationId,
+      editMode: CvAssistantEditMode.factsOnly,
+    );
+  }
+
+  Future<CvAssistantSessionModel>
+  startDesignAndFactsEdit(
+      String generationId,
+      ) {
+    return startCvAssistantEdit(
+      generationId: generationId,
+      editMode:
+      CvAssistantEditMode.designAndFacts,
+    );
+  }
+
+  Future<CvAssistantSessionModel>
+  startCvAssistantEdit({
+    required String generationId,
+    required CvAssistantEditMode editMode,
+  }) async {
+    final String normalizedGenerationId =
+    generationId.trim();
+
+    if (normalizedGenerationId.isEmpty) {
+      throw ArgumentError(
+        'Generation ID is required.',
+      );
+    }
+
+    final Response<dynamic> response =
+    await _apiClient.dio.post<dynamic>(
+      '/cv-assistant/generations/'
+          '$normalizedGenerationId/edit',
+      data: <String, dynamic>{
+        'editMode': editMode.apiValue,
       },
     );
 
@@ -67,7 +114,9 @@ class CvGenerationApiService {
     required CvAssistantConversationMode mode,
   }) {
     final String command =
-    mode == CvAssistantConversationMode.allAtOnce
+    mode ==
+        CvAssistantConversationMode
+            .allAtOnce
         ? 'Ask me all questions at once.'
         : 'Ask me one by one.';
 
@@ -96,26 +145,22 @@ class CvGenerationApiService {
     required String sessionId,
     required String message,
   }) async {
+    final String normalizedMessage =
+    message.trim();
+
+    if (normalizedMessage.isEmpty) {
+      throw ArgumentError(
+        'Message cannot be empty.',
+      );
+    }
+
     final Response<dynamic> response =
     await _apiClient.dio.post<dynamic>(
-      '/cv-assistant/sessions/$sessionId/messages',
+      '/cv-assistant/sessions/'
+          '$sessionId/messages',
       data: <String, dynamic>{
-        'message': message.trim(),
+        'message': normalizedMessage,
       },
-    );
-
-    return CvAssistantSessionModel.fromJson(
-      _responseMap(response),
-    );
-  }
-
-  Future<CvAssistantSessionModel>
-  skipCvAssistantQuestion(
-      String sessionId,
-      ) async {
-    final Response<dynamic> response =
-    await _apiClient.dio.post<dynamic>(
-      '/cv-assistant/sessions/$sessionId/skip',
     );
 
     return CvAssistantSessionModel.fromJson(
@@ -129,18 +174,41 @@ class CvGenerationApiService {
     String? profilePhotoFileId,
     List<String>? referenceImageFileIds,
   }) async {
+    final List<String> normalizedReferenceIds =
+    (referenceImageFileIds ?? <String>[])
+        .map(
+          (String item) => item.trim(),
+    )
+        .where(
+          (String item) =>
+      item.isNotEmpty,
+    )
+        .toSet()
+        .toList();
+
+    final String? normalizedProfilePhotoId =
+    _nullableValue(
+      profilePhotoFileId,
+    );
+
+    if (normalizedProfilePhotoId == null &&
+        normalizedReferenceIds.isEmpty) {
+      throw ArgumentError(
+        'Provide a profile photo or at least one reference image.',
+      );
+    }
+
     final Response<dynamic> response =
     await _apiClient.dio.post<dynamic>(
-      '/cv-assistant/sessions/$sessionId/attachments',
+      '/cv-assistant/sessions/'
+          '$sessionId/attachments',
       data: <String, dynamic>{
-        if (profilePhotoFileId != null &&
-            profilePhotoFileId.trim().isNotEmpty)
+        if (normalizedProfilePhotoId != null)
           'profilePhotoFileId':
-          profilePhotoFileId.trim(),
-        if (referenceImageFileIds != null &&
-            referenceImageFileIds.isNotEmpty)
+          normalizedProfilePhotoId,
+        if (normalizedReferenceIds.isNotEmpty)
           'referenceImageFileIds':
-          referenceImageFileIds,
+          normalizedReferenceIds,
       },
     );
 
@@ -152,43 +220,60 @@ class CvGenerationApiService {
   Future<String> generateCvFromSession(
       String sessionId,
       ) async {
-    final Response<dynamic> response =
-    await _apiClient.dio.post<dynamic>(
-      '/cv-assistant/sessions/$sessionId/generate',
-    );
+    final String normalizedSessionId =
+    sessionId.trim();
 
-    final Map<String, dynamic> data =
-    _responseMap(response);
-
-    final String directGenerationId =
-        data['generationId']?.toString().trim() ??
-            '';
-
-    if (directGenerationId.isNotEmpty) {
-      return directGenerationId;
+    if (normalizedSessionId.isEmpty) {
+      throw ArgumentError(
+        'Session ID is required.',
+      );
     }
 
-    final dynamic generation = data['generation'];
+    try {
+      final Response<dynamic> response =
+      await _apiClient.dio.post<dynamic>(
+        '/cv-assistant/sessions/'
+            '$normalizedSessionId/generate',
+      );
 
-    if (generation is Map) {
-      final String nestedId =
-          generation['id']?.toString().trim() ?? '';
-
-      if (nestedId.isNotEmpty) {
-        return nestedId;
+      return _extractGenerationId(
+        _responseMap(response),
+      );
+    } on DioException catch (error) {
+      if (!_isConflict(error)) {
+        rethrow;
       }
+
+      /*
+       * Another request may already have started generation.
+       * Refresh the assistant session and reuse the generation
+       * ID when the backend has already linked it.
+       */
+      try {
+        final CvAssistantSessionModel session =
+        await getCvAssistantSession(
+          normalizedSessionId,
+        );
+
+        final String generationId =
+            session.generationId?.trim() ?? '';
+
+        if (generationId.isNotEmpty) {
+          return generationId;
+        }
+      } catch (_) {
+        /*
+         * Preserve the original 409 response when refreshing
+         * the session also fails.
+         */
+      }
+
+      throw CvGenerationAlreadyStartedException(
+        _extractDioErrorMessage(error) ??
+            'CV generation has already started. '
+                'Please refresh the session shortly.',
+      );
     }
-
-    final String directId =
-        data['id']?.toString().trim() ?? '';
-
-    if (directId.isNotEmpty) {
-      return directId;
-    }
-
-    throw StateError(
-      'The server did not return a generation ID.',
-    );
   }
 
   Future<CvGenerationModel> fetchGeneration(
@@ -204,12 +289,36 @@ class CvGenerationApiService {
     );
   }
 
-  Future<CvGenerationModel> regenerate(
-      String generationId,
-      ) async {
+  Future<CvGenerationModel> regenerateDesign({
+    required String generationId,
+    required String designInstruction,
+  }) async {
+    final String normalizedGenerationId =
+    generationId.trim();
+
+    final String normalizedInstruction =
+    designInstruction.trim();
+
+    if (normalizedGenerationId.isEmpty) {
+      throw ArgumentError(
+        'Generation ID is required.',
+      );
+    }
+
+    if (normalizedInstruction.isEmpty) {
+      throw ArgumentError(
+        'A design instruction is required.',
+      );
+    }
+
     final Response<dynamic> response =
     await _apiClient.dio.post<dynamic>(
-      '/cv-generations/$generationId/regenerate',
+      '/cv-generations/'
+          '$normalizedGenerationId/regenerate',
+      data: <String, dynamic>{
+        'designInstruction':
+        normalizedInstruction,
+      },
     );
 
     return CvGenerationModel.fromJson(
@@ -221,7 +330,8 @@ class CvGenerationApiService {
     required XFile file,
     required String filePurpose,
   }) async {
-    final int sizeBytes = await file.length();
+    final int sizeBytes =
+    await file.length();
 
     if (sizeBytes <= 0) {
       throw StateError(
@@ -238,7 +348,8 @@ class CvGenerationApiService {
     final String originalName =
     _safeOriginalName(file);
 
-    final String mimeType = _imageMimeType(file);
+    final String mimeType =
+    _imageMimeType(file);
 
     final Response<dynamic> prepareResponse =
     await _apiClient.dio.post<dynamic>(
@@ -262,7 +373,9 @@ class CvGenerationApiService {
             '';
 
     final String storageKey =
-        prepared['storageKey']?.toString().trim() ??
+        prepared['storageKey']
+            ?.toString()
+            .trim() ??
             '';
 
     if (signedUploadUrl.isEmpty ||
@@ -305,10 +418,14 @@ class CvGenerationApiService {
     final Map<String, dynamic> confirmed =
     _responseMap(confirmResponse);
 
-    final dynamic rawFile = confirmed['file'];
+    final dynamic rawFile =
+    confirmed['file'];
 
     final String fileId = rawFile is Map
-        ? rawFile['id']?.toString().trim() ?? ''
+        ? rawFile['id']
+        ?.toString()
+        .trim() ??
+        ''
         : '';
 
     if (fileId.isEmpty) {
@@ -320,10 +437,92 @@ class CvGenerationApiService {
     return fileId;
   }
 
+  String _extractGenerationId(
+      Map<String, dynamic> data,
+      ) {
+    final String directGenerationId =
+        data['generationId']
+            ?.toString()
+            .trim() ??
+            '';
+
+    if (directGenerationId.isNotEmpty) {
+      return directGenerationId;
+    }
+
+    final dynamic rawGeneration =
+    data['generation'];
+
+    if (rawGeneration is Map) {
+      final String nestedGenerationId =
+          rawGeneration['id']
+              ?.toString()
+              .trim() ??
+              '';
+
+      if (nestedGenerationId.isNotEmpty) {
+        return nestedGenerationId;
+      }
+    }
+
+    final String directId =
+        data['id']?.toString().trim() ?? '';
+
+    if (directId.isNotEmpty) {
+      return directId;
+    }
+
+    throw StateError(
+      'The server did not return a generation ID.',
+    );
+  }
+
+  bool _isConflict(
+      DioException error,
+      ) {
+    return error.response?.statusCode == 409;
+  }
+
+  String? _extractDioErrorMessage(
+      DioException error,
+      ) {
+    final dynamic rawData =
+        error.response?.data;
+
+    if (rawData is String) {
+      return _nullableValue(rawData);
+    }
+
+    if (rawData is Map) {
+      final dynamic rawMessage =
+      rawData['message'];
+
+      if (rawMessage is List) {
+        final String message = rawMessage
+            .map(
+              (dynamic item) =>
+              item.toString().trim(),
+        )
+            .where(
+              (String item) =>
+          item.isNotEmpty,
+        )
+            .join(' ');
+
+        return _nullableValue(message);
+      }
+
+      return _nullableValue(rawMessage);
+    }
+
+    return null;
+  }
+
   Map<String, dynamic> _responseMap(
       Response<dynamic> response,
       ) {
-    final dynamic rawData = response.data;
+    final dynamic rawData =
+        response.data;
 
     if (rawData is! Map) {
       throw StateError(
@@ -334,7 +533,8 @@ class CvGenerationApiService {
     final Map<String, dynamic> map =
     Map<String, dynamic>.from(rawData);
 
-    final dynamic nestedData = map['data'];
+    final dynamic nestedData =
+    map['data'];
 
     if (nestedData is Map) {
       return Map<String, dynamic>.from(
@@ -345,17 +545,23 @@ class CvGenerationApiService {
     return map;
   }
 
-  String _safeOriginalName(XFile file) {
-    final String suppliedName = file.name.trim();
+  String _safeOriginalName(
+      XFile file,
+      ) {
+    final String suppliedName =
+    file.name.trim();
 
     if (suppliedName.isNotEmpty) {
       return suppliedName;
     }
 
     final List<String> pathParts =
-    file.path.split(RegExp(r'[\\/]'));
+    file.path.split(
+      RegExp(r'[\\/]'),
+    );
 
-    final String pathName = pathParts.isEmpty
+    final String pathName =
+    pathParts.isEmpty
         ? ''
         : pathParts.last.trim();
 
@@ -364,9 +570,14 @@ class CvGenerationApiService {
         : pathName;
   }
 
-  String _imageMimeType(XFile file) {
+  String _imageMimeType(
+      XFile file,
+      ) {
     final String suppliedMimeType =
-        file.mimeType?.trim().toLowerCase() ?? '';
+        file.mimeType
+            ?.trim()
+            .toLowerCase() ??
+            '';
 
     if (<String>{
       'image/jpeg',
@@ -377,7 +588,8 @@ class CvGenerationApiService {
     }
 
     final String fileName =
-    _safeOriginalName(file).toLowerCase();
+    _safeOriginalName(file)
+        .toLowerCase();
 
     if (fileName.endsWith('.png')) {
       return 'image/png';
@@ -389,4 +601,29 @@ class CvGenerationApiService {
 
     return 'image/jpeg';
   }
+}
+
+class CvGenerationAlreadyStartedException
+    implements Exception {
+  const CvGenerationAlreadyStartedException(
+      this.message,
+      );
+
+  final String message;
+
+  @override
+  String toString() {
+    return message;
+  }
+}
+
+String? _nullableValue(
+    dynamic value,
+    ) {
+  final String normalized =
+      value?.toString().trim() ?? '';
+
+  return normalized.isEmpty
+      ? null
+      : normalized;
 }

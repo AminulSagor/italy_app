@@ -6,6 +6,7 @@ enum CvAssistantConversationMode {
     switch (this) {
       case CvAssistantConversationMode.oneByOne:
         return 'one_by_one';
+
       case CvAssistantConversationMode.allAtOnce:
         return 'all_at_once';
     }
@@ -15,6 +16,7 @@ enum CvAssistantConversationMode {
     switch (this) {
       case CvAssistantConversationMode.oneByOne:
         return 'One by One';
+
       case CvAssistantConversationMode.allAtOnce:
         return 'All at Once';
     }
@@ -26,9 +28,92 @@ enum CvAssistantConversationMode {
     switch (value?.trim().toLowerCase()) {
       case 'all_at_once':
         return CvAssistantConversationMode.allAtOnce;
+
       case 'one_by_one':
       default:
         return CvAssistantConversationMode.oneByOne;
+    }
+  }
+}
+
+enum CvAssistantEditMode {
+  factsOnly,
+  designAndFacts;
+
+  String get apiValue {
+    switch (this) {
+      case CvAssistantEditMode.factsOnly:
+        return 'facts_only';
+
+      case CvAssistantEditMode.designAndFacts:
+        return 'design_and_facts';
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case CvAssistantEditMode.factsOnly:
+        return 'Edit information';
+
+      case CvAssistantEditMode.designAndFacts:
+        return 'Edit information and design';
+    }
+  }
+
+  static CvAssistantEditMode? fromValue(
+      String? value,
+      ) {
+    switch (value?.trim().toLowerCase()) {
+      case 'facts_only':
+        return CvAssistantEditMode.factsOnly;
+
+      case 'design_and_facts':
+        return CvAssistantEditMode.designAndFacts;
+
+      default:
+        return null;
+    }
+  }
+}
+
+enum CvAssistantPhotoDecision {
+  unresolved,
+  uploaded,
+  withoutPhoto,
+  notApplicable;
+
+  String get apiValue {
+    switch (this) {
+      case CvAssistantPhotoDecision.unresolved:
+        return 'unresolved';
+
+      case CvAssistantPhotoDecision.uploaded:
+        return 'uploaded';
+
+      case CvAssistantPhotoDecision.withoutPhoto:
+        return 'without_photo';
+
+      case CvAssistantPhotoDecision.notApplicable:
+        return 'not_applicable';
+    }
+  }
+
+  static CvAssistantPhotoDecision fromValue(
+      String? value,
+      ) {
+    switch (value?.trim().toLowerCase()) {
+      case 'uploaded':
+        return CvAssistantPhotoDecision.uploaded;
+
+      case 'without_photo':
+        return CvAssistantPhotoDecision.withoutPhoto;
+
+      case 'not_applicable':
+        return CvAssistantPhotoDecision.notApplicable;
+
+      case 'unresolved':
+      default:
+        return CvAssistantPhotoDecision.unresolved;
     }
   }
 }
@@ -92,7 +177,33 @@ class CvAssistantQuestionModel {
   final String type;
   final bool optional;
 
-  bool get isBatchQuestion => key == 'batchCvDetails';
+  bool get isBatchQuestion {
+    return key == 'batchCvDetails';
+  }
+
+  bool get isChoiceQuestion {
+    return type == 'choice';
+  }
+
+  bool get isLongTextQuestion {
+    return type == 'long_text';
+  }
+
+  bool get isEmailQuestion {
+    return type == 'email';
+  }
+
+  bool get isPhoneQuestion {
+    return type == 'phone';
+  }
+
+  bool get isUrlQuestion {
+    return type == 'url';
+  }
+
+  bool get isListQuestion {
+    return type == 'list';
+  }
 
   factory CvAssistantQuestionModel.fromJson(
       Map<String, dynamic> json,
@@ -159,12 +270,188 @@ class CvAssistantMessageModel {
   }
 }
 
+class CvPendingSuggestionModel {
+  const CvPendingSuggestionModel({
+    required this.key,
+    required this.targetField,
+    required this.text,
+  });
+
+  final String key;
+  final String? targetField;
+  final String text;
+
+  factory CvPendingSuggestionModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    return CvPendingSuggestionModel(
+      key: json['key']?.toString().trim() ?? '',
+      targetField: _nullableString(
+        json['targetField'],
+      ),
+      text: json['text']?.toString().trim() ?? '',
+    );
+  }
+}
+
+class CvAssistantPlanningStateModel {
+  const CvAssistantPlanningStateModel({
+    required this.pendingSuggestions,
+    required this.confirmedSuggestions,
+    required this.rejectedSuggestions,
+    required this.declinedOptionalSections,
+    required this.missingRequiredFields,
+    required this.missingTemplateSections,
+    required this.unresolvedOptionalSections,
+    required this.photoDecision,
+    required this.qualityIssues,
+    required this.canGenerate,
+  });
+
+  final List<CvPendingSuggestionModel> pendingSuggestions;
+
+  final List<String> confirmedSuggestions;
+
+  final List<String> rejectedSuggestions;
+
+  final List<String> declinedOptionalSections;
+
+  final List<String> missingRequiredFields;
+
+  final List<String> missingTemplateSections;
+
+  final List<String> unresolvedOptionalSections;
+
+  final CvAssistantPhotoDecision photoDecision;
+
+  final List<String> qualityIssues;
+
+  final bool canGenerate;
+
+  bool get hasPendingSuggestions {
+    return pendingSuggestions.isNotEmpty;
+  }
+
+  bool get hasMissingRequiredFields {
+    return missingRequiredFields.isNotEmpty;
+  }
+
+  bool get hasMissingTemplateSections {
+    return missingTemplateSections.isNotEmpty;
+  }
+
+  bool get hasUnresolvedOptionalSections {
+    return unresolvedOptionalSections.isNotEmpty;
+  }
+
+  bool get hasQualityIssues {
+    return qualityIssues.isNotEmpty;
+  }
+
+  bool get isPhotoDecisionUnresolved {
+    return photoDecision ==
+        CvAssistantPhotoDecision.unresolved;
+  }
+
+  bool get hasBlockers {
+    return hasPendingSuggestions ||
+        hasMissingRequiredFields ||
+        hasMissingTemplateSections ||
+        hasUnresolvedOptionalSections ||
+        hasQualityIssues ||
+        isPhotoDecisionUnresolved ||
+        !canGenerate;
+  }
+
+  factory CvAssistantPlanningStateModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    final dynamic rawPendingSuggestions =
+    json['pendingSuggestions'];
+
+    return CvAssistantPlanningStateModel(
+      pendingSuggestions:
+      rawPendingSuggestions is List
+          ? rawPendingSuggestions
+          .whereType<Map>()
+          .map(
+            (Map item) =>
+            CvPendingSuggestionModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ),
+      )
+          .where(
+            (CvPendingSuggestionModel item) =>
+        item.key.isNotEmpty ||
+            item.text.isNotEmpty,
+      )
+          .toList()
+          : <CvPendingSuggestionModel>[],
+
+      confirmedSuggestions: _toStringList(
+        json['confirmedSuggestions'],
+      ),
+
+      rejectedSuggestions: _toStringList(
+        json['rejectedSuggestions'],
+      ),
+
+      declinedOptionalSections: _toStringList(
+        json['declinedOptionalSections'],
+      ),
+
+      missingRequiredFields: _toStringList(
+        json['missingRequiredFields'],
+      ),
+
+      missingTemplateSections: _toStringList(
+        json['missingTemplateSections'],
+      ),
+
+      unresolvedOptionalSections: _toStringList(
+        json['unresolvedOptionalSections'],
+      ),
+
+      photoDecision:
+      CvAssistantPhotoDecision.fromValue(
+        json['photoDecision']?.toString(),
+      ),
+
+      qualityIssues: _toStringList(
+        json['qualityIssues'],
+      ),
+
+      canGenerate: json['canGenerate'] == true,
+    );
+  }
+
+  factory CvAssistantPlanningStateModel.empty() {
+    return const CvAssistantPlanningStateModel(
+      pendingSuggestions:
+      <CvPendingSuggestionModel>[],
+      confirmedSuggestions: <String>[],
+      rejectedSuggestions: <String>[],
+      declinedOptionalSections: <String>[],
+      missingRequiredFields: <String>[],
+      missingTemplateSections: <String>[],
+      unresolvedOptionalSections: <String>[],
+      photoDecision:
+      CvAssistantPhotoDecision.unresolved,
+      qualityIssues: <String>[],
+      canGenerate: false,
+    );
+  }
+}
+
 class CvAssistantSessionModel {
   const CvAssistantSessionModel({
     required this.id,
     required this.templateId,
     required this.status,
     required this.conversationMode,
+    required this.editMode,
+    required this.sourceGenerationId,
+    required this.pendingDesignInstruction,
     required this.currentQuestionKey,
     required this.currentQuestion,
     required this.assistantMessage,
@@ -176,6 +463,11 @@ class CvAssistantSessionModel {
     required this.templateAnalysis,
     required this.generationId,
     required this.canGenerate,
+    required this.validationComplete,
+    required this.qualityCheckPassed,
+    required this.qualityCheckedAt,
+    required this.generationBlockers,
+    required this.planningState,
     required this.progress,
     required this.createdAt,
     required this.updatedAt,
@@ -188,6 +480,12 @@ class CvAssistantSessionModel {
   final CvAssistantSessionStatus status;
 
   final CvAssistantConversationMode conversationMode;
+
+  final CvAssistantEditMode? editMode;
+
+  final String? sourceGenerationId;
+
+  final String? pendingDesignInstruction;
 
   final String? currentQuestionKey;
 
@@ -209,7 +507,20 @@ class CvAssistantSessionModel {
 
   final String? generationId;
 
+  /// This value comes directly from the backend.
   final bool canGenerate;
+
+  /// This value comes directly from the backend.
+  final bool validationComplete;
+
+  /// This value comes directly from the backend.
+  final bool qualityCheckPassed;
+
+  final DateTime? qualityCheckedAt;
+
+  final List<String> generationBlockers;
+
+  final CvAssistantPlanningStateModel planningState;
 
   final int progress;
 
@@ -227,6 +538,20 @@ class CvAssistantSessionModel {
         CvAssistantConversationMode.allAtOnce;
   }
 
+  bool get isEditSession {
+    return editMode != null;
+  }
+
+  bool get isFactsOnlyEdit {
+    return editMode ==
+        CvAssistantEditMode.factsOnly;
+  }
+
+  bool get isDesignAndFactsEdit {
+    return editMode ==
+        CvAssistantEditMode.designAndFacts;
+  }
+
   bool get isGenerating {
     return status ==
         CvAssistantSessionStatus.generating;
@@ -242,10 +567,54 @@ class CvAssistantSessionModel {
         CvAssistantSessionStatus.cancelled;
   }
 
+  /// Generation readiness must come from the complete
+  /// backend validation state.
   bool get isReadyToGenerate {
     return status ==
-        CvAssistantSessionStatus.readyToGenerate ||
-        canGenerate;
+        CvAssistantSessionStatus.readyToGenerate &&
+        canGenerate &&
+        validationComplete &&
+        qualityCheckPassed &&
+        currentQuestion == null &&
+        generationBlockers.isEmpty;
+  }
+
+  bool get hasGenerationBlockers {
+    return generationBlockers.isNotEmpty;
+  }
+
+  List<String> get missingRequiredFields {
+    return planningState.missingRequiredFields;
+  }
+
+  List<String> get missingTemplateSections {
+    return planningState.missingTemplateSections;
+  }
+
+  List<String> get unresolvedOptionalSections {
+    return planningState.unresolvedOptionalSections;
+  }
+
+  List<CvPendingSuggestionModel>
+  get pendingSuggestions {
+    return planningState.pendingSuggestions;
+  }
+
+  CvAssistantPhotoDecision get photoDecision {
+    return planningState.photoDecision;
+  }
+
+  List<String> get qualityIssues {
+    return planningState.qualityIssues;
+  }
+
+  bool get hasPendingSuggestions {
+    return pendingSuggestions.isNotEmpty;
+  }
+
+  bool get hasUnresolvedPhotoDecision {
+    return photoDecision ==
+        CvAssistantPhotoDecision.unresolved;
   }
 
   factory CvAssistantSessionModel.fromJson(
@@ -269,6 +638,9 @@ class CvAssistantSessionModel {
     final dynamic rawTemplateAnalysis =
     json['templateAnalysis'];
 
+    final dynamic rawPlanningState =
+    json['planningState'];
+
     return CvAssistantSessionModel(
       id: json['id']?.toString() ?? '',
 
@@ -276,13 +648,28 @@ class CvAssistantSessionModel {
         json['templateId'],
       ),
 
-      status: CvAssistantSessionStatus.fromValue(
+      status:
+      CvAssistantSessionStatus.fromValue(
         json['status']?.toString(),
       ),
 
       conversationMode:
       CvAssistantConversationMode.fromValue(
         json['conversationMode']?.toString(),
+      ),
+
+      editMode:
+      CvAssistantEditMode.fromValue(
+        json['editMode']?.toString(),
+      ),
+
+      sourceGenerationId: _nullableString(
+        json['sourceGenerationId'],
+      ),
+
+      pendingDesignInstruction:
+      _nullableString(
+        json['pendingDesignInstruction'],
       ),
 
       currentQuestionKey: _nullableString(
@@ -307,19 +694,9 @@ class CvAssistantSessionModel {
       )
           : <String, dynamic>{},
 
-      skippedQuestionKeys:
-      rawSkippedKeys is List
-          ? rawSkippedKeys
-          .map(
-            (dynamic item) =>
-            item.toString().trim(),
-      )
-          .where(
-            (String item) =>
-        item.isNotEmpty,
-      )
-          .toList()
-          : <String>[],
+      skippedQuestionKeys: _toStringList(
+        rawSkippedKeys,
+      ),
 
       messages: rawMessages is List
           ? rawMessages
@@ -339,19 +716,9 @@ class CvAssistantSessionModel {
         json['profilePhotoFileId'],
       ),
 
-      referenceImageFileIds:
-      rawReferenceIds is List
-          ? rawReferenceIds
-          .map(
-            (dynamic item) =>
-            item.toString().trim(),
-      )
-          .where(
-            (String item) =>
-        item.isNotEmpty,
-      )
-          .toList()
-          : <String>[],
+      referenceImageFileIds: _toStringList(
+        rawReferenceIds,
+      ),
 
       templateAnalysis:
       rawTemplateAnalysis is Map
@@ -365,7 +732,33 @@ class CvAssistantSessionModel {
       ),
 
       canGenerate:
-      json['canGenerate'] != false,
+      json['canGenerate'] == true,
+
+      validationComplete:
+      json['validationComplete'] == true,
+
+      qualityCheckPassed:
+      json['qualityCheckPassed'] == true,
+
+      qualityCheckedAt: DateTime.tryParse(
+        json['qualityCheckedAt']?.toString() ??
+            '',
+      ),
+
+      generationBlockers: _toStringList(
+        json['generationBlockers'],
+      ),
+
+      planningState:
+      rawPlanningState is Map
+          ? CvAssistantPlanningStateModel
+          .fromJson(
+        Map<String, dynamic>.from(
+          rawPlanningState,
+        ),
+      )
+          : CvAssistantPlanningStateModel
+          .empty(),
 
       progress: _toProgress(
         json['progress'],
@@ -385,7 +778,11 @@ class CvAssistantSessionModel {
     String? id,
     String? templateId,
     CvAssistantSessionStatus? status,
-    CvAssistantConversationMode? conversationMode,
+    CvAssistantConversationMode?
+    conversationMode,
+    CvAssistantEditMode? editMode,
+    String? sourceGenerationId,
+    String? pendingDesignInstruction,
     String? currentQuestionKey,
     CvAssistantQuestionModel? currentQuestion,
     String? assistantMessage,
@@ -397,45 +794,108 @@ class CvAssistantSessionModel {
     Map<String, dynamic>? templateAnalysis,
     String? generationId,
     bool? canGenerate,
+    bool? validationComplete,
+    bool? qualityCheckPassed,
+    DateTime? qualityCheckedAt,
+    List<String>? generationBlockers,
+    CvAssistantPlanningStateModel?
+    planningState,
     int? progress,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return CvAssistantSessionModel(
       id: id ?? this.id,
-      templateId: templateId ?? this.templateId,
+
+      templateId:
+      templateId ?? this.templateId,
+
       status: status ?? this.status,
+
       conversationMode:
-      conversationMode ?? this.conversationMode,
+      conversationMode ??
+          this.conversationMode,
+
+      editMode: editMode ?? this.editMode,
+
+      sourceGenerationId:
+      sourceGenerationId ??
+          this.sourceGenerationId,
+
+      pendingDesignInstruction:
+      pendingDesignInstruction ??
+          this.pendingDesignInstruction,
+
       currentQuestionKey:
       currentQuestionKey ??
           this.currentQuestionKey,
+
       currentQuestion:
-      currentQuestion ?? this.currentQuestion,
+      currentQuestion ??
+          this.currentQuestion,
+
       assistantMessage:
-      assistantMessage ?? this.assistantMessage,
+      assistantMessage ??
+          this.assistantMessage,
+
       collectedCvData:
-      collectedCvData ?? this.collectedCvData,
+      collectedCvData ??
+          this.collectedCvData,
+
       skippedQuestionKeys:
       skippedQuestionKeys ??
           this.skippedQuestionKeys,
-      messages: messages ?? this.messages,
+
+      messages:
+      messages ?? this.messages,
+
       profilePhotoFileId:
       profilePhotoFileId ??
           this.profilePhotoFileId,
+
       referenceImageFileIds:
       referenceImageFileIds ??
           this.referenceImageFileIds,
+
       templateAnalysis:
       templateAnalysis ??
           this.templateAnalysis,
+
       generationId:
-      generationId ?? this.generationId,
+      generationId ??
+          this.generationId,
+
       canGenerate:
       canGenerate ?? this.canGenerate,
-      progress: progress ?? this.progress,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+
+      validationComplete:
+      validationComplete ??
+          this.validationComplete,
+
+      qualityCheckPassed:
+      qualityCheckPassed ??
+          this.qualityCheckPassed,
+
+      qualityCheckedAt:
+      qualityCheckedAt ??
+          this.qualityCheckedAt,
+
+      generationBlockers:
+      generationBlockers ??
+          this.generationBlockers,
+
+      planningState:
+      planningState ??
+          this.planningState,
+
+      progress:
+      progress ?? this.progress,
+
+      createdAt:
+      createdAt ?? this.createdAt,
+
+      updatedAt:
+      updatedAt ?? this.updatedAt,
     );
   }
 }
@@ -449,6 +909,24 @@ String? _nullableString(
   return normalized.isEmpty
       ? null
       : normalized;
+}
+
+List<String> _toStringList(
+    dynamic value,
+    ) {
+  if (value is! List) {
+    return <String>[];
+  }
+
+  return value
+      .map(
+        (dynamic item) =>
+        item.toString().trim(),
+  )
+      .where(
+        (String item) => item.isNotEmpty,
+  )
+      .toList();
 }
 
 int _toProgress(
