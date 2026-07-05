@@ -14,7 +14,6 @@ import '../sub-feature/user-block/service/user_block_api_service.dart';
 import '../services/messages_service.dart';
 import '../services/chat_socket_service.dart';
 import '../../../core/services/token_service.dart';
-import '../sub-feature/call/views/message_call_view.dart';
 import '../sub-feature/call/controllers/message_call_controller.dart';
 import '../sub-feature/call/models/message_call_models.dart';
 
@@ -746,31 +745,29 @@ class MessageChatController extends GetxController
     final String participantId =
         currentChat.contactId ?? thread.contactId ?? '';
 
-    await Get.to<void>(
-      () => const MessageCallView(),
-      binding: BindingsBuilder(() {
-        Get.put<MessageCallController>(
-          MessageCallController(
-            conversationId: thread.id,
-            callType: callType,
-            participant:
-            MessageCallParticipantModel(
-              id: participantId,
-              name: currentChat.contactName,
-              avatarUrl:
-              currentChat.contactAvatarUrl,
-              isOnline: currentChat.isOnline,
-            ),
-            callSocketService:
-            Get.find<CallSocketService>(),
-            callAgoraService:
-            CallAgoraService(),
-          ),
-        );
-      }),
-      transition: Transition.rightToLeft,
-    );
+    if (Get.isRegistered<MessageCallController>()) {
+      Get.snackbar(
+        'Call in progress',
+        'Return to the current call before starting another one.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
 
+    final MessageCallController controller = MessageCallController(
+      conversationId: thread.id,
+      callType: callType,
+      participant: MessageCallParticipantModel(
+        id: participantId,
+        name: currentChat.contactName,
+        avatarUrl: currentChat.contactAvatarUrl,
+        isOnline: currentChat.isOnline,
+      ),
+      callSocketService: Get.find<CallSocketService>(),
+      callAgoraService: Get.find<CallAgoraService>(),
+    );
+    Get.put<MessageCallController>(controller, permanent: true);
+    await controller.openCallScreen();
     await refreshChat();
   }
 

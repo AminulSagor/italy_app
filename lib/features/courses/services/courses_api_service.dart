@@ -13,15 +13,9 @@ class CoursesApiService {
     final Response<dynamic> response = await _apiClient.dio.get('/courses');
     final List<Map<String, dynamic>> courseItems = _responseList(response.data);
 
-    final List<CourseCardModel> courses = <CourseCardModel>[];
-
-    for (final Map<String, dynamic> course in courseItems) {
-      final CourseProgressModel? progress = await _safeFetchCourseProgress(
-        courseId: _stringValue(course['id']),
-      );
-
-      courses.add(_courseCardFromApi(course, progress: progress));
-    }
+    final List<CourseCardModel> courses = courseItems
+        .map(_courseCardFromApi)
+        .toList(growable: false);
 
     return CoursesDashboardModel(
       courses: courses,
@@ -75,6 +69,21 @@ class CoursesApiService {
     } on DioException {
       return false;
     }
+  }
+
+  Future<CourseCardModel> fetchCourseProgress(
+    CourseCardModel course,
+  ) async {
+    final CourseProgressModel? progress = await _safeFetchCourseProgress(
+      courseId: course.courseId,
+    );
+    if (progress == null) return course;
+
+    final int percent = progress.completionPercent.round();
+    return course.copyWith(
+      progressLabel: '$percent%',
+      progress: (percent / 100).clamp(0.0, 1.0).toDouble(),
+    );
   }
 
   Future<CourseProgressModel?> _safeFetchCourseProgress({
@@ -151,11 +160,7 @@ class CoursesApiService {
     }
   }
 
-  CourseCardModel _courseCardFromApi(
-    Map<String, dynamic> json, {
-    CourseProgressModel? progress,
-  }) {
-    final int percent = (progress?.completionPercent ?? 0).round();
+  CourseCardModel _courseCardFromApi(Map<String, dynamic> json) {
     final String subtitle = _stringValue(json['subtitle']).isNotEmpty
         ? _stringValue(json['subtitle'])
         : _stringValue(json['description']);
@@ -167,8 +172,8 @@ class CoursesApiService {
       chapterId: _stringValue(json['chapterId']),
       title: _fallbackString(json['title'], 'Untitled Course'),
       subtitle: subtitle,
-      progressLabel: '$percent%',
-      progress: (percent / 100).clamp(0.0, 1.0).toDouble(),
+      progressLabel: '-',
+      progress: 0,
       statusLabel: 'ACTIVE',
       state: CourseCardState.active,
     );

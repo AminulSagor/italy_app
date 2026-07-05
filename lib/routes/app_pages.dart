@@ -19,6 +19,7 @@ import '../features/courses/controllers/course_detail_controller.dart';
 import '../features/courses/controllers/course_certificate_controller.dart';
 import '../features/courses/controllers/courses_controller.dart';
 import '../features/courses/models/course_models.dart';
+import '../features/courses/services/course_catalog_api_service.dart';
 import '../features/courses/services/courses_api_service.dart';
 import '../features/courses/services/course_certificate_mock_service.dart';
 import '../features/courses/sub_features/chapter_detail/controllers/chapter_detail_controller.dart';
@@ -57,6 +58,8 @@ import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_service.dart';
 import '../features/notifications/services/notifications_api_service.dart';
 import '../features/practice_hub/services/job_sentences_api_service.dart';
+import '../features/practice_hub/sub_features/course_catalog/controllers/course_catalog_controller.dart';
+import '../features/practice_hub/sub_features/course_catalog/views/course_catalog_view.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_contact_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_dynamic_form_controller.dart';
 import '../features/service_hub/sub_features/cv_builder/controllers/create_cv_theme_controller.dart';
@@ -265,20 +268,13 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<HomeApiService>()) {
           Get.lazyPut<HomeApiService>(
-            () => HomeApiService(
-              apiClient: Get.find<ApiClient>(),
-              learningActivityApiService:
-                  Get.find<LearningActivityApiService>(),
-            ),
+            () => HomeApiService(apiClient: Get.find<ApiClient>()),
             fenix: true,
           );
         }
         if (!Get.isRegistered<HomeController>()) {
           Get.lazyPut<HomeController>(
-            () => HomeController(
-              homeApiService: Get.find<HomeApiService>(),
-              userSessionController: Get.find<UserSessionController>(),
-            ),
+            () => HomeController(homeApiService: Get.find<HomeApiService>()),
             fenix: true,
           );
         }
@@ -296,20 +292,13 @@ class AppPages {
         }
         if (!Get.isRegistered<HomeApiService>()) {
           Get.lazyPut<HomeApiService>(
-            () => HomeApiService(
-              apiClient: Get.find<ApiClient>(),
-              learningActivityApiService:
-                  Get.find<LearningActivityApiService>(),
-            ),
+            () => HomeApiService(apiClient: Get.find<ApiClient>()),
             fenix: true,
           );
         }
         if (!Get.isRegistered<HomeController>()) {
           Get.lazyPut<HomeController>(
-            () => HomeController(
-              homeApiService: Get.find<HomeApiService>(),
-              userSessionController: Get.find<UserSessionController>(),
-            ),
+            () => HomeController(homeApiService: Get.find<HomeApiService>()),
             fenix: true,
           );
         }
@@ -358,6 +347,20 @@ class AppPages {
             fenix: true,
           );
         }
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.courseCatalog,
+      page: () => const CourseCatalogView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CourseCatalogApiService>(
+          () => CourseCatalogApiService(apiClient: Get.find<ApiClient>()),
+        );
+        Get.lazyPut<CourseCatalogController>(
+          () => CourseCatalogController(
+            courseCatalogApiService: Get.find<CourseCatalogApiService>(),
+          ),
+        );
       }),
     ),
     GetPage(

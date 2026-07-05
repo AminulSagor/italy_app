@@ -22,6 +22,7 @@ class CallkitIncomingService {
   static final Set<String> _shownCallIds = <String>{};
 
   static Future<void> initialize({
+    required CallkitActionCallback onIncoming,
     required CallkitActionCallback onAccept,
     required CallkitActionCallback onDecline,
     required CallkitActionCallback onEnded,
@@ -37,6 +38,21 @@ class CallkitIncomingService {
     _callkitSubscription = FlutterCallkitIncoming.onEvent.listen(
       (CallEvent? event) async {
         if (event == null) {
+          return;
+        }
+
+        if (event is CallEventActionCallIncoming) {
+          final Map<String, dynamic> extra = _extractExtra(
+            event.callKitParams.extra,
+          );
+          final String callId = _eventCallId(
+            extra: extra,
+            fallbackId: event.callKitParams.id,
+          );
+
+          if (callId.isNotEmpty) {
+            await onIncoming(callId, extra);
+          }
           return;
         }
 
@@ -233,6 +249,10 @@ class CallkitIncomingService {
 
   static bool consumeRemoteTermination(String callId) {
     return _remoteTerminationCallIds.remove(callId.trim());
+  }
+
+  static Future<List<CallKitParams>> activeNativeCalls() async {
+    return FlutterCallkitIncoming.activeCalls();
   }
 
   static Future<List<CallKitParams>> acceptedNativeCalls() async {

@@ -89,9 +89,7 @@ class MessageThreadCard extends StatelessWidget {
                                 ? FontWeight.w700
                                 : FontWeight.w400,
                             height: 1.25,
-                            color: thread.unreadCount > 0
-                                ? AppColors.homePrimaryText
-                                : AppColors.bodyText,
+                            color: _previewColor(thread),
                           ),
                         ),
                       ),
@@ -106,6 +104,19 @@ class MessageThreadCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Color _previewColor(MessageThreadModel thread) {
+  switch (thread.previewTone) {
+    case MessageThreadPreviewTone.missed:
+      return AppColors.homeNotificationRed;
+    case MessageThreadPreviewTone.ongoing:
+      return AppColors.messageOnlineGreen;
+    case MessageThreadPreviewTone.normal:
+      return thread.unreadCount > 0
+          ? AppColors.homePrimaryText
+          : AppColors.bodyText;
   }
 }
 

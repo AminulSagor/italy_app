@@ -6,17 +6,27 @@ import '../../../../../core/services/callkit_incoming_service.dart';
 import '../models/message_call_models.dart';
 import '../service/call_agora_service.dart';
 import '../service/call_socket_service.dart';
-import '../views/message_call_view.dart';
-import 'message_call_controller.dart';
 
 class MessageIncomingCallController extends GetxController {
   MessageIncomingCallController({
     required this.payload,
     required CallSocketService callSocketService,
-  }) : _callSocketService = callSocketService;
+    required CallAgoraService callAgoraService,
+    required Future<void> Function(Map<String, dynamic>) onAccepted,
+    required Future<void> Function() onFinished,
+    required void Function(String) onStatusChanged,
+  }) : _callSocketService = callSocketService,
+       _callAgoraService = callAgoraService,
+       _onAccepted = onAccepted,
+       _onFinished = onFinished,
+       _onStatusChanged = onStatusChanged;
 
   final Map<String, dynamic> payload;
   final CallSocketService _callSocketService;
+  final CallAgoraService _callAgoraService;
+  final Future<void> Function(Map<String, dynamic>) _onAccepted;
+  final Future<void> Function() _onFinished;
+  final void Function(String) _onStatusChanged;
 
   late final String callId;
   late final String conversationId;
@@ -44,9 +54,9 @@ class MessageIncomingCallController extends GetxController {
     callType = MessageCallType.fromValue(call['callType']?.toString());
     caller = MessageCallParticipantModel.fromJson(callerData);
 
-    statusLabel.value = callType.isVideo
-        ? 'Incoming video call'
-        : 'Incoming voice call';
+    _setStatus(
+      callType.isVideo ? 'Incoming video call' : 'Incoming voice call',
+    );
 
     _cancelledCallListener = _handleRemoteCallClosed;
     _endedCallListener = _handleRemoteCallClosed;
@@ -60,14 +70,19 @@ class MessageIncomingCallController extends GetxController {
   }
 
   Future<void> answerCall() async {
-    if (isProcessing.value || callId.isEmpty) {
+    if (isProcessing.value || callId.isEmpty || _routeClosed) {
       return;
     }
 
     isProcessing.value = true;
-    statusLabel.value = 'Connecting...';
+    _setStatus('Checking permissions...');
 
     try {
+      await _callAgoraService.ensurePermissionsForCall(
+        isVideoCall: callType.isVideo,
+      );
+
+      _setStatus('Connecting...');
       final Map<String, dynamic> response = await _callSocketService.answerCall(
         callId: callId,
       );
@@ -91,22 +106,13 @@ class MessageIncomingCallController extends GetxController {
       await CallkitIncomingService.endNativeSubsystemOnly(callId);
       _routeClosed = true;
       isProcessing.value = false;
-
-      Get.off<void>(
-        () => const MessageCallView(),
-        binding: BindingsBuilder(() {
-          Get.put<MessageCallController>(
-            MessageCallController(
-              conversationId: session.conversationId,
-              callType: session.type,
-              participant: caller,
-              callSocketService: _callSocketService,
-              callAgoraService: Get.find<CallAgoraService>(),
-              initialSession: session,
-            ),
-          );
-        }),
-        transition: Transition.fadeIn,
+      await _onAccepted(response);
+    } on CallAgoraException catch (error) {
+      _resetIncomingStatus();
+      Get.snackbar(
+        'Permission required',
+        error.message,
+        snackPosition: SnackPosition.BOTTOM,
       );
     } on CallSocketException catch (error) {
       _resetIncomingStatus();
@@ -126,18 +132,17 @@ class MessageIncomingCallController extends GetxController {
   }
 
   Future<void> rejectCall() async {
-    if (isProcessing.value || callId.isEmpty) {
+    if (isProcessing.value || callId.isEmpty || _routeClosed) {
       return;
     }
 
     isProcessing.value = true;
-    statusLabel.value = 'Declining...';
+    _setStatus('Declining...');
 
     try {
       await _callSocketService.rejectCall(callId: callId);
-      _stopTimeout();
       await CallkitIncomingService.endNativeSubsystemOnly(callId);
-      _closeRoute();
+      await _finishCall();
     } on CallSocketException catch (error) {
       Get.snackbar(
         'Unable to decline',
@@ -161,22 +166,21 @@ class MessageIncomingCallController extends GetxController {
     }
 
     isProcessing.value = true;
-    statusLabel.value = 'Missed call';
+    _setStatus('Missed call');
 
     try {
       await _callSocketService.timeoutCall(callId: callId);
     } catch (_) {
-      // The backend also owns a one-minute timer. A race here is harmless.
+      // The backend owns the same timeout, so a race is harmless.
     } finally {
       await CallkitIncomingService.endNativeSubsystemOnly(callId);
-      _closeRoute();
+      await _finishCall();
       isProcessing.value = false;
     }
   }
 
   void closeFromNativeAction() {
-    _stopTimeout();
-    _closeRoute();
+    unawaited(_finishCall());
   }
 
   void _handleRemoteCallClosed(Map<String, dynamic> data) {
@@ -188,16 +192,20 @@ class MessageIncomingCallController extends GetxController {
       return;
     }
 
-    _stopTimeout();
     unawaited(CallkitIncomingService.endNativeSubsystemOnly(callId));
-    _closeRoute();
+    unawaited(_finishCall());
   }
 
   void _resetIncomingStatus() {
-    statusLabel.value = callType.isVideo
-        ? 'Incoming video call'
-        : 'Incoming voice call';
+    _setStatus(
+      callType.isVideo ? 'Incoming video call' : 'Incoming voice call',
+    );
     isProcessing.value = false;
+  }
+
+  void _setStatus(String status) {
+    statusLabel.value = status;
+    _onStatusChanged(status);
   }
 
   void _stopTimeout() {
@@ -205,15 +213,14 @@ class MessageIncomingCallController extends GetxController {
     _timeoutTimer = null;
   }
 
-  void _closeRoute() {
+  Future<void> _finishCall() async {
     if (_routeClosed) {
       return;
     }
 
     _routeClosed = true;
-    if (!isClosed) {
-      Get.back<void>();
-    }
+    _stopTimeout();
+    await _onFinished();
   }
 
   static Map<String, dynamic> _toMap(dynamic value) {

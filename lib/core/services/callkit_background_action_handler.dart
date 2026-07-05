@@ -1,4 +1,6 @@
-import 'package:flutter/foundation.dart';
+import 'dart:developer' as dev;
+import 'dart:ui';
+
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -9,7 +11,12 @@ import 'token_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> callkitBackgroundActionHandler(CallEvent event) async {
-  debugPrint('[CallKitBackground] Received ${event.runtimeType}');
+  DartPluginRegistrant.ensureInitialized();
+
+  dev.log(
+    'Received ${event.runtimeType}',
+    name: 'CallKitBackground',
+  );
 
   if (event is CallEventActionCallTimeout) {
     final String callId = event.id.trim();
@@ -35,31 +42,35 @@ Future<void> callkitBackgroundActionHandler(CallEvent event) async {
       extraCallId.isNotEmpty ? extraCallId : callKitParams.id.trim();
 
   if (callId.isEmpty) {
-    debugPrint('[CallKitBackground] Action ignored: callId missing');
+    dev.log(
+      'Action ignored because callId is missing',
+      name: 'CallKitBackground',
+    );
+    return;
+  }
+
+  if (event is CallEventActionCallAccept) {
+    // Do not initialize API clients or request media permissions from the
+    // background isolate. Persist the native action and finish the answer
+    // flow only after Flutter has a resumed Activity.
+    await CallkitPendingActionStore.saveAcceptedCall(
+      callId: callId,
+      callData: extra,
+    );
+
+    dev.log(
+      'Accept queued for foreground restoration',
+      name: 'CallKitBackground',
+    );
     return;
   }
 
   await _runBackgroundAction((CallSocketService callService) async {
-    if (event is CallEventActionCallAccept) {
-      debugPrint('[CallKitBackground] Answering over HTTP callId=$callId');
-
-      final Map<String, dynamic> answerResponse =
-          await callService.answerCallOverHttp(callId: callId);
-
-      await CallkitPendingActionStore.saveAcceptedCall(
-        callId: callId,
-        callData: extra,
-        answerResponse: answerResponse,
-      );
-
-      debugPrint(
-        '[CallKitBackground] Answer saved for foreground restoration',
-      );
-      return;
-    }
-
     if (event is CallEventActionCallDecline) {
-      debugPrint('[CallKitBackground] Rejecting over HTTP callId=$callId');
+      dev.log(
+        'Rejecting call over HTTP',
+        name: 'CallKitBackground',
+      );
       await callService.rejectCallOverHttp(callId: callId);
       await CallkitPendingActionStore.clear();
       return;
@@ -88,8 +99,12 @@ Future<void> _runBackgroundAction(
     );
     await action(callService);
   } catch (error, stackTrace) {
-    debugPrint('[CallKitBackground] Action failed: $error');
-    debugPrintStack(stackTrace: stackTrace);
+    dev.log(
+      'Background action failed',
+      name: 'CallKitBackground',
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 }
 

@@ -279,6 +279,7 @@ class _LeaderboardUserTile extends StatelessWidget {
     final String xp = user['xp'] as String;
     final String league = user['league'] as String;
     final bool isCurrentUser = (user['isCurrentUser'] as bool?) ?? false;
+    final String avatarUrl = user['avatarUrl']?.toString().trim() ?? '';
 
     return GestureDetector(
       onTap: isCurrentUser ? null : onMessageTap,
@@ -318,7 +319,11 @@ class _LeaderboardUserTile extends StatelessWidget {
               ),
             ),
             SizedBox(width: 4.w),
-            _SmallAvatar(isCurrentUser: isCurrentUser, rank: rank),
+            _SmallAvatar(
+              isCurrentUser: isCurrentUser,
+              rank: rank,
+              avatarUrl: avatarUrl,
+            ),
             SizedBox(width: 12.w),
             Expanded(
               child: Column(
@@ -410,8 +415,13 @@ class _LeaderboardUserTile extends StatelessWidget {
 class _SmallAvatar extends StatelessWidget {
   final bool isCurrentUser;
   final int rank;
+  final String avatarUrl;
 
-  const _SmallAvatar({required this.isCurrentUser, required this.rank});
+  const _SmallAvatar({
+    required this.isCurrentUser,
+    required this.rank,
+    required this.avatarUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -431,10 +441,48 @@ class _SmallAvatar extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(
-        isCurrentUser ? Icons.person_rounded : Icons.person,
-        size: 30.r,
-        color: rank > 16 ? AppColors.white : AppColors.legacyColorFFDFDFDF,
+      child: ClipOval(
+        child: avatarUrl.isEmpty
+            ? _SmallAvatarFallback(
+                isCurrentUser: isCurrentUser,
+                rank: rank,
+              )
+            : Image.network(
+                avatarUrl,
+                width: 52.r,
+                height: 52.r,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => _SmallAvatarFallback(
+                  isCurrentUser: isCurrentUser,
+                  rank: rank,
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+class _SmallAvatarFallback extends StatelessWidget {
+  const _SmallAvatarFallback({
+    required this.isCurrentUser,
+    required this.rank,
+  });
+
+  final bool isCurrentUser;
+  final int rank;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: rank > 16 ? AppColors.legacyColorFFDFDFDF : AppColors.black,
+      child: Center(
+        child: Icon(
+          isCurrentUser ? Icons.person_rounded : Icons.person,
+          size: 30.r,
+          color: rank > 16
+              ? AppColors.white
+              : AppColors.legacyColorFFDFDFDF,
+        ),
       ),
     );
   }

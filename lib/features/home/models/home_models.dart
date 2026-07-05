@@ -53,6 +53,39 @@ class HomeDashboardModel {
     );
   }
 
+  factory HomeDashboardModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic>? chapter = _mapValue(json['currentChapter']);
+    final Map<String, dynamic>? webinar = _mapValue(json['webinar']);
+    final List<HomeWorkItemModel> workItems = _listValue(json['careerTracks'])
+        .map(HomeWorkItemModel.fromJson)
+        .toList(growable: false);
+    final int streakDays = _intValue(json['streakDays']);
+
+    return initial.copyWith(
+      overview: HomeOverviewModel.fromJson(
+        _mapValue(json['overview']) ?? <String, dynamic>{},
+      ),
+      currentChapter: chapter == null
+          ? null
+          : HomeChapterModel.fromJson(chapter),
+      clearCurrentChapter: chapter == null,
+      workItems: workItems,
+      webinar: webinar == null ? null : HomeWebinarModel.fromJson(webinar),
+      clearWebinar: webinar == null,
+      streak: HomeInfoCardModel(
+        eyebrow: 'DAY STREAK',
+        title: '$streakDays ${streakDays == 1 ? 'Day' : 'Days'}',
+        body: streakDays > 0
+            ? 'Keep learning today!'
+            : 'Start learning today!',
+        actionLabel: '',
+      ),
+      dailyChallenges: HomeDailyChallengesModel.fromJson(
+        _mapValue(json['dailyChallenges']) ?? <String, dynamic>{},
+      ),
+    );
+  }
+
   static const HomeDashboardModel initial = HomeDashboardModel(
     overview: HomeOverviewModel(totalSeconds: 0, days: <HomeActivityModel>[]),
     currentChapter: null,
@@ -101,6 +134,21 @@ class HomeOverviewModel {
   final int totalSeconds;
   final List<HomeActivityModel> days;
 
+  factory HomeOverviewModel.fromJson(Map<String, dynamic> json) {
+    final String today = _dateOnly(DateTime.now());
+    return HomeOverviewModel(
+      totalSeconds: _intValue(json['totalSeconds']),
+      days: _listValue(json['days'])
+          .map(
+            (Map<String, dynamic> item) => HomeActivityModel.fromJson(
+              item,
+              today: today,
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
   String get totalTimeLabel {
     final int hours = totalSeconds ~/ 3600;
     final int minutes = (totalSeconds % 3600) ~/ 60;
@@ -123,6 +171,19 @@ class HomeActivityModel {
   final String dayLabel;
   final int durationSeconds;
   final bool isToday;
+
+  factory HomeActivityModel.fromJson(
+    Map<String, dynamic> json, {
+    required String today,
+  }) {
+    final String date = _stringValue(json['date']);
+    return HomeActivityModel(
+      date: date,
+      dayLabel: _stringValue(json['dayLabel']),
+      durationSeconds: _intValue(json['durationSeconds']),
+      isToday: date == today,
+    );
+  }
 
   String get durationLabel {
     if (durationSeconds <= 0) return '0s';
@@ -276,10 +337,38 @@ class HomeDailyChallengesModel {
   final int completed;
   final int total;
 
+  factory HomeDailyChallengesModel.fromJson(Map<String, dynamic> json) {
+    return HomeDailyChallengesModel(
+      label: 'DAILY CHALLENGES',
+      completed: _intValue(json['completed']),
+      total: _intValue(json['total']),
+    );
+  }
+
   double get progress => total == 0
       ? 0
       : (completed / total).clamp(0, 1).toDouble();
   String get valueLabel => '$completed / $total';
+}
+
+Map<String, dynamic>? _mapValue(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return null;
+}
+
+List<Map<String, dynamic>> _listValue(dynamic value) {
+  if (value is! List) return <Map<String, dynamic>>[];
+  return value
+      .whereType<Map>()
+      .map((Map item) => Map<String, dynamic>.from(item))
+      .toList(growable: false);
+}
+
+String _dateOnly(DateTime date) {
+  final String month = date.month.toString().padLeft(2, '0');
+  final String day = date.day.toString().padLeft(2, '0');
+  return '${date.year}-$month-$day';
 }
 
 String _stringValue(dynamic value) => value?.toString().trim() ?? '';

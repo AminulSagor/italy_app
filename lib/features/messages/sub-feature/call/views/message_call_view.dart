@@ -21,65 +21,50 @@ class MessageCallView extends GetView<MessageCallController> {
 
       final bool showVideoStage = callType.isVideo && controller.isActive.value;
 
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (bool didPop, Object? result) async {
-          if (didPop) {
-            return;
-          }
-
-          await controller.endCall();
-        },
-        child: Scaffold(
-          backgroundColor: showVideoStage
-              ? AppColors.black
-              : AppColors.homeBackground,
-          body: Stack(
-            children: <Widget>[
-              if (showVideoStage) Positioned.fill(child: _buildRemoteVideo()),
-
-              SafeArea(
-                child: Column(
-                  children: <Widget>[
-                    _MessageCallTopBar(
-                      callType: callType,
-                      status: controller.durationLabel.value,
-                      useLightText: showVideoStage,
+      return Scaffold(
+        backgroundColor: showVideoStage
+            ? AppColors.black
+            : AppColors.homeBackground,
+        body: Stack(
+          children: <Widget>[
+            if (showVideoStage) Positioned.fill(child: _buildRemoteVideo()),
+            SafeArea(
+              child: Column(
+                children: <Widget>[
+                  _MessageCallTopBar(
+                    callType: callType,
+                    status: controller.durationLabel.value,
+                    useLightText: showVideoStage,
+                  ),
+                  if (controller.isLoading.value)
+                    const LinearProgressIndicator(
+                      minHeight: 2,
+                      color: AppColors.primaryGreen,
                     ),
-
-                    if (controller.isLoading.value)
-                      const LinearProgressIndicator(
-                        minHeight: 2,
-                        color: AppColors.primaryGreen,
-                      ),
-
-                    Expanded(
-                      child: Center(
-                        child: _buildParticipantArea(
-                          showVideoStage: showVideoStage,
-                        ),
+                  Expanded(
+                    child: Center(
+                      child: _buildParticipantArea(
+                        showVideoStage: showVideoStage,
                       ),
                     ),
-
-                    MessageCallControls(
-                      callType: callType,
-                      isMuted: controller.isMuted.value,
-                      isSpeakerOn: controller.isSpeakerOn.value,
-                      isCameraOff: controller.isCameraOff.value,
-                      isEnding: controller.isEnding.value,
-                      onMuteTap: controller.toggleMute,
-                      onSpeakerTap: controller.toggleSpeaker,
-                      onCameraTap: controller.toggleCamera,
-                      onSwitchCameraTap: controller.switchCamera,
-                      onEndTap: controller.endCall,
-                    ),
-                  ],
-                ),
+                  ),
+                  MessageCallControls(
+                    callType: callType,
+                    isMuted: controller.isMuted.value,
+                    isSpeakerOn: controller.isSpeakerOn.value,
+                    isCameraOff: controller.isCameraOff.value,
+                    isEnding: controller.isEnding.value,
+                    onMuteTap: controller.toggleMute,
+                    onSpeakerTap: controller.toggleSpeaker,
+                    onCameraTap: controller.toggleCamera,
+                    onSwitchCameraTap: controller.switchCamera,
+                    onEndTap: controller.endCall,
+                  ),
+                ],
               ),
-
-              if (showVideoStage) _buildLocalVideoPreview(),
-            ],
-          ),
+            ),
+            if (showVideoStage) _buildLocalVideoPreview(),
+          ],
         ),
       );
     });

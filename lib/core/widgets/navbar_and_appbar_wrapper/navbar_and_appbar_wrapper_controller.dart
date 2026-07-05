@@ -45,12 +45,10 @@ class NavbarAndAppbarWrapperController extends GetxController
 
   void onBottomNavTap(int index) {
     isMessagesPageOpen.value = false;
-
     // if (index == 4) {
     //   Get.snackbar("In Progress", "Feature comming soon");
     //   return;
     // }
-
     if (index == currentIndex.value) {
       if (Get.isRegistered<LearningActivityTrackerService>()) {
         Get.find<LearningActivityTrackerService>().setShellTab(index);
@@ -100,23 +98,27 @@ class NavbarAndAppbarWrapperController extends GetxController
     if (Get.isRegistered<NotificationsController>()) {
       Get.delete<NotificationsController>();
     }
-
-    Get.put<NotificationsController>(
-      NotificationsController(
-        notificationsApiService: Get.find<NotificationsApiService>(),
-        onNotificationOpen: _openNotificationDestination,
-      ),
-    );
-
+    final NotificationsController notificationsController =
+        Get.put<NotificationsController>(
+          NotificationsController(
+            notificationsApiService: Get.find<NotificationsApiService>(),
+            onNotificationOpen: _openNotificationDestination,
+          ),
+        );
     Get.bottomSheet<void>(
-      const NotificationsBottomSheet(),
+      NotificationsBottomSheet(controller: notificationsController),
       isScrollControlled: true,
       backgroundColor: AppColors.transparent,
       barrierColor: AppColors.black.withValues(alpha: 0.45),
       isDismissible: true,
       enableDrag: true,
-    ).whenComplete(() {
-      if (Get.isRegistered<NotificationsController>()) {
+    ).whenComplete(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      if (Get.isRegistered<NotificationsController>() &&
+          identical(
+            Get.find<NotificationsController>(),
+            notificationsController,
+          )) {
         Get.delete<NotificationsController>();
       }
       refreshNotificationState();
@@ -132,7 +134,6 @@ class NavbarAndAppbarWrapperController extends GetxController
       await Future<void>.delayed(const Duration(milliseconds: 180));
     }
     if (deepLink.isEmpty) return;
-
     final Uri? uri = Uri.tryParse(deepLink);
     final String path = uri?.path.toLowerCase() ?? deepLink.toLowerCase();
     final String host = uri?.host.toLowerCase() ?? '';

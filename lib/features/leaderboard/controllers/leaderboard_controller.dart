@@ -115,9 +115,9 @@ class LeaderboardController extends GetxController {
       ];
 
   final List<Map<String, dynamic>> _globalPodiumUsers = <Map<String, dynamic>>[
-    {'rank': 1, 'name': 'Sarah Ahmed', 'xp': '14.9k', 'league': '1ST'},
-    {'rank': 2, 'name': 'Rahul Dev', 'xp': '12.7k', 'league': '2ND'},
-    {'rank': 3, 'name': 'Nalia Khan', 'xp': '11.8k', 'league': '3RD'},
+    {'rank': 1, 'name': 'Sarah Ahmed', 'xp': '14.9k', 'league': 'GOLD'},
+    {'rank': 2, 'name': 'Rahul Dev', 'xp': '12.7k', 'league': 'GOLD'},
+    {'rank': 3, 'name': 'Nalia Khan', 'xp': '11.8k', 'league': 'SILVER'},
   ];
 
   final List<Map<String, dynamic>> _users = <Map<String, dynamic>>[
@@ -391,7 +391,10 @@ class LeaderboardController extends GetxController {
       currentUser.value = profile;
       currentUser.refresh();
       if (profile != null && Get.isRegistered<AppDrawerController>()) {
-        Get.find<AppDrawerController>().updateLeague(profile.league.name);
+        Get.find<AppDrawerController>().updateLeague(
+          profile.league.name,
+          rank: profile.leagueRank,
+        );
       }
       milestoneData.value = resp.milestone;
 
@@ -433,6 +436,9 @@ class LeaderboardController extends GetxController {
       'league': (r.league.name).toUpperCase(),
       'isCurrentUser': r.isCurrentUser,
       'userId': r.userId,
+      'avatarUrl': r.avatarUrl,
+      'streakDays': r.streakDays,
+      'totalXp': r.totalXp,
     };
   }
 
@@ -485,6 +491,7 @@ class LeaderboardController extends GetxController {
           'chatTargetUserId': preview.chatTargetUserId,
           'totalXp': preview.totalXp,
           'streakDays': preview.streakDays,
+          'avatarUrl': preview.avatarUrl,
         }),
         barrierColor: Colors.black.withValues(alpha: 0.45),
       );

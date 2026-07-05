@@ -99,9 +99,14 @@ class LoginController extends GetxController {
     try {
       final ApiResult<AuthTokenResultModel> result = await ApiErrorHandler.call(
         () => _authService.login(payload),
+        showError: false,
       );
 
       if (!result.isSuccess) {
+        Get.snackbar(
+          'Error',
+          result.error ?? 'Unable to log in. Please try again.',
+        );
         return;
       }
 

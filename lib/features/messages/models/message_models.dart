@@ -4,6 +4,8 @@ enum MessageChatCallType { audio, video }
 
 enum MessageChatCallStatus { completed, missed, rejected, failed }
 
+enum MessageThreadPreviewTone { normal, missed, ongoing }
+
 class MessageThreadModel {
   final String id;
   final String learnerName;
@@ -16,6 +18,7 @@ class MessageThreadModel {
   final bool isDelivered;
   final String avatarUrl;
   final String? contactId;
+  final MessageThreadPreviewTone previewTone;
 
   const MessageThreadModel({
     required this.id,
@@ -29,6 +32,7 @@ class MessageThreadModel {
     required this.isDelivered,
     required this.avatarUrl,
     this.contactId,
+    this.previewTone = MessageThreadPreviewTone.normal,
   });
 
   factory MessageThreadModel.fromJson(Map<String, dynamic> json) {
@@ -44,6 +48,10 @@ class MessageThreadModel {
       isDelivered: json['isDelivered'] as bool,
       avatarUrl: json['avatarUrl'] as String,
       contactId: json['contactId'] as String?,
+      previewTone: MessageThreadPreviewTone.values.firstWhere(
+        (MessageThreadPreviewTone tone) => tone.name == json['previewTone'],
+        orElse: () => MessageThreadPreviewTone.normal,
+      ),
     );
   }
 
@@ -60,6 +68,7 @@ class MessageThreadModel {
       'isDelivered': isDelivered,
       'avatarUrl': avatarUrl,
       'contactId': contactId,
+      'previewTone': previewTone.name,
     };
   }
 
@@ -75,6 +84,7 @@ class MessageThreadModel {
     String? avatarUrl,
     String? contactId,
     String? blockStatus,
+    MessageThreadPreviewTone? previewTone,
   }) {
     return MessageThreadModel(
       id: id ?? this.id,
@@ -88,6 +98,7 @@ class MessageThreadModel {
       isDelivered: isDelivered ?? this.isDelivered,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       contactId: contactId ?? this.contactId,
+      previewTone: previewTone ?? this.previewTone,
     );
   }
 }

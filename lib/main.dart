@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -16,6 +17,7 @@ import 'core/services/callkit_incoming_service.dart';
 import 'core/services/local_notification_service.dart';
 import 'core/services/learning_activity_tracker_service.dart';
 import 'core/themes/app_theme.dart';
+import 'features/messages/sub-feature/call/widgets/global_call_status_card.dart';
 import 'core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import 'features/home/controllers/home_controller.dart';
 import 'features/messages/sub-feature/call/service/call_socket_service.dart';
@@ -24,8 +26,8 @@ import 'routes/routes.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(
-    RemoteMessage message,
-    ) async {
+  RemoteMessage message,
+) async {
   await Firebase.initializeApp();
 
   await CallkitIncomingService.showIncomingCallFromBackgroundMessage(
@@ -38,11 +40,7 @@ Future<void> main() async {
 
   await Firebase.initializeApp();
 
-  FirebaseMessaging.onBackgroundMessage(
-    firebaseMessagingBackgroundHandler,
-  );
-
-
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FlutterCallkitIncoming.onBackgroundMessage(
     callkitBackgroundActionHandler,
   );
@@ -58,6 +56,10 @@ Future<void> main() async {
    */
   InitialBindings().dependencies();
 
+  // Attach foreground FCM and CallKit event listeners before the first frame
+  // so the first incoming call after installation cannot be missed.
+  await _initializeCallKitListeners();
+
   runApp(
     ItalyApp(
       initialRoute: AppPages.initial,
@@ -70,106 +72,58 @@ Future<void> main() async {
    * background or terminated state.
    */
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    unawaited(_initializeCallKit());
+    unawaited(_completeCallKitStartup());
   });
 }
 
-Future<void> _initializeCallKit() async {
-
-  if (Platform.isAndroid) {
-    try {
-      final bool canUseFullScreenIntent =
-      await FlutterCallkitIncoming.canUseFullScreenIntent();
-
-      if (!canUseFullScreenIntent) {
-        await FlutterCallkitIncoming.requestFullIntentPermission();
-      }
-    } catch (error) {
-      debugPrint(
-        '[CallKit] Full-screen intent permission failed: $error',
-      );
-    }
-  }
-
+Future<void> _initializeCallKitListeners() async {
   await CallkitIncomingService.initialize(
-    onAccept: (
-        String callId,
-        Map<String, dynamic> data,
-        ) async {
-      try {
-        final CallSocketService socketService =
-        Get.find<CallSocketService>();
-
-        final Map<String, dynamic> answerResponse =
-        await socketService.answerCall(
-          callId: callId,
-        );
-
-        final IncomingCallCoordinator coordinator =
-        Get.find<IncomingCallCoordinator>();
-
-        await CallkitIncomingService.markCallConnected(callId);
-
-        unawaited(
-          coordinator
-              .openAcceptedCall(
-            callId: callId,
-            callData: data,
-            answerResponse: answerResponse,
-          )
-              .catchError(
-                (Object error, StackTrace stackTrace) async {
-              await CallkitIncomingService.endNativeSubsystemOnly(callId);
-
-              Get.snackbar(
-                'Call failed',
-                error.toString(),
-                snackPosition: SnackPosition.BOTTOM,
-              );
-            },
-          ),
-        );
-      } catch (error) {
-        await CallkitIncomingService.endNativeSubsystemOnly(callId);
-
-        Get.snackbar(
-          'Call failed',
-          error.toString(),
-          snackPosition: SnackPosition.BOTTOM,
-        );
+    onIncoming: (
+      String callId,
+      Map<String, dynamic> data,
+    ) async {
+      if (!Get.isRegistered<IncomingCallCoordinator>()) {
+        return;
       }
+
+      unawaited(
+        Get.find<IncomingCallCoordinator>().openNativeIncomingCall(
+          callId: callId,
+          callData: data,
+        ),
+      );
+    },
+    onAccept: (
+      String callId,
+      Map<String, dynamic> data,
+    ) async {
+      if (!Get.isRegistered<IncomingCallCoordinator>()) {
+        await CallkitIncomingService.endNativeSubsystemOnly(callId);
+        return;
+      }
+
+      unawaited(
+        Get.find<IncomingCallCoordinator>().acceptNativeCall(
+          callId: callId,
+          callData: data,
+        ),
+      );
     },
     onDecline: (
-        String callId,
-        Map<String, dynamic> data,
-        ) async {
+      String callId,
+      Map<String, dynamic> data,
+    ) async {
       try {
-        final CallSocketService socketService =
-        Get.find<CallSocketService>();
-
-        debugPrint(
-          '[CallKit] Sending receiver rejection '
-              'callId=$callId',
-        );
-
-        await socketService.rejectCall(
-          callId: callId,
-        );
+        await Get.find<CallSocketService>().rejectCall(callId: callId);
 
         if (Get.isRegistered<IncomingCallCoordinator>()) {
           Get.find<IncomingCallCoordinator>().dismissIncomingCall(callId);
         }
-
-        debugPrint(
-          '[CallKit] Receiver rejection completed '
-              'callId=$callId',
-        );
       } catch (error, stackTrace) {
-        debugPrint(
-          '[CallKit] Receiver rejection failed: $error',
-        );
-
-        debugPrintStack(
+        dev.log(
+          'Unable to synchronize declined call',
+          name: 'CallKit',
+          error: error,
           stackTrace: stackTrace,
         );
       }
@@ -181,8 +135,12 @@ Future<void> _initializeCallKit() async {
       try {
         await Get.find<CallSocketService>().timeoutCall(callId: callId);
       } catch (error, stackTrace) {
-        debugPrint('[CallKit] Timeout synchronization failed: $error');
-        debugPrintStack(stackTrace: stackTrace);
+        dev.log(
+          'Unable to synchronize timed-out call',
+          name: 'CallKit',
+          error: error,
+          stackTrace: stackTrace,
+        );
       } finally {
         if (Get.isRegistered<IncomingCallCoordinator>()) {
           Get.find<IncomingCallCoordinator>().dismissIncomingCall(callId);
@@ -199,8 +157,7 @@ Future<void> _initializeCallKit() async {
       }
 
       try {
-        final CallSocketService socketService =
-            Get.find<CallSocketService>();
+        final CallSocketService socketService = Get.find<CallSocketService>();
         final Map<String, dynamic> statusResponse =
             await socketService.fetchCall(callId: callId);
         final dynamic rawCall = statusResponse['call'];
@@ -212,11 +169,52 @@ Future<void> _initializeCallKit() async {
           await socketService.endCall(callId: callId);
         }
       } catch (error, stackTrace) {
-        debugPrint('[CallKit] End synchronization failed: $error');
-        debugPrintStack(stackTrace: stackTrace);
+        dev.log(
+          'Unable to synchronize ended call',
+          name: 'CallKit',
+          error: error,
+          stackTrace: stackTrace,
+        );
       }
     },
   );
+}
+
+Future<void> _completeCallKitStartup() async {
+  if (Get.isRegistered<IncomingCallCoordinator>()) {
+    final IncomingCallCoordinator coordinator =
+        Get.find<IncomingCallCoordinator>();
+    unawaited(
+      coordinator.restorePendingAcceptedCall(
+        waitForBackgroundHandler: const Duration(milliseconds: 800),
+      ),
+    );
+    unawaited(coordinator.restoreNativeIncomingCall());
+  }
+
+  unawaited(_requestFullScreenCallPermission());
+}
+
+Future<void> _requestFullScreenCallPermission() async {
+  if (!Platform.isAndroid) {
+    return;
+  }
+
+  try {
+    final bool canUseFullScreenIntent =
+        await FlutterCallkitIncoming.canUseFullScreenIntent();
+
+    if (!canUseFullScreenIntent) {
+      await FlutterCallkitIncoming.requestFullIntentPermission();
+    }
+  } catch (error, stackTrace) {
+    dev.log(
+      'Unable to request full-screen call permission',
+      name: 'CallKit',
+      error: error,
+      stackTrace: stackTrace,
+    );
+  }
 }
 
 class ItalyApp extends StatelessWidget {
@@ -245,6 +243,37 @@ class ItalyApp extends StatelessWidget {
           fallbackLocale: TranslationService.fallbackLocale,
           theme: AppTheme.lightTheme,
           getPages: AppPages.pages,
+          builder: (BuildContext context, Widget? navigator) {
+            if (!Get.isRegistered<IncomingCallCoordinator>()) {
+              return navigator ?? const SizedBox.shrink();
+            }
+
+            final IncomingCallCoordinator coordinator =
+                Get.find<IncomingCallCoordinator>();
+
+            return Obx(() {
+              final bool showCallCard = coordinator.hasPresentedCall.value &&
+                  !coordinator.isPresentedCallScreenVisible.value;
+
+              if (!showCallCard) {
+                return navigator ?? const SizedBox.shrink();
+              }
+
+              return Column(
+                children: <Widget>[
+                  const GlobalCallStatusCard(),
+                  Expanded(
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).removePadding(
+                        removeTop: true,
+                      ),
+                      child: navigator ?? const SizedBox.shrink(),
+                    ),
+                  ),
+                ],
+              );
+            });
+          },
           routingCallback: (routing) {
             final String? currentRoute = routing?.current;
             if (Get.isRegistered<LearningActivityTrackerService>()) {

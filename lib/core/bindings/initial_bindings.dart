@@ -25,7 +25,6 @@ import '../../features/messages/sub-feature/call/models/message_call_models.dart
 import '../../features/messages/sub-feature/call/service/call_agora_service.dart';
 import '../../features/messages/sub-feature/call/service/call_socket_service.dart';
 import '../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
-import '../../features/messages/sub-feature/call/views/message_call_view.dart';
 import '../../features/notifications/services/notifications_api_service.dart';
 
 import '../../features/leaderboard/services/leaderboard_service.dart';
@@ -130,17 +129,11 @@ class InitialBindings extends Bindings {
     );
 
     Get.lazyPut<HomeApiService>(
-      () => HomeApiService(
-        apiClient: Get.find<ApiClient>(),
-        learningActivityApiService: Get.find<LearningActivityApiService>(),
-      ),
+      () => HomeApiService(apiClient: Get.find<ApiClient>()),
       fenix: true,
     );
     Get.lazyPut<HomeController>(
-      () => HomeController(
-        homeApiService: Get.find<HomeApiService>(),
-        userSessionController: Get.find<UserSessionController>(),
-      ),
+      () => HomeController(homeApiService: Get.find<HomeApiService>()),
       fenix: true,
     );
     if (!Get.isRegistered<HomeMockService>()) {
@@ -216,21 +209,18 @@ class InitialBindings extends Bindings {
                   await Get.delete<MessageCallController>(force: true);
                 }
 
-                await Get.to<void>(
-                  () => const MessageCallView(),
-                  binding: BindingsBuilder(() {
-                    Get.put<MessageCallController>(
-                      MessageCallController(
-                        conversationId: conversationId,
-                        callType: callType,
-                        participant: participant,
-                        callSocketService: Get.find<CallSocketService>(),
-                        callAgoraService: Get.find<CallAgoraService>(),
-                        initialSession: session,
-                      ),
-                    );
-                  }),
-                  transition: Transition.rightToLeft,
+                final MessageCallController controller = MessageCallController(
+                  conversationId: conversationId,
+                  callType: callType,
+                  participant: participant,
+                  callSocketService: Get.find<CallSocketService>(),
+                  callAgoraService: Get.find<CallAgoraService>(),
+                  initialSession: session,
+                );
+                Get.put<MessageCallController>(controller, permanent: true);
+                await controller.openCallScreen(
+                  replaceCurrent:
+                      callData['_replaceCurrentCallRoute'] == true,
                 );
               },
         ),

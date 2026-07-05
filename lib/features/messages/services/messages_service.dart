@@ -65,15 +65,9 @@ class MessagesMockService {
                   ? Map<String, dynamic>.from(conv)
                   : <String, dynamic>{};
 
-              // Extract last message content and timestamp
-              final dynamic lastMsg = c['lastMessage'];
-              final String lastMessageText = lastMsg is Map
-                  ? (lastMsg['content']?.toString() ?? '')
-                  : '';
-              final String timeLabel = _formatTimeLabel(
-                lastMsg is Map
-                    ? lastMsg['createdAt']?.toString()
-                    : c['lastMessageAt']?.toString(),
+              final _ThreadPreview preview = _buildThreadPreview(
+                c,
+                currentUserId: currentUserId,
               );
 
               // Extract delivery and read status
@@ -135,8 +129,8 @@ class MessagesMockService {
               return MessageThreadModel(
                 id: c['id']?.toString() ?? '',
                 learnerName: learnerName,
-                lastMessage: lastMessageText,
-                timeLabel: timeLabel,
+                lastMessage: preview.text,
+                timeLabel: preview.timeLabel,
                 unreadCount: unreadCount,
                 isOnline: false,
                 blockStatus: c['blockStatus']?.toString() ?? 'none',
@@ -144,6 +138,7 @@ class MessagesMockService {
                 isDelivered: isDelivered,
                 avatarUrl: avatarUrl,
                 contactId: contactId,
+                previewTone: preview.tone,
               );
             })
             .toList(growable: false);
@@ -168,6 +163,70 @@ class MessagesMockService {
       currentUserAvatarUrl: '',
       threads: <MessageThreadModel>[],
     );
+  }
+
+  _ThreadPreview _buildThreadPreview(
+    Map<String, dynamic> conversation, {
+    required String? currentUserId,
+  }) {
+    final Map<String, dynamic>? call = _mapValue(conversation['lastCall']);
+    if (call != null) {
+      final String type = call['callType']?.toString().toLowerCase() == 'video'
+          ? 'video'
+          : 'audio';
+      final String status = call['status']?.toString().toLowerCase() ?? '';
+      final String callerId = call['callerId']?.toString() ?? '';
+      final bool isIncoming = currentUserId != null &&
+          currentUserId.isNotEmpty &&
+          callerId.isNotEmpty &&
+          callerId != currentUserId;
+
+      if (status == 'ringing' || status == 'active') {
+        return _ThreadPreview(
+          text: 'Ongoing $type call',
+          timeLabel: _formatTimeLabel(call['createdAt']?.toString()),
+          tone: MessageThreadPreviewTone.ongoing,
+        );
+      }
+
+      if (status == 'missed' && isIncoming) {
+        return _ThreadPreview(
+          text: 'Missed $type call',
+          timeLabel: _formatTimeLabel(call['createdAt']?.toString()),
+          tone: MessageThreadPreviewTone.missed,
+        );
+      }
+
+      final String text = status == 'rejected'
+          ? '${_capitalized(type)} call rejected'
+          : '${_capitalized(type)} call ended';
+      return _ThreadPreview(
+        text: text,
+        timeLabel: _formatTimeLabel(call['createdAt']?.toString()),
+      );
+    }
+
+    final Map<String, dynamic>? message = _mapValue(
+      conversation['lastMessage'],
+    );
+    return _ThreadPreview(
+      text: message?['content']?.toString() ?? '',
+      timeLabel: _formatTimeLabel(
+        message?['createdAt']?.toString() ??
+            conversation['lastMessageAt']?.toString(),
+      ),
+    );
+  }
+
+  Map<String, dynamic>? _mapValue(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return null;
+  }
+
+  String _capitalized(String value) {
+    if (value.isEmpty) return value;
+    return '${value[0].toUpperCase()}${value.substring(1)}';
   }
 
   /// Mark a conversation as read for the current user.
@@ -463,4 +522,16 @@ class MessagesMockService {
     }
   }
 
+}
+
+class _ThreadPreview {
+  const _ThreadPreview({
+    required this.text,
+    required this.timeLabel,
+    this.tone = MessageThreadPreviewTone.normal,
+  });
+
+  final String text;
+  final String timeLabel;
+  final MessageThreadPreviewTone tone;
 }

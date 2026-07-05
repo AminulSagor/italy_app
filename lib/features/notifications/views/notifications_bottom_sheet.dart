@@ -10,8 +10,10 @@ import '../models/notification_models.dart';
 import '../widgets/notification_card.dart';
 import '../widgets/notification_filter_chip.dart';
 
-class NotificationsBottomSheet extends GetView<NotificationsController> {
-  const NotificationsBottomSheet({super.key});
+class NotificationsBottomSheet extends StatelessWidget {
+  const NotificationsBottomSheet({required this.controller, super.key});
+
+  final NotificationsController controller;
 
   @override
   Widget build(BuildContext context) {

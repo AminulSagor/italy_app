@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 // import '../../../core/themes/app_font.dart';
+import '../../../core/themes/app_font.dart';
 import '../../courses/services/courses_api_service.dart';
 import '../controllers/practice_hub_controller.dart';
 import '../models/practice_hub_models.dart';
@@ -192,21 +193,21 @@ class _SectionTitleRow extends StatelessWidget {
           ),
         ),
         SizedBox(width: 14.w),
-        // GestureDetector(
-        //   onTap: onActionTap,
-        //   child: Padding(
-        //     padding: EdgeInsets.only(bottom: 1.h),
-        //     child: Text(
-        //       actionText,
-        //       style: TextStyle(
-        //         fontSize: AppFont.font14.sp,
-        //         height: 1,
-        //         fontWeight: FontWeight.w900,
-        //         color: AppColors.primaryGreen,
-        //       ),
-        //     ),
-        //   ),
-        // ),
+        GestureDetector(
+          onTap: onActionTap,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 1.h),
+            child: Text(
+              actionText,
+              style: TextStyle(
+                fontSize: AppFont.font14.sp,
+                height: 1,
+                fontWeight: FontWeight.w900,
+                color: AppColors.primaryGreen,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

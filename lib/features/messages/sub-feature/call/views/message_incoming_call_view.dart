@@ -8,8 +8,8 @@ import '../controllers/message_incoming_call_controller.dart';
 
 class MessageIncomingCallView extends StatelessWidget {
   const MessageIncomingCallView({
-    super.key,
     required this.controller,
+    super.key,
   });
 
   final MessageIncomingCallController controller;
@@ -20,7 +20,7 @@ class MessageIncomingCallView extends StatelessWidget {
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
         child: Obx(
-              () => Padding(
+          () => Padding(
             padding: EdgeInsets.symmetric(
               horizontal: 28.w,
               vertical: 30.h,
@@ -28,7 +28,6 @@ class MessageIncomingCallView extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 SizedBox(height: 40.h),
-
                 Icon(
                   controller.callType.isVideo
                       ? Icons.videocam_rounded
@@ -36,9 +35,7 @@ class MessageIncomingCallView extends StatelessWidget {
                   size: 34.w,
                   color: AppColors.primaryGreen,
                 ),
-
                 SizedBox(height: 14.h),
-
                 Text(
                   controller.statusLabel.value,
                   style: TextStyle(
@@ -47,17 +44,12 @@ class MessageIncomingCallView extends StatelessWidget {
                     color: AppColors.homePrimaryText,
                   ),
                 ),
-
                 const Spacer(),
-
                 _CallerAvatar(
-                  avatarUrl:
-                  controller.caller.avatarUrl,
+                  avatarUrl: controller.caller.avatarUrl,
                   name: controller.caller.name,
                 ),
-
                 SizedBox(height: 22.h),
-
                 Text(
                   controller.caller.name,
                   textAlign: TextAlign.center,
@@ -67,9 +59,7 @@ class MessageIncomingCallView extends StatelessWidget {
                     color: AppColors.homePrimaryText,
                   ),
                 ),
-
                 SizedBox(height: 10.h),
-
                 Text(
                   controller.callType.isVideo
                       ? 'Incoming video call'
@@ -77,41 +67,31 @@ class MessageIncomingCallView extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.homePrimaryText
-                        .withValues(alpha: 0.65),
+                    color: AppColors.homePrimaryText.withValues(alpha: 0.65),
                   ),
                 ),
-
                 const Spacer(),
-
                 Row(
-                  mainAxisAlignment:
-                  MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     _IncomingCallButton(
                       icon: Icons.call_end_rounded,
                       label: 'gen_decline'.tr.tr,
                       backgroundColor: Colors.red,
-                      isLoading:
-                      controller.isProcessing.value,
-                      onPressed:
-                      controller.rejectCall,
+                      isLoading: controller.isProcessing.value,
+                      onPressed: controller.rejectCall,
                     ),
                     _IncomingCallButton(
                       icon: controller.callType.isVideo
                           ? Icons.videocam_rounded
                           : Icons.call_rounded,
                       label: 'gen_answer'.tr.tr,
-                      backgroundColor:
-                      AppColors.primaryGreen,
-                      isLoading:
-                      controller.isProcessing.value,
-                      onPressed:
-                      controller.answerCall,
+                      backgroundColor: AppColors.primaryGreen,
+                      isLoading: controller.isProcessing.value,
+                      onPressed: controller.answerCall,
                     ),
                   ],
                 ),
-
                 SizedBox(height: 42.h),
               ],
             ),
@@ -203,30 +183,25 @@ class _IncomingCallButton extends StatelessWidget {
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),
-            onTap: isLoading
-                ? null
-                : () {
-              onPressed();
-            },
+            onTap: isLoading ? null : onPressed,
             child: SizedBox(
               width: 72.w,
               height: 72.w,
               child: Center(
                 child: isLoading
                     ? SizedBox(
-                  width: 24.w,
-                  height: 24.w,
-                  child:
-                  const CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: Colors.white,
-                  ),
-                )
+                        width: 24.w,
+                        height: 24.w,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
                     : Icon(
-                  icon,
-                  size: 32.w,
-                  color: Colors.white,
-                ),
+                        icon,
+                        size: 32.w,
+                        color: Colors.white,
+                      ),
               ),
             ),
           ),

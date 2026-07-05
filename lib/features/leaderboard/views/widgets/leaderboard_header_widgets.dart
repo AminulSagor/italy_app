@@ -194,7 +194,7 @@ class LeaderboardPodiumSection extends StatelessWidget {
     final Map<String, dynamic> third = _userByRank(3);
 
     return SizedBox(
-      height: 260.h,
+      height: 310.h,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
@@ -218,7 +218,7 @@ class LeaderboardPodiumSection extends StatelessWidget {
               user: first,
               isGlobal: isGlobal,
               avatarSize: 82,
-              cardHeight: 140,
+              cardHeight: 150,
               accentColor: AppColors.primaryGreen,
               gradientColor: const Color(0xFF87FF49),
               isCenter: true,
@@ -266,6 +266,7 @@ class _PodiumUserCard extends StatelessWidget {
     final String name = user['name'] as String;
     final String xp = user['xp'] as String;
     final String league = user['league'] as String;
+    final String avatarUrl = user['avatarUrl']?.toString().trim() ?? '';
 
     final bool showChip = isGlobal || isCenter;
 
@@ -277,12 +278,13 @@ class _PodiumUserCard extends StatelessWidget {
           size: avatarSize,
           accentColor: accentColor,
           isCenter: isCenter,
+          avatarUrl: avatarUrl,
         ),
         SizedBox(height: 6.h),
-        if (showChip)
+        if (showChip) ...[
           Container(
             height: 28.h,
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: isCenter
@@ -293,15 +295,18 @@ class _PodiumUserCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(100.r),
             ),
             child: Text(
-              isCenter && !isGlobal ? 'SILVER' : league,
+              league,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: AppFont.font10.sp,
                 fontWeight: FontWeight.w900,
                 color: isCenter ? AppColors.primaryGreen : AppColors.white,
               ),
             ),
-          )
-        else
+          ),
+          SizedBox(height: 8.h),
+        ] else
           SizedBox(height: 28.h),
         Container(
           height: cardHeight.h,
@@ -320,6 +325,7 @@ class _PodiumUserCard extends StatelessWidget {
             borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
                 name,
@@ -333,14 +339,18 @@ class _PodiumUserCard extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 2.h),
-              Text(
-                '$rank${_rankSuffix(rank)}',
-                style: TextStyle(
-                  fontSize: AppFont.font15.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.homePrimaryText.withValues(alpha: 0.75),
-                ),
-              ),
+              isGlobal
+                  ? SizedBox.shrink()
+                  : Text(
+                      '$rank${_rankSuffix(rank)}',
+                      style: TextStyle(
+                        fontSize: AppFont.font15.sp,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.homePrimaryText.withValues(
+                          alpha: 0.75,
+                        ),
+                      ),
+                    ),
               SizedBox(height: 2.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -377,12 +387,14 @@ class _PodiumAvatar extends StatelessWidget {
   final double size;
   final Color accentColor;
   final bool isCenter;
+  final String avatarUrl;
 
   const _PodiumAvatar({
     required this.rank,
     required this.size,
     required this.accentColor,
     required this.isCenter,
+    required this.avatarUrl,
   });
 
   @override
@@ -408,39 +420,70 @@ class _PodiumAvatar extends StatelessWidget {
           ),
         ],
       ),
-      child: isCenter
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  '1',
-                  style: TextStyle(
-                    fontSize: 56.sp,
-                    height: 0.95,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.homePrimaryText,
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 9.h),
-                  child: Text(
-                    'st',
-                    style: TextStyle(
-                      fontSize: AppFont.font9.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.homePrimaryText,
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : Icon(
-              Icons.person_rounded,
-              size: 34.r,
-              color: AppColors.homeSecondaryText,
-            ),
+      child: ClipOval(
+        child: avatarUrl.isEmpty
+            ? _PodiumAvatarFallback(isCenter: isCenter)
+            : Image.network(
+                avatarUrl,
+                width: size.w,
+                height: size.w,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) =>
+                    _PodiumAvatarFallback(isCenter: isCenter),
+              ),
+      ),
     );
   }
 }
 
+class _PodiumAvatarFallback extends StatelessWidget {
+  const _PodiumAvatarFallback({required this.isCenter});
+
+  final bool isCenter;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isCenter) {
+      return ColoredBox(
+        color: AppColors.legacyColorFFDFDFDF,
+        child: Center(
+          child: Icon(
+            Icons.person_rounded,
+            size: 34.r,
+            color: AppColors.homeSecondaryText,
+          ),
+        ),
+      );
+    }
+
+    return ColoredBox(
+      color: AppColors.white,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            '1',
+            style: TextStyle(
+              fontSize: 56.sp,
+              height: 0.95,
+              fontWeight: FontWeight.w900,
+              color: AppColors.homePrimaryText,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 9.h),
+            child: Text(
+              'st',
+              style: TextStyle(
+                fontSize: AppFont.font9.sp,
+                fontWeight: FontWeight.w900,
+                color: AppColors.homePrimaryText,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

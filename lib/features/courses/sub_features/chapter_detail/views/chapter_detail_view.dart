@@ -74,6 +74,7 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
           }
 
           return SingleChildScrollView(
+            controller: controller.scrollController,
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.fromLTRB(
               kChapterHorizontalPadding.w,
@@ -89,8 +90,10 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                 if (detail.hasVideo) ...<Widget>[
                   ChapterVideoCard(
                     detail: detail,
-                    playCommand: controller.videoPlayCommand.value,
+                    playbackCommand: controller.videoPlaybackCommand.value,
+                    shouldPlay: controller.shouldPlayVideo.value,
                     loadVideoUrl: controller.loadVideoUrl,
+                    onPlaybackChanged: controller.onVideoPlaybackChanged,
                     onProgressChanged: (Duration position, Duration duration) {
                       controller.recordVideoProgress(
                         position: position,
@@ -137,7 +140,8 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                     status: detail.quiz!.status,
                     hasVideo: detail.hasVideo,
                     isLoading: controller.isResumeSubmitting.value,
-                    onResumeTap: controller.resumeVideo,
+                    isVideoPlaying: controller.isVideoPlaying.value,
+                    onResumeTap: controller.toggleVideoPlayback,
                     onQuizTap: controller.openQuiz,
                   ),
                 ],
@@ -189,6 +193,7 @@ class _BottomActions extends StatelessWidget {
   final ChapterQuizStatus status;
   final bool isLoading;
   final bool hasVideo;
+  final bool isVideoPlaying;
   final VoidCallback onResumeTap;
   final VoidCallback onQuizTap;
 
@@ -196,6 +201,7 @@ class _BottomActions extends StatelessWidget {
     required this.status,
     required this.isLoading,
     required this.hasVideo,
+    required this.isVideoPlaying,
     required this.onResumeTap,
     required this.onQuizTap,
   });
@@ -205,9 +211,17 @@ class _BottomActions extends StatelessWidget {
     if (status == ChapterQuizStatus.disabled) {
       return CustomButton.primary(
         onPressed: hasVideo ? onResumeTap : () {},
-        text: hasVideo ? 'Resume Video' : 'Video Not Given',
+        text: hasVideo
+            ? isVideoPlaying
+                  ? 'Pause'
+                  : 'Resume Video'
+            : 'Video Not Given',
         isLoading: isLoading,
-        icon: hasVideo ? Icons.play_arrow_rounded : Icons.lock_outline_rounded,
+        icon: hasVideo
+            ? isVideoPlaying
+                  ? Icons.pause_rounded
+                  : Icons.play_arrow_rounded
+            : Icons.lock_outline_rounded,
       );
     }
 
@@ -215,7 +229,11 @@ class _BottomActions extends StatelessWidget {
       children: <Widget>[
         CustomButton(
           onPressed: hasVideo ? onResumeTap : () {},
-          text: hasVideo ? '▶  Resume' : 'Video Not Given',
+          text: hasVideo
+              ? isVideoPlaying
+                    ? '❚❚  Pause'
+                    : '▶  Resume'
+              : 'Video Not Given',
           height: kChapterBottomButtonHeight,
           showShadow: true,
           btnColor: AppColors.white,

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_font.dart';
+import '../../../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import '../../../core/widgets/widgets.dart';
 import '../services/leaderboard_service.dart';
 
@@ -80,7 +81,14 @@ class ScoreSystemInfoView extends StatelessWidget {
             _DeepGreenButton(
               text: 'Let’s Learn',
               icon: Icons.play_arrow_rounded,
-              onTap: () => Get.back<void>(),
+              onTap: () {
+                Get.back<void>();
+                if (Get.isRegistered<NavbarAndAppbarWrapperController>()) {
+                  Get.find<NavbarAndAppbarWrapperController>().onBottomNavTap(
+                    1,
+                  );
+                }
+              },
             ),
           ],
         ),

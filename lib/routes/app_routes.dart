@@ -14,6 +14,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String wrapper = '/wrapper';
   static const String notifications = '/notifications';
+  static const String courseCatalog = '/practice-hub/courses';
 
   static const String courseDetail = '/courses/detail';
   static const String chapterDetail = '/courses/chapter-detail';
