@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../../../core/services/api_client.dart';
 import '../models/important_verb_detail_models.dart';
@@ -140,10 +143,16 @@ class ImportantVerbsApiService {
     required String verbId,
     String language = 'en',
   }) async {
+    debugPrint('fetchVerbDetails CALLED');
+    debugPrint('verbId: $verbId');
+    debugPrint('language: $language');
+
     final Response<dynamic> response = await _apiClient.dio.get(
       '/important-verbs/$verbId',
       queryParameters: <String, dynamic>{'language': language},
     );
+
+    print("entered");
     return ImportantVerbDetailModel.fromJson(_responseMap(response));
   }
 

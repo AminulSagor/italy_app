@@ -192,7 +192,11 @@ class _DailyChallengeHeader extends GetView<PracticeHubController> {
                   ),
                   SizedBox(width: 5.w),
                   Text(
-                    'controller_dailychallengexp_xp'.trParams(<String, String>{'dailychallengexp': controller.dailyChallengeXp.toString()}),
+                    'daily_challenge_xp'.trParams(
+                      <String, String>{
+                        'xp': controller.dailyChallengeXp.toString(),
+                      },
+                    ),
                     style: TextStyle(
                       fontSize: AppFont.font16.sp,
                       fontWeight: FontWeight.w900,
@@ -362,7 +366,13 @@ class _DailyTaskCard extends GetView<PracticeHubController> {
                 Row(
                   children: <Widget>[
                     Text(
-                      'task_progressvalue_task_targetvalue_task_unit'.trParams(<String, String>{'progressvalue': task.progressValue.toString(), 'targetvalue': task.targetValue.toString(), 'unit': task.unit.toString()}),
+                      'task_progress'.trParams(
+                        <String, String>{
+                          'current': task.progressValue.toString(),
+                          'target': task.targetValue.toString(),
+                          'unit': task.unit,
+                        },
+                      ),
                       style: TextStyle(
                         fontSize: AppFont.font14.sp,
                         fontWeight: FontWeight.w900,

@@ -3,6 +3,12 @@
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
+    'task_progress': '@current/@target @unit',
+    'claimed_xp': 'Claimed +@xp XP',
+    'daily_challenge_xp': '@xp XP',
+    'verb_learn_types_forms_examples':
+    'Learn verb types, forms, and real examples to master Italian fluency.',
+    'pdf_page_counter': 'Page @current of @total',
     'cv_preview_load_failed':
     'CV preview could not be loaded.',
     'cv_validation_title': 'Complete your CV',
@@ -4433,8 +4439,21 @@ appTranslations = <String, Map<String, String>>{
         ' সতর্কভাবে উত্তর দিয়ে,\nআর ব্যবহারকারী A তাড়াহুড়ো করে মাত্র ৮৫ XP পেয়েছে!',
     'score_xp_value': '@xp XP',
     'score_xp_delta': '+@xp XP',
+    'pdf_page_counter': 'পৃষ্ঠা @current / @total', // Bengali
+    'verb_learn_types_forms_examples':
+    'ইতালীয় ভাষায় দক্ষতা অর্জনের জন্য ক্রিয়ার ধরন, রূপ এবং বাস্তব উদাহরণ শিখুন।',
+    'daily_challenge_xp': '@xp এক্সপি',
+    'claimed_xp': '+@xp এক্সপি সংগ্রহ করা হয়েছে',
+    'task_progress': '@target @unit-এর মধ্যে @current',
+
   },
   'it_IT': <String, String>{
+    'task_progress': '@current/@target @unit',
+    'claimed_xp': 'Ottenuti +@xp XP',
+    'daily_challenge_xp': '@xp XP',
+    'verb_learn_types_forms_examples':
+    'Impara i tipi di verbo, le forme e gli esempi reali per padroneggiare l’italiano.',
+    'pdf_page_counter': 'Pagina @current di @total',
     'cv_preview_load_failed':
     'Impossibile caricare l’anteprima del CV.',
     'cv_validation_title':
