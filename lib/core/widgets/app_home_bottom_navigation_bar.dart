@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../themes/app_colors.dart';
 import '../themes/app_constants.dart';
+import 'package:get/get.dart';
 
 class AppBottomNavItem {
   final IconData icon;
@@ -13,11 +14,13 @@ class AppBottomNavItem {
 }
 
 class AppHomeBottomNavigationBar extends StatelessWidget {
-  static const List<AppBottomNavItem> defaultItems = <AppBottomNavItem>[
-    AppBottomNavItem(icon: Icons.home_rounded, semanticLabel: 'Home'),
-    AppBottomNavItem(icon: Icons.menu_book_outlined, semanticLabel: 'Courses'),
-    AppBottomNavItem(icon: Icons.auto_awesome_rounded, semanticLabel: 'AI Tutor'),
-    AppBottomNavItem(icon: Icons.emoji_events_outlined, semanticLabel: 'Progress'),
+  static List<AppBottomNavItem> get defaultItems => <AppBottomNavItem>[
+    AppBottomNavItem(icon: Icons.home_rounded, semanticLabel: 'home'.tr),
+    AppBottomNavItem(icon: Icons.menu_book_outlined, semanticLabel: 'courses'.tr),
+    AppBottomNavItem(icon: Icons.auto_awesome_rounded, semanticLabel: 'ai_tutor_1'.tr),
+    AppBottomNavItem(icon: Icons.emoji_events_outlined, semanticLabel: 'progress'.tr),
+    AppBottomNavItem(icon: Icons.handyman_outlined, semanticLabel: 'tools'.tr),
+
     AppBottomNavItem(
       icon: Icons.description_outlined,
       semanticLabel: 'CV Builder',

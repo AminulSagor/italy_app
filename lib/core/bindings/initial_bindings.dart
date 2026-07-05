@@ -191,7 +191,7 @@ class InitialBindings extends Bindings {
                 final MessageCallParticipantModel participant =
                     MessageCallParticipantModel(
                       id: callData['callerId']?.toString() ?? '',
-                      name: callData['callerName']?.toString() ?? 'Caller',
+                      name: callData['callerName']?.toString() ?? 'caller'.tr,
                       avatarUrl: callData['callerAvatarUrl']?.toString() ?? '',
                       isOnline: true,
                     );

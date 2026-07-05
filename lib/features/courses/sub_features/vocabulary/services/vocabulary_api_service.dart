@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../../core/services/api_client.dart';
 import '../models/vocabulary_models.dart';
+import 'package:get/get.dart' hide Response;
 
 class VocabularyApiService {
   VocabularyApiService({required ApiClient apiClient}) : _apiClient = apiClient;
@@ -63,7 +64,7 @@ class VocabularyApiService {
     return <String, dynamic>{
       'id': _stringValue(item['id']),
       'word': _fallbackString(item['italianWord'], 'Vocabulary'),
-      'languageLabel': 'ITALIAN',
+      'languageLabel': 'Italian',
       'meaning': _stringValue(item['englishMeaning']),
       'example': _stringValue(item['englishExample']),
       'hasAudio': _stringValue(item['aiPronunciationFileId']).isNotEmpty,
@@ -78,7 +79,7 @@ class VocabularyApiService {
 
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object',
+      message: 'response_is_not_a_valid_json_object'.tr,
     );
   }
 

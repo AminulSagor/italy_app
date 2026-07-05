@@ -179,8 +179,8 @@ class _EmptyLessonsCard extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
       ),
-      child: const Text(
-        'No published lessons found for this course yet.',
+      child: Text(
+        'no_published_lessons_found_for_this_course_yet'.tr,
         textAlign: TextAlign.center,
       ),
     );

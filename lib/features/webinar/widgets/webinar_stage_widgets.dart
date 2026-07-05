@@ -110,7 +110,7 @@ class _StagePlaceholder extends StatelessWidget {
         ),
         Center(
           child: Text(
-            'Your video will appear here when camera is on.',
+            'your_video_will_appear_here_when_camera_is_on'.tr,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: AppFont.font14.sp,
@@ -193,7 +193,7 @@ class _StageMessageChip extends StatelessWidget {
           SizedBox(width: 12.w),
           Flexible(
             child: Text(
-              '${message.senderName}  ${message.message}',
+              'message_sendername_message_message'.trParams(<String, String>{'sendername': message.senderName.toString(), 'message': message.message.toString()}),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(

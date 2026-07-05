@@ -283,7 +283,7 @@ class SplashView extends GetView<SplashController> {
 
           CustomButton(
             onPressed: controller.onPrimaryButtonTap,
-            text: 'splash_get_started',
+            text: 'splash_get_started'.tr,
             height: 60,
             width: 270,
             isElevated: true,

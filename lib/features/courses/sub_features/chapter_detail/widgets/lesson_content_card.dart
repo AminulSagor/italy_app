@@ -172,7 +172,7 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
         audioUrl = await widget.loadAudioUrl() ?? '';
       }
       if (audioUrl.isEmpty) {
-        throw StateError('Audio URL is not available');
+        throw StateError('audio_url_is_not_available'.tr);
       }
 
       await _audioPlayer.setUrl(audioUrl);
@@ -190,7 +190,7 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
       setState(() {
         _isPreparing = false;
         _isPrepared = false;
-        _errorMessage = 'Audio could not be loaded. Tap play to retry.';
+        _errorMessage = 'audio_could_not_be_loaded_tap_play_to_retry'.tr;
       });
       return false;
     }
@@ -307,19 +307,19 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
               child: Row(
                 children: <Widget>[
                   _SpeedPill(
-                    label: 'gen_0_75'.tr.tr,
+                    label: 'gen_0_75'.tr,
                     isSelected: _speed == 0.75,
                     onTap: () => _setSpeed(0.75),
                   ),
                   4.w.horizontalSpace,
                   _SpeedPill(
-                    label: 'gen_1'.tr.tr,
+                    label: 'gen_1'.tr,
                     isSelected: _speed == 1,
                     onTap: () => _setSpeed(1),
                   ),
                   4.w.horizontalSpace,
                   _SpeedPill(
-                    label: 'gen_1_25'.tr.tr,
+                    label: 'gen_1_25'.tr,
                     isSelected: _speed == 1.25,
                     onTap: () => _setSpeed(1.25),
                   ),
@@ -330,7 +330,8 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
               stream: _audioPlayer.playerStateStream,
               builder: (_, AsyncSnapshot<PlayerState> snapshot) {
                 final PlayerState? state = snapshot.data;
-                final bool isBuffering = _isPreparing ||
+                final bool isBuffering =
+                    _isPreparing ||
                     state?.processingState == ProcessingState.loading ||
                     state?.processingState == ProcessingState.buffering;
                 final bool isPlaying = state?.playing ?? false;
@@ -387,10 +388,7 @@ class _TheoryTextPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           if (lesson.italianText.isNotEmpty)
-            Text(
-              lesson.italianText,
-              style: _bodyStyle(),
-            ),
+            Text(lesson.italianText, style: _bodyStyle()),
           if (lesson.italianHighlightText.isNotEmpty) ...<Widget>[
             SizedBox(height: 8.h),
             Text(
@@ -439,7 +437,7 @@ class _TranslationPanel extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: Text(
-            '—${lesson.translationLabel}—',
+            'lesson_translationlabel'.trParams(<String, String>{'translationlabel': lesson.translationLabel.toString()}),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: AppFont.font10.sp,
@@ -451,9 +449,10 @@ class _TranslationPanel extends StatelessWidget {
         ),
         8.h.verticalSpace,
         Text(
-          [lesson.banglaText, lesson.banglaHighlightText]
-              .where((String item) => item.trim().isNotEmpty)
-              .join('\n'),
+          [
+            lesson.banglaText,
+            lesson.banglaHighlightText,
+          ].where((String item) => item.trim().isNotEmpty).join('\n'),
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: AppFont.font16.sp,

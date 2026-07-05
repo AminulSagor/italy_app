@@ -96,7 +96,7 @@ class _PhraseDetailsHeader extends GetView<JobSentencesController> {
             ),
             child: Center(
               child: Text(
-                '$learned / $total',
+                'learned_total'.trParams(<String, String>{'learned': learned.toString(), 'total': total.toString()}),
                 style: TextStyle(
                   fontSize: 12.sp,
                   height: 1,
@@ -146,7 +146,7 @@ class _PhraseSearchField extends GetView<JobSentencesController> {
               cursorColor: AppColors.primaryGreen,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'gen_search_phrases'.tr.tr,
+                hintText: 'gen_search_phrases'.tr,
                 hintStyle: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,
@@ -204,8 +204,8 @@ class _PhraseList extends GetView<JobSentencesController> {
       if (controller.sentences.isEmpty) {
         return _PhraseMessageState(
           message: controller.searchQuery.value.isEmpty
-              ? 'No sentences are available in this module.'
-              : 'No sentences match your search.',
+              ? 'no_sentences_are_available_in_this_module'.tr
+              : 'no_sentences_match_your_search'.tr,
         );
       }
 
@@ -431,7 +431,7 @@ class _PhraseCardState extends State<_PhraseCard> {
                       borderRadius: BorderRadius.circular(999.r),
                     ),
                     child: Text(
-                      'LEARNED',
+                      'learned'.tr,
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w900,
@@ -574,7 +574,7 @@ class _PhraseMessageState extends StatelessWidget {
             SizedBox(height: 10.h),
             TextButton(
               onPressed: onRetry,
-              child: const Text('Retry'),
+              child: Text('retry'.tr),
             ),
           ],
         ],

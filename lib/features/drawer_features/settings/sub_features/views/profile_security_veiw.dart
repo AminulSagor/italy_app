@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-
 import '../../../../../routes/routes.dart';
 import '../../settings_controller.dart';
 import '../../widgets/settings_ui_widgets.dart';
@@ -19,7 +18,7 @@ class ProfileSecurityView extends GetView<SettingsController> {
           padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 58.h),
           child: Column(
             children: <Widget>[
-              const SettingsTopBar(title: 'Edit Profile'),
+              SettingsTopBar(title: 'gen_edit_profile'.tr),
               SizedBox(height: 49.h),
               Obx(
                 () => _ProfileAvatar(
@@ -29,8 +28,8 @@ class ProfileSecurityView extends GetView<SettingsController> {
               ),
               SizedBox(height: 27.h),
               SettingsPillField(
-                label: 'Full Name',
-                hint: 'Enter your full name',
+                label: 'gen_full_name_1'.tr,
+                hint: 'enter_your_full_name'.tr,
                 icon: Icons.person_outline_rounded,
                 controller: controller.fullNameController,
                 keyboardType: TextInputType.name,
@@ -46,10 +45,10 @@ class ProfileSecurityView extends GetView<SettingsController> {
               SizedBox(height: 13.h),
               Obx(
                 () => SettingsPillField(
-                  label: controller.selectedContactIsEmail ? 'Email' : 'Phone',
+                  label: controller.selectedContactIsEmail ? 'email'.tr : 'phone'.tr,
                   hint: controller.selectedContactIsEmail
-                      ? 'Enter your new email'
-                      : 'Enter your new phone number',
+                      ? 'enter_your_new_email'.tr
+                      : 'enter_your_new_phone_number'.tr,
                   icon: controller.selectedContactIsEmail
                       ? Icons.alternate_email_rounded
                       : Icons.phone_rounded,
@@ -77,8 +76,8 @@ class ProfileSecurityView extends GetView<SettingsController> {
               Obx(
                 () => SettingsPrimaryButton(
                   text: controller.selectedContactChanged
-                      ? 'SAVE & VERIFY  →'
-                      : 'SAVE CHANGES',
+                      ? 'save_verify'.tr
+                      : 'save_changes'.tr,
                   icon: controller.selectedContactChanged
                       ? Icons.mark_email_read_outlined
                       : Icons.save_rounded,
@@ -90,12 +89,12 @@ class ProfileSecurityView extends GetView<SettingsController> {
                         await controller.saveProfileAndContinue();
                     if (result == ProfileSaveResult.saved) {
                       await SettingsSuccessBottomSheet.show(
-                        title: 'Profile Updated!',
+                        title: 'profile_updated'.tr,
                         subtitle:
-                            'Your profile information has been updated successfully.',
+                            'your_profile_information_has_been_updated_successf'.tr,
                       );
                     } else if (result == ProfileSaveResult.noChanges) {
-                      Get.snackbar('Profile', 'There are no changes to save.');
+                      Get.snackbar('profile'.tr, 'there_are_no_changes_to_save'.tr);
                     }
                   },
                 ),
@@ -212,14 +211,14 @@ class _SegmentedSwitch extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: _SegmentButton(
-              text: 'EMAIL',
+              text: 'field_email'.tr,
               selected: isEmail,
               onTap: onEmailTap,
             ),
           ),
           Expanded(
             child: _SegmentButton(
-              text: 'PHONE',
+              text: 'field_phone'.tr,
               selected: !isEmail,
               onTap: onPhoneTap,
             ),
@@ -278,12 +277,12 @@ class _ContactVerificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String contactName = isEmail ? 'email address' : 'phone number';
+    final String contactName = isEmail ? 'email_address'.tr : 'phone_number'.tr;
     final String message = hasChanged
-        ? 'A 4-digit OTP will be sent to the new $contactName. The change is applied only after verification.'
+        ? 'otp_will_be_sent'.trParams({'contact': contactName})
         : isVerified
-        ? 'Your current $contactName is verified. Enter a new one to change it through OTP verification.'
-        : 'Enter your $contactName and verify it with the 4-digit OTP.';
+        ? 'current_contact_verified'.trParams({'contact': contactName})
+        : 'enter_contact_and_verify'.trParams({'contact': contactName});
 
     return Container(
       width: double.infinity,

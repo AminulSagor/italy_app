@@ -422,7 +422,7 @@ class MessagesController extends GetxController {
     final MessageThreadModel thread = MessageThreadModel(
       id: conversationId ?? otherUserId,
       learnerName:
-          user['fullName']?.toString() ?? user['name']?.toString() ?? 'User',
+          user['fullName']?.toString() ?? user['name']?.toString() ?? 'user'.tr,
       lastMessage: '',
       timeLabel: '',
       unreadCount: 0,
@@ -574,7 +574,7 @@ class MessagesController extends GetxController {
       final int hour = dt.hour == 0
           ? 12
           : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
-      final String ampm = dt.hour >= 12 ? 'PM' : 'AM';
+      final String ampm = dt.hour >= 12 ? 'pm'.tr : 'am'.tr;
       final String minute = dt.minute.toString().padLeft(2, '0');
       return '$hour:$minute $ampm';
     } catch (_) {

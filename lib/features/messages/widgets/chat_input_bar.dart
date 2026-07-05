@@ -40,7 +40,7 @@ class ChatInputBar extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'You blocked this user. ',
+                      'you_blocked_this_user'.tr,
                       style: TextStyle(
                         fontSize: AppFont.font16.sp,
                         fontWeight: FontWeight.w500,
@@ -50,7 +50,7 @@ class ChatInputBar extends StatelessWidget {
                     GestureDetector(
                       onTap: controller.unblockUser,
                       child: Text(
-                        'Unblock',
+                        'unblock'.tr,
                         style: TextStyle(
                           fontSize: AppFont.font16.sp,
                           fontWeight: FontWeight.w700,
@@ -73,7 +73,7 @@ class ChatInputBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(kRadius34.r),
               ),
               child: Text(
-                "You cannot message this user.",
+                "you_cannot_message_this_user".tr,
                 style: TextStyle(
                   fontSize: AppFont.font16.sp,
                   fontWeight: FontWeight.w500,
@@ -103,7 +103,7 @@ class ChatInputBar extends StatelessWidget {
                         horizontal: 24.w,
                         vertical: 17.h,
                       ),
-                      hintText: 'gen_type_a_message'.tr.tr,
+                      hintText: 'gen_type_a_message'.tr,
                       hintStyle: TextStyle(
                         fontSize: AppFont.font16.sp,
                         fontWeight: FontWeight.w500,

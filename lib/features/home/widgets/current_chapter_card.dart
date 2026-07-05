@@ -6,6 +6,7 @@ import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../models/home_models.dart';
+import 'package:get/get.dart';
 
 class CurrentChapterCard extends StatelessWidget {
   const CurrentChapterCard({
@@ -39,7 +40,7 @@ class CurrentChapterCard extends StatelessWidget {
         children: <Widget>[
           Text(
             chapter.courseTitle.isEmpty
-                ? 'CURRENT CHAPTER'
+                ? 'current_chapter'.tr
                 : chapter.courseTitle.toUpperCase(),
             style: TextStyle(
               fontSize: AppFont.font11.sp,
@@ -73,7 +74,7 @@ class CurrentChapterCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
-                'Chapter progress',
+                'chapter_progress'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font12.sp,
                   fontWeight: FontWeight.w800,
@@ -105,7 +106,7 @@ class CurrentChapterCard extends StatelessWidget {
           SizedBox(height: 28.h),
           CustomButton(
             onPressed: onContinueTap ?? () {},
-            text: 'Continue Learning',
+            text: 'continue_learning'.tr,
             width: double.infinity,
             height: 56.h,
             icon: Icons.play_arrow_rounded,

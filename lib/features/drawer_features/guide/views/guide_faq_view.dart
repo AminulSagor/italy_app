@@ -130,7 +130,7 @@ class _FaqTopBar extends StatelessWidget {
             ),
           ),
           Text(
-            'FAQ',
+            'faq'.tr,
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w900,
@@ -233,7 +233,7 @@ class _ExpertTipCard extends StatelessWidget {
               ),
               SizedBox(width: 10.w),
               Text(
-                'EXPERT TIP',
+                'expert_tip'.tr,
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w900,
@@ -281,7 +281,7 @@ class _SupportCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Still have questions?',
+            'still_have_questions'.tr,
             style: TextStyle(
               fontSize: 22.sp,
               fontWeight: FontWeight.w900,
@@ -291,7 +291,7 @@ class _SupportCard extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Our support team is ready to help with any issue not covered in this guide.',
+            'our_support_team_is_ready_to_help_with_any_issue_n'.tr,
             style: TextStyle(
               fontSize: 16.sp,
               height: 1.35,
@@ -327,7 +327,7 @@ class _SupportCard extends StatelessWidget {
                   ),
                   SizedBox(width: 12.w),
                   Text(
-                    'Chat with Support',
+                    'chat_with_support'.tr,
                     style: TextStyle(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w900,

@@ -5,6 +5,7 @@ import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../models/home_models.dart';
+import 'package:get/get.dart';
 
 class DailyOverviewSection extends StatelessWidget {
   const DailyOverviewSection({super.key, required this.overview});
@@ -29,7 +30,7 @@ class DailyOverviewSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Daily Overview',
+                    'gen_daily_overview'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font20.sp,
                       fontWeight: FontWeight.w800,
@@ -38,7 +39,7 @@ class DailyOverviewSection extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'Your learning activity this week',
+                    'gen_your_learning_activity_this_we'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font12.sp,
                       fontWeight: FontWeight.w500,
@@ -61,7 +62,7 @@ class DailyOverviewSection extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'THIS WEEK',
+                  'this_week'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font9.sp,
                     fontWeight: FontWeight.w900,

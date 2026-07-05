@@ -7,6 +7,7 @@ import 'package:italir_pothe/core/widgets/custom_button.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class QuizCorrectAnswerSheet extends StatelessWidget {
   final String meaning;
@@ -64,7 +65,7 @@ class QuizCorrectAnswerSheet extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              'Excellent!',
+                              'excellent'.tr,
                               style: TextStyle(
                                 fontSize: AppFont.font22.sp,
                                 fontWeight: FontWeight.w700,
@@ -88,7 +89,7 @@ class QuizCorrectAnswerSheet extends StatelessWidget {
                   ),
                   SizedBox(height: 30.h),
                   CustomButton.primary(
-                    text: 'Continue',
+                    text: 'continue'.tr,
                     onPressed: onContinueTap,
                   ),
                 ],
@@ -138,7 +139,7 @@ class QuizWrongAnswerFeedback extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Oh no!',
+                  'oh_no'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w700,
@@ -147,7 +148,7 @@ class QuizWrongAnswerFeedback extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  "That's not quite right.",
+                  "that_s_not_quite_right".tr,
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w400,
@@ -156,7 +157,7 @@ class QuizWrongAnswerFeedback extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'Correct Answer:',
+                  'correct_answer'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w400,
@@ -248,7 +249,7 @@ class QuizExitConfirmationDialog extends StatelessWidget {
             ),
             SizedBox(height: 28.h),
             Text(
-              'Wait! Are you sure?',
+              'wait_are_you_sure'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font30.sp,
@@ -258,7 +259,7 @@ class QuizExitConfirmationDialog extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
             Text(
-              "If you quit now, you'll lose your\nprogress and current score for\nthis chapter.",
+              'quit_quiz_progress_warning'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font18.sp,
@@ -270,12 +271,12 @@ class QuizExitConfirmationDialog extends StatelessWidget {
             SizedBox(height: 32.h),
             CustomButton.primary(
               onPressed: onKeepGoingTap,
-              text: 'Keep Going  ▶',
+              text: 'keep_going'.tr,
             ),
             SizedBox(height: 16.h),
             CustomButton(
               onPressed: onQuitTap,
-              text: 'QUIT QUIZ',
+              text: 'quit_quiz'.tr,
               textColor: AppColors.blockDangerRed,
               btnColor: AppColors.white,
               borderColor: AppColors.blockDangerRed,

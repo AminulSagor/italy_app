@@ -31,7 +31,7 @@ class CvCreditOrderSummaryView extends GetView<ShopController> {
               GestureDetector(
                 onTap: Get.back,
                 child: Text(
-                  'Maybe later',
+                  'maybe_later'.tr,
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
@@ -69,7 +69,7 @@ class _SummaryTopBar extends StatelessWidget {
             ),
           ),
           Text(
-            'Order Summary',
+            'gen_order_summary'.tr,
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w900,
@@ -107,13 +107,13 @@ class _CurrencyToggle extends GetView<ShopController> {
             child: Row(
               children: <Widget>[
                 _CurrencyItem(
-                  title: 'gen_eur'.tr.tr,
+                  title: 'gen_eur'.tr,
                   selected:
                       controller.selectedCurrency.value == RefillCurrency.eur,
                   onTap: () => controller.selectCurrency(RefillCurrency.eur),
                 ),
                 _CurrencyItem(
-                  title: 'gen_bdt'.tr.tr,
+                  title: 'gen_bdt'.tr,
                   selected:
                       controller.selectedCurrency.value == RefillCurrency.bdt,
                   onTap: () => controller.selectCurrency(RefillCurrency.bdt),
@@ -325,7 +325,7 @@ class _BuyButton extends GetView<ShopController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      'Continue to Checkout',
+                      'continue_to_checkout'.tr,
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w900,
@@ -375,7 +375,7 @@ class _TrustedLearnersPill extends StatelessWidget {
           ),
           SizedBox(width: 6.w),
           Text(
-            'TRUSTED BY 5K+ LEARNERS',
+            'trusted_by_5k_learners'.tr,
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w900,

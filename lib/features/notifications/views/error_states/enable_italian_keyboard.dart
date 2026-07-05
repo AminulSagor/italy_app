@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../widgets/status_error_widgets.dart';
+import 'package:get/get.dart';
 
 class ItalianKeyboardWarningView extends StatelessWidget {
   final VoidCallback? onSkipTap;
@@ -56,7 +57,7 @@ class ItalianKeyboardWarningView extends StatelessWidget {
                       child: Column(
                         children: <Widget>[
                           Text(
-                            'Enable Italian Keyboard',
+                            'enable_italian_keyboard'.tr,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: StatusColors.primaryGreen,
@@ -139,7 +140,7 @@ class ItalianKeyboardWarningView extends StatelessWidget {
                                     ),
                                     SizedBox(width: 11.w),
                                     Text(
-                                      'WHY IT MATTERS',
+                                      'why_it_matters'.tr,
                                       style: TextStyle(
                                         color: const Color(0xFF005D9E),
                                         fontSize: 13.sp,
@@ -161,13 +162,13 @@ class ItalianKeyboardWarningView extends StatelessWidget {
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
                                           AccentWordRow(
-                                            word: 'Caffe',
+                                            word: 'caffe'.tr,
                                             mark: Icons.close_rounded,
                                             color: const Color(0xFFC8290D),
                                           ),
                                           SizedBox(height: 11.h),
                                           AccentWordRow(
-                                            word: 'Caffè',
+                                            word: 'caff'.tr,
                                             mark: Icons.check_rounded,
                                             color: StatusColors.primaryGreen,
                                           ),

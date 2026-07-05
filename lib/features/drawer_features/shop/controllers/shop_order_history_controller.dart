@@ -27,7 +27,7 @@ class ShopOrderHistoryController extends GetxController {
   final RxInt orderHistoryTotalPages = 1.obs;
   Timer? _searchDebounce;
 
-  final List<String> orderHistoryFilters = const <String>[
+  final List<String> orderHistoryFilters = <String>[
     OrderHistoryFilterTitles.allOrders,
     OrderHistoryFilterTitles.courses,
     OrderHistoryFilterTitles.aiRefills,
@@ -98,21 +98,20 @@ class ShopOrderHistoryController extends GetxController {
   }
 
   void contactOrderSupport() {
-    Get.snackbar('Support', 'Please contact support from the Help Center.');
+    Get.snackbar('gen_support'.tr, 'please_contact_support_from_the_help_center'.tr);
   }
 
   String _historyCategory(String title) {
-    switch (title) {
-      case OrderHistoryFilterTitles.courses:
-        return 'course';
-      case OrderHistoryFilterTitles.aiRefills:
-        return 'ai_refill';
-      case OrderHistoryFilterTitles.streakFreezes:
-        return 'streak_freeze';
-      case OrderHistoryFilterTitles.cvCredits:
-        return 'cv_credit';
-      default:
-        return 'all';
+    if (title == OrderHistoryFilterTitles.courses) {
+      return 'course';
+    } else if (title == OrderHistoryFilterTitles.aiRefills) {
+      return 'ai_refill';
+    } else if (title == OrderHistoryFilterTitles.streakFreezes) {
+      return 'streak_freeze';
+    } else if (title == OrderHistoryFilterTitles.cvCredits) {
+      return 'cv_credit';
+    } else {
+      return 'all';
     }
   }
 

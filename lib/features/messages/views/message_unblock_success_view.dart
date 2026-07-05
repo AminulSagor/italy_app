@@ -20,7 +20,7 @@ class MessageUnblockSuccessView extends GetView<MessageUserInfoController> {
         child: Obx(
           () {
             final MessageUserProfileModel? profile = controller.profile.value;
-            final String userName = profile?.name ?? 'User';
+            final String userName = profile?.name ?? 'user'.tr;
 
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -41,7 +41,7 @@ class MessageUnblockSuccessView extends GetView<MessageUserInfoController> {
                   ),
                   SizedBox(height: 34.h),
                   Text(
-                    '$userName has been successfully unblocked. You can now send messages and view their profile again.',
+                    'username_has_been_successfully_unblocked_you_can_now_send_messages_and_view_their_profile_again'.trParams(<String, String>{'username': userName.toString()}),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: AppFont.font24.sp,
@@ -54,7 +54,7 @@ class MessageUnblockSuccessView extends GetView<MessageUserInfoController> {
                   const _CommunicationRestoredCard(),
                   SizedBox(height: 50.h),
                   CustomButton.primary(
-                    text: 'Back To Messages',
+                    text: 'back_to_messages'.tr,
                     onPressed: controller.backToMessages,
                   ),
                 ],
@@ -158,7 +158,7 @@ class _CommunicationRestoredCard extends StatelessWidget {
                 ),
                 SizedBox(height: 12.h),
                 Text(
-                  'Safe learning environment maintained.',
+                  'safe_learning_environment_maintained'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font22.sp,
                     fontWeight: FontWeight.w500,

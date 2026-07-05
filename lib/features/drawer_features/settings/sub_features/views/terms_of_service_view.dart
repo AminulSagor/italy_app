@@ -8,7 +8,7 @@ class TermsOfServiceView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LegalDocumentView(
+    return LegalDocumentView(
       document: TermsOfServiceContent.document,
       icon: Icons.description_outlined,
     );

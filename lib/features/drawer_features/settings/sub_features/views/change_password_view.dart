@@ -18,7 +18,7 @@ class ChangePasswordView extends GetView<SettingsController> {
           padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 39.h),
           child: Column(
             children: <Widget>[
-              const SettingsTopBar(title: 'Change Password'),
+              SettingsTopBar(title: 'gen_change_password'.tr),
               SizedBox(height: 52.h),
               Container(
                 width: 80.r,
@@ -47,8 +47,8 @@ class ChangePasswordView extends GetView<SettingsController> {
               SizedBox(height: 43.h),
               Obx(
                 () => SettingsPillField(
-                  label: 'Current Password',
-                  hint: 'Enter current password',
+                  label: 'gen_current_password'.tr,
+                  hint: 'enter_current_password'.tr,
                   icon: Icons.lock_outline_rounded,
                   suffixIcon: controller.obscureCurrentPassword.value
                       ? Icons.visibility_outlined
@@ -61,8 +61,8 @@ class ChangePasswordView extends GetView<SettingsController> {
               SizedBox(height: 28.h),
               Obx(
                 () => SettingsPillField(
-                  label: 'New Password',
-                  hint: 'Create a new password',
+                  label: 'gen_new_password'.tr,
+                  hint: 'create_a_new_password'.tr,
                   icon: Icons.key_rounded,
                   suffixIcon: controller.obscureNewPassword.value
                       ? Icons.visibility_outlined
@@ -76,8 +76,8 @@ class ChangePasswordView extends GetView<SettingsController> {
               SizedBox(height: 28.h),
               Obx(
                 () => SettingsPillField(
-                  label: 'Confirm New Password',
-                  hint: 'Repeat new password',
+                  label: 'gen_confirm_new_password'.tr,
+                  hint: 'repeat_new_password'.tr,
                   icon: Icons.verified_user_outlined,
                   suffixIcon: controller.obscureConfirmPassword.value
                       ? Icons.visibility_outlined
@@ -102,7 +102,7 @@ class ChangePasswordView extends GetView<SettingsController> {
               SizedBox(height: 48.h),
               Obx(
                 () => SettingsPrimaryButton(
-                  text: 'RESET PASSWORD  →',
+                  text: 'reset_password_1'.tr,
                   isLoading: controller.isChangingPassword.value,
                   onTap: () async {
                     final bool changed =
@@ -110,8 +110,8 @@ class ChangePasswordView extends GetView<SettingsController> {
                     if (!changed) return;
 
                     await SettingsSuccessBottomSheet.show(
-                      title: 'Password Updated!',
-                      subtitle: 'Your password has been updated successfully.',
+                      title: 'gen_password_updated'.tr,
+                      subtitle: 'your_password_has_been_updated_successfully'.tr,
                       onDone: () {
                         Get.back<void>();
                         Get.back<void>();
@@ -156,7 +156,7 @@ class _SecurityRequirementsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Security Requirements',
+            'security_requirements'.tr,
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.w900,
@@ -165,17 +165,17 @@ class _SecurityRequirementsCard extends StatelessWidget {
           ),
           SizedBox(height: 19.h),
           _RequirementItem(
-            text: 'At least 8 characters',
+            text: 'at_least_8_characters'.tr,
             isDone: hasMinimumLength,
           ),
           SizedBox(height: 14.h),
           _RequirementItem(
-            text: 'One uppercase letter (A–Z)',
+            text: 'one_uppercase_letter_a_z'.tr,
             isDone: hasUppercase,
           ),
           SizedBox(height: 14.h),
           _RequirementItem(
-            text: 'Include a number (0–9)',
+            text: 'include_a_number_0_9'.tr,
             isDone: hasNumber,
           ),
           SizedBox(height: 14.h),
@@ -185,7 +185,7 @@ class _SecurityRequirementsCard extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           _RequirementItem(
-            text: 'Both new passwords match',
+            text: 'both_new_passwords_match'.tr,
             isDone: passwordsMatch,
           ),
         ],

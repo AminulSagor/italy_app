@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class CourseProBanner extends StatelessWidget {
   final bool isLoading;
@@ -50,7 +51,7 @@ class CourseProBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Unlock $courseName',
+                  'unlock_coursename'.trParams(<String, String>{'coursename': courseName.toString()}),
                   style: TextStyle(
                     fontSize: AppFont.font18.sp,
                     fontWeight: FontWeight.w700,
@@ -60,7 +61,7 @@ class CourseProBanner extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '$lessonCount lessons included',
+                  'lessoncount_lessons_included'.trParams(<String, String>{'lessoncount': lessonCount.toString()}),
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w400,

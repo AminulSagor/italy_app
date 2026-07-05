@@ -57,7 +57,7 @@ class MessageReportController extends GetxController {
     final int fileSize = await File(image.path).length();
     if (fileSize > 5 * 1024 * 1024) {
       Get.snackbar(
-        'File too large',
+        'file_too_large'.tr,
         'Please select a PNG or JPG under 5MB.',
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -70,7 +70,7 @@ class MessageReportController extends GetxController {
         ext.endsWith('.jpeg') ||
         ext.endsWith('.webp'))) {
       Get.snackbar(
-        'Unsupported file',
+        'unsupported_file'.tr,
         'Please select a PNG, JPG or WEBP image.',
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -93,7 +93,7 @@ class MessageReportController extends GetxController {
 
     if (reasonId.isEmpty) {
       Get.snackbar(
-        'Select reason',
+        'select_reason'.tr,
         'Please choose a reason for the report.',
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -111,7 +111,7 @@ class MessageReportController extends GetxController {
       } else {
         // UUID not found locally — try fetching fresh reasons.
         Get.snackbar(
-          'Reason unavailable',
+          'reason_unavailable'.tr,
           'Could not resolve reason. Please tap "Reload reasons" and try again.',
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 4),
@@ -123,7 +123,7 @@ class MessageReportController extends GetxController {
     final String desc = descriptionController.text.trim();
     if (desc.length > 500) {
       Get.snackbar(
-        'Description too long',
+        'description_too_long'.tr,
         'Description must be 500 characters or less.',
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -152,7 +152,7 @@ class MessageReportController extends GetxController {
       );
     } catch (e) {
       Get.snackbar(
-        'Report failed',
+        'report_failed'.tr,
         'Could not submit report. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
       );

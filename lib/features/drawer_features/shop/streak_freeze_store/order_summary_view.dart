@@ -30,7 +30,7 @@ class StreakOrderSummaryView extends GetView<ShopController> {
               SizedBox(height: 52.h),
               Obx(
                 () => CustomButton.primary(
-                  text: 'Continue to Checkout',
+                  text: 'continue_to_checkout'.tr,
                   icon: Icons.play_arrow_rounded,
                   isLoading: controller.isCheckoutLoading.value,
                   onPressed: controller.confirmStreakFreezePurchase,
@@ -48,7 +48,7 @@ class StreakOrderSummaryView extends GetView<ShopController> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(
-                  'Maybe later',
+                  'maybe_later'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w800,
@@ -99,7 +99,7 @@ class _OrderTopBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
               Text(
-                'Order Summary',
+                'gen_order_summary'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font20.sp,
@@ -138,13 +138,13 @@ class _CurrencySwitch extends GetView<ShopController> {
             child: Row(
               children: <Widget>[
                 _CurrencyPill(
-                  label: 'EUR',
+                  label: 'gen_eur'.tr,
                   selected:
                       controller.selectedCurrency.value == RefillCurrency.eur,
                   onTap: () => controller.selectCurrency(RefillCurrency.eur),
                 ),
                 _CurrencyPill(
-                  label: 'BDT',
+                  label: 'gen_bdt'.tr,
                   selected:
                       controller.selectedCurrency.value == RefillCurrency.bdt,
                   onTap: () => controller.selectCurrency(RefillCurrency.bdt),
@@ -243,7 +243,7 @@ class _SelectedPackCard extends GetView<ShopController> {
             ),
             SizedBox(height: 12.h),
             Text(
-              '${controller.selectedStreakFreezeCount}× Streak Freezes | Instant Activation',
+              '${controller.selectedStreakFreezeCount}x ${'streak_freezes'.tr}',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font15.sp,
@@ -387,7 +387,7 @@ class _TrustedBadge extends StatelessWidget {
           ),
           SizedBox(width: 5.w),
           Text(
-            'TRUSTED BY 5K+ LEARNERS',
+            'trusted_by_5k_learners'.tr,
             style: TextStyle(
               fontSize: AppFont.font12.sp,
               fontWeight: FontWeight.w900,

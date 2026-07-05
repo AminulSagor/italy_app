@@ -11,11 +11,11 @@ import 'models/shop_order_models.dart';
 import 'services/google_play_billing_service.dart';
 import 'services/shop_api_service.dart';
 class OrderHistoryFilterTitles {
-  static const String allOrders = 'All Orders';
-  static const String courses = 'Courses';
-  static const String aiRefills = 'AI Refills';
-  static const String streakFreezes = 'Streak Freezes';
-  static const String cvCredits = 'CV Credits';
+  static String get allOrders => 'all_orders'.tr;
+  static String get courses => 'courses'.tr;
+  static String get aiRefills => 'ai_refills'.tr;
+  static String get streakFreezes => 'streak_freezes'.tr;
+  static String get cvCredits => 'cv_credits'.tr;
 }
 class ShopController extends GetxController {
   ShopController({
@@ -102,7 +102,7 @@ class ShopController extends GetxController {
         ]);
       }, showError: false);
       if (!result.isSuccess || result.data == null) {
-        shopError.value = result.error ?? 'Could not load the shop.';
+        shopError.value = result.error ?? 'could_not_load_the_shop'.tr;
         return;
       }
       final List<Object> data = result.data!;
@@ -177,7 +177,7 @@ class ShopController extends GetxController {
     if (!canUseCoupon) return;
     final String code = couponTextController.text.trim();
     if (code.isEmpty) {
-      Get.snackbar('Coupon Required', 'Please enter a coupon code.');
+      Get.snackbar('coupon_required'.tr, 'please_enter_a_coupon_code'.tr);
       return;
     }
     final bool loaded = await _loadQuote(coupon: code);
@@ -218,7 +218,7 @@ class ShopController extends GetxController {
       _billingService.localizedPrice(quote.value?.storeProduct);
   StorePackageModel? get checkoutPackage =>
       activePackage.value ?? selectedAiPackage;
-  String get selectedPlanTitle => checkoutPackage?.name ?? 'Package';
+  String get selectedPlanTitle => checkoutPackage?.name ?? 'package'.tr;
   String get selectedPlanSubtitle => checkoutPackage?.entitlementSummary ?? '';
   String get checkoutBillingLabel =>
       checkoutPackage?.isMonthly == true ? '/ month' : '/ one-time';
@@ -279,7 +279,7 @@ class ShopController extends GetxController {
             ? option.unavailableReason
             : _billingService.lastError.value.isNotEmpty
                 ? _billingService.lastError.value
-                : 'The Google Play product is unavailable.',
+                : 'this_payment_method_is_unavailable'.tr,
       );
     }
     return null;
@@ -290,10 +290,10 @@ class ShopController extends GetxController {
     final StoreProviderOptionModel? option = paymentOption(method);
     if (option == null || !option.enabled) {
       Get.snackbar(
-        'Payment Unavailable',
+        'payment_unavailable'.tr,
         option?.unavailableReason.isNotEmpty == true
             ? option!.unavailableReason
-            : 'Google Play Billing is unavailable.',
+            : 'this_payment_method_is_unavailable'.tr,
       );
       return;
     }
@@ -301,7 +301,7 @@ class ShopController extends GetxController {
     if (method == CheckoutPaymentMethod.googlePlay) _resetCouponState();
     checkoutError.value = '';
   }
-  String paymentMethodTitle(CheckoutPaymentMethod _) => 'Google Play';
+  String paymentMethodTitle(CheckoutPaymentMethod _) => 'google_play'.tr;
   Future<void> confirmCheckout() async {
     await _completeSelectedPurchase();
   }
@@ -315,7 +315,7 @@ class ShopController extends GetxController {
   }
   String get completedMessage {
     final StorePurchaseCompletionModel? value = completedPurchase.value;
-    if (value == null) return 'Your purchase is now active.';
+    if (value == null) return 'your_purchase_is_now_active'.tr;
     switch (value.packageType) {
       case StorePackageType.aiBundle:
         return "Your '${value.packageName}' bundle is active. Voice minutes and AI tokens were added to your balance.";
@@ -343,13 +343,13 @@ class ShopController extends GetxController {
   String get completionFirstLabel {
     switch (completedPurchase.value?.packageType) {
       case StorePackageType.aiBundle:
-        return 'Voice Interaction';
+        return 'gen_voice_interaction'.tr;
       case StorePackageType.streakFreeze:
-        return 'Protection Added';
+        return 'protection_added'.tr;
       case StorePackageType.cvCredit:
-        return 'CV Credits Added';
+        return 'cv_credits_added'.tr;
       case null:
-        return 'Credits Added';
+        return 'credits_added'.tr;
     }
   }
   String get completionSecondValue {
@@ -366,8 +366,8 @@ class ShopController extends GetxController {
   }
   String get completionSecondLabel {
     return completedPurchase.value?.packageType == StorePackageType.aiBundle
-        ? 'AI Smart Tokens'
-        : 'Current Balance';
+        ? 'gen_ai_smart_tokens'.tr
+        : 'current_balance'.tr;
   }
   void closePurchaseCompleted() {
     _resetCompletedPurchase();
@@ -385,7 +385,7 @@ class ShopController extends GetxController {
   Future<void> _openPackageList(StorePackageType type, String route) async {
     if (_packagesFor(type).isEmpty) await loadShop();
     if (_packagesFor(type).isEmpty) {
-      Get.snackbar('Unavailable', 'No published packages are available.');
+      Get.snackbar('unavailable'.tr, 'no_published_packages_are_available'.tr);
       return;
     }
     _resetQuote();
@@ -396,7 +396,7 @@ class ShopController extends GetxController {
     String route,
   ) async {
     if (package == null) {
-      Get.snackbar('Select a Package', 'Please select a package first.');
+      Get.snackbar('select_a_package'.tr, 'please_select_a_package_first'.tr);
       return;
     }
     activePackage.value = package;
@@ -436,7 +436,7 @@ class ShopController extends GetxController {
     final StorePackageModel? package = activePackage.value;
     final StoreQuoteResponseModel? currentQuote = quote.value;
     if (package == null || currentQuote == null) {
-      checkoutError.value = 'A valid package is required.';
+      checkoutError.value = 'please_select_a_package_first'.tr;
       return;
     }
     isCheckoutLoading.value = true;
@@ -458,10 +458,10 @@ class ShopController extends GetxController {
           }
           return;
         case GooglePlayPurchaseOutcomeStatus.pending:
-          Get.snackbar('Payment Pending', outcome.message);
+          Get.snackbar('processing'.tr, outcome.message);
           return;
         case GooglePlayPurchaseOutcomeStatus.cancelled:
-          Get.snackbar('Purchase Cancelled', outcome.message);
+          Get.snackbar('request_cancelled'.tr, outcome.message);
           return;
         case GooglePlayPurchaseOutcomeStatus.failed:
           checkoutError.value = outcome.message;

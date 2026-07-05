@@ -34,7 +34,7 @@ class ChatMessageBubble extends StatelessWidget {
               onLongPress: () {
                 Clipboard.setData(ClipboardData(text: message.text));
                 Get.snackbar(
-                  'Copied',
+                  'copied'.tr,
                   'Message copied to clipboard',
                   snackPosition: SnackPosition.BOTTOM,
                   backgroundColor: AppColors.homeBackground,
@@ -92,7 +92,7 @@ class ChatMessageBubble extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppFont.font10.sp,
                     fontWeight: FontWeight.w500,
-                    color: message.statusLabel == 'Seen'
+                    color: message.statusLabel == 'seen'.tr
                         ? AppColors.chatSeenText
                         : AppColors.bodyText,
                   ),

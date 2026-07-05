@@ -1,19 +1,20 @@
 import 'dart:math';
 
 import '../models/webinar_models.dart';
+import 'package:get/get.dart';
 
 class WebinarMockService {
   final Random _random = Random();
 
   WebinarLiveChatModel randomMessage(int index) {
-    const List<WebinarLiveChatModel> messages = <WebinarLiveChatModel>[
+    List<WebinarLiveChatModel> messages = <WebinarLiveChatModel>[
       WebinarLiveChatModel(
         id: 'mock-luca',
         webinarId: 'mock-webinar',
         senderUserId: 'mock-luca-user',
         senderName: 'Luca',
         initials: 'LR',
-        message: 'Could you repeat that sentence?',
+        message: 'could_you_repeat_that_sentence'.tr,
         colorIndex: 2,
       ),
       WebinarLiveChatModel(
@@ -22,7 +23,7 @@ class WebinarMockService {
         senderUserId: 'mock-sara-user',
         senderName: 'Sara',
         initials: 'SB',
-        message: 'This lesson is really useful!',
+        message: 'this_lesson_is_really_useful'.tr,
       ),
       WebinarLiveChatModel(
         id: 'mock-host',
@@ -30,7 +31,7 @@ class WebinarMockService {
         senderUserId: 'mock-host-user',
         senderName: 'Host',
         initials: 'HO',
-        message: 'Great question. Let us practice together.',
+        message: 'great_question_let_us_practice_together'.tr,
         isHost: true,
         colorIndex: 1,
       ),

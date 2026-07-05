@@ -23,7 +23,7 @@ class FinalExamWritingView extends GetView<FinalExamController> {
       backgroundColor: AppColors.coursesDetailBg,
       bottomNavigationBar: Obx(
         () => FinalExamBottomButton(
-          label: 'Submit Answer',
+          label: 'gen_submit_answer'.tr,
           onTap: controller.submitWritingAnswer,
           isLoading: controller.isSubmitting.value,
         ),
@@ -51,7 +51,7 @@ class FinalExamWritingView extends GetView<FinalExamController> {
                 FinalExamTopBar(
                   title: task.title,
                   closeIcon: true,
-                  timerText: 'gen_35_10'.tr.tr,
+                  timerText: 'gen_35_10'.tr,
                   onBackTap: () => Get.back<void>(),
                 ),
                 SizedBox(height: 32.h),
@@ -86,7 +86,7 @@ class FinalExamWritingView extends GetView<FinalExamController> {
                       SizedBox(width: 10.w),
                       Expanded(
                         child: Text(
-                          'AI IS MONITORING FOR COPY PASTE ACTIONS.',
+                          'ai_is_monitoring_for_copy_paste_actions'.tr,
                           style: TextStyle(
                             fontSize: AppFont.font12.sp,
                             fontWeight: FontWeight.w700,
@@ -211,7 +211,7 @@ class _WritingAnswerCard extends StatelessWidget {
               textAlignVertical: TextAlignVertical.top,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'gen_inizia_a_scrivere_qui_la_tua_s'.tr.tr,
+                hintText: 'gen_inizia_a_scrivere_qui_la_tua_s'.tr,
                 hintStyle: TextStyle(
                   fontSize: AppFont.font16.sp,
                   fontWeight: FontWeight.w500,

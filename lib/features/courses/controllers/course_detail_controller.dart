@@ -39,7 +39,7 @@ class CourseDetailController extends GetxController {
         () => _coursesApiService.fetchCourseDetail(
           courseId: course.id,
         ),
-        errorTitle: 'Course Details',
+        errorTitle: 'course_details'.tr,
       );
 
       if (!result.isSuccess || result.data == null) {

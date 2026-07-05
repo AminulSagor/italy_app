@@ -5,6 +5,7 @@ import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../models/home_models.dart';
+import 'package:get/get.dart';
 
 class LearnForWorkSection extends StatelessWidget {
   const LearnForWorkSection({
@@ -27,7 +28,7 @@ class LearnForWorkSection extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: Text(
-                'Learn For Work',
+                'learn_for_work'.tr,
                 style: TextStyle(
                   fontSize: AppFont.font20.sp,
                   fontWeight: FontWeight.w800,
@@ -45,7 +46,7 @@ class LearnForWorkSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(kHomePillRadius.r),
                 ),
                 child: Text(
-                  'View All',
+                  'gen_view_all'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font12.sp,
                     fontWeight: FontWeight.w900,
@@ -59,7 +60,7 @@ class LearnForWorkSection extends StatelessWidget {
         SizedBox(height: 14.h),
         if (items.isEmpty)
           Text(
-            'No career tracks are available yet.',
+            'no_career_tracks_are_available_yet'.tr,
             style: TextStyle(
               fontSize: AppFont.font13.sp,
               color: AppColors.homeSecondaryText,

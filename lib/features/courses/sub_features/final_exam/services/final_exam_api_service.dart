@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../../core/services/api_client.dart';
 import '../models/final_exam_api_models.dart';
+import 'package:get/get.dart' hide Response;
 
 class FinalExamApiService {
   FinalExamApiService({required ApiClient apiClient}) : _apiClient = apiClient;
@@ -212,7 +213,7 @@ class FinalExamApiService {
     if (data is Map) return Map<String, dynamic>.from(data);
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'Response is not a valid JSON object',
+      message: 'response_is_not_a_valid_json_object'.tr,
     );
   }
 

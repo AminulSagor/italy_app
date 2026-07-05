@@ -58,7 +58,7 @@ class ProCheckoutController extends GetxController {
           lessonCount: lessonCount,
           couponCode: couponCode,
         ),
-        errorTitle: 'Course Purchase',
+        errorTitle: 'course_purchase'.tr,
       );
       if (result.isSuccess && result.data != null) {
         order.value = result.data;
@@ -73,7 +73,7 @@ class ProCheckoutController extends GetxController {
 
     final String code = couponController.text.trim().toUpperCase();
     if (code.isEmpty) {
-      Get.snackbar('Coupon', 'Enter a coupon code first.');
+      Get.snackbar('coupon'.tr, 'enter_a_coupon_code_first'.tr);
       return;
     }
 
@@ -87,7 +87,7 @@ class ProCheckoutController extends GetxController {
           lessonCount: lessonCount,
           couponCode: code,
         ),
-        errorTitle: 'Coupon',
+        errorTitle: 'coupon'.tr,
       );
       if (!result.isSuccess || result.data == null) return;
 
@@ -130,7 +130,7 @@ class ProCheckoutController extends GetxController {
               ? couponController.text.trim()
               : null,
         ),
-        errorTitle: 'Course Purchase',
+        errorTitle: 'course_purchase'.tr,
       );
       if (!result.isSuccess || result.data == null) return;
 

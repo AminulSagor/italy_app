@@ -31,7 +31,7 @@ class CoursesController extends GetxController {
       final ApiResult<CoursesDashboardModel> result =
           await ApiErrorHandler.call<CoursesDashboardModel>(
         () => _coursesApiService.fetchDashboard(),
-        errorTitle: 'Courses',
+        errorTitle: 'courses'.tr,
       );
 
       if (!result.isSuccess || result.data == null) {

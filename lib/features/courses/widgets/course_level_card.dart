@@ -5,6 +5,7 @@ import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../models/course_models.dart';
+import 'package:get/get.dart';
 
 class CourseLevelCard extends StatelessWidget {
   final CourseCardModel course;
@@ -107,7 +108,7 @@ class CourseLevelCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Text(
-                    'PROGRESS',
+                    'progress'.tr,
                     style: TextStyle(
                       fontSize: AppFont.font11.sp,
                       fontWeight: FontWeight.w900,

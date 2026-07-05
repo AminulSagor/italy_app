@@ -21,7 +21,7 @@ class LeaderboardChatDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String name = (user['name'] as String? ?? 'Sofia Rossi').replaceAll(
+    final String name = (user['name'] as String? ?? 'sofia_rossi'.tr).replaceAll(
       '\n',
       ' ',
     );
@@ -80,11 +80,11 @@ class LeaderboardChatDialog extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      const _InfoPill(
+                      _InfoPill(
                         bgColor: Color(0xFFFFE9D2),
                         icon: Icons.local_fire_department_rounded,
                         iconColor: Color(0xFFE9511B),
-                        text: '12 Day Streak',
+                        text: '12_day_streak'.tr,
                         textColor: Color(0xFFC94D1F),
                       ),
                       SizedBox(width: 10.w),
@@ -92,14 +92,16 @@ class LeaderboardChatDialog extends StatelessWidget {
                         bgColor: const Color(0xFFD9E9FF),
                         icon: Icons.flash_on_rounded,
                         iconColor: const Color(0xFF2764E8),
-                        text: '$xp XP',
+                        text: 'score_xp_value'.trParams(<String, String>{
+                          'xp': xp.toString(),
+                        }),
                         textColor: const Color(0xFF2764E8),
                       ),
                     ],
                   ),
                   SizedBox(height: 35.h),
                   _DeepGreenButton(
-                    text: 'Start Chatting',
+                    text: 'start_chatting'.tr,
                     onTap: () async {
                       // Close the dialog first
                       Get.back<void>();
@@ -115,7 +117,7 @@ class LeaderboardChatDialog extends StatelessWidget {
                                 .fetchUserPreview(otherId);
                             if (preview != null && !preview.canChat) {
                               Get.snackbar(
-                                'Chat',
+                                'chat'.tr,
                                 'This user is not available for direct messages.',
                                 snackPosition: SnackPosition.BOTTOM,
                                 duration: const Duration(seconds: 2),
@@ -148,7 +150,7 @@ class LeaderboardChatDialog extends StatelessWidget {
                   GestureDetector(
                     onTap: () => Get.back<void>(),
                     child: Text(
-                      'Cancel',
+                      'cancel'.tr,
                       style: TextStyle(
                         fontSize: AppFont.font15.sp,
                         fontWeight: FontWeight.w800,

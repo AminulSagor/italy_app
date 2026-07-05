@@ -90,7 +90,7 @@ class FinalExamGatewayDialogLocked extends StatelessWidget {
                           ),
                           SizedBox(height: 18.h),
                           Text(
-                            'You need to finish 80% of the video lessons to unlock the final exam.',
+                            'you_need_to_finish_80_of_the_video_lessons_to_unlo'.tr,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: AppFont.font16.sp,
@@ -104,7 +104,7 @@ class FinalExamGatewayDialogLocked extends StatelessWidget {
                           SizedBox(height: 38.h),
                           CustomButton(
                             onPressed: onWatchMoreLessons ?? _close,
-                            text: 'Watch More Lessons',
+                            text: 'watch_more_lessons'.tr,
                             icon: Icons.play_circle_outline_rounded,
                             height: 58,
                             width: double.infinity,
@@ -214,7 +214,7 @@ class _LockedProgressCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'COURSE PROGRESS',
+                  'course_progress'.tr,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -385,7 +385,7 @@ class _BackToChapterButton extends StatelessWidget {
           ),
           SizedBox(width: 7.w),
           Text(
-            'Back to Chapter',
+            'back_to_chapter'.tr,
             style: TextStyle(
               fontSize: AppFont.font14.sp,
               height: 1,

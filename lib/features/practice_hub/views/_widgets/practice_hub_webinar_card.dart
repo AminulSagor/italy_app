@@ -32,7 +32,7 @@ class PracticeHubWebinarCard extends GetView<PracticeHubController> {
       if (webinar == null) {
         return PracticeHubSectionMessage(
           message: controller.practiceHubOverviewError.value.isEmpty
-              ? 'No upcoming webinar is available.'
+              ? 'no_upcoming_webinar_is_available'.tr
               : controller.practiceHubOverviewError.value,
           onRetry: () => controller.loadPracticeHubOverview(showError: true),
         );
@@ -85,7 +85,7 @@ class PracticeHubWebinarCard extends GetView<PracticeHubController> {
             SizedBox(height: 19.h),
             CustomButton(
               onPressed: controller.onViewAllSessionsTap,
-              text: 'View All Sessions  →',
+              text: 'view_all_sessions'.tr,
               height: 43,
               width: double.infinity,
               btnColor: AppColors.primaryGreen,
@@ -97,7 +97,7 @@ class PracticeHubWebinarCard extends GetView<PracticeHubController> {
             // SizedBox(height: 15.h),
             // CustomButton(
             //   onPressed: controller.onNotifyMeTap,
-            //   text: 'Notify Me',
+            //   text: 'notify_me'.tr,
             //   prefixIcon: Icons.notifications_none_rounded,
             //   height: 45,
             //   width: double.infinity,
@@ -125,7 +125,7 @@ class PracticeHubWebinarCard extends GetView<PracticeHubController> {
       final String hour = (date.hour % 12 == 0 ? 12 : date.hour % 12)
           .toString();
       final String minute = date.minute.toString().padLeft(2, '0');
-      final String period = date.hour >= 12 ? 'PM' : 'AM';
+      final String period = date.hour >= 12 ? 'pm'.tr : 'am'.tr;
       parts.add('$day/$month/${date.year} · $hour:$minute $period');
     }
     return parts.join('\n');
@@ -159,7 +159,7 @@ class _WebinarStatusPill extends StatelessWidget {
           ),
           SizedBox(width: 8.w),
           Text(
-            isLive ? 'LIVE NOW' : 'UPCOMING',
+            isLive ? 'live_now'.tr : 'upcoming'.tr,
             style: TextStyle(
               fontSize: AppFont.font15.sp,
               height: 1,

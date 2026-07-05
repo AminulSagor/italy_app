@@ -8,7 +8,7 @@ class PrivacyPolicyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LegalDocumentView(
+    return LegalDocumentView(
       document: PrivacyPolicyContent.document,
       icon: Icons.policy_outlined,
     );

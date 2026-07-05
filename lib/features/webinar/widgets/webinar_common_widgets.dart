@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class WebinarBackButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -156,7 +157,7 @@ class WebinarLiveBadge extends StatelessWidget {
           ),
           SizedBox(width: 4.w),
           Text(
-            'LIVE',
+            'live'.tr,
             style: TextStyle(
               fontSize: AppFont.font10.sp,
               fontWeight: FontWeight.w700,

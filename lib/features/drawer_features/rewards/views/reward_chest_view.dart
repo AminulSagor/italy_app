@@ -28,15 +28,15 @@ class RewardChestView extends GetView<RewardController> {
             padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 48.h),
             child: Column(
               children: <Widget>[
-                const RewardTopBar(title: 'Chest'),
+                RewardTopBar(title: 'gen_chest'.tr),
                 SizedBox(height: 24.h),
                 if (chest == null && openedReward == null)
                   RewardStateMessage(
                     icon: Icons.inventory_2_outlined,
-                    title: 'Chest unavailable',
+                    title: 'chest_unavailable'.tr,
                     message:
-                        'This reward is no longer available or has already been opened.',
-                    buttonText: 'Back to Rewards',
+                        'this_reward_is_no_longer_available_or_has_already'.tr,
+                    buttonText: 'back_to_rewards'.tr,
                     onTap: Get.back,
                   )
                 else
@@ -98,7 +98,7 @@ class _ChestContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final RewardType rewardType = reward?.rewardType ?? chest!.rewardType;
     final String? imageUrl = reward?.imageUrl ?? chest?.imageUrl;
-    final String title = reward?.title ?? chest?.headline ?? 'Reward';
+    final String title = reward?.title ?? chest?.headline ?? 'gen_reward'.tr;
     final String subtitle =
         reward?.congratulatoryNote ??
         chest?.congratulatoryNote ??
@@ -147,7 +147,7 @@ class _ChestContent extends StatelessWidget {
           ),
           SizedBox(height: 30.h),
           Text(
-            reward == null ? 'A NEW REWARD IS WAITING' : 'CONGRATULAZIONI!',
+            reward == null ? 'a_new_reward_is_waiting'.tr : 'congratulazioni'.tr,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 11.5.sp,
@@ -216,8 +216,8 @@ class _ChestContent extends StatelessWidget {
   bool get _hasAction => reward == null || reward!.action != null;
 
   String _buttonText() {
-    if (reward == null) return chest?.action?.label ?? 'Open Chest';
-    return reward!.action?.label ?? 'Reward Claimed';
+    if (reward == null) return chest?.action?.label ?? 'open_chest'.tr;
+    return reward!.action?.label ?? 'reward_claimed'.tr;
   }
 
   IconData? _buttonIcon() {
@@ -273,7 +273,7 @@ class _LearningTip extends StatelessWidget {
           SizedBox(width: 20.w),
           Expanded(
             child: Text(
-              'Keep learning to unlock more prizes!',
+              'keep_learning_to_unlock_more_prizes'.tr,
               style: TextStyle(
                 fontSize: 14.sp,
                 height: 1.35,

@@ -10,37 +10,37 @@ class FinalExamFlowMapper {
     FinalExamGatewayModel data,
   ) {
     return FinalExamOverviewModel(
-      title: data.examTitle.isEmpty ? 'Final Exam' : data.examTitle,
-      heroTitle: 'Ready to Graduate?',
+      title: data.examTitle.isEmpty ? 'gen_final_exam'.tr : data.examTitle,
+      heroTitle: 'ready_to_graduate'.tr,
       heroSubtitle: data.examDescription.isNotEmpty
           ? data.examDescription
-          : 'Complete the final exam to earn your course certificate.',
+          : 'complete_the_final_exam_to_earn_your_course_certif'.tr,
       components: <FinalExamComponentModel>[
         FinalExamComponentModel(
           id: 'core_quiz',
-          title: 'gen_part_1_core_quiz'.tr.tr,
-          subtitle: 'gen_auto_graded_knowledge_assessme'.tr.tr,
+          title: 'gen_part_1_core_quiz'.tr,
+          subtitle: 'gen_auto_graded_knowledge_assessme'.tr,
           iconName: 'quiz',
           tone: FinalExamComponentTone.green,
         ),
         FinalExamComponentModel(
           id: 'listening_lab',
-          title: 'gen_part_2_listening_lab'.tr.tr,
-          subtitle: 'gen_audio_comprehension_assessment'.tr.tr,
+          title: 'gen_part_2_listening_lab'.tr,
+          subtitle: 'gen_audio_comprehension_assessment'.tr,
           iconName: 'headphones',
           tone: FinalExamComponentTone.blue,
         ),
         FinalExamComponentModel(
           id: 'writing_task',
-          title: 'gen_part_3_writing_task'.tr.tr,
-          subtitle: 'gen_teacher_review_may_be_required'.tr.tr,
+          title: 'gen_part_3_writing_task'.tr,
+          subtitle: 'gen_teacher_review_may_be_required'.tr,
           iconName: 'write',
           tone: FinalExamComponentTone.orange,
         ),
         FinalExamComponentModel(
           id: 'speaking_lab',
-          title: 'gen_part_4_speaking_lab'.tr.tr,
-          subtitle: 'gen_record_and_submit_your_answer'.tr.tr,
+          title: 'gen_part_4_speaking_lab'.tr,
+          subtitle: 'gen_record_and_submit_your_answer'.tr,
           iconName: 'speak',
           tone: FinalExamComponentTone.lime,
         ),
@@ -48,7 +48,7 @@ class FinalExamFlowMapper {
       noteBangla: data.resultNoticeBn,
       noteEnglish: data.resultNotice.isNotEmpty
           ? data.resultNotice
-          : 'Writing and speaking answers may require teacher review.',
+          : 'writing_and_speaking_answers_may_require_teacher_r'.tr,
       canStart: data.isUnlocked,
       startMessage: data.message,
     );
@@ -178,7 +178,7 @@ class FinalExamFlowMapper {
       banglaInstruction: question.promptBn,
       tip: question.subtitle.isNotEmpty
           ? question.subtitle
-          : 'gen_speak_clearly_and_submit_your'.tr.tr,
+          : 'gen_speak_clearly_and_submit_your'.tr,
       maxDurationSeconds: section.rule.maxDurationSeconds > 0
           ? section.rule.maxDurationSeconds
           : 60,
@@ -193,7 +193,7 @@ class FinalExamFlowMapper {
       questionId: question.id,
       title: section.title,
       clipTitle: question.title.isEmpty ? section.title : question.title,
-      questionTag: 'QUESTION 1',
+      questionTag: 'question_1'.tr,
       question: question.prompt,
       options: question.options
           .map((FinalExamOptionModel item) => item.text)
@@ -236,7 +236,7 @@ class FinalExamFlowMapper {
     QuizQuestionType type,
   ) {
     if (type == QuizQuestionType.trueFalse && question.options.isEmpty) {
-      return const <String>['True', 'False'];
+      return <String>['true'.tr, 'false'.tr];
     }
     if (type == QuizQuestionType.sentenceTranslation ||
         type == QuizQuestionType.listeningAssembly) {

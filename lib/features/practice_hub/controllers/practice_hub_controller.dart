@@ -52,9 +52,9 @@ class PracticeHubController extends GetxController {
     try {
       final ApiResult<CoursesDashboardModel> result =
           await ApiErrorHandler.call<CoursesDashboardModel>(
-        () => _coursesApiService.fetchDashboard(),
-        showError: false,
-      );
+            () => _coursesApiService.fetchDashboard(),
+            showError: false,
+          );
 
       if (!result.isSuccess || result.data == null) {
         return;
@@ -78,8 +78,7 @@ class PracticeHubController extends GetxController {
       return;
     }
 
-    isFinalExamReady.value =
-        courses[selectedCourseIndex.value].progress >= 0.8;
+    isFinalExamReady.value = courses[selectedCourseIndex.value].progress >= 0.8;
   }
 
   final RxBool isPracticeHubOverviewLoading = false.obs;
@@ -97,13 +96,13 @@ class PracticeHubController extends GetxController {
     try {
       final ApiResult<PracticeHubOverviewModel> result =
           await ApiErrorHandler.call<PracticeHubOverviewModel>(
-        () => _practiceHubApiService.fetchOverview(),
-        showError: showError,
-      );
+            () => _practiceHubApiService.fetchOverview(),
+            showError: showError,
+          );
 
       if (!result.isSuccess || result.data == null) {
         practiceHubOverviewError.value =
-            result.error ?? 'Unable to load Practice Hub information.';
+            result.error ?? 'unable_to_load_practice_hub_information'.tr;
         return;
       }
 
@@ -144,10 +143,7 @@ class PracticeHubController extends GetxController {
 
     await Get.toNamed(
       AppRoutes.courseDetail,
-      arguments: CourseDetailRouteArguments(
-        course: course,
-        controllerTag: tag,
-      ),
+      arguments: CourseDetailRouteArguments(course: course, controllerTag: tag),
     );
   }
 
@@ -175,10 +171,10 @@ class PracticeHubController extends GetxController {
     try {
       final ApiResult<List<PracticeFinalExamCourseModel>> result =
           await ApiErrorHandler.call<List<PracticeFinalExamCourseModel>>(
-        _practiceHubApiService.fetchCurrentCourseFinalExams,
-        showError: showError,
-        errorTitle: 'Final Exams',
-      );
+            _practiceHubApiService.fetchCurrentCourseFinalExams,
+            showError: showError,
+            errorTitle: 'final_exams'.tr,
+          );
       if (result.isSuccess && result.data != null) {
         finalExamCourses.assignAll(result.data!);
       }
@@ -194,9 +190,13 @@ class PracticeHubController extends GetxController {
     }
 
     Get.snackbar(
-      'Final Exam Locked',
+      'final_exam_locked_1'.tr,
       item.message.isEmpty
-          ? 'Complete ${item.unlockCompletionPercent}% of ${item.courseName} to unlock the final exam.'
+          ? 'complete_course_percent_to_unlock_final_exam'
+                .trParams(<String, String>{
+                  'percent': item.unlockCompletionPercent.toString(),
+                  'course': item.courseName,
+                })
           : item.message,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.white,
@@ -239,22 +239,19 @@ class PracticeHubController extends GetxController {
     }
   }
 
-
   void onViewAllSessionsTap() {
     Get.toNamed(AppRoutes.webinar);
   }
 
   void onNotifyMeTap() {
     Get.snackbar(
-      'Notification Set',
-      'We will notify you before the webinar starts.',
+      'notification_set'.tr,
+      'webinar_start_notification_set'.tr,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.white,
       colorText: Colors.black87,
     );
   }
-
-
 
   final TextEditingController importantVerbSearchController =
       TextEditingController();
@@ -418,7 +415,7 @@ class PracticeHubController extends GetxController {
     List<Map<String, dynamic>> source,
     String filter,
   ) {
-    if (filter == 'All Verbs') return source;
+    if (filter == 'all_verbs'.tr) return source;
 
     final String expectedType = filter.toLowerCase();
 
@@ -493,8 +490,8 @@ class PracticeHubController extends GetxController {
 
   void onViewAllSearchResultsTap() {
     Get.snackbar(
-      'Search Results',
-      'Showing all matched verbs.',
+      'search_results'.tr,
+      'showing_all_matched_verbs'.tr,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.white,
       colorText: Colors.black87,
@@ -515,7 +512,7 @@ class PracticeHubController extends GetxController {
   }
 
   String get selectedVerbTenseSubtitle {
-    return currentVerbDetails['tenseSubtitle'] as String? ?? 'Presente';
+    return currentVerbDetails['tensesubtitle'.tr] as String? ?? 'presente'.tr;
   }
 
   List<Map<String, dynamic>> get selectedVerbPresentForms {
@@ -572,11 +569,11 @@ class PracticeHubController extends GetxController {
   }
 
   void playSelectedVerbAudio() {
-    final String title = currentVerbDetails['title'] as String? ?? 'Verb';
+    final String title = currentVerbDetails['title'] as String? ?? 'verb'.tr;
 
     Get.snackbar(
-      'Audio',
-      'Playing pronunciation for $title',
+      'audio'.tr,
+      'playing_pronunciation_for'.trParams(<String, String>{'text': title}),
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.white,
       colorText: Colors.black87,
@@ -587,8 +584,8 @@ class PracticeHubController extends GetxController {
     if (text.trim().isEmpty) return;
 
     Get.snackbar(
-      'Audio',
-      'Playing $text',
+      'audio'.tr,
+      'playing_text'.trParams(<String, String>{'text': text}),
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.white,
       colorText: Colors.black87,
@@ -597,8 +594,8 @@ class PracticeHubController extends GetxController {
 
   void onVerbTranslateTap() {
     Get.snackbar(
-      'Translation',
-      'Language helper will open here.',
+      'translation'.tr,
+      'language_helper_will_open_here'.tr,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.white,
       colorText: Colors.black87,
@@ -628,14 +625,14 @@ class PracticeHubController extends GetxController {
       'ending': ending,
       'typeLabel':
           override['typeLabel'] ??
-          (isIrregular ? 'Irregular Verb' : 'Regular Verb'),
+          (isIrregular ? 'irregular_verb'.tr : 'regular_verb'.tr),
       'endingLabel': override['endingLabel'] ?? '${ending.toLowerCase()} Verb',
       'information':
           override['information'] ??
           (isIrregular
-              ? 'An irregular verb used often in everyday Italian.'
+              ? 'an_irregular_verb_used_often_in_everyday_italian'.tr
               : 'A regular ${ending.toLowerCase()} verb used for daily communication.'),
-      'tenseSubtitle': override['tenseSubtitle'] ?? 'Presente',
+      'tenseSubtitle': override['tenseSubtitle'] ?? 'presente'.tr,
       'presentForms':
           override['presentForms'] ??
           _buildDefaultPresentForms(
@@ -702,12 +699,12 @@ class PracticeHubController extends GetxController {
                 <String, dynamic>{
                   'italian': 'Io $form italiano.',
                   'bangla': 'আমি ইতালিয়ান বলি',
-                  'english': 'I speak Italian.',
+                  'english': 'i_speak_italian'.tr,
                 },
                 <String, dynamic>{
                   'italian': 'Io $form con te.',
                   'bangla': 'আমি তোমার সাথে কথা বলি',
-                  'english': 'I speak with you.',
+                  'english': 'i_speak_with_you'.tr,
                 },
               ]
             : <Map<String, dynamic>>[],
@@ -732,26 +729,26 @@ class PracticeHubController extends GetxController {
   final Map<String, Map<String, dynamic>> _verbDetailOverrides =
       <String, Map<String, dynamic>>{
         'parlare': <String, dynamic>{
-          'typeLabel': 'Regular Verb',
+          'typeLabel': 'regular_verb'.tr,
           'endingLabel': '-are Verb',
-          'information': 'A regular -are verb used for speaking or talking.',
-          'tenseSubtitle': 'Presente (I speak)',
+          'information': 'a_regular_are_verb_used_for_speaking_or_talking'.tr,
+          'tenseSubtitle': 'presente_i_speak'.tr,
           'presentForms': <Map<String, dynamic>>[
             <String, dynamic>{
               'pronoun': 'io',
               'form': 'parlo',
               'bangla': 'আমি বলি',
-              'english': 'I speak',
+              'english': 'i_speak'.tr,
               'examples': <Map<String, dynamic>>[
                 <String, dynamic>{
-                  'italian': 'Io parlo italiano.',
+                  'italian': 'io_parlo_italiano'.tr,
                   'bangla': 'আমি ইতালিয়ান বলি',
-                  'english': 'I speak Italian.',
+                  'english': 'i_speak_italian'.tr,
                 },
                 <String, dynamic>{
-                  'italian': 'Io parlo con te.',
+                  'italian': 'io_parlo_con_te'.tr,
                   'bangla': 'আমি তোমার সাথে কথা বলি',
-                  'english': 'I speak with you.',
+                  'english': 'i_speak_with_you'.tr,
                 },
               ],
             },
@@ -759,61 +756,61 @@ class PracticeHubController extends GetxController {
               'pronoun': 'tu',
               'form': 'parli',
               'bangla': 'তুমি বল',
-              'english': 'You speak',
+              'english': 'you_speak'.tr,
               'examples': <Map<String, dynamic>>[],
             },
             <String, dynamic>{
               'pronoun': 'lui/lei',
               'form': 'parla',
               'bangla': 'সে বলে',
-              'english': 'He/She speaks',
+              'english': 'he_she_speaks'.tr,
               'examples': <Map<String, dynamic>>[],
             },
             <String, dynamic>{
               'pronoun': 'noi',
               'form': 'parliamo',
               'bangla': 'আমরা বলি',
-              'english': 'We speak',
+              'english': 'we_speak'.tr,
               'examples': <Map<String, dynamic>>[],
             },
             <String, dynamic>{
               'pronoun': 'voi',
               'form': 'parlate',
               'bangla': 'তোমরা বল',
-              'english': 'You all speak',
+              'english': 'you_all_speak'.tr,
               'examples': <Map<String, dynamic>>[],
             },
             <String, dynamic>{
               'pronoun': 'loro',
               'form': 'parlano',
               'bangla': 'তারা বলে',
-              'english': 'They speak',
+              'english': 'they_speak'.tr,
               'examples': <Map<String, dynamic>>[],
             },
           ],
         },
         'essere': <String, dynamic>{
-          'typeLabel': 'Irregular Verb',
+          'typeLabel': 'irregular_verb'.tr,
           'endingLabel': '-ere Verb',
           'information':
               'An irregular verb used for being, identity, and state.',
-          'tenseSubtitle': 'Presente (I am)',
+          'tenseSubtitle': 'presente_i_am'.tr,
           'presentForms': <Map<String, dynamic>>[
             <String, dynamic>{
               'pronoun': 'io',
               'form': 'sono',
               'bangla': 'আমি আছি',
-              'english': 'I am',
+              'english': 'i_am'.tr,
               'examples': <Map<String, dynamic>>[
                 <String, dynamic>{
-                  'italian': 'Io sono felice.',
+                  'italian': 'io_sono_felice'.tr,
                   'bangla': 'আমি খুশি',
-                  'english': 'I am happy.',
+                  'english': 'i_am_happy'.tr,
                 },
                 <String, dynamic>{
-                  'italian': 'Io sono uno studente.',
+                  'italian': 'io_sono_uno_studente'.tr,
                   'bangla': 'আমি একজন ছাত্র',
-                  'english': 'I am a student.',
+                  'english': 'i_am_a_student'.tr,
                 },
               ],
             },
@@ -821,35 +818,35 @@ class PracticeHubController extends GetxController {
               'pronoun': 'tu',
               'form': 'sei',
               'bangla': 'তুমি আছ',
-              'english': 'You are',
+              'english': 'you_are'.tr,
               'examples': <Map<String, dynamic>>[],
             },
             <String, dynamic>{
               'pronoun': 'lui/lei',
               'form': 'è',
               'bangla': 'সে আছে',
-              'english': 'He/She is',
+              'english': 'he_she_is'.tr,
               'examples': <Map<String, dynamic>>[],
             },
             <String, dynamic>{
               'pronoun': 'noi',
               'form': 'siamo',
               'bangla': 'আমরা আছি',
-              'english': 'We are',
+              'english': 'we_are'.tr,
               'examples': <Map<String, dynamic>>[],
             },
             <String, dynamic>{
               'pronoun': 'voi',
               'form': 'siete',
               'bangla': 'তোমরা আছ',
-              'english': 'You all are',
+              'english': 'you_all_are'.tr,
               'examples': <Map<String, dynamic>>[],
             },
             <String, dynamic>{
               'pronoun': 'loro',
               'form': 'sono',
               'bangla': 'তারা আছে',
-              'english': 'They are',
+              'english': 'they_are'.tr,
               'examples': <Map<String, dynamic>>[],
             },
           ],
@@ -892,8 +889,7 @@ class PracticeHubController extends GetxController {
     return survivalItalianItems
         .where(
           (SurvivalSituationModel item) =>
-              item.id != heroId &&
-              item.cardVariant != SurvivalCardVariant.wide,
+              item.id != heroId && item.cardVariant != SurvivalCardVariant.wide,
         )
         .toList(growable: false);
   }
@@ -923,8 +919,7 @@ class PracticeHubController extends GetxController {
   PracticeHubPdfDocumentModel? get currentPracticePdf =>
       selectedPracticePdf.value;
 
-  bool get canGoPreviousSurvivalPdfPage =>
-      currentSurvivalPdfPage.value > 1;
+  bool get canGoPreviousSurvivalPdfPage => currentSurvivalPdfPage.value > 1;
 
   bool get canGoNextSurvivalPdfPage =>
       currentSurvivalPdfPage.value < currentSurvivalPdfTotalPages.value;
@@ -937,13 +932,13 @@ class PracticeHubController extends GetxController {
     try {
       final ApiResult<SurvivalSituationsResponseModel> result =
           await ApiErrorHandler.call<SurvivalSituationsResponseModel>(
-        () => _practiceHubApiService.fetchSurvivalSituations(),
-        showError: showError,
-      );
+            () => _practiceHubApiService.fetchSurvivalSituations(),
+            showError: showError,
+          );
 
       if (!result.isSuccess || result.data == null) {
         survivalError.value =
-            result.error ?? 'Unable to load Survival Italian situations.';
+            result.error ?? 'unable_to_load_survival_italian_situations'.tr;
         return;
       }
 
@@ -970,16 +965,18 @@ class PracticeHubController extends GetxController {
     try {
       final ApiResult<SurvivalSituationDetailModel> result =
           await ApiErrorHandler.call<SurvivalSituationDetailModel>(
-        () => _practiceHubApiService.fetchSurvivalSituationDetails(
-          situationId: item.id,
-        ),
-      );
+            () => _practiceHubApiService.fetchSurvivalSituationDetails(
+              situationId: item.id,
+            ),
+          );
 
       final SurvivalResourceModel? resource = result.data?.resource;
-      if (!result.isSuccess || resource == null || resource.signedReadUrl.isEmpty) {
+      if (!result.isSuccess ||
+          resource == null ||
+          resource.signedReadUrl.isEmpty) {
         Get.snackbar(
-          'Resource unavailable',
-          'No PDF resource has been provided for this situation.',
+          'resource_unavailable'.tr,
+          'no_pdf_resource_for_situation'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.white,
           colorText: Colors.black87,
@@ -1040,9 +1037,7 @@ class PracticeHubController extends GetxController {
       );
       if (!result.isSuccess) return;
 
-      selectedPracticePdf.value = document.copyWith(
-        isSituationCompleted: true,
-      );
+      selectedPracticePdf.value = document.copyWith(isSituationCompleted: true);
       final int index = survivalItalianItems.indexWhere(
         (SurvivalSituationModel item) => item.id == situationId,
       );
@@ -1082,8 +1077,8 @@ class PracticeHubController extends GetxController {
   final RxList<Map<String, dynamic>> jobTracks = <Map<String, dynamic>>[
     {
       'id': 'restaurant',
-      'title': 'Restaurant\nJob',
-      'detailsTitle': 'Restaurant Job',
+      'title': 'restaurant_njob'.tr,
+      'detailsTitle': 'gen_restaurant_job'.tr,
       'bangla': 'রেস্টুরেন্ট এর কাজ',
       'icon': Icons.restaurant_rounded,
       'background': const Color(0xFFFFF0E6),
@@ -1096,8 +1091,8 @@ class PracticeHubController extends GetxController {
     },
     {
       'id': 'kitchen',
-      'title': 'Kitchen Job',
-      'detailsTitle': 'Example Job',
+      'title': 'kitchen_job'.tr,
+      'detailsTitle': 'example_job'.tr,
       'bangla': 'রান্নাঘরের কাজ',
       'icon': Icons.kitchen_rounded,
       'background': const Color(0xFFE8F7EA),
@@ -1110,8 +1105,8 @@ class PracticeHubController extends GetxController {
     },
     {
       'id': 'supermarket',
-      'title': 'Supermarket',
-      'detailsTitle': 'Supermarket',
+      'title': 'supermarket'.tr,
+      'detailsTitle': 'supermarket'.tr,
       'bangla': 'সুপারমার্কেট এর কাজ',
       'icon': Icons.shopping_bag_rounded,
       'background': const Color(0xFFE1F2FF),
@@ -1124,8 +1119,8 @@ class PracticeHubController extends GetxController {
     },
     {
       'id': 'cleaning',
-      'title': 'Cleaning\nServices',
-      'detailsTitle': 'Cleaning Services',
+      'title': 'cleaning_nservices'.tr,
+      'detailsTitle': 'cleaning_services'.tr,
       'bangla': 'ক্লিনিং সার্ভিস এর কাজ',
       'icon': Icons.cleaning_services_rounded,
       'background': const Color(0xFFF4E2F5),
@@ -1141,7 +1136,7 @@ class PracticeHubController extends GetxController {
   final List<Map<String, dynamic>> jobPhraseCategories = <Map<String, dynamic>>[
     {
       'id': 'taking_orders',
-      'title': 'Taking Orders',
+      'title': 'taking_orders'.tr,
       'bangla': 'অর্ডার নেওয়া',
       'icon': Icons.format_list_bulleted_rounded,
       'learned': 12,
@@ -1150,7 +1145,7 @@ class PracticeHubController extends GetxController {
     },
     {
       'id': 'talking_to_chef',
-      'title': 'Talking to Chef',
+      'title': 'talking_to_chef'.tr,
       'bangla': 'শেফের সাথে কথা',
       'icon': Icons.room_service_rounded,
       'learned': 8,
@@ -1159,7 +1154,7 @@ class PracticeHubController extends GetxController {
     },
     {
       'id': 'payments',
-      'title': 'Payments',
+      'title': 'payments'.tr,
       'bangla': 'পেমেন্ট নেওয়া',
       'icon': Icons.receipt_long_rounded,
       'learned': 7,
@@ -1168,7 +1163,7 @@ class PracticeHubController extends GetxController {
     },
     {
       'id': 'cleaning_tables',
-      'title': 'Cleaning Tables',
+      'title': 'cleaning_tables'.tr,
       'bangla': 'টেবিল পরিষ্কার করা',
       'icon': Icons.cleaning_services_rounded,
       'learned': 6,
@@ -1182,73 +1177,73 @@ class PracticeHubController extends GetxController {
         'taking_orders': <Map<String, dynamic>>[
           {
             'id': 'order_1',
-            'italian': 'Un tavolo per\ndue, per\nfavore.',
+            'italian': 'un_tavolo_per_ndue_per_nfavore'.tr,
             'bangla': 'দুইজনের জন্য একটি\nটেবিল, দয়া\nকরে।',
           },
           {
             'id': 'order_2',
-            'italian': 'Buongiorno,\ncosa desidera\nordinare?',
+            'italian': 'buongiorno_ncosa_desidera_nordinare'.tr,
             'bangla': 'শুভ সকাল, আপনি কি\nঅর্ডার করতে\nচান?',
           },
           {
             'id': 'order_3',
-            'italian': 'Il conto, per\nfavore.',
+            'italian': 'il_conto_per_nfavore'.tr,
             'bangla': 'বিলটা দিন, দয়া করে।',
           },
           {
             'id': 'order_4',
-            'italian': 'Avete opzioni\nvegetariane?',
+            'italian': 'avete_opzioni_nvegetariane'.tr,
             'bangla': 'আপনার কি নিরামিষ\nকোনো পদ\nআছে?',
           },
         ],
         'talking_to_chef': <Map<String, dynamic>>[
           {
             'id': 'chef_1',
-            'italian': 'Chef, il tavolo\ncinque aspetta.',
+            'italian': 'chef_il_tavolo_ncinque_aspetta'.tr,
             'bangla': 'শেফ, পাঁচ নম্বর টেবিল\nঅপেক্ষা করছে।',
           },
           {
             'id': 'chef_2',
-            'italian': 'Questo piatto è\npronto?',
+            'italian': 'questo_piatto_npronto'.tr,
             'bangla': 'এই খাবারটি কি প্রস্তুত?',
           },
           {
             'id': 'chef_3',
-            'italian': 'Serve più sale.',
+            'italian': 'serve_pi_sale'.tr,
             'bangla': 'আরও লবণ লাগবে।',
           },
         ],
         'payments': <Map<String, dynamic>>[
           {
             'id': 'payment_1',
-            'italian': 'Paga in contanti\no con carta?',
+            'italian': 'paga_in_contanti_no_con_carta'.tr,
             'bangla': 'আপনি নগদ নাকি কার্ডে\nপেমেন্ট করবেন?',
           },
           {
             'id': 'payment_2',
-            'italian': 'Ecco lo scontrino.',
+            'italian': 'ecco_lo_scontrino'.tr,
             'bangla': 'এই নিন রসিদ।',
           },
           {
             'id': 'payment_3',
-            'italian': 'Il totale è venti\neuro.',
+            'italian': 'il_totale_venti_neuro'.tr,
             'bangla': 'মোট বিশ ইউরো।',
           },
         ],
         'cleaning_tables': <Map<String, dynamic>>[
           {
             'id': 'clean_1',
-            'italian': 'Pulisco il tavolo\nsubito.',
+            'italian': 'pulisco_il_tavolo_nsubito'.tr,
             'bangla': 'আমি এখনই টেবিল পরিষ্কার\nকরছি।',
           },
           {
             'id': 'clean_2',
-            'italian': 'Serve un nuovo\nbicchiere?',
+            'italian': 'serve_un_nuovo_nbicchiere'.tr,
             'bangla': 'নতুন গ্লাস লাগবে?',
           },
           {
             'id': 'clean_3',
-            'italian': 'Porto via i piatti.',
+            'italian': 'porto_via_i_piatti'.tr,
             'bangla': 'আমি প্লেটগুলো নিয়ে যাচ্ছি।',
           },
         ],
@@ -1266,7 +1261,7 @@ class PracticeHubController extends GetxController {
     final String jobId = currentJobTrack['id'] as String? ?? 'restaurant';
 
     return jobPhraseCategories.map((Map<String, dynamic> category) {
-      return <String, dynamic>{...category, 'jobId': jobId};
+      return <String, dynamic>{...category, 'jobid'.tr: jobId};
     }).toList();
   }
 
@@ -1324,8 +1319,8 @@ class PracticeHubController extends GetxController {
 
   void onJobIntroVideoTap() {
     Get.snackbar(
-      'Video',
-      'Opening introduction video...',
+      'video_1'.tr,
+      'opening_introduction_video'.tr,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.white,
       colorText: Colors.black87,
@@ -1371,7 +1366,9 @@ class PracticeHubController extends GetxController {
     final Map<String, dynamic> job = currentJobTrack;
 
     selectedPracticePdf.value = PracticeHubPdfDocumentModel(
-      title: 'Lesson: ${job['detailsTitle']} Basics',
+      title: 'lesson_basics_title'.trParams(<String, String>{
+        'lesson': (job['detailsTitle'] as String? ?? '').toString(),
+      }),
       source: job['theoryPdfAsset'] as String,
       sourceType: PracticeHubPdfSourceType.asset,
     );
@@ -1396,7 +1393,7 @@ class PracticeHubController extends GetxController {
   int get dailyStreakDays =>
       dailyChallengeDashboard.value?.streak.currentDays ?? 0;
   String get dailyChallengeLevelLabel =>
-      dailyChallengeDashboard.value?.levelLabel ?? 'Level 1 Explorer';
+      dailyChallengeDashboard.value?.levelLabel ?? 'level_1_explorer'.tr;
   int get dailyCompletedTaskCount =>
       dailyChallengeDashboard.value?.completedTaskCount ?? 0;
   bool get isDailyChestUnlocked =>
@@ -1412,12 +1409,12 @@ class PracticeHubController extends GetxController {
     try {
       final ApiResult<DailyChallengeDashboardModel> result =
           await ApiErrorHandler.call<DailyChallengeDashboardModel>(
-        () => _practiceHubApiService.fetchDailyChallenges(),
-        showError: showError,
-      );
+            () => _practiceHubApiService.fetchDailyChallenges(),
+            showError: showError,
+          );
       if (!result.isSuccess || result.data == null) {
         dailyChallengesError.value =
-            result.error ?? 'Unable to load daily challenges.';
+            result.error ?? 'unable_to_load_daily_challenges'.tr;
         return;
       }
 
@@ -1449,8 +1446,8 @@ class PracticeHubController extends GetxController {
 
     if (!task.canClaim) {
       Get.snackbar(
-        'Challenge not completed',
-        'Finish this task first to claim XP.',
+        'challenge_not_completed'.tr,
+        'finish_task_first_claim_xp'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: Colors.black87,
@@ -1466,11 +1463,11 @@ class PracticeHubController extends GetxController {
     try {
       final ApiResult<DailyChallengeDashboardModel> result =
           await ApiErrorHandler.call<DailyChallengeDashboardModel>(
-        () => _practiceHubApiService.claimDailyChallengeTask(
-          taskKey: task.taskKey,
-          challengeDate: dashboard.challengeDate,
-        ),
-      );
+            () => _practiceHubApiService.claimDailyChallengeTask(
+              taskKey: task.taskKey,
+              challengeDate: dashboard.challengeDate,
+            ),
+          );
       if (!result.isSuccess || result.data == null) return;
 
       _applyDailyChallengeDashboard(result.data!);
@@ -1487,8 +1484,8 @@ class PracticeHubController extends GetxController {
 
     if (!dashboard.chest.isUnlocked) {
       Get.snackbar(
-        'Chest Locked',
-        'Complete all daily tasks before opening the chest.',
+        'chest_locked'.tr,
+        'complete_daily_tasks_before_chest'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: Colors.black87,
@@ -1506,10 +1503,10 @@ class PracticeHubController extends GetxController {
     try {
       final ApiResult<DailyChestRewardModel> result =
           await ApiErrorHandler.call<DailyChestRewardModel>(
-        () => _practiceHubApiService.openDailyChest(
-          challengeDate: dashboard.challengeDate,
-        ),
-      );
+            () => _practiceHubApiService.openDailyChest(
+              challengeDate: dashboard.challengeDate,
+            ),
+          );
       if (!result.isSuccess || result.data == null) return;
 
       lastDailyChestReward.value = result.data;
@@ -1519,6 +1516,7 @@ class PracticeHubController extends GetxController {
       isOpeningDailyChest.value = false;
     }
   }
+
   @override
   void onClose() {
     importantVerbSearchController.dispose();
@@ -1526,5 +1524,4 @@ class PracticeHubController extends GetxController {
     jobPhraseSearchController.dispose();
     super.onClose();
   }
-
 }

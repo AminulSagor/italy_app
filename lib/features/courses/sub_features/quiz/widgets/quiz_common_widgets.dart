@@ -8,6 +8,7 @@ import 'package:just_audio/just_audio.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class QuizTopBar extends StatelessWidget {
   final int current;
@@ -57,7 +58,7 @@ class QuizTopBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(kHomePillRadius.r),
           ),
           child: Text(
-            '$current/$total',
+            'current_total'.trParams(<String, String>{'current': current.toString(), 'total': total.toString()}),
             style: TextStyle(
               fontSize: AppFont.font12.sp,
               fontWeight: FontWeight.w900,
@@ -115,13 +116,13 @@ class QuizBottomAction extends StatelessWidget {
                   ?feedback,
                   SizedBox(height: 18.h),
                   CustomButton.primary(
-                    text: 'Next Question',
+                    text: 'next_question'.tr,
                     onPressed: onNextTap,
                   ),
                 ],
               )
             : CustomButton.primary(
-                text: 'Check Answer',
+                text: 'check_answer'.tr,
                 isLoading: isLoading,
                 onPressed: onCheckTap,
               ),
@@ -359,7 +360,9 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               _RoundAudioButton(
-                label: '${_formatSpeed(_speed)}x',
+                label: 'audio_speed_multiplier'.trParams(<String, String>{
+                  'speed': _formatSpeed(_speed),
+                }),
                 onTap: _cycleSpeed,
               ),
               SizedBox(width: 48.w),

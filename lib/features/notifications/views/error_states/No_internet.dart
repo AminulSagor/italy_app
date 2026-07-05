@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../widgets/status_error_widgets.dart';
+import 'package:get/get.dart';
 
 class NoInternetStatusView extends StatelessWidget {
   final VoidCallback? onTryAgainTap;
@@ -82,14 +83,14 @@ class NoInternetStatusView extends StatelessWidget {
                     BrightGreenButton(
                       width: 278.w,
                       height: 68.h,
-                      text: 'TRY AGAIN',
+                      text: 'try_again'.tr,
                       onTap: onTryAgainTap,
                     ),
 
                     SizedBox(height: 28.h),
 
                     Text(
-                      'ERROR CODE: IS_404_OFFLINE',
+                      'error_code_is_404_offline'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: const Color(0xFFA6A6A6),

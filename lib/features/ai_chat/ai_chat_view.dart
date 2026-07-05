@@ -57,7 +57,7 @@ class AiChatView extends GetView<AiChatController> {
             AiGuidedLearningCard(onTap: controller.onGuidedLearningTap),
             SizedBox(height: 24.h),
             Text(
-              'AI Zone Tools',
+              'ai_zone_tools'.tr,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
             ),
             SizedBox(height: 24.h),
@@ -65,7 +65,7 @@ class AiChatView extends GetView<AiChatController> {
               children: <Widget>[
                 Expanded(
                   child: AiToolCard(
-                    title: 'gen_writing_help'.tr.tr,
+                    title: 'gen_writing_help'.tr,
                     subtitle: 'রাইটিং অ্যাসিস্ট্যান্ট'.tr,
                     icon: Icons.auto_awesome_rounded,
                     backgroundColor: const Color(0xFFE9FFF4),
@@ -78,7 +78,7 @@ class AiChatView extends GetView<AiChatController> {
                 Expanded(
                   child: Obx(
                     () => AiToolCard(
-                      title: 'gen_level_test'.tr.tr,
+                      title: 'gen_level_test'.tr,
                       subtitle: controller.levelTestSubtitle,
                       icon: Icons.settings_suggest_rounded,
                       backgroundColor: const Color(0xFFFFF4E7),

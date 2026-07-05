@@ -6,6 +6,7 @@ import 'message_avatar.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
+import 'package:get/get.dart';
 
 class ReportProfileCard extends StatelessWidget {
   final MessageUserProfileModel profile;
@@ -32,7 +33,7 @@ class ReportProfileCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'REPORTING PROFILE',
+                  'reporting_profile'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w900,

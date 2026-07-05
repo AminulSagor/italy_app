@@ -37,7 +37,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
                   ),
                   Expanded(
                     child: Text(
-                      'Achievement Unlocked',
+                      'achievement_unlocked'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: AppFont.font18.sp,
@@ -76,7 +76,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
                         ),
                         SizedBox(width: 10.w),
                         Text(
-                          'ItalirPothe',
+                          'italirpothe'.tr,
                           style: TextStyle(
                             fontSize: AppFont.font18.sp,
                             fontWeight: FontWeight.w900,
@@ -88,7 +88,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
                     const CourseCertificateHero(compact: true),
                     SizedBox(height: 6.h),
                     Text(
-                      'Congratulazioni!',
+                      'congratulazioni'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: AppFont.font30.sp,
@@ -108,7 +108,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
                     ),
                     SizedBox(height: 30.h),
                     Text(
-                      'THIS CERTIFIES THAT',
+                      'this_certifies_that'.tr,
                       style: TextStyle(
                         fontSize: AppFont.font12.sp,
                         fontWeight: FontWeight.w500,
@@ -146,7 +146,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        'Proficiency Level: ${certificate.proficiencyLevel}',
+                        'proficiency_level_certificate_proficiencylevel'.trParams(<String, String>{'proficiencylevel': certificate.proficiencyLevel.toString()}),
                         style: TextStyle(
                           fontSize: AppFont.font14.sp,
                           fontWeight: FontWeight.w700,
@@ -157,7 +157,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
                     SizedBox(height: 20.h),
                     CustomButton(
                       onPressed: () {},
-                      text: 'Join the Italian journey!',
+                      text: 'join_the_italian_journey'.tr,
                       height: 44,
                       showShadow: true,
                       fontSize: AppFont.font16,
@@ -189,7 +189,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
                       onTap: () {},
                     ),
                     Text(
-                      'SHARE YOUR VICTORY',
+                      'share_your_victory'.tr,
                       style: TextStyle(
                         fontSize: AppFont.font12.sp,
                         fontWeight: FontWeight.w700,

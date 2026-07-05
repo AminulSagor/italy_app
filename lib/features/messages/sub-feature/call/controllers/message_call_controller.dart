@@ -48,7 +48,7 @@ class MessageCallController extends GetxController {
   final RxBool isSpeakerOn = true.obs;
   final RxBool isCameraOff = true.obs;
   final RxBool isFrontCamera = true.obs;
-  final RxString durationLabel = 'Connecting...'.obs;
+  final RxString durationLabel = 'loading'.tr.obs;
   final Rxn<MessageCallSessionModel> callSession =
       Rxn<MessageCallSessionModel>();
 
@@ -96,7 +96,7 @@ class MessageCallController extends GetxController {
     }
 
     isLoading.value = true;
-    durationLabel.value = 'Connecting...';
+    durationLabel.value = 'loading'.tr;
 
     try {
       final Map<String, dynamic> response =
@@ -112,9 +112,9 @@ class MessageCallController extends GetxController {
           );
 
       if (session.id.isEmpty) {
-        throw const CallSocketException(
-          code: 'CALL_ID_MISSING',
-          message: 'The server did not return a call ID.',
+        throw CallSocketException(
+          code: 'call_id_missing'.tr,
+          message: 'the_server_did_not_return_a_call_id'.tr,
         );
       }
 
@@ -133,7 +133,7 @@ class MessageCallController extends GetxController {
         return;
       }
 
-      durationLabel.value = 'Ringing...';
+      durationLabel.value = 'pending'.tr;
       _startCallStatusPolling();
       _startRingingTimeout();
     } on CallSocketException catch (error) {
@@ -148,7 +148,7 @@ class MessageCallController extends GetxController {
   Future<void> _startAcceptedCall(MessageCallSessionModel session) async {
     isLoading.value = true;
     isActive.value = true;
-    durationLabel.value = 'Connecting...';
+    durationLabel.value = 'loading'.tr;
     _callId = session.id;
     callSession.value = session;
     _startCallStatusPolling();
@@ -193,7 +193,7 @@ class MessageCallController extends GetxController {
     _stopRingingTimeout();
     isActive.value = true;
     isLoading.value = true;
-    durationLabel.value = 'Connecting...';
+    durationLabel.value = 'loading'.tr;
 
     try {
       await _joinMedia(session);
@@ -236,11 +236,11 @@ class MessageCallController extends GetxController {
     }
 
     Get.snackbar(
-      'Call failed',
+      'call_failed'.tr,
       message,
       snackPosition: SnackPosition.BOTTOM,
     );
-    await _showTerminalState('Call failed');
+    await _showTerminalState('call_failed'.tr);
   }
 
   Future<void> _handleMediaFailure(String message) async {
@@ -253,11 +253,11 @@ class MessageCallController extends GetxController {
       onTimeout: () {},
     );
     Get.snackbar(
-      'Call failed',
+      'call_failed'.tr,
       message,
       snackPosition: SnackPosition.BOTTOM,
     );
-    await _showTerminalState('Call failed');
+    await _showTerminalState('call_failed'.tr);
   }
 
   void _handleCallRejected(Map<String, dynamic> payload) {
@@ -268,7 +268,7 @@ class MessageCallController extends GetxController {
     _terminationSent = true;
     _remoteTerminal = true;
     isActive.value = false;
-    unawaited(_showTerminalState('Call rejected'));
+    unawaited(_showTerminalState('call_declined'.tr));
   }
 
   void _handleCallEnded(Map<String, dynamic> payload) {
@@ -283,7 +283,9 @@ class MessageCallController extends GetxController {
     final Map<String, dynamic> call = _toMap(payload['call']);
     final bool timedOut = payload['reason']?.toString() == 'timeout' ||
         call['status']?.toString() == 'missed';
-    unawaited(_showTerminalState(timedOut ? 'No answer' : 'Call ended'));
+    unawaited(
+      _showTerminalState(timedOut ? 'missed_call'.tr : 'call_ended'.tr),
+    );
   }
 
   bool _matchesCurrentCall(Map<String, dynamic> payload) {
@@ -407,7 +409,7 @@ class MessageCallController extends GetxController {
 
     _terminationSent = true;
     _remoteTerminal = true;
-    await _showTerminalState('No answer');
+    await _showTerminalState('missed_call'.tr);
   }
 
   void _startDurationTimer() {
@@ -421,7 +423,7 @@ class MessageCallController extends GetxController {
 
     isEnding.value = true;
     _endRequested = true;
-    durationLabel.value = 'Ending...';
+    durationLabel.value = 'loading'.tr;
 
     try {
       try {
@@ -463,7 +465,7 @@ class MessageCallController extends GetxController {
 
       if (showError && !_routeClosed) {
         Get.snackbar(
-          'Unable to end call',
+          'unable_to_end_call'.tr,
           error.message,
           snackPosition: SnackPosition.BOTTOM,
         );
@@ -545,10 +547,10 @@ class MessageCallController extends GetxController {
 
   String _labelForStatus(String status) {
     return switch (status) {
-      'rejected' => 'Call rejected',
-      'missed' => 'No answer',
-      'failed' => 'Call failed',
-      _ => 'Call ended',
+      'rejected' => 'call_declined'.tr,
+      'missed' => 'missed_call'.tr,
+      'failed' => 'call_failed'.tr,
+      _ => 'call_ended'.tr,
     };
   }
 

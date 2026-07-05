@@ -173,7 +173,7 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
                               OutlinedButton.icon(
                                 onPressed: controller.retryLiveVoice,
                                 icon: const Icon(Icons.refresh_rounded),
-                                label: const Text('Try again'),
+                                label: Text('try_again'.tr),
                               ),
                             ],
                           ],

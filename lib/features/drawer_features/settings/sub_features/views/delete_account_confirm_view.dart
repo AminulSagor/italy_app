@@ -35,7 +35,7 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
                       ),
                     ),
                     Text(
-                      'Confirm Deletion',
+                      'confirm_deletion'.tr,
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w900,
@@ -75,7 +75,7 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
               ),
               SizedBox(height: 59.h),
               Text(
-                'Are you absolutely\nsure?',
+                'are_you_absolutely_nsure'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 29.sp,
@@ -104,8 +104,8 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
                         color: SettingsUi.muted,
                       ),
                       children: <TextSpan>[
-                        const TextSpan(
-                          text: 'To permanently delete this account, type your full name exactly as shown:\n\n',
+                        TextSpan(
+                          text: 'to_permanently_delete_this_account_type_your_full'.tr,
                         ),
                         TextSpan(
                           text: controller.displayName,
@@ -114,8 +114,8 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
                             fontWeight: FontWeight.w900,
                           ),
                         ),
-                        const TextSpan(
-                          text: '\n\nThis action is irreversible and signs you out on all devices.',
+                        TextSpan(
+                          text: 'this_action_is_irreversible'.tr,
                         ),
                       ],
                     ),
@@ -142,7 +142,7 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
                   ),
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: 'Enter your full name',
+                    hintText: 'enter_your_full_name'.tr,
                     hintStyle: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -158,7 +158,7 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
                 return Opacity(
                   opacity: canDelete ? 1 : 0.55,
                   child: SettingsPrimaryButton(
-                    text: 'PERMANENTLY DELETE',
+                    text: 'permanently_delete'.tr,
                     color: SettingsUi.red,
                     shadowColor: SettingsUi.redShadow,
                     isLoading: controller.isDeletingAccount.value,
@@ -172,7 +172,7 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
               GestureDetector(
                 onTap: Get.back,
                 child: Text(
-                  'Cancel',
+                  'cancel'.tr,
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w900,

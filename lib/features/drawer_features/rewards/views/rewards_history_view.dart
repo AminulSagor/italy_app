@@ -27,7 +27,7 @@ class RewardsHistoryView extends GetView<RewardController> {
               ),
               padding: EdgeInsets.fromLTRB(26.w, 39.h, 26.w, 54.h),
               children: <Widget>[
-                const RewardTopBar(title: 'Rewards History'),
+                RewardTopBar(title: 'gen_rewards_history'.tr),
                 SizedBox(height: 36.h),
                 Container(
                   width: 58.r,
@@ -44,7 +44,7 @@ class RewardsHistoryView extends GetView<RewardController> {
                 ),
                 SizedBox(height: 23.h),
                 Text(
-                  'Reward History',
+                  'reward_history'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 30.sp,
@@ -57,7 +57,7 @@ class RewardsHistoryView extends GetView<RewardController> {
                 Text(
                   controller.historyTotal.value > 0
                       ? '${controller.historyTotal.value} achievements earned'
-                      : 'Italian Shikhi Achievements',
+                      : 'italian_shikhi_achievements'.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16.sp,
@@ -78,16 +78,16 @@ class RewardsHistoryView extends GetView<RewardController> {
                     controller.historyItems.isEmpty)
                   RewardStateMessage(
                     icon: Icons.error_outline_rounded,
-                    title: 'History unavailable',
+                    title: 'history_unavailable'.tr,
                     message: controller.historyError.value,
-                    buttonText: 'Retry',
+                    buttonText: 'retry'.tr,
                     onTap: () => controller.loadHistory(reset: true),
                   )
                 else if (controller.historyItems.isEmpty)
-                  const RewardStateMessage(
+                  RewardStateMessage(
                     icon: Icons.history_rounded,
-                    title: 'No rewards yet',
-                    message: 'Rewards you unlock or claim will be saved here.',
+                    title: 'no_rewards_yet'.tr,
+                    message: 'rewards_you_unlock_or_claim_will_be_saved_here'.tr,
                   )
                 else ...<Widget>[
                   ...controller.historyItems.map(
@@ -103,7 +103,7 @@ class RewardsHistoryView extends GetView<RewardController> {
                     Padding(
                       padding: EdgeInsets.only(top: 4.h, bottom: 10.h),
                       child: RewardPrimaryButton(
-                        text: 'Load More',
+                        text: 'load_more'.tr,
                         height: 52,
                         onTap: controller.loadMoreHistory,
                         isLoading: controller.isLoadingMoreHistory.value,

@@ -209,8 +209,8 @@ class MessageUserInfoController extends GetxController {
       } else {
         isSubmitting.value = false;
         Get.snackbar(
-          'Block Failed',
-          res.errorCode ?? 'Could not block this user. Please try again.',
+          'block_failed'.tr,
+          res.errorCode ?? 'could_not_block_this_user_please_try_again'.tr,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
@@ -271,8 +271,8 @@ class MessageUserInfoController extends GetxController {
       } else {
         isSubmitting.value = false;
         Get.snackbar(
-          'Unblock Failed',
-          res.errorCode ?? 'Could not unblock this user. Please try again.',
+          'unblock_failed'.tr,
+          res.errorCode ?? 'could_not_unblock_this_user_please_try_again'.tr,
           snackPosition: SnackPosition.BOTTOM,
         );
       }

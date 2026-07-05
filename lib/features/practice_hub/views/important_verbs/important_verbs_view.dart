@@ -17,7 +17,7 @@ class ImportantVerbsView extends GetView<ImportantVerbsController> {
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
       appBar: SimpleAppbar(
-        title: 'Important Verbs',
+        title: 'gen_important_verbs'.tr,
         onBackTap: () => Navigator.of(context).pop(),
       ),
       body: NotificationListener<ScrollNotification>(
@@ -53,7 +53,7 @@ class ImportantVerbsView extends GetView<ImportantVerbsController> {
                       () => VerbSearchField(
                         textController:
                             controller.importantVerbSearchController,
-                        hintText: 'gen_search_for_a_verb_e_g_avere'.tr.tr,
+                        hintText: 'gen_search_for_a_verb_e_g_avere'.tr,
                         query: controller.importantVerbSearchQuery.value,
                         onChanged: controller.onImportantVerbSearchChanged,
                         onClear: controller.clearImportantVerbSearch,

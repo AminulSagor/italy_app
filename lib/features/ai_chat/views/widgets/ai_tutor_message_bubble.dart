@@ -108,7 +108,7 @@ class AiTutorMessageBubble extends GetView<AiChatController> {
                               ),
                               SizedBox(width: 5.w),
                               Text(
-                                expanded ? 'Hide meaning' : 'Show meaning',
+                                expanded ? 'hide_meaning'.tr : 'show_meaning'.tr,
                                 style: TextStyle(
                                   fontSize: 9.sp,
                                   fontWeight: FontWeight.w800,
@@ -153,7 +153,7 @@ class AiTutorMessageBubble extends GetView<AiChatController> {
     final DateTime local = dateTime.toLocal();
     final int hour = local.hour % 12 == 0 ? 12 : local.hour % 12;
     final String minute = local.minute.toString().padLeft(2, '0');
-    final String period = local.hour >= 12 ? 'PM' : 'AM';
+    final String period = local.hour >= 12 ? 'pm'.tr : 'am'.tr;
     return '$hour:$minute $period';
   }
 }
@@ -189,7 +189,7 @@ class _CorrectionCard extends StatelessWidget {
               ),
               SizedBox(width: 6.w),
               Text(
-                'QUICK CORRECTION',
+                'quick_correction'.tr,
                 style: TextStyle(
                   fontSize: 9.sp,
                   fontWeight: FontWeight.w900,
@@ -337,12 +337,12 @@ class _TranslationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           if (message.english?.isNotEmpty ?? false)
-            _LanguageLine(label: 'gen_english_1'.tr.tr, text: message.english!),
+            _LanguageLine(label: 'gen_english_1'.tr, text: message.english!),
           if ((message.english?.isNotEmpty ?? false) &&
               (message.bangla?.isNotEmpty ?? false))
             SizedBox(height: 10.h),
           if (message.bangla?.isNotEmpty ?? false)
-            _LanguageLine(label: 'gen_bengali_1'.tr.tr, text: message.bangla!),
+            _LanguageLine(label: 'gen_bengali_1'.tr, text: message.bangla!),
         ],
       ),
     );

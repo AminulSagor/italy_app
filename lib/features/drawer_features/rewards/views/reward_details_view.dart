@@ -25,7 +25,7 @@ class RewardDetailsView extends GetView<RewardController> {
             padding: EdgeInsets.fromLTRB(25.w, 39.h, 25.w, 56.h),
             child: Column(
               children: <Widget>[
-                const RewardTopBar(title: 'Reward Details'),
+                RewardTopBar(title: 'gen_reward_details'.tr),
                 SizedBox(height: 30.h),
                 if (controller.isLoadingDetails.value && reward == null)
                   const Padding(
@@ -35,11 +35,11 @@ class RewardDetailsView extends GetView<RewardController> {
                 else if (reward == null)
                   RewardStateMessage(
                     icon: Icons.error_outline_rounded,
-                    title: 'Reward unavailable',
+                    title: 'reward_unavailable'.tr,
                     message: controller.detailsError.value.isEmpty
-                        ? 'Could not load this reward.'
+                        ? 'could_not_load_this_reward'.tr
                         : controller.detailsError.value,
-                    buttonText: 'Back',
+                    buttonText: 'back_1'.tr,
                     onTap: Get.back,
                   )
                 else ...<Widget>[
@@ -63,7 +63,7 @@ class RewardDetailsView extends GetView<RewardController> {
                     SizedBox(height: 34.h),
                     RewardPrimaryButton(
                       text: reward.canConfirmDelivery
-                          ? 'Confirm Delivery'
+                          ? 'confirm_delivery'.tr
                           : reward.action!.label,
                       suffixIcon: _actionIcon(reward),
                       onTap: () => _handleAction(reward),
@@ -341,7 +341,7 @@ class _EarnedReasonCard extends StatelessWidget {
               SizedBox(width: 17.w),
               Expanded(
                 child: Text(
-                  'How you earned this',
+                  'how_you_earned_this'.tr,
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w900,
@@ -377,17 +377,17 @@ class _DeliveryCard extends StatelessWidget {
     final RewardFulfillmentModel? fulfillment = reward.fulfillment;
     final RewardShippingAddressModel? address = reward.shippingAddress;
     final String title = reward.status.toLowerCase() == 'delivered'
-        ? 'Delivery Confirmed'
+        ? 'delivery_confirmed'.tr
         : reward.status.toLowerCase() == 'dispatched'
-        ? 'Reward Dispatched'
+        ? 'reward_dispatched'.tr
         : address == null
-        ? 'Shipping Address Required'
-        : 'Shipping In Progress';
+        ? 'shipping_address_required'.tr
+        : 'shipping_in_progress'.tr;
     final String detail = fulfillment?.trackingNumber?.isNotEmpty == true
         ? 'Tracking: ${fulfillment!.trackingNumber}'
         : fulfillment?.carrierName?.isNotEmpty == true
         ? 'Carrier: ${fulfillment!.carrierName}'
-        : address?.addressLine ?? 'Add your delivery information to continue.';
+        : address?.addressLine ?? 'add_your_delivery_information_to_continue'.tr;
 
     return Container(
       width: double.infinity,
