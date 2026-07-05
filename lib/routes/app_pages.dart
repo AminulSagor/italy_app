@@ -55,6 +55,7 @@ import '../features/home/views/home_view.dart';
 import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_service.dart';
 import '../features/notifications/services/notifications_mock_service.dart';
+import '../features/practice_hub/services/italian_tts_service.dart';
 import '../features/practice_hub/services/job_sentences_api_service.dart';
 import '../core/services/api_client.dart';
 import '../core/controllers/user_session_controller.dart';
@@ -1005,8 +1006,9 @@ class AppPages {
         }
         if (!Get.isRegistered<JobSentencesController>()) {
           Get.lazyPut<JobSentencesController>(
-            () => JobSentencesController(
+                () => JobSentencesController(
               apiService: Get.find<JobSentencesApiService>(),
+              ttsService: Get.find<ItalianTtsService>(),
             ),
             fenix: true,
           );

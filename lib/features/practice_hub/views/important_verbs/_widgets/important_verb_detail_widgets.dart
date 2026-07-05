@@ -93,12 +93,12 @@ class VerbHeroCard extends GetView<ImportantVerbsController> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'verb_englishmeaning_verb_banglameaning'.trParams(<String, String>{'englishmeaning': verb.englishMeaning.toString(), 'banglameaning': verb.banglaMeaning.toString()}),
+            '(${verb.englishMeaning.trim()} / ${verb.banglaMeaning.trim()})',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: 12.sp,
               height: 1.2,
               fontWeight: FontWeight.w600,
               color: AppColors.white.withValues(alpha: 0.72),

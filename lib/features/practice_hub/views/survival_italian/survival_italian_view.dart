@@ -244,17 +244,8 @@ class _SurvivalHeader extends GetView<PracticeHubController> {
                     color: const Color(0xFF376812),
                   ),
                 ),
-                SizedBox(height: 7.h),
-                Text(
-                  'label_lib_features_practice_hub_views_survival_italian_survival_italian_view_249'.tr,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: AppFont.font11.sp,
-                    height: 1,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF72777B),
-                  ),
-                ),
+
+
               ],
             ),
           ),
@@ -342,7 +333,7 @@ class _SurvivalProgressBar extends GetView<PracticeHubController> {
                                 ),
                               ),
                               TextSpan(
-                                text: '$learned/$total',
+                                text: ' $learned/$total',
                                 style: TextStyle(
                                   fontSize: AppFont.font16.sp,
                                   fontWeight: FontWeight.w900,

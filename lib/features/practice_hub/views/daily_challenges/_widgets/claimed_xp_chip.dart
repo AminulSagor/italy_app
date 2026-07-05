@@ -19,7 +19,11 @@ class ClaimedXpChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(999.r),
       ),
       child: Text(
-        'claimed_rewardxp_xp'.trParams(<String, String>{'rewardxp': rewardXp.toString()}),
+        'claimed_xp'.trParams(
+          <String, String>{
+            'xp': rewardXp.toString(),
+          },
+        ),
         style: TextStyle(
           fontSize: AppFont.font11.sp,
           fontWeight: FontWeight.w900,
