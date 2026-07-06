@@ -21,7 +21,7 @@ class SurvivalHeroSituationCard extends GetView<PracticeHubController> {
       onTap: () => controller.openSurvivalPdf(item),
       child: Container(
         width: double.infinity,
-        height: 296.h,
+        height: 310.h,
         padding: EdgeInsets.fromLTRB(32.w, 32.h, 26.w, 31.h),
         decoration: BoxDecoration(
           gradient: LinearGradient(

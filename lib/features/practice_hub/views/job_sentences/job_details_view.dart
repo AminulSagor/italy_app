@@ -206,15 +206,28 @@ class _JobDetailsHeader extends GetView<JobSentencesController> {
 }
 
 class _TrackProgressCard extends StatelessWidget {
-  const _TrackProgressCard({required this.progress});
+  const _TrackProgressCard({
+    required this.progress,
+  });
 
   final JobLearningSummaryModel progress;
 
   @override
   Widget build(BuildContext context) {
+    final double percent = progress.completionPercent
+        .clamp(0, 100)
+        .toDouble();
+
+    final double progressValue = percent / 100.0;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(22.w, 18.h, 22.w, 18.h),
+      padding: EdgeInsets.fromLTRB(
+        22.w,
+        18.h,
+        22.w,
+        18.h,
+      ),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(28.r),
@@ -240,7 +253,8 @@ class _TrackProgressCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'progress_learnedsentences_of_progress_totalsentences_sentences_learned'.trParams(<String, String>{'learnedsentences': progress.learnedSentences.toString(), 'totalsentences': progress.totalSentences.toString()}),
+                  '${progress.learnedSentences} of '
+                      '${progress.totalSentences} sentences learned',
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w900,
@@ -251,10 +265,11 @@ class _TrackProgressCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(999.r),
                   child: LinearProgressIndicator(
-                    value: progress.completionPercent / 100,
+                    value: progressValue,
                     minHeight: 6.h,
                     backgroundColor: const Color(0xFFE4E7E6),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
+                    valueColor:
+                    const AlwaysStoppedAnimation<Color>(
                       AppColors.primaryGreen,
                     ),
                   ),
@@ -264,7 +279,7 @@ class _TrackProgressCard extends StatelessWidget {
           ),
           SizedBox(width: 14.w),
           Text(
-            'progress_completionpercent'.trParams(<String, String>{'completionpercent': progress.completionPercent.toString()}),
+            '${percent.round()}%',
             style: TextStyle(
               fontSize: AppFont.font16.sp,
               fontWeight: FontWeight.w900,
@@ -354,11 +369,12 @@ class _JobModuleCard extends GetView<JobSentencesController> {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                'item_learnedsentencecount_item_sentencecount_learned'.trParams(<String, String>{'learnedsentencecount': item.learnedSentenceCount.toString(), 'sentencecount': item.sentenceCount.toString()}),
+                '${item.learnedSentenceCount}/${item.sentenceCount} sentences completed',
                 maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: AppFont.font11.sp,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w800,
                   color: palette.accent,
                 ),
               ),

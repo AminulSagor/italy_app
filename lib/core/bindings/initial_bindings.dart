@@ -292,8 +292,9 @@ class InitialBindings extends Bindings {
       fenix: true,
     );
     Get.lazyPut<JobSentencesController>(
-      () => JobSentencesController(
+          () => JobSentencesController(
         apiService: Get.find<JobSentencesApiService>(),
+        ttsService: Get.find<ItalianTtsService>(),
       ),
       fenix: true,
     );

@@ -5,22 +5,47 @@ import 'package:flutter_tts/flutter_tts.dart';
 import '../models/important_verb_models.dart';
 
 class ItalianTtsService {
-  ItalianTtsService({FlutterTts? flutterTts})
-    : _flutterTts = flutterTts ?? FlutterTts();
+  ItalianTtsService({
+    FlutterTts? flutterTts,
+  }) : _flutterTts = flutterTts ?? FlutterTts();
 
   final FlutterTts _flutterTts;
+
   bool _isInitialized = false;
 
-  Future<void> speak(ImportantVerbTtsModel tts) async {
-    final String text = tts.text.trim();
-    if (text.isEmpty) return;
+  // Existing Important Verbs functionality.
+  Future<void> speak(
+      ImportantVerbTtsModel tts,
+      ) async {
+    await speakText(
+      tts.text,
+      locale: tts.locale,
+    );
+  }
 
-    await _initialize(tts.locale);
+  // Reusable method for Job Sentences.
+  Future<void> speakText(
+      String text, {
+        String locale = 'it-IT',
+      }) async {
+    final String normalizedText = text.trim();
+
+    if (normalizedText.isEmpty) {
+      return;
+    }
+
+    await _initialize(locale);
     await _flutterTts.stop();
-    await _setItalianLanguage(tts.locale);
-    final dynamic result = await _flutterTts.speak(text);
+    await _setItalianLanguage(locale);
+
+    final dynamic result = await _flutterTts.speak(
+      normalizedText,
+    );
+
     if (result != 1) {
-      throw StateError('Italian pronunciation could not be started.');
+      throw StateError(
+        'Italian pronunciation could not be started.',
+      );
     }
   }
 
@@ -28,33 +53,51 @@ class ItalianTtsService {
     await _flutterTts.stop();
   }
 
-  Future<void> _initialize(String requestedLocale) async {
-    if (_isInitialized) return;
+  Future<void> _initialize(
+      String requestedLocale,
+      ) async {
+    if (_isInitialized) {
+      return;
+    }
 
     await _flutterTts.awaitSpeakCompletion(true);
     await _flutterTts.setSpeechRate(0.46);
     await _flutterTts.setPitch(1.0);
     await _flutterTts.setVolume(1.0);
     await _setItalianLanguage(requestedLocale);
+
     _isInitialized = true;
   }
 
-  Future<void> _setItalianLanguage(String requestedLocale) async {
-    final String locale = requestedLocale.trim().isEmpty
+  Future<void> _setItalianLanguage(
+      String requestedLocale,
+      ) async {
+    final String locale =
+    requestedLocale.trim().isEmpty
         ? 'it-IT'
         : requestedLocale.trim();
 
     try {
-      final dynamic isAvailable = await _flutterTts.isLanguageAvailable(locale);
-      final bool available = isAvailable == true || isAvailable == 1;
-      await _flutterTts.setLanguage(available ? locale : 'it-IT');
+      final dynamic availability =
+      await _flutterTts.isLanguageAvailable(
+        locale,
+      );
+
+      final bool isAvailable =
+          availability == true || availability == 1;
+
+      await _flutterTts.setLanguage(
+        isAvailable ? locale : 'it-IT',
+      );
     } catch (error, stackTrace) {
       dev.log(
-        'Unable to verify Italian TTS locale. Falling back to it-IT.',
+        'Unable to verify Italian TTS locale. '
+            'Falling back to it-IT.',
         name: 'ItalianTtsService',
         error: error,
         stackTrace: stackTrace,
       );
+
       await _flutterTts.setLanguage('it-IT');
     }
   }

@@ -57,6 +57,7 @@ import '../features/home/views/home_view.dart';
 import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_service.dart';
 import '../features/notifications/services/notifications_api_service.dart';
+import '../features/practice_hub/services/italian_tts_service.dart';
 import '../features/practice_hub/services/job_sentences_api_service.dart';
 import '../features/practice_hub/sub_features/course_catalog/controllers/course_catalog_controller.dart';
 import '../features/practice_hub/sub_features/course_catalog/views/course_catalog_view.dart';
@@ -1019,6 +1020,7 @@ class AppPages {
           Get.lazyPut<JobSentencesController>(
             () => JobSentencesController(
               apiService: Get.find<JobSentencesApiService>(),
+              ttsService: Get.find<ItalianTtsService>(),
             ),
             fenix: true,
           );

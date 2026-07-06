@@ -35,6 +35,8 @@ class VerbDetailsView extends GetView<ImportantVerbsController> {
             );
           }
 
+
+
           return RefreshIndicator(
             onRefresh: () => controller.loadVerbDetails(summary.id),
             child: SingleChildScrollView(

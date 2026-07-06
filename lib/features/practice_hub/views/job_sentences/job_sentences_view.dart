@@ -215,7 +215,9 @@ class _CareerTrackCard extends GetView<JobSentencesController> {
                   ],
                   SizedBox(height: 9.h),
                   Text(
-                    'item_learnedsentencecount_item_sentencecount_sentences_learned'.trParams(<String, String>{'learnedsentencecount': item.learnedSentenceCount.toString(), 'sentencecount': item.sentenceCount.toString()}),
+                    '${item.learnedSentenceCount}/${item.sentenceCount} sentences completed',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: AppFont.font11.sp,
                       fontWeight: FontWeight.w800,

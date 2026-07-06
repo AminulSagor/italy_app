@@ -364,13 +364,18 @@ class _PdfBottomNavigation extends GetView<PracticeHubController> {
                   ),
                   SizedBox(width: 9.w),
                   Text(
-                    'controller_currentsurvivalpdfpage_value_controller_currentsurvivalpdftotalpages_value'.trParams(<String, String>{'value': controller.currentSurvivalPdfPage.value.toString(), 'value': controller.currentSurvivalPdfTotalPages.value.toString()}),
+                    'pdf_page_counter'.trParams({
+                      'current':
+                      controller.currentSurvivalPdfPage.value.toString(),
+                      'total':
+                      controller.currentSurvivalPdfTotalPages.value.toString(),
+                    }),
                     style: TextStyle(
-                      fontSize: AppFont.font16.sp,
+                      fontSize: AppFont.font12.sp,
                       fontWeight: FontWeight.w900,
                       color: AppColors.white,
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
