@@ -12,6 +12,7 @@ import '../../../../../core/services/learning_activity_tracker_service.dart';
 import '../../../../../features/messages/services/chat_socket_service.dart';
 import '../../../../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import '../../../../../routes/routes.dart';
+import '../../Signup/controllers/signup_controller.dart';
 import '../../../models/auth_models.dart';
 import '../models/login_models.dart';
 
@@ -103,10 +104,18 @@ class LoginController extends GetxController {
       );
 
       if (!result.isSuccess) {
-        Get.snackbar(
-          'Error',
-          result.error ?? 'Unable to log in. Please try again.',
-        );
+        final String errorMessage =
+            result.error ?? 'Unable to log in. Please try again.';
+
+        if (_requiresAccountVerification(errorMessage)) {
+          await _sendVerificationCodeAndOpenOtp(
+            identifier: normalizedIdentifier,
+            isEmailMode: current.isEmailMode,
+          );
+          return;
+        }
+
+        Get.snackbar('Error', errorMessage);
         return;
       }
 
@@ -149,6 +158,42 @@ class LoginController extends GetxController {
     } finally {
       form.value = form.value.copyWith(isLoading: false);
     }
+  }
+
+  bool _requiresAccountVerification(String message) {
+    return message.trim().toLowerCase() ==
+        'please verify your account first'.toLowerCase();
+  }
+
+  Future<void> _sendVerificationCodeAndOpenOtp({
+    required String identifier,
+    required bool isEmailMode,
+  }) async {
+    final ApiResult<OtpResponseModel> resendResult =
+        await ApiErrorHandler.call<OtpResponseModel>(
+          () => _authService.resendOtp(identifier: identifier),
+          showError: false,
+        );
+
+    if (!resendResult.isSuccess) {
+      Get.snackbar(
+        'Error',
+        resendResult.error ?? 'Unable to send verification code.',
+      );
+      return;
+    }
+
+    final SignupController signupController = Get.isRegistered<SignupController>()
+        ? Get.find<SignupController>()
+        : Get.put<SignupController>(SignupController());
+
+    signupController.prepareExistingAccountOtp(
+      identifier: identifier,
+      isEmailMode: isEmailMode,
+      devOtp: resendResult.data?.devOtp,
+    );
+
+    Get.toNamed(AppRoutes.signupOtp);
   }
 
   void _syncSelectedLanguageWithLocale() {

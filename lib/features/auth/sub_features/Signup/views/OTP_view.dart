@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -8,6 +7,8 @@ import '../controllers/signup_controller.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../../../../../core/themes/app_constants.dart';
+import '../../../../../core/widgets/otp_code_input_row.dart';
+import '../../../../../core/widgets/otp_resend_button.dart';
 
 class OtpView extends GetView<SignupController> {
   const OtpView({super.key});
@@ -72,12 +73,11 @@ class OtpView extends GetView<SignupController> {
               ),
               SizedBox(height: 22.h),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List<Widget>.generate(
-                  4,
-                  (int index) => _buildOtpInput(index),
-                ),
+              OtpCodeInputRow(
+                controllers: controller.otpControllers,
+                focusNodes: controller.otpFocusNodes,
+                onChanged: controller.onOtpDigitChanged,
+                onCompleted: controller.onOtpContinueTap,
               ),
               SizedBox(height: 26.h),
 
@@ -95,27 +95,13 @@ class OtpView extends GetView<SignupController> {
 
               Center(
                 child: Obx(
-                  () => TextButton(
-                    onPressed: controller.otpUi.value.isResending
-                        ? null
-                        : controller.onResendOtpTap,
-                    child: controller.otpUi.value.isResending
-                        ? SizedBox(
-                            width: 18.w,
-                            height: 18.w,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.primaryGreen,
-                            ),
-                          )
-                        : Text(
-                            'resend'.tr,
-                            style: TextStyle(
-                              color: AppColors.primaryGreen,
-                              fontSize: AppFont.font15.sp,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
+                  () => OtpResendButton(
+                    label: 'resend'.tr,
+                    isLoading: controller.otpUi.value.isResending,
+                    remainingSeconds:
+                        controller.resendCooldown.remainingSeconds.value,
+                    remainingLabel: controller.resendCooldown.remainingLabel,
+                    onTap: controller.onResendOtpTap,
                   ),
                 ),
               ),
@@ -280,56 +266,4 @@ class OtpView extends GetView<SignupController> {
     );
   }
 
-  Widget _buildOtpInput(int index) {
-    return AnimatedBuilder(
-      animation: controller.otpFocusNodes[index],
-      builder: (context, _) {
-        final bool isFocused = controller.otpFocusNodes[index].hasFocus;
-
-        return SizedBox(
-          width: 76.w,
-          height: 76.w,
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.legacyColorFFF8F8F8,
-              border: Border.all(
-                color: isFocused ? AppColors.primaryGreen : AppColors.transparent,
-                width: 1.6,
-              ),
-            ),
-            child: TextField(
-              controller: controller.otpControllers[index],
-              focusNode: controller.otpFocusNodes[index],
-              textAlign: TextAlign.center,
-              textAlignVertical: TextAlignVertical.center,
-              keyboardType: TextInputType.number,
-              maxLength: 1,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(1),
-              ],
-              style: TextStyle(
-                color: AppColors.legacyColorFF646C7A,
-                fontSize: AppFont.font28.sp,
-                fontWeight: FontWeight.w700,
-              ),
-              decoration: const InputDecoration(
-                counterText: '',
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-                isCollapsed: true,
-              ),
-              onChanged: (String value) {
-                controller.onOtpDigitChanged(index: index, value: value);
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
 }

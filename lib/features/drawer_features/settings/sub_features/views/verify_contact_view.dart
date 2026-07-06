@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/themes/app_font.dart';
+import '../../../../../core/widgets/otp_code_input_row.dart';
+import '../../../../../core/widgets/otp_resend_button.dart';
 import '../../settings_controller.dart';
 import '../../widgets/settings_ui_widgets.dart';
 
@@ -117,7 +119,14 @@ class VerifyContactView extends GetView<SettingsController> {
                       ),
                     ),
                     SizedBox(height: 52.h),
-                    _OtpInputRow(controller: controller),
+                    OtpCodeInputRow(
+                      controllers: controller.otpControllers,
+                      focusNodes: controller.otpFocusNodes,
+                      onChanged: ({required int index, required String value}) =>
+                          controller.onOtpDigitChanged(index, value),
+                      onCompleted: controller.verifyPendingContact,
+                      boxSize: 66.r,
+                    ),
                     SizedBox(height: 40.h),
                     SettingsPrimaryButton(
                       text: 'verify_continue_1'.tr,
@@ -135,19 +144,19 @@ class VerifyContactView extends GetView<SettingsController> {
                       ),
                     ),
                     SizedBox(height: 11.h),
-                    GestureDetector(
-                      onTap: controller.isResendingContactOtp.value
-                          ? null
-                          : controller.resendPendingContactOtp,
-                      child: Text(
-                        controller.isResendingContactOtp.value
-                            ? 'sending'.tr
-                            : 'resend_code_1'.tr,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w900,
-                          color: SettingsUi.green,
-                        ),
+                    Obx(
+                      () => OtpResendButton(
+                        label: 'resend_code_1'.tr,
+                        isLoading: controller.isResendingContactOtp.value,
+                        remainingSeconds: controller
+                            .contactOtpResendCooldown
+                            .remainingSeconds
+                            .value,
+                        remainingLabel: controller
+                            .contactOtpResendCooldown
+                            .remainingLabel,
+                        onTap: controller.resendPendingContactOtp,
+                        fontSize: AppFont.font16,
                       ),
                     ),
                     SizedBox(height: 41.h),
@@ -191,79 +200,6 @@ class VerifyContactView extends GetView<SettingsController> {
         ),
       );
     });
-  }
-}
-
-class _OtpInputRow extends StatelessWidget {
-  const _OtpInputRow({required this.controller});
-
-  final SettingsController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List<Widget>.generate(
-        controller.otpControllers.length,
-        (int index) => _OtpBox(controller: controller, index: index),
-      ),
-    );
-  }
-}
-
-class _OtpBox extends StatelessWidget {
-  const _OtpBox({required this.controller, required this.index});
-
-  final SettingsController controller;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 64.r,
-      height: 78.r,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF1F2F2),
-        borderRadius: BorderRadius.circular(26.r),
-      ),
-      child: TextField(
-        controller: controller.otpControllers[index],
-        focusNode: controller.otpFocusNodes[index],
-        autofocus: index == 0,
-        textAlign: TextAlign.center,
-        maxLength: 1,
-        keyboardType: TextInputType.number,
-        textInputAction: index == controller.otpControllers.length - 1
-            ? TextInputAction.done
-            : TextInputAction.next,
-        inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        onChanged: (String value) =>
-            controller.onOtpDigitChanged(index, value),
-        onSubmitted: (_) {
-          if (controller.isOtpComplete) {
-            controller.verifyPendingContact();
-          }
-        },
-        style: TextStyle(
-          fontSize: 24.sp,
-          fontWeight: FontWeight.w900,
-          color: SettingsUi.text,
-        ),
-        decoration: InputDecoration(
-          counterText: '',
-          border: InputBorder.none,
-          hintText: '•'.tr,
-          hintStyle: TextStyle(
-            fontSize: 32.sp,
-            fontWeight: FontWeight.w900,
-            color: const Color(0xFF6F7785),
-          ),
-        ),
-      ),
-    );
   }
 }
 

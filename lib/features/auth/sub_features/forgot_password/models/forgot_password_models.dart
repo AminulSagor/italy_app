@@ -158,15 +158,21 @@ class ForgotPasswordRequestUiModel {
   const ForgotPasswordRequestUiModel({
     required this.maskedIdentifier,
     required this.requestToken,
+    required this.message,
+    this.devOtp,
   });
 
   final String maskedIdentifier;
   final String requestToken;
+  final String message;
+  final String? devOtp;
 
   factory ForgotPasswordRequestUiModel.fromJson(Map<String, dynamic> json) {
     return ForgotPasswordRequestUiModel(
       maskedIdentifier: (json['maskedIdentifier'] ?? '').toString(),
       requestToken: (json['requestToken'] ?? '').toString(),
+      message: (json['message'] ?? 'Reset code sent successfully.').toString(),
+      devOtp: json['devOtp']?.toString(),
     );
   }
 }
@@ -186,29 +192,39 @@ class ForgotPasswordVerifyOtpPayloadModel {
 }
 
 class ForgotPasswordVerifyOtpUiModel {
-  const ForgotPasswordVerifyOtpUiModel({required this.resetToken});
+  const ForgotPasswordVerifyOtpUiModel({
+    required this.identifier,
+    required this.otp,
+  });
 
-  final String resetToken;
+  final String identifier;
+  final String otp;
 
   factory ForgotPasswordVerifyOtpUiModel.fromJson(Map<String, dynamic> json) {
     return ForgotPasswordVerifyOtpUiModel(
-      resetToken: (json['resetToken'] ?? '').toString(),
+      identifier: (json['identifier'] ?? '').toString(),
+      otp: (json['otp'] ?? '').toString(),
     );
   }
 }
 
 class ForgotPasswordResetPayloadModel {
   const ForgotPasswordResetPayloadModel({
-    required this.resetToken,
+    required this.identifier,
+    required this.otp,
     required this.newPassword,
   });
 
-  final String resetToken;
+  final String identifier;
+  final String otp;
   final String newPassword;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'resetToken': resetToken,
+      'identifier': identifier.trim().contains('@')
+          ? identifier.trim().toLowerCase()
+          : identifier.trim(),
+      'otp': otp.trim(),
       'newPassword': newPassword,
     };
   }
@@ -221,7 +237,7 @@ class ForgotPasswordResetUiModel {
 
   factory ForgotPasswordResetUiModel.fromJson(Map<String, dynamic> json) {
     return ForgotPasswordResetUiModel(
-      successMessage: (json['successMessage'] ?? '').toString(),
+      successMessage: (json['successMessage'] ?? json['message'] ?? '').toString(),
     );
   }
 }

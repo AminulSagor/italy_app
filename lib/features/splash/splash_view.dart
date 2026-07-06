@@ -222,8 +222,6 @@ class SplashView extends GetView<SplashController> {
 
           Align(
             child: Container(
-              width: 263.w,
-              height: 142.h,
               padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
                 color: AppColors.splashChipContainer,
@@ -238,7 +236,7 @@ class SplashView extends GetView<SplashController> {
                 ],
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   // Legacy implementation kept for quick revert.
                   // _ServiceChip(
@@ -262,12 +260,7 @@ class SplashView extends GetView<SplashController> {
                     iconColor: AppColors.splashChipActiveIcon,
                     iconBackground: AppColors.splashChipActiveBg,
                   ),
-                  _ServiceChipPlain(
-                    icon: Icons.gavel,
-                    label: 'splash_service_caf'.tr,
-                    iconColor: AppColors.splashChipCafIcon,
-                    iconBackground: AppColors.splashChipInactiveBg,
-                  ),
+                  SizedBox(width: 10.w),
                   _ServiceChipPlain(
                     icon: Icons.work,
                     label: 'splash_service_cv'.tr,
@@ -292,23 +285,22 @@ class SplashView extends GetView<SplashController> {
 
           SizedBox(height: 16.h),
 
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-            decoration: BoxDecoration(
-              color: AppColors.splashTrustedBadgeBg,
-              borderRadius: BorderRadius.circular(kRadius20.r),
-            ),
-            child: Text(
-              'splash_trusted'.tr,
-              style: TextStyle(
-                fontSize: AppFont.font11.sp,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.1,
-                color: AppColors.splashTrustedBadgeText,
-              ),
-            ),
-          ),
-
+          // Container(
+          //   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+          //   decoration: BoxDecoration(
+          //     color: AppColors.splashTrustedBadgeBg,
+          //     borderRadius: BorderRadius.circular(kRadius20.r),
+          //   ),
+          //   child: Text(
+          //     'splash_trusted'.tr,
+          //     style: TextStyle(
+          //       fontSize: AppFont.font11.sp,
+          //       fontWeight: FontWeight.w700,
+          //       letterSpacing: 1.1,
+          //       color: AppColors.splashTrustedBadgeText,
+          //     ),
+          //   ),
+          // ),
           SizedBox(height: 20.h),
 
           _buildLanguageSwitcher(controller),
@@ -515,59 +507,6 @@ class SplashView extends GetView<SplashController> {
 // =========================================================
 // SERVICE CHIP
 // =========================================================
-
-class _ServiceChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool active;
-  final Color? iconColor;
-
-  const _ServiceChip({required this.icon, required this.label})
-    : active = false,
-      iconColor = null;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        color: AppColors.splashChipCardBg,
-        borderRadius: BorderRadius.circular(kRadius36.r),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Container(
-            width: 48.r,
-            height: 48.r,
-            decoration: BoxDecoration(
-              color: active
-                  ? AppColors.splashChipActiveBg
-                  : AppColors.splashChipInactiveBg,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              size: 21.r,
-              color: active
-                  ? AppColors.splashChipActiveIcon
-                  : (iconColor ?? AppColors.splashChipCafIcon),
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.splashTextSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _ServiceChipHighlighted extends StatelessWidget {
   final IconData icon;

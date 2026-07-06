@@ -5,7 +5,6 @@ import '../../features/auth/models/auth_models.dart';
 import 'api_client.dart';
 import 'storage_service.dart';
 import 'token_service.dart';
-import 'package:get/get.dart' hide Response;
 
 class AuthService {
   AuthService({

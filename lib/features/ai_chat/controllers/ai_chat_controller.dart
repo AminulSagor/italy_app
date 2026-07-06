@@ -680,11 +680,11 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   String _writingHelpWelcome(AiTutorWritingSourceLanguage sourceLanguage) {
     switch (sourceLanguage) {
       case AiTutorWritingSourceLanguage.english:
-        return 'send_a_word_sentence_or_italian_draft_i_will_show'.tr +
-            'natural Italian writing and explain the main point briefly in English.';
+        return 'Send any Italian word, sentence, paragraph, or writing request. '
+            'I will correct it, explain the important point in English, and give useful examples.';
       case AiTutorWritingSourceLanguage.bangla:
-        return 'একটি শব্দ, বাক্য বা ইতালীয় খসড়া লিখুন। আমি স্বাভাবিক '
-            'ইতালীয় লেখাটি দেখাব এবং মূল বিষয়টি বাংলায় সংক্ষেপে বুঝিয়ে দেব।';
+        return 'ইতালীয় কোনো শব্দ, বাক্য, প্যারাগ্রাফ বা লেখার অনুরোধ পাঠান। '
+            'আমি ঠিক করে দেব, বাংলায় কারণ বুঝিয়ে দেব এবং দরকারি উদাহরণ দেব।';
     }
   }
 
