@@ -220,11 +220,7 @@ class _DrawerProfileHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(100.r),
             ),
             child: Text(
-<<<<<<< HEAD
               league,
-=======
-              'level_level'.trParams(<String, String>{'level': level.toString()}),
->>>>>>> main
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w900,
