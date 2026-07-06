@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
@@ -19,7 +21,10 @@ class FinalExamResultView extends GetView<FinalExamController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.exam,
+      sourceId: 'final_exam_result_view',
+      child: Scaffold(
       backgroundColor: AppColors.coursesDetailBg,
       bottomNavigationBar: Container(
         padding: EdgeInsets.fromLTRB(28.w, 18.h, 28.w, 24.h),
@@ -201,6 +206,7 @@ class FinalExamResultView extends GetView<FinalExamController> {
           );
         }),
       ),
+    ),
     );
   }
 }

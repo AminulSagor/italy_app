@@ -113,40 +113,42 @@ class CheckoutProductCard extends StatelessWidget {
                   color: AppColors.primaryGreen,
                 ),
               ),
-              SizedBox(width: 12.w),
-              Text(
-                oldPrice,
-                style: TextStyle(
-                  fontSize: AppFont.font12.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.bodyText,
-                  decoration: TextDecoration.lineThrough,
+              if (oldPrice != price) ...<Widget>[
+                SizedBox(width: 12.w),
+                Text(
+                  oldPrice,
+                  style: TextStyle(
+                    fontSize: AppFont.font12.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.bodyText,
+                    decoration: TextDecoration.lineThrough,
+                  ),
                 ),
-              ),
-              6.w.horizontalSpace,
-              Expanded(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.homeOrange,
-                      borderRadius: BorderRadius.circular(kHomePillRadius.r),
-                    ),
-                    child: Text(
-                      plan.discountLabel,
-                      style: TextStyle(
-                        fontSize: AppFont.font10.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.black,
+                6.w.horizontalSpace,
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.homeOrange,
+                        borderRadius: BorderRadius.circular(kHomePillRadius.r),
+                      ),
+                      child: Text(
+                        plan.discountLabel,
+                        style: TextStyle(
+                          fontSize: AppFont.font10.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.black,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ],

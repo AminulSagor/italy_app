@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../controllers/important_verbs_controller.dart';
@@ -13,7 +15,10 @@ class VerbDetailsView extends GetView<ImportantVerbsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.importantVerbs,
+      sourceId: 'verb_details_view',
+      child: Scaffold(
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
         bottom: false,
@@ -99,6 +104,7 @@ class VerbDetailsView extends GetView<ImportantVerbsController> {
           );
         }),
       ),
+    ),
     );
   }
 }

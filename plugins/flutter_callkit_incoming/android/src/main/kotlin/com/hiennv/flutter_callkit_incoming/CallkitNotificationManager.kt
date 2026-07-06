@@ -468,6 +468,7 @@ class CallkitNotificationManager(
                 if (TextUtils.isEmpty(textAccept)) context.getString(R.string.text_accept)
                 else textAccept
         )
+        remoteViews.setImageViewResource(R.id.ivAvatar, R.drawable.ic_default_avatar)
         var avatarUrl = data.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
         if (!avatarUrl.isNullOrEmpty()) {
             if (!avatarUrl.startsWith("http://", true) && !avatarUrl.startsWith("https://", true)) {

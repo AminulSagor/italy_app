@@ -21,11 +21,13 @@ class LeaderboardChatDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String name = (user['name'] as String? ?? 'sofia_rossi'.tr).replaceAll(
-      '\n',
-      ' ',
-    );
-    final String xp = user['xp'] as String? ?? '1,280';
+    final String name = (user['name'] as String? ?? 'sofia_rossi'.tr)
+        .replaceAll('\n', ' ');
+    final int streakDays = _intValue(user['streakDays']);
+    final String xp = user['totalXp'] == null
+        ? user['xp']?.toString() ?? '0'
+        : _formatWithCommas(_intValue(user['totalXp']));
+    final String avatarUrl = user['avatarUrl']?.toString().trim() ?? '';
 
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
@@ -64,7 +66,7 @@ class LeaderboardChatDialog extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   SizedBox(height: 5.h),
-                  const _ChatAvatar(),
+                  _ChatAvatar(avatarUrl: avatarUrl),
                   SizedBox(height: 26.h),
                   Text(
                     name,
@@ -81,11 +83,11 @@ class LeaderboardChatDialog extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       _InfoPill(
-                        bgColor: Color(0xFFFFE9D2),
+                        bgColor: const Color(0xFFFFE9D2),
                         icon: Icons.local_fire_department_rounded,
-                        iconColor: Color(0xFFE9511B),
-                        text: '12_day_streak'.tr,
-                        textColor: Color(0xFFC94D1F),
+                        iconColor: const Color(0xFFE9511B),
+                        text: '$streakDays Day Streak',
+                        textColor: const Color(0xFFC94D1F),
                       ),
                       SizedBox(width: 10.w),
                       _InfoPill(
@@ -166,6 +168,24 @@ class LeaderboardChatDialog extends StatelessWidget {
       ),
     );
   }
+
+  int _intValue(dynamic value) {
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  String _formatWithCommas(int value) {
+    final String digits = value.toString();
+    final StringBuffer buffer = StringBuffer();
+    for (int index = 0; index < digits.length; index++) {
+      final int remaining = digits.length - index;
+      buffer.write(digits[index]);
+      if (remaining > 1 && remaining % 3 == 1) {
+        buffer.write(',');
+      }
+    }
+    return buffer.toString();
+  }
 }
 
 MessagesController _ensureMessagesController() {
@@ -202,7 +222,9 @@ MessagesController _ensureMessagesController() {
 }
 
 class _ChatAvatar extends StatelessWidget {
-  const _ChatAvatar();
+  const _ChatAvatar({required this.avatarUrl});
+
+  final String avatarUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -227,16 +249,32 @@ class _ChatAvatar extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         padding: EdgeInsets.all(4.r),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF162420),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.person_rounded,
-            size: 58.r,
-            color: const Color(0xFFD9E0DE),
-          ),
+        child: ClipOval(
+          child: avatarUrl.isEmpty
+              ? const _ChatAvatarFallback()
+              : Image.network(
+                  avatarUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const _ChatAvatarFallback(),
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatAvatarFallback extends StatelessWidget {
+  const _ChatAvatarFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: const Color(0xFF162420),
+      child: Center(
+        child: Icon(
+          Icons.person_rounded,
+          size: 58.r,
+          color: const Color(0xFFD9E0DE),
         ),
       ),
     );

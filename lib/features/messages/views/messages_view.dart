@@ -262,9 +262,8 @@ class _SearchUserItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String name =
-        user['fullName']?.toString() ?? user['name']?.toString() ?? 'user'.tr;
-    final String avatar =
-        user['avatarUrl']?.toString() ?? 'https://i.pravatar.cc/120?img=12';
+        user['fullName']?.toString() ?? user['name']?.toString() ?? 'User';
+    final String avatar = user['avatarUrl']?.toString() ?? '';
     final bool isOnline = user['isOnline'] as bool? ?? false;
 
     return GestureDetector(

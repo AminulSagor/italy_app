@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
@@ -15,7 +17,10 @@ class JobDetailsView extends GetView<JobSentencesController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.jobSentences,
+      sourceId: 'job_details_view',
+      child: Scaffold(
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
         bottom: false,
@@ -58,6 +63,7 @@ class JobDetailsView extends GetView<JobSentencesController> {
           );
         }),
       ),
+    ),
     );
   }
 }

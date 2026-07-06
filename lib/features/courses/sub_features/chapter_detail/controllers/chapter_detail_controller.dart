@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/services/api_error_handler.dart';
@@ -26,9 +27,12 @@ class ChapterDetailController extends GetxController {
   }) : _chapterDetailApiService = chapterDetailApiService;
 
   final RxBool isLoading = false.obs;
+  final ScrollController scrollController = ScrollController();
   final RxBool isResumeSubmitting = false.obs;
   final RxBool isAudioProgressRecorded = false.obs;
-  final RxInt videoPlayCommand = 0.obs;
+  final RxBool isVideoPlaying = false.obs;
+  final RxBool shouldPlayVideo = false.obs;
+  final RxInt videoPlaybackCommand = 0.obs;
   final Rx<ChapterQuizStatus> quizStatus = ChapterQuizStatus.disabled.obs;
   final Rxn<ChapterDetailModel> detail = Rxn<ChapterDetailModel>();
 
@@ -47,6 +51,12 @@ class ChapterDetailController extends GetxController {
       _lastRecordedVideoPercent = 80;
     }
     loadDetail();
+  }
+
+  @override
+  void onClose() {
+    scrollController.dispose();
+    super.onClose();
   }
 
   Future<void> loadDetail() async {
@@ -253,16 +263,36 @@ class ChapterDetailController extends GetxController {
     );
   }
 
-  Future<void> resumeVideo() async {
+  Future<void> toggleVideoPlayback() async {
     final ChapterDetailModel? current = detail.value;
     if (current == null || !current.hasVideo || isResumeSubmitting.value) {
       return;
     }
 
+    if (isVideoPlaying.value) {
+      shouldPlayVideo.value = false;
+      videoPlaybackCommand.value++;
+      return;
+    }
+
     isResumeSubmitting.value = true;
-    videoPlayCommand.value++;
-    await Future<void>.delayed(const Duration(milliseconds: 180));
-    isResumeSubmitting.value = false;
+    try {
+      if (scrollController.hasClients) {
+        await scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeOutCubic,
+        );
+      }
+      shouldPlayVideo.value = true;
+      videoPlaybackCommand.value++;
+    } finally {
+      isResumeSubmitting.value = false;
+    }
+  }
+
+  void onVideoPlaybackChanged(bool isPlaying) {
+    isVideoPlaying.value = isPlaying;
   }
 
   Future<void> recordVideoProgress({

@@ -1,96 +1,20 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 
-import '../../../core/models/learning_activity_models.dart';
 import '../../../core/services/api_client.dart';
-import '../../../core/services/learning_activity_api_service.dart';
 import '../models/home_models.dart';
 
 class HomeApiService {
-  HomeApiService({
-    required ApiClient apiClient,
-    required LearningActivityApiService learningActivityApiService,
-  }) : _apiClient = apiClient,
-       _learningActivityApiService = learningActivityApiService;
+  HomeApiService({required ApiClient apiClient}) : _apiClient = apiClient;
 
   final ApiClient _apiClient;
-  final LearningActivityApiService _learningActivityApiService;
 
-  Future<HomeOverviewModel> fetchWeeklyOverview() async {
-    final WeeklyLearningActivityModel result = await _learningActivityApiService
-        .getWeeklySummary(weekStart: _currentWeekStart());
-    final String today = _dateOnly(DateTime.now());
-    return HomeOverviewModel(
-      totalSeconds: result.totalSeconds,
-      days: result.days
-          .map(
-            (LearningActivityDayModel day) => HomeActivityModel(
-              date: day.date,
-              dayLabel: day.dayLabel,
-              durationSeconds: day.durationSeconds,
-              isToday: day.date == today,
-            ),
-          )
-          .toList(growable: false),
-    );
-  }
-
-  Future<HomeChapterModel?> fetchCurrentChapter() async {
+  Future<HomeDashboardModel> fetchDashboard() async {
     final Response<dynamic> response = await _apiClient.dio.get(
-      '/learning-progress/current-chapter',
+      '/home/dashboard',
+      queryParameters: <String, dynamic>{'weekStart': _currentWeekStart()},
     );
-    if (response.data == null) return null;
-    return HomeChapterModel.fromJson(_responseMap(response));
-  }
-
-  Future<List<HomeWorkItemModel>> fetchCareerTracks() async {
-    final Response<dynamic> response = await _apiClient.dio.get(
-      '/skill-builder/career-tracks',
-      queryParameters: <String, dynamic>{'page': 1, 'limit': 8},
-    );
-    final Map<String, dynamic> body = _responseMap(response);
-    final dynamic rawItems = body['items'];
-    if (rawItems is! List) return <HomeWorkItemModel>[];
-    return rawItems
-        .whereType<Map>()
-        .map(
-          (Map item) =>
-              HomeWorkItemModel.fromJson(Map<String, dynamic>.from(item)),
-        )
-        .toList(growable: false);
-  }
-
-  Future<HomeWebinarModel?> fetchNextWebinar() async {
-    final Response<dynamic> response = await _apiClient.dio.get(
-      '/webinars/upcoming',
-      queryParameters: <String, dynamic>{'page': 1, 'limit': 1},
-    );
-    final dynamic rawItems = _responseMap(response)['webinars'];
-    if (rawItems is! List || rawItems.isEmpty || rawItems.first is! Map) {
-      return null;
-    }
-    return HomeWebinarModel.fromJson(
-      Map<String, dynamic>.from(rawItems.first as Map),
-    );
-  }
-
-  Future<HomeDailyChallengesModel> fetchDailyChallenges() async {
-    final Response<dynamic> response = await _apiClient.dio.get(
-      '/daily-challenges/today',
-    );
-    final Map<String, dynamic> body = _responseMap(response);
-    final dynamic rawTasks = body['tasks'];
-    final List<dynamic> tasks = rawTasks is List ? rawTasks : <dynamic>[];
-    final int completed = tasks.where((dynamic item) {
-      if (item is! Map) return false;
-      final String status = item['status']?.toString() ?? '';
-      return status == 'completed' || status == 'claimed';
-    }).length;
-    return HomeDailyChallengesModel(
-      label: 'gen_daily_challenges_1'.tr,
-      completed: completed,
-      total: tasks.length,
-    );
+    return HomeDashboardModel.fromJson(_responseMap(response));
   }
 
   Map<String, dynamic> _responseMap(Response<dynamic> response) {

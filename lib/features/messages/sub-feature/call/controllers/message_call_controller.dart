@@ -7,9 +7,12 @@ import 'package:uuid/uuid.dart';
 import '../models/message_call_models.dart';
 import '../service/call_agora_service.dart';
 import '../service/call_socket_service.dart';
+import '../service/incoming_call_coordinator.dart';
+import '../views/message_call_view.dart';
 import 'message_call_duration_tracker.dart';
 
 part 'message_call_controller_media.dart';
+part 'message_call_controller_presentation.dart';
 
 class MessageCallController extends GetxController {
   MessageCallController({
@@ -40,6 +43,10 @@ class MessageCallController extends GetxController {
   final MessageCallSessionModel? _initialSession;
   final MessageCallDurationTracker _durationTracker =
       MessageCallDurationTracker();
+  final String _presentationId = 'message-call-${const Uuid().v4()}';
+
+  late final IncomingCallCoordinator _callCoordinator;
+  late final Worker _statusWorker;
 
   final RxBool isLoading = false.obs;
   final RxBool isEnding = false.obs;
@@ -84,6 +91,21 @@ class MessageCallController extends GetxController {
     _callSocketService.addRejectedCallListener(_rejectedCallListener);
     _callSocketService.addEndedCallListener(_endedCallListener);
 
+    _callCoordinator = Get.find<IncomingCallCoordinator>();
+    _callCoordinator.presentCall(
+      ownerId: _presentationId,
+      participantName: participant.name,
+      isVideo: callType.isVideo,
+      status: durationLabel.value,
+      onResume: openCallScreen,
+    );
+    _statusWorker = ever<String>(durationLabel, (String status) {
+      _callCoordinator.updatePresentedCallStatus(
+        ownerId: _presentationId,
+        status: status,
+      );
+    });
+
     final MessageCallSessionModel? session = _initialSession;
     _startCallFuture = session == null
         ? startCall()
@@ -99,6 +121,10 @@ class MessageCallController extends GetxController {
     durationLabel.value = 'loading'.tr;
 
     try {
+      await _callAgoraService.ensurePermissionsForCall(
+        isVideoCall: callType.isVideo,
+      );
+
       final Map<String, dynamic> response =
           await _callSocketService.initiateCall(
             conversationId: conversationId,
@@ -533,18 +559,6 @@ class MessageCallController extends GetxController {
     _ringingTimeoutTimer = null;
   }
 
-  void _closeRoute() {
-    if (_routeClosed) {
-      return;
-    }
-
-    _routeClosed = true;
-    _stopAllTimers();
-    if (!isClosed) {
-      Get.back<void>();
-    }
-  }
-
   String _labelForStatus(String status) {
     return switch (status) {
       'rejected' => 'call_declined'.tr,
@@ -566,6 +580,8 @@ class MessageCallController extends GetxController {
 
   @override
   void onClose() {
+    _statusWorker.dispose();
+    _callCoordinator.clearPresentedCall(_presentationId);
     _callSocketService.removeAnsweredCallListener(_answeredCallListener);
     _callSocketService.removeRejectedCallListener(_rejectedCallListener);
     _callSocketService.removeEndedCallListener(_endedCallListener);

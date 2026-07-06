@@ -7,6 +7,9 @@ import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../controllers/leaderboard_controller.dart';
 import '../services/leaderboard_service.dart';
+import 'widgets/leaderboard_header_widgets.dart';
+import 'widgets/leaderboard_list_widgets.dart';
+import 'widgets/my_rank_floating_card.dart';
 import '../../../core/services/api_client.dart';
 import '../../../core/services/token_service.dart';
 
@@ -48,103 +51,114 @@ class LeaderboardView extends GetView<LeaderboardController> {
         child: Stack(
           children: <Widget>[
             Obx(
-              () => CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: <Widget>[
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      kHomeHorizontalPadding.w,
-                      showPageAppBar ? 22.h : 20.h,
-                      kHomeHorizontalPadding.w,
-                      0,
-                    ),
-                    sliver: SliverToBoxAdapter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          _LeaderboardHeader(
-                            showPageAppBar: showPageAppBar,
-                            onHelpTap: controller.onHelpTap,
-                          ),
-                          SizedBox(height: 24.h),
-                          if (controller.hasError.value)
-                            Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.all(12.h),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFE6E6),
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              child: Row(
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.error_outline,
-                                    color: const Color(0xFFB00020),
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  Expanded(
-                                    child: Text(
-                                      controller.errorMessage.value,
-                                      style: TextStyle(
-                                        color: const Color(0xFFB00020),
-                                        fontWeight: FontWeight.w700,
+              () => RefreshIndicator(
+                onRefresh: controller.refreshLeaderboard,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  slivers: <Widget>[
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        kHomeHorizontalPadding.w,
+                        showPageAppBar ? 22.h : 20.h,
+                        kHomeHorizontalPadding.w,
+                        0,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            LeaderboardHeader(
+                              showPageAppBar: showPageAppBar,
+                              onHelpTap: controller.onHelpTap,
+                            ),
+                            SizedBox(height: 24.h),
+                            if (controller.hasError.value)
+                              Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.all(12.h),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFE6E6),
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                child: Row(
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.error_outline,
+                                      color: const Color(0xFFB00020),
+                                    ),
+                                    SizedBox(width: 10.w),
+                                    Expanded(
+                                      child: Text(
+                                        controller.errorMessage.value,
+                                        style: TextStyle(
+                                          color: const Color(0xFFB00020),
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
+                            LeaderboardTabBar(
+                              selectedIndex: controller.selectedTabIndex.value,
+                              onChanged: controller.onTabChanged,
                             ),
-                          _LeaderboardTabBar(
-                            selectedIndex: controller.selectedTabIndex.value,
-                            onChanged: controller.onTabChanged,
-                          ),
-                          SizedBox(height: 48.h),
-                          _PodiumSection(
-                            users: controller.podiumUsers,
-                            isGlobal: controller.isGlobalSelected,
-                          ),
-                          if (controller.isMyLeagueSelected) ...<Widget>[
-                            SizedBox(height: 30.h),
-                            _MilestoneCard(
-                              milestone: controller.milestoneData.value,
+                            SizedBox(height: 48.h),
+                            LeaderboardPodiumSection(
+                              users: controller.podiumUsers,
+                              isGlobal: controller.isGlobalSelected,
                             ),
+                            if (controller.isMyLeagueSelected) ...<Widget>[
+                              SizedBox(height: 30.h),
+                              LeaderboardMilestoneCard(
+                                milestone: controller.milestoneData.value,
+                              ),
+                            ],
+                            SizedBox(height: 32.h),
+                            LeaderboardSearchField(
+                              controller: controller.searchController,
+                              onChanged: controller.onSearchChanged,
+                            ),
+                            SizedBox(height: 32.h),
                           ],
-                          SizedBox(height: 32.h),
-                          _SearchField(
-                            controller: controller.searchController,
-                            onChanged: controller.onSearchChanged,
-                          ),
-                          SizedBox(height: 32.h),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      kHomeHorizontalPadding.w,
-                      0,
-                      kHomeHorizontalPadding.w,
-                      245.h,
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        kHomeHorizontalPadding.w,
+                        0,
+                        kHomeHorizontalPadding.w,
+                        245.h,
+                      ),
+                      sliver: controller.filteredUsers.isEmpty
+                          ? const SliverToBoxAdapter(child: EmptyLeaderboard())
+                          : LeaderboardList(
+                              users: controller.filteredUsers,
+                              onMessageTap: controller.onMessageTap,
+                            ),
                     ),
-                    sliver: controller.filteredUsers.isEmpty
-                        ? const SliverToBoxAdapter(child: _EmptyLeaderboard())
-                        : _LeaderboardList(
-                            users: controller.filteredUsers,
-                            onMessageTap: controller.onMessageTap,
-                          ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Positioned(
               left: 24.w,
               right: 24.w,
-              bottom: showPageAppBar ? 28.h : 90.h,
-              child: _MyRankFloatingCard(
-                onInfoTap: controller.onRankInfoTap,
-                rankLabel: controller.myRankLabel,
-                xpLabel: controller.myXpLabel,
-                zoneLabel: controller.currentUser.value?.zoneLabel,
+              bottom: showPageAppBar
+                  ? 28.h
+                  : MediaQuery.paddingOf(context).bottom +
+                        (kHomeBottomNavOuterPadding + kHomeBottomNavHeight + 20)
+                            .h,
+              child: Obx(
+                () => MyRankFloatingCard(
+                  onInfoTap: controller.onRankInfoTap,
+                  rankLabel: controller.myRankLabel,
+                  xpLabel: controller.myXpLabel,
+                  zoneLabel: controller.currentUser.value?.zoneLabel,
+                ),
               ),
             ),
           ],
@@ -1103,7 +1117,10 @@ class _MyRankFloatingCard extends StatelessWidget {
               SizedBox(height: 3.h),
               if (zoneLabel != null && zoneLabel!.isNotEmpty)
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 3.h,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF3D9416),
                     borderRadius: BorderRadius.circular(100.r),

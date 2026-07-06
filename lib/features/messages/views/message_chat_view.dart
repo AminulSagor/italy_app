@@ -122,7 +122,12 @@ class MessageChatView extends GetView<MessageChatController> {
                                     ),
                                     SizedBox(height: 12.h),
                                   ],
-                                  ChatMessageBubble(message: item),
+                                  ChatMessageBubble(
+                                    message: item,
+                                    onTap: item.canCallBack
+                                        ? () => controller.callBack(item)
+                                        : null,
+                                  ),
                                   SizedBox(height: 12.h),
                                 ],
                               );

@@ -13,15 +13,9 @@ class CoursesApiService {
     final Response<dynamic> response = await _apiClient.dio.get('/courses');
     final List<Map<String, dynamic>> courseItems = _responseList(response.data);
 
-    final List<CourseCardModel> courses = <CourseCardModel>[];
-
-    for (final Map<String, dynamic> course in courseItems) {
-      final CourseProgressModel? progress = await _safeFetchCourseProgress(
-        courseId: _stringValue(course['id']),
-      );
-
-      courses.add(_courseCardFromApi(course, progress: progress));
-    }
+    final List<CourseCardModel> courses = courseItems
+        .map(_courseCardFromApi)
+        .toList(growable: false);
 
     return CoursesDashboardModel(
       courses: courses,
@@ -51,9 +45,9 @@ class CoursesApiService {
         await _safeFetchLessonProgressById(syllabus);
     final Map<String, dynamic>? finalExamGateway =
         await _safeFetchFinalExamGateway(
-      courseId: courseId,
-      hasLinkedExam: _stringValue(course['finalExamTemplateId']).isNotEmpty,
-    );
+          courseId: courseId,
+          hasLinkedExam: _stringValue(course['finalExamTemplateId']).isNotEmpty,
+        );
 
     return _courseDetailFromApi(
       course: course,
@@ -75,6 +69,19 @@ class CoursesApiService {
     } on DioException {
       return false;
     }
+  }
+
+  Future<CourseCardModel> fetchCourseProgress(CourseCardModel course) async {
+    final CourseProgressModel? progress = await _safeFetchCourseProgress(
+      courseId: course.courseId,
+    );
+    if (progress == null) return course;
+
+    final int percent = progress.completionPercent.round();
+    return course.copyWith(
+      progressLabel: '$percent%',
+      progress: (percent / 100).clamp(0.0, 1.0).toDouble(),
+    );
   }
 
   Future<CourseProgressModel?> _safeFetchCourseProgress({
@@ -108,12 +115,11 @@ class CoursesApiService {
     }
   }
 
-  Future<Map<String, CourseLessonProgressModel>>
-      _safeFetchLessonProgressById(Map<String, dynamic> syllabus) async {
+  Future<Map<String, CourseLessonProgressModel>> _safeFetchLessonProgressById(
+    Map<String, dynamic> syllabus,
+  ) async {
     final List<String> lessonIds = _jsonList(syllabus['chapters'])
-        .expand(
-          (Map<String, dynamic> chapter) => _jsonList(chapter['lessons']),
-        )
+        .expand((Map<String, dynamic> chapter) => _jsonList(chapter['lessons']))
         .map((Map<String, dynamic> lesson) => _stringValue(lesson['id']))
         .where((String lessonId) => lessonId.isNotEmpty)
         .toSet()
@@ -151,11 +157,7 @@ class CoursesApiService {
     }
   }
 
-  CourseCardModel _courseCardFromApi(
-    Map<String, dynamic> json, {
-    CourseProgressModel? progress,
-  }) {
-    final int percent = (progress?.completionPercent ?? 0).round();
+  CourseCardModel _courseCardFromApi(Map<String, dynamic> json) {
     final String subtitle = _stringValue(json['subtitle']).isNotEmpty
         ? _stringValue(json['subtitle'])
         : _stringValue(json['description']);
@@ -167,8 +169,8 @@ class CoursesApiService {
       chapterId: _stringValue(json['chapterId']),
       title: _fallbackString(json['title'], 'untitled_course'.tr),
       subtitle: subtitle,
-      progressLabel: '$percent%',
-      progress: (percent / 100).clamp(0.0, 1.0).toDouble(),
+      progressLabel: '-',
+      progress: 0,
       statusLabel: 'active'.tr,
       state: CourseCardState.active,
     );
@@ -240,10 +242,7 @@ class CoursesApiService {
 
     for (final Map<String, dynamic> chapter in chapters) {
       for (final Map<String, dynamic> lesson in _jsonList(chapter['lessons'])) {
-        final bool lessonIsFree = _boolValue(
-          lesson['isFree'],
-          fallback: true,
-        );
+        final bool lessonIsFree = _boolValue(lesson['isFree'], fallback: true);
         lessonEntries.add(
           _CourseLessonEntry(
             lesson: lesson,
@@ -394,11 +393,11 @@ class CoursesApiService {
         : _intValue(backendProgressValue);
     final bool thresholdReached =
         hasPublishedExam && backendProgressPercent >= unlockPercent;
-    final bool gatewayUnlocked = gateway != null &&
+    final bool gatewayUnlocked =
+        gateway != null &&
         (_boolValue(gateway['isUnlocked'], fallback: thresholdReached) ||
             thresholdReached);
-    final bool canStart =
-        hasLinkedExam && hasPublishedExam && gatewayUnlocked;
+    final bool canStart = hasLinkedExam && hasPublishedExam && gatewayUnlocked;
     final String gatewayMessage = gateway == null
         ? ''
         : _stringValue(gateway['message']);
@@ -581,8 +580,5 @@ class _CourseLessonEntry {
   final Map<String, dynamic> lesson;
   final bool isAccessible;
 
-  const _CourseLessonEntry({
-    required this.lesson,
-    required this.isAccessible,
-  });
+  const _CourseLessonEntry({required this.lesson, required this.isAccessible});
 }

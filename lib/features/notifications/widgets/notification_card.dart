@@ -58,7 +58,18 @@ class NotificationCard extends StatelessWidget {
                         ).copyWith(color: cardStyle.titleColor),
                       ),
                     ),
-                    SizedBox(width: 3.w),
+                    SizedBox(width: 6.w),
+                    if (!notification.isRead) ...<Widget>[
+                      Container(
+                        width: 8.w,
+                        height: 8.w,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryGreen,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                    ],
                     _TimeLabel(notification: notification),
                   ],
                 ),

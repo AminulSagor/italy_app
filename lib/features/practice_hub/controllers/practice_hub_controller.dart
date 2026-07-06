@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/api_error_handler.dart';
@@ -26,6 +28,7 @@ class PracticeHubController extends GetxController {
 
   final RxInt selectedCourseIndex = 0.obs;
   final RxBool isCoursesLoading = false.obs;
+  int _courseRequestVersion = 0;
 
   /// Synced with the currently selected course progress.
   final RxBool isFinalExamReady = false.obs;
@@ -60,7 +63,9 @@ class PracticeHubController extends GetxController {
         return;
       }
 
+      final int requestVersion = ++_courseRequestVersion;
       courses.assignAll(result.data!.courses);
+      unawaited(_loadCourseProgress(result.data!.courses, requestVersion));
 
       if (selectedCourseIndex.value >= courses.length) {
         selectedCourseIndex.value = 0;
@@ -70,6 +75,37 @@ class PracticeHubController extends GetxController {
     } finally {
       isCoursesLoading.value = false;
     }
+  }
+
+
+  Future<void> _loadCourseProgress(
+    List<CourseCardModel> loadedCourses,
+    int requestVersion,
+  ) async {
+    await Future.wait(
+      loadedCourses.map((CourseCardModel course) async {
+        final ApiResult<CourseCardModel> result =
+            await ApiErrorHandler.call<CourseCardModel>(
+              () => _coursesApiService.fetchCourseProgress(course),
+              showError: false,
+            );
+        if (requestVersion != _courseRequestVersion ||
+            !result.isSuccess ||
+            result.data == null) {
+          return;
+        }
+
+        final int index = courses.indexWhere(
+          (CourseCardModel item) => item.id == course.id,
+        );
+        if (index >= 0) {
+          courses[index] = result.data!;
+          if (index == selectedCourseIndex.value) {
+            _syncFinalExamState();
+          }
+        }
+      }),
+    );
   }
 
   void _syncFinalExamState() {
@@ -122,7 +158,7 @@ class PracticeHubController extends GetxController {
   }
 
   void onViewAllCoursesTap() {
-    loadCourses();
+    Get.toNamed(AppRoutes.courseCatalog);
   }
 
   Future<void> onCourseTap(int index) async {

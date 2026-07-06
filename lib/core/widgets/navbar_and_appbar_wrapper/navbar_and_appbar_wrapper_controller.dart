@@ -7,7 +7,9 @@ import 'package:get/get.dart';
 
 import '../../../features/drawer_features/language/language_switch_dialogue.dart';
 import '../../../features/home/controllers/home_controller.dart';
+import '../../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../../features/messages/controllers/messages_controller.dart';
+import '../../../features/messages/controllers/messages_controller_navigation.dart';
 import '../../../features/messages/controllers/message_chat_controller.dart';
 import '../../../features/messages/services/messages_service.dart';
 import '../../../features/messages/services/chat_socket_service.dart';
@@ -20,7 +22,8 @@ import '../../services/learning_activity_tracker_service.dart';
 import '../../services/notification_summary_service.dart';
 import '../../services/token_service.dart';
 import '../../../features/notifications/controllers/notifications_controller.dart';
-import '../../../features/notifications/services/notifications_mock_service.dart';
+import '../../../features/notifications/models/notification_models.dart';
+import '../../../features/notifications/services/notifications_api_service.dart';
 import '../../../features/notifications/views/notifications_bottom_sheet.dart';
 import '../../localization/translation_service.dart';
 import '../../services/auth_service.dart';
@@ -42,12 +45,10 @@ class NavbarAndAppbarWrapperController extends GetxController
 
   void onBottomNavTap(int index) {
     isMessagesPageOpen.value = false;
-
     // if (index == 4) {
     //   Get.snackbar("In Progress", "Feature comming soon");
     //   return;
     // }
-
     if (index == currentIndex.value) {
       if (Get.isRegistered<LearningActivityTrackerService>()) {
         Get.find<LearningActivityTrackerService>().setShellTab(index);
@@ -55,6 +56,7 @@ class NavbarAndAppbarWrapperController extends GetxController
       if (index == 0) {
         unawaited(refreshHomeDashboard());
       }
+      _refreshLeaderboardIfNeeded(index);
       return;
     }
 
@@ -66,6 +68,16 @@ class NavbarAndAppbarWrapperController extends GetxController
     if (index == 0) {
       unawaited(refreshHomeDashboard());
     }
+    _refreshLeaderboardIfNeeded(index);
+  }
+
+  void _refreshLeaderboardIfNeeded(int index) {
+    if (index != 3) return;
+    Future<void>.microtask(() async {
+      if (Get.isRegistered<LeaderboardController>()) {
+        await Get.find<LeaderboardController>().refreshLeaderboard();
+      }
+    });
   }
 
   Future<void> refreshHomeDashboard() async {
@@ -76,33 +88,137 @@ class NavbarAndAppbarWrapperController extends GetxController
   }
 
   void openNotifications() {
-    if (!Get.isRegistered<NotificationsMockService>()) {
-      Get.lazyPut<NotificationsMockService>(() => NotificationsMockService());
+    if (!Get.isRegistered<NotificationsApiService>()) {
+      Get.lazyPut<NotificationsApiService>(
+        () => NotificationsApiService(apiClient: Get.find<ApiClient>()),
+        fenix: true,
+      );
     }
 
     if (Get.isRegistered<NotificationsController>()) {
       Get.delete<NotificationsController>();
     }
-
-    Get.put<NotificationsController>(
-      NotificationsController(
-        notificationsMockService: Get.find<NotificationsMockService>(),
-      ),
-    );
-
+    final NotificationsController notificationsController =
+        Get.put<NotificationsController>(
+          NotificationsController(
+            notificationsApiService: Get.find<NotificationsApiService>(),
+            onNotificationOpen: _openNotificationDestination,
+          ),
+        );
     Get.bottomSheet<void>(
-      const NotificationsBottomSheet(),
+      NotificationsBottomSheet(controller: notificationsController),
       isScrollControlled: true,
       backgroundColor: AppColors.transparent,
       barrierColor: AppColors.black.withValues(alpha: 0.45),
       isDismissible: true,
       enableDrag: true,
-    ).whenComplete(() {
-      if (Get.isRegistered<NotificationsController>()) {
+    ).whenComplete(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      if (Get.isRegistered<NotificationsController>() &&
+          identical(
+            Get.find<NotificationsController>(),
+            notificationsController,
+          )) {
         Get.delete<NotificationsController>();
       }
       refreshNotificationState();
     });
+  }
+
+  Future<void> _openNotificationDestination(
+    NotificationItemModel notification,
+  ) async {
+    final String deepLink = notification.deepLink.trim();
+    if (Get.isBottomSheetOpen ?? false) {
+      Get.back<void>();
+      await Future<void>.delayed(const Duration(milliseconds: 180));
+    }
+    if (deepLink.isEmpty) return;
+    final Uri? uri = Uri.tryParse(deepLink);
+    final String path = uri?.path.toLowerCase() ?? deepLink.toLowerCase();
+    final String host = uri?.host.toLowerCase() ?? '';
+
+    if (path.startsWith('/messages') || host == 'messages') {
+      final String conversationId =
+          uri?.queryParameters['conversationId']?.trim() ?? '';
+      openMessages();
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      if (conversationId.isNotEmpty && Get.isRegistered<MessagesController>()) {
+        final bool opened = await Get.find<MessagesController>()
+            .openConversationById(conversationId);
+        if (!opened) {
+          Get.snackbar('Messages', 'The conversation could not be opened.');
+        }
+      }
+      return;
+    }
+
+    if (
+        path.startsWith('/daily-challenges') ||
+        path.startsWith('/practice-hub') ||
+        notification.eventType == 'streak_reminder') {
+      onBottomNavTap(1);
+      return;
+    }
+
+    if (path.startsWith('/webinar') || host == 'webinar') {
+      isMessagesPageOpen.value = false;
+      await Get.toNamed(
+        AppRoutes.webinar,
+        parameters: uri?.queryParameters ?? const <String, String>{},
+      );
+      return;
+    }
+
+    if (
+        path.startsWith('/courses') ||
+        host == 'final-exams' ||
+        host == 'certificates') {
+      onBottomNavTap(1);
+      return;
+    }
+
+    if (
+        path.startsWith('/ai-tutor') ||
+        path.startsWith('/ai-chat') ||
+        host == 'ai-tutor') {
+      onBottomNavTap(2);
+      return;
+    }
+    if (path.startsWith('/leaderboard') || host == 'leaderboard') {
+      onBottomNavTap(3);
+      return;
+    }
+
+    if (
+        path.startsWith('/service-hub') ||
+        path.startsWith('/cv-builder') ||
+        host == 'cv-builder') {
+      onBottomNavTap(4);
+      return;
+    }
+    if (path.startsWith('/rewards') || host == 'rewards') {
+      await Get.toNamed(AppRoutes.rewards);
+      return;
+    }
+    if (path.startsWith(AppRoutes.shop)) {
+      await Get.toNamed(AppRoutes.shop);
+      return;
+    }
+    if (path.startsWith(AppRoutes.settings)) {
+      await Get.toNamed(AppRoutes.settings);
+      return;
+    }
+    if (path.startsWith(AppRoutes.guide)) {
+      await Get.toNamed(AppRoutes.guide);
+      return;
+    }
+    if (path.startsWith(AppRoutes.contactSupport)) {
+      await Get.toNamed(AppRoutes.contactSupport);
+      return;
+    }
+
+    onBottomNavTap(0);
   }
 
   void openMessages() {
@@ -355,7 +471,7 @@ class NavbarAndAppbarWrapperController extends GetxController
             : (senderId.isNotEmpty
                   ? senderId
                   : DateTime.now().millisecondsSinceEpoch.toString());
-        String avatar = 'https://i.pravatar.cc/120?img=12';
+        String avatar = '';
         String name = 'Conversation';
 
         final MessageThreadModel newThread = MessageThreadModel(
@@ -442,8 +558,8 @@ class NavbarAndAppbarWrapperController extends GetxController
   }
 
   void onDrawerChanged(bool isOpened) {
-    if (!isOpened || !Get.isRegistered<UserSessionController>()) return;
-    Get.find<UserSessionController>().loadUser();
+    if (!isOpened || !Get.isRegistered<AppDrawerController>()) return;
+    unawaited(Get.find<AppDrawerController>().refreshProfile());
   }
 
   Future<void> onLogoutTap() async {

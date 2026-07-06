@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
 
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PendingAcceptedCall {
@@ -27,7 +27,7 @@ class CallkitPendingActionStore {
   static Future<void> saveAcceptedCall({
     required String callId,
     required Map<String, dynamic> callData,
-    required Map<String, dynamic> answerResponse,
+    Map<String, dynamic> answerResponse = const <String, dynamic>{},
   }) async {
     final String normalizedCallId = callId.trim();
     if (normalizedCallId.isEmpty) {
@@ -91,8 +91,12 @@ class CallkitPendingActionStore {
         createdAt: createdAt,
       );
     } catch (error, stackTrace) {
-      debugPrint('[CallKitPending] Unable to decode pending call: $error');
-      debugPrintStack(stackTrace: stackTrace);
+      dev.log(
+        'Unable to decode pending accepted call',
+        name: 'CallKitPending',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }

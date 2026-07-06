@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
@@ -13,7 +15,10 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.survivalItalian,
+      sourceId: 'survival_italian_view',
+      child: Scaffold(
       backgroundColor: AppColors.homeBackground,
       body: Stack(
         children: <Widget>[
@@ -112,6 +117,7 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
           }),
         ],
       ),
+    ),
     );
   }
 }

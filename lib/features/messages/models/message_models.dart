@@ -1,3 +1,11 @@
+enum MessageChatItemType { text, call }
+
+enum MessageChatCallType { audio, video }
+
+enum MessageChatCallStatus { completed, missed, rejected, failed }
+
+enum MessageThreadPreviewTone { normal, missed, ongoing }
+
 class MessageThreadModel {
   final String id;
   final String learnerName;
@@ -10,6 +18,7 @@ class MessageThreadModel {
   final bool isDelivered;
   final String avatarUrl;
   final String? contactId;
+  final MessageThreadPreviewTone previewTone;
 
   const MessageThreadModel({
     required this.id,
@@ -23,6 +32,7 @@ class MessageThreadModel {
     required this.isDelivered,
     required this.avatarUrl,
     this.contactId,
+    this.previewTone = MessageThreadPreviewTone.normal,
   });
 
   factory MessageThreadModel.fromJson(Map<String, dynamic> json) {
@@ -38,6 +48,10 @@ class MessageThreadModel {
       isDelivered: json['isDelivered'] as bool,
       avatarUrl: json['avatarUrl'] as String,
       contactId: json['contactId'] as String?,
+      previewTone: MessageThreadPreviewTone.values.firstWhere(
+        (MessageThreadPreviewTone tone) => tone.name == json['previewTone'],
+        orElse: () => MessageThreadPreviewTone.normal,
+      ),
     );
   }
 
@@ -54,6 +68,7 @@ class MessageThreadModel {
       'isDelivered': isDelivered,
       'avatarUrl': avatarUrl,
       'contactId': contactId,
+      'previewTone': previewTone.name,
     };
   }
 
@@ -69,6 +84,7 @@ class MessageThreadModel {
     String? avatarUrl,
     String? contactId,
     String? blockStatus,
+    MessageThreadPreviewTone? previewTone,
   }) {
     return MessageThreadModel(
       id: id ?? this.id,
@@ -82,6 +98,7 @@ class MessageThreadModel {
       isDelivered: isDelivered ?? this.isDelivered,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       contactId: contactId ?? this.contactId,
+      previewTone: previewTone ?? this.previewTone,
     );
   }
 }
@@ -94,6 +111,11 @@ class MessageChatItemModel {
   final bool isMine;
   final String? createdAtIso;
   final bool isSystem;
+  final MessageChatItemType itemType;
+  final String? callId;
+  final MessageChatCallType? callType;
+  final MessageChatCallStatus? callStatus;
+  final int callDurationSeconds;
 
   const MessageChatItemModel({
     required this.id,
@@ -103,7 +125,20 @@ class MessageChatItemModel {
     required this.statusLabel,
     required this.isMine,
     this.isSystem = false,
+    this.itemType = MessageChatItemType.text,
+    this.callId,
+    this.callType,
+    this.callStatus,
+    this.callDurationSeconds = 0,
   });
+
+  bool get isCall => itemType == MessageChatItemType.call;
+
+  bool get canCallBack =>
+      isCall &&
+      (callStatus == MessageChatCallStatus.missed ||
+          callStatus == MessageChatCallStatus.rejected ||
+          callStatus == MessageChatCallStatus.failed);
 
   factory MessageChatItemModel.fromJson(Map<String, dynamic> json) {
     return MessageChatItemModel(
@@ -114,6 +149,14 @@ class MessageChatItemModel {
       statusLabel: json['statusLabel'] as String,
       isMine: json['isMine'] as bool,
       isSystem: json['isSystem'] as bool? ?? false,
+      itemType: MessageChatItemType.values.firstWhere(
+        (MessageChatItemType value) => value.name == json['itemType'],
+        orElse: () => MessageChatItemType.text,
+      ),
+      callId: json['callId'] as String?,
+      callType: _callTypeFrom(json['callType']),
+      callStatus: _callStatusFrom(json['callStatus']),
+      callDurationSeconds: _intFrom(json['callDurationSeconds']),
     );
   }
 
@@ -126,6 +169,11 @@ class MessageChatItemModel {
       'statusLabel': statusLabel,
       'isMine': isMine,
       'isSystem': isSystem,
+      'itemType': itemType.name,
+      'callId': callId,
+      'callType': callType?.name,
+      'callStatus': callStatus?.name,
+      'callDurationSeconds': callDurationSeconds,
     };
   }
 
@@ -137,6 +185,11 @@ class MessageChatItemModel {
     bool? isMine,
     String? createdAtIso,
     bool? isSystem,
+    MessageChatItemType? itemType,
+    String? callId,
+    MessageChatCallType? callType,
+    MessageChatCallStatus? callStatus,
+    int? callDurationSeconds,
   }) {
     return MessageChatItemModel(
       id: id ?? this.id,
@@ -146,8 +199,38 @@ class MessageChatItemModel {
       statusLabel: statusLabel ?? this.statusLabel,
       isMine: isMine ?? this.isMine,
       isSystem: isSystem ?? this.isSystem,
+      itemType: itemType ?? this.itemType,
+      callId: callId ?? this.callId,
+      callType: callType ?? this.callType,
+      callStatus: callStatus ?? this.callStatus,
+      callDurationSeconds: callDurationSeconds ?? this.callDurationSeconds,
     );
   }
+}
+
+MessageChatCallType? _callTypeFrom(dynamic value) {
+  final String normalized = value?.toString().trim().toLowerCase() ?? '';
+  if (normalized == MessageChatCallType.audio.name) {
+    return MessageChatCallType.audio;
+  }
+  if (normalized == MessageChatCallType.video.name) {
+    return MessageChatCallType.video;
+  }
+  return null;
+}
+
+MessageChatCallStatus? _callStatusFrom(dynamic value) {
+  final String normalized = value?.toString().trim().toLowerCase() ?? '';
+  for (final MessageChatCallStatus status in MessageChatCallStatus.values) {
+    if (status.name == normalized) return status;
+  }
+  return null;
+}
+
+int _intFrom(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }
 
 class MessageChatModel {
@@ -188,6 +271,7 @@ class MessageChatModel {
       'contactName': contactName,
       'contactStatus': contactStatus,
       'contactAvatarUrl': contactAvatarUrl,
+      'contactId': contactId,
       'isOnline': isOnline,
       'messages': messages
           .map((MessageChatItemModel message) => message.toJson())
@@ -199,6 +283,7 @@ class MessageChatModel {
     String? contactName,
     String? contactStatus,
     String? contactAvatarUrl,
+    String? contactId,
     bool? isOnline,
     List<MessageChatItemModel>? messages,
   }) {
@@ -206,6 +291,7 @@ class MessageChatModel {
       contactName: contactName ?? this.contactName,
       contactStatus: contactStatus ?? this.contactStatus,
       contactAvatarUrl: contactAvatarUrl ?? this.contactAvatarUrl,
+      contactId: contactId ?? this.contactId,
       isOnline: isOnline ?? this.isOnline,
       messages: messages ?? this.messages,
     );

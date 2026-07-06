@@ -12,15 +12,19 @@ import 'chapter_video_player_surface.dart';
 
 class ChapterVideoCard extends StatefulWidget {
   final ChapterDetailModel detail;
-  final int playCommand;
+  final int playbackCommand;
+  final bool shouldPlay;
   final Future<String?> Function() loadVideoUrl;
+  final ValueChanged<bool> onPlaybackChanged;
   final void Function(Duration position, Duration duration) onProgressChanged;
 
   const ChapterVideoCard({
     super.key,
     required this.detail,
-    required this.playCommand,
+    required this.playbackCommand,
+    required this.shouldPlay,
     required this.loadVideoUrl,
+    required this.onPlaybackChanged,
     required this.onProgressChanged,
   });
 
@@ -35,13 +39,14 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
 
   bool _isInitializing = false;
   String? _errorMessage;
-  int _lastPlayCommand = 0;
+  int _lastPlaybackCommand = 0;
+  bool _lastReportedPlaying = false;
   int _lastReportedPercent = 0;
 
   @override
   void initState() {
     super.initState();
-    _lastPlayCommand = widget.playCommand;
+    _lastPlaybackCommand = widget.playbackCommand;
     _lastReportedPercent = widget.detail.progress.videoWatchPercent;
     _hasWatchedFullyNotifier = ValueNotifier<bool>(
       widget.detail.progress.videoWatchPercent >= 100,
@@ -75,9 +80,13 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       _hasWatchedFullyNotifier.value = true;
     }
 
-    if (widget.playCommand != _lastPlayCommand) {
-      _lastPlayCommand = widget.playCommand;
-      _play();
+    if (widget.playbackCommand != _lastPlaybackCommand) {
+      _lastPlaybackCommand = widget.playbackCommand;
+      if (widget.shouldPlay) {
+        _play();
+      } else {
+        _pause();
+      }
     }
   }
 
@@ -186,6 +195,8 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       return;
     }
 
+    _reportPlaybackState(controller.value.isPlaying);
+
     final Duration duration = controller.value.duration;
     final Duration position = controller.value.position;
     if (duration.inMilliseconds <= 0) {
@@ -222,6 +233,19 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     }
   }
 
+  void _reportPlaybackState(bool isPlaying) {
+    if (_lastReportedPlaying == isPlaying) return;
+    _lastReportedPlaying = isPlaying;
+    widget.onPlaybackChanged(isPlaying);
+  }
+
+  Future<void> _pause() async {
+    final VideoPlayerController? controller = _videoController;
+    if (controller == null || !controller.value.isInitialized) return;
+    await controller.pause();
+    _reportPlaybackState(false);
+  }
+
   Future<void> _play() async {
     await _ensurePlayerInitialized();
 
@@ -237,6 +261,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     }
 
     await controller.play();
+    _reportPlaybackState(true);
   }
 
   Future<void> _openFullscreen() async {

@@ -55,7 +55,7 @@ class CallAgoraService extends GetxService {
     }
 
     await leaveCall();
-    await _ensureMicrophonePermission();
+    await ensurePermissionsForCall(isVideoCall: isVideoCall);
 
     _activeMedia = media;
     _supportsVideo = isVideoCall;
@@ -201,6 +201,14 @@ class CallAgoraService extends GetxService {
       if (identical(_joinCompleter, joinCompleter)) {
         _joinCompleter = null;
       }
+    }
+  }
+
+
+  Future<void> ensurePermissionsForCall({required bool isVideoCall}) async {
+    await _ensureMicrophonePermission();
+    if (isVideoCall) {
+      await _ensureCameraPermission();
     }
   }
 
@@ -389,23 +397,31 @@ class CallAgoraService extends GetxService {
   }
 
   Future<void> _ensureMicrophonePermission() async {
-    final PermissionStatus status =
-    await Permission.microphone.request();
+    final PermissionStatus currentStatus = await Permission.microphone.status;
+    final PermissionStatus status = currentStatus.isGranted
+        ? currentStatus
+        : await Permission.microphone.request();
 
     if (!status.isGranted) {
-      throw const CallAgoraException(
-        'Microphone permission is required for calling.',
+      throw CallAgoraException(
+        status.isPermanentlyDenied
+            ? 'Allow microphone access from the app settings to use calls.'
+            : 'Microphone permission is required for calling.',
       );
     }
   }
 
   Future<void> _ensureCameraPermission() async {
-    final PermissionStatus status =
-    await Permission.camera.request();
+    final PermissionStatus currentStatus = await Permission.camera.status;
+    final PermissionStatus status = currentStatus.isGranted
+        ? currentStatus
+        : await Permission.camera.request();
 
     if (!status.isGranted) {
-      throw const CallAgoraException(
-        'Camera permission is required for video calling.',
+      throw CallAgoraException(
+        status.isPermanentlyDenied
+            ? 'Allow camera access from the app settings to use video calls.'
+            : 'Camera permission is required for video calling.',
       );
     }
   }

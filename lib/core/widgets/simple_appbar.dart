@@ -30,6 +30,7 @@ class SimpleAppbar extends StatelessWidget implements PreferredSizeWidget {
               child: Container(
                 width: 48.r,
                 height: 48.r,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,

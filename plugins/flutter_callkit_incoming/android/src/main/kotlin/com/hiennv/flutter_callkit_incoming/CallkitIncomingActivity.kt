@@ -505,7 +505,8 @@ class CallkitIncomingActivity : Activity() {
             )
 
         if (avatarUrl.isNullOrEmpty()) {
-            ivAvatar.visibility = View.INVISIBLE
+            ivAvatar.visibility = View.VISIBLE
+            ivAvatar.setImageResource(R.drawable.ic_default_avatar)
             return
         }
 

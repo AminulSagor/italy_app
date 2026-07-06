@@ -26,7 +26,7 @@ class HomeView extends GetView<HomeController> {
           top: false,
           child: RefreshIndicator(
             color: AppColors.primaryGreen,
-            onRefresh: () => controller.loadDashboard(refresh: true),
+            onRefresh: () => controller.loadDashboard(),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),

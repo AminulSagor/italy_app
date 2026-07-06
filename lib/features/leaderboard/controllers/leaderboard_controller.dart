@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/widgets/app_drawer_controller.dart';
 import '../views/league_system_promotion_view.dart';
 import '../views/popup_insider_view.dart';
 import '../views/score_system_info_view.dart';
@@ -103,12 +107,11 @@ class LeaderboardController extends GetxController {
   ];
 
   // Fallback static data shown when the service hasn't returned anything yet
-  List<Map<String, dynamic>> get _myLeaguePodiumUsers =>
-      <Map<String, dynamic>>[
-        {'rank': 1, 'name': 'sarah_ahmed', 'xp': '4.9k', 'league': 'silver'.tr},
-        {'rank': 2, 'name': 'rahul_dev', 'xp': '4.7k', 'league': 'silver'.tr},
-        {'rank': 3, 'name': 'nalia_khan', 'xp': '4.6k', 'league': 'silver'.tr},
-      ];
+  List<Map<String, dynamic>> get _myLeaguePodiumUsers => <Map<String, dynamic>>[
+    {'rank': 1, 'name': 'sarah_ahmed', 'xp': '4.9k', 'league': 'silver'.tr},
+    {'rank': 2, 'name': 'rahul_dev', 'xp': '4.7k', 'league': 'silver'.tr},
+    {'rank': 3, 'name': 'nalia_khan', 'xp': '4.6k', 'league': 'silver'.tr},
+  ];
 
   List<Map<String, dynamic>> get _globalPodiumUsers => <Map<String, dynamic>>[
     {'rank': 1, 'name': 'sarah_ahmed', 'xp': '14.9k', 'league': '1ST'},
@@ -201,32 +204,31 @@ class LeaderboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // initial load
-    loadLeaderboard();
-    // load league configuration
-    loadLeagues();
-    
-    loadScoringGuide();
-    loadPendingPromotion();
+    unawaited(loadLeaderboard());
+    unawaited(loadLeagues());
+    unawaited(loadScoringGuide());
+    unawaited(loadPendingPromotion());
 
     // debounce the search query and call the backend search when user pauses typing
-    debounce<String>(searchQuery, (String val) {
-      loadLeaderboard(page: 1, search: val);
+    debounce<String>(searchQuery, (String value) {
+      unawaited(loadLeaderboard(page: 1, search: value));
     }, time: const Duration(milliseconds: 400));
   }
-  
+
   final Rxn<Map<String, dynamic>> scoringGuide = Rxn<Map<String, dynamic>>();
 
   Future<void> loadScoringGuide() async {
     try {
-      final Map<String, dynamic>? data = await _leaderboardService.fetchScoringGuide();
+      final Map<String, dynamic>? data = await _leaderboardService
+          .fetchScoringGuide();
       scoringGuide.value = data;
     } catch (_) {}
   }
 
   Future<void> loadPendingPromotion() async {
     try {
-      final Map<String, dynamic>? data = await _leaderboardService.fetchPendingPromotion();
+      final Map<String, dynamic>? data = await _leaderboardService
+          .fetchPendingPromotion();
       if (data != null && data['hasPendingPromotion'] == true) {
         final Map<String, dynamic>? promotion = data['promotion'];
         if (promotion != null) {
@@ -242,16 +244,24 @@ class LeaderboardController extends GetxController {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    const Icon(Icons.stars_rounded, color: Colors.orange, size: 64),
+                    const Icon(
+                      Icons.stars_rounded,
+                      color: Colors.orange,
+                      size: 64,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       promotion['title'] as String? ?? 'gen_congratulations'.tr,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      promotion['message'] as String? ?? 'you_have_been_promoted'.tr,
+                      promotion['message'] as String? ??
+                          'you_have_been_promoted'.tr,
                       style: const TextStyle(fontSize: 16),
                       textAlign: TextAlign.center,
                     ),
@@ -259,25 +269,50 @@ class LeaderboardController extends GetxController {
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         child: Text(
-                          (promotion['benefit'] as Map<String, dynamic>)['type'] == 'xp_boost' 
-                              ? 'Reward: ${(promotion['benefit'] as Map<String, dynamic>)['multiplier']}x XP Boost!' 
+                          (promotion['benefit']
+                                      as Map<String, dynamic>)['type'] ==
+                                  'xp_boost'
+                              ? 'Reward: ${(promotion['benefit'] as Map<String, dynamic>)['multiplier']}x XP Boost!'
                               : 'reward_bonus_unlocked'.tr,
-                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColorsBridge.primaryGreen, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999))),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColorsBridge.primaryGreen,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
                       onPressed: () {
                         Get.back<void>();
-                        _leaderboardService.acknowledgePromotion(promotion['id'].toString());
+                        _leaderboardService.acknowledgePromotion(
+                          promotion['id'].toString(),
+                        );
                       },
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        child: Text('awesome'.tr, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          'awesome'.tr,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -300,11 +335,20 @@ class LeaderboardController extends GetxController {
     }
   }
 
+  Future<void> refreshLeaderboard() async {
+    final String search = searchQuery.value.trim();
+    await Future.wait<void>(<Future<void>>[
+      loadLeaderboard(page: 1, search: search),
+      loadLeagues(),
+      loadScoringGuide(),
+    ]);
+  }
+
   void onTabChanged(int index) {
     selectedTabIndex.value = index;
     searchQuery.value = '';
     searchController.clear();
-    loadLeaderboard(page: 1, search: '');
+    unawaited(loadLeaderboard(page: 1, search: ''));
   }
 
   void onSearchChanged(String value) {
@@ -361,20 +405,30 @@ class LeaderboardController extends GetxController {
         limit: 20,
         search: search.isNotEmpty ? search : null,
       );
-      // Debug output to help diagnose why fallback data may be shown
-      print('[Leaderboard] fetching with params: ${dto.toQueryParameters()}');
-
-
+      dev.log(
+        'Fetching leaderboard with ${dto.toQueryParameters()}',
+        name: 'LeaderboardController',
+      );
 
       final LeaderboardResponseModel resp = await _leaderboardService
           .fetchLeaderboard(dto: dto);
+      final ProfileModel? profile =
+          resp.currentUser ?? await _leaderboardService.fetchMe();
 
-      print(
-        '[Leaderboard] fetched: podium=${resp.podium.length} entries=${resp.entries.length}',
+      dev.log(
+        'Fetched podium=${resp.podium.length} entries=${resp.entries.length}',
+        name: 'LeaderboardController',
       );
 
       meta.value = resp.meta;
-      currentUser.value = resp.currentUser;
+      currentUser.value = profile;
+      currentUser.refresh();
+      if (profile != null && Get.isRegistered<AppDrawerController>()) {
+        Get.find<AppDrawerController>().updateLeague(
+          profile.league.name,
+          rank: profile.leagueRank,
+        );
+      }
       milestoneData.value = resp.milestone;
 
       // Map podium and entries to the small map shape the view expects
@@ -415,6 +469,9 @@ class LeaderboardController extends GetxController {
       'league': (r.league.name).toUpperCase(),
       'isCurrentUser': r.isCurrentUser,
       'userId': r.userId,
+      'avatarUrl': r.avatarUrl,
+      'streakDays': r.streakDays,
+      'totalXp': r.totalXp,
     };
   }
 
@@ -455,23 +512,31 @@ class LeaderboardController extends GetxController {
 
   void onMessageTap(Map<String, dynamic> user) async {
     if ((user['isCurrentUser'] as bool?) ?? false) return;
-    
+
     final String? userId = user['userId']?.toString();
     if (userId == null) return;
-    
-    final ProfileModel? preview = await _leaderboardService.fetchUserPreview(userId);
+
+    final ProfileModel? preview = await _leaderboardService.fetchUserPreview(
+      userId,
+    );
     if (preview != null && preview.canChat == true) {
       Get.dialog<void>(
-        LeaderboardChatDialog(user: <String, dynamic>{
-          ...user,
-          'chatTargetUserId': preview.chatTargetUserId,
-          'totalXp': preview.totalXp,
-          'streakDays': preview.streakDays,
-        }),
+        LeaderboardChatDialog(
+          user: <String, dynamic>{
+            ...user,
+            'chatTargetUserId': preview.chatTargetUserId,
+            'totalXp': preview.totalXp,
+            'streakDays': preview.streakDays,
+            'avatarUrl': preview.avatarUrl,
+          },
+        ),
         barrierColor: Colors.black.withValues(alpha: 0.45),
       );
     } else {
-      Get.snackbar('cannot_chat'.tr, 'this_user_cannot_be_messaged_right_now'.tr);
+      Get.snackbar(
+        'cannot_chat'.tr,
+        'this_user_cannot_be_messaged_right_now'.tr,
+      );
     }
   }
 

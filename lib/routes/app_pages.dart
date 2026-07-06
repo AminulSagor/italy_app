@@ -19,6 +19,7 @@ import '../features/courses/controllers/course_detail_controller.dart';
 import '../features/courses/controllers/course_certificate_controller.dart';
 import '../features/courses/controllers/courses_controller.dart';
 import '../features/courses/models/course_models.dart';
+import '../features/courses/services/course_catalog_api_service.dart';
 import '../features/courses/services/courses_api_service.dart';
 import '../features/courses/services/course_certificate_mock_service.dart';
 import '../features/courses/sub_features/chapter_detail/controllers/chapter_detail_controller.dart';
@@ -33,6 +34,7 @@ import '../features/courses/sub_features/final_exam/views/final_exam_speaking_vi
 import '../features/courses/sub_features/final_exam/views/final_exam_success_view.dart';
 import '../features/courses/sub_features/final_exam/views/final_exam_writing_view.dart';
 import '../features/courses/sub_features/pro_checkout/controllers/pro_checkout_controller.dart';
+import '../features/courses/sub_features/pro_checkout/services/course_google_play_billing_service.dart';
 import '../features/courses/sub_features/pro_checkout/services/pro_checkout_api_service.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_checkout_view.dart';
 import '../features/courses/sub_features/pro_checkout/views/pro_order_summary_view.dart';
@@ -54,14 +56,17 @@ import '../features/home/services/home_api_service.dart';
 import '../features/home/views/home_view.dart';
 import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_service.dart';
-import '../features/notifications/services/notifications_mock_service.dart';
+import '../features/notifications/services/notifications_api_service.dart';
 import '../features/practice_hub/services/italian_tts_service.dart';
 import '../features/practice_hub/services/job_sentences_api_service.dart';
+import '../features/practice_hub/sub_features/course_catalog/controllers/course_catalog_controller.dart';
+import '../features/practice_hub/sub_features/course_catalog/views/course_catalog_view.dart';
 import '../core/services/api_client.dart';
 import '../core/controllers/user_session_controller.dart';
 import '../core/services/learning_activity_api_service.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/token_service.dart';
+import '../core/services/storage_service.dart';
 import '../features/messages/services/chat_socket_service.dart';
 import '../features/messages/services/presence_service.dart';
 import '../features/splash/splash_view.dart';
@@ -244,20 +249,13 @@ class AppPages {
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<HomeApiService>()) {
           Get.lazyPut<HomeApiService>(
-            () => HomeApiService(
-              apiClient: Get.find<ApiClient>(),
-              learningActivityApiService:
-                  Get.find<LearningActivityApiService>(),
-            ),
+            () => HomeApiService(apiClient: Get.find<ApiClient>()),
             fenix: true,
           );
         }
         if (!Get.isRegistered<HomeController>()) {
           Get.lazyPut<HomeController>(
-            () => HomeController(
-              homeApiService: Get.find<HomeApiService>(),
-              userSessionController: Get.find<UserSessionController>(),
-            ),
+            () => HomeController(homeApiService: Get.find<HomeApiService>()),
             fenix: true,
           );
         }
@@ -275,20 +273,13 @@ class AppPages {
         }
         if (!Get.isRegistered<HomeApiService>()) {
           Get.lazyPut<HomeApiService>(
-            () => HomeApiService(
-              apiClient: Get.find<ApiClient>(),
-              learningActivityApiService:
-                  Get.find<LearningActivityApiService>(),
-            ),
+            () => HomeApiService(apiClient: Get.find<ApiClient>()),
             fenix: true,
           );
         }
         if (!Get.isRegistered<HomeController>()) {
           Get.lazyPut<HomeController>(
-            () => HomeController(
-              homeApiService: Get.find<HomeApiService>(),
-              userSessionController: Get.find<UserSessionController>(),
-            ),
+            () => HomeController(homeApiService: Get.find<HomeApiService>()),
             fenix: true,
           );
         }
@@ -325,9 +316,10 @@ class AppPages {
             ),
           );
         }
-        if (!Get.isRegistered<NotificationsMockService>()) {
-          Get.lazyPut<NotificationsMockService>(
-            () => NotificationsMockService(),
+        if (!Get.isRegistered<NotificationsApiService>()) {
+          Get.lazyPut<NotificationsApiService>(
+            () => NotificationsApiService(apiClient: Get.find<ApiClient>()),
+            fenix: true,
           );
         }
         if (!Get.isRegistered<NavbarAndAppbarWrapperController>()) {
@@ -336,6 +328,20 @@ class AppPages {
             fenix: true,
           );
         }
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.courseCatalog,
+      page: () => const CourseCatalogView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CourseCatalogApiService>(
+          () => CourseCatalogApiService(apiClient: Get.find<ApiClient>()),
+        );
+        Get.lazyPut<CourseCatalogController>(
+          () => CourseCatalogController(
+            courseCatalogApiService: Get.find<CourseCatalogApiService>(),
+          ),
+        );
       }),
     ),
     GetPage(
@@ -359,9 +365,6 @@ class AppPages {
         );
       }),
     ),
-
-
-
 
     GetPage(
       name: AppRoutes.chapterDetail,
@@ -521,9 +524,18 @@ class AppPages {
           () => ProCheckoutApiService(apiClient: Get.find<ApiClient>()),
           tag: args.controllerTag,
         );
+        Get.lazyPut<CourseGooglePlayBillingService>(
+          () => CourseGooglePlayBillingService(
+            storageService: Get.find<StorageService>(),
+          ),
+          tag: args.controllerTag,
+        );
         Get.lazyPut<ProCheckoutController>(
           () => ProCheckoutController(
             proCheckoutApiService: Get.find<ProCheckoutApiService>(
+              tag: args.controllerTag,
+            ),
+            billingService: Get.find<CourseGooglePlayBillingService>(
               tag: args.controllerTag,
             ),
             courseId: args.courseId,
@@ -1006,7 +1018,7 @@ class AppPages {
         }
         if (!Get.isRegistered<JobSentencesController>()) {
           Get.lazyPut<JobSentencesController>(
-                () => JobSentencesController(
+            () => JobSentencesController(
               apiService: Get.find<JobSentencesApiService>(),
               ttsService: Get.find<ItalianTtsService>(),
             ),
@@ -1065,6 +1077,5 @@ class AppPages {
         Get.find<PracticeHubController>().loadDailyChallenges(showError: false);
       }),
     ),
-
   ];
 }

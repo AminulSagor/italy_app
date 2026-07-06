@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../controllers/ai_chat_controller.dart';
@@ -63,7 +65,11 @@ class _AiTutorChatContentState extends State<AiTutorChatContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.aiTutor,
+      sourceId: 'ai_tutor_chat_view',
+      enabled: !widget.showWritingHelpStatus,
+      child: Obx(() {
       final List<AiTutorMessageModel> messages = _controller.textMessages;
       final bool loading = _controller.isSendingMessage.value;
 
@@ -98,7 +104,8 @@ class _AiTutorChatContentState extends State<AiTutorChatContent> {
           return const AiTutorThinkingBubble();
         },
       );
-    });
+    }),
+    );
   }
 }
 

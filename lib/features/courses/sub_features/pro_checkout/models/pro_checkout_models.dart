@@ -2,6 +2,53 @@ enum ProCurrency { eur, bdt }
 
 enum ProPaymentMethod { card, googlePlay }
 
+enum ProPurchaseOutcomeStatus { completed, pending, cancelled, failed }
+
+class ProStoreProductModel {
+  const ProStoreProductModel({
+    required this.id,
+    required this.provider,
+    required this.productId,
+    required this.productType,
+    required this.basePlanId,
+    required this.offerId,
+    required this.isActive,
+  });
+
+  final String id;
+  final String provider;
+  final String productId;
+  final String productType;
+  final String basePlanId;
+  final String offerId;
+  final bool isActive;
+
+  factory ProStoreProductModel.fromJson(Map<String, dynamic> json) {
+    return ProStoreProductModel(
+      id: _stringValue(json['id'] ?? json['providerProductId']),
+      provider: _stringValue(json['provider']),
+      productId: _stringValue(json['productId']),
+      productType: _stringValue(
+        json['productType'],
+        fallback: 'non_consumable',
+      ),
+      basePlanId: _stringValue(json['basePlanId']),
+      offerId: _stringValue(json['offerId']),
+      isActive: _boolValue(json['isActive'], fallback: true),
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'provider': provider,
+    'productId': productId,
+    'productType': productType,
+    'basePlanId': basePlanId,
+    'offerId': offerId,
+    'isActive': isActive,
+  };
+}
+
 class ProFeatureModel {
   const ProFeatureModel({
     required this.title,
@@ -21,25 +68,11 @@ class ProFeatureModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'title': title,
-      'iconName': iconName,
-      'tone': tone,
-    };
-  }
-
-  ProFeatureModel copyWith({
-    String? title,
-    String? iconName,
-    String? tone,
-  }) {
-    return ProFeatureModel(
-      title: title ?? this.title,
-      iconName: iconName ?? this.iconName,
-      tone: tone ?? this.tone,
-    );
-  }
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'title': title,
+    'iconName': iconName,
+    'tone': tone,
+  };
 }
 
 class ProPlanModel {
@@ -51,10 +84,6 @@ class ProPlanModel {
     required this.bdtPrice,
     required this.bdtOldPrice,
     required this.discountLabel,
-    required this.couponCode,
-    this.couponEurPrice,
-    this.couponBdtPrice,
-    this.couponSaveLabel,
   });
 
   final String title;
@@ -64,10 +93,6 @@ class ProPlanModel {
   final String bdtPrice;
   final String bdtOldPrice;
   final String discountLabel;
-  final String couponCode;
-  final String? couponEurPrice;
-  final String? couponBdtPrice;
-  final String? couponSaveLabel;
 
   factory ProPlanModel.fromJson(Map<String, dynamic> json) {
     return ProPlanModel(
@@ -78,22 +103,10 @@ class ProPlanModel {
       bdtPrice: _stringValue(json['bdtPrice']),
       bdtOldPrice: _stringValue(json['bdtOldPrice']),
       discountLabel: _stringValue(json['discountLabel']),
-      couponCode: _stringValue(json['couponCode']),
-      couponEurPrice: _nullableString(json['couponEurPrice']),
-      couponBdtPrice: _nullableString(json['couponBdtPrice']),
-      couponSaveLabel: _nullableString(json['couponSaveLabel']),
     );
   }
 
   String priceLabel(ProCurrency currency, {bool isCouponApplied = false}) {
-    if (isCouponApplied) {
-      final String? couponPrice = currency == ProCurrency.bdt
-          ? couponBdtPrice
-          : couponEurPrice;
-      if (couponPrice != null && couponPrice.isNotEmpty) {
-        return couponPrice;
-      }
-    }
     return currency == ProCurrency.bdt ? bdtPrice : eurPrice;
   }
 
@@ -101,35 +114,7 @@ class ProPlanModel {
     return currency == ProCurrency.bdt ? bdtOldPrice : eurOldPrice;
   }
 
-  String couponSaveLabelFor(ProCurrency currency) {
-    final String? explicitLabel = couponSaveLabel;
-    if (explicitLabel != null && explicitLabel.isNotEmpty) {
-      return explicitLabel;
-    }
-
-    final double price = _amountFromLabel(
-      priceLabel(currency, isCouponApplied: true),
-    );
-    final double oldPrice = _amountFromLabel(oldPriceLabel(currency));
-    final double saved = (oldPrice - price).clamp(0, double.infinity);
-    return 'YOU SAVE ${_formatAmount(currency, saved)}';
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'title': title,
-      'subtitle': subtitle,
-      'eurPrice': eurPrice,
-      'eurOldPrice': eurOldPrice,
-      'bdtPrice': bdtPrice,
-      'bdtOldPrice': bdtOldPrice,
-      'discountLabel': discountLabel,
-      'couponCode': couponCode,
-      'couponEurPrice': couponEurPrice,
-      'couponBdtPrice': couponBdtPrice,
-      'couponSaveLabel': couponSaveLabel,
-    };
-  }
+  String couponSaveLabelFor(ProCurrency currency) => discountLabel;
 
   ProPlanModel copyWith({
     String? title,
@@ -139,10 +124,6 @@ class ProPlanModel {
     String? bdtPrice,
     String? bdtOldPrice,
     String? discountLabel,
-    String? couponCode,
-    String? couponEurPrice,
-    String? couponBdtPrice,
-    String? couponSaveLabel,
   }) {
     return ProPlanModel(
       title: title ?? this.title,
@@ -152,26 +133,18 @@ class ProPlanModel {
       bdtPrice: bdtPrice ?? this.bdtPrice,
       bdtOldPrice: bdtOldPrice ?? this.bdtOldPrice,
       discountLabel: discountLabel ?? this.discountLabel,
-      couponCode: couponCode ?? this.couponCode,
-      couponEurPrice: couponEurPrice ?? this.couponEurPrice,
-      couponBdtPrice: couponBdtPrice ?? this.couponBdtPrice,
-      couponSaveLabel: couponSaveLabel ?? this.couponSaveLabel,
     );
   }
 
-  double _amountFromLabel(String label) {
-    final RegExpMatch? match = RegExp(
-      r'\d+(\.\d+)?',
-    ).firstMatch(label.replaceAll(',', ''));
-    return double.tryParse(match?.group(0) ?? '') ?? 0;
-  }
-
-  String _formatAmount(ProCurrency currency, double amount) {
-    if (currency == ProCurrency.bdt) {
-      return '৳${amount.toStringAsFixed(2)}';
-    }
-    return '€${amount.toStringAsFixed(2)}';
-  }
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'title': title,
+    'subtitle': subtitle,
+    'eurPrice': eurPrice,
+    'eurOldPrice': eurOldPrice,
+    'bdtPrice': bdtPrice,
+    'bdtOldPrice': bdtOldPrice,
+    'discountLabel': discountLabel,
+  };
 }
 
 class ProOrderModel {
@@ -185,6 +158,7 @@ class ProOrderModel {
     required this.trustedLabel,
     required this.plan,
     required this.features,
+    required this.storeProduct,
   });
 
   final String courseId;
@@ -196,65 +170,101 @@ class ProOrderModel {
   final String trustedLabel;
   final ProPlanModel plan;
   final List<ProFeatureModel> features;
+  final ProStoreProductModel storeProduct;
 
   factory ProOrderModel.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> rawFeatures = json['features'] is List
+        ? json['features'] as List<dynamic>
+        : const <dynamic>[];
+    final Map<String, dynamic> storeProductJson = proJsonMap(
+      json['storeProduct'],
+    );
     return ProOrderModel(
       courseId: _stringValue(json['courseId']),
       courseName: _stringValue(
         json['courseName'],
-        fallback: _stringValue(json['headline'], fallback: 'Course'),
+        fallback: _stringValue(json['headline']),
       ),
       lessonCount: _intValue(json['lessonCount']),
       appName: _stringValue(json['appName']),
       headline: _stringValue(json['headline']),
       description: _stringValue(json['description']),
       trustedLabel: _stringValue(json['trustedLabel']),
-      plan: ProPlanModel.fromJson(_jsonMap(json['plan'])),
-      features: _jsonList(json['features'])
-          .map(ProFeatureModel.fromJson)
+      plan: ProPlanModel.fromJson(proJsonMap(json['plan'])),
+      features: rawFeatures
+          .whereType<Map>()
+          .map(
+            (Map<dynamic, dynamic> item) => ProFeatureModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ),
+          )
           .toList(growable: false),
+      storeProduct: ProStoreProductModel.fromJson(
+        storeProductJson.isEmpty
+            ? <String, dynamic>{
+                'provider': 'google_play',
+                'productType': 'non_consumable',
+                'isActive': false,
+              }
+            : storeProductJson,
+      ),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'courseId': courseId,
-      'courseName': courseName,
-      'lessonCount': lessonCount,
-      'appName': appName,
-      'headline': headline,
-      'description': description,
-      'trustedLabel': trustedLabel,
-      'plan': plan.toJson(),
-      'features': features
-          .map((ProFeatureModel feature) => feature.toJson())
-          .toList(growable: false),
-    };
   }
 
   ProOrderModel copyWith({
-    String? courseId,
-    String? courseName,
-    int? lessonCount,
-    String? appName,
-    String? headline,
-    String? description,
-    String? trustedLabel,
     ProPlanModel? plan,
-    List<ProFeatureModel>? features,
+    ProStoreProductModel? storeProduct,
   }) {
     return ProOrderModel(
-      courseId: courseId ?? this.courseId,
-      courseName: courseName ?? this.courseName,
-      lessonCount: lessonCount ?? this.lessonCount,
-      appName: appName ?? this.appName,
-      headline: headline ?? this.headline,
-      description: description ?? this.description,
-      trustedLabel: trustedLabel ?? this.trustedLabel,
+      courseId: courseId,
+      courseName: courseName,
+      lessonCount: lessonCount,
+      appName: appName,
+      headline: headline,
+      description: description,
+      trustedLabel: trustedLabel,
       plan: plan ?? this.plan,
-      features: features ?? this.features,
+      features: features,
+      storeProduct: storeProduct ?? this.storeProduct,
     );
   }
+}
+
+class ProPendingGooglePlayPurchaseModel {
+  const ProPendingGooglePlayPurchaseModel({
+    required this.courseId,
+    required this.orderId,
+    required this.orderNumber,
+    required this.productId,
+    required this.createdAt,
+  });
+
+  final String courseId;
+  final String orderId;
+  final String orderNumber;
+  final String productId;
+  final DateTime createdAt;
+
+  factory ProPendingGooglePlayPurchaseModel.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ProPendingGooglePlayPurchaseModel(
+      courseId: _stringValue(json['courseId']),
+      orderId: _stringValue(json['orderId']),
+      orderNumber: _stringValue(json['orderNumber']),
+      productId: _stringValue(json['productId']),
+      createdAt: DateTime.tryParse(_stringValue(json['createdAt']))?.toLocal() ??
+          DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'courseId': courseId,
+    'orderId': orderId,
+    'orderNumber': orderNumber,
+    'productId': productId,
+    'createdAt': createdAt.toUtc().toIso8601String(),
+  };
 }
 
 class ProPurchaseResultModel {
@@ -281,42 +291,18 @@ class ProPurchaseResultModel {
       buttonLabel: _stringValue(json['buttonLabel']),
     );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'orderId': orderId,
-      'statusLabel': statusLabel,
-      'title': title,
-      'description': description,
-      'buttonLabel': buttonLabel,
-    };
-  }
+class ProPurchaseOutcome {
+  const ProPurchaseOutcome({required this.status, required this.message});
 
-  ProPurchaseResultModel copyWith({
-    String? orderId,
-    String? statusLabel,
-    String? title,
-    String? description,
-    String? buttonLabel,
-  }) {
-    return ProPurchaseResultModel(
-      orderId: orderId ?? this.orderId,
-      statusLabel: statusLabel ?? this.statusLabel,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      buttonLabel: buttonLabel ?? this.buttonLabel,
-    );
-  }
+  final ProPurchaseOutcomeStatus status;
+  final String message;
 }
 
 String _stringValue(dynamic value, {String fallback = ''}) {
   final String text = value?.toString().trim() ?? '';
   return text.isEmpty ? fallback : text;
-}
-
-String? _nullableString(dynamic value) {
-  final String text = value?.toString().trim() ?? '';
-  return text.isEmpty ? null : text;
 }
 
 int _intValue(dynamic value) {
@@ -325,16 +311,18 @@ int _intValue(dynamic value) {
   return int.tryParse(value?.toString() ?? '') ?? 0;
 }
 
-Map<String, dynamic> _jsonMap(dynamic value) {
+bool _boolValue(dynamic value, {bool fallback = false}) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    if (value.toLowerCase() == 'true') return true;
+    if (value.toLowerCase() == 'false') return false;
+  }
+  return fallback;
+}
+
+Map<String, dynamic> proJsonMap(dynamic value) {
   if (value is Map<String, dynamic>) return value;
   if (value is Map) return Map<String, dynamic>.from(value);
   return <String, dynamic>{};
-}
-
-List<Map<String, dynamic>> _jsonList(dynamic value) {
-  if (value is! List) return <Map<String, dynamic>>[];
-  return value
-      .whereType<Map>()
-      .map((Map<dynamic, dynamic> item) => Map<String, dynamic>.from(item))
-      .toList(growable: false);
 }

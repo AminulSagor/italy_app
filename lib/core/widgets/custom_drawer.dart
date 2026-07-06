@@ -63,7 +63,8 @@ class AppDrawer extends GetView<AppDrawerController> {
                       Obx(
                         () => _DrawerProfileHeader(
                           name: controller.displayName,
-                          level: controller.levelLabel,
+                          league: controller.leagueLabel,
+                          rank: controller.leagueRank,
                           avatarUrl: controller.avatarUrl,
                           onRefresh: controller.refreshProfile,
                         ),
@@ -160,13 +161,15 @@ class AppDrawer extends GetView<AppDrawerController> {
 class _DrawerProfileHeader extends StatelessWidget {
   const _DrawerProfileHeader({
     required this.name,
-    required this.level,
+    required this.league,
+    required this.rank,
     required this.avatarUrl,
     required this.onRefresh,
   });
 
   final String name;
-  final String level;
+  final String league;
+  final int? rank;
   final String? avatarUrl;
   final Future<void> Function({bool showError}) onRefresh;
 
@@ -213,15 +216,15 @@ class _DrawerProfileHeader extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: const Color(0xFF9BEF74),
+              color: _backgroundColorForRank(rank),
               borderRadius: BorderRadius.circular(100.r),
             ),
             child: Text(
-              'level_level'.trParams(<String, String>{'level': level.toString()}),
+              league,
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w900,
-                color: const Color(0xFF287C12),
+                color: _textColorForRank(rank),
               ),
             ),
           ),
@@ -239,6 +242,31 @@ class _DrawerProfileHeader extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _backgroundColorForRank(int? currentRank) {
+    switch (currentRank) {
+      case 1:
+        return const Color(0xFF77F53E);
+      case 2:
+        return const Color(0xFFE92886);
+      case 3:
+        return const Color(0xFFE98B00);
+      default:
+        return const Color(0xFFE6E7E8);
+    }
+  }
+
+  Color _textColorForRank(int? currentRank) {
+    switch (currentRank) {
+      case 1:
+        return const Color(0xFF287C12);
+      case 2:
+      case 3:
+        return Colors.white;
+      default:
+        return const Color(0xFF6E7275);
+    }
   }
 }
 

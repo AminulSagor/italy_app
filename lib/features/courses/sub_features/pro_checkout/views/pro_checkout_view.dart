@@ -43,17 +43,12 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
                   onBackTap: () => Get.back<void>(),
                 ),
                 SizedBox(height: 20.h),
-                ProCurrencyToggle(
-                  selectedCurrency: controller.selectedCurrency.value,
-                  onChanged: controller.setCurrency,
-                ),
-                SizedBox(height: 20.h),
                 CheckoutProductCard(
                   courseName: order.courseName,
                   lessonCount: order.lessonCount,
                   plan: order.plan,
                   currency: controller.selectedCurrency.value,
-                  isCouponApplied: controller.isCouponApplied.value,
+                  isCouponApplied: false,
                 ),
                 SizedBox(height: 30.h),
                 Padding(
@@ -70,19 +65,8 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
                 ),
                 SizedBox(height: 18.h),
                 CheckoutPaymentMethodCard(
-                  method: ProPaymentMethod.card,
-                  isSelected:
-                      controller.selectedPaymentMethod.value ==
-                      ProPaymentMethod.card,
-                  onTap: () =>
-                      controller.selectPaymentMethod(ProPaymentMethod.card),
-                ),
-                SizedBox(height: 24.h),
-                CheckoutPaymentMethodCard(
                   method: ProPaymentMethod.googlePlay,
-                  isSelected:
-                      controller.selectedPaymentMethod.value ==
-                      ProPaymentMethod.googlePlay,
+                  isSelected: true,
                   onTap: () => controller.selectPaymentMethod(
                     ProPaymentMethod.googlePlay,
                   ),

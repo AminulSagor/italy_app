@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:get/get.dart';
-
 import '../models/message_models.dart';
 import '../services/messages_service.dart';
 import '../views/message_chat_view.dart';
@@ -167,8 +166,9 @@ class MessagesController extends GetxController {
         final MessageThreadModel updated = old.copyWith(
           lastMessage: content,
           timeLabel: _formatTimeLabel(createdAt),
-          unreadCount: (old.unreadCount ?? 0) + 1,
+          unreadCount: old.unreadCount + 1,
           isHighlighted: true,
+          previewTone: MessageThreadPreviewTone.normal,
         );
         threads.removeAt(idx);
         threads.insert(0, updated);
@@ -194,9 +194,7 @@ class MessagesController extends GetxController {
           blockStatus: 'none',
           isHighlighted: true,
           isDelivered: true,
-          avatarUrl: avatar.isNotEmpty
-              ? avatar
-              : 'https://i.pravatar.cc/120?img=12',
+          avatarUrl: avatar,
           contactId: senderId.isNotEmpty ? senderId : null,
         );
         // prevent duplicates
@@ -430,8 +428,7 @@ class MessagesController extends GetxController {
       blockStatus: user['blockStatus']?.toString() ?? 'none',
       isHighlighted: false,
       isDelivered: true,
-      avatarUrl:
-          user['avatarUrl']?.toString() ?? 'https://i.pravatar.cc/120?img=12',
+      avatarUrl: user['avatarUrl']?.toString() ?? '',
       contactId: otherUserId,
     );
 

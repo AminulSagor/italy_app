@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:italir_pothe/core/models/learning_activity_models.dart';
+import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
@@ -75,7 +77,10 @@ class _PracticeHubPdfViewerState extends State<PracticeHubPdfViewer> {
         : controller.currentPracticePdf;
 
     if (document == null || document.source.trim().isEmpty) {
-      return Scaffold(
+      return LearningActivityPageScope(
+        activityKind: LearningActivityKind.pdf,
+        sourceId: 'practice_hub_pdf_viewer',
+        child: Scaffold(
         backgroundColor: const Color(0xFF10201B),
         body: SafeArea(
           child: Center(
@@ -89,11 +94,15 @@ class _PracticeHubPdfViewerState extends State<PracticeHubPdfViewer> {
             ),
           ),
         ),
+      ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF10201B),
+    return LearningActivityPageScope(
+      activityKind: LearningActivityKind.pdf,
+      sourceId: 'practice_hub_pdf_viewer',
+      child: Scaffold(
+        backgroundColor: const Color(0xFF10201B),
       body: Stack(
         children: <Widget>[
           const _PdfDarkBackground(),
@@ -127,6 +136,7 @@ class _PracticeHubPdfViewerState extends State<PracticeHubPdfViewer> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
