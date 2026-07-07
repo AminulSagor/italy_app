@@ -329,10 +329,10 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
       return;
     }
 
-    final String speechText = isWritingHelpSession &&
-            message.italianSpeechText?.trim().isNotEmpty == true
-        ? message.italianSpeechText!.trim()
-        : message.primary.trim();
+    final String speechText = _speechTextForMessage(message);
+    if (speechText.isEmpty) {
+      return;
+    }
 
     await _ttsService.stop();
     speakingMessageId.value = message.id;
@@ -348,6 +348,33 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
         speakingMessageId.value = null;
       }
     }
+  }
+
+  String _speechTextForMessage(AiTutorMessageModel message) {
+    if (!isWritingHelpSession) {
+      return message.primary.trim();
+    }
+
+    final List<String> parts = <String>[];
+
+    void addPart(String? value) {
+      final String cleanValue = value?.trim() ?? '';
+      if (cleanValue.isEmpty) {
+        return;
+      }
+      final String normalizedValue = cleanValue.toLowerCase();
+      final bool exists = parts.any(
+        (String item) => item.toLowerCase() == normalizedValue,
+      );
+      if (!exists) {
+        parts.add(cleanValue);
+      }
+    }
+
+    addPart(message.italianSpeechText);
+    addPart(message.correction?.corrected);
+
+    return parts.join('. ').trim();
   }
 
   void resetTextConversation() {
@@ -681,10 +708,10 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     switch (sourceLanguage) {
       case AiTutorWritingSourceLanguage.english:
         return 'Send any Italian word, sentence, paragraph, or writing request. '
-            'I will correct it, explain the important point in English, and give useful examples.';
+            'I will correct it and explain the important point in English.';
       case AiTutorWritingSourceLanguage.bangla:
         return 'ইতালীয় কোনো শব্দ, বাক্য, প্যারাগ্রাফ বা লেখার অনুরোধ পাঠান। '
-            'আমি ঠিক করে দেব, বাংলায় কারণ বুঝিয়ে দেব এবং দরকারি উদাহরণ দেব।';
+            'আমি ঠিক করে দেব এবং বাংলায় কারণ বুঝিয়ে দেব।';
     }
   }
 

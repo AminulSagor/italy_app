@@ -73,8 +73,33 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
                 ProPlanCard(
                   plan: order.plan,
                   currency: controller.selectedCurrency.value,
-                  isCouponApplied: false,
+                  isCouponApplied: order.hasCoupon,
                 ),
+                SizedBox(height: 26.h),
+                ProCouponInput(
+                  controller: controller.couponTextController,
+                  isCouponApplied: order.hasCoupon,
+                  isLoading: controller.isApplyingCoupon.value ||
+                      controller.isPreparingGooglePlay.value,
+                  appliedCode: order.couponCode,
+                  discountPercentage: order.discountPercentage,
+                  pricingNote: order.pricingNote,
+                  onChanged: controller.onCouponChanged,
+                  onApplyTap: controller.applyCoupon,
+                  onRemoveTap: controller.clearCoupon,
+                ),
+                if (controller.billingError.value.isNotEmpty) ...<Widget>[
+                  SizedBox(height: 12.h),
+                  Text(
+                    controller.billingError.value,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.notificationRed,
+                      fontSize: AppFont.font12.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
                 SizedBox(height: 42.h),
                 CustomButton.primary(
                   text: 'buy_full_course_now'.tr,

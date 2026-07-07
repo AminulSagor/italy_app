@@ -86,14 +86,6 @@ class CheckoutPage extends StatelessWidget {
                     .toList(),
               ),
             ),
-            Obx(
-              () => controller.canUseCoupon
-                  ? const Padding(
-                      padding: EdgeInsets.only(bottom: 28),
-                      child: _CheckoutCouponSection(),
-                    )
-                  : const SizedBox.shrink(),
-            ),
             const SizedBox(height: 16),
             Obx(
               () => CustomButton.primary(
@@ -404,76 +396,6 @@ class _OrderSummaryCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-
-class _CheckoutCouponSection extends GetView<ShopController> {
-  const _CheckoutCouponSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final bool applied = controller.isCouponApplied.value;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'coupon'.tr,
-            style: TextStyle(
-              color: CheckoutPage._bodyText,
-              fontSize: 14,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.15,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: controller.couponTextController,
-                  onChanged: controller.onCouponChanged,
-                  readOnly: applied,
-                  decoration: InputDecoration(
-                    hintText: 'gen_enter_coupon_code'.tr,
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(28),
-                      borderSide: const BorderSide(color: Color(0xFFD9DBDB)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(28),
-                      borderSide: BorderSide(
-                        color: applied
-                            ? CheckoutPage._green
-                            : const Color(0xFFD9DBDB),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                height: 56,
-                child: OutlinedButton(
-                  onPressed:
-                      applied ? controller.clearCoupon : controller.applyCoupon,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: CheckoutPage._green,
-                    side: const BorderSide(color: CheckoutPage._green),
-                    shape: const StadiumBorder(),
-                  ),
-                  child: Text(applied ? 'cancel'.tr : 'apply'.tr),
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    });
   }
 }
 

@@ -130,20 +130,31 @@ class CheckoutProductCard extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 6.h,
+                        horizontal: 8.w,
+                        vertical: 5.h,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.homeOrange,
-                        borderRadius: BorderRadius.circular(kHomePillRadius.r),
+                        color: AppColors.homeSoftGreen,
+                        borderRadius: BorderRadius.circular(5.r),
                       ),
-                      child: Text(
-                        plan.discountLabel,
-                        style: TextStyle(
-                          fontSize: AppFont.font10.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.black,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            Icons.redeem_outlined,
+                            size: 11.w,
+                            color: AppColors.primaryGreen,
+                          ),
+                          SizedBox(width: 3.w),
+                          Text(
+                            plan.discountLabel,
+                            style: TextStyle(
+                              fontSize: AppFont.font10.sp,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.primaryGreen,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

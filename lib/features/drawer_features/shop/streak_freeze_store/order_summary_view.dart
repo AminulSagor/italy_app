@@ -8,6 +8,7 @@ import 'package:italir_pothe/core/themes/app_font.dart';
 import 'package:italir_pothe/core/widgets/custom_button.dart';
 import '../models/shop_models.dart';
 import '../shop_controller.dart';
+import '../widgets/shop_coupon_section.dart';
 
 class StreakOrderSummaryView extends GetView<ShopController> {
   const StreakOrderSummaryView({super.key});
@@ -27,7 +28,10 @@ class StreakOrderSummaryView extends GetView<ShopController> {
               const _CurrencySwitch(),
               SizedBox(height: 32.h),
               const _SelectedPackCard(),
-              SizedBox(height: 52.h),
+              SizedBox(height: 26.h),
+              const ShopCouponSection(),
+              const ShopCouponError(),
+              SizedBox(height: 42.h),
               Obx(
                 () => CustomButton.primary(
                   text: 'continue_to_checkout'.tr,

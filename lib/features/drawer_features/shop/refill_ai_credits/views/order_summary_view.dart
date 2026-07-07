@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../models/shop_models.dart';
 import '../../shop_controller.dart';
+import '../../widgets/shop_coupon_section.dart';
 
 class OrderSummaryPage extends StatelessWidget {
   const OrderSummaryPage({super.key});
@@ -57,10 +58,23 @@ class OrderSummaryPage extends StatelessWidget {
                           title: controller.selectedPlanTitle,
                           subtitle: controller.selectedPlanSubtitle,
                           price: controller.payablePriceText,
-                          originalPrice: controller.originalPriceText,
+                          originalPrice: controller.checkoutOriginalPriceText,
                           savedAmount: controller.savedAmountText,
                           isCouponApplied: controller.hasDiscount,
                         ),
+                      ),
+
+                      SizedBox(height: 26.h),
+
+                      Obx(
+                        () => controller.canUseCoupon
+                            ? const Column(
+                                children: <Widget>[
+                                  ShopCouponSection(),
+                                  ShopCouponError(),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
                       ),
 
                       SizedBox(height: 34.h),
@@ -285,20 +299,33 @@ class OrderSummaryPage extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                  height: 18.h,
+                  padding: EdgeInsets.symmetric(horizontal: 7.w),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8F7DF),
-                    borderRadius: BorderRadius.circular(7.r),
+                    color: const Color(0xFFE4F3DC),
+                    borderRadius: BorderRadius.circular(5.r),
                   ),
-                  child: Text(
-                    savedAmount,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: green,
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.redeem_outlined,
+                        size: 11.w,
+                        color: green,
+                      ),
+                      SizedBox(width: 3.w),
+                      Text(
+                        savedAmount,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: green,
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .25,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(width: 8.w),

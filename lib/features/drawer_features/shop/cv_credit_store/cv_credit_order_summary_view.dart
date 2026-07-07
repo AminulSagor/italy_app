@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../models/shop_models.dart';
 import '../shop_controller.dart';
+import '../widgets/shop_coupon_section.dart';
 
 class CvCreditOrderSummaryView extends GetView<ShopController> {
   const CvCreditOrderSummaryView({super.key});
@@ -25,7 +26,10 @@ class CvCreditOrderSummaryView extends GetView<ShopController> {
               const _CurrencyToggle(),
               SizedBox(height: 32.h),
               const _SelectedCvPackCard(),
-              SizedBox(height: 54.h),
+              SizedBox(height: 26.h),
+              const ShopCouponSection(),
+              const ShopCouponError(),
+              SizedBox(height: 42.h),
               const _BuyButton(),
               SizedBox(height: 30.h),
               GestureDetector(

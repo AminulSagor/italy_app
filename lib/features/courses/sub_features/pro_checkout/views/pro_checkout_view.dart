@@ -48,7 +48,7 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
                   lessonCount: order.lessonCount,
                   plan: order.plan,
                   currency: controller.selectedCurrency.value,
-                  isCouponApplied: false,
+                  isCouponApplied: order.hasCoupon,
                 ),
                 SizedBox(height: 30.h),
                 Padding(
@@ -71,7 +71,18 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
                     ProPaymentMethod.googlePlay,
                   ),
                 ),
-                SizedBox(height: 58.h),
+                if (controller.billingError.value.isNotEmpty) ...<Widget>[
+                  SizedBox(height: 26.h),
+                  Text(
+                    controller.billingError.value,
+                    style: TextStyle(
+                      color: AppColors.notificationRed,
+                      fontSize: AppFont.font12.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+                SizedBox(height: 36.h),
                 CustomButton.primary(
                   text: 'complete_purchase'.tr,
                   isLoading: controller.isPurchasing.value,

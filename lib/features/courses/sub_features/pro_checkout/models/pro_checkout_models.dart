@@ -159,6 +159,9 @@ class ProOrderModel {
     required this.plan,
     required this.features,
     required this.storeProduct,
+    required this.couponCode,
+    required this.discountPercentage,
+    required this.pricingNote,
   });
 
   final String courseId;
@@ -171,6 +174,11 @@ class ProOrderModel {
   final ProPlanModel plan;
   final List<ProFeatureModel> features;
   final ProStoreProductModel storeProduct;
+  final String couponCode;
+  final int discountPercentage;
+  final String pricingNote;
+
+  bool get hasCoupon => couponCode.trim().isNotEmpty;
 
   factory ProOrderModel.fromJson(Map<String, dynamic> json) {
     final List<dynamic> rawFeatures = json['features'] is List
@@ -208,12 +216,22 @@ class ProOrderModel {
               }
             : storeProductJson,
       ),
+      couponCode: _stringValue(json['couponCode']),
+      discountPercentage: _intValue(json['discountPercentage']),
+      pricingNote: _stringValue(
+        json['pricingNote'],
+        fallback:
+            'Google Play or App Store controls the final localized amount charged.',
+      ),
     );
   }
 
   ProOrderModel copyWith({
     ProPlanModel? plan,
     ProStoreProductModel? storeProduct,
+    String? couponCode,
+    int? discountPercentage,
+    String? pricingNote,
   }) {
     return ProOrderModel(
       courseId: courseId,
@@ -226,6 +244,9 @@ class ProOrderModel {
       plan: plan ?? this.plan,
       features: features,
       storeProduct: storeProduct ?? this.storeProduct,
+      couponCode: couponCode ?? this.couponCode,
+      discountPercentage: discountPercentage ?? this.discountPercentage,
+      pricingNote: pricingNote ?? this.pricingNote,
     );
   }
 }
