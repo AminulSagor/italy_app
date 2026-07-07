@@ -51,6 +51,8 @@ class ShopController extends GetxController {
   final RxString couponCode = ''.obs;
   final RxBool isCouponApplied = false.obs;
   final Rxn<StoreQuoteResponseModel> quote = Rxn<StoreQuoteResponseModel>();
+  String _regularStorePriceText = '';
+  String _regularStoreProductId = '';
   final Rx<CheckoutPaymentMethod> selectedPaymentMethod =
       CheckoutPaymentMethod.googlePlay.obs;
   final Rxn<StorePurchaseCompletionModel> completedPurchase =
@@ -161,8 +163,7 @@ class ShopController extends GetxController {
   bool get isGooglePlaySelected =>
       selectedPaymentMethod.value == CheckoutPaymentMethod.googlePlay;
   bool get canChangeCurrency => !isGooglePlaySelected;
-  bool get canUseCoupon =>
-      !isGooglePlaySelected && (activePackage.value?.couponEnabled ?? false);
+  bool get canUseCoupon => activePackage.value != null;
   bool get hasDiscount => isCouponApplied.value && discountAmount > 0;
   Future<void> selectCurrency(RefillCurrency currency) async {
     if (!canChangeCurrency || selectedCurrency.value == currency) return;
@@ -171,6 +172,7 @@ class ShopController extends GetxController {
   }
   void onCouponChanged(String value) {
     couponCode.value = value.trim();
+    checkoutError.value = '';
     if (isCouponApplied.value) isCouponApplied.value = false;
   }
   Future<void> applyCoupon() async {
@@ -182,14 +184,19 @@ class ShopController extends GetxController {
     }
     final bool loaded = await _loadQuote(coupon: code);
     if (loaded) {
+      checkoutError.value = '';
       couponCode.value = code;
+      couponTextController.text = code;
       isCouponApplied.value = true;
+    } else {
+      checkoutError.value = 'Coupon is not valid for this item.';
     }
   }
   Future<void> clearCoupon() async {
     couponTextController.clear();
     couponCode.value = '';
     isCouponApplied.value = false;
+    checkoutError.value = '';
     if (activePackage.value != null) await _loadQuote();
   }
   String formatPrice(double value) {
@@ -203,19 +210,32 @@ class ShopController extends GetxController {
   double get payableAmount => pricing?.payableAmount ?? currentBasePrice;
   String get originalPriceText => formatPrice(currentBasePrice);
   String get payablePriceText => _checkoutStorePrice ?? formatPrice(payableAmount);
-  String get savedAmountText => formatPrice(discountAmount);
+  String get savedAmountText =>
+      'YOU SAVED ${_storeSavedAmountText ?? formatPrice(discountAmount)}';
   String get orderSummaryPrice => payablePriceText;
-  String get checkoutOriginalPriceText => originalPriceText;
+  String get checkoutOriginalPriceText =>
+      hasDiscount && _regularStorePriceText.isNotEmpty
+          ? _regularStorePriceText
+          : originalPriceText;
   String get checkoutPayablePriceText => payablePriceText;
   String get checkoutSavedAmountText => savedAmountText;
-  String get streakFreezeOriginalPriceText => originalPriceText;
+  String get streakFreezeOriginalPriceText => checkoutOriginalPriceText;
   String get streakFreezePayablePriceText => payablePriceText;
   String get streakFreezeSavedAmountText => savedAmountText;
-  String get cvCreditOriginalPriceText => originalPriceText;
+  String get cvCreditOriginalPriceText => checkoutOriginalPriceText;
   String get cvCreditPayablePriceText => payablePriceText;
   String get cvCreditSavedAmountText => savedAmountText;
   String? get _checkoutStorePrice =>
       _billingService.localizedPrice(quote.value?.storeProduct);
+  String? get _storeSavedAmountText {
+    if (!hasDiscount || _regularStorePriceText.isEmpty) return null;
+    final String? discounted = _checkoutStorePrice;
+    if (discounted == null || discounted.isEmpty) return null;
+    return _formatLocalizedSaving(
+      regularPriceText: _regularStorePriceText,
+      discountedPriceText: discounted,
+    );
+  }
   StorePackageModel? get checkoutPackage =>
       activePackage.value ?? selectedAiPackage;
   String get selectedPlanTitle => checkoutPackage?.name ?? 'package'.tr;
@@ -254,7 +274,6 @@ class ShopController extends GetxController {
   Future<void> buySelectedPlan() async {
     if (quote.value == null && !await _loadQuote()) return;
     selectedPaymentMethod.value = CheckoutPaymentMethod.googlePlay;
-    _resetCouponState();
     Get.toNamed(AppRoutes.checkout);
   }
   List<CheckoutPaymentMethod> get availablePaymentMethods =>
@@ -298,7 +317,6 @@ class ShopController extends GetxController {
       return;
     }
     selectedPaymentMethod.value = method;
-    if (method == CheckoutPaymentMethod.googlePlay) _resetCouponState();
     checkoutError.value = '';
   }
   String paymentMethodTitle(CheckoutPaymentMethod _) => 'google_play'.tr;
@@ -415,17 +433,28 @@ class ShopController extends GetxController {
           currency: selectedCurrency.value,
           couponCode: coupon,
         ),
+        showError: coupon.trim().isEmpty,
       );
-      if (!result.isSuccess || result.data == null) return false;
-      quote.value = result.data;
-      balances.value = result.data!.balances;
-      _syncUserSessionBalances(result.data!.balances);
-      await _billingService.prepareProducts(
-        <StoreProviderProductModel>[result.data!.storeProduct],
-      );
+      if (!result.isSuccess || result.data == null) {
+        if (coupon.trim().isNotEmpty) {
+          checkoutError.value = 'Coupon is not valid for this item.';
+        }
+        return false;
+      }
+      checkoutError.value = '';
+      final StoreQuoteResponseModel loadedQuote = result.data!;
+      final List<StoreProviderProductModel> productsToPrepare =
+          <StoreProviderProductModel>[
+        if (package.storeProduct != null) package.storeProduct!,
+        loadedQuote.storeProduct,
+      ];
+      await _billingService.prepareProducts(productsToPrepare);
+      _syncRegularStorePrice(package, coupon: coupon);
+      quote.value = loadedQuote;
+      balances.value = loadedQuote.balances;
+      _syncUserSessionBalances(loadedQuote.balances);
       selectedPaymentMethod.value = CheckoutPaymentMethod.googlePlay;
-      _syncCurrencyFromGooglePlay(result.data!.storeProduct);
-      _resetCouponState();
+      _syncCurrencyFromGooglePlay(loadedQuote.storeProduct);
       return true;
     } finally {
       isLoadingQuote.value = false;
@@ -447,9 +476,7 @@ class ShopController extends GetxController {
         package: package,
         storeProduct: currentQuote.storeProduct,
         currency: selectedCurrency.value,
-        couponCode: canUseCoupon && isCouponApplied.value
-            ? couponCode.value
-            : '',
+        couponCode: isCouponApplied.value ? couponCode.value : '',
       );
       switch (outcome.status) {
         case GooglePlayPurchaseOutcomeStatus.completed:
@@ -519,7 +546,69 @@ class ShopController extends GetxController {
     couponTextController.clear();
     couponCode.value = '';
     isCouponApplied.value = false;
+    _regularStorePriceText = '';
+    _regularStoreProductId = '';
   }
+
+  void _syncRegularStorePrice(
+    StorePackageModel package, {
+    required String coupon,
+  }) {
+    final StoreProviderProductModel? regularProduct = package.storeProduct;
+    if (regularProduct == null) return;
+
+    final String localizedRegular =
+        _billingService.localizedPrice(regularProduct) ?? '';
+    if (localizedRegular.isEmpty) return;
+
+    if (coupon.trim().isEmpty ||
+        _regularStorePriceText.isEmpty ||
+        _regularStoreProductId != regularProduct.productId) {
+      _regularStorePriceText = localizedRegular;
+      _regularStoreProductId = regularProduct.productId;
+    }
+  }
+
+  String? _formatLocalizedSaving({
+    required String regularPriceText,
+    required String discountedPriceText,
+  }) {
+    final double? regular = _parseLocalizedAmount(regularPriceText);
+    final double? discounted = _parseLocalizedAmount(discountedPriceText);
+    if (regular == null || discounted == null || regular <= discounted) {
+      return null;
+    }
+
+    final double saving = regular - discounted;
+    return '${_localizedPricePrefix(regularPriceText)}${saving.toStringAsFixed(2)}';
+  }
+
+  double? _parseLocalizedAmount(String value) {
+    String amount = value.replaceAll(RegExp(r'[^0-9,.-]'), '');
+    if (amount.isEmpty) return null;
+
+    final int lastComma = amount.lastIndexOf(',');
+    final int lastDot = amount.lastIndexOf('.');
+    if (lastComma > -1 && lastDot > -1) {
+      final bool commaIsDecimal = lastComma > lastDot;
+      amount = commaIsDecimal
+          ? amount.replaceAll('.', '').replaceAll(',', '.')
+          : amount.replaceAll(',', '');
+    } else if (lastComma > -1) {
+      final int decimals = amount.length - lastComma - 1;
+      amount = decimals == 2
+          ? amount.replaceAll(',', '.')
+          : amount.replaceAll(',', '');
+    }
+
+    return double.tryParse(amount);
+  }
+
+  String _localizedPricePrefix(String value) {
+    final RegExpMatch? match = RegExp(r'^\s*([^0-9.,-]+)').firstMatch(value);
+    return match?.group(1)?.trimRight() ?? '';
+  }
+
   void _syncCurrencyFromGooglePlay(StoreProviderProductModel product) {
     final String currency =
         (_billingService.localizedCurrencyCode(product) ?? '').toUpperCase();

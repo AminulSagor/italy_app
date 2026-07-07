@@ -6,6 +6,7 @@ import '../../../core/services/api_error_handler.dart';
 import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/models/current_user_summary.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/utils/otp_resend_cooldown.dart';
 import '../../../core/widgets/app_drawer_controller.dart';
 import '../../../routes/routes.dart';
 import 'models/user_settings_models.dart';
@@ -46,6 +47,7 @@ class SettingsController extends GetxController {
   final RxString deleteConfirmText = ''.obs;
   final RxString pendingContactType = ''.obs;
   final RxString pendingContactValue = ''.obs;
+  final OtpResendCooldown contactOtpResendCooldown = OtpResendCooldown();
 
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -81,6 +83,7 @@ class SettingsController extends GetxController {
     for (final FocusNode focusNode in otpFocusNodes) {
       focusNode.dispose();
     }
+    contactOtpResendCooldown.dispose();
     super.onClose();
   }
 
@@ -246,6 +249,7 @@ class SettingsController extends GetxController {
       pendingContactType.value = result.data!.contactType;
       pendingContactValue.value = result.data!.destination;
       clearOtpFields();
+      contactOtpResendCooldown.start();
 
       final String? devOtp = result.data!.devOtp;
       if (devOtp != null && devOtp.isNotEmpty) {
@@ -305,7 +309,10 @@ class SettingsController extends GetxController {
   }
 
   Future<void> resendPendingContactOtp() async {
-    if (pendingContactValue.value.isEmpty || isResendingContactOtp.value) {
+    contactOtpResendCooldown.refresh();
+    if (pendingContactValue.value.isEmpty ||
+        isResendingContactOtp.value ||
+        contactOtpResendCooldown.isActive) {
       return;
     }
 
@@ -326,6 +333,7 @@ class SettingsController extends GetxController {
 
       if (!result.isSuccess || result.data == null) return;
       clearOtpFields();
+      contactOtpResendCooldown.start();
       final String? devOtp = result.data!.devOtp;
       Get.snackbar(
         'verification_code_1'.tr,
@@ -358,6 +366,7 @@ class SettingsController extends GetxController {
   void clearPendingContact() {
     pendingContactType.value = '';
     pendingContactValue.value = '';
+    contactOtpResendCooldown.reset();
     clearOtpFields();
   }
 

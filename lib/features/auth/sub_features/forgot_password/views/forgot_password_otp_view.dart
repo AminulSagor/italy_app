@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -8,6 +7,8 @@ import '../controllers/forgot_password_controller.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../../../../../core/themes/app_constants.dart';
+import '../../../../../core/widgets/otp_code_input_row.dart';
+import '../../../../../core/widgets/otp_resend_button.dart';
 
 class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
   const ForgotPasswordOtpView({super.key});
@@ -67,9 +68,11 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
               //   ),
               // ),
               // SizedBox(height: 24.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List<Widget>.generate(4, _buildOtpInput),
+              OtpCodeInputRow(
+                controllers: controller.otpControllers,
+                focusNodes: controller.otpFocusNodes,
+                onChanged: controller.onOtpDigitChanged,
+                onCompleted: controller.onVerifyCodeTap,
               ),
               SizedBox(height: 30.h),
               SizedBox(
@@ -136,27 +139,14 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
               SizedBox(height: 3.h),
               Center(
                 child: Obx(
-                  () => TextButton(
-                    onPressed: controller.otpUi.value.isResending
-                        ? null
-                        : controller.onResendCodeTap,
-                    child: controller.otpUi.value.isResending
-                        ? SizedBox(
-                            width: 18.w,
-                            height: 18.w,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.primaryGreen,
-                            ),
-                          )
-                        : Text(
-                            'resend_code'.tr,
-                            style: TextStyle(
-                              color: AppColors.primaryGreen,
-                              fontSize: AppFont.font19.sp,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                  () => OtpResendButton(
+                    label: 'resend_code'.tr,
+                    isLoading: controller.otpUi.value.isResending,
+                    remainingSeconds:
+                        controller.resendCooldown.remainingSeconds.value,
+                    remainingLabel: controller.resendCooldown.remainingLabel,
+                    onTap: controller.onResendCodeTap,
+                    fontSize: AppFont.font19,
                   ),
                 ),
               ),
@@ -221,55 +211,6 @@ class ForgotPasswordOtpView extends GetView<ForgotPasswordController> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildOtpInput(int index) {
-    return AnimatedBuilder(
-      animation: controller.otpFocusNodes[index],
-      builder: (BuildContext context, Widget? child) {
-        final bool isFocused = controller.otpFocusNodes[index].hasFocus;
-
-        return SizedBox(
-          width: 70.w,
-          height: 84.w,
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 199, 199, 199),
-              borderRadius: BorderRadius.circular(kRadius36.r),
-              border: Border.all(
-                color: isFocused ? AppColors.primaryGreen : AppColors.transparent,
-                width: 1.6,
-              ),
-            ),
-            child: TextField(
-              controller: controller.otpControllers[index],
-              focusNode: controller.otpFocusNodes[index],
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              maxLength: 1,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(1),
-              ],
-              style: TextStyle(
-                color: AppColors.legacyColorFF626C7B,
-                fontSize: AppFont.font30.sp,
-                fontWeight: FontWeight.w800,
-              ),
-              decoration: const InputDecoration(
-                counterText: '',
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-              ),
-              onChanged: (String value) {
-                controller.onOtpDigitChanged(index: index, value: value);
-              },
-            ),
-          ),
-        );
-      },
     );
   }
 

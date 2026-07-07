@@ -18,11 +18,12 @@ class ProCheckoutApiService {
     required String courseId,
     required String fallbackCourseName,
     required int lessonCount,
+    String couponCode = '',
   }) async {
     final List<Response<dynamic>> responses = await Future.wait(
       <Future<Response<dynamic>>>[
-        _fetchQuote(courseId, 'EUR'),
-        _fetchQuote(courseId, 'BDT'),
+        _fetchQuote(courseId, 'EUR', couponCode: couponCode),
+        _fetchQuote(courseId, 'BDT', couponCode: couponCode),
       ],
     );
 
@@ -107,12 +108,20 @@ class ProCheckoutApiService {
         ),
       ],
       storeProduct: ProStoreProductModel.fromJson(product),
+      couponCode: _stringValue(eur['couponCode']),
+      discountPercentage: discountPercentage,
+      pricingNote: _stringValue(
+        eur['pricingNote'],
+        fallback:
+            'Google Play or App Store controls the final localized amount charged.',
+      ),
     );
   }
 
   Future<ProPendingGooglePlayPurchaseModel> createGooglePlayOrder({
     required ProOrderModel order,
     required ProCurrency currency,
+    required String couponCode,
   }) async {
     final Response<dynamic> response = await _apiClient.dio.post(
       '/course-commerce/orders',
@@ -122,6 +131,7 @@ class ProCheckoutApiService {
         'productId': order.storeProduct.productId,
         'currency': currency == ProCurrency.bdt ? 'BDT' : 'EUR',
         'idempotencyKey': _uuid.v4(),
+        if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
       },
     );
     final Map<String, dynamic> body = _responseMap(response);
@@ -186,7 +196,11 @@ class ProCheckoutApiService {
     );
   }
 
-  Future<Response<dynamic>> _fetchQuote(String courseId, String currency) {
+  Future<Response<dynamic>> _fetchQuote(
+    String courseId,
+    String currency, {
+    String couponCode = '',
+  }) {
     if (!Platform.isAndroid) {
       throw UnsupportedError('Google Play course purchases require Android.');
     }
@@ -195,6 +209,7 @@ class ProCheckoutApiService {
       queryParameters: <String, dynamic>{
         'currency': currency,
         'provider': 'google_play',
+        if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
       },
     );
   }

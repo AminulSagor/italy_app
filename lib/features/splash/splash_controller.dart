@@ -27,7 +27,7 @@ class SplashController extends GetxController {
 
   Future<void> onPrimaryButtonTap() async {
     if (isLastPage) {
-      _goToLogin();
+      _goToSignup();
       return;
     }
 
@@ -51,6 +51,10 @@ class SplashController extends GetxController {
 
   void _goToLogin() {
     Get.offAllNamed(AppRoutes.login);
+  }
+
+  void _goToSignup() {
+    Get.offAllNamed(AppRoutes.signup);
   }
 
   @override

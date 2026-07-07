@@ -9,6 +9,7 @@ import '../controllers/signup_controller.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../../../../../core/themes/app_constants.dart';
+import '../../../../../routes/routes.dart';
 
 class SignupView extends GetView<SignupController> {
   const SignupView({super.key});
@@ -133,15 +134,15 @@ class SignupView extends GetView<SignupController> {
                       ),
                       SizedBox(height: 14.h),
                       Obx(
-                        () => InkWell(
-                          onTap: controller.toggleTermsAgreement,
-                          borderRadius: BorderRadius.circular(kRadius20.r),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4.h),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Container(
+                        () => Padding(
+                          padding: EdgeInsets.symmetric(vertical: 4.h),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              InkWell(
+                                onTap: controller.toggleTermsAgreement,
+                                borderRadius: BorderRadius.circular(kRadius20.r),
+                                child: Container(
                                   margin: EdgeInsets.only(top: 2.h),
                                   width: 22.w,
                                   height: 22.w,
@@ -163,38 +164,60 @@ class SignupView extends GetView<SignupController> {
                                         )
                                       : null,
                                 ),
-                                SizedBox(width: 10.w),
-                                Expanded(
-                                  child: Text.rich(
-                                    TextSpan(
-                                      text: 'terms_prefix'.tr,
-                                      style: TextStyle(
-                                        fontSize: AppFont.font15.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.legacyColorFF4D5053,
-                                      ),
-                                      children: <InlineSpan>[
-                                        TextSpan(
-                                          text: 'terms_and_conditions'.tr,
-                                          style: TextStyle(
-                                            color: AppColors.primaryGreen,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                        TextSpan(text: 'terms_join'.tr),
-                                        TextSpan(
-                                          text: 'privacy_policy'.tr,
-                                          style: TextStyle(
-                                            color: AppColors.primaryGreen,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ],
+                              ),
+                              SizedBox(width: 10.w),
+                              Expanded(
+                                child: Text.rich(
+                                  TextSpan(
+                                    text: 'terms_prefix'.tr,
+                                    style: TextStyle(
+                                      fontSize: AppFont.font15.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.legacyColorFF4D5053,
                                     ),
+                                    children: <InlineSpan>[
+                                      WidgetSpan(
+                                        alignment: PlaceholderAlignment.baseline,
+                                        baseline: TextBaseline.alphabetic,
+                                        child: GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTap: () => Get.toNamed(
+                                            AppRoutes.termsOfService,
+                                          ),
+                                          child: Text(
+                                            'terms_and_conditions'.tr,
+                                            style: TextStyle(
+                                              color: AppColors.primaryGreen,
+                                              fontSize: AppFont.font15.sp,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      TextSpan(text: 'terms_join'.tr),
+                                      WidgetSpan(
+                                        alignment: PlaceholderAlignment.baseline,
+                                        baseline: TextBaseline.alphabetic,
+                                        child: GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTap: () => Get.toNamed(
+                                            AppRoutes.privacyPolicy,
+                                          ),
+                                          child: Text(
+                                            'privacy_policy'.tr,
+                                            style: TextStyle(
+                                              color: AppColors.primaryGreen,
+                                              fontSize: AppFont.font15.sp,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

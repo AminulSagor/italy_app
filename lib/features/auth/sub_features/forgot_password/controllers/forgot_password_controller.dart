@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/localization/translation_service.dart';
+import '../../../../../core/services/api_client.dart';
+import '../../../../../core/utils/otp_resend_cooldown.dart';
 import '../../../../../routes/routes.dart';
 import '../models/forgot_password_models.dart';
 import '../services/forgot_password_service.dart';
 
 class ForgotPasswordController extends GetxController {
   ForgotPasswordController({ForgotPasswordService? service})
-    : _service = service ?? ForgotPasswordService();
+    : _service =
+          service ?? ForgotPasswordService(apiClient: Get.find<ApiClient>());
 
   final ForgotPasswordService _service;
   final TranslationService _translationService = Get.find<TranslationService>();
@@ -24,6 +27,7 @@ class ForgotPasswordController extends GetxController {
       Rxn<ForgotPasswordRequestPayloadModel>();
   final Rxn<ForgotPasswordVerifyOtpUiModel> pendingVerifiedOtp =
       Rxn<ForgotPasswordVerifyOtpUiModel>();
+  final OtpResendCooldown resendCooldown = OtpResendCooldown();
 
   bool get isEmailMode => form.value.isEmailMode;
 
@@ -67,7 +71,10 @@ class ForgotPasswordController extends GetxController {
 
   Future<void> onSendResetLinkTap() async {
     final ForgotPasswordFormModel current = form.value;
-    final String normalizedIdentifier = current.identifier.trim();
+    final String normalizedIdentifier = _normalizeIdentifier(
+      identifier: current.identifier,
+      isEmailMode: current.isEmailMode,
+    );
 
     if (current.isSubmitting) {
       return;
@@ -83,7 +90,7 @@ class ForgotPasswordController extends GetxController {
       return;
     }
 
-    if (!current.isEmailMode && !GetUtils.isPhoneNumber(normalizedIdentifier)) {
+    if (!current.isEmailMode && !_isSupportedPhone(normalizedIdentifier)) {
       Get.snackbar('snack_invalid_phone'.tr, 'snack_enter_valid_phone'.tr);
       return;
     }
@@ -113,6 +120,13 @@ class ForgotPasswordController extends GetxController {
         isVerifying: false,
       );
       _clearOtpInputs();
+      resendCooldown.start();
+
+      final String? devOtp = result.data!.devOtp;
+      if (devOtp != null && devOtp.isNotEmpty) {
+        Get.snackbar('otp'.tr, devOtp);
+      }
+
       Get.toNamed(AppRoutes.forgotPasswordOtp);
     } finally {
       form.value = form.value.copyWith(isSubmitting: false);
@@ -141,7 +155,8 @@ class ForgotPasswordController extends GetxController {
   Future<void> onResendCodeTap() async {
     final ForgotPasswordRequestPayloadModel? payload =
         pendingRequestPayload.value;
-    if (otpUi.value.isResending || payload == null) {
+    resendCooldown.refresh();
+    if (otpUi.value.isResending || resendCooldown.isActive || payload == null) {
       return;
     }
 
@@ -158,7 +173,15 @@ class ForgotPasswordController extends GetxController {
         requestToken: result.data!.requestToken,
       );
       _clearOtpInputs();
-      Get.snackbar('snack_code_resent'.tr, 'snack_fresh_code_sent'.tr);
+      resendCooldown.start();
+
+      final String? devOtp = result.data!.devOtp;
+      Get.snackbar(
+        'snack_code_resent'.tr,
+        devOtp != null && devOtp.isNotEmpty
+            ? devOtp
+            : 'snack_fresh_code_sent'.tr,
+      );
     } finally {
       otpUi.value = otpUi.value.copyWith(isResending: false);
     }
@@ -220,7 +243,9 @@ class ForgotPasswordController extends GetxController {
       return;
     }
 
-    if (verifiedOtp == null || verifiedOtp.resetToken.isEmpty) {
+    if (verifiedOtp == null ||
+        verifiedOtp.identifier.isEmpty ||
+        verifiedOtp.otp.isEmpty) {
       Get.snackbar('snack_session_expired'.tr, 'snack_verify_again'.tr);
       Get.offNamedUntil(AppRoutes.forgotPassword, (route) => route.isFirst);
       return;
@@ -245,7 +270,8 @@ class ForgotPasswordController extends GetxController {
     try {
       final result = await _service.resetPassword(
         payload: ForgotPasswordResetPayloadModel(
-          resetToken: verifiedOtp.resetToken,
+          identifier: verifiedOtp.identifier,
+          otp: verifiedOtp.otp,
           newPassword: current.newPassword.trim(),
         ),
       );
@@ -289,6 +315,35 @@ class ForgotPasswordController extends GetxController {
     otpUi.value = otpUi.value.copyWith(codeDigits: <String>['', '', '', '']);
   }
 
+  String _normalizeIdentifier({
+    required String identifier,
+    required bool isEmailMode,
+  }) {
+    final String normalized = identifier.trim();
+    if (isEmailMode || normalized.startsWith('+')) {
+      return isEmailMode ? normalized.toLowerCase() : normalized;
+    }
+
+    final String digitsOnly = normalized.replaceAll(RegExp(r'\D'), '');
+    if (digitsOnly.startsWith('01') && digitsOnly.length == 11) {
+      return '+88$digitsOnly';
+    }
+
+    if (digitsOnly.startsWith('8801') && digitsOnly.length == 13) {
+      return '+$digitsOnly';
+    }
+
+    if (digitsOnly.startsWith('39') && digitsOnly.length >= 10) {
+      return '+$digitsOnly';
+    }
+
+    return normalized;
+  }
+
+  bool _isSupportedPhone(String phone) {
+    return RegExp(r'^(?:\+8801\d{9}|\+39\d{8,11})$').hasMatch(phone);
+  }
+
   @override
   void onClose() {
     identifierController.dispose();
@@ -298,6 +353,7 @@ class ForgotPasswordController extends GetxController {
     for (final FocusNode focusNode in otpFocusNodes) {
       focusNode.dispose();
     }
+    resendCooldown.dispose();
     newPasswordController.dispose();
     confirmPasswordController.dispose();
     super.onClose();

@@ -1,26 +1,39 @@
-import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 
+import '../../../../../core/services/api_client.dart';
 import '../../../../../core/services/api_error_handler.dart';
 import '../models/forgot_password_models.dart';
 
 class ForgotPasswordService {
+  ForgotPasswordService({required ApiClient apiClient}) : _apiClient = apiClient;
+
+  final ApiClient _apiClient;
+
+  static const String _forgotPasswordEndpoint = '/auth/forgot-password';
+  static const String _resetPasswordEndpoint = '/auth/reset-password';
+
   Future<ApiHandledResponse<ForgotPasswordRequestUiModel>> requestResetCode({
     required ForgotPasswordRequestPayloadModel payload,
   }) {
     return ApiErrorHandler.handle<ForgotPasswordRequestUiModel>(
       request: () async {
-        await Future<void>.delayed(const Duration(milliseconds: 650));
+        final String identifier = _normalizeIdentifier(payload.identifier);
+        final Response<dynamic> response = await _apiClient.dio.post(
+          _forgotPasswordEndpoint,
+          data: <String, dynamic>{'identifier': identifier},
+        );
+        final Map<String, dynamic> data = _responseMap(response);
 
-        final Map<String, dynamic> response = <String, dynamic>{
-          'maskedIdentifier': _maskedIdentifier(
-            identifier: payload.identifier,
-            isEmailMode: payload.channel == 'email',
-          ),
-          'requestToken': _buildToken('request', payload.identifier),
-        };
-
-        debugPrint('Forgot request payload: ${payload.toJson()}');
-        return ForgotPasswordRequestUiModel.fromJson(response);
+        return ForgotPasswordRequestUiModel.fromJson(
+          <String, dynamic>{
+            ...data,
+            'maskedIdentifier': _maskedIdentifier(
+              identifier: identifier,
+              isEmailMode: payload.channel == 'email',
+            ),
+            'requestToken': identifier,
+          },
+        );
       },
       fallbackErrorCode: 'forgot_request_failed',
     );
@@ -31,14 +44,17 @@ class ForgotPasswordService {
   }) {
     return ApiErrorHandler.handle<ForgotPasswordVerifyOtpUiModel>(
       request: () async {
-        await Future<void>.delayed(const Duration(milliseconds: 600));
+        if (!RegExp(r'^\d{4}$').hasMatch(payload.code.trim())) {
+          throw DioException(
+            requestOptions: RequestOptions(path: _resetPasswordEndpoint),
+            message: 'OTP must be exactly 4 digits',
+          );
+        }
 
-        final Map<String, dynamic> response = <String, dynamic>{
-          'resetToken': _buildToken('reset', payload.requestToken),
-        };
-
-        debugPrint('Forgot verify payload: ${payload.toJson()}');
-        return ForgotPasswordVerifyOtpUiModel.fromJson(response);
+        return ForgotPasswordVerifyOtpUiModel(
+          identifier: _normalizeIdentifier(payload.requestToken),
+          otp: payload.code.trim(),
+        );
       },
       fallbackErrorCode: 'forgot_verify_failed',
     );
@@ -49,21 +65,31 @@ class ForgotPasswordService {
   }) {
     return ApiErrorHandler.handle<ForgotPasswordResetUiModel>(
       request: () async {
-        await Future<void>.delayed(const Duration(milliseconds: 700));
+        final Response<dynamic> response = await _apiClient.dio.post(
+          _resetPasswordEndpoint,
+          data: payload.toJson(),
+        );
 
-        final Map<String, dynamic> response = <String, dynamic>{
-          'successMessage': 'Your password has been reset successfully.',
-        };
-
-        debugPrint('Forgot reset payload: ${payload.toJson()}');
-        return ForgotPasswordResetUiModel.fromJson(response);
+        return ForgotPasswordResetUiModel.fromJson(_responseMap(response));
       },
       fallbackErrorCode: 'forgot_reset_failed',
     );
   }
 
-  String _buildToken(String prefix, String seed) {
-    return '${prefix}_${seed.hashCode.abs()}';
+  Map<String, dynamic> _responseMap(Response<dynamic> response) {
+    final dynamic data = response.data;
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return <String, dynamic>{};
+  }
+
+  String _normalizeIdentifier(String identifier) {
+    final String normalized = identifier.trim();
+    return normalized.contains('@') ? normalized.toLowerCase() : normalized;
   }
 
   String _maskedIdentifier({

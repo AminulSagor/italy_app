@@ -5,6 +5,7 @@ import '../../../../../core/localization/translation_service.dart';
 import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../core/controllers/user_session_controller.dart';
 import '../../../../../core/services/learning_activity_tracker_service.dart';
+import '../../../../../core/utils/otp_resend_cooldown.dart';
 import '../../../../../core/services/auth_service.dart';
 import '../../../../../features/messages/services/chat_socket_service.dart';
 import '../../../../../core/services/device_push_token_service.dart';
@@ -24,6 +25,7 @@ class SignupController extends GetxController {
   final Rxn<SignupPayloadModel> pendingPayload = Rxn<SignupPayloadModel>();
   final Rxn<OtpVerificationPayloadModel> pendingOtpVerificationPayload =
       Rxn<OtpVerificationPayloadModel>();
+  final OtpResendCooldown resendCooldown = OtpResendCooldown();
 
   late final TextEditingController fullNameController;
   late final TextEditingController identifierController;
@@ -167,6 +169,7 @@ class SignupController extends GetxController {
         Get.snackbar('otp'.tr, signupResult.devOtp!);
       }
 
+      resendCooldown.start();
       Get.toNamed(AppRoutes.signupOtp);
     } finally {
       form.value = form.value.copyWith(isLoading: false);
@@ -193,7 +196,8 @@ class SignupController extends GetxController {
   }
 
   Future<void> onResendOtpTap() async {
-    if (otpUi.value.isResending) {
+    resendCooldown.refresh();
+    if (otpUi.value.isResending || resendCooldown.isActive) {
       return;
     }
 
@@ -215,6 +219,7 @@ class SignupController extends GetxController {
       }
 
       _clearOtpInputs();
+      resendCooldown.start();
       final String? devOtp = result.data?.devOtp;
       Get.snackbar(
         'snack_code_resent'.tr,
@@ -261,9 +266,11 @@ class SignupController extends GetxController {
         () => _authService.verifyOtp(verifyPayload),
       );
 
-      if (!result.isSuccess) {
+      if (!result.isSuccess || result.data == null) {
         return;
       }
+
+      _applyVerifiedAccountInfo(result.data!.user);
 
       // Refresh socket connection with the new token after successful verification
       try {
@@ -319,6 +326,64 @@ class SignupController extends GetxController {
 
   void onBackFromOtp() {
     Get.back();
+  }
+
+  void prepareExistingAccountOtp({
+    required String identifier,
+    required bool isEmailMode,
+    String? devOtp,
+  }) {
+    final String normalizedIdentifier = _normalizeIdentifier(
+      identifier: identifier,
+      isEmailMode: isEmailMode,
+    );
+
+    pendingPayload.value = SignupPayloadModel(
+      fullName: '',
+      password: '',
+      email: isEmailMode ? normalizedIdentifier : null,
+      phone: isEmailMode ? null : normalizedIdentifier,
+    );
+    accountCreatedUi.value = accountCreatedUi.value.copyWith(
+      fullName: '',
+      identifier: normalizedIdentifier,
+    );
+    pendingOtpVerificationPayload.value = null;
+    otpUi.value = otpUi.value.copyWith(
+      maskedIdentifier: _maskedIdentifier(
+        identifier: normalizedIdentifier,
+        isEmailMode: isEmailMode,
+      ),
+      codeDigits: <String>['', '', '', ''],
+      isResending: false,
+      isVerifying: false,
+    );
+    _clearOtpInputs();
+    resendCooldown.start();
+
+    if (devOtp != null && devOtp.isNotEmpty) {
+      Get.snackbar('otp'.tr, devOtp);
+    }
+  }
+
+  void _applyVerifiedAccountInfo(AuthUserModel user) {
+    final String fallbackIdentifier =
+        pendingPayload.value?.email ?? pendingPayload.value?.phone ?? '';
+    final bool isEmailIdentifier = user.email?.trim().isNotEmpty == true;
+    final String verifiedIdentifier = isEmailIdentifier
+        ? user.email!.trim()
+        : (user.phone?.trim().isNotEmpty == true
+            ? user.phone!.trim()
+            : fallbackIdentifier);
+
+    accountCreatedUi.value = accountCreatedUi.value.copyWith(
+      fullName: user.fullName.trim().isNotEmpty
+          ? user.fullName.trim()
+          : accountCreatedUi.value.fullName,
+      identifier: verifiedIdentifier.trim().isNotEmpty
+          ? verifiedIdentifier.trim()
+          : accountCreatedUi.value.identifier,
+    );
   }
 
   void _onFormInputChanged() {
@@ -410,6 +475,7 @@ class SignupController extends GetxController {
     for (final FocusNode focusNode in otpFocusNodes) {
       focusNode.dispose();
     }
+    resendCooldown.dispose();
     super.onClose();
   }
 }
