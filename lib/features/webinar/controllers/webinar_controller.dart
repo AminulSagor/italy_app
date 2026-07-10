@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,6 +9,7 @@ import '../models/webinar_models.dart';
 import '../services/webinar_agora_service.dart';
 import '../services/webinar_api_service.dart';
 import '../services/webinar_socket_service.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class WebinarController extends GetxController {
   WebinarController({
@@ -65,6 +68,7 @@ class WebinarController extends GetxController {
 
   @override
   void onClose() {
+    unawaited(WakelockPlus.disable());
     chatTextController.dispose();
     chatScrollController.dispose();
     _webinarSocketService.disconnect();
@@ -107,7 +111,14 @@ class WebinarController extends GetxController {
           await ApiErrorHandler.call(
         () => _webinarApiService.joinWebinar(webinarId: webinar.id),
       );
-      if (!result.isSuccess || result.data == null) return;
+      if (!result.isSuccess || result.data == null) {
+        selectedWebinar.value = null;
+
+        // Reload webinar lists to show the latest live/upcoming status.
+        await loadWebinars();
+
+        return;
+      }
 
       currentParticipant.value = result.data!.participant;
       speakerRequestStatus.value = _normalizeSpeakingPermission(
@@ -119,6 +130,8 @@ class WebinarController extends GetxController {
         loadParticipants(webinar.id),
         loadChatMessages(webinar.id),
       ]);
+
+      await WakelockPlus.enable();
       Get.toNamed(AppRoutes.webinarLive);
     } finally {
       isJoining.value = false;
@@ -132,7 +145,12 @@ class WebinarController extends GetxController {
       showError: false,
     );
     if (result.isSuccess && result.data != null) {
-      participantsTotal.value = result.data!.pagination.totalItems;
+      participantsTotal.value = result.data!.participants
+          .where(
+            (WebinarParticipantModel participant) =>
+        participant.leftAt == null,
+      )
+          .length;
     }
   }
 
@@ -144,7 +162,7 @@ class WebinarController extends GetxController {
     );
     if (result.isSuccess && result.data != null) {
       liveMessages.assignAll(result.data!.chatMessages);
-      _scrollChatToBottom(force: true);
+      _scrollChatToLatest(force: true);
     }
   }
 
@@ -265,6 +283,7 @@ class WebinarController extends GetxController {
   }
 
   Future<void> leaveLiveWebinar() async {
+    await WakelockPlus.disable();
     final WebinarItemModel? webinar = selectedWebinar.value;
     if (webinar == null) return;
 
@@ -345,24 +364,39 @@ class WebinarController extends GetxController {
       liveMessages.removeRange(0, liveMessages.length - 50);
     }
 
-    if (shouldScroll) _scrollChatToBottom();
+    if (shouldScroll) {
+      _scrollChatToLatest();
+    }
   }
 
 
   void _handleChatScroll() {
-    if (!chatScrollController.hasClients) return;
-    final ScrollPosition position = chatScrollController.position;
+    if (!chatScrollController.hasClients) {
+      return;
+    }
+
+    final ScrollPosition position =
+        chatScrollController.position;
+
+    // The newest message is now at the top.
     _shouldAutoScrollChat =
-        position.maxScrollExtent - position.pixels <= 48;
+        position.pixels <= 48;
   }
 
-  void _scrollChatToBottom({bool force = false}) {
+  void _scrollChatToLatest({
+    bool force = false,
+  }) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!chatScrollController.hasClients) return;
-      if (!force && !_shouldAutoScrollChat) return;
+      if (!chatScrollController.hasClients) {
+        return;
+      }
+
+      if (!force && !_shouldAutoScrollChat) {
+        return;
+      }
 
       chatScrollController.animateTo(
-        chatScrollController.position.maxScrollExtent,
+        chatScrollController.position.minScrollExtent,
         duration: const Duration(milliseconds: 260),
         curve: Curves.easeOut,
       );

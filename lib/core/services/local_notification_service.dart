@@ -207,10 +207,21 @@ class LocalNotificationService {
         ? null
         : await _downloadImage(imageUrl);
 
-    final AndroidNotificationDetails androidDetails = _createAndroidDetails(
+    final String conversationId =
+        message.data['conversationId']
+            ?.toString()
+            .trim() ??
+            '';
+
+    final bool showReplyAction =
+        conversationId.isNotEmpty;
+
+    final AndroidNotificationDetails androidDetails =
+    _createAndroidDetails(
       title: title,
       body: body,
       localImagePath: localImagePath,
+      showReplyAction: showReplyAction,
     );
 
     final DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
@@ -230,8 +241,7 @@ class LocalNotificationService {
     );
 
     final String deepLink = message.data['deepLink']?.toString().trim() ?? '';
-    final String conversationId =
-        message.data['conversationId']?.toString().trim() ?? '';
+
     final String contactId = message.data['senderId']?.toString().trim() ?? '';
     final String contactName =
         message.data['senderName']?.toString().trim() ?? title;
@@ -262,17 +272,28 @@ class LocalNotificationService {
     required String title,
     required String body,
     required String? localImagePath,
+    required bool showReplyAction,
   }) {
-    final List<AndroidNotificationAction> actions = [
+    final List<AndroidNotificationAction> actions =
+    showReplyAction
+        ? <AndroidNotificationAction>[
       AndroidNotificationAction(
         'REPLY_ACTION',
         'Reply',
-        icon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
-        inputs: [
-          AndroidNotificationActionInput(label: 'gen_type_a_message'.tr),
+        icon:
+        const DrawableResourceAndroidBitmap(
+          '@mipmap/ic_launcher',
+        ),
+        inputs:
+        <AndroidNotificationActionInput>[
+          AndroidNotificationActionInput(
+            label:
+            'gen_type_a_message'.tr,
+          ),
         ],
       ),
-    ];
+    ]
+        : <AndroidNotificationAction>[];
 
     if (localImagePath == null) {
       return AndroidNotificationDetails(

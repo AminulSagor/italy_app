@@ -38,16 +38,26 @@ class WebinarLiveView extends GetView<WebinarController> {
               );
             }
 
+            final bool keyboardVisible =
+                MediaQuery.viewInsetsOf(context).bottom > 0;
+
             return Padding(
               padding: EdgeInsets.fromLTRB(
                 kWebinarHorizontalPadding.w,
                 10.h,
                 kWebinarHorizontalPadding.w,
-                20.h,
+                keyboardVisible ? 0 : 20.h,
               ),
               child: controller.isParticipating.value
-                  ? _ParticipationBody(data: data, controller: controller)
-                  : _ChatBody(data: data, controller: controller),
+                  ? _ParticipationBody(
+                data: data,
+                controller: controller,
+              )
+                  : _ChatBody(
+                data: data,
+                controller: controller,
+                keyboardVisible: keyboardVisible,
+              ),
             );
           }),
         ),
@@ -58,41 +68,116 @@ class WebinarLiveView extends GetView<WebinarController> {
 }
 
 class _ChatBody extends StatelessWidget {
-  const _ChatBody({required this.data, required this.controller});
+  const _ChatBody({
+    required this.data,
+    required this.controller,
+    required this.keyboardVisible,
+  });
 
   final WebinarItemModel data;
   final WebinarController controller;
+  final bool keyboardVisible;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        WebinarLiveHeader(webinar: data, controller: controller),
-        SizedBox(height: 20.h),
-        WebinarVideoCard(webinar: data, controller: controller),
-        SizedBox(height: 16.h),
-        Obx(
-          () => WebinarRequestButton(
-            text: _requestButtonText(),
-            icon: Icons.mic_rounded,
-            isDisabled:
-                controller.isSpeakerPending || controller.isRequesting.value,
-            onTap: controller.requestToParticipate,
-          ),
-        ),
-        SizedBox(height: 16.h),
-        Expanded(child: WebinarLiveChatSection(controller: controller)),
-        SizedBox(height: 14.h),
-        WebinarChatInput(controller: controller),
-      ],
+    return LayoutBuilder(
+      builder: (
+          BuildContext context,
+          BoxConstraints constraints,
+          ) {
+        final bool compactLayout =
+            constraints.maxHeight < 560.h;
+
+        return Stack(
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                WebinarLiveHeader(
+                  webinar: data,
+                  controller: controller,
+                ),
+
+                SizedBox(
+                  height: compactLayout ? 10.h : 20.h,
+                ),
+
+                WebinarVideoCard(
+                  webinar: data,
+                  controller: controller,
+                ),
+
+                SizedBox(
+                  height: compactLayout ? 10.h : 16.h,
+                ),
+
+                Obx(
+                      () => WebinarRequestButton(
+                    text: _requestButtonText(),
+                    icon: Icons.mic_rounded,
+                    isDisabled:
+                    controller.isSpeakerPending ||
+                        controller.isRequesting.value,
+                    onTap: controller.requestToParticipate,
+                  ),
+                ),
+
+                if (!compactLayout && !keyboardVisible) ...<Widget>[
+                  SizedBox(height: 16.h),
+                  Expanded(
+                    child: WebinarLiveChatSection(
+                      controller: controller,
+                    ),
+                  ),
+                  SizedBox(height: 14.h),
+                ] else
+                  const Spacer(),
+
+                WebinarChatInput(
+                  controller: controller,
+                ),
+              ],
+            ),
+
+            // Floating transparent comments above the keyboard/input.
+            if (keyboardVisible)
+              Positioned(
+                left: 8.w,
+                right: 8.w,
+                bottom: 78.h,
+                child: IgnorePointer(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: 175.h,
+                    ),
+                    child: WebinarLiveChatSection(
+                      controller: controller,
+                      compact: true,
+                      showTitle: false,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
   String _requestButtonText() {
-    if (controller.isRequesting.value) return 'requesting'.tr;
-    if (controller.isSpeakerPending) return 'pending'.tr;
-    if (controller.isSpeakerGranted) return 'approved'.tr;
+    if (controller.isRequesting.value) {
+      return 'requesting'.tr;
+    }
+
+    if (controller.isSpeakerPending) {
+      return 'pending'.tr;
+    }
+
+    if (controller.isSpeakerGranted) {
+      return 'approved'.tr;
+    }
+
     return 'request_to_participate'.tr;
   }
 }

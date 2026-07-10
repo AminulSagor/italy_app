@@ -74,7 +74,7 @@ class _LocalStageVideo extends StatelessWidget {
             rtcEngine: engine,
             canvas: const VideoCanvas(
               uid: 0,
-              renderMode: RenderModeType.renderModeFit,
+              renderMode: RenderModeType.renderModeHidden,
             ),
           ),
         );
@@ -254,11 +254,7 @@ class WebinarStageControls extends StatelessWidget {
             onTap: controller.switchCamera,
             child: const _RoundControl(icon: Icons.flip_camera_ios_rounded),
           ),
-          SizedBox(width: 22.w),
-          GestureDetector(
-            onTap: controller.openChatMode,
-            child: const _RoundControl(icon: Icons.chat_bubble_outline_rounded),
-          ),
+
         ],
       ),
     );

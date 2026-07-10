@@ -3,6 +3,7 @@
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
+    'webinar_participants_watching': '@value watching',
     'task_progress': '@current/@target @unit',
     'claimed_xp': 'Claimed +@xp XP',
     'daily_challenge_xp': '@xp XP',
@@ -4445,9 +4446,10 @@ appTranslations = <String, Map<String, String>>{
     'daily_challenge_xp': '@xp এক্সপি',
     'claimed_xp': '+@xp এক্সপি সংগ্রহ করা হয়েছে',
     'task_progress': '@target @unit-এর মধ্যে @current',
-
+    'webinar_participants_watching': '@value জন দেখছেন',
   },
   'it_IT': <String, String>{
+    'webinar_participants_watching': '@value stanno guardando',
     'task_progress': '@current/@target @unit',
     'claimed_xp': 'Ottenuti +@xp XP',
     'daily_challenge_xp': '@xp XP',

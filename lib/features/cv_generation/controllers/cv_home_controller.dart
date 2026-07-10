@@ -288,7 +288,10 @@ class CvHomeController extends GetxController {
       await _openChat(
         session: session,
         selectedTemplate: template,
-        onChatOpened: onChatOpened,
+        onChatOpened: () {
+          isTemplateOverlayVisible.value = false;
+          onChatOpened?.call();
+        },
       );
     } catch (error) {
       isTemplateOverlayVisible.value = false;
