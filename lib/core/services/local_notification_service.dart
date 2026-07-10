@@ -6,8 +6,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
-
-import 'notification_reply_handler.dart';
 import '../../features/messages/views/message_chat_view.dart';
 import '../../features/messages/controllers/message_chat_controller.dart';
 import '../../features/messages/models/message_models.dart';
@@ -63,8 +61,7 @@ class LocalNotificationService {
     await _plugin.initialize(
       settings: settings,
       onDidReceiveNotificationResponse: _handleNotificationTap,
-      onDidReceiveBackgroundNotificationResponse:
-          onDidReceiveBackgroundNotificationResponse,
+
     );
 
     await _plugin
@@ -189,6 +186,8 @@ class LocalNotificationService {
   }
 
   Future<void> showRemoteMessage(RemoteMessage message) async {
+
+
     final String title =
         message.notification?.title ??
         message.data['title']?.toString() ??

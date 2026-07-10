@@ -80,4 +80,5 @@ class AppRoutes {
   static const String createCvEducation = '/create-cv-education';
   static const String createCvSummary = '/create-cv-summary';
   static const String cvReady = '/cv-ready';
+  static const String messages = '/messages';
 }

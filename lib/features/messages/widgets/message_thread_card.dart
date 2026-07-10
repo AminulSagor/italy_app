@@ -1,43 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../models/message_models.dart';
-import 'message_avatar.dart';
-
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
+import '../models/message_models.dart';
+import 'message_avatar.dart';
 
 class MessageThreadCard extends StatelessWidget {
+  const MessageThreadCard({
+    super.key,
+    required this.thread,
+    this.onTap,
+  });
+
   final MessageThreadModel thread;
   final VoidCallback? onTap;
 
-  const MessageThreadCard({super.key, required this.thread, this.onTap});
-
   @override
   Widget build(BuildContext context) {
+    final bool hasUnread =
+        thread.unreadCount > 0 || thread.isHighlighted;
+
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: EdgeInsets.all(24.w),
+        padding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 14.h,
+        ),
         decoration: BoxDecoration(
-          color: (thread.isHighlighted || thread.unreadCount > 0)
+          color: hasUnread
               ? AppColors.messageTileActiveBg
               : AppColors.messageTileInactiveBg,
-          borderRadius: BorderRadius.circular(kMessageTileRadius.r),
+          borderRadius: BorderRadius.circular(
+            kMessageTileRadius.r,
+          ),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             MessageAvatar(
               imageUrl: thread.avatarUrl,
+              size: 48,
               showStatus: true,
               isOnline: thread.isOnline,
             ),
-            SizedBox(width: 20.w),
+
+            SizedBox(width: 14.w),
+
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment:
+                CrossAxisAlignment.start,
                 children: <Widget>[
                   Row(
                     children: <Widget>[
@@ -45,56 +62,77 @@ class MessageThreadCard extends StatelessWidget {
                         child: Text(
                           thread.learnerName,
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          overflow:
+                          TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: AppFont.font20.sp,
-                            fontWeight: thread.unreadCount > 0
-                                ? FontWeight.w800
+                            fontSize:
+                            AppFont.font16.sp,
+                            fontWeight: thread
+                                .unreadCount >
+                                0
+                                ? FontWeight.w700
                                 : FontWeight.w600,
                             color: thread.unreadCount > 0
-                                ? AppColors.homePrimaryText
-                                : AppColors.primaryGreen,
+                                ? AppColors
+                                .homePrimaryText
+                                : AppColors
+                                .primaryGreen,
                           ),
                         ),
                       ),
+
                       SizedBox(width: 8.w),
+
                       Text(
                         thread.timeLabel,
                         maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        overflow:
+                        TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: AppFont.font12.sp,
-                          fontWeight: thread.unreadCount > 0
-                              ? FontWeight.w800
+                          fontSize: 11.sp,
+                          fontWeight:
+                          thread.unreadCount > 0
+                              ? FontWeight.w700
                               : FontWeight.w500,
-                          letterSpacing: 0.7,
                           color: thread.unreadCount > 0
-                              ? AppColors.homePrimaryText
+                              ? AppColors
+                              .homePrimaryText
                               : AppColors.bodyText,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 6.h),
+
+                  SizedBox(height: 5.h),
+
                   Row(
                     children: <Widget>[
                       Expanded(
                         child: Text(
                           thread.lastMessage,
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          overflow:
+                          TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: AppFont.font16.sp,
-                            fontWeight: thread.unreadCount > 0
-                                ? FontWeight.w700
+                            fontSize:
+                            AppFont.font14.sp,
+                            fontWeight: thread
+                                .unreadCount >
+                                0
+                                ? FontWeight.w600
                                 : FontWeight.w400,
                             height: 1.25,
-                            color: _previewColor(thread),
+                            color:
+                            _previewColor(thread),
                           ),
                         ),
                       ),
+
                       SizedBox(width: 8.w),
-                      _TrailingStatus(thread: thread),
+
+                      _TrailingStatus(
+                        thread: thread,
+                      ),
                     ],
                   ),
                 ],
@@ -111,8 +149,10 @@ Color _previewColor(MessageThreadModel thread) {
   switch (thread.previewTone) {
     case MessageThreadPreviewTone.missed:
       return AppColors.homeNotificationRed;
+
     case MessageThreadPreviewTone.ongoing:
       return AppColors.messageOnlineGreen;
+
     case MessageThreadPreviewTone.normal:
       return thread.unreadCount > 0
           ? AppColors.homePrimaryText
@@ -121,16 +161,19 @@ Color _previewColor(MessageThreadModel thread) {
 }
 
 class _TrailingStatus extends StatelessWidget {
-  final MessageThreadModel thread;
+  const _TrailingStatus({
+    required this.thread,
+  });
 
-  const _TrailingStatus({required this.thread});
+  final MessageThreadModel thread;
 
   @override
   Widget build(BuildContext context) {
-    if (thread.unreadCount > 0 || thread.isHighlighted) {
+    if (thread.unreadCount > 0 ||
+        thread.isHighlighted) {
       return Container(
-        width: 12.w,
-        height: 12.w,
+        width: 10.w,
+        height: 10.w,
         decoration: const BoxDecoration(
           color: AppColors.primaryGreen,
           shape: BoxShape.circle,
@@ -139,8 +182,10 @@ class _TrailingStatus extends StatelessWidget {
     }
 
     return Icon(
-      thread.isDelivered ? Icons.done_all_rounded : Icons.check_rounded,
-      size: 18.w,
+      thread.isDelivered
+          ? Icons.done_all_rounded
+          : Icons.check_rounded,
+      size: 16.w,
       color: thread.isDelivered
           ? AppColors.primaryGreen
           : AppColors.messageCheckGrey,

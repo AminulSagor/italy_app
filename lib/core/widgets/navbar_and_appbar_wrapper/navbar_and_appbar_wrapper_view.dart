@@ -89,15 +89,6 @@ class NavbarAndAppbarWrapper extends GetView<NavbarAndAppbarWrapperController> {
                     }),
                   ),
                 ),
-                Obx(
-                  () => controller.isMessagesPageOpen.value
-                      ? Positioned.fill(
-                          child: MessagesView(
-                            onBackTap: controller.closeMessages,
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                ),
                 Positioned(
                   left: 0,
                   right: 0,

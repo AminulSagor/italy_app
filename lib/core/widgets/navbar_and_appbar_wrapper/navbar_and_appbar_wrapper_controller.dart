@@ -36,7 +36,6 @@ class NavbarAndAppbarWrapperController extends GetxController
   final TranslationService _translationService = Get.find<TranslationService>();
   final AuthService _authService = Get.find<AuthService>();
   final RxInt currentIndex = 0.obs;
-  final RxBool isMessagesPageOpen = false.obs;
   final RxBool hasUnreadNotifications = false.obs;
   final RxSet<int> visitedTabs = <int>{0}.obs;
   // Presence listener registration flag
@@ -44,11 +43,8 @@ class NavbarAndAppbarWrapperController extends GetxController
   String? _currentUserId;
 
   void onBottomNavTap(int index) {
-    isMessagesPageOpen.value = false;
-    // if (index == 4) {
-    //   Get.snackbar("In Progress", "Feature comming soon");
-    //   return;
-    // }
+
+
     if (index == currentIndex.value) {
       if (Get.isRegistered<LearningActivityTrackerService>()) {
         Get.find<LearningActivityTrackerService>().setShellTab(index);
@@ -162,7 +158,6 @@ class NavbarAndAppbarWrapperController extends GetxController
     }
 
     if (path.startsWith('/webinar') || host == 'webinar') {
-      isMessagesPageOpen.value = false;
       await Get.toNamed(
         AppRoutes.webinar,
         parameters: uri?.queryParameters ?? const <String, String>{},
@@ -222,50 +217,13 @@ class NavbarAndAppbarWrapperController extends GetxController
   }
 
   void openMessages() {
-    if (!Get.isRegistered<MessagesMockService>()) {
-      if (!Get.isRegistered<ChatSocketService>()) {
-        Get.lazyPut<ChatSocketService>(
-          () => ChatSocketService(tokenService: Get.find<TokenService>()),
-        );
-      }
-
-      Get.lazyPut<MessagesMockService>(
-        () => MessagesMockService(
-          apiClient: Get.find<ApiClient>(),
-          tokenService: Get.find<TokenService>(),
-          chatSocketService: Get.find<ChatSocketService>(),
-        ),
-      );
-    }
-
-    if (!Get.isRegistered<MessagesController>()) {
-      Get.put<MessagesController>(
-        MessagesController(
-          messagesMockService: Get.find<MessagesMockService>(),
-        ),
-      );
-    }
-
-    isMessagesPageOpen.value = true;
-    // Ensure a global presence listener is active so threads update in real-time
-    _ensurePresenceListener();
+    Get.toNamed<void>(AppRoutes.messages);
   }
 
-  void closeMessages() {
-    isMessagesPageOpen.value = false;
-  }
 
-  void backToHome() {
-    isMessagesPageOpen.value = false;
-    onBottomNavTap(0);
-  }
+
 
   Future<bool> onWillPop() async {
-    if (isMessagesPageOpen.value) {
-      isMessagesPageOpen.value = false;
-      return false;
-    }
-
     if (currentIndex.value != 0) {
       onBottomNavTap(0);
       return false;
@@ -298,14 +256,18 @@ class NavbarAndAppbarWrapperController extends GetxController
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(
+      AppLifecycleState state,
+      ) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed && isMessagesPageOpen.value) {
-      try {
-        if (Get.isRegistered<MessagesController>()) {
-          Get.find<MessagesController>().refreshMessages();
-        }
-      } catch (_) {}
+
+    if (state != AppLifecycleState.resumed ||
+        Get.currentRoute != AppRoutes.messages) {
+      return;
+    }
+
+    if (Get.isRegistered<MessagesController>()) {
+      Get.find<MessagesController>().refreshMessages();
     }
   }
 

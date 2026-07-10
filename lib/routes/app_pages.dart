@@ -56,6 +56,7 @@ import '../features/home/services/home_api_service.dart';
 import '../features/home/views/home_view.dart';
 import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_service.dart';
+import '../features/messages/views/messages_view.dart';
 import '../features/notifications/services/notifications_api_service.dart';
 import '../features/practice_hub/services/italian_tts_service.dart';
 import '../features/practice_hub/services/job_sentences_api_service.dart';
@@ -1075,6 +1076,52 @@ class AppPages {
           );
         }
         Get.find<PracticeHubController>().loadDailyChallenges(showError: false);
+      }),
+    ),
+
+
+    GetPage(
+      name: AppRoutes.messages,
+      page: () => MessagesView(
+        onBackTap: () => Get.back<void>(),
+      ),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<ChatSocketService>()) {
+          Get.lazyPut<ChatSocketService>(
+                () => ChatSocketService(
+              tokenService: Get.find<TokenService>(),
+            ),
+            fenix: true,
+          );
+        }
+
+        if (!Get.isRegistered<PresenceService>()) {
+          Get.put<PresenceService>(
+            PresenceService(),
+            permanent: true,
+          );
+        }
+
+        if (!Get.isRegistered<MessagesMockService>()) {
+          Get.lazyPut<MessagesMockService>(
+                () => MessagesMockService(
+              apiClient: Get.find<ApiClient>(),
+              tokenService: Get.find<TokenService>(),
+              chatSocketService: Get.find<ChatSocketService>(),
+            ),
+            fenix: true,
+          );
+        }
+
+        if (!Get.isRegistered<MessagesController>()) {
+          Get.lazyPut<MessagesController>(
+                () => MessagesController(
+              messagesMockService:
+              Get.find<MessagesMockService>(),
+            ),
+            fenix: true,
+          );
+        }
       }),
     ),
   ];
