@@ -106,7 +106,9 @@ class WebinarVideoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(kWebinarLiveVideoRadius.r),
         child: Stack(
           children: <Widget>[
-            Positioned.fill(child: _RemoteAgoraVideo(controller: controller)),
+            Positioned.fill(
+              child: _RemoteAgoraVideoGrid(controller: controller),
+            ),
             Positioned(
               left: 24.w,
               top: 20.h,
@@ -889,5 +891,65 @@ class _WebinarAnimatedChatBubbleState
         ),
       ),
     );
+  }
+}
+
+
+class _RemoteAgoraVideoGrid extends StatelessWidget {
+  const _RemoteAgoraVideoGrid({
+    required this.controller,
+  });
+
+  final WebinarController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final RtcEngine? engine = controller.agoraService.engine;
+      final String? channelName =
+          controller.agoraService.activeChannelName;
+
+      final List<int> remoteUids =
+      controller.agoraService.remoteVideoUids.toList();
+
+      if (engine == null ||
+          channelName == null ||
+          remoteUids.isEmpty) {
+        return _VideoPlaceholder(
+          text: 'waiting_for_host_video'.tr,
+        );
+      }
+
+      Widget buildRemoteVideo(int uid) {
+        return AgoraVideoView(
+          controller: VideoViewController.remote(
+            rtcEngine: engine,
+            canvas: VideoCanvas(
+              uid: uid,
+              renderMode: RenderModeType.renderModeHidden,
+            ),
+            connection: RtcConnection(
+              channelId: channelName,
+            ),
+          ),
+        );
+      }
+
+      if (remoteUids.length == 1) {
+        return buildRemoteVideo(remoteUids.first);
+      }
+
+      return Row(
+        children: <Widget>[
+          Expanded(
+            child: buildRemoteVideo(remoteUids[0]),
+          ),
+          SizedBox(width: 2.w),
+          Expanded(
+            child: buildRemoteVideo(remoteUids[1]),
+          ),
+        ],
+      );
+    });
   }
 }

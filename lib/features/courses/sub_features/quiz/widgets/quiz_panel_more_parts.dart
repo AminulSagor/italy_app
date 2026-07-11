@@ -20,21 +20,30 @@ class _ListeningAssemblyPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        _TitleBlock(title: question.title, subtitle: question.subtitle),
-        if ((question.prompt ?? '').isNotEmpty) ...<Widget>[
-          SizedBox(height: 18.h),
-          _PromptText(text: question.prompt!),
-        ],
-        SizedBox(height: 30.h),
-        AudioPromptCard(audioUrl: question.mediaUrl, compact: true),
-        SizedBox(height: 30.h),
+        _TitleBlock(
+          title: question.title,
+          subtitle: question.subtitle,
+        ),
+
+        SizedBox(height: 24.h),
+
+        // Play the audio without displaying the correct sentence.
+        AudioPromptCard(
+          audioUrl: question.mediaUrl,
+          compact: true,
+        ),
+
+        SizedBox(height: 28.h),
+
         _AssemblyLines(
           selectedWords: selectedWords,
           slotCount: question.answerWordCount,
           isWrong: showWrongResult,
           onWordTap: onSelectedWordTap,
         ),
-        SizedBox(height: 30.h),
+
+        SizedBox(height: 28.h),
+
         _WordBank(
           words: question.options,
           selected: selectedWords,
@@ -225,6 +234,10 @@ class _WritingWordPanel extends StatelessWidget {
         SizedBox(height: 20.h),
         TextField(
           controller: answerController,
+          scrollPadding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom + 40.h,
+          ),
+          textInputAction: TextInputAction.done,
           cursorColor: AppColors.primaryGreen,
           style: TextStyle(
             fontSize: AppFont.font18.sp,

@@ -29,23 +29,35 @@ class ChapterVideoFullscreenView extends StatefulWidget {
 
 class _ChapterVideoFullscreenViewState
     extends State<ChapterVideoFullscreenView> {
+
+
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.immersiveSticky,
+    );
+
+    SystemChrome.setPreferredOrientations(
+      <DeviceOrientation>[
+        DeviceOrientation.portraitUp,
+      ],
+    );
   }
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setPreferredOrientations(<DeviceOrientation>[
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.edgeToEdge,
+    );
+
+    SystemChrome.setPreferredOrientations(
+      <DeviceOrientation>[
+        DeviceOrientation.portraitUp,
+      ],
+    );
+
     super.dispose();
   }
 

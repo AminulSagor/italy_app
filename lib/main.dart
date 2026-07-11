@@ -16,6 +16,7 @@ import 'core/services/callkit_background_action_handler.dart';
 import 'core/services/callkit_incoming_service.dart';
 import 'core/services/local_notification_service.dart';
 import 'core/services/learning_activity_tracker_service.dart';
+import 'core/services/screen_protection_service.dart';
 import 'core/themes/app_theme.dart';
 import 'features/messages/sub-feature/call/widgets/global_call_status_card.dart';
 import 'core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
@@ -41,6 +42,8 @@ Future<void> main() async {
     callkitBackgroundActionHandler,
   );
 
+
+
   await LocalNotificationService.instance.initialize();
   LocalNotificationService.instance.listenToForegroundMessages();
 
@@ -55,6 +58,13 @@ Future<void> main() async {
   // Attach foreground FCM and CallKit event listeners before the first frame
   // so the first incoming call after installation cannot be missed.
   await _initializeCallKitListeners();
+
+
+  Get.put<ScreenProtectionService>(
+    ScreenProtectionService(),
+    permanent: true,
+  );
+
 
   runApp(ItalyApp(initialRoute: AppPages.initial));
 
@@ -249,18 +259,31 @@ class ItalyApp extends StatelessWidget {
               );
             });
           },
-          routingCallback: (routing) {
+          routingCallback: (Routing? routing) {
             final String? currentRoute = routing?.current;
+
+            if (currentRoute?.isNotEmpty == true &&
+                routing?.isDialog != true &&
+                routing?.isBottomSheet != true &&
+                Get.isRegistered<ScreenProtectionService>()) {
+              unawaited(
+                Get.find<ScreenProtectionService>().updateForRoute(
+                  currentRoute,
+                ),
+              );
+            }
+
             if (Get.isRegistered<LearningActivityTrackerService>()) {
               Get.find<LearningActivityTrackerService>().handleRoute(
                 currentRoute,
               );
             }
+
             if (currentRoute == AppRoutes.wrapper &&
                 Get.isRegistered<NavbarAndAppbarWrapperController>() &&
                 Get.find<NavbarAndAppbarWrapperController>()
-                        .currentIndex
-                        .value ==
+                    .currentIndex
+                    .value ==
                     0 &&
                 Get.isRegistered<HomeController>()) {
               unawaited(

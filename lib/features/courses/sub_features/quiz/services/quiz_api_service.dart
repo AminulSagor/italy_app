@@ -102,7 +102,7 @@ class QuizApiService {
       'title': _fallbackString(data['completedTitle'], 'Lesson Complete'),
       'appName': 'Italir Pothe',
       'chapterTitle': _fallbackString(data['lessonTitle'], chapterTitle),
-      'headline': _fallbackString(data['completedMessage'], 'Bravissimo!'),
+      'headline': _fallbackString(data['completedMessage'], 'Ottimo lavoro!'),
       'xpEarned': _intValue(data['totalXpEarned']) > 0
           ? _intValue(data['totalXpEarned'])
           : _intValue(data['earnedXp']),

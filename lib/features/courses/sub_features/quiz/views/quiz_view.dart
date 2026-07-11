@@ -24,104 +24,158 @@ class QuizView extends GetView<QuizController> {
 
   @override
   Widget build(BuildContext context) {
-    return LearningActivityPageScope(
-      activityKind: LearningActivityKind.quiz,
-      sourceId: 'quiz_view',
-      child: Material(
-      color: AppColors.coursesDetailBg,
-      child: SafeArea(
-        bottom: false,
-        child: Obx(() {
-          final QuizQuestionModel? question = controller.currentQuestion;
-          final bool showWrongResult = controller.showWrongResult;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (didPop) return;
+        _showQuitDialog();
+      },
+      child: LearningActivityPageScope(
+        activityKind: LearningActivityKind.quiz,
+        sourceId: 'quiz_view',
+        child: Material(
+        color: AppColors.coursesDetailBg,
+        child: SafeArea(
+          bottom: false,
+          child: Obx(() {
+            final QuizQuestionModel? question = controller.currentQuestion;
+            final bool showWrongResult =
+                !controller.isExamMode && controller.showWrongResult;
+            final double keyboardHeight =
+                MediaQuery.viewInsetsOf(context).bottom;
 
-          if (controller.isLoading.value && question == null) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen),
-            );
-          }
-
-          if (question == null) {
-            return const SizedBox.shrink();
-          }
-
-          return Stack(
-            children: <Widget>[
-              SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(
-                  kQuizHorizontalPadding.w,
-                  15.h,
-                  kQuizHorizontalPadding.w,
-                  showWrongResult ? 270.h : 150.h,
-                ),
-                child: Column(
-                  children: <Widget>[
-                    QuizTopBar(
-                      current: controller.currentIndex.value + 1,
-                      total: controller.totalQuestions,
-                      onCloseTap: _showQuitDialog,
-                    ),
-                    SizedBox(height: 15.h),
-                    QuizQuestionPanel(
-                      key: ValueKey<String>(question.id),
-                      question: question,
-                      selectedIndex: controller.selectedOptionIndex.value,
-                      hasCheckedAnswer: controller.hasCheckedAnswer.value,
-                      isAnswerCorrect: controller.isAnswerCorrect.value,
-                      sentenceSelectedWords: controller.sentenceSelectedWords
-                          .toList(),
-                      listeningSelectedWords: controller.listeningSelectedWords
-                          .toList(),
-                      matchingRightOrder:
-                          controller.matchingRightOrder.toList(),
-                      matchingRightKeys:
-                          controller.matchingRightPairIdOrder.toList(),
-                      writingAnswerController:
-                          controller.writingAnswerController,
-                      onOptionTap: controller.selectOption,
-                      onSentenceWordTap: controller.addSentenceWord,
-                      onSentenceSelectedWordTap: controller.removeSentenceWord,
-                      onListeningWordTap: controller.addListeningWord,
-                      onListeningSelectedWordTap:
-                          controller.removeListeningWord,
-                      onMatchingRightReorder:
-                          controller.reorderMatchingRight,
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: QuizBottomAction(
-                  showWrongResult: showWrongResult,
-                  isLoading: controller.isSubmittingAnswer.value,
-                  feedback: QuizWrongAnswerFeedback(
-                    correctAnswer: controller.currentCorrectAnswer,
+            if (controller.isLoading.value && question == null) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryGreen),
+              );
+            }
+      
+            if (question == null) {
+              return const SizedBox.shrink();
+            }
+      
+            return Stack(
+              children: <Widget>[
+                SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(
+                    kQuizHorizontalPadding.w,
+                    16.h,
+                    kQuizHorizontalPadding.w,
+                    (showWrongResult ? 270.h : 150.h) + keyboardHeight,
                   ),
-                  onCheckTap: _handleCheckAnswer,
-                  onNextTap: _goNext,
+                  child: Column(
+                    children: <Widget>[
+                      QuizTopBar(
+                        current: controller.currentIndex.value + 1,
+                        total: controller.totalQuestions,
+                        onCloseTap: _showQuitDialog,
+                      ),
+                      SizedBox(height: 16.h),
+                      QuizQuestionPanel(
+                        key: ValueKey<String>(question.id),
+                        question: question,
+                        selectedIndex:
+                        controller.selectedOptionIndex.value,
+                        hasCheckedAnswer:
+                        controller.isExamMode ? false : controller.hasCheckedAnswer.value,
+                        isAnswerCorrect:
+                        controller.isExamMode ? false : controller.isAnswerCorrect.value,
+                        sentenceSelectedWords:
+                        controller.sentenceSelectedWords.toList(),
+                        listeningSelectedWords:
+                        controller.listeningSelectedWords.toList(),
+                        matchingRightOrder:
+                        controller.matchingRightOrder.toList(),
+                        matchingRightKeys:
+                        controller.matchingRightPairIdOrder.toList(),
+                        writingAnswerController:
+                        controller.writingAnswerController,
+                        onOptionTap: controller.selectOption,
+                        onSentenceWordTap:
+                        controller.addSentenceWord,
+                        onSentenceSelectedWordTap:
+                        controller.removeSentenceWord,
+                        onListeningWordTap:
+                        controller.addListeningWord,
+                        onListeningSelectedWordTap:
+                        controller.removeListeningWord,
+                        onMatchingRightReorder:
+                        controller.reorderMatchingRight,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        }),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: SafeArea(
+                    top: false,
+                    child: QuizBottomAction(
+                      isExamMode: controller.isExamMode,
+                      showWrongResult: showWrongResult,
+                      isLoading:
+                      controller.isSubmittingAnswer.value ||
+                          controller.isCompleting.value,
+                      feedback: controller.isExamMode
+                          ? null
+                          : QuizWrongAnswerFeedback(
+                        correctAnswer: controller.currentCorrectAnswer,
+                      ),
+                      onCheckTap: _handleCheckAnswer,
+                      onNextTap: _goNext,
+                      onSkipTap: _skipQuestion,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ),
       ),
-    ),
+      ),
     );
   }
 
   Future<void> _handleCheckAnswer() async {
+    if (controller.isSubmittingAnswer.value ||
+        controller.isCompleting.value) {
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    if (controller.isExamMode) {
+      if (!controller.hasCurrentAnswer) {
+        Get.snackbar(
+          'quiz'.tr,
+          'please_select_an_answer'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: EdgeInsets.all(16.w),
+          duration: const Duration(seconds: 2),
+        );
+        return;
+      }
+
+      await controller.checkAnswer();
+
+      if (!controller.hasCheckedAnswer.value) {
+        return;
+      }
+
+      await _goNext();
+      return;
+    }
+
     final bool isCorrect = await controller.checkAnswer();
+
     if (!isCorrect) {
       return;
     }
 
     Get.bottomSheet<void>(
       QuizCorrectAnswerSheet(
-        meaning: controller.currentCorrectMeaning,
         onContinueTap: () {
           Get.back<void>();
           _goNext();
@@ -133,9 +187,26 @@ class QuizView extends GetView<QuizController> {
       backgroundColor: AppColors.transparent,
     );
   }
+  Future<void> _skipQuestion() async {
+    if (!controller.isExamMode ||
+        controller.isSubmittingAnswer.value ||
+        controller.isCompleting.value) {
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    // Skipping does not submit an answer.
+    await _goNext();
+  }
 
   Future<void> _goNext() async {
+    if (controller.isCompleting.value) {
+      return;
+    }
+
     final bool isFinished = controller.goNext();
+
     if (!isFinished) {
       return;
     }
@@ -147,9 +218,16 @@ class QuizView extends GetView<QuizController> {
 
     await controller.loadLessonComplete();
 
+    // Do not open the completion page until the API result exists.
+    if (controller.lessonComplete.value == null) {
+      return;
+    }
+
     final Object? routeResult = await Get.toNamed(
       AppRoutes.quizCompletion,
-      arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
+      arguments: ControllerTagRouteArguments(
+        controllerTag: controllerTag,
+      ),
     );
 
     if (routeResult == true) {

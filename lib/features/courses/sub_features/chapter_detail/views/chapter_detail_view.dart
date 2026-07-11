@@ -21,7 +21,10 @@ import '../widgets/lesson_content_card.dart';
 class ChapterDetailView extends GetView<ChapterDetailController> {
   final String controllerTag;
 
-  const ChapterDetailView({super.key, required this.controllerTag});
+  const ChapterDetailView({
+    super.key,
+    required this.controllerTag,
+  });
 
   @override
   String? get tag => controllerTag;
@@ -32,14 +35,18 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
     }
 
     if (Get.isRegistered<NavbarAndAppbarWrapperController>()) {
-      Get.find<NavbarAndAppbarWrapperController>().onBottomNavTap(index);
+      Get.find<NavbarAndAppbarWrapperController>()
+          .onBottomNavTap(index);
+
       Get.until((Route<dynamic> route) {
-        return route.settings.name == AppRoutes.wrapper || route.isFirst;
+        return route.settings.name == AppRoutes.wrapper ||
+            route.isFirst;
       });
 
       if (Get.currentRoute != AppRoutes.wrapper) {
         Get.offAllNamed(AppRoutes.wrapper);
       }
+
       return;
     }
 
@@ -61,11 +68,15 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
         body: SafeArea(
           bottom: false,
           child: Obx(() {
-            final ChapterDetailModel? detail = controller.detail.value;
+            final ChapterDetailModel? detail =
+                controller.detail.value;
 
-            if (controller.isLoading.value && detail == null) {
+            if (controller.isLoading.value &&
+                detail == null) {
               return const Center(
-                child: CircularProgressIndicator(color: AppColors.primaryGreen),
+                child: CircularProgressIndicator(
+                  color: AppColors.primaryGreen,
+                ),
               );
             }
 
@@ -78,9 +89,9 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
               physics: const BouncingScrollPhysics(),
               padding: EdgeInsets.fromLTRB(
                 kChapterHorizontalPadding.w,
-                34.h,
+                20.h,
                 kChapterHorizontalPadding.w,
-                160.h,
+                120.h,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,33 +100,42 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                     title: detail.title,
                     onBackTap: () => Get.back<void>(),
                   ),
-                  SizedBox(height: 26.h),
+                  SizedBox(height: 20.h),
+
                   if (detail.hasVideo) ...<Widget>[
                     ChapterVideoCard(
                       detail: detail,
-                      playbackCommand: controller.videoPlaybackCommand.value,
-                      shouldPlay: controller.shouldPlayVideo.value,
+                      playbackCommand:
+                      controller.videoPlaybackCommand.value,
+                      shouldPlay:
+                      controller.shouldPlayVideo.value,
                       loadVideoUrl: controller.loadVideoUrl,
-                      onPlaybackChanged: controller.onVideoPlaybackChanged,
-                      onProgressChanged:
-                          (Duration position, Duration duration) {
-                            controller.recordVideoProgress(
-                              position: position,
-                              duration: duration,
-                            );
-                          },
+                      onPlaybackChanged:
+                      controller.onVideoPlaybackChanged,
+                      onProgressChanged: (
+                          Duration position,
+                          Duration duration,
+                          ) {
+                        controller.recordVideoProgress(
+                          position: position,
+                          duration: duration,
+                        );
+                      },
                     ),
-                    SizedBox(height: 38.h),
+                    SizedBox(height: 24.h),
                   ],
+
                   if (detail.hasLessonContent) ...<Widget>[
                     LessonContentCard(
                       lesson: detail.lessonContent!,
                       audio: detail.audio,
                       loadAudioUrl: controller.loadAudioUrl,
-                      onAudioCompleted: controller.recordAudioCompleted,
+                      onAudioCompleted:
+                      controller.recordAudioCompleted,
                     ),
-                    SizedBox(height: 38.h),
+                    SizedBox(height: 24.h),
                   ],
+
                   Row(
                     children: <Widget>[
                       Expanded(
@@ -124,7 +144,7 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                           onTap: controller.openTheoryBook,
                         ),
                       ),
-                      SizedBox(width: 24.w),
+                      SizedBox(width: 14.w),
                       Expanded(
                         child: ChapterResourceCard(
                           resource: detail.vocabulary,
@@ -133,19 +153,23 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                       ),
                     ],
                   ),
+
                   if (detail.quiz != null) ...<Widget>[
-                    SizedBox(height: 40.h),
+                    SizedBox(height: 26.h),
                     ChapterQuizCard(
                       quiz: detail.quiz!,
                       onStartTap: controller.openQuiz,
                     ),
-                    SizedBox(height: 40.h),
+                    SizedBox(height: 26.h),
                     _BottomActions(
                       status: detail.quiz!.status,
                       hasVideo: detail.hasVideo,
-                      isLoading: controller.isResumeSubmitting.value,
-                      isVideoPlaying: controller.isVideoPlaying.value,
-                      onResumeTap: controller.toggleVideoPlayback,
+                      isLoading:
+                      controller.isResumeSubmitting.value,
+                      isVideoPlaying:
+                      controller.isVideoPlaying.value,
+                      onResumeTap:
+                      controller.toggleVideoPlayback,
                       onQuizTap: controller.openQuiz,
                     ),
                   ],
@@ -163,7 +187,10 @@ class _Header extends StatelessWidget {
   final String title;
   final VoidCallback onBackTap;
 
-  const _Header({required this.title, required this.onBackTap});
+  const _Header({
+    required this.title,
+    required this.onBackTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -171,20 +198,28 @@ class _Header extends StatelessWidget {
       children: <Widget>[
         GestureDetector(
           onTap: onBackTap,
-          child: Icon(
-            Icons.arrow_back_rounded,
-            color: AppColors.primaryGreen,
-            size: 22.w,
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            width: 40.w,
+            height: 40.w,
+            child: Icon(
+              Icons.arrow_back_rounded,
+              color: AppColors.primaryGreen,
+              size: 22.sp,
+            ),
           ),
         ),
-        SizedBox(width: 24.w),
+        SizedBox(width: 12.w),
         Expanded(
           child: Text(
             title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: AppFont.font18.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.homePrimaryText,
+              height: 1.25,
             ),
           ),
         ),
@@ -217,34 +252,41 @@ class _BottomActions extends StatelessWidget {
         onPressed: hasVideo ? onResumeTap : () {},
         text: hasVideo
             ? isVideoPlaying
-                  ? 'Pause'
-                  : 'resume_video'.tr
+            ? 'pause'.tr
+            : 'resume_video'.tr
             : 'video_not_given'.tr,
         isLoading: isLoading,
         icon: hasVideo
             ? isVideoPlaying
-                  ? Icons.pause_rounded
-                  : Icons.play_arrow_rounded
+            ? Icons.pause_rounded
+            : Icons.play_arrow_rounded
             : Icons.lock_outline_rounded,
       );
     }
 
     return Row(
       children: <Widget>[
-        CustomButton(
-          onPressed: hasVideo ? onResumeTap : () {},
-          text: hasVideo
-              ? isVideoPlaying
-                    ? '❚❚  Pause'
-                    : '▶  ${'resume_video'.tr}'
-              : 'video_not_given'.tr,
-          height: kChapterBottomButtonHeight,
-          showShadow: true,
-          btnColor: AppColors.white,
-          btnShadowColor: AppColors.homeNeutralShadow,
-          borderColor: AppColors.white,
-          textColor: AppColors.homePrimaryText,
-          fontSize: AppFont.font16.sp,
+        Expanded(
+          child: CustomButton(
+            onPressed: hasVideo ? onResumeTap : () {},
+            text: hasVideo
+                ? isVideoPlaying
+                ? 'pause'.tr
+                : 'resume_video'.tr
+                : 'video_not_given'.tr,
+            icon: hasVideo
+                ? isVideoPlaying
+                ? Icons.pause_rounded
+                : Icons.play_arrow_rounded
+                : Icons.lock_outline_rounded,
+            height: kChapterBottomButtonHeight,
+            showShadow: true,
+            btnColor: AppColors.white,
+            btnShadowColor: AppColors.homeNeutralShadow,
+            borderColor: AppColors.white,
+            textColor: AppColors.homePrimaryText,
+            fontSize: AppFont.font14.sp,
+          ),
         ),
         SizedBox(width: 12.w),
         Expanded(
@@ -258,7 +300,7 @@ class _BottomActions extends StatelessWidget {
             btnShadowColor: AppColors.primaryBtnShadow,
             borderColor: AppColors.primaryBtnColor,
             textColor: AppColors.limeTextColor,
-            fontSize: AppFont.font16.sp,
+            fontSize: AppFont.font14.sp,
           ),
         ),
       ],

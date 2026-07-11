@@ -3,6 +3,44 @@
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
+    'submit': 'Submit',
+    'review_quiz_subtitle':
+    'Let’s review your answers and see how you did.',
+    'quiz_result_not_available':
+    'The quiz result is not available.',
+    'your_answer_is_correct': 'Your answer is correct.',
+    'that_s_not_quite_right': 'That’s not quite right.',
+    'current_total': '@current / @total',
+    'audio_speed_multiplier': '@speed×',
+    'if_you_quit_now_you_ll_lose_your_progress':
+    'If you quit now, you’ll lose your progress.',
+    'community_link_error': 'Unable to open community',
+    'community_link_not_available':
+    'The community link is not configured.',
+    'community_link_could_not_open':
+    'The Facebook community could not be opened.',
+    'vocabulary_words_count': '@count words',
+    'you_reviewed_complete_reviewedcount_words':
+    'You reviewed @reviewedcount words',
+    'vocabulary_card_progress': 'Card @current of @total',
+    'no_vocabulary_available': 'No vocabulary available',
+    'no_vocabulary_available_description':
+    'There is no vocabulary available for this lesson yet.',
+    'italian_voice_unavailable_message':
+    'Install or enable an Italian voice on this device and try again.',
+    'pause': 'Pause',
+    'course_final_exam_title': 'Final Exam',
+    'course_final_exam_description':
+    'Complete the final exam to test your knowledge and finish the course.',
+    'course_final_exam_action': 'Complete all chapters to unlock',
+    'course_final_exam_helper': 'Finish every chapter before taking the exam',
+    'current_lesson': 'Current lesson',
+    'chapter_progress_percent': '@progress%',
+    'course_tag_pro': 'PRO',
+    'course_tag_free': 'FREE',
+    'unlock_coursename': 'Unlock @coursename',
+    'lessoncount_lessons_included': '@lessoncount lessons included',
+    'get_pro': 'Get Pro',
     'webinar_participants_watching': '@value watching',
     'task_progress': '@current/@target @unit',
     'claimed_xp': 'Claimed +@xp XP',
@@ -704,8 +742,8 @@ appTranslations = <String, Map<String, String>>{
     'gen_words': 'WORDS',
     'gen_days': 'DAYS',
     'gen_quizzes': 'QUIZZES',
-    'gen_streakdays_day_streak': '\$streakDays DAY STREAK',
-    'gen_level_level': 'LEVEL \$level',
+    'gen_streakdays_day_streak': '@streakDays DAY STREAK',
+    'gen_level_level': 'LEVEL @level',
     'gen_right': 'RIGHT',
     'gen_wrong': 'WRONG',
     'gen_accuracy': 'ACCURACY',
@@ -1812,7 +1850,7 @@ appTranslations = <String, Map<String, String>>{
     'streak_freezes': 'Streak Freezes',
     'strict_exam_mode': 'Strict Exam Mode',
     'students_assisted': 'Students Assisted',
-    'study_again': 'Study Again',
+    'study_again': 'Study\nAgain',
     'study_important_verbs_open_survival_italian_pdfs_p':
         'Study Important Verbs Open Survival Italian Pdfs P',
     'submit_final_exam': 'Submit Final Exam',
@@ -2721,8 +2759,8 @@ appTranslations = <String, Map<String, String>>{
     'gen_words': 'শব্দ',
     'gen_days': 'দিন',
     'gen_quizzes': 'কুইজ',
-    'gen_streakdays_day_streak': '\$streakDays দিনের স্ট্রীক',
-    'gen_level_level': 'লেভেল \$level',
+    'gen_streakdays_day_streak': '@streakDays দিনের স্ট্রীক',
+    'gen_level_level': 'লেভেল @level',
     'gen_right': 'ডান',
     'gen_wrong': 'ভুল',
     'gen_accuracy': 'নির্ভুলতা',
@@ -4038,7 +4076,7 @@ appTranslations = <String, Map<String, String>>{
     'streak_freezes': 'স্ট্রিক ফ্রিজসমূহ',
     'strict_exam_mode': 'কঠোর পরীক্ষা মোড',
     'students_assisted': 'সহায়তা পাওয়া শিক্ষার্থী',
-    'study_again': 'আবার পড়ুন',
+    'study_again': 'আবার\nপড়ুন',
     'study_important_verbs_open_survival_italian_pdfs_p':
         'গুরুত্বপূর্ণ ক্রিয়া পড়ুন, সারভাইভাল ইতালিয়ান PDF খুলুন এবং অনুশীলন করুন',
     'submit_final_exam': 'চূড়ান্ত পরীক্ষা জমা দিন',
@@ -4447,8 +4485,90 @@ appTranslations = <String, Map<String, String>>{
     'claimed_xp': '+@xp এক্সপি সংগ্রহ করা হয়েছে',
     'task_progress': '@target @unit-এর মধ্যে @current',
     'webinar_participants_watching': '@value জন দেখছেন',
+    'unlock_coursename': '@coursename আনলক করুন',
+    'lessoncount_lessons_included': '@lessoncountটি লেসন অন্তর্ভুক্ত',
+    'get_pro': 'প্রো নিন',
+    'current_lesson': 'বর্তমান পাঠ',
+    'chapter_progress_percent': '@progress%',
+    'course_tag_pro': 'প্রো',
+    'course_tag_free': 'ফ্রি',
+    'course_final_exam_title': 'চূড়ান্ত পরীক্ষা',
+    'course_final_exam_description':
+    'আপনার জ্ঞান যাচাই করতে এবং কোর্স সম্পন্ন করতে চূড়ান্ত পরীক্ষা দিন।',
+    'course_final_exam_action': 'আনলক করতে সব অধ্যায় সম্পন্ন করুন',
+    'course_final_exam_helper':
+    'পরীক্ষায় অংশ নেওয়ার আগে প্রতিটি অধ্যায় সম্পন্ন করুন',
+    'pause': 'বিরতি দিন',
+    'vocabulary_card_progress':
+    '@totalটির মধ্যে @current নম্বর কার্ড',
+    'no_vocabulary_available':
+    'কোনো শব্দভাণ্ডার পাওয়া যায়নি',
+    'no_vocabulary_available_description':
+    'এই পাঠের জন্য এখনো কোনো শব্দভাণ্ডার পাওয়া যায়নি।',
+    'italian_voice_unavailable_message':
+    'ডিভাইসে ইতালীয় ভয়েস ইনস্টল বা চালু করে আবার চেষ্টা করুন।',
+    'vocabulary_words_count': '@countটি শব্দ',
+    'you_reviewed_complete_reviewedcount_words':
+    'আপনি @reviewedcountটি শব্দ পর্যালোচনা করেছেন',
+    'community_link_error': 'কমিউনিটি খোলা যায়নি',
+    'community_link_not_available':
+    'কমিউনিটি লিংকটি কনফিগার করা হয়নি।',
+    'community_link_could_not_open':
+    'ফেসবুক কমিউনিটিটি খোলা যায়নি।',
+    'if_you_quit_now_you_ll_lose_your_progress':
+    'এখন বের হলে আপনার অগ্রগতি হারিয়ে যাবে।',
+    'current_total': '@current / @total',
+    'audio_speed_multiplier': '@speed×',
+    'that_s_not_quite_right': 'উত্তরটি সঠিক হয়নি।',
+    'your_answer_is_correct': 'আপনার উত্তরটি সঠিক।',
+    'quiz_result_not_available':
+    'কুইজের ফলাফল পাওয়া যায়নি।',
+    'review_quiz_subtitle':
+    'চলুন আপনার উত্তরগুলো পর্যালোচনা করে দেখি আপনি কেমন করেছেন।',
+    'submit': 'জমা দিন',
   },
   'it_IT': <String, String>{
+    'submit': 'Invia',
+    'review_quiz_subtitle':
+    'Rivediamo le tue risposte e vediamo come te la sei cavata.',
+    'quiz_result_not_available':
+    'Il risultato del quiz non è disponibile.',
+    'your_answer_is_correct': 'La tua risposta è corretta.',
+    'that_s_not_quite_right': 'La risposta non è corretta.',
+    'current_total': '@current / @total',
+    'audio_speed_multiplier': '@speed×',
+    'if_you_quit_now_you_ll_lose_your_progress':
+    'Se esci ora, perderai i tuoi progressi.',
+    'community_link_error': 'Impossibile aprire la community',
+    'community_link_not_available':
+    'Il link della community non è configurato.',
+    'community_link_could_not_open':
+    'Non è stato possibile aprire la community Facebook.',
+    'you_reviewed_complete_reviewedcount_words':
+    'Hai ripassato @reviewedcount parole',
+    'vocabulary_words_count': '@count parole',
+    'vocabulary_card_progress':
+    'Scheda @current di @total',
+    'no_vocabulary_available':
+    'Nessun vocabolario disponibile',
+    'no_vocabulary_available_description':
+    'Non è ancora disponibile alcun vocabolario per questa lezione.',
+    'italian_voice_unavailable_message':
+    'Installa o abilita una voce italiana sul dispositivo e riprova.',
+    'pause': 'Pausa',
+    'course_final_exam_title': 'Esame finale',
+    'course_final_exam_description':
+    'Completa l’esame finale per verificare le tue conoscenze e terminare il corso.',
+    'course_final_exam_action': 'Completa tutti i capitoli per sbloccare',
+    'course_final_exam_helper':
+    'Completa ogni capitolo prima di sostenere l’esame',
+    'current_lesson': 'Lezione attuale',
+    'chapter_progress_percent': '@progress%',
+    'course_tag_pro': 'PRO',
+    'course_tag_free': 'GRATIS',
+    'unlock_coursename': 'Sblocca @coursename',
+    'lessoncount_lessons_included': '@lessoncount lezioni incluse',
+    'get_pro': 'Ottieni Pro',
     'webinar_participants_watching': '@value stanno guardando',
     'task_progress': '@current/@target @unit',
     'claimed_xp': 'Ottenuti +@xp XP',
@@ -5168,8 +5288,8 @@ appTranslations = <String, Map<String, String>>{
     'gen_words': 'PAROLE',
     'gen_days': 'GIORNI',
     'gen_quizzes': 'QUIZ',
-    'gen_streakdays_day_streak': '\$streakDays GIORNI CONSEGUITI',
-    'gen_level_level': 'LIVELLO \$level',
+    'gen_streakdays_day_streak': 'SERIE DI @streakDays GIORNI',
+    'gen_level_level': 'LIVELLO @level',
     'gen_right': 'GIUSTO',
     'gen_wrong': 'SBAGLIATO',
     'gen_accuracy': 'PRECISIONE',
@@ -6305,7 +6425,7 @@ appTranslations = <String, Map<String, String>>{
     'streak_freezes': 'Blocchi serie',
     'strict_exam_mode': 'Modalità esame rigorosa',
     'students_assisted': 'Studenti assistiti',
-    'study_again': 'Studia di nuovo',
+    'study_again': 'Studia\ndi nuovo',
     'study_important_verbs_open_survival_italian_pdfs_p':
         'Studia i verbi importanti, apri i PDF di italiano di sopravvivenza e fai pratica',
     'submit_final_exam': 'Invia esame finale',

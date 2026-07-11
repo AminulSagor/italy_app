@@ -132,40 +132,62 @@ class _ListeningReview extends StatelessWidget {
   final QuizQuestionModel question;
   final QuizAnswerReviewModel? review;
 
-  const _ListeningReview({required this.question, required this.review});
+  const _ListeningReview({
+    required this.question,
+    required this.review,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final String answer =
+        review?.selectedAnswer ?? question.correctAnswer;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Container(
-          width: 42.w,
-          height: 42.w,
-          decoration: const BoxDecoration(
-            color: AppColors.primaryGreen,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.play_arrow_rounded,
-            color: AppColors.white,
-            size: 26.w,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              width: 42.w,
+              height: 42.w,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                color: AppColors.primaryGreen,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.play_arrow_rounded,
+                color: AppColors.white,
+                size: 26.sp,
+              ),
+            ),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Text(
+                question.title.replaceAll('\n', ' '),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: AppFont.font15.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.homePrimaryText,
+                  height: 1.35,
+                ),
+              ),
+            ),
+          ],
         ),
-        SizedBox(width: 18.w),
-        Expanded(
-          child: Text(
-            question.title,
-            style: TextStyle(
-              fontSize: AppFont.font16.sp,
-              fontWeight: FontWeight.w900,
-              color: AppColors.homePrimaryText,
+        if (answer.isNotEmpty) ...<Widget>[
+          SizedBox(height: 16.h),
+          SizedBox(
+            width: double.infinity,
+            child: _AnswerChip(
+              label: answer,
+              isCorrect: review?.isCorrect ?? true,
             ),
           ),
-        ),
-        _AnswerChip(
-          label: review?.selectedAnswer ?? question.correctAnswer,
-          isCorrect: review?.isCorrect ?? true,
-        ),
+        ],
       ],
     );
   }
@@ -175,17 +197,25 @@ class _ChoiceReview extends StatelessWidget {
   final QuizQuestionModel question;
   final QuizAnswerReviewModel? review;
 
-  const _ChoiceReview({required this.question, required this.review});
+  const _ChoiceReview({
+    required this.question,
+    required this.review,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        if (question.type == QuizQuestionType.identifyImage &&
+            question.hasImageMedia) ...<Widget>[
+          _ReviewImage(
+            imageUrl: question.mediaUrl,
+          ),
+          SizedBox(height: 14.h),
+        ],
         Text(
-          question.type == QuizQuestionType.identifyImage
-              ? '🍎  ${question.objectLabel ?? 'apple'.tr}'
-              : question.title.replaceAll('\n', ' '),
+          question.title.replaceAll('\n', ' '),
           style: TextStyle(
             fontSize: AppFont.font16.sp,
             fontWeight: FontWeight.w800,
@@ -193,6 +223,17 @@ class _ChoiceReview extends StatelessWidget {
             height: 1.35,
           ),
         ),
+        if ((question.objectLabel ?? '').isNotEmpty) ...<Widget>[
+          SizedBox(height: 6.h),
+          Text(
+            question.objectLabel!,
+            style: TextStyle(
+              fontSize: AppFont.font14.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.bodyText,
+            ),
+          ),
+        ],
         SizedBox(height: 14.h),
         Wrap(
           spacing: 10.w,
@@ -205,9 +246,11 @@ class _ChoiceReview extends StatelessWidget {
               ),
             if (review != null && !review!.isCorrect)
               _AnswerChip(
-                label: 'correct_answer_value'.trParams(<String, String>{
-                  'answer': review!.correctAnswer,
-                }),
+                label: 'correct_answer_value'.trParams(
+                  <String, String>{
+                    'answer': review!.correctAnswer,
+                  },
+                ),
                 isCorrect: true,
               ),
           ],
@@ -334,28 +377,44 @@ class _WritingReview extends StatelessWidget {
   final QuizQuestionModel question;
   final QuizAnswerReviewModel? review;
 
-  const _WritingReview({required this.question, required this.review});
+  const _WritingReview({
+    required this.question,
+    required this.review,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final String answer =
+        review?.selectedAnswer ?? question.correctAnswer;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('🍎', style: TextStyle(fontSize: 46.sp)),
-        SizedBox(width: 20.w),
-        Expanded(
-          child: Text(
-            question.objectLabel ?? '',
+        if (question.hasImageMedia) ...<Widget>[
+          _ReviewImage(
+            imageUrl: question.mediaUrl,
+          ),
+          SizedBox(height: 14.h),
+        ],
+        if ((question.objectLabel ?? '').isNotEmpty)
+          Text(
+            question.objectLabel!,
             style: TextStyle(
-              fontSize: AppFont.font22.sp,
+              fontSize: AppFont.font18.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.homePrimaryText,
             ),
           ),
-        ),
-        _AnswerChip(
-          label: review?.selectedAnswer ?? question.correctAnswer,
-          isCorrect: review?.isCorrect ?? true,
-        ),
+        if (answer.isNotEmpty) ...<Widget>[
+          SizedBox(height: 14.h),
+          SizedBox(
+            width: double.infinity,
+            child: _AnswerChip(
+              label: answer,
+              isCorrect: review?.isCorrect ?? true,
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -415,6 +474,61 @@ class _GreyPairChip extends StatelessWidget {
           fontSize: AppFont.font14.sp,
           fontWeight: FontWeight.w900,
           color: AppColors.homePrimaryText,
+        ),
+      ),
+    );
+  }
+}
+
+class _ReviewImage extends StatelessWidget {
+  final String imageUrl;
+
+  const _ReviewImage({
+    required this.imageUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16.r),
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Image.network(
+          imageUrl,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          loadingBuilder: (
+              BuildContext context,
+              Widget child,
+              ImageChunkEvent? loadingProgress,
+              ) {
+            if (loadingProgress == null) {
+              return child;
+            }
+
+            return Container(
+              color: AppColors.legacyColorFFF1F2F2,
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(
+                color: AppColors.primaryGreen,
+              ),
+            );
+          },
+          errorBuilder: (
+              BuildContext context,
+              Object error,
+              StackTrace? stackTrace,
+              ) {
+            return Container(
+              color: AppColors.legacyColorFFF1F2F2,
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.broken_image_outlined,
+                size: 36.sp,
+                color: AppColors.bodyText,
+              ),
+            );
+          },
         ),
       ),
     );

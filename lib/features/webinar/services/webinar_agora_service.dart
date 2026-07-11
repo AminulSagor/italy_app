@@ -177,14 +177,22 @@ class WebinarAgoraService {
   }
 
   void _markRemoteVideoActive(int remoteUid) {
-    remoteVideoUids.remove(remoteUid);
-    remoteVideoUids.add(remoteUid);
-    remoteHostUid.value = remoteVideoUids.isEmpty ? null : remoteVideoUids.last;
+    if (!remoteVideoUids.contains(remoteUid)) {
+      remoteVideoUids.add(remoteUid);
+    }
+
+    remoteHostUid.value ??= remoteUid;
   }
 
   void _removeRemoteVideo(int remoteUid) {
+    final bool wasOriginalHost = remoteHostUid.value == remoteUid;
+
     remoteVideoUids.remove(remoteUid);
-    remoteHostUid.value = remoteVideoUids.isEmpty ? null : remoteVideoUids.last;
+
+    if (wasOriginalHost) {
+      remoteHostUid.value =
+      remoteVideoUids.isEmpty ? null : remoteVideoUids.first;
+    }
   }
 
   Future<void> _setSpeakerphoneSafely(RtcEngine engine) async {

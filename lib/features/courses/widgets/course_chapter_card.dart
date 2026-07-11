@@ -1,111 +1,140 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../models/course_models.dart';
-import 'package:get/get.dart';
 
 class CourseChapterCard extends StatelessWidget {
   final CourseChapterModel chapter;
   final VoidCallback? onTap;
 
-  const CourseChapterCard({super.key, required this.chapter, this.onTap});
+  const CourseChapterCard({
+    super.key,
+    required this.chapter,
+    this.onTap,
+  });
 
-  bool get _isCompleted => chapter.state == CourseChapterState.completed;
-  bool get _isCurrent => chapter.state == CourseChapterState.current;
-  bool get _isLocked => chapter.state == CourseChapterState.locked;
+  bool get _isCurrent =>
+      chapter.state == CourseChapterState.current;
+
+  bool get _isLocked =>
+      chapter.state == CourseChapterState.locked;
 
   @override
   Widget build(BuildContext context) {
     if (_isCurrent) {
-      return _CurrentChapterCard(chapter: chapter, onTap: onTap);
+      return _CurrentChapterCard(
+        chapter: chapter,
+        onTap: onTap,
+      );
     }
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: _isLocked ? null : onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        height: kCourseDetailChapterHeight.h,
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        width: double.infinity,
+        constraints: BoxConstraints(
+          minHeight: 94.h,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 14.h,
+        ),
         decoration: BoxDecoration(
           color: _isLocked
               ? AppColors.coursesLockedCardBg
               : AppColors.coursesUnlockedCardBg,
-          borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
+          borderRadius: BorderRadius.circular(
+            kCourseDetailCardRadius.r,
+          ),
           boxShadow: _isLocked
               ? const <BoxShadow>[]
               : <BoxShadow>[
-                  BoxShadow(
-                    color: AppColors.homeNeutralShadow,
-                    blurRadius: 0,
-                    offset: Offset(0, 5.h),
-                  ),
-                ],
+            BoxShadow(
+              color: AppColors.homeNeutralShadow,
+              blurRadius: 0,
+              offset: Offset(0, 3.h),
+            ),
+          ],
         ),
         child: Opacity(
           opacity: _isLocked ? 0.72 : 1,
           child: Row(
             children: <Widget>[
               _ChapterIcon(chapter: chapter),
-              SizedBox(width: 18.w),
+              SizedBox(width: 14.w),
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
                   children: <Widget>[
-                    if (chapter.statusLabel != null) ...<Widget>[
-                      Text(
-                        chapter.statusLabel!,
-                        style: TextStyle(
-                          fontSize: AppFont.font12.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryGreen,
-                          letterSpacing: 1.8,
+                    if (chapter.statusLabel != null &&
+                        chapter.statusLabel!.trim().isNotEmpty)
+                      ...<Widget>[
+                        Text(
+                          chapter.statusLabel!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: AppFont.font11.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primaryGreen,
+                            letterSpacing: 1.2,
+                            height: 1.2,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 2.h),
-                    ],
+                        SizedBox(height: 3.h),
+                      ],
                     Text(
                       chapter.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: AppFont.font18.sp,
+                        fontSize: AppFont.font16.sp,
                         fontWeight: FontWeight.w700,
                         color: _isLocked
-                            ? AppColors.coursesCardDisabledText
+                            ? AppColors
+                            .coursesCardDisabledText
                             : AppColors.homePrimaryText,
-                        height: 1.24,
+                        height: 1.25,
                       ),
                     ),
-                    if (chapter.subtitle.isNotEmpty) ...<Widget>[
-                      SizedBox(height: 4.h),
-                      Text(
-                        chapter.subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: AppFont.font15.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.bodyText,
-                          height: 1.2,
+                    if (chapter.subtitle.trim().isNotEmpty)
+                      ...<Widget>[
+                        SizedBox(height: 4.h),
+                        Text(
+                          chapter.subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: AppFont.font13.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.bodyText,
+                            height: 1.2,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
                   ],
                 ),
               ),
-              if (chapter.tagLabel != null) _Tag(label: chapter.tagLabel!),
-              SizedBox(width: 12.w),
+              if (chapter.tagLabel != null &&
+                  chapter.tagLabel!.trim().isNotEmpty)
+                ...<Widget>[
+                  SizedBox(width: 8.w),
+                  _Tag(label: chapter.tagLabel!),
+                ],
+              SizedBox(width: 8.w),
               Icon(
                 _isLocked
                     ? Icons.lock_outline_rounded
                     : Icons.chevron_right_rounded,
-                color: _isLocked
-                    ? AppColors.coursesLockedIcon
-                    : AppColors.coursesLockedIcon,
-                size: 28.w,
+                color: AppColors.coursesLockedIcon,
+                size: 22.sp,
               ),
             ],
           ),
@@ -119,75 +148,107 @@ class _CurrentChapterCard extends StatelessWidget {
   final CourseChapterModel chapter;
   final VoidCallback? onTap;
 
-  const _CurrentChapterCard({required this.chapter, this.onTap});
+  const _CurrentChapterCard({
+    required this.chapter,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final double progress =
+    chapter.progress.clamp(0.0, 1.0).toDouble();
+
+    final int progressPercentage =
+    (progress * 100).round();
+
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        height: kCourseDetailCurrentHeight.h,
-        padding: EdgeInsets.all(24.w),
+        width: double.infinity,
+        padding: EdgeInsets.all(18.w),
         decoration: BoxDecoration(
           color: AppColors.primaryGreen,
-          borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
+          borderRadius: BorderRadius.circular(
+            kCourseDetailCardRadius.r,
+          ),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: AppColors.homeCardShadow,
-              blurRadius: 24.r,
-              offset: Offset(0, 16.h),
+              blurRadius: 16.r,
+              offset: Offset(0, 8.h),
             ),
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Row(
               children: <Widget>[
                 Container(
-                  width: 65.w,
-                  height: 65.w,
+                  width: 52.w,
+                  height: 52.w,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.24),
+                    color: AppColors.white.withValues(
+                      alpha: 0.24,
+                    ),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.play_arrow_rounded,
                     color: AppColors.white,
-                    size: 30.w,
+                    size: 26.sp,
                   ),
                 ),
-                SizedBox(width: 22.w),
+                SizedBox(width: 14.w),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        chapter.statusLabel ?? 'current_study'.tr,
+                        chapter.statusLabel?.trim().isNotEmpty ==
+                            true
+                            ? chapter.statusLabel!
+                            : 'current_study'.tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: AppFont.font12.sp,
+                          fontSize: AppFont.font11.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.homeLime,
-                          letterSpacing: 1.8,
+                          letterSpacing: 1.2,
+                          height: 1.2,
                         ),
                       ),
-                      SizedBox(height: 8.h),
+                      SizedBox(height: 5.h),
                       Text(
                         chapter.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: AppFont.font20.sp,
+                          fontSize: AppFont.font18.sp,
                           fontWeight: FontWeight.w800,
                           color: AppColors.white,
-                          height: 1.15,
+                          height: 1.2,
                         ),
                       ),
                     ],
                   ),
                 ),
+                SizedBox(width: 6.w),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.white,
+                  size: 24.sp,
+                ),
               ],
             ),
-            const Spacer(),
+            SizedBox(height: 18.h),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment:
+              MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
                   'progress'.tr,
@@ -198,7 +259,12 @@ class _CurrentChapterCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'chapter_progress_100_round'.trParams(<String, String>{'progress': (chapter.progress * 100).round().toString()}),
+                  'chapter_progress_percent'.trParams(
+                    <String, String>{
+                      'progress':
+                      progressPercentage.toString(),
+                    },
+                  ),
                   style: TextStyle(
                     fontSize: AppFont.font12.sp,
                     fontWeight: FontWeight.w700,
@@ -207,15 +273,17 @@ class _CurrentChapterCard extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: 8.h),
             ClipRRect(
-              borderRadius: BorderRadius.circular(kHomePillRadius.r),
+              borderRadius: BorderRadius.circular(
+                kHomePillRadius.r,
+              ),
               child: LinearProgressIndicator(
-                value: chapter.progress,
-                borderRadius: BorderRadius.circular(kHomePillRadius.r),
-                minHeight: 14.h,
+                value: progress,
+                minHeight: 9.h,
                 color: AppColors.homeLime,
-                backgroundColor: AppColors.black.withValues(alpha: 0.18),
+                backgroundColor:
+                AppColors.black.withValues(alpha: 0.18),
               ),
             ),
           ],
@@ -228,16 +296,22 @@ class _CurrentChapterCard extends StatelessWidget {
 class _ChapterIcon extends StatelessWidget {
   final CourseChapterModel chapter;
 
-  const _ChapterIcon({required this.chapter});
+  const _ChapterIcon({
+    required this.chapter,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final bool isCompleted = chapter.state == CourseChapterState.completed;
-    final bool isLocked = chapter.state == CourseChapterState.locked;
+    final bool isCompleted =
+        chapter.state == CourseChapterState.completed;
+
+    final bool isLocked =
+        chapter.state == CourseChapterState.locked;
 
     return Container(
-      width: kCourseIconCircleSize.w,
-      height: kCourseIconCircleSize.w,
+      width: 44.w,
+      height: 44.w,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isCompleted
             ? AppColors.legacyColorFFE8F4DF
@@ -248,7 +322,7 @@ class _ChapterIcon extends StatelessWidget {
       ),
       child: Icon(
         isCompleted
-            ? Icons.check_circle_outline_rounded
+            ? Icons.check_rounded
             : isLocked
             ? Icons.lock_outline_rounded
             : Icons.bookmark_border_rounded,
@@ -257,7 +331,7 @@ class _ChapterIcon extends StatelessWidget {
             : isLocked
             ? AppColors.coursesLockedIcon
             : AppColors.coursesChapterBlue,
-        size: 20.w,
+        size: 20.sp,
       ),
     );
   }
@@ -266,24 +340,49 @@ class _ChapterIcon extends StatelessWidget {
 class _Tag extends StatelessWidget {
   final String label;
 
-  const _Tag({required this.label});
+  const _Tag({
+    required this.label,
+  });
+
+  bool get _isPro =>
+      label.trim().toUpperCase() == 'PRO';
+
+  String get _translatedLabel {
+    switch (label.trim().toUpperCase()) {
+      case 'PRO':
+        return 'course_tag_pro'.tr;
+      case 'FREE':
+        return 'course_tag_free'.tr;
+      default:
+        return label;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final bool isPro = label == 'PRO';
-
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+      padding: EdgeInsets.symmetric(
+        horizontal: 8.w,
+        vertical: 4.h,
+      ),
       decoration: BoxDecoration(
-        color: isPro ? AppColors.coursesProTagBg : AppColors.coursesFreeTagBg,
-        borderRadius: BorderRadius.circular(kRadius10.r),
+        color: _isPro
+            ? AppColors.coursesProTagBg
+            : AppColors.coursesFreeTagBg,
+        borderRadius: BorderRadius.circular(
+          kRadius10.r,
+        ),
       ),
       child: Text(
-        label,
+        _translatedLabel,
+        maxLines: 1,
         style: TextStyle(
           fontSize: AppFont.font10.sp,
-          fontWeight: FontWeight.w900,
-          color: isPro ? AppColors.coursesCreamText : AppColors.primaryGreen,
+          fontWeight: FontWeight.w800,
+          color: _isPro
+              ? AppColors.coursesCreamText
+              : AppColors.primaryGreen,
+          height: 1.1,
         ),
       ),
     );

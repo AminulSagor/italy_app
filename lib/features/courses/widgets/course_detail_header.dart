@@ -23,57 +23,70 @@ class CourseDetailHeader extends StatelessWidget {
       children: <Widget>[
         GestureDetector(
           onTap: onBackTap,
+          behavior: HitTestBehavior.opaque,
           child: Container(
-            width: kCourseDetailBackButtonSize.w,
-            height: kCourseDetailBackButtonSize.w,
+            width: 42.w,
+            height: 42.w,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.white,
               shape: BoxShape.circle,
               boxShadow: <BoxShadow>[
                 BoxShadow(
                   color: AppColors.homeNeutralShadow,
-                  blurRadius: 12.r,
-                  offset: Offset(0, 6.h),
+                  blurRadius: 8.r,
+                  offset: Offset(0, 3.h),
                 ),
               ],
             ),
             child: Icon(
               Icons.arrow_back_rounded,
               color: AppColors.primaryGreen,
-              size: 24.w,
+              size: 20.sp,
             ),
           ),
         ),
-        SizedBox(width: 16.w),
+        SizedBox(width: 12.w),
         Expanded(
           child: Text(
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: AppFont.font24.sp,
+              fontSize: AppFont.font20.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.homePrimaryText,
-              letterSpacing: -0.6,
+              letterSpacing: -0.3,
             ),
           ),
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: 10.w),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+          constraints: BoxConstraints(
+            minWidth: 52.w,
+            minHeight: 32.h,
+          ),
+          padding: EdgeInsets.symmetric(
+            horizontal: 12.w,
+            vertical: 6.h,
+          ),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: progressLabel == '100%'
                 ? AppColors.homeGreenChip
                 : AppColors.coursesProgressBadgeBg,
-            borderRadius: BorderRadius.circular(kHomePillRadius.r),
+            borderRadius: BorderRadius.circular(
+              kHomePillRadius.r,
+            ),
           ),
           child: Text(
             progressLabel,
+            maxLines: 1,
             style: TextStyle(
-              fontSize: AppFont.font16.sp,
+              fontSize: AppFont.font14.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.coursesCreamText,
+              height: 1.1,
             ),
           ),
         ),

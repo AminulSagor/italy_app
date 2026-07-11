@@ -47,7 +47,6 @@ import '../features/courses/sub_features/quiz/views/quiz_review_answers_view.dar
 import '../features/courses/sub_features/quiz/views/quiz_view.dart';
 import '../features/courses/sub_features/vocabulary/controllers/vocabulary_controller.dart';
 import '../features/courses/sub_features/vocabulary/services/vocabulary_api_service.dart';
-import '../features/courses/sub_features/vocabulary/services/vocabulary_mock_service.dart';
 import '../features/courses/sub_features/vocabulary/views/vocabulary_view.dart';
 import '../features/courses/views/course_detail_view.dart';
 import '../features/courses/views/course_certificate_view.dart';
@@ -417,36 +416,39 @@ class AppPages {
       name: AppRoutes.vocabulary,
       page: () {
         final ControllerTagRouteArguments args =
-            _arguments<ControllerTagRouteArguments>();
-        return VocabularyView(controllerTag: args.controllerTag);
+        _arguments<ControllerTagRouteArguments>();
+
+        return VocabularyView(
+          controllerTag: args.controllerTag,
+        );
       },
       binding: BindingsBuilder(() {
         final Object routeArgs = Get.arguments as Object;
+
         final VocabularyRouteArguments args =
-            routeArgs is VocabularyRouteArguments
+        routeArgs is VocabularyRouteArguments
             ? routeArgs
             : VocabularyRouteArguments(
-                controllerTag:
-                    (routeArgs as ControllerTagRouteArguments).controllerTag,
-              );
-        Get.lazyPut<VocabularyMockService>(
-          () => VocabularyMockService(),
-          tag: args.controllerTag,
+          controllerTag:
+          (routeArgs as ControllerTagRouteArguments)
+              .controllerTag,
         );
+
         Get.lazyPut<VocabularyApiService>(
-          () => VocabularyApiService(apiClient: Get.find<ApiClient>()),
+              () => VocabularyApiService(
+            apiClient: Get.find<ApiClient>(),
+          ),
           tag: args.controllerTag,
         );
+
         Get.lazyPut<VocabularyController>(
-          () => VocabularyController(
+              () => VocabularyController(
             lessonId: args.lessonId,
-            vocabularyMockService: Get.find<VocabularyMockService>(
-              tag: args.controllerTag,
-            ),
             vocabularyApiService: Get.find<VocabularyApiService>(
               tag: args.controllerTag,
             ),
             userSessionController: Get.find<UserSessionController>(),
+            ttsService: Get.find<ItalianTtsService>(),
           ),
           tag: args.controllerTag,
         );

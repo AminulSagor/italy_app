@@ -63,6 +63,34 @@ class QuizController extends GetxController {
   QuizQuestionModel? get currentQuestion =>
       questions.isEmpty ? null : questions[currentIndex.value];
 
+  bool get hasCurrentAnswer {
+    final QuizQuestionModel? question = currentQuestion;
+
+    if (question == null) {
+      return false;
+    }
+
+    switch (question.type) {
+      case QuizQuestionType.listening:
+      case QuizQuestionType.wordTranslation:
+      case QuizQuestionType.trueFalse:
+      case QuizQuestionType.fillBlank:
+      case QuizQuestionType.identifyImage:
+        return selectedOptionIndex.value >= 0;
+
+      case QuizQuestionType.sentenceTranslation:
+        return sentenceSelectedWords.isNotEmpty;
+
+      case QuizQuestionType.listeningAssembly:
+        return listeningSelectedWords.isNotEmpty;
+
+      case QuizQuestionType.matchingPairs:
+        return matchingRightOrder.isNotEmpty;
+
+      case QuizQuestionType.writingWordTranslation:
+        return writingAnswerController.text.trim().isNotEmpty;
+    }
+  }
   String get currentCorrectAnswer {
     final String apiAnswer = _lastCheckResult?.correctAnswer ?? '';
     if (apiAnswer.isNotEmpty) {

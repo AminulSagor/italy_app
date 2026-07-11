@@ -12,7 +12,6 @@ import '../../quiz/services/quiz_api_service.dart';
 import '../../quiz/services/quiz_mock_service.dart';
 import '../../vocabulary/controllers/vocabulary_controller.dart';
 import '../../vocabulary/services/vocabulary_api_service.dart';
-import '../../vocabulary/services/vocabulary_mock_service.dart';
 import '../models/chapter_detail_models.dart';
 import '../services/chapter_detail_api_service.dart';
 import '../widgets/chapter_pdf_viewer.dart';
@@ -466,6 +465,7 @@ class ChapterDetailController extends GetxController {
 
   Future<void> openVocabulary() async {
     final ChapterDetailModel? current = detail.value;
+
     if (current == null || !current.vocabulary.isAvailable) {
       Get.snackbar(
         'gen_vocabulary'.tr,
@@ -486,13 +486,17 @@ class ChapterDetailController extends GetxController {
     );
 
     if (Get.isRegistered<VocabularyController>(tag: tag)) {
-      Get.delete<VocabularyController>(tag: tag, force: true);
+      Get.delete<VocabularyController>(
+        tag: tag,
+        force: true,
+      );
     }
+
     if (Get.isRegistered<VocabularyApiService>(tag: tag)) {
-      Get.delete<VocabularyApiService>(tag: tag, force: true);
-    }
-    if (Get.isRegistered<VocabularyMockService>(tag: tag)) {
-      Get.delete<VocabularyMockService>(tag: tag, force: true);
+      Get.delete<VocabularyApiService>(
+        tag: tag,
+        force: true,
+      );
     }
   }
 

@@ -16,83 +16,139 @@ import '../models/vocabulary_models.dart';
 class VocabularyView extends GetView<VocabularyController> {
   final String controllerTag;
 
-  const VocabularyView({super.key, required this.controllerTag});
+  const VocabularyView({
+    super.key,
+    required this.controllerTag,
+  });
 
   @override
   String? get tag => controllerTag;
 
   @override
   Widget build(BuildContext context) {
-    return LearningActivityPageScope(
-      activityKind: LearningActivityKind.vocabulary,
-      sourceId: 'vocabulary_view',
-      child: Material(
-      color: AppColors.coursesDetailBg,
-      child: SafeArea(
-        child: Obx(() {
-          final VocabularySessionModel? session = controller.session.value;
-          final VocabularyCardModel? card = controller.currentCard;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (
+          bool didPop,
+          Object? result,
+          ) {
+        if (didPop) {
+          return;
+        }
 
-          if (controller.isLoading.value && session == null) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen),
-            );
-          }
-
-          if (session == null || card == null) {
-            return const SizedBox.shrink();
-          }
-
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 26.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _VocabularyHeader(
-                        title: session.title,
-                        cardLabel:
-                            'Card ${controller.currentCardNumber} of ${controller.totalCards}',
-                        onBackTap: controller.showExitConfirmation,
-                      ),
-                      SizedBox(height: 26.h),
-                      _VocabularyProgressBar(value: controller.progressValue),
-                      SizedBox(height: 30.h),
-                      _VocabularyFlashCard(
-                        card: card,
-                        isRevealed: controller.isRevealed.value,
-                        onTap: controller.flipCard,
-                      ),
-                    ],
+        controller.showExitConfirmation();
+      },
+      child: LearningActivityPageScope(
+        activityKind: LearningActivityKind.vocabulary,
+        sourceId: 'vocabulary_view',
+        child: Material(
+          color: AppColors.coursesDetailBg,
+          child: SafeArea(
+            child: Obx(() {
+              final VocabularySessionModel? session =
+                  controller.session.value;
+      
+              final VocabularyCardModel? card =
+                  controller.currentCard;
+      
+              if (controller.isLoading.value &&
+                  session == null) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryGreen,
                   ),
+                );
+              }
+      
+              if (session == null || card == null) {
+                return _EmptyVocabularyState(
+                  onBackTap: () => Get.back<void>(),
+                );
+              }
+      
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 24.w,
+                  vertical: 26.h,
                 ),
-                Spacer(),
-                _VocabularyStats(
-                  streakDays: controller.currentStreakDays,
-                  level: session.level,
+                child: Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: <Widget>[
+                    SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          _VocabularyHeader(
+                            title: session.title,
+                            cardLabel:
+                            'vocabulary_card_progress'
+                                .trParams(
+                              <String, String>{
+                                'current': controller
+                                    .currentCardNumber
+                                    .toString(),
+                                'total': controller
+                                    .totalCards
+                                    .toString(),
+                              },
+                            ),
+                            onBackTap:
+                            controller
+                                .showExitConfirmation,
+                          ),
+                          SizedBox(height: 26.h),
+                          _VocabularyProgressBar(
+                            value:
+                            controller.progressValue,
+                          ),
+                          SizedBox(height: 30.h),
+                          _VocabularyFlashCard(
+                            card: card,
+                            isRevealed:
+                            controller
+                                .isRevealed
+                                .value,
+                            isSpeaking:
+                            controller
+                                .isSpeaking
+                                .value,
+                            onTap: controller.flipCard,
+                            onAudioTap:
+                            controller
+                                .speakCurrentWord,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    _VocabularyStats(
+                      streakDays:
+                      controller.currentStreakDays,
+                      level: session.level,
+                    ),
+                    SizedBox(height: 30.h),
+                    if (controller.isRevealed.value)
+                      _VocabularyRevealedActions(
+                        isKnownLoading: controller.isKnownSubmitting.value,
+                        onStudyAgainTap: controller.studyAgain,
+                        onKnownTap: controller.markKnown,
+                      )
+                    else
+                      CustomButton.primary(
+                        onPressed:
+                        controller.revealAnswer,
+                        text: 'reveal_answer'.tr,
+                        icon:
+                        Icons.visibility_outlined,
+                      ),
+                    SizedBox(height: 20.h),
+                  ],
                 ),
-                SizedBox(height: 30.h),
-                if (controller.isRevealed.value)
-                  _VocabularyRevealedActions(
-                    onStudyAgainTap: controller.studyAgain,
-                    onKnownTap: controller.markKnown,
-                  )
-                else
-                  CustomButton.primary(
-                    onPressed: controller.revealAnswer,
-                    text: 'reveal_answer'.tr,
-                    icon: Icons.visibility_outlined,
-                  ),
-                SizedBox(height: 20.h),
-              ],
-            ),
-          );
-        }),
+              );
+            }),
+          ),
+        ),
       ),
-    ),
     );
   }
 }
@@ -114,16 +170,23 @@ class _VocabularyHeader extends StatelessWidget {
       children: <Widget>[
         GestureDetector(
           onTap: onBackTap,
-          child: Icon(
-            Icons.arrow_back_rounded,
-            color: AppColors.primaryGreen,
-            size: 20.w,
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            width: 40.w,
+            height: 40.w,
+            child: Icon(
+              Icons.arrow_back_rounded,
+              color: AppColors.primaryGreen,
+              size: 20.sp,
+            ),
           ),
         ),
         SizedBox(width: 10.w),
         Expanded(
           child: Text(
             title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: AppFont.font16.sp,
               fontWeight: FontWeight.w900,
@@ -131,8 +194,10 @@ class _VocabularyHeader extends StatelessWidget {
             ),
           ),
         ),
+        SizedBox(width: 8.w),
         Text(
           cardLabel,
+          maxLines: 1,
           style: TextStyle(
             fontSize: AppFont.font12.sp,
             fontWeight: FontWeight.w500,
@@ -144,35 +209,47 @@ class _VocabularyHeader extends StatelessWidget {
   }
 }
 
-class _VocabularyProgressBar extends StatelessWidget {
+class _VocabularyProgressBar
+    extends StatelessWidget {
   final double value;
 
-  const _VocabularyProgressBar({required this.value});
+  const _VocabularyProgressBar({
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(999.r),
+      borderRadius:
+      BorderRadius.circular(999.r),
       child: LinearProgressIndicator(
-        value: value,
-        minHeight: kVocabularyProgressHeight.h,
-        borderRadius: BorderRadius.circular(999.r),
+        value: value.clamp(0.0, 1.0),
+        minHeight:
+        kVocabularyProgressHeight.h,
+        borderRadius:
+        BorderRadius.circular(999.r),
         color: AppColors.primaryGreen,
-        backgroundColor: AppColors.vocabularyProgressTrack,
+        backgroundColor:
+        AppColors.vocabularyProgressTrack,
       ),
     );
   }
 }
 
-class _VocabularyFlashCard extends StatelessWidget {
+class _VocabularyFlashCard
+    extends StatelessWidget {
   final VocabularyCardModel card;
   final bool isRevealed;
+  final bool isSpeaking;
   final VoidCallback onTap;
+  final VoidCallback onAudioTap;
 
   const _VocabularyFlashCard({
     required this.card,
     required this.isRevealed,
+    required this.isSpeaking,
     required this.onTap,
+    required this.onAudioTap,
   });
 
   @override
@@ -180,11 +257,19 @@ class _VocabularyFlashCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: TweenAnimationBuilder<double>(
-        tween: Tween<double>(end: isRevealed ? math.pi : 0),
-        duration: const Duration(milliseconds: 520),
+        tween: Tween<double>(
+          end: isRevealed ? math.pi : 0,
+        ),
+        duration:
+        const Duration(milliseconds: 520),
         curve: Curves.easeInOutCubic,
-        builder: (BuildContext context, double angle, Widget? child) {
-          final bool showBack = angle > math.pi / 2;
+        builder: (
+            BuildContext context,
+            double angle,
+            Widget? child,
+            ) {
+          final bool showBack =
+              angle > math.pi / 2;
 
           return Transform(
             alignment: Alignment.center,
@@ -193,17 +278,24 @@ class _VocabularyFlashCard extends StatelessWidget {
               ..rotateY(angle),
             child: Transform(
               alignment: Alignment.center,
-              transform: Matrix4.identity()..rotateY(showBack ? math.pi : 0),
+              transform: Matrix4.identity()
+                ..rotateY(
+                  showBack ? math.pi : 0,
+                ),
               child: Container(
                 width: double.infinity,
                 height: 440.h,
                 padding: EdgeInsets.all(30.w),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(kRadius48.r),
+                  borderRadius:
+                  BorderRadius.circular(
+                    kRadius48.r,
+                  ),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: AppColors.vocabularyCardShadow,
+                      color: AppColors
+                          .vocabularyCardShadow,
                       blurRadius: 42.r,
                       offset: Offset(0, 22.h),
                     ),
@@ -211,16 +303,34 @@ class _VocabularyFlashCard extends StatelessWidget {
                 ),
                 child: Center(
                   child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 140),
+                    duration: const Duration(
+                      milliseconds: 140,
+                    ),
                     child: showBack
                         ? _VocabularyBackSide(
-                            card: card,
-                            key: const ValueKey<String>('back'),
-                          )
+                      key:
+                      const ValueKey<
+                          String>(
+                        'back',
+                      ),
+                      card: card,
+                      isSpeaking:
+                      isSpeaking,
+                      onAudioTap:
+                      onAudioTap,
+                    )
                         : _VocabularyFrontSide(
-                            card: card,
-                            key: const ValueKey<String>('front'),
-                          ),
+                      key:
+                      const ValueKey<
+                          String>(
+                        'front',
+                      ),
+                      card: card,
+                      isSpeaking:
+                      isSpeaking,
+                      onAudioTap:
+                      onAudioTap,
+                    ),
                   ),
                 ),
               ),
@@ -232,25 +342,42 @@ class _VocabularyFlashCard extends StatelessWidget {
   }
 }
 
-class _VocabularyAudioButton extends StatelessWidget {
+class _VocabularyAudioButton
+    extends StatelessWidget {
+  final bool isSpeaking;
   final VoidCallback onTap;
 
-  const _VocabularyAudioButton({required this.onTap});
+  const _VocabularyAudioButton({
+    required this.isSpeaking,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isSpeaking ? null : onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
         width: kVocabularyAudioButtonSize.w,
         height: kVocabularyAudioButtonSize.w,
+        alignment: Alignment.center,
         decoration: const BoxDecoration(
           color: AppColors.homePaleGreen,
           shape: BoxShape.circle,
         ),
-        child: Icon(
+        child: isSpeaking
+            ? SizedBox(
+          width: 20.w,
+          height: 20.w,
+          child:
+          const CircularProgressIndicator(
+            strokeWidth: 2,
+            color: AppColors.primaryGreen,
+          ),
+        )
+            : Icon(
           Icons.volume_up_rounded,
-          size: 28.w,
+          size: 28.sp,
           color: AppColors.primaryGreen,
         ),
       ),
@@ -258,10 +385,18 @@ class _VocabularyAudioButton extends StatelessWidget {
   }
 }
 
-class _VocabularyFrontSide extends StatelessWidget {
+class _VocabularyFrontSide
+    extends StatelessWidget {
   final VocabularyCardModel card;
+  final bool isSpeaking;
+  final VoidCallback onAudioTap;
 
-  const _VocabularyFrontSide({super.key, required this.card});
+  const _VocabularyFrontSide({
+    super.key,
+    required this.card,
+    required this.isSpeaking,
+    required this.onAudioTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -269,8 +404,14 @@ class _VocabularyFrontSide extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [_VocabularyAudioButton(onTap: () {})],
+          mainAxisAlignment:
+          MainAxisAlignment.end,
+          children: <Widget>[
+            _VocabularyAudioButton(
+              isSpeaking: isSpeaking,
+              onTap: onAudioTap,
+            ),
+          ],
         ),
         SizedBox(height: 60.h),
         Text(
@@ -286,6 +427,7 @@ class _VocabularyFrontSide extends StatelessWidget {
         SizedBox(height: 12.h),
         Text(
           card.languageLabel,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: AppFont.font18.sp,
             fontWeight: FontWeight.w500,
@@ -296,12 +438,13 @@ class _VocabularyFrontSide extends StatelessWidget {
         SizedBox(height: 60.h),
         Icon(
           Icons.pan_tool_alt_outlined,
-          size: 26.w,
+          size: 26.sp,
           color: AppColors.bodyText,
         ),
         SizedBox(height: 8.h),
         Text(
           'tap_card_to_flip'.tr,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: AppFont.font16.sp,
             fontWeight: FontWeight.w900,
@@ -314,10 +457,18 @@ class _VocabularyFrontSide extends StatelessWidget {
   }
 }
 
-class _VocabularyBackSide extends StatelessWidget {
+class _VocabularyBackSide
+    extends StatelessWidget {
   final VocabularyCardModel card;
+  final bool isSpeaking;
+  final VoidCallback onAudioTap;
 
-  const _VocabularyBackSide({super.key, required this.card});
+  const _VocabularyBackSide({
+    super.key,
+    required this.card,
+    required this.isSpeaking,
+    required this.onAudioTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -325,8 +476,14 @@ class _VocabularyBackSide extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [_VocabularyAudioButton(onTap: () {})],
+          mainAxisAlignment:
+          MainAxisAlignment.end,
+          children: <Widget>[
+            _VocabularyAudioButton(
+              isSpeaking: isSpeaking,
+              onTap: onAudioTap,
+            ),
+          ],
         ),
         SizedBox(height: 60.h),
         Text(
@@ -335,7 +492,8 @@ class _VocabularyBackSide extends StatelessWidget {
           style: TextStyle(
             fontSize: AppFont.font44.sp,
             fontWeight: FontWeight.w900,
-            color: AppColors.homePrimaryText,
+            color:
+            AppColors.homePrimaryText,
             height: 1,
           ),
         ),
@@ -346,7 +504,8 @@ class _VocabularyBackSide extends StatelessWidget {
           style: TextStyle(
             fontSize: AppFont.font22.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.vocabularyBlueText,
+            color:
+            AppColors.vocabularyBlueText,
             height: 1.15,
           ),
         ),
@@ -370,7 +529,10 @@ class _VocabularyStats extends StatelessWidget {
   final int streakDays;
   final int level;
 
-  const _VocabularyStats({required this.streakDays, required this.level});
+  const _VocabularyStats({
+    required this.streakDays,
+    required this.level,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -378,16 +540,31 @@ class _VocabularyStats extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: _VocabularyStatText(
-            icon: Icons.local_fire_department_rounded,
-            label: 'gen_streakdays_day_streak'.tr,
-            color: AppColors.vocabularyStreakText,
+            icon: Icons
+                .local_fire_department_rounded,
+            label:
+            'gen_streakdays_day_streak'
+                .trParams(
+              <String, String>{
+                'streakDays':
+                streakDays.toString(),
+              },
+            ),
+            color:
+            AppColors.vocabularyStreakText,
           ),
         ),
         Expanded(
           child: _VocabularyStatText(
-            icon: Icons.emoji_events_outlined,
-            label: 'gen_level_level'.tr,
-            color: AppColors.vocabularyBlueText,
+            icon:
+            Icons.emoji_events_outlined,
+            label: 'gen_level_level'.trParams(
+              <String, String>{
+                'level': level.toString(),
+              },
+            ),
+            color:
+            AppColors.vocabularyBlueText,
             alignEnd: true,
           ),
         ),
@@ -396,7 +573,8 @@ class _VocabularyStats extends StatelessWidget {
   }
 }
 
-class _VocabularyStatText extends StatelessWidget {
+class _VocabularyStatText
+    extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
@@ -416,7 +594,11 @@ class _VocabularyStatText extends StatelessWidget {
           ? MainAxisAlignment.end
           : MainAxisAlignment.start,
       children: <Widget>[
-        Icon(icon, color: color, size: 22.w),
+        Icon(
+          icon,
+          color: color,
+          size: 22.sp,
+        ),
         SizedBox(width: 8.w),
         Flexible(
           child: Text(
@@ -435,11 +617,14 @@ class _VocabularyStatText extends StatelessWidget {
   }
 }
 
-class _VocabularyRevealedActions extends StatelessWidget {
+class _VocabularyRevealedActions
+    extends StatelessWidget {
+  final bool isKnownLoading;
   final VoidCallback onStudyAgainTap;
   final VoidCallback onKnownTap;
 
   const _VocabularyRevealedActions({
+    required this.isKnownLoading,
     required this.onStudyAgainTap,
     required this.onKnownTap,
   });
@@ -454,9 +639,13 @@ class _VocabularyRevealedActions extends StatelessWidget {
             text: 'study_again'.tr,
             icon: Icons.refresh_rounded,
             showShadow: true,
-            btnColor: AppColors.vocabularyOrange,
-            btnShadowColor: AppColors.vocabularyOrangeShadow,
-            borderColor: AppColors.vocabularyOrange,
+            btnColor:
+            AppColors.vocabularyOrange,
+            btnShadowColor:
+            AppColors
+                .vocabularyOrangeShadow,
+            borderColor:
+            AppColors.vocabularyOrange,
             textColor: AppColors.white,
             fontSize: 14.sp,
             borderRadius: kRadius42,
@@ -470,9 +659,136 @@ class _VocabularyRevealedActions extends StatelessWidget {
             text: 'i_know_nthis'.tr,
             icon: Icons.check_circle_rounded,
             borderRadius: kRadius42,
+            isLoading: isKnownLoading,
           ),
         ),
       ],
+    );
+  }
+}
+
+class _EmptyVocabularyState
+    extends StatelessWidget {
+  final VoidCallback onBackTap;
+
+  const _EmptyVocabularyState({
+    required this.onBackTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: 24.w,
+        vertical: 20.h,
+      ),
+      child: Column(
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              GestureDetector(
+                onTap: onBackTap,
+                behavior:
+                HitTestBehavior.opaque,
+                child: SizedBox(
+                  width: 44.w,
+                  height: 44.w,
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    color:
+                    AppColors.primaryGreen,
+                    size: 22.sp,
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  'gen_vocabulary'.tr,
+                  style: TextStyle(
+                    fontSize:
+                    AppFont.font18.sp,
+                    fontWeight:
+                    FontWeight.w700,
+                    color: AppColors
+                        .homePrimaryText,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: Center(
+              child: Container(
+                width: double.infinity,
+                padding:
+                EdgeInsets.symmetric(
+                  horizontal: 24.w,
+                  vertical: 32.h,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius:
+                  BorderRadius.circular(
+                    20.r,
+                  ),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: AppColors
+                          .homeNeutralShadow,
+                      blurRadius: 10.r,
+                      offset: Offset(0, 4.h),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize:
+                  MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(
+                      Icons.menu_book_outlined,
+                      color: AppColors
+                          .primaryGreen,
+                      size: 42.sp,
+                    ),
+                    SizedBox(height: 18.h),
+                    Text(
+                      'no_vocabulary_available'
+                          .tr,
+                      textAlign:
+                      TextAlign.center,
+                      style: TextStyle(
+                        fontSize:
+                        AppFont.font18.sp,
+                        fontWeight:
+                        FontWeight.w700,
+                        color: AppColors
+                            .homePrimaryText,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'no_vocabulary_available_description'
+                          .tr,
+                      textAlign:
+                      TextAlign.center,
+                      style: TextStyle(
+                        fontSize:
+                        AppFont.font14.sp,
+                        fontWeight:
+                        FontWeight.w400,
+                        color:
+                        AppColors.bodyText,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:italir_pothe/core/models/learning_activity_models.dart';
 import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
+import '../../../../../core/services/screen_protection_service.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
 
@@ -36,6 +38,12 @@ class _ChapterPdfViewerState extends State<ChapterPdfViewer> {
   void initState() {
     super.initState();
     _pdfController = PdfViewerController();
+
+    if (Get.isRegistered<ScreenProtectionService>()) {
+      unawaited(
+        Get.find<ScreenProtectionService>().enable(),
+      );
+    }
   }
 
   @override
