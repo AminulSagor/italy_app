@@ -373,62 +373,129 @@ class CoursesApiService {
   }
 
   CourseFinalExamModel _finalExamFromCourse(
-    Map<String, dynamic> course, {
-    required Map<String, dynamic>? gateway,
-    required int completionPercent,
-  }) {
-    final bool hasLinkedExam = _stringValue(
-      course['finalExamTemplateId'],
-    ).isNotEmpty;
+      Map<String, dynamic> course, {
+        required Map<String, dynamic>? gateway,
+        required int completionPercent,
+      }) {
+    final bool hasLinkedExam =
+        _stringValue(course['finalExamTemplateId']).isNotEmpty;
+
     final Map<String, dynamic> exam = gateway == null
         ? <String, dynamic>{}
         : _jsonMapOr(gateway['exam'], <String, dynamic>{});
+
     final bool hasPublishedExam = _stringValue(exam['id']).isNotEmpty;
     final int unlockPercent = _intValue(exam['unlockCompletionPercent']);
+
     final String backendProgressValue = gateway == null
         ? ''
         : _stringValue(gateway['courseProgressPercent']);
+
     final int backendProgressPercent = backendProgressValue.isEmpty
         ? completionPercent
         : _intValue(backendProgressValue);
+
     final bool thresholdReached =
         hasPublishedExam && backendProgressPercent >= unlockPercent;
+
     final bool gatewayUnlocked =
         gateway != null &&
-        (_boolValue(gateway['isUnlocked'], fallback: thresholdReached) ||
-            thresholdReached);
-    final bool canStart = hasLinkedExam && hasPublishedExam && gatewayUnlocked;
+            (_boolValue(
+              gateway['isUnlocked'],
+              fallback: thresholdReached,
+            ) ||
+                thresholdReached);
+
+    // New backend fields.
+    final bool hasAttempted = gateway != null &&
+        _boolValue(
+          gateway['hasAttempted'],
+          fallback: false,
+        );
+
+    final String attemptStatus = gateway == null
+        ? ''
+        : _stringValue(gateway['attemptStatus']);
+
+    final bool isEligible = gateway != null
+        ? _boolValue(
+      gateway['isEligible'],
+      fallback: gatewayUnlocked && !hasAttempted,
+    )
+        : false;
+
+    final bool canStart =
+        hasLinkedExam && hasPublishedExam && isEligible;
+
+    final bool hasCertificate =
+        attemptStatus == 'certificate_issued';
+
     final String gatewayMessage = gateway == null
         ? ''
         : _stringValue(gateway['message']);
 
+    String actionLabel;
     String helperLabel;
-    if (!hasLinkedExam) {
+
+    if (hasCertificate) {
+      actionLabel = 'View Certificate';
+      helperLabel = 'Your certificate is ready.';
+    } else if (attemptStatus == 'submitted' ||
+        attemptStatus == 'under_review') {
+      actionLabel = 'Result Pending';
+      helperLabel = 'Your final examination is being reviewed.';
+    } else if (attemptStatus == 'evaluated' ||
+        attemptStatus == 'retake_requested') {
+      actionLabel = 'View Result';
+      helperLabel = 'Your final examination result is available.';
+    } else if (attemptStatus == 'in_progress') {
+      actionLabel = 'Exam Already Started';
+      helperLabel = 'You have already started this final examination.';
+    } else if (attemptStatus == 'cancelled') {
+      actionLabel = 'Exam Unavailable';
+      helperLabel = 'This final examination attempt was cancelled.';
+    } else if (!hasLinkedExam) {
+      actionLabel = 'not_yet_eligible'.tr;
       helperLabel = 'Final exam not configured';
     } else if (!hasPublishedExam) {
+      actionLabel = 'not_yet_eligible'.tr;
       helperLabel = 'Final exam is not published yet';
     } else if (!gatewayUnlocked) {
+      actionLabel = 'not_yet_eligible'.tr;
       helperLabel = gatewayMessage.isNotEmpty
           ? gatewayMessage
           : 'Reach $unlockPercent% course completion to unlock the final exam';
-    } else {
+    } else if (canStart) {
+      actionLabel = 'start_final_exam'.tr;
       helperLabel = gatewayMessage.isNotEmpty
           ? gatewayMessage
           : 'ready_to_start'.tr;
+    } else {
+      actionLabel = 'Exam Already Taken';
+      helperLabel = gatewayMessage.isNotEmpty
+          ? gatewayMessage
+          : 'You have already taken this final examination.';
     }
 
     return CourseFinalExamModel(
       examId: _stringValue(exam['id']),
-      title: _fallbackString(exam['title'], 'gen_final_exam'.tr),
+      title: _fallbackString(
+        exam['title'],
+        'gen_final_exam'.tr,
+      ),
       description: _fallbackString(
         exam['description'],
         'Complete the final exam to earn your course certificate.',
       ),
-      actionLabel: canStart ? 'start_final_exam'.tr : 'not_yet_eligible'.tr,
+      actionLabel: actionLabel,
       helperLabel: helperLabel,
       isConfigured: hasLinkedExam,
       canStart: canStart,
-      courseProgressPercent: backendProgressPercent.clamp(0, 100).toInt(),
+      hasAttempted: hasAttempted,
+      isEligible: isEligible,
+      attemptStatus: attemptStatus,
+      courseProgressPercent:
+      backendProgressPercent.clamp(0, 100).toInt(),
       unlockCompletionPercent: unlockPercent,
     );
   }

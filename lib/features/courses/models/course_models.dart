@@ -428,6 +428,13 @@ class CourseFinalExamModel {
   final String helperLabel;
   final bool isConfigured;
   final bool canStart;
+
+  // Add these three fields.
+  final bool hasAttempted;
+  final bool isEligible;
+  final String attemptStatus;
+  bool get hasCertificate =>
+      attemptStatus == 'certificate_issued';
   final int courseProgressPercent;
   final int unlockCompletionPercent;
 
@@ -439,6 +446,9 @@ class CourseFinalExamModel {
     required this.helperLabel,
     required this.isConfigured,
     required this.canStart,
+    required this.hasAttempted,
+    required this.isEligible,
+    required this.attemptStatus,
     required this.courseProgressPercent,
     required this.unlockCompletionPercent,
   });
@@ -452,8 +462,13 @@ class CourseFinalExamModel {
       helperLabel: json['helperLabel']?.toString() ?? '',
       isConfigured: json['isConfigured'] as bool? ?? false,
       canStart: json['canStart'] as bool? ?? false,
+      hasAttempted: json['hasAttempted'] as bool? ?? false,
+      isEligible: json['isEligible'] as bool? ?? false,
+      attemptStatus: json['attemptStatus']?.toString() ?? '',
       courseProgressPercent: _intValue(json['courseProgressPercent']),
-      unlockCompletionPercent: _intValue(json['unlockCompletionPercent']),
+      unlockCompletionPercent: _intValue(
+        json['unlockCompletionPercent'],
+      ),
     );
   }
 
@@ -466,6 +481,9 @@ class CourseFinalExamModel {
       'helperLabel': helperLabel,
       'isConfigured': isConfigured,
       'canStart': canStart,
+      'hasAttempted': hasAttempted,
+      'isEligible': isEligible,
+      'attemptStatus': attemptStatus,
       'courseProgressPercent': courseProgressPercent,
       'unlockCompletionPercent': unlockCompletionPercent,
     };

@@ -86,6 +86,29 @@ class CourseDetailController extends GetxController {
         courseId: course.id,
       ),
     );
+    await loadDetail();
+  }
+
+  Future<void> handleFinalExamTap() async {
+    final CourseFinalExamModel? finalExam = detail.value?.finalExam;
+    if (finalExam == null) return;
+
+    if (finalExam.hasCertificate) {
+      final String tag =
+          'course_certificate_${DateTime.now().millisecondsSinceEpoch}';
+
+      await Get.toNamed(
+        AppRoutes.courseCertificate,
+        arguments: CourseCertificateRouteArguments(
+          controllerTag: tag,
+        ),
+      );
+      return;
+    }
+
+    if (finalExam.canStart) {
+      await openFinalExam();
+    }
   }
 
   Future<void> openChapter(CourseChapterModel chapter) async {

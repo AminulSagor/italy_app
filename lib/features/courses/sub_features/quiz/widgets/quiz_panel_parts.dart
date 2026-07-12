@@ -22,6 +22,9 @@ class _ListeningPanel extends StatelessWidget {
           subtitle: question.subtitle,
           center: true,
         ),
+
+
+
         if ((question.prompt ?? '').isNotEmpty) ...<Widget>[
           SizedBox(height: 18.h),
           _PromptText(text: question.prompt!, center: true),
@@ -64,6 +67,7 @@ class _WordTranslationPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _TitleBlock(title: question.title, subtitle: question.subtitle),
+
         if ((question.prompt ?? '').isNotEmpty) ...<Widget>[
           SizedBox(height: 24.h),
           _QuotedPromptText(text: question.prompt!),

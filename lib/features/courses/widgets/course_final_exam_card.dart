@@ -89,7 +89,9 @@ class CourseFinalExamCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Icon(
-                    Icons.verified_outlined,
+                    finalExam.hasCertificate
+                        ? Icons.workspace_premium_outlined
+                        : Icons.verified_outlined,
                     color: AppColors.bodyText,
                     size: 17.sp,
                   ),

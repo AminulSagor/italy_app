@@ -7,10 +7,7 @@ import 'package:get/get.dart';
 import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../routes/app_route_arguments.dart';
 import '../../../../../routes/app_routes.dart';
-import '../../quiz/controllers/quiz_controller.dart';
 import '../../quiz/models/quiz_models.dart';
-import '../../quiz/services/quiz_api_service.dart';
-import '../../quiz/services/quiz_mock_service.dart';
 import '../helpers/final_exam_flow_mapper.dart';
 import '../models/final_exam_api_models.dart';
 import '../models/final_exam_models.dart';
@@ -199,24 +196,15 @@ class FinalExamController extends GetxController {
         externalAnswerHandler: submitQuizAnswer,
       ),
     );
-    _disposeQuizRoute(quizTag);
 
     if (routeResult == true) {
+      // Allow the previous route's closing animation to finish.
+      await Future<void>.delayed(const Duration(milliseconds: 350));
       await _openSectionAt(sectionIndex + 1);
     }
   }
 
-  void _disposeQuizRoute(String tag) {
-    if (Get.isRegistered<QuizController>(tag: tag)) {
-      Get.delete<QuizController>(tag: tag, force: true);
-    }
-    if (Get.isRegistered<QuizApiService>(tag: tag)) {
-      Get.delete<QuizApiService>(tag: tag, force: true);
-    }
-    if (Get.isRegistered<QuizMockService>(tag: tag)) {
-      Get.delete<QuizMockService>(tag: tag, force: true);
-    }
-  }
+
 
   Future<QuizExternalAnswerResult> submitQuizAnswer(
     QuizQuestionModel question,
