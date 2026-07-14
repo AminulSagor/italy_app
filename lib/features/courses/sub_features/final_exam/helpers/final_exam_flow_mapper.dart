@@ -49,7 +49,7 @@ class FinalExamFlowMapper {
       noteEnglish: data.resultNotice.isNotEmpty
           ? data.resultNotice
           : 'writing_and_speaking_answers_may_require_teacher_r'.tr,
-      canStart: data.isUnlocked,
+      canStart: data.isEligible,
       startMessage: data.message,
     );
   }

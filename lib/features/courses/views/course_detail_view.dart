@@ -154,8 +154,8 @@ class CourseDetailView extends GetView<CourseDetailController> {
                   sliver: SliverToBoxAdapter(
                     child: CourseFinalExamCard(
                       finalExam: detail.finalExam,
-                      onTap:
-                      detail.finalExam.canStart || detail.finalExam.hasCertificate
+                      onTap: detail.finalExam.canStart ||
+                          detail.finalExam.canViewResult
                           ? controller.handleFinalExamTap
                           : null,
                     ),

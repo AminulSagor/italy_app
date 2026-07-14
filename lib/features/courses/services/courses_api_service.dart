@@ -377,108 +377,117 @@ class CoursesApiService {
         required Map<String, dynamic>? gateway,
         required int completionPercent,
       }) {
-    final bool hasLinkedExam =
-        _stringValue(course['finalExamTemplateId']).isNotEmpty;
+    final bool hasLinkedExam = _stringValue(
+      course['finalExamTemplateId'],
+    ).isNotEmpty;
 
     final Map<String, dynamic> exam = gateway == null
         ? <String, dynamic>{}
-        : _jsonMapOr(gateway['exam'], <String, dynamic>{});
+        : _jsonMapOr(
+      gateway['exam'],
+      <String, dynamic>{},
+    );
 
-    final bool hasPublishedExam = _stringValue(exam['id']).isNotEmpty;
-    final int unlockPercent = _intValue(exam['unlockCompletionPercent']);
+    final bool hasPublishedExam =
+        _stringValue(exam['id']).isNotEmpty;
 
-    final String backendProgressValue = gateway == null
+    final String attemptId = gateway == null
         ? ''
-        : _stringValue(gateway['courseProgressPercent']);
-
-    final int backendProgressPercent = backendProgressValue.isEmpty
-        ? completionPercent
-        : _intValue(backendProgressValue);
-
-    final bool thresholdReached =
-        hasPublishedExam && backendProgressPercent >= unlockPercent;
-
-    final bool gatewayUnlocked =
-        gateway != null &&
-            (_boolValue(
-              gateway['isUnlocked'],
-              fallback: thresholdReached,
-            ) ||
-                thresholdReached);
-
-    // New backend fields.
-    final bool hasAttempted = gateway != null &&
-        _boolValue(
-          gateway['hasAttempted'],
-          fallback: false,
-        );
+        : _stringValue(gateway['attemptId']);
 
     final String attemptStatus = gateway == null
         ? ''
         : _stringValue(gateway['attemptStatus']);
 
-    final bool isEligible = gateway != null
-        ? _boolValue(
-      gateway['isEligible'],
-      fallback: gatewayUnlocked && !hasAttempted,
-    )
-        : false;
+    final bool hasAttempted = gateway != null &&
+        _boolValue(
+          gateway['hasAttempted'],
+          fallback: attemptId.isNotEmpty,
+        );
 
-    final bool canStart =
-        hasLinkedExam && hasPublishedExam && isEligible;
+    final bool resultReady = gateway != null &&
+        _boolValue(
+          gateway['resultReady'],
+          fallback: false,
+        );
 
-    final bool hasCertificate =
-        attemptStatus == 'certificate_issued';
+    final int unlockPercent = _intValue(
+      exam['unlockCompletionPercent'],
+    );
+
+    final String backendProgressValue = gateway == null
+        ? ''
+        : _stringValue(gateway['courseProgressPercent']);
+
+    final int backendProgressPercent =
+    backendProgressValue.isEmpty
+        ? completionPercent
+        : _intValue(backendProgressValue);
+
+    final bool thresholdReached =
+        hasPublishedExam &&
+            backendProgressPercent >= unlockPercent;
+
+    final bool isUnlocked = gateway != null &&
+        _boolValue(
+          gateway['isUnlocked'],
+          fallback: thresholdReached,
+        );
+
+    final bool backendEligible = gateway != null &&
+        _boolValue(
+          gateway['isEligible'],
+          fallback: isUnlocked && !hasAttempted,
+        );
+
+    final bool canStart = hasLinkedExam &&
+        hasPublishedExam &&
+        backendEligible &&
+        !hasAttempted;
+
+    final bool canViewResult =
+        resultReady && attemptId.isNotEmpty;
 
     final String gatewayMessage = gateway == null
         ? ''
         : _stringValue(gateway['message']);
 
-    String actionLabel;
-    String helperLabel;
+    late final String actionLabel;
+    late final String helperLabel;
 
-    if (hasCertificate) {
-      actionLabel = 'View Certificate';
-      helperLabel = 'Your certificate is ready.';
-    } else if (attemptStatus == 'submitted' ||
-        attemptStatus == 'under_review') {
-      actionLabel = 'Result Pending';
-      helperLabel = 'Your final examination is being reviewed.';
-    } else if (attemptStatus == 'evaluated' ||
-        attemptStatus == 'retake_requested') {
-      actionLabel = 'View Result';
-      helperLabel = 'Your final examination result is available.';
-    } else if (attemptStatus == 'in_progress') {
-      actionLabel = 'Exam Already Started';
-      helperLabel = 'You have already started this final examination.';
-    } else if (attemptStatus == 'cancelled') {
-      actionLabel = 'Exam Unavailable';
-      helperLabel = 'This final examination attempt was cancelled.';
-    } else if (!hasLinkedExam) {
+    if (!hasLinkedExam) {
       actionLabel = 'not_yet_eligible'.tr;
       helperLabel = 'Final exam not configured';
     } else if (!hasPublishedExam) {
       actionLabel = 'not_yet_eligible'.tr;
       helperLabel = 'Final exam is not published yet';
-    } else if (!gatewayUnlocked) {
-      actionLabel = 'not_yet_eligible'.tr;
+    } else if (canViewResult) {
+      actionLabel = 'final_exam_view_result'.tr;
       helperLabel = gatewayMessage.isNotEmpty
           ? gatewayMessage
-          : 'Reach $unlockPercent% course completion to unlock the final exam';
+          : 'Your final exam result is ready.';
+    } else if (hasAttempted) {
+      actionLabel = 'result_pending'.tr;
+      helperLabel = gatewayMessage.isNotEmpty
+          ? gatewayMessage
+          : 'Your final exam is under review.';
     } else if (canStart) {
       actionLabel = 'start_final_exam'.tr;
       helperLabel = gatewayMessage.isNotEmpty
           ? gatewayMessage
           : 'ready_to_start'.tr;
     } else {
-      actionLabel = 'Exam Already Taken';
+      actionLabel = 'not_yet_eligible'.tr;
       helperLabel = gatewayMessage.isNotEmpty
           ? gatewayMessage
-          : 'You have already taken this final examination.';
+          : 'Reach $unlockPercent% course completion '
+          'to unlock the final exam';
     }
 
     return CourseFinalExamModel(
       examId: _stringValue(exam['id']),
+      attemptId: attemptId,
+      attemptStatus: attemptStatus,
       title: _fallbackString(
         exam['title'],
         'gen_final_exam'.tr,
@@ -492,8 +501,8 @@ class CoursesApiService {
       isConfigured: hasLinkedExam,
       canStart: canStart,
       hasAttempted: hasAttempted,
-      isEligible: isEligible,
-      attemptStatus: attemptStatus,
+      isEligible: backendEligible,
+      resultReady: resultReady,
       courseProgressPercent:
       backendProgressPercent.clamp(0, 100).toInt(),
       unlockCompletionPercent: unlockPercent,

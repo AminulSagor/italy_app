@@ -3,6 +3,74 @@
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
+    'close': 'Close',
+    'official_certificate': 'Official Certificate',
+    'certificate_unavailable': 'Certificate unavailable',
+    'try_again': 'Try again',
+    'certificate_of_achievement': 'Certificate of Achievement',
+    'this_certifies_that': 'This certifies that',
+    'proficiency_level_value': 'Proficiency level: @level',
+    'issue_date': 'Issue date',
+    'final_score': 'Final score',
+    'certificate_number_value': 'Certificate number: @number',
+    'verified_digital_signature': 'Verified digital signature',
+    'download_pdf_certificate': 'Download PDF certificate',
+    'not_available': 'Not available',
+    'certificate_download': 'Certificate download',
+    'certificate_information_unavailable':
+    'Certificate information is unavailable.',
+    'certificate_not_active': 'This certificate is not active.',
+    'certificate_pdf_unavailable':
+    'The certificate PDF is unavailable.',
+    'invalid_certificate_download_url':
+    'The certificate download URL is invalid.',
+    'unable_to_open_certificate_pdf':
+    'Unable to open the certificate PDF.',
+    'final_exam_results_title': 'Exam Results',
+    'final_exam_mark_achieved': 'MARK ACHIEVED',
+    'final_exam_xp_awarded': '@xp XP Awarded',
+    'final_exam_teacher_comments': "Teacher's Comments",
+    'final_exam_result_passed': 'Final Result: Passed!',
+    'final_exam_retake_required': 'Retake Required',
+    'final_exam_evaluation_ready': 'Your final evaluation is ready.',
+    'final_exam_result_unavailable': 'The final exam result is unavailable.',
+    'final_exam_success_title': 'Exam complete',
+    'final_exam_back_to_practice_hub': 'Back to Practice Hub',
+    'final_exam_submitted_title': 'Exam submitted!',
+    'final_exam_submitted_message':
+    'Bravissimo! You have completed the hard work. Our teachers will now review your answers.',
+    'final_exam_reference_id': 'Reference ID: @value',
+    'final_exam_reference_id_unavailable': 'Reference ID is not available',
+    'final_exam_evaluation_timeline': 'EVALUATION TIMELINE',
+    'final_exam_received': 'Exam received',
+    'final_exam_uploaded_successfully':
+    'Successfully uploaded to the server',
+    'final_exam_teacher_review': 'Teacher review',
+    'final_exam_manual_review_completed':
+    'Manual review completed',
+    'final_exam_reviewing_answers':
+    'Reviewing your speaking and writing answers',
+    'final_exam_result_certificate': 'Result and certificate',
+    'final_exam_result_ready': 'Your result is ready',
+    'final_exam_unlock_achievement':
+    'Your achievement will unlock after the review',
+    'final_exam_view_result': 'View result',
+    'final_exam_estimated_result_unavailable':
+    'Estimated result time is not available',
+    'final_exam_estimated_result': 'Estimated result: @value',
+    'final_exam_waiting_tip':
+    'While you wait, try a daily challenge or continue practising.',
+    'common_back': 'Back',
+    'final_exam_submit_answer': 'Submit answer',
+    'final_exam_recording': 'Recording…',
+    'final_exam_recorded': 'Recorded',
+    'final_exam_ready': 'Ready',
+    'final_exam_hold_to_record': 'Press and hold to record',
+    'final_exam_release_to_stop': 'Release to stop recording',
+    'final_exam_reset_recording': 'Reset recording',
+    'final_exam_play_recording': 'Play recording',
+    'final_exam_pause_recording': 'Pause recording',
+    'final_exam_no_speaking_task': 'No speaking task is available.',
     'submit': 'Submit',
     'review_quiz_subtitle':
     'Let’s review your answers and see how you did.',
@@ -1209,11 +1277,9 @@ appTranslations = <String, Map<String, String>>{
     'description_too_long': 'Description Too Long',
     'detailed_description': 'Detailed Description',
     'detailed_skill_breakdown': 'Detailed Skill Breakdown',
-    'detailstitle': 'Details',
     'diamond': 'Diamond',
     'done': 'Done',
     'download': 'Download',
-    'download_pdf_certificate': 'Download PDF Certificate',
     'download_unavailable': 'Download Unavailable',
     'downloading': 'Downloading',
     'draft': 'Draft',
@@ -1524,7 +1590,6 @@ appTranslations = <String, Map<String, String>>{
     'no_users_found': 'No Users Found',
     'no_verb_forms_are_available': 'No Verb Forms are Available',
     'no_verbs_found': 'No Verbs Found',
-    'not_available': 'Not Available',
     'not_found': 'Not Found',
     'not_yet_eligible': 'Not Yet Eligible',
     'notification_set': 'Notification Set',
@@ -1927,7 +1992,6 @@ appTranslations = <String, Map<String, String>>{
     'they_speak': 'They Speak',
     'they_will_not_be_notified_that_you_blocked_them_yo':
         'They will not be notified that you blocked them.',
-    'this_certifies_that': 'This Certifies that',
     'this_feature_is_coming_soon': 'This Feature is Coming Soon',
     'this_lesson_is_really_useful': 'This Lesson is Really Useful',
     'this_payment_method_is_unavailable': 'This Payment Method is Unavailable',
@@ -1956,7 +2020,6 @@ appTranslations = <String, Map<String, String>>{
     'true': 'True',
     'true_false': 'True False',
     'trusted_by_5k_learners': 'Trusted by 5k Learners',
-    'try_again': 'Try Again',
     'turning_your_voice_into_text': 'Turning Your Voice into Text',
     'type_or_speak_a_phrase': 'Type or Speak a Phrase',
     'type_or_speak_naturally_and_follow_the_tutor_respo':
@@ -2030,7 +2093,6 @@ appTranslations = <String, Map<String, String>>{
     'verb_information_is_unavailable': 'Verb Information is Unavailable',
     'verification_code': 'Verification Code',
     'verification_code_1': 'Verification Code',
-    'verified_digital_signature': 'Verified Digital Signature',
     'verify_contact': 'Verify Contact',
     'verify_continue_1': 'Verify & Continue',
     'version_1_0_0_italir_pothe': 'Version 1 0 0 Italir Pothe',
@@ -4526,8 +4588,133 @@ appTranslations = <String, Map<String, String>>{
     'review_quiz_subtitle':
     'চলুন আপনার উত্তরগুলো পর্যালোচনা করে দেখি আপনি কেমন করেছেন।',
     'submit': 'জমা দিন',
+    'common_back': 'পেছনে যান',
+    'final_exam_submit_answer': 'উত্তর জমা দিন',
+    'final_exam_recording': 'রেকর্ড হচ্ছে…',
+    'final_exam_recorded': 'রেকর্ড হয়েছে',
+    'final_exam_ready': 'প্রস্তুত',
+    'final_exam_hold_to_record': 'রেকর্ড করতে চেপে ধরে রাখুন',
+    'final_exam_release_to_stop': 'রেকর্ডিং বন্ধ করতে ছেড়ে দিন',
+    'final_exam_reset_recording': 'রেকর্ডিং আবার শুরু করুন',
+    'final_exam_play_recording': 'রেকর্ডিং চালান',
+    'final_exam_pause_recording': 'রেকর্ডিং বিরতি দিন',
+    'final_exam_no_speaking_task': 'কোনো স্পিকিং টাস্ক পাওয়া যায়নি।',
+    'final_exam_success_title': 'পরীক্ষা সম্পন্ন',
+    'final_exam_back_to_practice_hub':
+    'অনুশীলন কেন্দ্রে ফিরে যান',
+    'final_exam_submitted_title': 'পরীক্ষা জমা হয়েছে!',
+    'final_exam_submitted_message':
+    'দারুণ! কঠিন অংশটি তুমি শেষ করেছ। এখন আমাদের শিক্ষকরা তোমার উত্তরগুলো পর্যালোচনা করবেন।',
+    'final_exam_reference_id': 'রেফারেন্স আইডি: @value',
+    'final_exam_reference_id_unavailable':
+    'রেফারেন্স আইডি পাওয়া যায়নি',
+    'final_exam_evaluation_timeline':
+    'মূল্যায়নের ধাপসমূহ',
+    'final_exam_received':
+    'পরীক্ষা গ্রহণ করা হয়েছে',
+    'final_exam_uploaded_successfully':
+    'সার্ভারে সফলভাবে আপলোড হয়েছে',
+    'final_exam_teacher_review':
+    'শিক্ষকের পর্যালোচনা',
+    'final_exam_manual_review_completed':
+    'ম্যানুয়াল পর্যালোচনা সম্পন্ন',
+    'final_exam_reviewing_answers':
+    'তোমার বলা ও লেখা উত্তর পর্যালোচনা করা হচ্ছে',
+    'final_exam_result_certificate':
+    'ফলাফল ও সার্টিফিকেট',
+    'final_exam_result_ready':
+    'তোমার ফলাফল প্রস্তুত',
+    'final_exam_unlock_achievement':
+    'পর্যালোচনা শেষ হলে তোমার অর্জন আনলক হবে',
+    'final_exam_view_result':
+    'ফলাফল দেখুন',
+    'final_exam_estimated_result_unavailable':
+    'ফলাফল প্রকাশের আনুমানিক সময় এখনো পাওয়া যায়নি',
+    'final_exam_estimated_result':
+    'আনুমানিক ফলাফল: @value',
+    'final_exam_waiting_tip':
+    'অপেক্ষার সময় একটি দৈনিক চ্যালেঞ্জ চেষ্টা করো অথবা অনুশীলন চালিয়ে যাও।',
+    'final_exam_results_title': 'পরীক্ষার ফলাফল',
+    'final_exam_mark_achieved': 'প্রাপ্ত নম্বর',
+    'final_exam_xp_awarded': '@xp XP অর্জিত',
+    'final_exam_teacher_comments': 'শিক্ষকের মন্তব্য',
+    'final_exam_result_passed': 'চূড়ান্ত ফলাফল: উত্তীর্ণ!',
+    'final_exam_retake_required': 'পুনরায় পরীক্ষা প্রয়োজন',
+    'final_exam_evaluation_ready': 'আপনার চূড়ান্ত মূল্যায়ন প্রস্তুত।',
+    'final_exam_result_unavailable': 'চূড়ান্ত পরীক্ষার ফলাফল পাওয়া যাচ্ছে না।',
+    'close': 'বন্ধ করুন',
+    'official_certificate': 'অফিশিয়াল সার্টিফিকেট',
+    'certificate_unavailable': 'সার্টিফিকেট পাওয়া যাচ্ছে না',
+    'certificate_of_achievement': 'অর্জনের সার্টিফিকেট',
+    'proficiency_level_value': 'দক্ষতার স্তর: @level',
+    'issue_date': 'ইস্যুর তারিখ',
+    'final_score': 'চূড়ান্ত স্কোর',
+    'certificate_number_value': 'সার্টিফিকেট নম্বর: @number',
+    'certificate_download': 'সার্টিফিকেট ডাউনলোড',
+    'certificate_information_unavailable':
+    'সার্টিফিকেটের তথ্য পাওয়া যাচ্ছে না।',
+    'certificate_not_active': 'এই সার্টিফিকেটটি সক্রিয় নয়।',
+    'certificate_pdf_unavailable':
+    'সার্টিফিকেটের PDF পাওয়া যাচ্ছে না।',
+    'invalid_certificate_download_url':
+    'সার্টিফিকেট ডাউনলোড লিংকটি সঠিক নয়।',
+    'unable_to_open_certificate_pdf':
+    'সার্টিফিকেটের PDF খোলা যায়নি।',
   },
   'it_IT': <String, String>{
+    'final_exam_results_title': 'Risultati dell’esame',
+    'final_exam_mark_achieved': 'PUNTEGGIO OTTENUTO',
+    'final_exam_xp_awarded': '@xp XP ottenuti',
+    'final_exam_teacher_comments': 'Commenti dell’insegnante',
+    'final_exam_result_passed': 'Risultato finale: Superato!',
+    'final_exam_retake_required': 'Esame da ripetere',
+    'final_exam_evaluation_ready': 'La valutazione finale è pronta.',
+    'final_exam_result_unavailable': 'Il risultato dell’esame finale non è disponibile.',
+    'final_exam_success_title': 'Esame completato',
+    'final_exam_back_to_practice_hub':
+    'Torna all’area pratica',
+    'final_exam_submitted_title': 'Esame inviato!',
+    'final_exam_submitted_message':
+    'Bravissimo! Hai completato la parte più difficile. Ora i nostri insegnanti esamineranno le tue risposte.',
+    'final_exam_reference_id': 'ID di riferimento: @value',
+    'final_exam_reference_id_unavailable':
+    'ID di riferimento non disponibile',
+    'final_exam_evaluation_timeline':
+    'CRONOLOGIA DELLA VALUTAZIONE',
+    'final_exam_received': 'Esame ricevuto',
+    'final_exam_uploaded_successfully':
+    'Caricato correttamente sul server',
+    'final_exam_teacher_review':
+    'Revisione dell’insegnante',
+    'final_exam_manual_review_completed':
+    'Revisione manuale completata',
+    'final_exam_reviewing_answers':
+    'Stiamo esaminando le tue risposte orali e scritte',
+    'final_exam_result_certificate':
+    'Risultato e certificato',
+    'final_exam_result_ready':
+    'Il tuo risultato è pronto',
+    'final_exam_unlock_achievement':
+    'Il tuo traguardo sarà sbloccato al termine della revisione',
+    'final_exam_view_result':
+    'Visualizza risultato',
+    'final_exam_estimated_result_unavailable':
+    'L’orario stimato del risultato non è disponibile',
+    'final_exam_estimated_result':
+    'Risultato previsto: @value',
+    'final_exam_waiting_tip':
+    'Nell’attesa, prova una sfida giornaliera o continua a esercitarti.',
+    'common_back': 'Indietro',
+    'final_exam_submit_answer': 'Invia risposta',
+    'final_exam_recording': 'Registrazione…',
+    'final_exam_recorded': 'Registrato',
+    'final_exam_ready': 'Pronto',
+    'final_exam_hold_to_record': 'Tieni premuto per registrare',
+    'final_exam_release_to_stop': 'Rilascia per interrompere la registrazione',
+    'final_exam_reset_recording': 'Reimposta la registrazione',
+    'final_exam_play_recording': 'Riproduci la registrazione',
+    'final_exam_pause_recording': 'Metti in pausa la registrazione',
+    'final_exam_no_speaking_task': 'Nessuna prova orale disponibile.',
     'submit': 'Invia',
     'review_quiz_subtitle':
     'Rivediamo le tue risposte e vediamo come te la sei cavata.',

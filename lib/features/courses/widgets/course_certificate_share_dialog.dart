@@ -8,7 +8,6 @@ import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../models/course_certificate_models.dart';
-import 'course_certificate_widgets.dart';
 
 class CourseCertificateShareDialog extends StatelessWidget {
   final CourseCertificateModel certificate;
@@ -85,7 +84,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const CourseCertificateHero(compact: true),
+
                     SizedBox(height: 6.h),
                     Text(
                       'congratulazioni'.tr,

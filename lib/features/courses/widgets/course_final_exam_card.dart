@@ -19,8 +19,11 @@ class CourseFinalExamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool canInteract =
+        finalExam.canStart || finalExam.canViewResult;
+
     return GestureDetector(
-      onTap: onTap,
+      onTap: canInteract ? onTap : null,
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: double.infinity,
@@ -74,13 +77,17 @@ class CourseFinalExamCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 22.h),
+
+            // Start Exam / View Result / Result Pending
             Container(
               padding: EdgeInsets.symmetric(
                 horizontal: 18.w,
                 vertical: 9.h,
               ),
               decoration: BoxDecoration(
-                color: AppColors.modalBorderGrey,
+                color: finalExam.canViewResult
+                    ? AppColors.homeSoftGreen
+                    : AppColors.modalBorderGrey,
                 borderRadius: BorderRadius.circular(
                   kHomePillRadius.r,
                 ),
@@ -89,10 +96,10 @@ class CourseFinalExamCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Icon(
-                    finalExam.hasCertificate
-                        ? Icons.workspace_premium_outlined
-                        : Icons.verified_outlined,
-                    color: AppColors.bodyText,
+                    _actionIcon,
+                    color: finalExam.canViewResult
+                        ? AppColors.primaryGreen
+                        : AppColors.bodyText,
                     size: 17.sp,
                   ),
                   SizedBox(width: 8.w),
@@ -105,7 +112,9 @@ class CourseFinalExamCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: AppFont.font13.sp,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.bodyText,
+                        color: finalExam.canViewResult
+                            ? AppColors.primaryGreen
+                            : AppColors.bodyText,
                         height: 1.2,
                       ),
                     ),
@@ -119,7 +128,9 @@ class CourseFinalExamCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(
-                  Icons.info_outline_rounded,
+                  finalExam.isResultPending
+                      ? Icons.access_time_rounded
+                      : Icons.info_outline_rounded,
                   color: AppColors.primaryGreen,
                   size: 16.sp,
                 ),
@@ -144,5 +155,23 @@ class CourseFinalExamCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  IconData get _actionIcon {
+    if (finalExam.canViewResult) {
+      return finalExam.hasCertificate
+          ? Icons.workspace_premium_outlined
+          : Icons.visibility_outlined;
+    }
+
+    if (finalExam.isResultPending) {
+      return Icons.hourglass_top_rounded;
+    }
+
+    if (finalExam.canStart) {
+      return Icons.play_circle_outline_rounded;
+    }
+
+    return Icons.lock_outline_rounded;
   }
 }

@@ -422,24 +422,27 @@ class CourseChapterModel {
 
 class CourseFinalExamModel {
   final String examId;
+  final String attemptId;
+  final String attemptStatus;
+
   final String title;
   final String description;
   final String actionLabel;
   final String helperLabel;
+
   final bool isConfigured;
   final bool canStart;
-
-  // Add these three fields.
   final bool hasAttempted;
   final bool isEligible;
-  final String attemptStatus;
-  bool get hasCertificate =>
-      attemptStatus == 'certificate_issued';
+  final bool resultReady;
+
   final int courseProgressPercent;
   final int unlockCompletionPercent;
 
   const CourseFinalExamModel({
     required this.examId,
+    required this.attemptId,
+    required this.attemptStatus,
     required this.title,
     required this.description,
     required this.actionLabel,
@@ -448,24 +451,48 @@ class CourseFinalExamModel {
     required this.canStart,
     required this.hasAttempted,
     required this.isEligible,
-    required this.attemptStatus,
+    required this.resultReady,
     required this.courseProgressPercent,
     required this.unlockCompletionPercent,
   });
 
-  factory CourseFinalExamModel.fromJson(Map<String, dynamic> json) {
+  bool get canViewResult =>
+      resultReady && attemptId.trim().isNotEmpty;
+
+  bool get isResultPending =>
+      hasAttempted && !resultReady;
+
+  bool get hasCertificate =>
+      attemptStatus == 'certificate_issued';
+
+  factory CourseFinalExamModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return CourseFinalExamModel(
       examId: json['examId']?.toString() ?? '',
+      attemptId: json['attemptId']?.toString() ?? '',
+      attemptStatus:
+      json['attemptStatus']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Final Exam',
-      description: json['description']?.toString() ?? '',
-      actionLabel: json['actionLabel']?.toString() ?? '',
-      helperLabel: json['helperLabel']?.toString() ?? '',
-      isConfigured: json['isConfigured'] as bool? ?? false,
-      canStart: json['canStart'] as bool? ?? false,
-      hasAttempted: json['hasAttempted'] as bool? ?? false,
-      isEligible: json['isEligible'] as bool? ?? false,
-      attemptStatus: json['attemptStatus']?.toString() ?? '',
-      courseProgressPercent: _intValue(json['courseProgressPercent']),
+      description:
+      json['description']?.toString() ?? '',
+      actionLabel:
+      json['actionLabel']?.toString() ?? '',
+      helperLabel:
+      json['helperLabel']?.toString() ?? '',
+      isConfigured:
+      json['isConfigured'] as bool? ?? false,
+      canStart:
+      json['canStart'] as bool? ?? false,
+      hasAttempted:
+      json['hasAttempted'] as bool? ?? false,
+      isEligible:
+      json['isEligible'] as bool? ?? false,
+      resultReady:
+      json['resultReady'] as bool? ?? false,
+      courseProgressPercent: _intValue(
+        json['courseProgressPercent'],
+      ),
       unlockCompletionPercent: _intValue(
         json['unlockCompletionPercent'],
       ),
@@ -475,6 +502,8 @@ class CourseFinalExamModel {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'examId': examId,
+      'attemptId': attemptId,
+      'attemptStatus': attemptStatus,
       'title': title,
       'description': description,
       'actionLabel': actionLabel,
@@ -483,9 +512,10 @@ class CourseFinalExamModel {
       'canStart': canStart,
       'hasAttempted': hasAttempted,
       'isEligible': isEligible,
-      'attemptStatus': attemptStatus,
+      'resultReady': resultReady,
       'courseProgressPercent': courseProgressPercent,
-      'unlockCompletionPercent': unlockCompletionPercent,
+      'unlockCompletionPercent':
+      unlockCompletionPercent,
     };
   }
 }

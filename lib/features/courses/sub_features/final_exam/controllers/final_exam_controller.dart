@@ -17,6 +17,8 @@ import 'final_exam_media_coordinator.dart';
 class FinalExamController extends GetxController {
   final String controllerTag;
   final String courseId;
+  final String? initialAttemptId;
+  final bool loadOverviewOnInit;
   final FinalExamApiService _finalExamApiService;
   final FinalExamMediaCoordinator _media = FinalExamMediaCoordinator();
 
@@ -24,6 +26,8 @@ class FinalExamController extends GetxController {
     required this.controllerTag,
     required this.courseId,
     required FinalExamApiService finalExamApiService,
+    this.initialAttemptId,
+    this.loadOverviewOnInit = true,
   }) : _finalExamApiService = finalExamApiService;
 
   final RxBool isLoading = false.obs;
@@ -66,7 +70,22 @@ class FinalExamController extends GetxController {
   void onInit() {
     super.onInit();
     _media.initialize();
-    unawaited(loadOverview());
+
+    final String existingAttemptId =
+        initialAttemptId?.trim() ?? '';
+
+    if (existingAttemptId.isNotEmpty) {
+      unawaited(
+        loadResultByAttemptId(
+          attemptId: existingAttemptId,
+        ),
+      );
+      return;
+    }
+
+    if (loadOverviewOnInit) {
+      unawaited(loadOverview());
+    }
   }
 
   @override
@@ -424,32 +443,124 @@ class FinalExamController extends GetxController {
     }
   }
 
-  Future<void> loadResult({bool showPendingMessage = true}) async {
-    final FinalExamAttemptModel? currentAttempt = attempt.value;
-    if (currentAttempt == null || isLoading.value) return;
+  Future<bool> loadResultByAttemptId({
+    required String attemptId,
+    bool showPendingMessage = true,
+  }) async {
+    final String normalizedAttemptId = attemptId.trim();
+
+    if (normalizedAttemptId.isEmpty || isLoading.value) {
+      return false;
+    }
 
     isLoading.value = true;
+
     try {
       final ApiResult<FinalExamResultResponseModel> response =
-          await ApiErrorHandler.call<FinalExamResultResponseModel>(
-        () => _finalExamApiService.fetchResult(attemptId: currentAttempt.id),
+      await ApiErrorHandler.call<
+          FinalExamResultResponseModel>(
+            () => _finalExamApiService.fetchResult(
+          attemptId: normalizedAttemptId,
+        ),
         showError: showPendingMessage,
         errorTitle: 'gen_final_exam_result'.tr,
       );
-      if (!response.isSuccess || response.data == null) return;
 
-      final FinalExamResultResponseModel data = response.data!;
+      if (!response.isSuccess || response.data == null) {
+        return false;
+      }
+
+      final FinalExamResultResponseModel data =
+      response.data!;
+
       referenceId.value = data.referenceCode;
       resultComplete.value = data.resultReady;
       teacherReviewComplete.value = data.resultReady;
+
       if (!data.resultReady) {
+        result.value = null;
+
         if (showPendingMessage) {
-          Get.snackbar('gen_final_exam_result'.tr, data.message);
+          Get.snackbar(
+            'gen_final_exam_result'.tr,
+            data.message,
+          );
         }
+
+        return false;
+      }
+
+      result.value = FinalExamResultModel.fromReview(
+        data.review,
+      );
+
+      _resultPollTimer?.cancel();
+
+      return true;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> loadResult({
+    bool showPendingMessage = true,
+    String? existingAttemptId,
+  }) async {
+    if (isLoading.value) return;
+
+    final String attemptId = existingAttemptId?.trim().isNotEmpty == true
+        ? existingAttemptId!.trim()
+        : attempt.value?.id.trim() ?? '';
+
+    if (attemptId.isEmpty) {
+      if (showPendingMessage) {
+        Get.snackbar(
+          'gen_final_exam_result'.tr,
+          'Result attempt was not found.',
+        );
+      }
+      return;
+    }
+
+    isLoading.value = true;
+
+    try {
+      final ApiResult<FinalExamResultResponseModel> response =
+      await ApiErrorHandler.call<FinalExamResultResponseModel>(
+            () => _finalExamApiService.fetchResult(
+          attemptId: attemptId,
+        ),
+        showError: showPendingMessage,
+        errorTitle: 'gen_final_exam_result'.tr,
+      );
+
+      if (!response.isSuccess || response.data == null) {
         return;
       }
 
-      result.value = FinalExamResultModel.fromReview(data.review);
+      final FinalExamResultResponseModel data = response.data!;
+
+      referenceId.value = data.referenceCode;
+      resultComplete.value = data.resultReady;
+      teacherReviewComplete.value = data.resultReady;
+
+      if (!data.resultReady) {
+        result.value = null;
+
+        if (showPendingMessage) {
+          Get.snackbar(
+            'gen_final_exam_result'.tr,
+            data.message,
+          );
+        }
+
+        return;
+      }
+
+      result.value = FinalExamResultModel.fromReview(
+        data.review,
+      );
+
       _resultPollTimer?.cancel();
     } finally {
       isLoading.value = false;
@@ -466,11 +577,29 @@ class FinalExamController extends GetxController {
   }
 
   Future<void> openCertificate() async {
+    final String resolvedAttemptId =
+    initialAttemptId?.trim().isNotEmpty == true
+        ? initialAttemptId!.trim()
+        : attempt.value?.id.trim() ?? '';
+
+    if (resolvedAttemptId.isEmpty) {
+      Get.snackbar(
+        'Certificate unavailable',
+        'Final exam attempt was not found.',
+      );
+      return;
+    }
+
     final String tag =
-        'course_certificate_${DateTime.now().millisecondsSinceEpoch}';
+        'course_certificate_'
+        '${DateTime.now().millisecondsSinceEpoch}';
+
     await Get.toNamed(
       AppRoutes.courseCertificate,
-      arguments: CourseCertificateRouteArguments(controllerTag: tag),
+      arguments: CourseCertificateRouteArguments(
+        controllerTag: tag,
+        attemptId: resolvedAttemptId,
+      ),
     );
   }
 

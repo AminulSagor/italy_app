@@ -1,321 +1,425 @@
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
-import '../../../core/widgets/custom_button.dart';
 import '../models/course_certificate_models.dart';
-
-class CourseCertificateHero extends StatelessWidget {
-  final bool compact;
-
-  const CourseCertificateHero({super.key, this.compact = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final double size = compact ? 205.w : 224.w;
-
-    return SizedBox(
-      width: double.infinity,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          if (compact)
-            Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: AppColors.homeLime.withValues(alpha: 0.1),
-                    blurRadius: 46.r,
-                    spreadRadius: 20.r,
-                  ),
-                ],
-              ),
-            ),
-          Image.asset('assets/decor_png/achievement.png'),
-        ],
-      ),
-    );
-  }
-}
 
 class CourseCertificateCard extends StatelessWidget {
   final CourseCertificateModel certificate;
-  final bool compact;
 
   const CourseCertificateCard({
     super.key,
     required this.certificate,
-    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(32.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(kRadius42.r),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            AppColors.coursesCreamLightBg.withValues(alpha: 0.4),
-            AppColors.white,
-            AppColors.coursesCreamLightBg.withValues(alpha: 0.4),
-          ],
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AppColors.homeNeutralShadow,
-            blurRadius: 22.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
-      ),
-      child: Column(
-        children: <Widget>[
-          Container(
-            width: 56.w,
-            height: 56.w,
-            decoration: BoxDecoration(
-              color: AppColors.primaryGreen,
-              borderRadius: BorderRadius.circular(kRadius18.r),
+    return LayoutBuilder(
+      builder: (
+          BuildContext context,
+          BoxConstraints constraints,
+          ) {
+        final bool isSmallScreen = constraints.maxWidth < 350;
+        final double padding = isSmallScreen ? 18.w : 28.w;
+        final double logoSize = isSmallScreen ? 48.w : 56.w;
+        final double sealSize = isSmallScreen ? 50.w : 64.w;
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(padding),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(
+              isSmallScreen ? kRadius24.r : kRadius42.r,
             ),
-            child: Icon(
-              Icons.school_rounded,
-              color: AppColors.white,
-              size: 32.w,
-            ),
-          ),
-          SizedBox(height: 10.h),
-          Text(
-            'gen_italir_pothe'.tr,
-            style: TextStyle(
-              fontSize: AppFont.font10.sp,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 3,
-              color: AppColors.primaryGreen,
-            ),
-          ),
-          SizedBox(height: compact ? 30.h : 30.h),
-          Text(
-            'CERTIFICATE OF\nACHIEVEMENT',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: compact ? AppFont.font20.sp : AppFont.font20.sp,
-              fontWeight: FontWeight.w800,
-              height: 1.25,
-              color: AppColors.headerText,
-            ),
-          ),
-          SizedBox(height: 30.h),
-          Text(
-            'this_certifies_that'.tr,
-            style: TextStyle(
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 2.4,
-              color: AppColors.bodyText,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            certificate.learnerName,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: AppFont.font30.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.homePrimaryText,
-            ),
-          ),
-          SizedBox(height: 10.h),
-          Container(
-            width: 48.w,
-            height: 2.h,
-            color: AppColors.coursesCertificationBorder,
-          ),
-          SizedBox(height: 30.h),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: AppColors.homeSoftGreen.withValues(alpha: 0.34),
-              borderRadius: BorderRadius.circular(kHomePillRadius.r),
-              border: Border.all(
-                color: AppColors.coursesCertificationBorder.withValues(
-                  alpha: 0.3,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: <Color>[
+                AppColors.coursesCreamLightBg.withValues(
+                  alpha: 0.4,
                 ),
-              ),
-            ),
-            child: Text(
-              'Proficiency Level: ${certificate.proficiencyLevel}',
-              style: TextStyle(
-                fontSize: AppFont.font14.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primaryGreen,
-              ),
-            ),
-          ),
-          if (!compact) ...<Widget>[
-            SizedBox(height: 30.h),
-            Divider(color: AppColors.modalBorderGrey.withValues(alpha: 0.4)),
-            SizedBox(height: 16.h),
-            Row(
-              mainAxisAlignment: .spaceBetween,
-              children: <Widget>[
-                _CertificateMeta(
-                  label: 'gen_issue_date'.tr,
-                  value: certificate.issueDate,
-                ),
-                Container(
-                  width: 70.w,
-                  height: 70.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGreen,
-                    borderRadius: BorderRadius.circular(kRadius24.r),
-                  ),
-                  child: SvgPicture.asset('assets/icons_svg/app_icon.svg'),
-                ),
-                _CertificateMeta(
-                  label: 'gen_final_score'.tr,
-                  value: '${certificate.finalScore} / 100',
-                  alignEnd: true,
+                AppColors.white,
+                AppColors.coursesCreamLightBg.withValues(
+                  alpha: 0.4,
                 ),
               ],
             ),
-            SizedBox(height: 60.h),
-            Text(
-              'verified_digital_signature'.tr,
-              style: TextStyle(
-                fontSize: AppFont.font9.sp,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 2,
-                color: AppColors.bodyText,
+            border: Border.all(
+              color: AppColors.coursesCertificationBorder.withValues(
+                alpha: 0.35,
               ),
             ),
-          ],
-        ],
-      ),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: AppColors.homeNeutralShadow,
+                blurRadius: 20.r,
+                offset: Offset(0, 8.h),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                width: logoSize,
+                height: logoSize,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryGreen,
+                  borderRadius: BorderRadius.circular(kRadius18.r),
+                ),
+                child: Icon(
+                  Icons.school_rounded,
+                  color: AppColors.white,
+                  size: isSmallScreen ? 27.w : 31.w,
+                ),
+              ),
+              SizedBox(height: 10.h),
+
+              Text(
+                'gen_italir_pothe'.tr,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: _responsiveSp(
+                    AppFont.font10.sp,
+                    minimum: 9,
+                    maximum: 11,
+                  ),
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: isSmallScreen ? 1.5 : 2.5,
+                  color: AppColors.primaryGreen,
+                ),
+              ),
+
+              SizedBox(height: 26.h),
+
+              Text(
+                'certificate_of_achievement'.tr,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: _responsiveSp(
+                    AppFont.font20.sp,
+                    minimum: 17,
+                    maximum: 22,
+                  ),
+                  fontWeight: FontWeight.w800,
+                  height: 1.25,
+                  color: AppColors.headerText,
+                ),
+              ),
+
+              SizedBox(height: 26.h),
+
+              Text(
+                'this_certifies_that'.tr,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: _responsiveSp(
+                    AppFont.font12.sp,
+                    minimum: 10,
+                    maximum: 13,
+                  ),
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: isSmallScreen ? 1.2 : 1.8,
+                  color: AppColors.bodyText,
+                ),
+              ),
+
+              SizedBox(height: 10.h),
+
+              SizedBox(
+                width: double.infinity,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    certificate.learnerName.trim().isEmpty
+                        ? 'not_available'.tr
+                        : certificate.learnerName,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: _responsiveSp(
+                        AppFont.font30.sp,
+                        minimum: 22,
+                        maximum: 32,
+                      ),
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.homePrimaryText,
+                    ),
+                  ),
+                ),
+              ),
+
+              if (certificate.courseTitle.trim().isNotEmpty) ...<Widget>[
+                SizedBox(height: 12.h),
+                Text(
+                  certificate.courseTitle,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: _responsiveSp(
+                      AppFont.font16.sp,
+                      minimum: 13,
+                      maximum: 17,
+                    ),
+                    height: 1.3,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.bodyText,
+                  ),
+                ),
+              ],
+
+              SizedBox(height: 14.h),
+
+              Container(
+                width: 48.w,
+                height: 2.h,
+                color: AppColors.coursesCertificationBorder,
+              ),
+
+              SizedBox(height: 24.h),
+
+              Container(
+                constraints: const BoxConstraints(
+                  maxWidth: 360,
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmallScreen ? 14.w : 22.w,
+                  vertical: 11.h,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.homeSoftGreen.withValues(
+                    alpha: 0.34,
+                  ),
+                  borderRadius: BorderRadius.circular(
+                    kHomePillRadius.r,
+                  ),
+                  border: Border.all(
+                    color: AppColors.coursesCertificationBorder.withValues(
+                      alpha: 0.3,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  'proficiency_level_value'.trParams(
+                    <String, String>{
+                      'level': certificate.proficiencyLevel.trim().isEmpty
+                          ? 'not_available'.tr
+                          : certificate.proficiencyLevel,
+                    },
+                  ),
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: _responsiveSp(
+                      AppFont.font14.sp,
+                      minimum: 12,
+                      maximum: 15,
+                    ),
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryGreen,
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 26.h),
+
+              Divider(
+                color: AppColors.modalBorderGrey.withValues(
+                  alpha: 0.4,
+                ),
+              ),
+
+              SizedBox(height: 18.h),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: _CertificateMeta(
+                      label: 'issue_date'.tr,
+                      value: certificate.issueDate,
+                    ),
+                  ),
+
+                  SizedBox(width: isSmallScreen ? 8.w : 14.w),
+
+                  Container(
+                    width: sealSize,
+                    height: sealSize,
+                    padding: EdgeInsets.all(
+                      isSmallScreen ? 8.w : 10.w,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryGreen,
+                      borderRadius: BorderRadius.circular(
+                        isSmallScreen ? kRadius18.r : kRadius24.r,
+                      ),
+                    ),
+                    child: SvgPicture.asset(
+                      'assets/icons_svg/app_icon.svg',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+
+                  SizedBox(width: isSmallScreen ? 8.w : 14.w),
+
+                  Expanded(
+                    child: _CertificateMeta(
+                      label: 'final_score'.tr,
+                      value: '${certificate.finalScore} / 100',
+                      alignEnd: true,
+                    ),
+                  ),
+                ],
+              ),
+
+              if (certificate.certificateNumber.trim().isNotEmpty)
+                ...<Widget>[
+                  SizedBox(height: 24.h),
+                  Text(
+                    'certificate_number_value'.trParams(
+                      <String, String>{
+                        'number': certificate.certificateNumber,
+                      },
+                    ),
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: _responsiveSp(
+                        AppFont.font11.sp,
+                        minimum: 10,
+                        maximum: 12,
+                      ),
+                      height: 1.4,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.bodyText,
+                    ),
+                  ),
+                ],
+
+              SizedBox(height: 26.h),
+
+              Text(
+                'verified_digital_signature'.tr,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: _responsiveSp(
+                    AppFont.font9.sp,
+                    minimum: 9,
+                    maximum: 11,
+                  ),
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: isSmallScreen ? 0.8 : 1.4,
+                  color: AppColors.bodyText,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
-  }
-}
-
-class CourseCertificateStatsRow extends StatelessWidget {
-  final CourseCertificateModel certificate;
-
-  const CourseCertificateStatsRow({super.key, required this.certificate});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: _CertificateStatCard(
-            icon: Icons.menu_book_rounded,
-            iconColor: AppColors.reportReviewText,
-            value: _formatNumber(certificate.wordsLearned),
-            label: 'gen_words'.tr,
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: _CertificateStatCard(
-            icon: Icons.local_fire_department_rounded,
-            iconColor: AppColors.blockDangerRed,
-            value: '${certificate.streakDays}',
-            label: 'gen_days'.tr,
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: _CertificateStatCard(
-            icon: Icons.check_circle_rounded,
-            iconColor: AppColors.primaryGreen,
-            value: '${certificate.quizzesCompleted}',
-            label: 'gen_quizzes'.tr,
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _formatNumber(int value) {
-    final String text = value.toString();
-    final StringBuffer buffer = StringBuffer();
-    for (int i = 0; i < text.length; i++) {
-      if (i != 0 && (text.length - i) % 3 == 0) {
-        buffer.write(',');
-      }
-      buffer.write(text[i]);
-    }
-    return buffer.toString();
   }
 }
 
 class CourseCertificateActions extends StatelessWidget {
-  final VoidCallback onDownloadTap;
-  final VoidCallback onStartLevelTap;
+  final VoidCallback? onDownloadTap;
+  final bool isLoading;
 
   const CourseCertificateActions({
     super.key,
     required this.onDownloadTap,
-    required this.onStartLevelTap,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        GestureDetector(
-          onTap: onDownloadTap,
+    final bool isDisabled = onDownloadTap == null || isLoading;
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 180),
+      opacity: isDisabled ? 0.65 : 1,
+      child: Material(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(kHomePillRadius.r),
+        child: InkWell(
+          onTap: isDisabled ? null : onDownloadTap,
+          borderRadius: BorderRadius.circular(kHomePillRadius.r),
           child: Container(
             width: double.infinity,
-            height: 60.h,
-            alignment: Alignment.center,
+            constraints: BoxConstraints(
+              minHeight: 54.h,
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: 18.w,
+              vertical: 13.h,
+            ),
             decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(999.r),
+              borderRadius: BorderRadius.circular(
+                kHomePillRadius.r,
+              ),
               border: Border.all(
                 color: AppColors.coursesCertificationBorder,
-                width: 2.w,
+                width: 1.5,
               ),
             ),
-            child: Row(
+            alignment: Alignment.center,
+            child: isLoading
+                ? SizedBox(
+              width: 22.w,
+              height: 22.w,
+              child: const CircularProgressIndicator(
+                strokeWidth: 2.4,
+                color: AppColors.primaryGreen,
+              ),
+            )
+                : Row(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(
                   Icons.download_rounded,
                   color: AppColors.primaryGreen,
-                  size: 20.w,
+                  size: 21.w,
                 ),
                 SizedBox(width: 8.w),
-                Text(
-                  'download_pdf_certificate'.tr,
-                  style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryGreen,
+                Flexible(
+                  child: Text(
+                    'download_pdf_certificate'.tr,
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: _responsiveSp(
+                        AppFont.font16.sp,
+                        minimum: 14,
+                        maximum: 17,
+                      ),
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryGreen,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
         ),
-        SizedBox(height: 22.h),
-        CustomButton.primary(
-          onPressed: onStartLevelTap,
-          text: 'start_level_a2'.tr,
-          icon: Icons.play_arrow_rounded,
-        ),
-      ],
+      ),
     );
   }
 }
@@ -333,6 +437,9 @@ class _CertificateMeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String displayValue =
+    value.trim().isEmpty ? 'not_available'.tr : value;
+
     return Column(
       crossAxisAlignment: alignEnd
           ? CrossAxisAlignment.end
@@ -340,18 +447,31 @@ class _CertificateMeta extends StatelessWidget {
       children: <Widget>[
         Text(
           label,
+          maxLines: 2,
+          textAlign: alignEnd ? TextAlign.end : TextAlign.start,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: AppFont.font9.sp,
+            fontSize: _responsiveSp(
+              AppFont.font9.sp,
+              minimum: 9,
+              maximum: 11,
+            ),
             fontWeight: FontWeight.w700,
-            letterSpacing: 1.8,
             color: AppColors.bodyText,
           ),
         ),
         SizedBox(height: 6.h),
         Text(
-          value,
+          displayValue,
+          maxLines: 2,
+          textAlign: alignEnd ? TextAlign.end : TextAlign.start,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: AppFont.font14.sp,
+            fontSize: _responsiveSp(
+              AppFont.font14.sp,
+              minimum: 12,
+              maximum: 15,
+            ),
             fontWeight: FontWeight.w700,
             color: alignEnd
                 ? AppColors.primaryGreen
@@ -363,58 +483,10 @@ class _CertificateMeta extends StatelessWidget {
   }
 }
 
-class _CertificateStatCard extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String value;
-  final String label;
-
-  const _CertificateStatCard({
-    required this.icon,
-    required this.iconColor,
-    required this.value,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 104.h,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(kRadius24.r),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AppColors.homeNeutralShadow,
-            blurRadius: 12.r,
-            offset: Offset(0, 4.h),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Icon(icon, color: iconColor, size: 20.w),
-          SizedBox(height: 8.h),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: AppFont.font14.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.homePrimaryText,
-            ),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 1.1,
-              color: AppColors.bodyText,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+double _responsiveSp(
+    double value, {
+      required double minimum,
+      required double maximum,
+    }) {
+  return value.clamp(minimum, maximum).toDouble();
 }

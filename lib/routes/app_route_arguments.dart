@@ -69,6 +69,18 @@ class FinalExamRouteArguments {
   });
 }
 
+class FinalExamResultRouteArguments {
+  final String controllerTag;
+  final String courseId;
+  final String attemptId;
+
+  const FinalExamResultRouteArguments({
+    required this.controllerTag,
+    required this.courseId,
+    required this.attemptId,
+  });
+}
+
 class ProOrderSummaryRouteArguments {
   final String controllerTag;
   final String courseDetailControllerTag;
@@ -88,8 +100,12 @@ class ProOrderSummaryRouteArguments {
 
 class CourseCertificateRouteArguments {
   final String controllerTag;
+  final String attemptId;
 
-  const CourseCertificateRouteArguments({required this.controllerTag});
+  const CourseCertificateRouteArguments({
+    required this.controllerTag,
+    required this.attemptId,
+  });
 }
 
 

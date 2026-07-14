@@ -10,16 +10,26 @@ class FinalExamGatewayModel {
   final String courseId;
   final String courseTitle;
   final String courseSubtitle;
+
   final String examId;
   final String examTitle;
   final String examDescription;
+
+  final String attemptId;
+  final String attemptStatus;
+
   final int totalDurationMinutes;
   final int unlockCompletionPercent;
+  final int courseProgressPercent;
+
   final String resultNotice;
   final String resultNoticeBn;
-  final int courseProgressPercent;
-  final bool isUnlocked;
   final String message;
+
+  final bool isUnlocked;
+  final bool hasAttempted;
+  final bool isEligible;
+  final bool resultReady;
 
   const FinalExamGatewayModel({
     required this.courseId,
@@ -28,32 +38,65 @@ class FinalExamGatewayModel {
     required this.examId,
     required this.examTitle,
     required this.examDescription,
+    required this.attemptId,
+    required this.attemptStatus,
     required this.totalDurationMinutes,
     required this.unlockCompletionPercent,
+    required this.courseProgressPercent,
     required this.resultNotice,
     required this.resultNoticeBn,
-    required this.courseProgressPercent,
-    required this.isUnlocked,
     required this.message,
+    required this.isUnlocked,
+    required this.hasAttempted,
+    required this.isEligible,
+    required this.resultReady,
   });
 
-  factory FinalExamGatewayModel.fromJson(Map<String, dynamic> json) {
+  bool get canViewResult {
+    return resultReady && attemptId.trim().isNotEmpty;
+  }
+
+  bool get isResultPending {
+    return hasAttempted && !resultReady;
+  }
+
+  factory FinalExamGatewayModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     final Map<String, dynamic> course = _map(json['course']);
     final Map<String, dynamic> exam = _map(json['exam']);
+
     return FinalExamGatewayModel(
       courseId: _string(course['id']),
       courseTitle: _string(course['title']),
       courseSubtitle: _string(course['subtitle']),
+
       examId: _string(exam['id']),
       examTitle: _string(exam['title']),
       examDescription: _string(exam['description']),
-      totalDurationMinutes: _int(exam['totalDurationMinutes']),
-      unlockCompletionPercent: _int(exam['unlockCompletionPercent']),
+
+      // New backend fields
+      attemptId: _string(json['attemptId']),
+      attemptStatus: _string(json['attemptStatus']),
+
+      totalDurationMinutes: _int(
+        exam['totalDurationMinutes'],
+      ),
+      unlockCompletionPercent: _int(
+        exam['unlockCompletionPercent'],
+      ),
+      courseProgressPercent: _int(
+        json['courseProgressPercent'],
+      ),
+
       resultNotice: _string(exam['resultNotice']),
       resultNoticeBn: _string(exam['resultNoticeBn']),
-      courseProgressPercent: _int(json['courseProgressPercent']),
-      isUnlocked: _bool(json['isUnlocked']),
       message: _string(json['message']),
+
+      isUnlocked: _bool(json['isUnlocked']),
+      hasAttempted: _bool(json['hasAttempted']),
+      isEligible: _bool(json['isEligible']),
+      resultReady: _bool(json['resultReady']),
     );
   }
 }

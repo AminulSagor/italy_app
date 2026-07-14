@@ -21,7 +21,7 @@ import '../features/courses/controllers/courses_controller.dart';
 import '../features/courses/models/course_models.dart';
 import '../features/courses/services/course_catalog_api_service.dart';
 import '../features/courses/services/courses_api_service.dart';
-import '../features/courses/services/course_certificate_mock_service.dart';
+import '../features/courses/services/course_certificate_api_service.dart';
 import '../features/courses/sub_features/chapter_detail/controllers/chapter_detail_controller.dart';
 import '../features/courses/sub_features/chapter_detail/services/chapter_detail_api_service.dart';
 import '../features/courses/sub_features/chapter_detail/views/chapter_detail_view.dart';
@@ -574,19 +574,28 @@ class AppPages {
       name: AppRoutes.courseCertificate,
       page: () {
         final CourseCertificateRouteArguments args =
-            _arguments<CourseCertificateRouteArguments>();
-        return CourseCertificateView(controllerTag: args.controllerTag);
+        _arguments<CourseCertificateRouteArguments>();
+
+        return CourseCertificateView(
+          controllerTag: args.controllerTag,
+        );
       },
       binding: BindingsBuilder(() {
         final CourseCertificateRouteArguments args =
-            _arguments<CourseCertificateRouteArguments>();
-        Get.lazyPut<CourseCertificateMockService>(
-          () => CourseCertificateMockService(),
+        _arguments<CourseCertificateRouteArguments>();
+
+        Get.lazyPut<CourseCertificateApiService>(
+              () => CourseCertificateApiService(
+            apiClient: Get.find<ApiClient>(),
+          ),
           tag: args.controllerTag,
         );
+
         Get.lazyPut<CourseCertificateController>(
-          () => CourseCertificateController(
-            certificateMockService: Get.find<CourseCertificateMockService>(
+              () => CourseCertificateController(
+            attemptId: args.attemptId,
+            certificateApiService:
+            Get.find<CourseCertificateApiService>(
               tag: args.controllerTag,
             ),
           ),
@@ -656,10 +665,58 @@ class AppPages {
     GetPage(
       name: AppRoutes.finalExamResult,
       page: () {
-        final ControllerTagRouteArguments args =
-            _arguments<ControllerTagRouteArguments>();
-        return FinalExamResultView(controllerTag: args.controllerTag);
+        final Object rawArguments = Get.arguments as Object;
+
+        final String controllerTag =
+        rawArguments is FinalExamResultRouteArguments
+            ? rawArguments.controllerTag
+            : (rawArguments as ControllerTagRouteArguments)
+            .controllerTag;
+
+        return FinalExamResultView(
+          controllerTag: controllerTag,
+        );
       },
+      binding: BindingsBuilder(() {
+        final Object rawArguments = Get.arguments as Object;
+
+        // Existing submission flow already has its controller.
+        if (rawArguments is! FinalExamResultRouteArguments) {
+          return;
+        }
+
+        final FinalExamResultRouteArguments args =
+            rawArguments;
+
+        if (!Get.isRegistered<FinalExamApiService>(
+          tag: args.controllerTag,
+        )) {
+          Get.lazyPut<FinalExamApiService>(
+                () => FinalExamApiService(
+              apiClient: Get.find<ApiClient>(),
+            ),
+            tag: args.controllerTag,
+          );
+        }
+
+        if (!Get.isRegistered<FinalExamController>(
+          tag: args.controllerTag,
+        )) {
+          Get.lazyPut<FinalExamController>(
+                () => FinalExamController(
+              controllerTag: args.controllerTag,
+              courseId: args.courseId,
+              initialAttemptId: args.attemptId,
+              loadOverviewOnInit: false,
+              finalExamApiService:
+              Get.find<FinalExamApiService>(
+                tag: args.controllerTag,
+              ),
+            ),
+            tag: args.controllerTag,
+          );
+        }
+      }),
     ),
 
     GetPage(

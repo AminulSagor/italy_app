@@ -45,9 +45,6 @@ class CoursesController extends GetxController {
   }
 
 
-
-
-
   Future<void> openCourse(CourseCardModel course) async {
     final String tag = 'course_${course.id}_${DateTime.now().millisecondsSinceEpoch}';
 

@@ -73,11 +73,63 @@ class CourseDetailController extends GetxController {
 
   Future<void> openFinalExam() async {
     final CourseDetailModel? currentDetail = detail.value;
-    if (currentDetail == null || !currentDetail.finalExam.canStart) {
+    if (currentDetail == null) return;
+
+    final CourseFinalExamModel finalExam = currentDetail.finalExam;
+
+    // Result is available: open result page directly.
+    if (finalExam.canViewResult) {
+      final String attemptId = finalExam.attemptId.trim();
+
+      if (attemptId.isEmpty) {
+        Get.snackbar(
+          'gen_final_exam_result'.tr,
+          'Result attempt was not found.',
+        );
+        return;
+      }
+
+      final String tag =
+          'final_exam_result_${attemptId}_'
+          '${DateTime.now().millisecondsSinceEpoch}';
+
+      await Get.toNamed(
+        AppRoutes.finalExamResult,
+        arguments: FinalExamResultRouteArguments(
+          controllerTag: tag,
+          courseId: course.id,
+          attemptId: attemptId,
+        ),
+      );
+
+      await loadDetail();
       return;
     }
 
-    final String tag = 'final_exam_${course.id}_${DateTime.now().millisecondsSinceEpoch}';
+    // Exam submitted, but teacher review is incomplete.
+    if (finalExam.hasAttempted && !finalExam.resultReady) {
+      Get.snackbar(
+        'gen_final_exam_result'.tr,
+        finalExam.helperLabel.isNotEmpty
+            ? finalExam.helperLabel
+            : 'Your final examination result is being processed.',
+      );
+      return;
+    }
+
+    // User cannot start the exam.
+    if (!finalExam.canStart) {
+      Get.snackbar(
+        'gen_final_exam'.tr,
+        finalExam.helperLabel,
+      );
+      return;
+    }
+
+    // User is eligible: open the exam overview.
+    final String tag =
+        'final_exam_${course.id}_'
+        '${DateTime.now().millisecondsSinceEpoch}';
 
     await Get.toNamed(
       AppRoutes.finalExamOverview,
@@ -86,26 +138,50 @@ class CourseDetailController extends GetxController {
         courseId: course.id,
       ),
     );
+
     await loadDetail();
   }
 
   Future<void> handleFinalExamTap() async {
-    final CourseFinalExamModel? finalExam = detail.value?.finalExam;
+    final CourseFinalExamModel? finalExam =
+        detail.value?.finalExam;
+
     if (finalExam == null) return;
 
+    // View Result
+    if (finalExam.canViewResult) {
+      await openFinalExam();
+      return;
+    }
+
+    // Preserve existing certificate navigation
     if (finalExam.hasCertificate) {
+      final String resolvedAttemptId =
+      finalExam.attemptId.trim();
+
+      if (resolvedAttemptId.isEmpty) {
+        Get.snackbar(
+          'Certificate unavailable',
+          'Final exam attempt was not found.',
+        );
+        return;
+      }
+
       final String tag =
-          'course_certificate_${DateTime.now().millisecondsSinceEpoch}';
+          'course_certificate_'
+          '${DateTime.now().millisecondsSinceEpoch}';
 
       await Get.toNamed(
         AppRoutes.courseCertificate,
         arguments: CourseCertificateRouteArguments(
           controllerTag: tag,
+          attemptId: resolvedAttemptId,
         ),
       );
       return;
     }
 
+    // Start Exam
     if (finalExam.canStart) {
       await openFinalExam();
     }
