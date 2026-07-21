@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../models/message_call_models.dart';
+import 'package:flutter/widgets.dart';
 
 class CallAgoraException implements Exception {
   const CallAgoraException(this.message);
@@ -26,6 +27,7 @@ class CallAgoraService extends GetxService {
   final RxBool isCameraEnabled = false.obs;
   final RxBool isSpeakerEnabled = true.obs;
   final RxnInt remoteUid = RxnInt();
+  final RxBool isRemoteCameraEnabled = false.obs;
 
   bool _supportsVideo = false;
 
@@ -61,6 +63,7 @@ class CallAgoraService extends GetxService {
     _supportsVideo = isVideoCall;
 
     remoteUid.value = null;
+    isRemoteCameraEnabled.value = false;
     isCameraEnabled.value = false;
 
     final RtcEngine engine = createAgoraRtcEngine();
@@ -98,7 +101,38 @@ class CallAgoraService extends GetxService {
               int elapsed,
               ) {
             remoteUid.value = uid;
+            isRemoteCameraEnabled.value = false;
           },
+
+          onRemoteVideoStateChanged: (
+              RtcConnection connection,
+              int uid,
+              RemoteVideoState state,
+              RemoteVideoStateReason reason,
+              int elapsed,
+              ) {
+            if (remoteUid.value == null) {
+              remoteUid.value = uid;
+            }
+
+            if (remoteUid.value != uid) {
+              return;
+            }
+
+            switch (state) {
+              case RemoteVideoState.remoteVideoStateStarting:
+              case RemoteVideoState.remoteVideoStateDecoding:
+              case RemoteVideoState.remoteVideoStateFrozen:
+                isRemoteCameraEnabled.value = true;
+                break;
+
+              case RemoteVideoState.remoteVideoStateStopped:
+              case RemoteVideoState.remoteVideoStateFailed:
+                isRemoteCameraEnabled.value = false;
+                break;
+            }
+          },
+
           onUserOffline: (
               RtcConnection connection,
               int uid,
@@ -106,14 +140,17 @@ class CallAgoraService extends GetxService {
               ) {
             if (remoteUid.value == uid) {
               remoteUid.value = null;
+              isRemoteCameraEnabled.value = false;
             }
           },
+
           onLeaveChannel: (
               RtcConnection connection,
               RtcStats stats,
               ) {
             isJoined.value = false;
             remoteUid.value = null;
+            isRemoteCameraEnabled.value = false;
           },
           onError: (
             ErrorCodeType errorCode,
@@ -205,10 +242,24 @@ class CallAgoraService extends GetxService {
   }
 
 
-  Future<void> ensurePermissionsForCall({required bool isVideoCall}) async {
+  Future<void> ensurePermissionsForCall({
+    required bool isVideoCall,
+  }) async {
+    final bool microphoneWasRequested =
     await _ensureMicrophonePermission();
-    if (isVideoCall) {
-      await _ensureCameraPermission();
+
+    final bool cameraWasRequested = isVideoCall
+        ? await _ensureCameraPermission()
+        : false;
+
+    /*
+   * Android permission dialogs temporarily make the
+   * Flutter activity inactive. Do not start Agora or
+   * socket actions until the activity is resumed.
+   */
+    if (microphoneWasRequested ||
+        cameraWasRequested) {
+      await _waitUntilAppResumed();
     }
   }
 
@@ -334,6 +385,7 @@ class CallAgoraService extends GetxService {
     _supportsVideo = false;
 
     remoteUid.value = null;
+    isRemoteCameraEnabled.value = false;
     isJoined.value = false;
     isInitialized.value = false;
     isMicrophoneEnabled.value = true;
@@ -396,11 +448,16 @@ class CallAgoraService extends GetxService {
     isSpeakerEnabled.value = enabled;
   }
 
-  Future<void> _ensureMicrophonePermission() async {
-    final PermissionStatus currentStatus = await Permission.microphone.status;
-    final PermissionStatus status = currentStatus.isGranted
-        ? currentStatus
-        : await Permission.microphone.request();
+  Future<bool> _ensureMicrophonePermission() async {
+    final PermissionStatus currentStatus =
+    await Permission.microphone.status;
+
+    if (currentStatus.isGranted) {
+      return false;
+    }
+
+    final PermissionStatus status =
+    await Permission.microphone.request();
 
     if (!status.isGranted) {
       throw CallAgoraException(
@@ -409,13 +466,20 @@ class CallAgoraService extends GetxService {
             : 'Microphone permission is required for calling.',
       );
     }
+
+    return true;
   }
 
-  Future<void> _ensureCameraPermission() async {
-    final PermissionStatus currentStatus = await Permission.camera.status;
-    final PermissionStatus status = currentStatus.isGranted
-        ? currentStatus
-        : await Permission.camera.request();
+  Future<bool> _ensureCameraPermission() async {
+    final PermissionStatus currentStatus =
+    await Permission.camera.status;
+
+    if (currentStatus.isGranted) {
+      return false;
+    }
+
+    final PermissionStatus status =
+    await Permission.camera.request();
 
     if (!status.isGranted) {
       throw CallAgoraException(
@@ -424,7 +488,52 @@ class CallAgoraService extends GetxService {
             : 'Camera permission is required for video calling.',
       );
     }
+
+    return true;
   }
+  Future<void> _waitUntilAppResumed() async {
+    final WidgetsBinding binding =
+        WidgetsBinding.instance;
+
+    if (binding.lifecycleState !=
+        AppLifecycleState.resumed) {
+      final Completer<void> completer =
+      Completer<void>();
+
+      late final AppLifecycleListener listener;
+
+      listener = AppLifecycleListener(
+        onResume: () {
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        },
+      );
+
+      if (binding.lifecycleState ==
+          AppLifecycleState.resumed &&
+          !completer.isCompleted) {
+        completer.complete();
+      }
+
+      try {
+        await completer.future.timeout(
+          const Duration(seconds: 5),
+        );
+      } on TimeoutException {
+        // Continue safely after the timeout.
+      } finally {
+        listener.dispose();
+      }
+    }
+
+    // Allow Android to finish closing the permission UI.
+    await Future<void>.delayed(
+      const Duration(milliseconds: 350),
+    );
+  }
+
+
 
   @override
   void onClose() {

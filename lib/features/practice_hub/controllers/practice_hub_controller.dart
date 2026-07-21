@@ -219,20 +219,55 @@ class PracticeHubController extends GetxController {
     }
   }
 
-  void onFinalExamCardTap(PracticeFinalExamCourseModel item) {
-    if (item.isUnlocked) {
-      openFinalExam(item);
-      return;
-    }
+  Future<void> onFinalExamCardTap(
+      PracticeFinalExamCourseModel item,
+      ) async {
+    switch (item.action) {
+      case PracticeFinalExamAction.locked:
+        _showFinalExamLockedMessage(item);
+        return;
 
+      case PracticeFinalExamAction.startExam:
+      case PracticeFinalExamAction.retakeExam:
+        await openFinalExam(item);
+        return;
+
+      case PracticeFinalExamAction.resultPending:
+        Get.snackbar(
+          'gen_final_exam_result'.tr,
+          item.message.isNotEmpty
+              ? item.message
+              : 'final_exam_review_in_progress'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white,
+          colorText: Colors.black87,
+        );
+        return;
+
+      case PracticeFinalExamAction.viewResult:
+        await openFinalExamResult(item);
+        return;
+
+      case PracticeFinalExamAction.viewCertificate:
+        await openFinalExamCertificate(item);
+        return;
+    }
+  }
+
+  void _showFinalExamLockedMessage(
+      PracticeFinalExamCourseModel item,
+      ) {
     Get.snackbar(
       'final_exam_locked_1'.tr,
       item.message.isEmpty
           ? 'complete_course_percent_to_unlock_final_exam'
-                .trParams(<String, String>{
-                  'percent': item.unlockCompletionPercent.toString(),
-                  'course': item.courseName,
-                })
+          .trParams(
+        <String, String>{
+          'percent':
+          item.unlockCompletionPercent.toString(),
+          'course': item.courseName,
+        },
+      )
           : item.message,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.white,
@@ -240,19 +275,83 @@ class PracticeHubController extends GetxController {
     );
   }
 
-  Future<void> openFinalExam(PracticeFinalExamCourseModel item) async {
+  Future<void> openFinalExamResult(
+      PracticeFinalExamCourseModel item,
+      ) async {
+    final String attemptId = item.attemptId.trim();
+
+    if (attemptId.isEmpty) {
+      Get.snackbar(
+        'gen_final_exam_result'.tr,
+        'final_exam_attempt_not_found'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final String tag =
+        'final_exam_result_${attemptId}_'
+        '${DateTime.now().millisecondsSinceEpoch}';
+
+    await Get.toNamed<void>(
+      AppRoutes.finalExamResult,
+      arguments: FinalExamResultRouteArguments(
+        controllerTag: tag,
+        courseId: item.courseId,
+        attemptId: attemptId,
+      ),
+    );
+
+    await loadFinalExamCourses();
+  }
+
+  Future<void> openFinalExamCertificate(
+      PracticeFinalExamCourseModel item,
+      ) async {
+    final String attemptId = item.attemptId.trim();
+
+    if (attemptId.isEmpty) {
+      Get.snackbar(
+        'final_exam_view_certificate'.tr,
+        'final_exam_attempt_not_found'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final String tag =
+        'course_certificate_${attemptId}_'
+        '${DateTime.now().millisecondsSinceEpoch}';
+
+    await Get.toNamed<void>(
+      AppRoutes.courseCertificate,
+      arguments: CourseCertificateRouteArguments(
+        controllerTag: tag,
+        attemptId: attemptId,
+      ),
+    );
+
+    await loadFinalExamCourses();
+  }
+
+  Future<void> openFinalExam(
+      PracticeFinalExamCourseModel item,
+      ) async {
     if (!item.isUnlocked) return;
 
     final String tag =
-        'final_exam_${item.courseId}_${DateTime.now().millisecondsSinceEpoch}';
+        'final_exam_${item.courseId}_'
+        '${DateTime.now().millisecondsSinceEpoch}';
 
-    await Get.toNamed(
+    await Get.toNamed<void>(
       AppRoutes.finalExamOverview,
       arguments: FinalExamRouteArguments(
         controllerTag: tag,
         courseId: item.courseId,
       ),
     );
+
+    await loadFinalExamCourses();
   }
 
   Future<void> openCourseFromFinalExam(

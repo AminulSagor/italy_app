@@ -31,8 +31,7 @@ class OrderHistoryView extends GetView<ShopOrderHistoryController> {
                 const _SearchBox(),
                 SizedBox(height: 24.h),
                 const _OrdersList(),
-                SizedBox(height: 18.h),
-                const _SupportCard(),
+
               ],
             ),
           ),
@@ -484,88 +483,4 @@ class _StatusLabel extends StatelessWidget {
   }
 }
 
-class _SupportCard extends GetView<ShopOrderHistoryController> {
-  const _SupportCard();
 
-  static const Color _green = Color(0xFF267A05);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(30.w, 32.h, 30.w, 24.h),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF2F2F2),
-        borderRadius: BorderRadius.circular(42.r),
-        border: Border.all(color: Colors.white, width: 2.w),
-      ),
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-            right: -28.w,
-            bottom: -44.h,
-            child: Icon(
-              Icons.support_agent_rounded,
-              size: 112.r,
-              color: Colors.white.withValues(alpha: 0.55),
-            ),
-          ),
-          Column(
-            children: <Widget>[
-              Text(
-                'questions_about_an_order'.tr,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF2D3032),
-                  letterSpacing: -0.35,
-                ),
-              ),
-              SizedBox(height: 20.h),
-              GestureDetector(
-                onTap: controller.contactOrderSupport,
-                child: Container(
-                  width: double.infinity,
-                  height: 62.h,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: _green,
-                    borderRadius: BorderRadius.circular(100.r),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: const Color(0xFF155200),
-                        blurRadius: 0,
-                        offset: Offset(0, 7.h),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'gen_contact_support'.tr,
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(width: 10.w),
-                      Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        size: 24.r,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 7.h),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}

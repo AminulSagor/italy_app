@@ -33,8 +33,7 @@ class ProPurchaseSuccessView extends GetView<ProCheckoutController> {
           orderId: '#IT-SHK-1024',
           statusLabel: 'status_completed'.tr,
           title: 'gen_congratulations'.tr,
-          description:
-              'You now have full lifetime access to all\nItalian Shikhi features. Your journey to\nfluency starts today.',
+          description: 'purchase_success_description'.tr,
           buttonLabel: 'start_learning_now'.tr,
         );
 

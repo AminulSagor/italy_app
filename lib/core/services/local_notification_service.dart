@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as dev;
 import 'dart:io';
 
@@ -10,6 +11,7 @@ import '../../features/messages/views/message_chat_view.dart';
 import '../../features/messages/controllers/message_chat_controller.dart';
 import '../../features/messages/models/message_models.dart';
 import '../../features/messages/services/messages_service.dart';
+import 'notification_deep_link_service.dart';
 
 class LocalNotificationService {
   LocalNotificationService._();
@@ -94,6 +96,15 @@ class LocalNotificationService {
           'data=${message.data}',
           name: 'LocalNotificationService',
         );
+
+        final String moderationDeepLink =
+            message.data['deepLink']?.toString().trim() ?? '';
+
+        if (await NotificationDeepLinkService.openAccountRestriction(
+          moderationDeepLink,
+        )) {
+          return;
+        }
 
         // Skip displaying the notification if the user is currently viewing
         // the conversation that this message belongs to.
@@ -465,66 +476,151 @@ class LocalNotificationService {
     return '.jpg';
   }
 
-  void _handleNotificationTap(NotificationResponse response) {
+  void _handleNotificationTap(
+      NotificationResponse response,
+      ) {
     dev.log(
-      'Foreground notification tapped. '
-      'payload=${response.payload}',
+      'Notification tapped. payload=${response.payload}',
       name: 'LocalNotificationService',
     );
 
-    final String? payloadStr = response.payload;
-    if (payloadStr != null && payloadStr.isNotEmpty) {
-      try {
-        if (payloadStr.startsWith('{')) {
-          final Map<String, dynamic> data = jsonDecode(payloadStr);
-          final String conversationId =
-              data['conversationId']?.toString() ?? '';
-          if (conversationId.isNotEmpty) {
-            final String contactId = data['contactId']?.toString() ?? '';
-            final String contactName =
-                data['contactName']?.toString() ?? 'User';
+    final String rawPayload =
+        response.payload?.trim() ?? '';
 
-            final MessageThreadModel thread = MessageThreadModel(
-              id: conversationId,
-              learnerName: contactName,
-              lastMessage: '',
-              timeLabel: '',
-              unreadCount: 0,
-              isOnline: false,
-              isHighlighted: false,
-              isDelivered: true,
-              avatarUrl: '',
-              contactId: contactId,
-            );
+    if (rawPayload.isEmpty) {
+      return;
+    }
 
-            Get.to<void>(
-              () => const MessageChatView(),
-              binding: BindingsBuilder(() {
-                Get.put<MessageChatController>(
-                  MessageChatController(
-                    thread: thread,
-                    messagesMockService: Get.find<MessagesMockService>(),
-                  ),
-                );
-              }),
-              transition: Transition.rightToLeft,
-            );
-            return;
-          }
+    String deepLink = rawPayload;
+
+    try {
+      if (rawPayload.startsWith('{')) {
+        final dynamic decoded = jsonDecode(rawPayload);
+
+        if (decoded is! Map) {
+          return;
         }
-      } catch (e, stackTrace) {
-        dev.log(
-          'Error parsing notification payload',
-          error: e,
-          stackTrace: stackTrace,
-          name: 'LocalNotificationService',
-        );
-      }
 
-      final Uri? deepLink = Uri.tryParse(payloadStr);
-      if (deepLink != null && deepLink.path.startsWith('/')) {
-        Get.toNamed<void>(deepLink.path, parameters: deepLink.queryParameters);
+        final Map<String, dynamic> data =
+        Map<String, dynamic>.from(decoded);
+
+        final String conversationId =
+            data['conversationId']
+                ?.toString()
+                .trim() ??
+                '';
+
+        if (conversationId.isNotEmpty) {
+          final String contactId =
+              data['contactId']
+                  ?.toString()
+                  .trim() ??
+                  '';
+
+          final String contactName =
+              data['contactName']
+                  ?.toString()
+                  .trim() ??
+                  'User';
+
+          final MessageThreadModel thread =
+          MessageThreadModel(
+            id: conversationId,
+            learnerName: contactName,
+            lastMessage: '',
+            timeLabel: '',
+            unreadCount: 0,
+            isOnline: false,
+            isHighlighted: false,
+            isDelivered: true,
+            avatarUrl: '',
+            contactId: contactId,
+          );
+
+          Get.to<void>(
+                () => const MessageChatView(),
+            binding: BindingsBuilder(() {
+              Get.put<MessageChatController>(
+                MessageChatController(
+                  thread: thread,
+                  messagesMockService:
+                  Get.find<MessagesMockService>(),
+                ),
+              );
+            }),
+            transition: Transition.rightToLeft,
+          );
+
+          return;
+        }
+
+        deepLink =
+            data['deepLink']?.toString().trim() ?? '';
       }
+    } catch (error, stackTrace) {
+      dev.log(
+        'Error parsing notification payload',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'LocalNotificationService',
+      );
+
+      return;
+    }
+
+    if (deepLink.isEmpty) {
+      return;
+    }
+
+    unawaited(
+      _openNotificationDeepLink(deepLink),
+    );
+  }
+  Future<void> _openNotificationDeepLink(
+      String deepLink,
+      ) async {
+    final bool handled =
+    await NotificationDeepLinkService.open(
+      deepLink,
+    );
+
+    if (handled) {
+      return;
+    }
+
+    final Uri? uri = Uri.tryParse(deepLink);
+
+    if (uri == null) {
+      return;
+    }
+
+    final String routePath;
+
+    if (uri.scheme.isEmpty) {
+      routePath = uri.path;
+    } else if (uri.host.isNotEmpty) {
+      routePath = '/${uri.host}${uri.path}';
+    } else {
+      routePath = uri.path;
+    }
+
+    if (routePath.isEmpty ||
+        !routePath.startsWith('/')) {
+      return;
+    }
+
+    try {
+      await Get.toNamed<void>(
+        routePath,
+        parameters: uri.queryParameters,
+      );
+    } catch (error, stackTrace) {
+      dev.log(
+        'Unable to open notification deep link: $deepLink',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'LocalNotificationService',
+      );
     }
   }
 

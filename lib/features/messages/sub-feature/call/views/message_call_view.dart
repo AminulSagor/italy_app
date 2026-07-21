@@ -71,20 +71,27 @@ class MessageCallView extends GetView<MessageCallController> {
   }
 
   Widget _buildRemoteVideo() {
-    final RtcEngine? engine = controller.agoraEngine;
+    final RtcEngine? engine =
+        controller.agoraEngine;
 
-    final int? remoteUid = controller.agora.remoteUid.value;
+    final int? remoteUid =
+        controller.agora.remoteUid.value;
 
-    final String? channelName = controller.agoraChannelName;
+    final bool remoteCameraEnabled =
+        controller
+            .agora
+            .isRemoteCameraEnabled
+            .value;
+
+    final String? channelName =
+        controller.agoraChannelName;
 
     if (engine == null ||
         remoteUid == null ||
+        !remoteCameraEnabled ||
         channelName == null ||
         channelName.isEmpty) {
-      return MessageVideoPlaceholder(
-        isCameraOff: controller.isCameraOff.value,
-        isFrontCamera: controller.isFrontCamera.value,
-      );
+      return const MessageVideoPlaceholder();
     }
 
     return AgoraVideoView(
@@ -92,28 +99,39 @@ class MessageCallView extends GetView<MessageCallController> {
         rtcEngine: engine,
         canvas: VideoCanvas(
           uid: remoteUid,
-          renderMode: RenderModeType.renderModeHidden,
+          renderMode:
+          RenderModeType.renderModeHidden,
         ),
-        connection: RtcConnection(channelId: channelName),
+        connection: RtcConnection(
+          channelId: channelName,
+        ),
       ),
     );
   }
 
-  Widget _buildParticipantArea({required bool showVideoStage}) {
+  Widget _buildParticipantArea({
+    required bool showVideoStage,
+  }) {
     final bool hasRemoteVideo =
-        showVideoStage && controller.agora.remoteUid.value != null;
+        showVideoStage &&
+            controller.agora.remoteUid.value != null &&
+            controller
+                .agora
+                .isRemoteCameraEnabled
+                .value;
 
     if (hasRemoteVideo) {
       return const SizedBox.shrink();
     }
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.symmetric(
+        horizontal: 24.w,
+      ),
       child: MessageCallParticipantCard(
         participant: controller.participant,
-        durationLabel: controller.durationLabel.value,
-
-        // Before answer, use the normal audio-call colors.
+        durationLabel:
+        controller.durationLabel.value,
         isVideoCall: showVideoStage,
       ),
     );

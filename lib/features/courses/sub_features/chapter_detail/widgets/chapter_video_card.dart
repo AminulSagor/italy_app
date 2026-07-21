@@ -266,7 +266,10 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
 
   Future<void> _openFullscreen() async {
     final VideoPlayerController? controller = _videoController;
-    if (controller == null || !controller.value.isInitialized || !mounted) {
+
+    if (controller == null ||
+        !controller.value.isInitialized ||
+        !mounted) {
       return;
     }
 
@@ -274,13 +277,26 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       MaterialPageRoute<void>(
         builder: (_) => ChapterVideoFullscreenView(
           controller: controller,
-          hasWatchedFullyListenable: _hasWatchedFullyNotifier,
-          progressLabel: widget.detail.videoProgressLabel,
-          fallbackPositionLabel: widget.detail.watchedTimeLabel,
-          fallbackDurationLabel: widget.detail.totalTimeLabel,
+          hasWatchedFullyListenable:
+          _hasWatchedFullyNotifier,
+          progressLabel:
+          widget.detail.videoProgressLabel,
+          fallbackPositionLabel:
+          widget.detail.watchedTimeLabel,
+          fallbackDurationLabel:
+          widget.detail.totalTimeLabel,
         ),
       ),
     );
+
+    /*
+   * The fullscreen page restores portrait before it
+   * closes. Rebuild this video card using the restored
+   * portrait dimensions.
+   */
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override

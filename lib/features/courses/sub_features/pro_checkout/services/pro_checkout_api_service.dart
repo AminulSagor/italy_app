@@ -134,8 +134,12 @@ class ProCheckoutApiService {
         if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
       },
     );
+
+
     final Map<String, dynamic> body = _responseMap(response);
+
     final String orderId = _stringValue(body['id']);
+
     if (orderId.isEmpty) {
       throw DioException(
         requestOptions: response.requestOptions,
@@ -143,11 +147,26 @@ class ProCheckoutApiService {
       );
     }
 
+    final String obfuscatedAccountId = _stringValue(
+      body['googlePlayObfuscatedAccountId'],
+    ).toLowerCase();
+
+    if (obfuscatedAccountId.isEmpty) {
+      throw DioException(
+        requestOptions: response.requestOptions,
+        message: 'Google Play account binding information is missing.',
+      );
+    }
+
     return ProPendingGooglePlayPurchaseModel(
       courseId: order.courseId,
       orderId: orderId,
-      orderNumber: _stringValue(body['orderNumber'], fallback: orderId),
+      orderNumber: _stringValue(
+        body['orderNumber'],
+        fallback: orderId,
+      ),
       productId: order.storeProduct.productId,
+      obfuscatedAccountId: obfuscatedAccountId,
       createdAt: DateTime.now(),
     );
   }
@@ -174,6 +193,23 @@ class ProCheckoutApiService {
       fallbackOrderNumber: pending.orderNumber,
       courseName: courseName,
       lessonCount: lessonCount,
+    );
+  }
+
+
+  Future<void> verifyGooglePlayPurchaseForRecovery({
+    required ProPendingGooglePlayPurchaseModel pending,
+    required String purchaseToken,
+    required String transactionId,
+  }) async {
+    await _apiClient.dio.post(
+      '/course-commerce/orders/${pending.orderId}/google-play/verify',
+      data: <String, dynamic>{
+        'productId': pending.productId,
+        'purchaseToken': purchaseToken,
+        if (transactionId.trim().isNotEmpty)
+          'transactionId': transactionId.trim(),
+      },
     );
   }
 

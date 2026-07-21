@@ -41,13 +41,18 @@ class TranslationService extends Translations {
     final String label = _labelFromLanguage(language);
 
     if (selectedLabel.value == label) {
+      if (Get.locale != locale) {
+        Get.updateLocale(locale);
+      }
       return;
     }
 
+    // Update the visible app language immediately.
     selectedLabel.value = label;
-    await _storageService.saveAppLocale(label);
-
     Get.updateLocale(locale);
+
+    // Save the preference after updating the UI.
+    await _storageService.saveAppLocale(label);
   }
 
   Future<void> setLanguageLabel(String label) async {
@@ -55,13 +60,18 @@ class TranslationService extends Translations {
     final String normalizedLabel = _labelFromLocale(locale);
 
     if (selectedLabel.value == normalizedLabel) {
+      if (Get.locale != locale) {
+        Get.updateLocale(locale);
+      }
       return;
     }
 
+    // Update the visible app language immediately.
     selectedLabel.value = normalizedLabel;
-    await _storageService.saveAppLocale(normalizedLabel);
-
     Get.updateLocale(locale);
+
+    // Save the preference after updating the UI.
+    await _storageService.saveAppLocale(normalizedLabel);
   }
 
   Locale _localeFromLabel(String label) {

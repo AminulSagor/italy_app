@@ -84,10 +84,17 @@ class _StatusChip extends StatelessWidget {
 class AiSpeakingLabCard extends StatelessWidget {
   final VoidCallback onTap;
 
-  const AiSpeakingLabCard({required this.onTap});
+  const AiSpeakingLabCard({
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final String languageCode =
+        Get.locale?.languageCode ?? 'en';
+
+    final bool isItalian = languageCode == 'it';
+    final bool isBangla = languageCode == 'bn';
     return _GradientFeatureCard(
       height: 252,
       borderRadius: 54,
@@ -112,10 +119,12 @@ class AiSpeakingLabCard extends StatelessWidget {
                 Text(
                   'ai_speaking_lab'.tr,
                   style: TextStyle(
-                    fontSize: 24.sp,
-                    height: 1.06,
+                    // Only Italian title is smaller.
+                    fontSize: isItalian ? 20.sp : 24.sp,
+                    height: isItalian ? 1.15 : 1.06,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: -0.7,
+                    letterSpacing:
+                    isItalian ? -0.3 : -0.7,
                     color: AppColors.white,
                   ),
                 ),
@@ -126,7 +135,9 @@ class AiSpeakingLabCard extends StatelessWidget {
                     fontSize: 15.sp,
                     height: 1.55,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.white.withValues(alpha: 0.62),
+                    color: AppColors.white.withValues(
+                      alpha: 0.62,
+                    ),
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -140,16 +151,18 @@ class AiSpeakingLabCard extends StatelessWidget {
                 ),
                 SizedBox(height: 22.h),
                 CustomButton(
-                  text: 'enter_lab'.tr,
+                  text: 'enter_lab',
                   onPressed: onTap,
-                  width: 157,
+               width: (isItalian || isBangla) ? 210 : 157,
                   height: 43,
                   btnColor: AppColors.white,
                   textColor: const Color(0xFF153D35),
-                  fontSize: 14,
+
+                  // Only Bangla button text becomes smaller.
+                  fontSize: isBangla ? 12 : 14,
+
                   icon: Icons.play_arrow_rounded,
                 ),
-                // _WhiteActionButton(text: 'enter_lab'.tr, width: 157, onTap: onTap),
               ],
             ),
           ),
@@ -160,7 +173,8 @@ class AiSpeakingLabCard extends StatelessWidget {
               width: 64.r,
               height: 64.r,
               decoration: BoxDecoration(
-                color: const Color(0xFF66A61D).withValues(alpha: 0.55),
+                color: const Color(0xFF66A61D)
+                    .withValues(alpha: 0.55),
                 borderRadius: BorderRadius.circular(24.r),
               ),
               child: Icon(
@@ -183,6 +197,17 @@ class AiGuidedLearningCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String languageCode = Get.locale?.languageCode ?? 'en';
+
+    final bool isItalian = languageCode == 'it';
+    final bool isBangla = languageCode == 'bn';
+
+    final double buttonWidth = isItalian ? 270 : (isBangla ? 235 : 222);
+
+    final double buttonHeight = isItalian ? 48 : (isBangla ? 46 : 43);
+
+    final double buttonFontSize = isItalian ? 12 : (isBangla ? 13 : 14);
+
     return _GradientFeatureCard(
       height: 309,
       borderRadius: 38,
@@ -230,9 +255,19 @@ class AiGuidedLearningCard extends StatelessWidget {
             SizedBox(height: 10.h),
             Text(
               'ai_guided_learning_description'.tr,
+              maxLines: isItalian || isBangla ? 4 : 3,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 15.sp,
-                height: 1.55,
+                fontSize: isItalian
+                    ? 13.sp
+                    : isBangla
+                    ? 13.5.sp
+                    : 15.sp,
+                height: isItalian
+                    ? 1.45
+                    : isBangla
+                    ? 1.55
+                    : 1.55,
                 fontWeight: FontWeight.w500,
                 color: AppColors.white.withValues(alpha: 0.75),
               ),
@@ -246,22 +281,17 @@ class AiGuidedLearningCard extends StatelessWidget {
                 color: AppColors.white.withValues(alpha: 0.55),
               ),
             ),
-            const Spacer(),
+            SizedBox(height: 6.h),
             CustomButton(
-              text: 'start_guided_learning'.tr,
+              // CustomButton already translates the key internally.
+              text: 'start_guided_learning',
               onPressed: onTap,
-              width: 222,
-              height: 43,
+              width: buttonWidth,
+              height: buttonHeight,
               btnColor: AppColors.white,
               textColor: const Color(0xFF153D35),
-              fontSize: 14,
-              //icon: Icons.play_arrow_rounded,
+              fontSize: buttonFontSize,
             ),
-            // _WhiteActionButton(
-            //   text: 'start_guided_learning'.tr,
-            //   width: 222,
-            //   onTap: onTap,
-            // ),
           ],
         ),
       ),
@@ -490,9 +520,7 @@ class AiProTipCard extends StatelessWidget {
                       color: Color(0xFF153F35),
                     ),
                   ),
-                  TextSpan(
-                    text: 'ai_pro_tip_speaking_daily'.tr,
-                  ),
+                  TextSpan(text: 'ai_pro_tip_speaking_daily'.tr),
                 ],
               ),
             ),

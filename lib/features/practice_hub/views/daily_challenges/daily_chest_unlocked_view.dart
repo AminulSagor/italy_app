@@ -163,9 +163,7 @@ class XpBoostButton extends GetView<PracticeHubController> {
               ),
               child: Center(
                 child: Text(
-                  'formatmultiplier_multiplier'.trParams(<String, String>{
-                    'multiplier': _formatMultiplier(multiplier).toString(),
-                  }),
+                  '${_formatMultiplier(multiplier)}×',
                   style: TextStyle(
                     fontSize: 18.sp,
                     height: 1,
@@ -274,13 +272,12 @@ class _XpRewardCard extends GetView<PracticeHubController> {
           SizedBox(height: 10.h),
           Obx(
             () => Text(
-              'controller_lastdailychestreward_value_totalxpawarded_0_xp'
-                  .trParams(<String, String>{
-                    'totalxpawarded':
-                        controller.lastDailyChestReward.value?.totalXpAwarded
-                            ?.toString() ??
-                        '0',
-                  }),
+              'daily_chest_total_xp'.trParams(<String, String>{
+                'xp':
+                controller.lastDailyChestReward.value?.totalXpAwarded
+                    ?.toString() ??
+                    '0',
+              }),
               style: TextStyle(
                 fontSize: AppFont.font22.sp,
                 height: 1,
@@ -335,13 +332,12 @@ class _FreezeRewardCard extends GetView<PracticeHubController> {
           SizedBox(height: 10.h),
           Obx(
             () => Text(
-              'controller_lastdailychestreward_value_streakfreezecount_0_awarded'
-                  .trParams(<String, String>{
-                    'streakfreezecount':
-                        controller.lastDailyChestReward.value?.streakFreezeCount
-                            ?.toString() ??
-                        '0',
-                  }),
+              'daily_chest_streak_freezes_awarded'.trParams(<String, String>{
+                'count':
+                controller.lastDailyChestReward.value?.streakFreezeCount
+                    ?.toString() ??
+                    '0',
+              }),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font20.sp,
@@ -389,11 +385,9 @@ class _StreakIncreasePill extends GetView<PracticeHubController> {
           Expanded(
             child: Obx(
               () => Text(
-                'your_streak_is_controller_dailystreakdays_days'.trParams(
-                  <String, String>{
-                    'dailystreakdays': controller.dailyStreakDays.toString(),
-                  },
-                ),
+                'daily_streak_message'.trParams(<String, String>{
+                  'days': controller.dailyStreakDays.toString(),
+                }),
                 style: TextStyle(
                   fontSize: AppFont.font13.sp,
                   height: 1,

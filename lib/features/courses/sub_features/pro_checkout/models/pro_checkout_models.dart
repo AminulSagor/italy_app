@@ -257,6 +257,7 @@ class ProPendingGooglePlayPurchaseModel {
     required this.orderId,
     required this.orderNumber,
     required this.productId,
+    required this.obfuscatedAccountId,
     required this.createdAt,
   });
 
@@ -264,17 +265,24 @@ class ProPendingGooglePlayPurchaseModel {
   final String orderId;
   final String orderNumber;
   final String productId;
+  final String obfuscatedAccountId;
   final DateTime createdAt;
 
   factory ProPendingGooglePlayPurchaseModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
+      Map<String, dynamic> json,
+      ) {
     return ProPendingGooglePlayPurchaseModel(
       courseId: _stringValue(json['courseId']),
       orderId: _stringValue(json['orderId']),
       orderNumber: _stringValue(json['orderNumber']),
       productId: _stringValue(json['productId']),
-      createdAt: DateTime.tryParse(_stringValue(json['createdAt']))?.toLocal() ??
+      obfuscatedAccountId: _stringValue(
+        json['obfuscatedAccountId'],
+      ),
+      createdAt:
+      DateTime.tryParse(
+        _stringValue(json['createdAt']),
+      )?.toLocal() ??
           DateTime.now(),
     );
   }
@@ -284,6 +292,7 @@ class ProPendingGooglePlayPurchaseModel {
     'orderId': orderId,
     'orderNumber': orderNumber,
     'productId': productId,
+    'obfuscatedAccountId': obfuscatedAccountId,
     'createdAt': createdAt.toUtc().toIso8601String(),
   };
 }

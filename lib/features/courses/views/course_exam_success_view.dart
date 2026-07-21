@@ -53,7 +53,7 @@ class CourseExamSuccessView extends StatelessWidget {
               ),
               SizedBox(height: 80.h),
               Text(
-                'Level A1\nMastered',
+                'level_mastered'.trParams(<String, String>{'level': 'A1'}),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppFont.font52.sp,
@@ -81,7 +81,9 @@ class CourseExamSuccessView extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 30.w),
                 decoration: BoxDecoration(
                   color: AppColors.coursesSuccessInfoBg,
-                  borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
+                  borderRadius: BorderRadius.circular(
+                    kCourseDetailCardRadius.r,
+                  ),
                 ),
                 child: Row(
                   children: <Widget>[
@@ -92,7 +94,11 @@ class CourseExamSuccessView extends StatelessWidget {
                         color: AppColors.unblockSuccessIconCircle,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.verified_rounded, color: AppColors.primaryGreen, size: 34.w),
+                      child: Icon(
+                        Icons.verified_rounded,
+                        color: AppColors.primaryGreen,
+                        size: 34.w,
+                      ),
                     ),
                     SizedBox(width: 24.w),
                     Expanded(
@@ -127,7 +133,8 @@ class CourseExamSuccessView extends StatelessWidget {
               ),
               const Spacer(),
               CustomButton.primary(
-                onPressed: () => Get.until((Route<dynamic> route) => route.isFirst),
+                onPressed: () =>
+                    Get.until((Route<dynamic> route) => route.isFirst),
                 text: 'back_to_courses'.tr,
               ),
             ],

@@ -152,7 +152,7 @@ class _DiscoveryStarterContent extends StatelessWidget {
           ),
           SizedBox(height: 11.h),
           Text(
-            "I am your AI Tutor. Let's practice\nItalian together.",
+            'ai_tutor_intro'.tr,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12.sp,

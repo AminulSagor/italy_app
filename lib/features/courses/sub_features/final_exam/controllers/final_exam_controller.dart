@@ -37,6 +37,10 @@ class FinalExamController extends GetxController {
   final RxInt selectedListeningOption = (-1).obs;
   final RxString referenceId = ''.obs;
   final RxString estimatedResult = ''.obs;
+  final RxBool retakeAvailable = false.obs;
+  final RxBool certificateAvailable = false.obs;
+
+  final RxString resultCourseId = ''.obs;
 
   RxBool get isAudioPlaying => _media.isAudioPlaying;
   RxBool get isRecording => _media.isRecording;
@@ -113,6 +117,14 @@ class FinalExamController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+  void _applyResultMetadata(
+      FinalExamResultResponseModel data,
+      ) {
+    resultCourseId.value = data.courseId;
+    retakeAvailable.value = data.canRetake;
+    certificateAvailable.value =
+        data.certificateAvailable;
   }
 
   Future<void> startExam() async {
@@ -472,6 +484,7 @@ class FinalExamController extends GetxController {
 
       final FinalExamResultResponseModel data =
       response.data!;
+      _applyResultMetadata(data);
 
       referenceId.value = data.referenceCode;
       resultComplete.value = data.resultReady;
@@ -539,6 +552,7 @@ class FinalExamController extends GetxController {
       }
 
       final FinalExamResultResponseModel data = response.data!;
+      _applyResultMetadata(data);
 
       referenceId.value = data.referenceCode;
       resultComplete.value = data.resultReady;
@@ -567,6 +581,102 @@ class FinalExamController extends GetxController {
     }
   }
 
+  Future<void> startRetake() async {
+    if (isSubmitting.value) {
+      return;
+    }
+
+    if (!retakeAvailable.value) {
+      Get.snackbar(
+        'gen_final_exam'.tr,
+        'A new exam attempt is not available.',
+      );
+      return;
+    }
+
+    final String resolvedCourseId =
+    courseId.trim().isNotEmpty
+        ? courseId.trim()
+        : resultCourseId.value.trim();
+
+    if (resolvedCourseId.isEmpty) {
+      Get.snackbar(
+        'gen_final_exam'.tr,
+        'The course for this exam could not be found.',
+      );
+      return;
+    }
+
+    FinalExamAttemptModel? startedAttempt;
+
+    isSubmitting.value = true;
+
+    try {
+      final ApiResult<FinalExamAttemptModel> response =
+      await ApiErrorHandler.call<
+          FinalExamAttemptModel>(
+            () => _finalExamApiService.startAttempt(
+          courseId: resolvedCourseId,
+        ),
+        errorTitle: 'gen_final_exam'.tr,
+      );
+
+      if (!response.isSuccess ||
+          response.data == null) {
+        return;
+      }
+
+      final FinalExamAttemptModel data =
+      response.data!;
+
+      startedAttempt = data;
+
+      _resultPollTimer?.cancel();
+
+      attempt.value = data;
+      referenceId.value = data.referenceCode;
+      resultCourseId.value = resolvedCourseId;
+
+      _attemptStartedAt =
+          data.startedAt ?? DateTime.now();
+
+      _activeSectionIndex = -1;
+
+      selectedListeningOption.value = -1;
+
+      listeningTask.value = null;
+      writingTask.value = null;
+      speakingTask.value = null;
+
+      writingController.clear();
+
+      await _media.stopListeningAudio(
+        reset: true,
+      );
+
+      await _media.stopRecordedAudio(
+        reset: true,
+      );
+
+      await _media.resetRecording();
+
+      result.value = null;
+      resultComplete.value = false;
+      teacherReviewComplete.value = false;
+
+      estimatedResult.value = '';
+
+      retakeAvailable.value = false;
+      certificateAvailable.value = false;
+    } finally {
+      isSubmitting.value = false;
+    }
+
+    if (startedAttempt != null) {
+      await _openSectionAt(0);
+    }
+  }
+
   Future<void> openResult() async {
     await loadResult();
     if (result.value == null) return;
@@ -577,10 +687,24 @@ class FinalExamController extends GetxController {
   }
 
   Future<void> openCertificate() async {
+    if (!certificateAvailable.value) {
+      Get.snackbar(
+        'Certificate unavailable',
+        'No certificate is available for this exam result.',
+      );
+      return;
+    }
+
+    final String currentAttemptId =
+        attempt.value?.id.trim() ?? '';
+
+    final String notificationAttemptId =
+        initialAttemptId?.trim() ?? '';
+
     final String resolvedAttemptId =
-    initialAttemptId?.trim().isNotEmpty == true
-        ? initialAttemptId!.trim()
-        : attempt.value?.id.trim() ?? '';
+    currentAttemptId.isNotEmpty
+        ? currentAttemptId
+        : notificationAttemptId;
 
     if (resolvedAttemptId.isEmpty) {
       Get.snackbar(

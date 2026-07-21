@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../models/message_models.dart';
 import '../services/messages_service.dart';
@@ -14,18 +16,44 @@ class MessagesController extends GetxController {
   final MessagesMockService _messagesMockService;
 
   MessagesController({required MessagesMockService messagesMockService})
-    : _messagesMockService = messagesMockService;
+      : _messagesMockService = messagesMockService;
 
   final RxBool isLoading = false.obs;
   final RxBool hasError = false.obs;
   final RxString errorMessage = ''.obs;
   final RxString searchQuery = ''.obs;
   final RxBool isSearching = false.obs;
+  final RxString openingUserId = ''.obs;
   final RxList<Map<String, dynamic>> searchResults =
       <Map<String, dynamic>>[].obs;
   final RxString currentUserName = ''.obs;
   final RxString currentUserAvatarUrl = ''.obs;
   final RxList<MessageThreadModel> threads = <MessageThreadModel>[].obs;
+
+  int get totalUnreadMessageCount {
+    return threads.fold<int>(
+      0,
+          (
+          int total,
+          MessageThreadModel thread,
+          ) {
+        if (thread.unreadCount > 0) {
+          return total + thread.unreadCount;
+        }
+
+        // Safety fallback when a thread is highlighted
+        // but its unread count is missing.
+        if (thread.isHighlighted) {
+          return total + 1;
+        }
+
+        return total;
+      },
+    );
+  }
+
+  bool get hasUnreadMessages =>
+      totalUnreadMessageCount > 0;
 
   String? _currentUserId;
 
@@ -44,9 +72,9 @@ class MessagesController extends GetxController {
     return threads
         .where(
           (MessageThreadModel thread) =>
-              thread.learnerName.toLowerCase().contains(query) ||
-              thread.lastMessage.toLowerCase().contains(query),
-        )
+      thread.learnerName.toLowerCase().contains(query) ||
+          thread.lastMessage.toLowerCase().contains(query),
+    )
         .toList();
   }
 
@@ -116,10 +144,46 @@ class MessagesController extends GetxController {
       final String normalized = base64Url.normalize(payload);
       final String decoded = utf8.decode(base64Url.decode(normalized));
       final Map<String, dynamic> map =
-          json.decode(decoded) as Map<String, dynamic>;
+      json.decode(decoded) as Map<String, dynamic>;
       _currentUserId = map['sub']?.toString();
     } catch (_) {
       _currentUserId = null;
+    }
+  }
+
+  bool _isConversationCurrentlyOpen({
+    required String conversationId,
+    String senderId = '',
+  }) {
+    if (WidgetsBinding.instance.lifecycleState !=
+        AppLifecycleState.resumed ||
+        !Get.isRegistered<MessageChatController>()) {
+      return false;
+    }
+
+    try {
+      final MessageChatController activeChat =
+      Get.find<MessageChatController>();
+
+      final String activeThreadId = activeChat.thread.id.trim();
+      final String activeContactId =
+          activeChat.thread.contactId?.trim() ?? '';
+      final String normalizedConversationId = conversationId.trim();
+      final String normalizedSenderId = senderId.trim();
+
+      final bool conversationMatches =
+          normalizedConversationId.isNotEmpty &&
+              (normalizedConversationId == activeThreadId ||
+                  normalizedConversationId == activeContactId);
+
+      final bool senderMatches =
+          normalizedSenderId.isNotEmpty &&
+              (normalizedSenderId == activeThreadId ||
+                  normalizedSenderId == activeContactId);
+
+      return conversationMatches || senderMatches;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -128,36 +192,49 @@ class MessagesController extends GetxController {
       final String messageId =
           msg['messageId']?.toString() ?? msg['id']?.toString() ?? '';
 
-      // Deduplicate messages we've already processed
-      if (messageId.isNotEmpty && _seenMessageIds.contains(messageId)) return;
-      if (messageId.isNotEmpty) _seenMessageIds.add(messageId);
+      // Deduplicate messages we've already processed.
+      if (messageId.isNotEmpty && _seenMessageIds.contains(messageId)) {
+        return;
+      }
+      if (messageId.isNotEmpty) {
+        _seenMessageIds.add(messageId);
+      }
 
       final String content =
           msg['content']?.toString() ?? msg['text']?.toString() ?? '';
       final String createdAt =
           msg['createdAt']?.toString() ??
-          msg['created_at']?.toString() ??
-          DateTime.now().toIso8601String();
-
+              msg['created_at']?.toString() ??
+              DateTime.now().toIso8601String();
       final String senderId =
           msg['senderId']?.toString() ?? msg['userId']?.toString() ?? '';
-
       final String conversationId =
           msg['conversationId']?.toString() ??
-          msg['threadId']?.toString() ??
-          msg['conversation_id']?.toString() ??
-          '';
+              msg['threadId']?.toString() ??
+              msg['conversation_id']?.toString() ??
+              '';
 
-      // Try to locate existing thread by conversation id or sender contact id
+      final bool isMine =
+          senderId.isNotEmpty && senderId == _currentUserId;
+      final bool isConversationOpen = _isConversationCurrentlyOpen(
+        conversationId: conversationId,
+        senderId: senderId,
+      );
+      final bool shouldMarkUnread = !isMine && !isConversationOpen;
+
+      // Try to locate an existing thread by conversation ID or sender ID.
       int idx = -1;
       if (conversationId.isNotEmpty) {
         idx = threads.indexWhere(
-          (t) => t.id == conversationId || t.contactId == conversationId,
+              (MessageThreadModel thread) =>
+          thread.id == conversationId ||
+              thread.contactId == conversationId,
         );
       }
       if (idx < 0 && senderId.isNotEmpty) {
         idx = threads.indexWhere(
-          (t) => t.id == senderId || t.contactId == senderId,
+              (MessageThreadModel thread) =>
+          thread.id == senderId || thread.contactId == senderId,
         );
       }
 
@@ -166,44 +243,58 @@ class MessagesController extends GetxController {
         final MessageThreadModel updated = old.copyWith(
           lastMessage: content,
           timeLabel: _formatTimeLabel(createdAt),
-          unreadCount: old.unreadCount + 1,
-          isHighlighted: true,
+          unreadCount: shouldMarkUnread ? old.unreadCount + 1 : 0,
+          isHighlighted: shouldMarkUnread,
           previewTone: MessageThreadPreviewTone.normal,
         );
+
         threads.removeAt(idx);
         threads.insert(0, updated);
       } else {
-        // New conversation — create a thread entry
+        // New conversation — create a thread entry.
         final String id = conversationId.isNotEmpty
             ? conversationId
             : (senderId.isNotEmpty
-                  ? senderId
-                  : DateTime.now().millisecondsSinceEpoch.toString());
+            ? senderId
+            : DateTime.now().millisecondsSinceEpoch.toString());
         final String name =
             msg['senderName']?.toString() ??
-            msg['senderFullName']?.toString() ??
-            'User';
+                msg['senderFullName']?.toString() ??
+                'User';
         final String avatar = msg['senderAvatar']?.toString() ?? '';
+
         final MessageThreadModel thread = MessageThreadModel(
           id: id,
           learnerName: name,
           lastMessage: content,
           timeLabel: _formatTimeLabel(createdAt),
-          unreadCount: 1,
+          unreadCount: shouldMarkUnread ? 1 : 0,
           isOnline: false,
           blockStatus: 'none',
-          isHighlighted: true,
+          isHighlighted: shouldMarkUnread,
           isDelivered: true,
           avatarUrl: avatar,
           contactId: senderId.isNotEmpty ? senderId : null,
         );
-        // prevent duplicates
+
+        // Prevent duplicate conversation entries.
         threads.removeWhere(
-          (t) => t.id == thread.id || t.contactId == thread.contactId,
+              (MessageThreadModel item) =>
+          item.id == thread.id || item.contactId == thread.contactId,
         );
         threads.insert(0, thread);
       }
+
       threads.refresh();
+
+      // Keep the backend read state synchronized while this chat is visible.
+      if (isConversationOpen && conversationId.isNotEmpty) {
+        unawaited(
+          _messagesMockService
+              .markConversationRead(conversationId)
+              .then<void>((_) {}),
+        );
+      }
     } catch (_) {}
   }
 
@@ -221,8 +312,8 @@ class MessagesController extends GetxController {
         final PresenceService presenceService = Get.find<PresenceService>();
         // Reactively update thread presence when the global presence map changes
         ever(presenceService.presenceMap, (
-          Map<String, MessagePresenceModel> map,
-        ) {
+            Map<String, MessagePresenceModel> map,
+            ) {
           bool updated = false;
           for (int i = 0; i < threads.length; i++) {
             final String contactId = threads[i].contactId ?? '';
@@ -269,11 +360,11 @@ class MessagesController extends GetxController {
             final String normalized = base64Url.normalize(payload);
             final String decoded = utf8.decode(base64Url.decode(normalized));
             final Map<String, dynamic> map =
-                json.decode(decoded) as Map<String, dynamic>;
+            json.decode(decoded) as Map<String, dynamic>;
             currentUserName.value =
                 map['name']?.toString() ??
-                map['fullName']?.toString() ??
-                response.currentUserName;
+                    map['fullName']?.toString() ??
+                    response.currentUserName;
             currentUserAvatarUrl.value =
                 map['avatarUrl']?.toString() ?? response.currentUserAvatarUrl;
           }
@@ -332,10 +423,10 @@ class MessagesController extends GetxController {
   }
 
   List<MessageThreadModel> _mergePreservedThreadState(
-    List<MessageThreadModel> refreshedThreads,
-  ) {
+      List<MessageThreadModel> refreshedThreads,
+      ) {
     final Map<String, MessageThreadModel> preservedMap =
-        <String, MessageThreadModel>{};
+    <String, MessageThreadModel>{};
 
     for (final MessageThreadModel thread in threads) {
       if (thread.id.isNotEmpty) {
@@ -350,9 +441,9 @@ class MessagesController extends GetxController {
     for (final MessageThreadModel refreshed in refreshedThreads) {
       final MessageThreadModel? preserved =
           preservedMap[refreshed.id] ??
-          (refreshed.contactId != null
-              ? preservedMap[refreshed.contactId!]
-              : null);
+              (refreshed.contactId != null
+                  ? preservedMap[refreshed.contactId!]
+                  : null);
       if (preserved != null) {
         merged.add(
           refreshed.copyWith(
@@ -383,16 +474,16 @@ class MessagesController extends GetxController {
       final List<dynamic>? items = resp['items'] is List<dynamic>
           ? resp['items'] as List<dynamic>
           : (resp['data'] is List<dynamic>
-                ? resp['data'] as List<dynamic>
-                : null);
+          ? resp['data'] as List<dynamic>
+          : null);
 
       if (items != null) {
         final List<Map<String, dynamic>> parsed = items
             .map<Map<String, dynamic>>(
               (dynamic e) => e is Map<String, dynamic>
-                  ? Map<String, dynamic>.from(e)
-                  : <String, dynamic>{},
-            )
+              ? Map<String, dynamic>.from(e)
+              : <String, dynamic>{},
+        )
             .toList(growable: false);
         searchResults.assignAll(parsed);
       } else {
@@ -406,62 +497,134 @@ class MessagesController extends GetxController {
   }
 
   /// Start or get a direct conversation with a user result and open the chat view.
-  Future<void> startDirectConversation(Map<String, dynamic> user) async {
-    final String otherUserId = (user['id'] ?? user['userId'])?.toString() ?? '';
-    if (otherUserId.isEmpty) return;
+  Future<void> startDirectConversation(
+      Map<String, dynamic> user,
+      ) async {
+    final String otherUserId =
+        (user['id'] ?? user['userId'])
+            ?.toString()
+            .trim() ??
+            '';
 
-    String? conversationId;
+    if (otherUserId.isEmpty ||
+        openingUserId.value.isNotEmpty) {
+      return;
+    }
+
+    openingUserId.value = otherUserId;
+
     try {
-      conversationId = await _messagesMockService.createDirectConversation(
-        otherUserId: otherUserId,
-      );
-    } catch (_) {}
+      String? conversationId;
 
-    final MessageThreadModel thread = MessageThreadModel(
-      id: conversationId ?? otherUserId,
-      learnerName:
-          user['fullName']?.toString() ?? user['name']?.toString() ?? 'user'.tr,
-      lastMessage: '',
-      timeLabel: '',
-      unreadCount: 0,
-      isOnline: user['isOnline'] as bool? ?? false,
-      blockStatus: user['blockStatus']?.toString() ?? 'none',
-      isHighlighted: false,
-      isDelivered: true,
-      avatarUrl: user['avatarUrl']?.toString() ?? '',
-      contactId: otherUserId,
-    );
-
-    // Ensure we have a thread entry for navigation and quick access.
-    threads.removeWhere(
-      (t) => t.id == thread.id || t.contactId == thread.contactId,
-    );
-    threads.insert(0, thread);
-
-    // clear search state
-    searchQuery.value = '';
-    searchResults.clear();
-
-    // navigate to chat
-    Get.to<void>(
-      () => const MessageChatView(),
-      binding: BindingsBuilder(() {
-        Get.put<MessageChatController>(
-          MessageChatController(
-            thread: thread,
-            messagesMockService: _messagesMockService,
-          ),
+      try {
+        conversationId =
+        await _messagesMockService
+            .createDirectConversation(
+          otherUserId: otherUserId,
         );
-      }),
-      transition: Transition.rightToLeft,
-    );
+      } catch (_) {
+        conversationId = null;
+      }
+
+      /*
+     * Reuse the existing thread when this user
+     * already has a conversation. This preserves
+     * the last message, unread state and preview.
+     */
+      final int existingIndex =
+      threads.indexWhere(
+            (MessageThreadModel thread) {
+          final bool matchesUser =
+              thread.contactId == otherUserId;
+
+          final bool matchesConversation =
+              conversationId != null &&
+                  conversationId.isNotEmpty &&
+                  thread.id == conversationId;
+
+          return matchesUser ||
+              matchesConversation;
+        },
+      );
+
+      final MessageThreadModel thread;
+
+      if (existingIndex >= 0) {
+        thread = threads[existingIndex];
+
+        threads.removeAt(existingIndex);
+        threads.insert(0, thread);
+      } else {
+        thread = MessageThreadModel(
+          id: conversationId != null &&
+              conversationId.isNotEmpty
+              ? conversationId
+              : otherUserId,
+          learnerName:
+          user['fullName']?.toString() ??
+              user['name']?.toString() ??
+              'user'.tr,
+          lastMessage: '',
+          timeLabel: '',
+          unreadCount: 0,
+          isOnline:
+          user['isOnline'] as bool? ??
+              false,
+          blockStatus:
+          user['blockStatus']
+              ?.toString() ??
+              'none',
+          isHighlighted: false,
+          isDelivered: true,
+          avatarUrl:
+          user['avatarUrl']?.toString() ??
+              '',
+          contactId: otherUserId,
+        );
+
+        threads.removeWhere(
+              (MessageThreadModel item) =>
+          item.id == thread.id ||
+              item.contactId ==
+                  thread.contactId,
+        );
+
+        threads.insert(0, thread);
+      }
+
+      threads.refresh();
+
+      searchQuery.value = '';
+      searchResults.clear();
+
+      unawaited(
+        Get.to<void>(
+              () => const MessageChatView(),
+          binding: BindingsBuilder(() {
+            Get.put<MessageChatController>(
+              MessageChatController(
+                thread: thread,
+                messagesMockService:
+                _messagesMockService,
+              ),
+            );
+          }),
+          transition: Transition.rightToLeft,
+        ),
+      );
+    } finally {
+      if (openingUserId.value ==
+          otherUserId) {
+        openingUserId.value = '';
+      }
+    }
   }
 
   void openChat(MessageThreadModel thread) {
     // Clear unread/highlight when opening the chat so the UI updates instantly
     try {
       final int idx = threads.indexWhere(
-        (t) => t.id == thread.id || t.contactId == thread.contactId,
+            (t) => t.id == thread.id || t.contactId == thread.contactId,
       );
       if (idx >= 0) {
         final MessageThreadModel old = threads[idx];
@@ -475,7 +638,7 @@ class MessagesController extends GetxController {
     } catch (_) {}
 
     Get.to<void>(
-      () => const MessageChatView(),
+          () => const MessageChatView(),
       binding: BindingsBuilder(() {
         Get.put<MessageChatController>(
           MessageChatController(
@@ -491,28 +654,46 @@ class MessagesController extends GetxController {
   void _handleConversationUnread(Map<String, dynamic> data) {
     try {
       final String conversationId = data['conversationId']?.toString() ?? '';
-      if (conversationId.isEmpty) return;
+      if (conversationId.isEmpty) {
+        return;
+      }
+
       final int unreadCount = data['unreadCount'] is int
           ? data['unreadCount'] as int
           : int.tryParse(data['unreadCount']?.toString() ?? '') ?? 0;
       final bool isHighlighted = data['isHighlighted'] is bool
           ? data['isHighlighted'] as bool
-          : (unreadCount > 0);
+          : unreadCount > 0;
+
+      final bool isConversationOpen = _isConversationCurrentlyOpen(
+        conversationId: conversationId,
+      );
 
       final int idx = threads.indexWhere(
-        (t) =>
-            t.id == conversationId ||
-            (t.contactId != null && t.contactId == conversationId),
+            (MessageThreadModel thread) =>
+        thread.id == conversationId ||
+            thread.contactId == conversationId,
       );
-      if (idx >= 0) {
-        final MessageThreadModel old = threads[idx];
-        final MessageThreadModel updated = old.copyWith(
-          unreadCount: unreadCount,
-          isHighlighted: isHighlighted,
+      if (idx < 0) {
+        return;
+      }
+
+      final MessageThreadModel old = threads[idx];
+      final MessageThreadModel updated = old.copyWith(
+        unreadCount: isConversationOpen ? 0 : unreadCount,
+        isHighlighted: isConversationOpen ? false : isHighlighted,
+      );
+
+      threads.removeAt(idx);
+      threads.insert(0, updated);
+      threads.refresh();
+
+      if (isConversationOpen) {
+        unawaited(
+          _messagesMockService
+              .markConversationRead(conversationId)
+              .then<void>((_) {}),
         );
-        threads.removeAt(idx);
-        threads.insert(0, updated);
-        threads.refresh();
       }
     } catch (_) {}
   }
@@ -524,8 +705,8 @@ class MessagesController extends GetxController {
       if (conversationId.isEmpty) return;
 
       final int idx = threads.indexWhere(
-        (t) =>
-            t.id == conversationId ||
+            (t) =>
+        t.id == conversationId ||
             (t.contactId != null && t.contactId == conversationId),
       );
       if (idx >= 0) {
@@ -546,22 +727,38 @@ class MessagesController extends GetxController {
     bool isMine = false,
   }) {
     final int idx = threads.indexWhere(
-      (MessageThreadModel t) =>
-          t.id == threadId || (t.contactId != null && t.contactId == threadId),
+          (MessageThreadModel thread) =>
+      thread.id == threadId || thread.contactId == threadId,
     );
-    if (idx < 0) return;
+    if (idx < 0) {
+      return;
+    }
+
+    final bool isConversationOpen = _isConversationCurrentlyOpen(
+      conversationId: threadId,
+    );
+    final bool shouldMarkUnread = !isMine && !isConversationOpen;
+
     final MessageThreadModel old = threads[idx];
-    // If the message is from the current user, clear unread/highlight.
-    // For incoming messages we preserve the existing unread count.
     final MessageThreadModel updated = old.copyWith(
       lastMessage: lastMessage,
       timeLabel: _formatTimeLabel(isoTime),
       isDelivered: isMine ? true : old.isDelivered,
-      unreadCount: isMine ? 0 : old.unreadCount,
-      isHighlighted: isMine ? false : true,
+      unreadCount: shouldMarkUnread ? old.unreadCount : 0,
+      isHighlighted: shouldMarkUnread,
     );
+
     threads.removeAt(idx);
     threads.insert(0, updated);
+    threads.refresh();
+
+    if (isConversationOpen) {
+      unawaited(
+        _messagesMockService
+            .markConversationRead(threadId)
+            .then<void>((_) {}),
+      );
+    }
   }
 
   String _formatTimeLabel(String? iso) {

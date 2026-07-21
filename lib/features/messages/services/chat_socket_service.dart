@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
+import '../../../core/services/notification_deep_link_service.dart';
 import '../../../core/services/token_service.dart';
 
 class ChatSocketService {
@@ -390,6 +391,32 @@ class ChatSocketService {
           } catch (_) {}
         }
       }
+    });
+
+
+    _socket?.on('account_banned', (dynamic data) {
+      final Map<String, dynamic> payload = data is Map
+          ? Map<String, dynamic>.from(data)
+          : <String, dynamic>{};
+
+      final Uri deepLink = Uri(
+        scheme: 'italirpothe',
+        host: 'account-suspended',
+        queryParameters: <String, String>{
+          'reason':
+          payload['reason']?.toString().trim() ?? '',
+          'effectiveAt':
+          payload['effectiveAt']?.toString().trim() ?? '',
+          'caseNumber':
+          payload['caseNumber']?.toString().trim() ?? '',
+        },
+      );
+
+      unawaited(
+        NotificationDeepLinkService.openAccountRestriction(
+          deepLink.toString(),
+        ),
+      );
     });
 
     _socket?.on('call:incoming', (dynamic data) {

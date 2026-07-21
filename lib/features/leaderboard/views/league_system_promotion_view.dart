@@ -217,7 +217,6 @@ class _LeagueTrackCard extends StatelessWidget {
               final bool isActive = key == currentLeagueKey;
 
               Color? bgColor;
-              Color? textColor;
               Color? borderColor;
 
               if (key == 'silver') bgColor = const Color(0xFFA9D1FF);

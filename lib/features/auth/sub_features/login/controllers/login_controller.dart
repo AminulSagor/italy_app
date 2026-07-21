@@ -44,11 +44,14 @@ class LoginController extends GetxController {
     _syncSelectedLanguageWithLocale();
   }
 
-  void setLanguage(String value) {
-    _translationService.setLanguageLabel(value);
+  Future<void> setLanguage(String value) async {
+    final Future<void> saveFuture = _translationService.setLanguageLabel(value);
+
     form.value = form.value.copyWith(
       selectedLanguage: _translationService.selectedLabel.value,
     );
+
+    await saveFuture;
   }
 
   void setLoginMode(String value) {
@@ -192,7 +195,8 @@ class LoginController extends GetxController {
       return;
     }
 
-    final SignupController signupController = Get.isRegistered<SignupController>()
+    final SignupController signupController =
+        Get.isRegistered<SignupController>()
         ? Get.find<SignupController>()
         : Get.put<SignupController>(SignupController());
 

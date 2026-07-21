@@ -193,7 +193,7 @@ class CallkitIncomingService {
     final String callerName =
         data['callerName']?.toString().trim().isNotEmpty == true
         ? data['callerName'].toString().trim()
-        : 'incoming_call'.tr;
+        : 'incoming_call';
     final String callType = data['callType']?.toString() ?? 'audio';
 
     final CallKitParams params = CallKitParams(
@@ -206,12 +206,18 @@ class CallkitIncomingService {
       duration: 60000,
       isAccepted: false,
       extra: data,
+
       missedCallNotification: NotificationParams(
         showNotification: true,
         isShowCallback: false,
-        subtitle: 'missed_call'.tr,
-        callbackText: 'call_back'.tr,
+        subtitle: 'Missed call',
+        callbackText: 'Call back',
       ),
+
+      callingNotification: const NotificationParams(
+        showNotification: false,
+      ),
+
       android: AndroidParams(
         isCustomNotification: true,
         isShowLogo: false,
@@ -219,8 +225,8 @@ class CallkitIncomingService {
         backgroundColor: '#0955FA',
         actionColor: '#4CAF50',
         textColor: '#FFFFFF',
-        textAccept: 'gen_answer'.tr,
-        textDecline: 'gen_decline'.tr,
+        textAccept: 'Answer',
+        textDecline: 'Decline',
         incomingCallNotificationChannelName: 'incoming_call'.tr,
         missedCallNotificationChannelName: 'missed_call'.tr,
         isShowCallID: false,
@@ -228,6 +234,7 @@ class CallkitIncomingService {
         isImportant: true,
         isFullScreen: showFullScreen,
       ),
+
       ios: IOSParams(
         iconName: 'CallKitLogo',
         handleType: 'generic',
@@ -239,7 +246,6 @@ class CallkitIncomingService {
         ringtonePath: 'system_ringtone_default',
       ),
     );
-
     try {
       await FlutterCallkitIncoming.showCallkitIncoming(params);
     } catch (_) {

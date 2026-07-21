@@ -11,7 +11,8 @@ class ForgotPasswordFormModel {
   final String identifier;
   final bool isSubmitting;
 
-  bool get isEmailMode => selectedResetMode == 'email';
+  bool get isEmailMode =>
+      selectedResetMode == 'email';
 
   ForgotPasswordFormModel copyWith({
     String? selectedLanguage,
@@ -20,10 +21,16 @@ class ForgotPasswordFormModel {
     bool? isSubmitting,
   }) {
     return ForgotPasswordFormModel(
-      selectedLanguage: selectedLanguage ?? this.selectedLanguage,
-      selectedResetMode: selectedResetMode ?? this.selectedResetMode,
-      identifier: identifier ?? this.identifier,
-      isSubmitting: isSubmitting ?? this.isSubmitting,
+      selectedLanguage:
+      selectedLanguage ??
+          this.selectedLanguage,
+      selectedResetMode:
+      selectedResetMode ??
+          this.selectedResetMode,
+      identifier:
+      identifier ?? this.identifier,
+      isSubmitting:
+      isSubmitting ?? this.isSubmitting,
     );
   }
 
@@ -40,44 +47,80 @@ class ForgotPasswordFormModel {
 class ForgotPasswordOtpUiModel {
   const ForgotPasswordOtpUiModel({
     required this.maskedIdentifier,
-    required this.requestToken,
+    required this.identifier,
     required this.codeDigits,
     required this.isResending,
     required this.isVerifying,
   });
 
+  /*
+   * Used only for displaying the destination.
+   *
+   * Example:
+   * am***@gmail.com
+   */
   final String maskedIdentifier;
-  final String requestToken;
+
+  /*
+   * Real normalized email address or phone number.
+   *
+   * This is sent to:
+   * POST /auth/verify-reset-otp
+   */
+  final String identifier;
+
   final List<String> codeDigits;
   final bool isResending;
   final bool isVerifying;
 
-  bool get isCodeComplete =>
-      codeDigits.every((String digit) => digit.trim().isNotEmpty);
+  bool get isCodeComplete {
+    return codeDigits.length == 4 &&
+        codeDigits.every(
+              (String digit) =>
+              RegExp(r'^\d$').hasMatch(
+                digit.trim(),
+              ),
+        );
+  }
 
-  String get code => codeDigits.join();
+  String get code =>
+      codeDigits.join().trim();
 
   ForgotPasswordOtpUiModel copyWith({
     String? maskedIdentifier,
-    String? requestToken,
+    String? identifier,
     List<String>? codeDigits,
     bool? isResending,
     bool? isVerifying,
   }) {
     return ForgotPasswordOtpUiModel(
-      maskedIdentifier: maskedIdentifier ?? this.maskedIdentifier,
-      requestToken: requestToken ?? this.requestToken,
-      codeDigits: codeDigits ?? this.codeDigits,
-      isResending: isResending ?? this.isResending,
-      isVerifying: isVerifying ?? this.isVerifying,
+      maskedIdentifier:
+      maskedIdentifier ??
+          this.maskedIdentifier,
+      identifier:
+      identifier ?? this.identifier,
+      codeDigits:
+      codeDigits ??
+          this.codeDigits,
+      isResending:
+      isResending ??
+          this.isResending,
+      isVerifying:
+      isVerifying ??
+          this.isVerifying,
     );
   }
 
   factory ForgotPasswordOtpUiModel.initial() {
     return const ForgotPasswordOtpUiModel(
       maskedIdentifier: '',
-      requestToken: '',
-      codeDigits: <String>['', '', '', ''],
+      identifier: '',
+      codeDigits: <String>[
+        '',
+        '',
+        '',
+        '',
+      ],
       isResending: false,
       isVerifying: false,
     );
@@ -99,18 +142,67 @@ class ResetPasswordFormModel {
   final bool obscureConfirmPassword;
   final bool isSubmitting;
 
-  bool get hasMinLength => newPassword.trim().length >= 8;
+  String get normalizedNewPassword =>
+      newPassword.trim();
 
-  bool get hasUppercaseAndNumber {
-    final String value = newPassword.trim();
-    final bool hasUppercase = RegExp(r'[A-Z]').hasMatch(value);
-    final bool hasNumber = RegExp(r'\d').hasMatch(value);
-    return hasUppercase && hasNumber;
+  bool get hasMinLength =>
+      normalizedNewPassword.length >= 8;
+
+  bool get hasUppercase {
+    return RegExp(
+      r'[A-Z]',
+    ).hasMatch(normalizedNewPassword);
   }
 
-  bool get matchesConfirm =>
-      confirmPassword.trim().isNotEmpty &&
-      newPassword.trim() == confirmPassword.trim();
+  bool get hasNumber {
+    return RegExp(
+      r'\d',
+    ).hasMatch(normalizedNewPassword);
+  }
+
+  bool get hasSpecialCharacter {
+    return RegExp(
+      r'[@$!%*?&#]',
+    ).hasMatch(normalizedNewPassword);
+  }
+
+  /*
+   * This matches the backend strongPasswordRegex:
+   *
+   * A-Z
+   * a-z
+   * 0-9
+   * @ $ ! % * ? & #
+   */
+  bool get containsOnlyAllowedCharacters {
+    return RegExp(
+      r'^[A-Za-z\d@$!%*?&#]+$',
+    ).hasMatch(normalizedNewPassword);
+  }
+
+  /*
+   * Kept so existing controller/UI code continues
+   * working without losing functionality.
+   */
+  bool get hasUppercaseAndNumber =>
+      hasUppercase && hasNumber;
+
+  bool get isStrongPassword {
+    return hasMinLength &&
+        hasUppercase &&
+        hasNumber &&
+        hasSpecialCharacter &&
+        containsOnlyAllowedCharacters;
+  }
+
+  bool get matchesConfirm {
+    final String normalizedConfirmPassword =
+    confirmPassword.trim();
+
+    return normalizedConfirmPassword.isNotEmpty &&
+        normalizedNewPassword ==
+            normalizedConfirmPassword;
+  }
 
   ResetPasswordFormModel copyWith({
     String? newPassword,
@@ -120,12 +212,20 @@ class ResetPasswordFormModel {
     bool? isSubmitting,
   }) {
     return ResetPasswordFormModel(
-      newPassword: newPassword ?? this.newPassword,
-      confirmPassword: confirmPassword ?? this.confirmPassword,
-      obscureNewPassword: obscureNewPassword ?? this.obscureNewPassword,
+      newPassword:
+      newPassword ?? this.newPassword,
+      confirmPassword:
+      confirmPassword ??
+          this.confirmPassword,
+      obscureNewPassword:
+      obscureNewPassword ??
+          this.obscureNewPassword,
       obscureConfirmPassword:
-          obscureConfirmPassword ?? this.obscureConfirmPassword,
-      isSubmitting: isSubmitting ?? this.isSubmitting,
+      obscureConfirmPassword ??
+          this.obscureConfirmPassword,
+      isSubmitting:
+      isSubmitting ??
+          this.isSubmitting,
     );
   }
 
@@ -150,49 +250,61 @@ class ForgotPasswordRequestPayloadModel {
   final String channel;
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{'identifier': identifier, 'channel': channel};
+    return <String, dynamic>{
+      'identifier':
+      _normalizeIdentifier(identifier),
+      'channel': channel,
+    };
   }
 }
 
 class ForgotPasswordRequestUiModel {
   const ForgotPasswordRequestUiModel({
     required this.maskedIdentifier,
-    required this.requestToken,
+    required this.identifier,
     required this.message,
     this.devOtp,
   });
 
   final String maskedIdentifier;
-  final String requestToken;
+
+  /*
+   * The real normalized email address or phone number.
+   *
+   * This replaces the old fake requestToken value.
+   */
+  final String identifier;
+
   final String message;
   final String? devOtp;
 
-  factory ForgotPasswordRequestUiModel.fromJson(Map<String, dynamic> json) {
+  factory ForgotPasswordRequestUiModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return ForgotPasswordRequestUiModel(
-      maskedIdentifier: (json['maskedIdentifier'] ?? '').toString(),
-      requestToken: (json['requestToken'] ?? '').toString(),
-      message: (json['message'] ?? 'Reset code sent successfully.').toString(),
-      devOtp: json['devOtp']?.toString(),
+      maskedIdentifier:
+      (json['maskedIdentifier'] ?? '')
+          .toString()
+          .trim(),
+      identifier:
+      _normalizeIdentifier(
+        (json['identifier'] ?? '')
+            .toString(),
+      ),
+      message:
+      (json['message'] ??
+          'Reset code sent successfully.')
+          .toString()
+          .trim(),
+      devOtp: _optionalString(
+        json['devOtp'],
+      ),
     );
   }
 }
 
 class ForgotPasswordVerifyOtpPayloadModel {
   const ForgotPasswordVerifyOtpPayloadModel({
-    required this.requestToken,
-    required this.code,
-  });
-
-  final String requestToken;
-  final String code;
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{'requestToken': requestToken, 'code': code};
-  }
-}
-
-class ForgotPasswordVerifyOtpUiModel {
-  const ForgotPasswordVerifyOtpUiModel({
     required this.identifier,
     required this.otp,
   });
@@ -200,44 +312,135 @@ class ForgotPasswordVerifyOtpUiModel {
   final String identifier;
   final String otp;
 
-  factory ForgotPasswordVerifyOtpUiModel.fromJson(Map<String, dynamic> json) {
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'identifier':
+      _normalizeIdentifier(identifier),
+      'otp': otp.trim(),
+    };
+  }
+}
+
+class ForgotPasswordVerifyOtpUiModel {
+  const ForgotPasswordVerifyOtpUiModel({
+    required this.resetToken,
+    required this.expiresInSeconds,
+  });
+
+  /*
+   * One-time token returned by:
+   *
+   * POST /auth/verify-reset-otp
+   *
+   * The OTP itself is no longer stored for the
+   * final password-reset request.
+   */
+  final String resetToken;
+  final int expiresInSeconds;
+
+  bool get isValid {
+    return resetToken.trim().isNotEmpty &&
+        expiresInSeconds > 0;
+  }
+
+  factory ForgotPasswordVerifyOtpUiModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return ForgotPasswordVerifyOtpUiModel(
-      identifier: (json['identifier'] ?? '').toString(),
-      otp: (json['otp'] ?? '').toString(),
+      resetToken:
+      (json['resetToken'] ?? '')
+          .toString()
+          .trim()
+          .toLowerCase(),
+      expiresInSeconds:
+      _toInt(
+        json['expiresInSeconds'],
+      ),
     );
   }
 }
 
 class ForgotPasswordResetPayloadModel {
   const ForgotPasswordResetPayloadModel({
-    required this.identifier,
-    required this.otp,
+    required this.resetToken,
     required this.newPassword,
   });
 
-  final String identifier;
-  final String otp;
+  final String resetToken;
   final String newPassword;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'identifier': identifier.trim().contains('@')
-          ? identifier.trim().toLowerCase()
-          : identifier.trim(),
-      'otp': otp.trim(),
-      'newPassword': newPassword,
+      'resetToken':
+      resetToken
+          .trim()
+          .toLowerCase(),
+      'newPassword':
+      newPassword.trim(),
     };
   }
 }
 
 class ForgotPasswordResetUiModel {
-  const ForgotPasswordResetUiModel({required this.successMessage});
+  const ForgotPasswordResetUiModel({
+    required this.successMessage,
+  });
 
   final String successMessage;
 
-  factory ForgotPasswordResetUiModel.fromJson(Map<String, dynamic> json) {
+  factory ForgotPasswordResetUiModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return ForgotPasswordResetUiModel(
-      successMessage: (json['successMessage'] ?? json['message'] ?? '').toString(),
+      successMessage:
+      (json['successMessage'] ??
+          json['message'] ??
+          'Password has been successfully updated.')
+          .toString()
+          .trim(),
     );
   }
+}
+
+String _normalizeIdentifier(
+    String identifier,
+    ) {
+  final String normalized =
+  identifier.trim();
+
+  return normalized.contains('@')
+      ? normalized.toLowerCase()
+      : normalized;
+}
+
+String? _optionalString(
+    dynamic value,
+    ) {
+  if (value == null) {
+    return null;
+  }
+
+  final String normalized =
+  value.toString().trim();
+
+  return normalized.isEmpty
+      ? null
+      : normalized;
+}
+
+int _toInt(
+    dynamic value,
+    ) {
+  if (value is int) {
+    return value;
+  }
+
+  if (value is num) {
+    return value.toInt();
+  }
+
+  return int.tryParse(
+    value?.toString() ?? '',
+  ) ??
+      0;
 }

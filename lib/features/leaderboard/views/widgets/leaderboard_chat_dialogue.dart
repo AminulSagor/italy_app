@@ -86,7 +86,9 @@ class LeaderboardChatDialog extends StatelessWidget {
                         bgColor: const Color(0xFFFFE9D2),
                         icon: Icons.local_fire_department_rounded,
                         iconColor: const Color(0xFFE9511B),
-                        text: '$streakDays Day Streak',
+                        text: 'day_streak_value'.trParams(<String, String>{
+                          'count': streakDays.toString(),
+                        }),
                         textColor: const Color(0xFFC94D1F),
                       ),
                       SizedBox(width: 10.w),

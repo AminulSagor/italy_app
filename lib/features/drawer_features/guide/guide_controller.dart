@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../routes/routes.dart';
 import 'models/guide_faq_item.dart';
@@ -366,20 +368,76 @@ class GuideController extends GetxController {
     Get.toNamed(AppRoutes.guideFaq, arguments: id);
   }
 
-  void joinFacebookCommunity() {
-    Get.snackbar(
-      'facebook_community'.tr,
-      'Community link will open here.',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+  Future<void> joinFacebookCommunity() async {
+    final String communityUrl =
+    (dotenv.env['FACEBOOK_COMMUNITY_URL'] ?? '').trim();
+
+    final Uri? uri = Uri.tryParse(communityUrl);
+
+    if (uri == null ||
+        !uri.hasScheme ||
+        communityUrl.isEmpty) {
+      Get.snackbar(
+        'facebook_community'.tr,
+        'Facebook community link is unavailable.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    try {
+      final bool opened = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!opened) {
+        Get.snackbar(
+          'facebook_community'.tr,
+          'Could not open the Facebook community.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (_) {
+      Get.snackbar(
+        'facebook_community'.tr,
+        'Could not open the Facebook community.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
-  void chatWithSupport() {
-    Get.snackbar(
-      'support'.tr,
-      'Support chat will open here.',
-      snackPosition: SnackPosition.BOTTOM,
+  Future<void> chatWithSupport() async {
+    const String phoneNumber = '393510066920';
+
+    final Uri whatsappUri = Uri.https(
+      'wa.me',
+      '/$phoneNumber',
+      <String, String>{
+        'text': 'Hello, I need support with Italir Pothe.',
+      },
     );
+
+    try {
+      final bool opened = await launchUrl(
+        whatsappUri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!opened) {
+        Get.snackbar(
+          'support'.tr,
+          'Could not open WhatsApp support.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (_) {
+      Get.snackbar(
+        'support'.tr,
+        'Could not open WhatsApp support.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   void onGuideTap() {

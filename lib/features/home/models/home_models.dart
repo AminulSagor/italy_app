@@ -75,9 +75,17 @@ class HomeDashboardModel {
       webinar: webinar == null ? null : HomeWebinarModel.fromJson(webinar),
       clearWebinar: webinar == null,
       streak: HomeInfoCardModel(
-        eyebrow: 'DAY STREAK',
-        title: '$streakDays ${streakDays == 1 ? 'Day' : 'Days'}',
-        body: streakDays > 0 ? 'Keep learning today!' : 'Start learning today!',
+        eyebrow: 'day_streak'.tr,
+        title: streakDays == 1
+            ? 'home_one_day'.tr
+            : 'home_days_count'.trParams(
+          <String, String>{
+            'count': streakDays.toString(),
+          },
+        ),
+        body: streakDays > 0
+            ? 'home_keep_learning_today'.tr
+            : 'start_learning_today'.tr,
         actionLabel: '',
       ),
       dailyChallenges: HomeDailyChallengesModel.fromJson(
@@ -86,7 +94,7 @@ class HomeDashboardModel {
     );
   }
 
-  static HomeDashboardModel initial = HomeDashboardModel(
+  static HomeDashboardModel get initial => HomeDashboardModel(
     overview: HomeOverviewModel(totalSeconds: 0, days: <HomeActivityModel>[]),
     currentChapter: null,
     quickTools: <HomeToolModel>[
@@ -148,12 +156,7 @@ class HomeOverviewModel {
   }
 
   String get totalTimeLabel {
-    final int hours = totalSeconds ~/ 3600;
-    final int minutes = (totalSeconds % 3600) ~/ 60;
-    if (hours > 0 && minutes > 0) return '${hours}h ${minutes}m';
-    if (hours > 0) return '${hours}h';
-    if (minutes > 0) return '${minutes}m';
-    return '${totalSeconds}s';
+    return _durationLabel(totalSeconds);
   }
 }
 
@@ -177,19 +180,17 @@ class HomeActivityModel {
     final String date = _stringValue(json['date']);
     return HomeActivityModel(
       date: date,
-      dayLabel: _stringValue(json['dayLabel']),
+      dayLabel: _localizedWeekdayLabel(
+        date,
+        fallback: _stringValue(json['dayLabel']),
+      ),
       durationSeconds: _intValue(json['durationSeconds']),
       isToday: date == today,
     );
   }
 
   String get durationLabel {
-    if (durationSeconds <= 0) return '0s';
-    final int hours = durationSeconds ~/ 3600;
-    final int minutes = (durationSeconds % 3600) ~/ 60;
-    if (hours > 0) return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
-    if (minutes > 0) return '${minutes}m';
-    return '${durationSeconds}s';
+    return _durationLabel(durationSeconds);
   }
 }
 
@@ -264,16 +265,29 @@ class HomeWorkItemModel {
   final int sentenceCount;
   final int learnedSentenceCount;
 
-  factory HomeWorkItemModel.fromJson(Map<String, dynamic> json) {
+  factory HomeWorkItemModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return HomeWorkItemModel(
       id: _stringValue(json['id']),
-      title: _stringValue(json['title']),
-      subtitle: _stringValue(json['subtitleBn']),
+      title: _localizedJsonValue(
+        json,
+        key: 'title',
+      ),
+      subtitle: _localizedJsonValue(
+        json,
+        key: 'subtitle',
+        fallbackKey: 'title',
+      ),
       iconKey: _stringValue(json['iconKey']),
       cardColor: _stringValue(json['cardColor']),
       moduleCount: _intValue(json['moduleCount']),
-      sentenceCount: _intValue(json['sentenceCount']),
-      learnedSentenceCount: _intValue(json['learnedSentenceCount']),
+      sentenceCount: _intValue(
+        json['sentenceCount'],
+      ),
+      learnedSentenceCount: _intValue(
+        json['learnedSentenceCount'],
+      ),
     );
   }
 }
@@ -337,7 +351,7 @@ class HomeDailyChallengesModel {
 
   factory HomeDailyChallengesModel.fromJson(Map<String, dynamic> json) {
     return HomeDailyChallengesModel(
-      label: 'DAILY CHALLENGES',
+      label: 'gen_daily_challenges_1'.tr,
       completed: _intValue(json['completed']),
       total: _intValue(json['total']),
     );
@@ -382,26 +396,140 @@ double _doubleValue(dynamic value) {
 }
 
 String _formatDateTime(DateTime value) {
-  const List<String> months = <String>[
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
+  final String languageCode =
+      Get.locale?.languageCode.toLowerCase() ??
+          'en';
+
+  final String month =
+      'home_month_${value.month}'.tr;
+
+  final String minute =
+  value.minute.toString().padLeft(2, '0');
+
+  if (languageCode == 'it' ||
+      languageCode == 'bn') {
+    final String hour =
+    value.hour.toString().padLeft(2, '0');
+
+    return '${value.day} $month, $hour:$minute';
+  }
+
   final int hour = value.hour == 0
       ? 12
       : value.hour > 12
       ? value.hour - 12
       : value.hour;
-  final String minute = value.minute.toString().padLeft(2, '0');
-  final String period = value.hour >= 12 ? 'PM' : 'AM';
-  return '${months[value.month - 1]} ${value.day}, $hour:$minute $period';
+
+  final String period = value.hour >= 12
+      ? 'home_time_pm'.tr
+      : 'home_time_am'.tr;
+
+  return '$month ${value.day}, '
+      '$hour:$minute $period';
+}
+
+String _durationLabel(int totalSeconds) {
+  if (totalSeconds <= 0) {
+    return '0${'home_second_short'.tr}';
+  }
+
+  final int hours = totalSeconds ~/ 3600;
+  final int minutes =
+      (totalSeconds % 3600) ~/ 60;
+  final int seconds = totalSeconds % 60;
+
+  if (hours > 0 && minutes > 0) {
+    return '$hours${'home_hour_short'.tr} '
+        '$minutes${'home_minute_short'.tr}';
+  }
+
+  if (hours > 0) {
+    return '$hours${'home_hour_short'.tr}';
+  }
+
+  if (minutes > 0) {
+    return '$minutes${'home_minute_short'.tr}';
+  }
+
+  return '$seconds${'home_second_short'.tr}';
+}
+
+String _localizedWeekdayLabel(
+    String date, {
+      required String fallback,
+    }) {
+  final DateTime? parsedDate =
+  DateTime.tryParse(date);
+
+  if (parsedDate == null) {
+    return fallback;
+  }
+
+  const List<String> weekdayKeys =
+  <String>[
+    'home_weekday_monday',
+    'home_weekday_tuesday',
+    'home_weekday_wednesday',
+    'home_weekday_thursday',
+    'home_weekday_friday',
+    'home_weekday_saturday',
+    'home_weekday_sunday',
+  ];
+
+  return weekdayKeys[
+  parsedDate.weekday - 1]
+      .tr;
+}
+
+String _localizedJsonValue(
+    Map<String, dynamic> json, {
+      required String key,
+      String? fallbackKey,
+    }) {
+  final String languageCode =
+      Get.locale?.languageCode.toLowerCase() ??
+          'en';
+
+  final List<dynamic> candidates =
+  <dynamic>[];
+
+  if (languageCode == 'bn') {
+    candidates.add(json['${key}Bn']);
+  } else if (languageCode == 'it') {
+    candidates.add(json['${key}It']);
+  } else {
+    candidates.add(json['${key}En']);
+  }
+
+  candidates.add(json[key]);
+
+  if (fallbackKey != null) {
+    if (languageCode == 'bn') {
+      candidates.add(
+        json['${fallbackKey}Bn'],
+      );
+    } else if (languageCode == 'it') {
+      candidates.add(
+        json['${fallbackKey}It'],
+      );
+    } else {
+      candidates.add(
+        json['${fallbackKey}En'],
+      );
+    }
+
+    candidates.add(json[fallbackKey]);
+  }
+
+  for (final dynamic candidate
+  in candidates) {
+    final String value =
+    _stringValue(candidate);
+
+    if (value.isNotEmpty) {
+      return value;
+    }
+  }
+
+  return '';
 }

@@ -3,10 +3,313 @@
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
+    'guided_learning_level_selection':
+    'Guided Learning Level Selection',
+    'notification_filter_all': 'All',
+    'notification_filter_learning': 'Learning',
+    'notification_filter_system': 'System',
+    'no_notifications_found': 'No notifications found',
+
+    'offline_screen_title': 'Oops! You’re\nOffline.',
+    'offline_learning_message':
+    'Please check your internet connection to continue learning your favorite Italian phrases.',
+    'search_no_match_message':
+    'We couldn’t find what you were looking for. Try a different keyword.',
+
+    'italian_keyboard_accents_help':
+    'You’ll need Italian accents like à, è, and ì to answer writing questions correctly.',
+    'italian_keyboard_setup_help':
+    'Set up the Italian keyboard on your phone to answer correctly.',
+    'italian_accents_explanation':
+    'Accents change the meaning and pronunciation of words.',
+
+    'ai_level_test_description':
+    'Find your current level through only 10 questions.',
+    'ai_tutor_intro':
+    'I am your AI Tutor. Let’s practice Italian together.',
+    'ai_scenario_tip':
+    'The AI will play the role in that scenario, such as a cashier, waiter, or driver.',
+
+    'level_mastered': 'Level @level\nMastered',
+    'certificate_milestone_message':
+    'You’ve reached a new milestone',
+    'course_information_unavailable':
+    'Unable to load course information.',
+    'purchase_success_description':
+    'You now have full lifetime access to all Italir Pothe features. Your journey to fluency starts today.',
+
+    'coupon_applied': 'Coupon applied',
+    'discount_value': 'Discount: @discount%',
+    'remove_coupon': 'Remove coupon',
+    'store_price_notice':
+    'The final price is controlled by Google Play or the App Store and may include VAT, tax, currency conversion, or regional pricing.',
+
+    'support_contact_description':
+    'Choose the most convenient way to contact the Italir Pothe support team.',
+    'chat_on_whatsapp': 'Chat on WhatsApp',
+    'fastest_response_recommended':
+    'Recommended for the fastest response',
+    'facebook_community_description':
+    'Ask questions, share experiences, and connect with other learners.',
+    'support_response_time':
+    'We aim to respond to support inquiries within 24 hours.',
+
+    'reward_awarded_date': 'Awarded\n@date',
+    'voice_minutes_value': '@count Mins',
+    'text_tokens_value': '@count Tokens',
+    'ai_credit_usage_description':
+    'Voice for speaking, tokens for chatting.',
+
+    'course_search_hint': 'Search courses by name',
+    'sentences_completed':
+    '@learned/@total sentences completed',
+    'sentences_learned_progress':
+    '@learned of @total sentences learned',
+    'final_exam_unlocked_message':
+    'You’ve completed 80% of the lessons. The Final Exam is now unlocked!',
+
+    'leaderboard_xp_explanation':
+    'XP increases as you complete lessons, practice conversations, and master Italian vocabulary.',
+
+    'boost_duration_message':
+    'Lasts for @duration. Practice more!',
+
+    'report_received_description':
+    'Thank you for keeping our community safe. Our admin team will review your report shortly.',
+
+    'webinar_host_value': 'Host: @host',
+    'webinar_starts_at': 'Starts at @time',
+    'webinar_course_access_description':
+    'This session is available to users enrolled in any of these courses:',
+    'webinar_selected_course_only':
+    'For selected course only',
+
+    'home_greeting': 'Hi, @name',
+    'level_tutor': 'Level @level Tutor',
+    'level_topics': 'Level @level Topics',
+    'final_exam_attempt_not_found': 'Final exam attempt not found.',
+    'score_label': 'Score: @score',
+    'xp_label': 'XP: @xp',
+    'time_label': 'Time: @time',
+    'monthly_subscription': 'Monthly subscription',
+    'invalid_coupon': 'Invalid coupon',
+    'you_ve_been_promoted_to': 'You’ve been promoted to',
+    'league_name_value': '@leagueName League',
+    'you_re_in_the_top_20_of_learners':
+    'You’re in the top 20% of learners',
+    'playing_pronunciation_for': 'Playing pronunciation for @text',
+    'playing_text': 'Playing @text',
+    'exam_progress_requirement':
+    '@progress% completed · @required% required',
+    'daily_chest_total_xp': '@xp XP',
+    'daily_chest_streak_freezes_awarded': '@count awarded',
+    'daily_streak_message': 'Your streak is @days days',
+    'webinar_message_preview': '@sender: @message',
+    'no_internet_title': 'No internet connection',
+    'no_internet_message':
+    'Please check your Wi-Fi or mobile data connection and try again.',
+    'try_again': 'Try Again',
+    'checking_connection': 'Checking connection...',
+    'no_internet_connection':
+    'No internet connection',
+    'final_exam_not_ready_title': 'Not Quite Ready',
+    'final_exam_unlock_requirement':
+    'Complete at least 80% of the video lessons to unlock the Final Exam.',
+    'currently_watched_percent': 'Currently @progress% watched',
+    'unlock_at_percent': '@progress% to unlock',
+    // English
+    'final_exam_result_pending': 'Result Pending',
+    'final_exam_view_certificate': 'View Certificate',
+    'final_exam_retake': 'Retake Exam',
+    'final_exam_review_in_progress':
+    'Your result is being reviewed',
+    'final_exam_result_available':
+    'Your final exam result is available',
+    'final_exam_certificate_available':
+    'Your certificate is ready',
+    'final_exam_retake_available':
+    'You are eligible to retake the exam',
+    'you_re_ready': "You're Ready!",
+    'home_cv_builder_unavailable':
+    'CV services are currently unavailable.',
+    'daily_streak_count': '@count Day Streak!',
+    'keep_the_flame_alive': 'Keep the flame alive',
+    'claim_xp': 'Claim +@xp XP',
+    'reward_xp': '+@xp XP',
+    'complete_all_tasks_to_open':
+    'Complete all @count tasks to open',
+    'home_no_activity_this_week':
+    'No learning activity recorded this week.',
+    'home_dashboard_load_failed':
+    'We could not load your home information. Please try again.',
+    'home_chapter_unavailable':
+    'This lesson is currently unavailable.',
+    'home_career_track_unavailable':
+    'This career track is currently unavailable.',
+    'home_ai_tutor_unavailable':
+    'The AI Tutor is currently unavailable.',
+    'home_one_day': '1 Day',
+    'home_days_count': '@count Days',
+    'home_keep_learning_today': 'Keep learning today!',
+    'home_hour_short': 'h',
+    'home_minute_short': 'm',
+    'home_second_short': 's',
+    'home_time_am': 'AM',
+    'home_time_pm': 'PM',
+
+    'home_weekday_monday': 'M',
+    'home_weekday_tuesday': 'T',
+    'home_weekday_wednesday': 'W',
+    'home_weekday_thursday': 'T',
+    'home_weekday_friday': 'F',
+    'home_weekday_saturday': 'S',
+    'home_weekday_sunday': 'S',
+
+    'home_month_1': 'Jan',
+    'home_month_2': 'Feb',
+    'home_month_3': 'Mar',
+    'home_month_4': 'Apr',
+    'home_month_5': 'May',
+    'home_month_6': 'Jun',
+    'home_month_7': 'Jul',
+    'home_month_8': 'Aug',
+    'home_month_9': 'Sep',
+    'home_month_10': 'Oct',
+    'home_month_11': 'Nov',
+    'home_month_12': 'Dec',
+    'leaderboard_you': 'You',
+    'send_otp': 'Send OTP',
+    'snack_need_special_character':
+    'Include at least one special character.',
+    'account_access_restricted_description':
+    'Your access to Italir Pothe has been restricted by the administration.',
+    'restriction_reason_unavailable':
+    'No additional restriction reason was provided.',
+    'effective_date_unavailable':
+    'Effective date is unavailable',
+    'effective_as_of':
+    'Effective as of @date',
+    'moderation_case_reference':
+    'Case reference: @caseNumber',
+    'account_restriction_appeal_message':
+    'If you believe this decision is a mistake, contact our support team to request a review.',
+    'user_unblocked': 'User unblocked',
+    'username_has_been_successfully_unblocked_you_can_now_send_messages_and_view_their_profile_again':
+    '@username has been successfully unblocked. You can now send messages and view their profile again.',
+    'communication_restored': 'Communication restored',
+    'unblock_username': 'Unblock @username?',
+    'username_has_been_hidden_from_your_app':
+    '@username has been hidden from your app.',
+    'block_username': 'Block @username?',
+    'opening_conversation': 'Opening conversation...',
+    'choose_package': 'Choose a Package',
+    'your_cv_allowance': 'YOUR CV ALLOWANCE',
+    'cv_free_creations_remaining':
+    '@count free CV creations remaining',
+    'cv_paid_credit_balance':
+    '@count purchased CV credits',
+    'cv_free_limit_ended':
+    'Your free CV limit has ended',
+    'cv_next_creation_uses_credit':
+    'Your next new CV will use 1 purchased credit.',
+    'cv_purchase_credit_to_continue':
+    'Purchase a CV credit to create another CV.',
+    'buy_cv_credits': 'Buy CV credits',
+    'cv_credit_required_title':
+    'CV credit required',
+    'cv_credit_required_message':
+    'You have used all three free CV creations and have no purchased credits remaining.',
+
+    // English
+    'review_your_order': 'Review your order',
+    'confirm_package_before_checkout':
+    'Check the package details before continuing.',
+    'total_price': 'Total',
+    'change_package': 'Change package',
+    'subscription_renews_automatically':
+    'This subscription renews automatically until cancelled.',
+    'secure_payment': 'Secure payment',
+    'payment_processed_securely':
+    'Your payment is securely processed through Google Play.',
+    'recurring_purchase': 'Recurring subscription',
+    'one_time_purchase': 'One-time purchase',
+    'cancel_subscription_anytime':
+    'You can manage or cancel it from Google Play.',
+    'you_will_only_be_charged_once':
+    'You will only be charged once for this purchase.',
+    'price_per_month':
+    '@price / month',
+
+    'monthly_plan_auto_renews':
+    'Renews automatically each month',
+
+    'monthly_plan_cancelled_active':
+    'Renewal is cancelled. Protection remains active until the date below.',
+
+    'active_monthly_plan_already_exists':
+    'Manage your current monthly plan before purchasing another one.',
+
+    'monthly_plan_already_active_badge':
+    'MONTHLY PLAN ALREADY ACTIVE',
+
+    'coupon_unavailable':
+    'Coupon unavailable',
+
+    'coupon_not_available_for_package':
+    'Coupons are not available for this package.',
+
+    'coupon_invalid_for_item':
+    'This coupon is not valid for the selected package.',
+    'streak_freeze_refiller': 'Streak Freeze Refills',
+    'streak_freeze_store': 'Streak Freeze Store',
+    'protect_your_progress_in_italian': 'Protect your learning progress',
+    'your_inventory': 'YOUR INVENTORY',
+    'streak_freeze_balance': '@count freezes',
+    'streak_freeze_pack_count': '@count streak freezes',
+    'no_streak_freeze_packages_are_available':
+    'No streak-freeze packages are currently available.',
+    'confirm_purchase': 'Confirm purchase',
+    'one_time_streak_freezes': 'One-time streak freezes',
+    'monthly_streak_protection': 'Monthly streak protection',
+    'monthly_protection_active': 'Monthly protection active',
+    'monthly_protection_inactive': 'Monthly protection inactive',
+    'protected_until': 'Protected until @date',
+    'protected_until_label': 'PROTECTED UNTIL',
+    'manage_monthly_plan': 'Manage monthly plan',
+    'manage_or_cancel_google_play': 'Manage or cancel in Google Play',
+    'monthly_cancellation_information':
+    'Cancellation stops the next renewal. Your protection remains active until the current paid period ends.',
+    'unlimited_streak_protection_description':
+    'Unlimited protection for missed learning days while the monthly plan is active.',
+    'unlimited_protection': 'Unlimited protection',
+    'monthly_protection_page_description':
+    'Your streak stays protected while this monthly plan remains active.',
+    'expiry_date_not_available': 'Expiry date unavailable',
+    'not_currently_protected': 'Not currently protected',
+    'opening_google_play': 'Opening Google Play...',
+    'unable_to_open_google_play': 'Could not open Google Play',
+    'open_google_play_subscriptions_manually':
+    'Open Google Play and go to Payments & subscriptions > Subscriptions.',
+    'google_play_handles_subscription_changes':
+    'Google Play handles cancellation, renewal, payment method changes, and resubscription.',
+    'active': 'ACTIVE',
+
+    'best_value': 'BEST VALUE',
+    'limited_time': 'LIMITED TIME',
+    'course_features': 'Course features',
+    'coupon_code': 'Coupon code',
+    'applying_coupon': 'Applying coupon…',
+    'unlock_this_course': 'Unlock this course!',
+    'unlock_course_access_description':
+    'Unlock @coursename to access all @lessoncount lessons and all included course features.',
+    'give_exam_again': 'Give Exam Again',
+    'final_exam_retake_not_available':
+    'A new exam attempt is not available.',
+    'final_exam_course_not_found':
+    'The course for this exam could not be found.',
     'close': 'Close',
     'official_certificate': 'Official Certificate',
     'certificate_unavailable': 'Certificate unavailable',
-    'try_again': 'Try again',
     'certificate_of_achievement': 'Certificate of Achievement',
     'this_certifies_that': 'This certifies that',
     'proficiency_level_value': 'Proficiency level: @level',
@@ -158,13 +461,13 @@ appTranslations = <String, Map<String, String>>{
     'cv_selected_template_label':
     'Selected template',
     'cv_photo_decision_title':
-    'আপনি কি একটি ছবি যোগ করতে চান?',
+    'Would you like to add a photo?',
     'cv_photo_decision_description':
-    'একটি পেশাদার প্রোফাইল ছবি নির্বাচন করুন অথবা ছবি ছাড়াই চালিয়ে যান।',
+    'Choose a professional profile photo or continue without one.',
     'cv_photo_decision_without_photo':
-    'ছবি ছাড়া',
+    'Avoid photo',
     'cv_photo_decision_upload_photo':
-    'ছবি আপলোড করুন',
+    'Upload photo',
     'cv_edit_options_title': 'Edit Your CV',
     'cv_edit_options_subtitle':
     'Choose what you want to update.',
@@ -404,8 +707,8 @@ appTranslations = <String, Map<String, String>>{
     'welcome': 'Welcome',
     'signup_tagline': 'The Ultimate Catalyst for Your Ambition',
     'hint_email_login': 'ciao@shikhi.it',
-    'hint_email_signup': 'giacomo@shikhi.it',
-    'hint_phone': '+39 312 345 6789',
+    'hint_email_signup': 'giacomo@gmail.com',
+    'hint_phone': '01711111111',
     'hint_password_mask': '••••••••',
     'hint_full_name': 'Giacomo Rossi',
     'terms_prefix': 'I agree to the ',
@@ -704,7 +1007,7 @@ appTranslations = <String, Map<String, String>>{
         'Master Italian\nthrough natural\nconversations.',
     'gen_daily_challenges_1': 'DAILY CHALLENGES',
     'gen_call_support': 'Call Support',
-    'gen_39_123_456_7890': '+39 123 456 7890',
+    'gen_39_123_456_7890': '01711111111',
     'gen_send_email': 'Send Email',
     'gen_support_lumina_it': 'support@lumina.it',
     'gen_how_do_i_restore_my_pro_purcha': 'How do I restore my Pro purchase?',
@@ -978,7 +1281,7 @@ appTranslations = <String, Map<String, String>>{
     'accuracy_is_better_than_speed_user_n':
         'Accuracy is better than speed — User N',
     'achievement_unlocked': 'Achievement Unlocked',
-    'active': 'Active',
+
     'adaptive_level_detection': 'Adaptive Level Detection',
     'adaptive_tutor_active': 'Adaptive Tutor Active',
     'add_another_experience': 'Add Another Experience',
@@ -1169,7 +1472,7 @@ appTranslations = <String, Map<String, String>>{
     'confirm_deletion': 'Confirm Deletion',
     'confirm_delivery': 'Confirm Delivery',
     'confirm_photo': 'Confirm Photo',
-    'confirm_purchase': 'Confirm Purchase',
+
     'confirm_purchase_1': 'Confirm Purchase',
     'confused_speak_to_an_expert': 'Confused Speak to an Expert',
     'congratulations_you_finished_the_final_exam_and_ea':
@@ -1461,20 +1764,6 @@ appTranslations = <String, Map<String, String>>{
     'keep_learning_today': 'Keep Learning Today',
     'keep_my_account': 'Keep My Account',
     'kitchen_job': 'Kitchen Job',
-    'label_lib_features_ai_chat_views_guided_learning_level_selection_view_35':
-        'Guided Learning Level Selection',
-    'label_lib_features_ai_chat_views_widgets_ai_chat_home_widgets_134':
-        'AI Chat Home',
-    'label_lib_features_ai_chat_views_widgets_ai_chat_home_widgets_242':
-        'AI Chat Home',
-    'label_lib_features_courses_sub_features_final_exam_views_final_exam_speaking_view_373':
-        'Final Exam Speaking',
-    'label_lib_features_practice_hub_views_job_sentences_job_sentences_view_45':
-        'Job Sentences',
-    'label_lib_features_practice_hub_views_survival_italian_survival_italian_view_249':
-        'Survival Italian',
-    'label_lib_features_service_hub_sub_features_caf_administrative_help__widgets_official_checklist_card_59':
-        'CAF Official Checklist',
     'language_bengali_native': 'Bengali — Native',
     'language_english_b2': 'English — B2',
     'language_helper_will_open_here': 'Language Helper Will Open Here',
@@ -1580,8 +1869,6 @@ appTranslations = <String, Map<String, String>>{
         'No Sentences are Available in this Module',
     'no_sentences_match_your_search': 'No Sentences Match Your Search',
     'no_skill_builders_are_available': 'No Skill Builders are Available',
-    'no_streak_freeze_packages_are_available':
-        'No Streak Freeze Packages are Available',
     'no_survival_italian_situations_are_available':
         'No Survival Italian Situations are Available',
     'no_unopened_chest': 'No Unopened Chest',
@@ -1732,7 +2019,6 @@ appTranslations = <String, Map<String, String>>{
     'profile_updated': 'Profile Updated',
     'progress': 'Progress',
     'pronunciation_unavailable': 'Pronunciation Unavailable',
-    'protect_your_progress_in_italian': 'Protect Your Progress in Italian',
     'protection_added': 'Protection Added',
     'pulisco_il_tavolo_nsubito': 'Pulisco il tavolo\nsubito',
     'purchase_completed': 'Purchase Completed',
@@ -1910,8 +2196,6 @@ appTranslations = <String, Map<String, String>>{
     'streak': 'Streak',
     'streak_bonus': 'Streak Bonus',
     'streak_freeze': 'Streak Freeze',
-    'streak_freeze_refiller': 'Streak Freeze Refiller',
-    'streak_freeze_store': 'Streak Freeze Store',
     'streak_freezes': 'Streak Freezes',
     'strict_exam_mode': 'Strict Exam Mode',
     'students_assisted': 'Students Assisted',
@@ -2165,7 +2449,7 @@ appTranslations = <String, Map<String, String>>{
     'you_all_are': 'You All are',
     'you_all_speak': 'You All Speak',
     'you_are': 'You are',
-    'you_blocked_this_user': 'You Blocked this User',
+    'you_blocked_this_user': 'You Blocked this User ',
     'you_blocked_this_user_1': 'You Blocked This User',
     'you_cannot_message_this_user': 'You Cannot Message this User',
     'you_have_been_promoted': 'You Have Been Promoted',
@@ -2187,7 +2471,6 @@ appTranslations = <String, Map<String, String>>{
         'Your email address has been successfully updated.',
     'your_final_level': 'Your Final Level',
     'your_future': 'Your Future',
-    'your_inventory': 'Your Inventory',
     'your_learning_milestone_is_saved': 'Your Learning Milestone is Saved',
     'your_new_benefits': 'Your New Benefits',
     'your_password_has_been_updated_successfully':
@@ -2414,8 +2697,8 @@ appTranslations = <String, Map<String, String>>{
     'welcome': 'স্বাগতম!',
     'signup_tagline': 'আপনার লক্ষ্যপূরণে শ্রেষ্ঠ সহায়ক',
     'hint_email_login': 'ciao@shikhi.it',
-    'hint_email_signup': 'giacomo@shikhi.it',
-    'hint_phone': '+39 312 345 6789',
+    'hint_email_signup': 'giacomo@gmail.com',
+    'hint_phone': '01711111111',
     'hint_password_mask': '••••••••',
     'hint_full_name': 'Giacomo Rossi',
     'terms_prefix': 'আমি সম্মত ',
@@ -2553,7 +2836,7 @@ appTranslations = <String, Map<String, String>>{
     'gen_email_address': 'ইমেল ঠিকানা',
     'gen_email_example_com': 'email@example.com',
     'gen_phone_number': 'ফোন নম্বর',
-    'gen_39_xxx_xxx_xxxx': '+39 XXX XXX XXXX',
+    'gen_39_xxx_xxx_xxxx': '01711111111',
     'gen_current_city_in_italy': 'ইতালির বর্তমান শহর',
     'gen_e_g_milano_roma': 'যেমন মিলান, রোম...',
     'gen_bullet_list': 'বুলেট তালিকা',
@@ -2713,7 +2996,7 @@ appTranslations = <String, Map<String, String>>{
         'ইতালীয়\nপ্রাকৃতিক কথোপকথনের মাধ্যমে।',
     'gen_daily_challenges_1': 'প্রতিদিনের চ্যালেঞ্জ',
     'gen_call_support': 'কল সমর্থন',
-    'gen_39_123_456_7890': '+39 123 456 7890',
+    'gen_39_123_456_7890': '01711111111',
     'gen_send_email': 'ইমেইল পাঠান',
     'gen_support_lumina_it': 'support@lumina.it',
     'gen_how_do_i_restore_my_pro_purcha':
@@ -3490,7 +3773,6 @@ appTranslations = <String, Map<String, String>>{
     'description_too_long': 'বর্ণনা খুব দীর্ঘ',
     'detailed_description': 'বিস্তারিত বর্ণনা',
     'detailed_skill_breakdown': 'দক্ষতার বিস্তারিত বিশ্লেষণ',
-    'detailstitle': 'বিস্তারিত',
     'diamond': 'ডায়মন্ড',
     'done': 'সম্পন্ন',
     'download': 'ডাউনলোড',
@@ -3677,20 +3959,6 @@ appTranslations = <String, Map<String, String>>{
     'keep_learning_today': 'আজও শেখা চালিয়ে যান',
     'keep_my_account': 'আমার অ্যাকাউন্ট রাখুন',
     'kitchen_job': 'রান্নাঘরের চাকরি',
-    'label_lib_features_ai_chat_views_guided_learning_level_selection_view_35':
-        'গাইডেড লার্নিং লেভেল নির্বাচন',
-    'label_lib_features_ai_chat_views_widgets_ai_chat_home_widgets_134':
-        'এআই চ্যাট হোম',
-    'label_lib_features_ai_chat_views_widgets_ai_chat_home_widgets_242':
-        'এআই চ্যাট হোম',
-    'label_lib_features_courses_sub_features_final_exam_views_final_exam_speaking_view_373':
-        'চূড়ান্ত পরীক্ষার স্পিকিং অংশ',
-    'label_lib_features_practice_hub_views_job_sentences_job_sentences_view_45':
-        'চাকরির বাক্য',
-    'label_lib_features_practice_hub_views_survival_italian_survival_italian_view_249':
-        'সারভাইভাল ইতালিয়ান',
-    'label_lib_features_service_hub_sub_features_caf_administrative_help__widgets_official_checklist_card_59':
-        'CAF অফিসিয়াল চেকলিস্ট',
     'language_bengali_native': 'ভাষা: বাংলা (মাতৃভাষা)',
     'language_english_b2': 'ভাষা: ইংরেজি (B2)',
     'language_helper_will_open_here': 'ভাষা সহায়ক এখানে খুলবে',
@@ -4392,7 +4660,7 @@ appTranslations = <String, Map<String, String>>{
     'you_all_are': 'আপনারা',
     'you_all_speak': 'আপনারা কথা বলেন',
     'you_are': 'আপনি',
-    'you_blocked_this_user': 'আপনি এই ব্যবহারকারীকে ব্লক করেছেন',
+    'you_blocked_this_user': 'আপনি এই ব্যবহারকারীকে ব্লক করেছেন ',
     'you_blocked_this_user_1': 'আপনি এই ব্যবহারকারীকে ব্লক করেছেন',
     'you_cannot_message_this_user':
         'আপনি এই ব্যবহারকারীকে বার্তা পাঠাতে পারবেন না',
@@ -4660,8 +4928,613 @@ appTranslations = <String, Map<String, String>>{
     'সার্টিফিকেট ডাউনলোড লিংকটি সঠিক নয়।',
     'unable_to_open_certificate_pdf':
     'সার্টিফিকেটের PDF খোলা যায়নি।',
+    'give_exam_again': 'আবার পরীক্ষা দিন',
+    'final_exam_retake_not_available':
+    'নতুন পরীক্ষার প্রচেষ্টা এখন উপলব্ধ নয়।',
+    'final_exam_course_not_found':
+    'এই পরীক্ষার কোর্সটি পাওয়া যায়নি।',
+    'unlock_this_course': 'এই কোর্সটি আনলক করুন!',
+    'unlock_course_access_description':
+    '@coursename আনলক করে সব @lessoncountটি লেসন এবং কোর্সের অন্তর্ভুক্ত সব ফিচার ব্যবহার করুন।',
+    'course_features': 'কোর্সের ফিচারসমূহ',
+    'coupon_code': 'কুপন কোড',
+    'applying_coupon': 'কুপন প্রয়োগ করা হচ্ছে…',
+    'best_value': 'সেরা মূল্য',
+    'limited_time': 'সীমিত সময়',
+
+
+
+    'streak_freeze_balance': '@countটি ফ্রিজ',
+    'streak_freeze_pack_count': '@countটি স্ট্রিক ফ্রিজ',
+
+
+    'one_time_streak_freezes': 'এককালীন স্ট্রিক ফ্রিজ',
+    'monthly_streak_protection': 'মাসিক স্ট্রিক সুরক্ষা',
+    'monthly_protection_active': 'মাসিক সুরক্ষা সক্রিয়',
+    'monthly_protection_inactive': 'মাসিক সুরক্ষা নিষ্ক্রিয়',
+    'protected_until': '@date পর্যন্ত সুরক্ষিত',
+    'protected_until_label': 'সুরক্ষিত থাকবে',
+    'manage_monthly_plan': 'মাসিক প্ল্যান পরিচালনা করুন',
+    'manage_or_cancel_google_play':
+    'Google Play-এ পরিচালনা বা বাতিল করুন',
+    'monthly_cancellation_information':
+    'বাতিল করলে পরবর্তী নবায়ন বন্ধ হবে। বর্তমান পরিশোধিত সময় শেষ হওয়া পর্যন্ত সুরক্ষা সক্রিয় থাকবে।',
+    'unlimited_streak_protection_description':
+    'মাসিক প্ল্যান সক্রিয় থাকলে শেখার দিন বাদ গেলেও আনলিমিটেড সুরক্ষা পাবেন।',
+    'unlimited_protection': 'আনলিমিটেড সুরক্ষা',
+    'monthly_protection_page_description':
+    'এই মাসিক প্ল্যান সক্রিয় থাকা পর্যন্ত আপনার স্ট্রিক সুরক্ষিত থাকবে।',
+    'expiry_date_not_available': 'মেয়াদ শেষের তারিখ পাওয়া যায়নি',
+    'not_currently_protected': 'বর্তমানে সুরক্ষিত নয়',
+    'opening_google_play': 'Google Play খোলা হচ্ছে...',
+    'unable_to_open_google_play': 'Google Play খোলা যায়নি',
+    'open_google_play_subscriptions_manually':
+    'Google Play খুলে Payments & subscriptions > Subscriptions-এ যান।',
+    'google_play_handles_subscription_changes':
+    'বাতিল, নবায়ন, পেমেন্ট পদ্ধতি পরিবর্তন ও পুনরায় সাবস্ক্রাইব Google Play পরিচালনা করে।',
+    'price_per_month':
+    '@price / মাস',
+
+    'monthly_plan_auto_renews':
+    'প্রতি মাসে স্বয়ংক্রিয়ভাবে নবায়ন হবে',
+
+    'monthly_plan_cancelled_active':
+    'নবায়ন বাতিল করা হয়েছে। নিচে দেখানো তারিখ পর্যন্ত সুরক্ষা সক্রিয় থাকবে।',
+
+    'active_monthly_plan_already_exists':
+    'অন্য প্ল্যান কেনার আগে আপনার বর্তমান মাসিক প্ল্যান পরিচালনা করুন।',
+
+    'monthly_plan_already_active_badge':
+    'মাসিক প্ল্যান ইতোমধ্যে সক্রিয়',
+
+    'coupon_unavailable':
+    'কুপন উপলভ্য নয়',
+
+    'coupon_not_available_for_package':
+    'এই প্যাকেজে কুপন ব্যবহার করা যাবে না।',
+
+    'coupon_invalid_for_item':
+    'এই কুপনটি নির্বাচিত প্যাকেজের জন্য বৈধ নয়।',
+    // Bangla
+    'review_your_order': 'আপনার অর্ডার পর্যালোচনা করুন',
+    'confirm_package_before_checkout':
+    'এগিয়ে যাওয়ার আগে প্যাকেজের তথ্য যাচাই করুন।',
+
+    'total_price': 'মোট',
+    'change_package': 'প্যাকেজ পরিবর্তন করুন',
+    'subscription_renews_automatically':
+    'বাতিল না করা পর্যন্ত সাবস্ক্রিপশনটি স্বয়ংক্রিয়ভাবে নবায়ন হবে।',
+    'secure_payment': 'নিরাপদ পেমেন্ট',
+    'payment_processed_securely':
+    'আপনার পেমেন্ট Google Play-এর মাধ্যমে নিরাপদে প্রক্রিয়া করা হবে।',
+    'recurring_purchase': 'নিয়মিত সাবস্ক্রিপশন',
+    'one_time_purchase': 'এককালীন ক্রয়',
+    'cancel_subscription_anytime':
+    'Google Play থেকে এটি পরিচালনা বা বাতিল করতে পারবেন।',
+    'you_will_only_be_charged_once':
+    'এই ক্রয়ের জন্য আপনাকে শুধু একবার চার্জ করা হবে।',
+    'your_cv_allowance': 'আপনার সিভি সুবিধা',
+    'cv_free_creations_remaining':
+    '@countটি ফ্রি সিভি তৈরি বাকি',
+    'cv_paid_credit_balance':
+    '@countটি কেনা সিভি ক্রেডিট',
+    'cv_free_limit_ended':
+    'আপনার ফ্রি সিভি সীমা শেষ হয়েছে',
+    'cv_next_creation_uses_credit':
+    'পরবর্তী নতুন সিভি তৈরিতে ১টি কেনা ক্রেডিট ব্যবহার হবে।',
+    'cv_purchase_credit_to_continue':
+    'আরেকটি সিভি তৈরি করতে একটি সিভি ক্রেডিট কিনুন।',
+    'buy_cv_credits': 'সিভি ক্রেডিট কিনুন',
+    'cv_credit_required_title':
+    'সিভি ক্রেডিট প্রয়োজন',
+    'cv_credit_required_message':
+    'আপনি তিনটি ফ্রি সিভি তৈরির সুযোগ ব্যবহার করেছেন এবং কোনো কেনা ক্রেডিট অবশিষ্ট নেই।',
+    'choose_package': 'একটি প্যাকেজ নির্বাচন করুন',
+    'opening_conversation': 'কথোপকথন খোলা হচ্ছে...',
+    'block_username': '@username-কে ব্লক করবেন?',
+    'username_has_been_hidden_from_your_app':
+    '@username-কে আপনার অ্যাপ থেকে লুকানো হয়েছে।',
+    'unblock_username': '@username-কে আনব্লক করবেন?',
+    'user_unblocked': 'ব্যবহারকারীকে আনব্লক করা হয়েছে',
+    'username_has_been_successfully_unblocked_you_can_now_send_messages_and_view_their_profile_again':
+    '@username-কে সফলভাবে আনব্লক করা হয়েছে। এখন আপনি আবার মেসেজ পাঠাতে এবং তার প্রোফাইল দেখতে পারবেন।',
+    'communication_restored': 'যোগাযোগ পুনরায় চালু হয়েছে',
+    'account_access_restricted_description':
+    'প্রশাসন আপনার ইতালির পথে অ্যাকাউন্টের ব্যবহার সীমাবদ্ধ করেছে।',
+    'restriction_reason_unavailable':
+    'অ্যাকাউন্ট সীমাবদ্ধ করার অতিরিক্ত কোনো কারণ দেওয়া হয়নি।',
+    'effective_date_unavailable':
+    'কার্যকর হওয়ার তারিখ পাওয়া যায়নি',
+    'effective_as_of':
+    '@date থেকে কার্যকর',
+    'moderation_case_reference':
+    'কেস রেফারেন্স: @caseNumber',
+    'account_restriction_appeal_message':
+    'আপনার মনে হলে সিদ্ধান্তটি ভুল, পর্যালোচনার অনুরোধ করতে আমাদের সহায়তা দলের সঙ্গে যোগাযোগ করুন।',
+    'snack_need_special_character':
+    'কমপক্ষে একটি বিশেষ চিহ্ন ব্যবহার করুন।',
+    'send_otp': 'ওটিপি পাঠান',
+    'leaderboard_you': 'আপনি',
+    'home_one_day': '১ দিন',
+    'home_days_count': '@count দিন',
+    'home_keep_learning_today': 'আজও শেখা চালিয়ে যান!',
+    'home_hour_short': 'ঘ',
+    'home_minute_short': 'মি',
+    'home_second_short': 'সে',
+    'home_time_am': 'পূর্বাহ্ণ',
+    'home_time_pm': 'অপরাহ্ণ',
+
+    'home_weekday_monday': 'সো',
+    'home_weekday_tuesday': 'ম',
+    'home_weekday_wednesday': 'বু',
+    'home_weekday_thursday': 'বৃ',
+    'home_weekday_friday': 'শু',
+    'home_weekday_saturday': 'শ',
+    'home_weekday_sunday': 'র',
+
+    'home_month_1': 'জানু',
+    'home_month_2': 'ফেব্রু',
+    'home_month_3': 'মার্চ',
+    'home_month_4': 'এপ্রিল',
+    'home_month_5': 'মে',
+    'home_month_6': 'জুন',
+    'home_month_7': 'জুলাই',
+    'home_month_8': 'আগস্ট',
+    'home_month_9': 'সেপ্টে',
+    'home_month_10': 'অক্টো',
+    'home_month_11': 'নভে',
+    'home_month_12': 'ডিসে',
+    'home_dashboard_load_failed':
+    'হোমের তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।',
+    'home_chapter_unavailable':
+    'এই লেসনটি বর্তমানে পাওয়া যাচ্ছে না।',
+    'home_career_track_unavailable':
+    'এই ক্যারিয়ার ট্র্যাকটি বর্তমানে পাওয়া যাচ্ছে না।',
+    'home_ai_tutor_unavailable':
+    'এআই টিউটর বর্তমানে পাওয়া যাচ্ছে না।',
+    'home_no_activity_this_week':
+    'এই সপ্তাহে এখনো কোনো শেখার কার্যক্রম রেকর্ড হয়নি।',
+    'daily_streak_count': '@count দিনের স্ট্রিক!',
+    'keep_the_flame_alive': 'আপনার স্ট্রিক চালিয়ে যান',
+    'claim_xp': '+@xp XP সংগ্রহ করুন',
+    'reward_xp': '+@xp XP',
+    'complete_all_tasks_to_open':
+    'খোলার জন্য সব @countটি কাজ সম্পন্ন করুন',
+    'home_cv_builder_unavailable':
+    'সিভি সেবা বর্তমানে পাওয়া যাচ্ছে না।',
+    'you_re_ready': 'আপনি প্রস্তুত!',
+    // Bangla
+    'final_exam_result_pending': 'ফলাফল অপেক্ষমাণ',
+    'final_exam_view_certificate': 'সার্টিফিকেট দেখুন',
+    'final_exam_retake': 'আবার পরীক্ষা দিন',
+    'final_exam_review_in_progress':
+    'আপনার ফলাফল পর্যালোচনা করা হচ্ছে',
+    'final_exam_result_available':
+    'আপনার চূড়ান্ত পরীক্ষার ফলাফল প্রস্তুত',
+    'final_exam_certificate_available':
+    'আপনার সার্টিফিকেট প্রস্তুত',
+    'final_exam_retake_available':
+    'আপনি আবার পরীক্ষা দেওয়ার সুযোগ পেয়েছেন',
+    'final_exam_not_ready_title': 'এখনও পুরোপুরি প্রস্তুত নন',
+    'final_exam_unlock_requirement':
+    'ফাইনাল পরীক্ষা আনলক করতে অন্তত ৮০% ভিডিও লেসন সম্পন্ন করুন।',
+    'currently_watched_percent': 'বর্তমানে @progress% দেখা হয়েছে',
+    'unlock_at_percent': 'আনলক করতে @progress%',
+    'no_internet_connection':
+    'ইন্টারনেট সংযোগ নেই',
+    'no_internet_title': 'ইন্টারনেট সংযোগ নেই',
+    'no_internet_message':
+    'আপনার ওয়াই-ফাই বা মোবাইল ডাটা সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।',
+    'checking_connection': 'সংযোগ পরীক্ষা করা হচ্ছে...',
+    'level_tutor': 'লেভেল @level টিউটর',
+    'level_topics': 'লেভেল @level-এর বিষয়সমূহ',
+    'final_exam_attempt_not_found':
+    'চূড়ান্ত পরীক্ষার চেষ্টা খুঁজে পাওয়া যায়নি।',
+    'score_label': 'স্কোর: @score',
+    'xp_label': 'XP: @xp',
+    'time_label': 'সময়: @time',
+    'monthly_subscription': 'মাসিক সাবস্ক্রিপশন',
+    'invalid_coupon': 'অবৈধ কুপন',
+    'you_ve_been_promoted_to': 'আপনাকে পদোন্নতি দেওয়া হয়েছে',
+    'league_name_value': '@leagueName লিগ',
+    'you_re_in_the_top_20_of_learners':
+    'আপনি শীর্ষ ২০% শিক্ষার্থীর মধ্যে আছেন',
+    'playing_pronunciation_for': '@text-এর উচ্চারণ চালানো হচ্ছে',
+    'playing_text': '@text চালানো হচ্ছে',
+    'exam_progress_requirement':
+    '@progress% সম্পন্ন · @required% প্রয়োজন',
+    'daily_chest_total_xp': '@xp XP',
+    'daily_chest_streak_freezes_awarded': '@countটি দেওয়া হয়েছে',
+    'daily_streak_message': 'আপনার স্ট্রিক @days দিন',
+    'webinar_message_preview': '@sender: @message',
+    'notification_filter_all': 'সব',
+    'notification_filter_learning': 'শেখার আপডেট',
+    'notification_filter_system': 'সিস্টেম',
+    'no_notifications_found': 'কোনো নোটিফিকেশন পাওয়া যায়নি',
+
+    'offline_screen_title': 'ওহো!\nআপনি অফলাইনে আছেন।',
+    'offline_learning_message':
+    'আপনার পছন্দের ইতালীয় বাক্য শেখা চালিয়ে যেতে ইন্টারনেট সংযোগ পরীক্ষা করুন।',
+    'search_no_match_message':
+    'আপনি যা খুঁজছেন তা পাওয়া যায়নি। অন্য একটি শব্দ দিয়ে চেষ্টা করুন।',
+
+    'italian_keyboard_accents_help':
+    'লিখিত প্রশ্নের সঠিক উত্তর দিতে à, è এবং ì-এর মতো ইতালীয় অ্যাকসেন্ট প্রয়োজন হবে।',
+    'italian_keyboard_setup_help':
+    'সঠিকভাবে উত্তর দিতে ফোনে ইতালীয় কিবোর্ড সেটআপ করুন।',
+    'italian_accents_explanation':
+    'অ্যাকসেন্ট শব্দের অর্থ ও উচ্চারণ পরিবর্তন করে।',
+
+    'ai_level_test_description':
+    'মাত্র ১০টি প্রশ্নের মাধ্যমে আপনার বর্তমান লেভেল জানুন।',
+    'ai_tutor_intro':
+    'আমি আপনার AI টিউটর। চলুন একসঙ্গে ইতালীয় অনুশীলন করি।',
+    'ai_scenario_tip':
+    'AI সেই পরিস্থিতিতে ক্যাশিয়ার, ওয়েটার বা ড্রাইভারের মতো একটি চরিত্রে অভিনয় করবে।',
+
+    'level_mastered': 'লেভেল @level\nসম্পন্ন',
+    'certificate_milestone_message':
+    'আপনি একটি নতুন মাইলফলক অর্জন করেছেন',
+    'course_information_unavailable':
+    'কোর্সের তথ্য লোড করা যায়নি।',
+    'purchase_success_description':
+    'আপনি এখন Italir Pothe-এর সব ফিচারে আজীবন পূর্ণ প্রবেশাধিকার পেয়েছেন। আজ থেকেই আপনার সাবলীলতার যাত্রা শুরু।',
+
+    'coupon_applied': 'কুপন প্রয়োগ করা হয়েছে',
+    'discount_value': 'ছাড়: @discount%',
+    'remove_coupon': 'কুপন সরান',
+    'store_price_notice':
+    'চূড়ান্ত মূল্য Google Play বা App Store দ্বারা নির্ধারিত হয় এবং এতে VAT, কর, মুদ্রা রূপান্তর বা অঞ্চলভিত্তিক মূল্য অন্তর্ভুক্ত থাকতে পারে।',
+
+    'support_contact_description':
+    'Italir Pothe সাপোর্ট টিমের সঙ্গে যোগাযোগের সবচেয়ে সুবিধাজনক মাধ্যমটি বেছে নিন।',
+    'chat_on_whatsapp': 'WhatsApp-এ চ্যাট করুন',
+    'fastest_response_recommended':
+    'দ্রুততম উত্তরের জন্য প্রস্তাবিত',
+    'facebook_community_description':
+    'প্রশ্ন করুন, অভিজ্ঞতা শেয়ার করুন এবং অন্য শিক্ষার্থীদের সঙ্গে যুক্ত হন।',
+    'support_response_time':
+    'আমরা ২৪ ঘণ্টার মধ্যে সাপোর্ট অনুরোধের উত্তর দেওয়ার চেষ্টা করি।',
+
+    'reward_awarded_date': 'প্রদান করা হয়েছে\n@date',
+    'voice_minutes_value': '@count মিনিট',
+    'text_tokens_value': '@count টোকেন',
+    'ai_credit_usage_description':
+    'কথা বলার জন্য ভয়েস এবং চ্যাটের জন্য টোকেন।',
+
+    'course_search_hint': 'নাম দিয়ে কোর্স খুঁজুন',
+    'sentences_completed':
+    '@learned/@totalটি বাক্য সম্পন্ন',
+    'sentences_learned_progress':
+    '@totalটির মধ্যে @learnedটি বাক্য শেখা হয়েছে',
+    'final_exam_unlocked_message':
+    'আপনি ৮০% লেসন সম্পন্ন করেছেন। চূড়ান্ত পরীক্ষা এখন আনলক হয়েছে!',
+
+    'leaderboard_xp_explanation':
+    'লেসন সম্পন্ন, কথোপকথন অনুশীলন এবং ইতালীয় শব্দভান্ডার আয়ত্ত করার সঙ্গে সঙ্গে XP বৃদ্ধি পায়।',
+
+    'boost_duration_message':
+    'এটি @duration পর্যন্ত থাকবে। আরও অনুশীলন করুন!',
+
+    'report_received_description':
+    'আমাদের কমিউনিটিকে নিরাপদ রাখতে সাহায্য করার জন্য ধন্যবাদ। আমাদের অ্যাডমিন টিম শিগগিরই আপনার রিপোর্ট পর্যালোচনা করবে।',
+
+    'webinar_host_value': 'হোস্ট: @host',
+    'webinar_starts_at': 'শুরু হবে @time-এ',
+    'webinar_course_access_description':
+    'এই সেশনটি নিচের যেকোনো কোর্সে নিবন্ধিত ব্যবহারকারীদের জন্য উপলভ্য:',
+    'webinar_selected_course_only':
+    'শুধু নির্বাচিত কোর্সের জন্য',
+
+    'home_greeting': 'হাই, @name',
+    'guided_learning_level_selection':
+    'গাইডেড লার্নিং লেভেল নির্বাচন',
   },
   'it_IT': <String, String>{
+    'guided_learning_level_selection':
+    'Selezione del livello di apprendimento guidato',
+    'notification_filter_all': 'Tutte',
+    'notification_filter_learning': 'Apprendimento',
+    'notification_filter_system': 'Sistema',
+    'no_notifications_found': 'Nessuna notifica trovata',
+
+    'offline_screen_title': 'Ops!\nSei offline.',
+    'offline_learning_message':
+    'Controlla la connessione Internet per continuare a imparare le tue frasi italiane preferite.',
+    'search_no_match_message':
+    'Non abbiamo trovato ciò che cercavi. Prova con una parola diversa.',
+
+    'italian_keyboard_accents_help':
+    'Avrai bisogno di accenti italiani come à, è e ì per rispondere correttamente alle domande scritte.',
+    'italian_keyboard_setup_help':
+    'Configura la tastiera italiana sul telefono per rispondere correttamente.',
+    'italian_accents_explanation':
+    'Gli accenti cambiano il significato e la pronuncia delle parole.',
+
+    'ai_level_test_description':
+    'Scopri il tuo livello attuale con soltanto 10 domande.',
+    'ai_tutor_intro':
+    'Sono il tuo tutor AI. Esercitiamoci insieme in italiano.',
+    'ai_scenario_tip':
+    'L’AI interpreterà un ruolo nello scenario, come cassiere, cameriere o autista.',
+
+    'level_mastered': 'Livello @level\ncompletato',
+    'certificate_milestone_message':
+    'Hai raggiunto un nuovo traguardo',
+    'course_information_unavailable':
+    'Impossibile caricare le informazioni del corso.',
+    'purchase_success_description':
+    'Ora hai accesso completo a vita a tutte le funzionalità di Italir Pothe. Il tuo percorso verso la padronanza inizia oggi.',
+
+    'coupon_applied': 'Coupon applicato',
+    'discount_value': 'Sconto: @discount%',
+    'remove_coupon': 'Rimuovi coupon',
+    'store_price_notice':
+    'Il prezzo finale è stabilito da Google Play o App Store e può includere IVA, tasse, conversione valutaria o prezzi regionali.',
+
+    'support_contact_description':
+    'Scegli il modo più comodo per contattare il team di supporto di Italir Pothe.',
+    'chat_on_whatsapp': 'Chatta su WhatsApp',
+    'fastest_response_recommended':
+    'Consigliato per una risposta più rapida',
+    'facebook_community_description':
+    'Fai domande, condividi esperienze e connettiti con altri studenti.',
+    'support_response_time':
+    'Cerchiamo di rispondere alle richieste di supporto entro 24 ore.',
+
+    'reward_awarded_date': 'Assegnato\n@date',
+    'voice_minutes_value': '@count minuti',
+    'text_tokens_value': '@count token',
+    'ai_credit_usage_description':
+    'Voce per parlare, token per chattare.',
+
+    'course_search_hint': 'Cerca corsi per nome',
+    'sentences_completed':
+    '@learned/@total frasi completate',
+    'sentences_learned_progress':
+    '@learned di @total frasi apprese',
+    'final_exam_unlocked_message':
+    'Hai completato l’80% delle lezioni. L’esame finale è ora sbloccato!',
+
+    'leaderboard_xp_explanation':
+    'Gli XP aumentano quando completi lezioni, pratichi conversazioni e impari il vocabolario italiano.',
+    'boost_duration_message':
+    'Dura per @duration. Esercitati ancora!',
+
+    'report_received_description':
+    'Grazie per contribuire alla sicurezza della community. Il nostro team amministrativo esaminerà presto la segnalazione.',
+
+    'webinar_host_value': 'Host: @host',
+    'webinar_starts_at': 'Inizia alle @time',
+    'webinar_course_access_description':
+    'Questa sessione è disponibile per gli utenti iscritti a uno dei seguenti corsi:',
+    'webinar_selected_course_only':
+    'Solo per il corso selezionato',
+
+    'home_greeting': 'Ciao, @name',
+    'level_tutor': 'Tutor di livello @level',
+    'level_topics': 'Argomenti del livello @level',
+    'final_exam_attempt_not_found':
+    'Tentativo dell’esame finale non trovato.',
+    'score_label': 'Punteggio: @score',
+    'xp_label': 'XP: @xp',
+    'time_label': 'Tempo: @time',
+    'monthly_subscription': 'Abbonamento mensile',
+    'invalid_coupon': 'Coupon non valido',
+    'you_ve_been_promoted_to': 'Sei stato promosso a',
+    'league_name_value': 'Lega @leagueName',
+    'you_re_in_the_top_20_of_learners':
+    'Sei nel 20% migliore degli studenti',
+    'playing_pronunciation_for':
+    'Riproduzione della pronuncia di @text',
+    'playing_text': 'Riproduzione di @text',
+    'exam_progress_requirement':
+    '@progress% completato · @required% richiesto',
+    'daily_chest_total_xp': '@xp XP',
+    'daily_chest_streak_freezes_awarded': '@count assegnati',
+    'daily_streak_message': 'La tua serie è di @days giorni',
+    'webinar_message_preview': '@sender: @message',
+    'no_internet_title': 'Nessuna connessione Internet',
+    'no_internet_message':
+    'Controlla la connessione Wi-Fi o dati mobili e riprova.',
+    'checking_connection': 'Controllo della connessione...',
+    'no_internet_connection':
+    'Nessuna connessione Internet',
+    'final_exam_not_ready_title': 'Non sei ancora pronto',
+    'final_exam_unlock_requirement':
+    'Completa almeno l’80% delle videolezioni per sbloccare l’esame finale.',
+    'currently_watched_percent': 'Attualmente completato il @progress%',
+    'unlock_at_percent': '@progress% per sbloccare',
+    // Italian
+    'final_exam_result_pending': 'Risultato in attesa',
+    'final_exam_view_certificate': 'Visualizza certificato',
+    'final_exam_retake': 'Ripeti l’esame',
+    'final_exam_review_in_progress':
+    'Il risultato è in fase di revisione',
+    'final_exam_result_available':
+    'Il risultato dell’esame finale è disponibile',
+    'final_exam_certificate_available':
+    'Il certificato è pronto',
+    'final_exam_retake_available':
+    'Puoi ripetere l’esame',
+    'you_re_ready': 'Sei pronto!',
+    'home_cv_builder_unavailable':
+    'I servizi CV non sono attualmente disponibili.',
+    'daily_streak_count': 'Serie di @count giorni!',
+    'keep_the_flame_alive': 'Mantieni viva la serie',
+    'claim_xp': 'Riscatta +@xp XP',
+    'reward_xp': '+@xp XP',
+    'complete_all_tasks_to_open':
+    'Completa tutte le @count attività per aprire',
+    'home_no_activity_this_week':
+    'Nessuna attività di apprendimento registrata questa settimana.',
+    'home_dashboard_load_failed':
+    'Impossibile caricare le informazioni della home. Riprova.',
+    'home_chapter_unavailable':
+    'Questa lezione non è attualmente disponibile.',
+    'home_career_track_unavailable':
+    'Questo percorso professionale non è attualmente disponibile.',
+    'home_ai_tutor_unavailable':
+    'Il tutor IA non è attualmente disponibile.',
+    'home_one_day': '1 giorno',
+    'home_days_count': '@count giorni',
+    'home_keep_learning_today': 'Continua a imparare oggi!',
+    'home_hour_short': 'h',
+    'home_minute_short': 'min',
+    'home_second_short': 's',
+    'home_time_am': 'AM',
+    'home_time_pm': 'PM',
+
+    'home_weekday_monday': 'L',
+    'home_weekday_tuesday': 'M',
+    'home_weekday_wednesday': 'M',
+    'home_weekday_thursday': 'G',
+    'home_weekday_friday': 'V',
+    'home_weekday_saturday': 'S',
+    'home_weekday_sunday': 'D',
+
+    'home_month_1': 'gen',
+    'home_month_2': 'feb',
+    'home_month_3': 'mar',
+    'home_month_4': 'apr',
+    'home_month_5': 'mag',
+    'home_month_6': 'giu',
+    'home_month_7': 'lug',
+    'home_month_8': 'ago',
+    'home_month_9': 'set',
+    'home_month_10': 'ott',
+    'home_month_11': 'nov',
+    'home_month_12': 'dic',
+    'leaderboard_you': 'Tu',
+    'send_otp': 'Invia OTP',
+    'snack_need_special_character':
+    'Inserisci almeno un carattere speciale.',
+    'account_access_restricted_description':
+    'L’amministrazione ha limitato il tuo accesso a Italir Pothe.',
+    'restriction_reason_unavailable':
+    'Non è stato fornito alcun motivo aggiuntivo per la restrizione.',
+    'effective_date_unavailable':
+    'Data di entrata in vigore non disponibile',
+    'effective_as_of':
+    'In vigore dal @date',
+    'moderation_case_reference':
+    'Riferimento del caso: @caseNumber',
+    'account_restriction_appeal_message':
+    'Se ritieni che la decisione sia un errore, contatta il nostro team di assistenza per richiedere una revisione.',
+    'user_unblocked': 'Utente sbloccato',
+    'username_has_been_successfully_unblocked_you_can_now_send_messages_and_view_their_profile_again':
+    '@username è stato sbloccato correttamente. Ora puoi inviare messaggi e visualizzare nuovamente il suo profilo.',
+    'communication_restored': 'Comunicazione ripristinata',
+    'unblock_username': 'Sbloccare @username?',
+    'username_has_been_hidden_from_your_app':
+    '@username è stato nascosto dalla tua app.',
+    'block_username': 'Bloccare @username?',
+    'opening_conversation': 'Apertura della conversazione...',
+    'choose_package': 'Scegli un pacchetto',
+    'your_cv_allowance': 'LA TUA DISPONIBILITÀ CV',
+    'cv_free_creations_remaining':
+    '@count creazioni CV gratuite rimaste',
+    'cv_paid_credit_balance':
+    '@count crediti CV acquistati',
+    'cv_free_limit_ended':
+    'Il limite gratuito dei CV è terminato',
+    'cv_next_creation_uses_credit':
+    'Il prossimo nuovo CV utilizzerà 1 credito acquistato.',
+    'cv_purchase_credit_to_continue':
+    'Acquista un credito CV per creare un altro CV.',
+    'buy_cv_credits': 'Acquista crediti CV',
+    'cv_credit_required_title':
+    'Credito CV richiesto',
+    'cv_credit_required_message':
+    'Hai utilizzato tutte e tre le creazioni CV gratuite e non hai crediti acquistati disponibili.',
+
+    // Italian
+    'review_your_order': 'Controlla il tuo ordine',
+    'confirm_package_before_checkout':
+    'Verifica i dettagli del pacchetto prima di continuare.',
+    'total_price': 'Totale',
+    'change_package': 'Cambia pacchetto',
+    'subscription_renews_automatically':
+    'L’abbonamento si rinnova automaticamente finché non viene annullato.',
+    'secure_payment': 'Pagamento sicuro',
+    'payment_processed_securely':
+    'Il pagamento viene elaborato in modo sicuro tramite Google Play.',
+    'recurring_purchase': 'Abbonamento ricorrente',
+    'one_time_purchase': 'Acquisto singolo',
+    'cancel_subscription_anytime':
+    'Puoi gestirlo o annullarlo tramite Google Play.',
+    'you_will_only_be_charged_once':
+    'Ti verrà addebitato l’importo una sola volta.',
+    'price_per_month':
+    '@price / mese',
+
+    'monthly_plan_auto_renews':
+    'Si rinnova automaticamente ogni mese',
+
+    'monthly_plan_cancelled_active':
+    'Il rinnovo è stato annullato. La protezione resta attiva fino alla data indicata sotto.',
+
+    'active_monthly_plan_already_exists':
+    'Gestisci il piano mensile attuale prima di acquistarne un altro.',
+
+    'monthly_plan_already_active_badge':
+    'PIANO MENSILE GIÀ ATTIVO',
+
+    'coupon_unavailable':
+    'Coupon non disponibile',
+
+    'coupon_not_available_for_package':
+    'I coupon non sono disponibili per questo pacchetto.',
+
+    'coupon_invalid_for_item':
+    'Questo coupon non è valido per il pacchetto selezionato.',
+    'streak_freeze_refiller': 'Ricariche blocco serie',
+    'streak_freeze_store': 'Negozio blocchi serie',
+    'protect_your_progress_in_italian':
+    'Proteggi i tuoi progressi di apprendimento',
+    'your_inventory': 'LE TUE SCORTE',
+    'streak_freeze_balance': '@count blocchi serie',
+    'streak_freeze_pack_count': '@count blocchi serie',
+    'no_streak_freeze_packages_are_available':
+    'Al momento non sono disponibili pacchetti blocco serie.',
+    'confirm_purchase': 'Conferma acquisto',
+    'one_time_streak_freezes': 'Blocchi serie una tantum',
+    'monthly_streak_protection': 'Protezione mensile della serie',
+    'monthly_protection_active': 'Protezione mensile attiva',
+    'monthly_protection_inactive': 'Protezione mensile non attiva',
+    'protected_until': 'Protetto fino al @date',
+    'protected_until_label': 'PROTETTO FINO AL',
+    'manage_monthly_plan': 'Gestisci il piano mensile',
+    'manage_or_cancel_google_play':
+    'Gestisci o annulla su Google Play',
+    'monthly_cancellation_information':
+    'L’annullamento interrompe il prossimo rinnovo. La protezione resta attiva fino alla fine del periodo già pagato.',
+    'unlimited_streak_protection_description':
+    'Protezione illimitata per i giorni di studio saltati mentre il piano mensile è attivo.',
+    'unlimited_protection': 'Protezione illimitata',
+    'monthly_protection_page_description':
+    'La tua serie resta protetta finché questo piano mensile è attivo.',
+    'expiry_date_not_available': 'Data di scadenza non disponibile',
+    'not_currently_protected': 'Protezione non attiva',
+    'opening_google_play': 'Apertura di Google Play...',
+    'unable_to_open_google_play': 'Impossibile aprire Google Play',
+    'open_google_play_subscriptions_manually':
+    'Apri Google Play e vai su Pagamenti e abbonamenti > Abbonamenti.',
+    'google_play_handles_subscription_changes':
+    'Google Play gestisce annullamento, rinnovo, metodo di pagamento e nuova iscrizione.',
+    'best_value': 'MIGLIOR VALORE',
+    'limited_time': 'TEMPO LIMITATO',
+    'course_features': 'Funzionalità del corso',
+    'coupon_code': 'Codice coupon',
+    'applying_coupon': 'Applicazione del coupon…',
+    'unlock_this_course': 'Sblocca questo corso!',
+    'unlock_course_access_description':
+    'Sblocca @coursename per accedere a tutte le @lessoncount lezioni e a tutte le funzionalità incluse nel corso.',
+    'give_exam_again': 'Ripeti l’esame',
+    'final_exam_retake_not_available':
+    'Non è disponibile un nuovo tentativo d’esame.',
+    'final_exam_course_not_found':
+    'Il corso relativo a questo esame non è stato trovato.',
     'final_exam_results_title': 'Risultati dell’esame',
     'final_exam_mark_achieved': 'PUNTEGGIO OTTENUTO',
     'final_exam_xp_awarded': '@xp XP ottenuti',
@@ -4669,7 +5542,28 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_result_passed': 'Risultato finale: Superato!',
     'final_exam_retake_required': 'Esame da ripetere',
     'final_exam_evaluation_ready': 'La valutazione finale è pronta.',
-    'final_exam_result_unavailable': 'Il risultato dell’esame finale non è disponibile.',
+    'final_exam_result_unavailable':
+    'Il risultato dell’esame finale non è disponibile.',
+
+    'close': 'Chiudi',
+    'official_certificate': 'Certificato ufficiale',
+    'certificate_unavailable': 'Certificato non disponibile',
+    'certificate_of_achievement': 'Certificato di conseguimento',
+    'proficiency_level_value': 'Livello di competenza: @level',
+    'issue_date': 'Data di rilascio',
+    'final_score': 'Punteggio finale',
+    'certificate_number_value': 'Numero del certificato: @number',
+    'certificate_download': 'Download del certificato',
+    'certificate_information_unavailable':
+    'Le informazioni del certificato non sono disponibili.',
+    'certificate_not_active': 'Questo certificato non è attivo.',
+    'certificate_pdf_unavailable':
+    'Il PDF del certificato non è disponibile.',
+    'invalid_certificate_download_url':
+    'L’URL per scaricare il certificato non è valido.',
+    'unable_to_open_certificate_pdf':
+    'Impossibile aprire il PDF del certificato.',
+
     'final_exam_success_title': 'Esame completato',
     'final_exam_back_to_practice_hub':
     'Torna all’area pratica',
@@ -5062,8 +5956,8 @@ appTranslations = <String, Map<String, String>>{
     'welcome': 'Benvenuto',
     'signup_tagline': 'Il catalizzatore definitivo per la tua ambizione',
     'hint_email_login': 'ciao@shikhi.it',
-    'hint_email_signup': 'giacomo@shikhi.it',
-    'hint_phone': '+39 312 345 6789',
+    'hint_email_signup': 'giacomo@gmail.com',
+    'hint_phone': '01711111111',
     'hint_password_mask': '••••••••',
     'hint_full_name': 'Giacomo Rossi',
     'terms_prefix': 'Accetto i ',
@@ -5367,7 +6261,7 @@ appTranslations = <String, Map<String, String>>{
         'Padroneggia l\'italiano\nattraverso\nconversazioni naturali.',
     'gen_daily_challenges_1': 'SFIDE QUOTIDIANE',
     'gen_call_support': 'Chiama l\'assistenza',
-    'gen_39_123_456_7890': '+39 123 456 7890',
+    'gen_39_123_456_7890': '01711111111',
     'gen_send_email': 'Invia e-mail',
     'gen_support_lumina_it': 'support@lumina.it',
     'gen_how_do_i_restore_my_pro_purcha':
@@ -5845,7 +6739,6 @@ appTranslations = <String, Map<String, String>>{
     'confirm_deletion': 'Conferma eliminazione',
     'confirm_delivery': 'Conferma consegna',
     'confirm_photo': 'Conferma foto',
-    'confirm_purchase': 'Conferma acquisto',
     'confirm_purchase_1': 'Conferma acquisto',
     'confused_speak_to_an_expert': 'Hai dubbi? Parla con un esperto',
     'congratulations_you_finished_the_final_exam_and_ea':
@@ -5956,7 +6849,6 @@ appTranslations = <String, Map<String, String>>{
     'description_too_long': 'Descrizione troppo lunga',
     'detailed_description': 'Descrizione dettagliata',
     'detailed_skill_breakdown': 'Analisi dettagliata delle competenze',
-    'detailstitle': 'Dettagli',
     'diamond': 'Diamante',
     'done': 'Fatto',
     'download': 'Scarica',
@@ -6146,20 +7038,7 @@ appTranslations = <String, Map<String, String>>{
     'keep_learning_today': 'Continua a imparare oggi',
     'keep_my_account': 'Mantieni il mio account',
     'kitchen_job': 'Lavoro in cucina',
-    'label_lib_features_ai_chat_views_guided_learning_level_selection_view_35':
-        'Selezione del livello di apprendimento guidato',
-    'label_lib_features_ai_chat_views_widgets_ai_chat_home_widgets_134':
-        'Home della chat IA',
-    'label_lib_features_ai_chat_views_widgets_ai_chat_home_widgets_242':
-        'Home della chat IA',
-    'label_lib_features_courses_sub_features_final_exam_views_final_exam_speaking_view_373':
-        'Sezione orale dell’esame finale',
-    'label_lib_features_practice_hub_views_job_sentences_job_sentences_view_45':
-        'Frasi per il lavoro',
-    'label_lib_features_practice_hub_views_survival_italian_survival_italian_view_249':
-        'Italiano di sopravvivenza',
-    'label_lib_features_service_hub_sub_features_caf_administrative_help__widgets_official_checklist_card_59':
-        'Checklist ufficiale CAF',
+
     'language_bengali_native': 'Lingua: bengalese (madrelingua)',
     'language_english_b2': 'Lingua: inglese (B2)',
     'language_helper_will_open_here': 'L’assistente linguistico si aprirà qui',
@@ -6270,8 +7149,6 @@ appTranslations = <String, Map<String, String>>{
     'no_sentences_match_your_search': 'Nessuna frase corrisponde alla ricerca',
     'no_skill_builders_are_available':
         'Nessun modulo di sviluppo competenze disponibile',
-    'no_streak_freeze_packages_are_available':
-        'Nessun pacchetto blocco serie disponibile',
     'no_survival_italian_situations_are_available':
         'Nessuna situazione di italiano di sopravvivenza disponibile',
     'no_unopened_chest': 'Nessun baule da aprire',
@@ -6424,7 +7301,6 @@ appTranslations = <String, Map<String, String>>{
     'profile_updated': 'Profilo aggiornato',
     'progress': 'Avanzamento',
     'pronunciation_unavailable': 'Pronuncia non disponibile',
-    'protect_your_progress_in_italian': 'Proteggi i tuoi progressi in italiano',
     'protection_added': 'Protezione aggiunta',
     'pulisco_il_tavolo_nsubito': 'Pulisco il tavolo\nsubito',
     'purchase_completed': 'Acquisto completato',
@@ -6607,8 +7483,6 @@ appTranslations = <String, Map<String, String>>{
     'streak': 'Serie',
     'streak_bonus': 'Bonus serie',
     'streak_freeze': 'Blocco serie',
-    'streak_freeze_refiller': 'Ricarica blocchi serie',
-    'streak_freeze_store': 'Negozio blocchi serie',
     'streak_freezes': 'Blocchi serie',
     'strict_exam_mode': 'Modalità esame rigorosa',
     'students_assisted': 'Studenti assistiti',
@@ -6871,7 +7745,7 @@ appTranslations = <String, Map<String, String>>{
     'you_all_are': 'Voi siete',
     'you_all_speak': 'Voi parlate',
     'you_are': 'Tu sei',
-    'you_blocked_this_user': 'Hai bloccato questo utente',
+    'you_blocked_this_user': 'Hai bloccato questo utente ',
     'you_blocked_this_user_1': 'Hai bloccato questo utente',
     'you_cannot_message_this_user': 'Non puoi inviare messaggi a questo utente',
     'you_have_been_promoted': 'Sei stato promosso',
@@ -6893,7 +7767,6 @@ appTranslations = <String, Map<String, String>>{
         'Il tuo indirizzo email è stato aggiornato correttamente',
     'your_final_level': 'Il tuo livello finale',
     'your_future': 'Il tuo futuro',
-    'your_inventory': 'Il tuo inventario',
     'your_learning_milestone_is_saved':
         'Il tuo traguardo di apprendimento è stato salvato',
     'your_new_benefits': 'I tuoi nuovi vantaggi',
@@ -6993,7 +7866,7 @@ appTranslations = <String, Map<String, String>>{
     'ai_speaking_lab_description':
         'Esercitati con conversazioni\nreali e ricevi feedback\n24 ore su 24, 7 giorni su 7.',
     'ai_speaking_lab_badge': 'FEEDBACK 24/7',
-    'ai_guided_learning_title': 'Apprendimento\nguidato IA',
+    'ai_guided_learning_title': 'Apprendimento guidato IA',
     'ai_guided_learning_description':
         'Intraprendi un percorso personalizzato e strutturato.\nPadroneggia grammatica, vocabolario e contesto con\nil tuo tutor IA personale.',
     'ai_guided_learning_badge': 'PERCORSO PERSONALIZZATO',

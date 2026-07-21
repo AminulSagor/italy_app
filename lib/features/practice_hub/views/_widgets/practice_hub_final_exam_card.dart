@@ -121,7 +121,10 @@ class _LockedFinalExamCard extends StatelessWidget {
             ),
             SizedBox(height: 10.h),
             Text(
-              'exam_courseprogresspercent_completed_exam_unlockcompletionpercent_required'.trParams(<String, String>{'courseprogresspercent': exam.courseProgressPercent.toString(), 'unlockcompletionpercent': exam.unlockCompletionPercent.toString()}),
+              'exam_progress_requirement'.trParams(<String, String>{
+                'progress': exam.courseProgressPercent.toString(),
+                'required': exam.unlockCompletionPercent.toString(),
+              }),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppFont.font13.sp,
@@ -252,7 +255,7 @@ class _ReadyFinalExamCard extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Text(
-              'ready_for_your_final_challenge'.tr,
+              exam.statusLabelKey.tr,
               style: TextStyle(
                 fontSize: AppFont.font18.sp,
                 fontWeight: FontWeight.w900,
@@ -262,7 +265,7 @@ class _ReadyFinalExamCard extends StatelessWidget {
             SizedBox(height: 28.h),
             CustomButton(
               onPressed: onStartTap,
-              text: 'start_final_exam'.tr,
+              text: exam.actionLabelKey.tr,
               height: 60,
               width: double.infinity,
               showShadow: true,

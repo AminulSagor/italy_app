@@ -21,191 +21,167 @@ class ProPlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isCouponApplied) {
-      return _CouponPlanCard(plan: plan, currency: currency);
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(32.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(kRadius48.r),
-        border: Border.all(color: AppColors.proPlanBorder, width: 1.2.w),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AppColors.homeNeutralShadow,
-            blurRadius: 18.r,
-            offset: Offset(0, 8.h),
-          ),
-        ],
-      ),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  plan.title,
-                  style: TextStyle(
-                    fontSize: AppFont.font20.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.homePrimaryText,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  plan.subtitle,
-                  style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.bodyText,
-                    height: 1.35,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            plan.priceLabel(currency),
-            style: TextStyle(
-              fontSize: AppFont.font30.sp,
-              fontWeight: FontWeight.w900,
-              color: AppColors.primaryGreen,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CouponPlanCard extends StatelessWidget {
-  final ProPlanModel plan;
-  final ProCurrency currency;
-
-  const _CouponPlanCard({required this.plan, required this.currency});
-
-  @override
-  Widget build(BuildContext context) {
     final String price = plan.priceLabel(currency);
     final String oldPrice = plan.oldPriceLabel(currency);
-    final bool hasDiscount = oldPrice != price;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 34.h),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(kProPlanCardRadius.r),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AppColors.homeNeutralShadow,
-            blurRadius: 24.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            plan.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: AppFont.font24.sp,
-              fontWeight: FontWeight.w900,
-              color: AppColors.homePrimaryText,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            plan.subtitle,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: AppFont.font14.sp,
-              fontWeight: FontWeight.w500,
-              color: AppColors.bodyText,
-              height: 1.35,
-            ),
-          ),
-          SizedBox(height: 34.h),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    price,
-                    maxLines: 1,
-                    style: TextStyle(
-                      fontSize: AppFont.font44.sp,
-                      fontWeight: FontWeight.w900,
-                      height: 0.95,
-                      color: AppColors.primaryGreen,
-                    ),
-                  ),
-                ),
+    final bool hasDiscount =
+        isCouponApplied && oldPrice.isNotEmpty && oldPrice != price;
+
+    final double titleFontSize = (AppFont.font18.sp)
+        .clamp(16.0, 19.0)
+        .toDouble();
+
+    final double subtitleFontSize = (AppFont.font13.sp)
+        .clamp(12.0, 14.0)
+        .toDouble();
+
+    final double priceFontSize = (AppFont.font24.sp)
+        .clamp(22.0, 27.0)
+        .toDouble();
+
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool isNarrow = constraints.maxWidth < 330;
+
+        final Widget courseInformation = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              plan.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.w800,
+                color: AppColors.homePrimaryText,
+                height: 1.25,
               ),
-              if (hasDiscount) ...<Widget>[
-                SizedBox(width: 10.w),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 5.h),
-                  child: Text(
-                    oldPrice,
-                    style: TextStyle(
-                      fontSize: AppFont.font18.sp,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.proPriceStruck,
-                      decoration: TextDecoration.lineThrough,
-                      decorationColor: AppColors.proPriceStruck,
-                      decorationThickness: 2.w,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          if (hasDiscount) ...<Widget>[
-            SizedBox(height: 10.h),
-            Container(
-              height: 18.h,
-              padding: EdgeInsets.symmetric(horizontal: 7.w),
-              decoration: BoxDecoration(
-                color: AppColors.homeSoftGreen,
-                borderRadius: BorderRadius.circular(5.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(
-                    Icons.redeem_outlined,
-                    size: 11.w,
-                    color: AppColors.primaryGreen,
-                  ),
-                  SizedBox(width: 3.w),
-                  Text(
-                    plan.couponSaveLabelFor(currency),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppFont.font10.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.primaryGreen,
-                      letterSpacing: .25,
-                    ),
-                  ),
-                ],
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              plan.subtitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: subtitleFontSize,
+                fontWeight: FontWeight.w500,
+                color: AppColors.bodyText,
+                height: 1.35,
               ),
             ),
           ],
-        ],
-      ),
+        );
+
+        final Widget priceInformation = Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: isNarrow
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.end,
+          children: <Widget>[
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: isNarrow ? 180.w : 130.w),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: isNarrow
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
+                child: Text(
+                  price,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: priceFontSize,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.primaryGreen,
+                    height: 1.1,
+                  ),
+                ),
+              ),
+            ),
+            if (hasDiscount) ...<Widget>[
+              SizedBox(height: 3.h),
+              Text(
+                oldPrice,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: AppFont.font13.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.proPriceStruck,
+                  decoration: TextDecoration.lineThrough,
+                  decorationColor: AppColors.proPriceStruck,
+                  decorationThickness: 1.5.w,
+                ),
+              ),
+              SizedBox(height: 7.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
+                decoration: BoxDecoration(
+                  color: AppColors.homeSoftGreen,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(
+                      Icons.redeem_outlined,
+                      size: 13.w,
+                      color: AppColors.primaryGreen,
+                    ),
+                    SizedBox(width: 4.w),
+                    Flexible(
+                      child: Text(
+                        plan.couponSaveLabelFor(currency),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: AppFont.font10.sp,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryGreen,
+                          height: 1.1,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        );
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: AppColors.proPlanBorder, width: 1.w),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: AppColors.homeNeutralShadow,
+                blurRadius: 10.r,
+                offset: Offset(0, 4.h),
+              ),
+            ],
+          ),
+          child: isNarrow
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    courseInformation,
+                    SizedBox(height: 14.h),
+                    priceInformation,
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(child: courseInformation),
+                    SizedBox(width: 16.w),
+                    priceInformation,
+                  ],
+                ),
+        );
+      },
     );
   }
 }
@@ -298,7 +274,7 @@ class ProCouponInput extends StatelessWidget {
                     SizedBox(width: 12.w),
                     Expanded(
                       child: Text(
-                        'Coupon applied',
+                        'coupon_applied'.tr,
                         style: TextStyle(
                           color: AppColors.homePrimaryText,
                           fontSize: AppFont.font20.sp,
@@ -321,7 +297,9 @@ class ProCouponInput extends StatelessWidget {
                 if (discountPercentage > 0) ...<Widget>[
                   SizedBox(height: 8.h),
                   Text(
-                    'Discount: $discountPercentage%',
+                    'discount_value'.trParams(<String, String>{
+                      'discount': discountPercentage.toString(),
+                    }),
                     style: TextStyle(
                       color: AppColors.bodyText,
                       fontSize: AppFont.font14.sp,
@@ -357,7 +335,7 @@ class ProCouponInput extends StatelessWidget {
                       shape: const StadiumBorder(),
                     ),
                     child: Text(
-                      'Remove coupon',
+                      'remove_coupon'.tr,
                       style: TextStyle(
                         fontSize: AppFont.font15.sp,
                         fontWeight: FontWeight.w900,
@@ -435,31 +413,52 @@ class _ProCouponEntryField extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           height: 58.h,
-          child: OutlinedButton(
-            onPressed: isLoading ? null : onApplyTap,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primaryGreen,
-              side: BorderSide(color: AppColors.primaryGreen, width: 2.w),
-              shape: const StadiumBorder(),
-              disabledForegroundColor: AppColors.bodyText,
+          child: SizedBox(
+            width: double.infinity,
+            height: 52.h,
+            child: OutlinedButton(
+              onPressed: isLoading ? null : onApplyTap,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primaryGreen,
+                side: BorderSide(color: AppColors.primaryGreen, width: 1.6.w),
+                shape: const StadiumBorder(),
+                disabledForegroundColor: AppColors.primaryGreen,
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                child: isLoading
+                    ? Row(
+                        key: const ValueKey<String>('coupon-loading'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          SizedBox(
+                            width: 18.w,
+                            height: 18.w,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primaryGreen,
+                            ),
+                          ),
+                          SizedBox(width: 9.w),
+                          Text(
+                            'applying_coupon'.tr,
+                            style: TextStyle(
+                              fontSize: AppFont.font14.sp,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        'apply'.tr,
+                        key: const ValueKey<String>('coupon-apply'),
+                        style: TextStyle(
+                          fontSize: AppFont.font14.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+              ),
             ),
-            child: isLoading
-                ? SizedBox(
-                    width: 22.w,
-                    height: 22.w,
-                    child: const CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primaryGreen,
-                    ),
-                  )
-                : Text(
-                    'apply'.tr,
-                    style: TextStyle(
-                      fontSize: AppFont.font15.sp,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
           ),
         ),
       ],

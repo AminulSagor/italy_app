@@ -59,13 +59,20 @@ class CoursesApiService {
     );
   }
 
-  Future<bool> _safeFetchCourseAccess({required String courseId}) async {
+  Future<bool> _safeFetchCourseAccess({
+    required String courseId,
+  }) async {
     try {
       final Response<dynamic> response = await _apiClient.dio.get(
         '/course-enrollments/courses/$courseId/access',
       );
+
       final Map<String, dynamic> body = _responseMap(response);
-      return _boolValue(body['hasaccess'.tr], fallback: false);
+
+      return _boolValue(
+        body['hasAccess'],
+        fallback: false,
+      );
     } on DioException {
       return false;
     }
@@ -467,7 +474,7 @@ class CoursesApiService {
           ? gatewayMessage
           : 'Your final exam result is ready.';
     } else if (hasAttempted) {
-      actionLabel = 'result_pending'.tr;
+      actionLabel = 'final_exam_result_pending'.tr;
       helperLabel = gatewayMessage.isNotEmpty
           ? gatewayMessage
           : 'Your final exam is under review.';

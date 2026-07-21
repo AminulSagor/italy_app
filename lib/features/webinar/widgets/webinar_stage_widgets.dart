@@ -193,7 +193,10 @@ class _StageMessageChip extends StatelessWidget {
           SizedBox(width: 12.w),
           Flexible(
             child: Text(
-              'message_sendername_message_message'.trParams(<String, String>{'sendername': message.senderName.toString(), 'message': message.message.toString()}),
+              'webinar_message_preview'.trParams(<String, String>{
+                'sender': message.senderName,
+                'message': message.message,
+              }),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(

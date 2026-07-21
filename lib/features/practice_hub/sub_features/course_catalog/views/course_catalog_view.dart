@@ -18,7 +18,7 @@ class CourseCatalogView extends GetView<CourseCatalogController> {
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
       appBar: SimpleAppbar(
-        title: 'Courses',
+        title: 'courses'.tr,
         onBackTap: () => Get.back<void>(),
       ),
       body: Column(
@@ -104,10 +104,7 @@ class CourseCatalogView extends GetView<CourseCatalogController> {
 }
 
 class _CourseSearchField extends StatelessWidget {
-  const _CourseSearchField({
-    required this.controller,
-    required this.onChanged,
-  });
+  const _CourseSearchField({required this.controller, required this.onChanged});
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
@@ -136,7 +133,7 @@ class _CourseSearchField extends StatelessWidget {
         ),
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: 'Search courses by name',
+          hintText: 'course_search_hint'.tr,
           hintStyle: TextStyle(
             fontSize: AppFont.font15.sp,
             fontWeight: FontWeight.w600,

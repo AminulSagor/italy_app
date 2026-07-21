@@ -65,7 +65,7 @@ class NoSearchResultStatusView extends StatelessWidget {
                     SizedBox(height: 22.h),
 
                     Text(
-                      "We couldn't find what you were\nlooking for. Try a different\nkeyword.",
+                      'search_no_match_message'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: StatusColors.bodyText,

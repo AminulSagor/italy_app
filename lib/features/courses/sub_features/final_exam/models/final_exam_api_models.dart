@@ -466,25 +466,44 @@ class FinalExamSubmissionModel {
 }
 
 class FinalExamResultResponseModel {
+  final String courseId;
   final String status;
   final String referenceCode;
   final bool resultReady;
+  final bool canRetake;
+  final bool certificateAvailable;
   final String message;
   final Map<String, dynamic> review;
 
   const FinalExamResultResponseModel({
+    required this.courseId,
     required this.status,
     required this.referenceCode,
     required this.resultReady,
+    required this.canRetake,
+    required this.certificateAvailable,
     required this.message,
     required this.review,
   });
 
-  factory FinalExamResultResponseModel.fromJson(Map<String, dynamic> json) {
+  factory FinalExamResultResponseModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return FinalExamResultResponseModel(
+      courseId: _string(json['courseId']),
       status: _string(json['status']),
-      referenceCode: _string(json['referenceCode']),
-      resultReady: _bool(json['resultReady']),
+      referenceCode: _string(
+        json['referenceCode'],
+      ),
+      resultReady: _bool(
+        json['resultReady'],
+      ),
+      canRetake: _bool(
+        json['canRetake'],
+      ),
+      certificateAvailable: _bool(
+        json['certificateAvailable'],
+      ),
       message: _string(json['message']),
       review: _map(json['review']),
     );

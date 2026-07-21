@@ -11,7 +11,7 @@ class DevicePushTokenService {
   DevicePushTokenService({
     required ApiClient apiClient,
     required StorageService storageService,
-  })  : _apiClient = apiClient,
+  }) : _apiClient = apiClient,
         _storageService = storageService;
 
   final ApiClient _apiClient;
@@ -20,7 +20,36 @@ class DevicePushTokenService {
   static const String _deviceIdStorageKey = 'device_id';
   static const String _registerEndpoint = '/devices/register';
 
+  bool _allowBackendSync = false;
+  bool _refreshListenerStarted = false;
+
+  String get platformValue =>
+      Platform.isIOS ? 'ios' : 'android';
+
+  Future<String> getOrCreateDeviceId() async {
+    final String existing =
+        _storageService
+            .readString(_deviceIdStorageKey)
+            ?.trim() ??
+            '';
+
+    if (existing.isNotEmpty) {
+      return existing;
+    }
+
+    final String newDeviceId = const Uuid().v4();
+
+    await _storageService.writeString(
+      _deviceIdStorageKey,
+      newDeviceId,
+    );
+
+    return newDeviceId;
+  }
+
   Future<void> registerCurrentDevice() async {
+    _allowBackendSync = true;
+
     try {
       await FirebaseMessaging.instance.requestPermission(
         alert: true,
@@ -28,17 +57,14 @@ class DevicePushTokenService {
         sound: true,
       );
 
-      final String? fcmToken = await FirebaseMessaging.instance.getToken();
+      final String? token =
+      await FirebaseMessaging.instance.getToken();
 
-      if (fcmToken == null || fcmToken.isEmpty) {
-        dev.log(
-          'FCM token is empty. Device registration skipped.',
-          name: 'DevicePushTokenService',
-        );
+      if (token == null || token.trim().isEmpty) {
         return;
       }
 
-      await _sendTokenToBackend(fcmToken);
+      await _sendTokenToBackend(token.trim());
     } catch (error, stackTrace) {
       dev.log(
         'Failed to register FCM token',
@@ -50,44 +76,68 @@ class DevicePushTokenService {
   }
 
   void listenForTokenRefresh() {
-    FirebaseMessaging.instance.onTokenRefresh.listen((String newToken) async {
-      try {
-        await _sendTokenToBackend(newToken);
-      } catch (error, stackTrace) {
-        dev.log(
-          'Failed to update refreshed FCM token',
-          error: error,
-          stackTrace: stackTrace,
-          name: 'DevicePushTokenService',
-        );
-      }
-    });
+    if (_refreshListenerStarted) {
+      return;
+    }
+
+    _refreshListenerStarted = true;
+
+    FirebaseMessaging.instance.onTokenRefresh.listen(
+          (String newToken) async {
+        if (!_allowBackendSync ||
+            !_storageService.isLoggedIn) {
+          return;
+        }
+
+        try {
+          await _sendTokenToBackend(newToken.trim());
+        } catch (error, stackTrace) {
+          dev.log(
+            'Failed to update refreshed FCM token',
+            error: error,
+            stackTrace: stackTrace,
+            name: 'DevicePushTokenService',
+          );
+        }
+      },
+    );
   }
 
-  Future<void> _sendTokenToBackend(String fcmToken) async {
-    final String deviceId = await _getOrCreateDeviceId();
+  void disableBackendSync() {
+    _allowBackendSync = false;
+  }
+
+  Future<void> deleteLocalFcmToken() async {
+    try {
+      await FirebaseMessaging.instance.deleteToken();
+    } catch (error, stackTrace) {
+      dev.log(
+        'Failed to delete local FCM token',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'DevicePushTokenService',
+      );
+    }
+  }
+
+  Future<void> _sendTokenToBackend(
+      String fcmToken,
+      ) async {
+    if (fcmToken.isEmpty) {
+      return;
+    }
+
+    final String deviceId =
+    await getOrCreateDeviceId();
 
     await _apiClient.dio.post(
       _registerEndpoint,
       data: <String, dynamic>{
         'deviceId': deviceId,
-        'platform': Platform.isIOS ? 'ios' : 'android',
+        'platform': platformValue,
         'appState': 'foreground',
         'fcmToken': fcmToken,
       },
     );
-  }
-
-  Future<String> _getOrCreateDeviceId() async {
-    final String? existingDeviceId =
-    _storageService.readString(_deviceIdStorageKey);
-
-    if (existingDeviceId != null && existingDeviceId.isNotEmpty) {
-      return existingDeviceId;
-    }
-
-    final String newDeviceId = const Uuid().v4();
-    await _storageService.writeString(_deviceIdStorageKey, newDeviceId);
-    return newDeviceId;
   }
 }

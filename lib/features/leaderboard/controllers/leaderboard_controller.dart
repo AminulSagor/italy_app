@@ -510,34 +510,44 @@ class LeaderboardController extends GetxController {
     return sb.toString().split('').reversed.join();
   }
 
-  void onMessageTap(Map<String, dynamic> user) async {
-    if ((user['isCurrentUser'] as bool?) ?? false) return;
+  Future<void> onMessageTap(Map<String, dynamic> user) async {
+    final bool isCurrentUser =
+        (user['isCurrentUser'] as bool?) ?? false;
 
-    final String? userId = user['userId']?.toString();
-    if (userId == null) return;
+    if (isCurrentUser) {
+      return;
+    }
 
-    final ProfileModel? preview = await _leaderboardService.fetchUserPreview(
-      userId,
-    );
-    if (preview != null && preview.canChat == true) {
-      Get.dialog<void>(
-        LeaderboardChatDialog(
-          user: <String, dynamic>{
-            ...user,
-            'chatTargetUserId': preview.chatTargetUserId,
-            'totalXp': preview.totalXp,
-            'streakDays': preview.streakDays,
-            'avatarUrl': preview.avatarUrl,
-          },
-        ),
-        barrierColor: Colors.black.withValues(alpha: 0.45),
-      );
-    } else {
+    final String userId =
+        user['userId']?.toString().trim() ?? '';
+
+    if (userId.isEmpty) {
+      return;
+    }
+
+    final ProfileModel? preview =
+    await _leaderboardService.fetchUserPreview(userId);
+
+    if (preview == null || preview.canChat != true) {
       Get.snackbar(
         'cannot_chat'.tr,
         'this_user_cannot_be_messaged_right_now'.tr,
       );
+      return;
     }
+
+    await Get.dialog<void>(
+      LeaderboardChatDialog(
+        user: <String, dynamic>{
+          ...user,
+          'chatTargetUserId': preview.chatTargetUserId,
+          'totalXp': preview.totalXp,
+          'streakDays': preview.streakDays,
+          'avatarUrl': preview.avatarUrl,
+        },
+      ),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+    );
   }
 
   @override

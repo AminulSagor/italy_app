@@ -18,6 +18,8 @@ class GooglePlayBillingService extends GetxService {
 
   static const String _pendingPurchaseKey =
       'package_store_pending_google_play_purchase';
+  static final RegExp _sha256Pattern =
+  RegExp(r'^[a-f0-9]{64}$');
 
   final StorageService _storageService;
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
@@ -185,15 +187,34 @@ class GooglePlayBillingService extends GetxService {
       return false;
     }
 
+    final String obfuscatedAccountId =
+    pendingPurchase.obfuscatedAccountId
+        .trim()
+        .toLowerCase();
+
+    if (!_sha256Pattern.hasMatch(obfuscatedAccountId)) {
+      lastError.value =
+      'The purchase could not be securely linked to your account.';
+
+      dev.log(
+        'Invalid Google Play obfuscated account ID.',
+        name: 'GooglePlayBillingService',
+      );
+
+      return false;
+    }
+
     await savePendingPurchase(pendingPurchase);
     try {
       final String? offerToken = details is GooglePlayProductDetails
           ? details.offerToken
           : null;
-      final GooglePlayPurchaseParam purchaseParam = GooglePlayPurchaseParam(
+      final GooglePlayPurchaseParam purchaseParam =
+      GooglePlayPurchaseParam(
         productDetails: details,
+        applicationUserName: obfuscatedAccountId,
         offerToken: pendingPurchase.productType ==
-                StoreProviderProductType.subscription
+            StoreProviderProductType.subscription
             ? offerToken
             : null,
       );
@@ -252,18 +273,25 @@ class GooglePlayBillingService extends GetxService {
   }
 
   Future<void> finishVerifiedPurchase(
-    PurchaseDetails purchase,
-    StoreProviderProductType productType,
-  ) async {
-    if (productType == StoreProviderProductType.consumable &&
-        Platform.isAndroid) {
-      final InAppPurchaseAndroidPlatformAddition addition = _inAppPurchase
-          .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
-      await addition.consumePurchase(purchase);
+      PurchaseDetails purchase,
+      StoreProviderProductType _,
+      ) async {
+    /*
+   * The secure backend already:
+   *
+   * - consumes finite consumables;
+   * - acknowledges initial subscriptions.
+   *
+   * Do not explicitly consume the same purchase
+   * again from the client.
+   */
+    if (!purchase.pendingCompletePurchase) {
+      return;
     }
-    if (purchase.pendingCompletePurchase) {
-      await _inAppPurchase.completePurchase(purchase);
-    }
+
+    await _inAppPurchase.completePurchase(
+      purchase,
+    );
   }
 
   PendingGooglePlayPurchaseModel? loadPendingPurchase() {

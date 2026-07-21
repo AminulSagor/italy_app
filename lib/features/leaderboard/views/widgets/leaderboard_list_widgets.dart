@@ -50,9 +50,16 @@ class LeaderboardMilestoneCard extends StatelessWidget {
     }
 
     return Container(
-      height: 190.h,
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 20.h),
+      constraints: BoxConstraints(
+        minHeight: 190.h,
+      ),
+      padding: EdgeInsets.fromLTRB(
+        24.w,
+        24.h,
+        24.w,
+        20.h,
+      ),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(30.r),
@@ -65,47 +72,63 @@ class LeaderboardMilestoneCard extends StatelessWidget {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             nextLeagueName.isNotEmpty
                 ? '${'leaderboard_milestone_title'.tr}: $nextLeagueName'
                 : 'leaderboard_milestone_title'.tr,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: AppFont.font20.sp,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font18.sp,
+              fontWeight: FontWeight.w800,
               color: AppColors.homePrimaryText,
-              letterSpacing: -0.5,
+              letterSpacing: -0.3,
+              height: 1.2,
             ),
           ),
-          SizedBox(height: 6.h),
+          SizedBox(height: 5.h),
+
           Text(
             message.isNotEmpty ? message : 'leaderboard_milestone_message'.tr,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: AppFont.font15.sp,
-              fontWeight: FontWeight.w600,
+              fontSize: AppFont.font13.sp,
+              fontWeight: FontWeight.w500,
               color: AppColors.homeSecondaryText,
+              height: 1.35,
             ),
           ),
-          const Spacer(),
+
+          // Do not use Spacer inside a dynamically sized Column.
+          SizedBox(height: 16.h),
+
           Row(
             children: <Widget>[
               Container(
-                width: 42.r,
-                height: 42.r,
-                decoration: BoxDecoration(
+                width: 36.r,
+                height: 36.r,
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color.fromARGB(29, 0, 0, 0),
+                  color: Color.fromARGB(29, 0, 0, 0),
                 ),
-                child: Icon(Icons.emoji_events_outlined),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.emoji_events_outlined,
+                  size: 20.r,
+                  color: AppColors.homePrimaryText,
+                ),
               ),
-              SizedBox(width: 14.w),
+              SizedBox(width: 10.w),
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100.r),
                   child: LinearProgressIndicator(
                     value: progress.clamp(0.0, 1.0),
-                    minHeight: 16.h,
+                    minHeight: 10.h,
                     backgroundColor: AppColors.legacyColorFFDFDFDF,
                     valueColor: const AlwaysStoppedAnimation<Color>(
                       Color(0xFF52CE12),
@@ -113,45 +136,63 @@ class LeaderboardMilestoneCard extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 14.w),
-              const _MilestoneIcon(
+              SizedBox(width: 10.w),
+              _MilestoneIcon(
                 icon: Icons.star_rounded,
                 iconColor: AppColors.white,
-                backgroundColor: Color.fromARGB(54, 255, 162, 0),
+                backgroundColor: const Color.fromARGB(54, 255, 162, 0),
               ),
             ],
           ),
           SizedBox(height: 6.h),
+
           Row(
             children: <Widget>[
-              Text(
-                _formatWithCommas(currentXp),
-                style: TextStyle(
-                  fontSize: AppFont.font11.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.homeSecondaryText,
+              Expanded(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(
+                        _formatWithCommas(currentXp),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: AppFont.font11.sp,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.homeSecondaryText,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 3.w),
+                    Icon(
+                      Icons.bolt_rounded,
+                      size: 13.r,
+                      color: AppColors.primaryGreen,
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(width: 4.w),
-              Icon(
-                Icons.bolt_rounded,
-                size: 13.r,
-                color: AppColors.primaryGreen,
-              ),
-              const Spacer(),
-              Text(
-                _formatWithCommas(targetXp),
-                style: TextStyle(
-                  fontSize: AppFont.font11.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.homeSecondaryText,
-                ),
-              ),
-              SizedBox(width: 4.w),
-              Icon(
-                Icons.bolt_rounded,
-                size: 13.r,
-                color: AppColors.primaryGreen,
+              SizedBox(width: 8.w),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    _formatWithCommas(targetXp),
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: AppFont.font11.sp,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.homeSecondaryText,
+                    ),
+                  ),
+                  SizedBox(width: 3.w),
+                  Icon(
+                    Icons.bolt_rounded,
+                    size: 13.r,
+                    color: AppColors.primaryGreen,
+                  ),
+                ],
               ),
             ],
           ),
@@ -196,7 +237,10 @@ class LeaderboardSearchField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
-  const LeaderboardSearchField({required this.controller, required this.onChanged});
+  const LeaderboardSearchField({
+    required this.controller,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -245,7 +289,7 @@ class LeaderboardSearchField extends StatelessWidget {
 
 class LeaderboardList extends StatelessWidget {
   final List<Map<String, dynamic>> users;
-  final ValueChanged<Map<String, dynamic>> onMessageTap;
+  final Future<void> Function(Map<String, dynamic>) onMessageTap;
 
   const LeaderboardList({required this.users, required this.onMessageTap});
 
@@ -268,7 +312,7 @@ class LeaderboardList extends StatelessWidget {
 
 class _LeaderboardUserTile extends StatelessWidget {
   final Map<String, dynamic> user;
-  final VoidCallback onMessageTap;
+  final Future<void> Function() onMessageTap;
 
   const _LeaderboardUserTile({required this.user, required this.onMessageTap});
 
@@ -287,7 +331,9 @@ class _LeaderboardUserTile extends StatelessWidget {
         height: 82.h,
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         decoration: BoxDecoration(
-          color: isCurrentUser ? const Color(0xFFF1FAEA) : AppColors.white,
+          color: isCurrentUser
+              ? AppColors.primaryGreen.withValues(alpha: 0.10)
+              : AppColors.white,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isCurrentUser
@@ -330,16 +376,43 @@ class _LeaderboardUserTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppFont.font15.sp,
-                      height: 1.14,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.homePrimaryText,
-                    ),
+                  Row(
+                    children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: AppFont.font15.sp,
+                            height: 1.14,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.homePrimaryText,
+                          ),
+                        ),
+                      ),
+                      if (isCurrentUser) ...<Widget>[
+                        SizedBox(width: 7.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 7.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryGreen,
+                            borderRadius: BorderRadius.circular(100.r),
+                          ),
+                          child: Text(
+                            'leaderboard_you'.tr,
+                            style: TextStyle(
+                              fontSize: AppFont.font9.sp,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   SizedBox(height: 3.h),
                   Row(
@@ -387,23 +460,7 @@ class _LeaderboardUserTile extends StatelessWidget {
             ),
             if (!isCurrentUser) ...<Widget>[
               SizedBox(width: 12.w),
-              GestureDetector(
-                onTap: onMessageTap,
-                child: Container(
-                  width: 42.r,
-                  height: 42.r,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.legacyColorFFF1F2F2,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.chat_bubble_outline_rounded,
-                    size: 18.r,
-                    color: AppColors.homeSecondaryText,
-                  ),
-                ),
-              ),
+              _MessageActionButton(onTap: onMessageTap),
             ],
           ],
         ),
@@ -443,10 +500,7 @@ class _SmallAvatar extends StatelessWidget {
       ),
       child: ClipOval(
         child: avatarUrl.isEmpty
-            ? _SmallAvatarFallback(
-                isCurrentUser: isCurrentUser,
-                rank: rank,
-              )
+            ? _SmallAvatarFallback(isCurrentUser: isCurrentUser, rank: rank)
             : Image.network(
                 avatarUrl,
                 width: 52.r,
@@ -463,10 +517,7 @@ class _SmallAvatar extends StatelessWidget {
 }
 
 class _SmallAvatarFallback extends StatelessWidget {
-  const _SmallAvatarFallback({
-    required this.isCurrentUser,
-    required this.rank,
-  });
+  const _SmallAvatarFallback({required this.isCurrentUser, required this.rank});
 
   final bool isCurrentUser;
   final int rank;
@@ -479,9 +530,7 @@ class _SmallAvatarFallback extends StatelessWidget {
         child: Icon(
           isCurrentUser ? Icons.person_rounded : Icons.person,
           size: 30.r,
-          color: rank > 16
-              ? AppColors.white
-              : AppColors.legacyColorFFDFDFDF,
+          color: rank > 16 ? AppColors.white : AppColors.legacyColorFFDFDFDF,
         ),
       ),
     );
@@ -497,12 +546,79 @@ class EmptyLeaderboard extends StatelessWidget {
       height: 110.h,
       alignment: Alignment.center,
       child: Text(
-        'No users found',
+        'no_users_found'.tr,
         style: TextStyle(
           fontSize: AppFont.font16.sp,
           fontWeight: FontWeight.w700,
           color: AppColors.homeSecondaryText,
         ),
+      ),
+    );
+  }
+}
+
+class _MessageActionButton extends StatefulWidget {
+  const _MessageActionButton({required this.onTap});
+
+  final Future<void> Function() onTap;
+
+  @override
+  State<_MessageActionButton> createState() => _MessageActionButtonState();
+}
+
+class _MessageActionButtonState extends State<_MessageActionButton> {
+  bool _isLoading = false;
+
+  Future<void> _handleTap() async {
+    if (_isLoading) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await widget.onTap();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _isLoading ? null : _handleTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 42.r,
+        height: 42.r,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: _isLoading
+              ? AppColors.primaryGreen.withValues(alpha: 0.12)
+              : AppColors.legacyColorFFF1F2F2,
+          shape: BoxShape.circle,
+        ),
+        child: _isLoading
+            ? SizedBox(
+                width: 18.r,
+                height: 18.r,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.2.w,
+                  color: AppColors.primaryGreen,
+                ),
+              )
+            : Icon(
+                Icons.chat_bubble_outline_rounded,
+                size: 18.r,
+                color: AppColors.homeSecondaryText,
+              ),
       ),
     );
   }

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../../../core/themes/app_font.dart';
-import '../../../../../core/widgets/otp_code_input_row.dart';
-import '../../../../../core/widgets/otp_resend_button.dart';
+import '../../models/settings_localization.dart';
 import '../../settings_controller.dart';
 import '../../widgets/settings_ui_widgets.dart';
 
@@ -13,215 +12,225 @@ class VerifyContactView extends GetView<SettingsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final bool isEmail = controller.pendingContactType.value != 'phone';
-      final String destination = controller.pendingContactValue.value;
-
-      return Scaffold(
-        backgroundColor: SettingsUi.bg,
+    return WillPopScope(
+      onWillPop: () async {
+        controller.clearPendingContact();
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: SettingsUi.background,
         body: SafeArea(
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                left: -56.w,
-                top: -40.h,
-                child: _GlowCircle(color: SettingsUi.lightGreen, size: 170.r),
-              ),
-              Positioned(
-                right: -52.w,
-                top: 230.h,
-                child: _GlowCircle(
-                  color: const Color(0xFF65B9FF),
-                  size: 150.r,
+          child: Obx(() {
+            final String destination = controller.pendingContactValue.value;
+            final bool expired = destination.isEmpty;
+
+            return ListView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 28.h),
+              children: <Widget>[
+                SettingsTopBar(
+                  title: SettingsL10n.text('verification_code'),
+                  onBack: () {
+                    controller.clearPendingContact();
+                    Get.back<void>();
+                  },
                 ),
-              ),
-              SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(32.w, 31.h, 32.w, 56.h),
-                child: Column(
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: () {
-                          controller.clearPendingContact();
-                          Get.back<void>();
-                        },
-                        child: Container(
-                          width: 54.r,
-                          height: 54.r,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.arrow_back_rounded,
-                            size: 27.r,
-                            color: SettingsUi.text,
+                SizedBox(height: 28.h),
+                Center(
+                  child: Container(
+                    width: 72.r,
+                    height: 72.r,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE6F7F0),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      controller.pendingContactType.value == 'phone'
+                          ? Icons.sms_outlined
+                          : Icons.mark_email_read_outlined,
+                      size: 34.r,
+                      color: SettingsUi.primary,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 18.h),
+                Text(
+                  SettingsL10n.text('verify_code'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 23.sp,
+                    fontWeight: FontWeight.w800,
+                    color: SettingsUi.text,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  expired
+                      ? SettingsL10n.text('verification_expired')
+                      : SettingsL10n.text(
+                          'code_sent_to',
+                          params: <String, String>{'destination': destination},
+                        ),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    height: 1.45,
+                    color: SettingsUi.muted,
+                  ),
+                ),
+                SizedBox(height: 28.h),
+                if (!expired) ...<Widget>[
+                  _OtpInputRow(controller: controller),
+                  SizedBox(height: 20.h),
+                  SettingsPrimaryButton(
+                    text: SettingsL10n.text('verify_code'),
+                    icon: Icons.verified_outlined,
+                    enabled: controller.isOtpComplete &&
+                        !controller.isVerifyingContactOtp.value,
+                    isLoading: controller.isVerifyingContactOtp.value,
+                    onTap: controller.verifyPendingContact,
+                  ),
+                  SizedBox(height: 16.h),
+                  Center(
+                    child: Obx(() {
+                      final bool coolingDown =
+                          controller.contactOtpResendCooldown.isActive;
+                      final String label = coolingDown
+                          ? SettingsL10n.text(
+                              'resend_in',
+                              params: <String, String>{
+                                'time': controller
+                                    .contactOtpResendCooldown.remainingLabel,
+                              },
+                            )
+                          : SettingsL10n.text('resend_code');
+
+                      return TextButton.icon(
+                        onPressed: coolingDown ||
+                                controller.isResendingContactOtp.value
+                            ? null
+                            : controller.resendPendingContactOtp,
+                        icon: controller.isResendingContactOtp.value
+                            ? SizedBox(
+                                width: 16.r,
+                                height: 16.r,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Icon(Icons.refresh_rounded, size: 19.r),
+                        label: Text(label),
+                        style: TextButton.styleFrom(
+                          foregroundColor: SettingsUi.primary,
+                          textStyle: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ),
-                    ),
-                    SizedBox(height: 13.h),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(24.w, 34.h, 24.w, 35.h),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(45.r),
-                        boxShadow: <BoxShadow>[
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 40.r,
-                            offset: Offset(0, 20.h),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            width: 80.r,
-                            height: 80.r,
-                            decoration: const BoxDecoration(
-                              color: SettingsUi.lightGreen,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              isEmail
-                                  ? Icons.mark_email_unread_rounded
-                                  : Icons.sms_outlined,
-                              size: 38.r,
-                              color: SettingsUi.green,
-                            ),
-                          ),
-                          SizedBox(height: 28.h),
-                          Text(
-                            'verify_code'.tr,
-                            style: TextStyle(
-                              fontSize: 30.sp,
-                              fontWeight: FontWeight.w900,
-                              color: SettingsUi.text,
-                              letterSpacing: -0.65,
-                            ),
-                          ),
-                          SizedBox(height: 12.h),
-                          Text(
-                            'Enter the 4-digit code sent to\n$destination',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              height: 1.45,
-                              fontWeight: FontWeight.w500,
-                              color: SettingsUi.muted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 52.h),
-                    OtpCodeInputRow(
-                      controllers: controller.otpControllers,
-                      focusNodes: controller.otpFocusNodes,
-                      onChanged: ({required int index, required String value}) =>
-                          controller.onOtpDigitChanged(index, value),
-                      onCompleted: controller.verifyPendingContact,
-                      boxSize: 66.r,
-                    ),
-                    SizedBox(height: 40.h),
-                    SettingsPrimaryButton(
-                      text: 'verify_continue_1'.tr,
-                      height: 68,
-                      isLoading: controller.isVerifyingContactOtp.value,
-                      onTap: controller.verifyPendingContact,
-                    ),
-                    SizedBox(height: 28.h),
-                    Text(
-                      "didn_t_receive_the_code".tr,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color: SettingsUi.muted,
-                      ),
-                    ),
-                    SizedBox(height: 11.h),
-                    Obx(
-                      () => OtpResendButton(
-                        label: 'resend_code_1'.tr,
-                        isLoading: controller.isResendingContactOtp.value,
-                        remainingSeconds: controller
-                            .contactOtpResendCooldown
-                            .remainingSeconds
-                            .value,
-                        remainingLabel: controller
-                            .contactOtpResendCooldown
-                            .remainingLabel,
-                        onTap: controller.resendPendingContactOtp,
-                        fontSize: AppFont.font16,
-                      ),
-                    ),
-                    SizedBox(height: 41.h),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(24.w, 23.h, 24.w, 23.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFDCEBFF),
-                        borderRadius: BorderRadius.circular(30.r),
-                        border: Border.all(color: const Color(0xFFBEDDFF)),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.info_rounded,
-                            size: 22.r,
-                            color: const Color(0xFF0064A8),
-                          ),
-                          SizedBox(width: 14.w),
-                          Expanded(
-                            child: Text(
-                              isEmail
-                                  ? 'check_your_spam_folder_if_the_email_does_not_arriv'.tr
-                                  : 'the_sms_code_is_valid_for_10_minutes_confirm_that'.tr,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                height: 1.25,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF005A97),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+                      );
+                    }),
+                  ),
+                  SizedBox(height: 16.h),
+                  _SecurityTip(),
+                ] else ...<Widget>[
+                  SettingsPrimaryButton(
+                    text: SettingsL10n.text('back_to_profile'),
+                    onTap: Get.back,
+                  ),
+                ],
+              ],
+            );
+          }),
         ),
-      );
-    });
+      ),
+    );
   }
 }
 
-class _GlowCircle extends StatelessWidget {
-  const _GlowCircle({required this.color, required this.size});
+class _OtpInputRow extends StatelessWidget {
+  const _OtpInputRow({required this.controller});
 
-  final Color color;
-  final double size;
+  final SettingsController controller;
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List<Widget>.generate(4, (int index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 5.w),
+          child: SizedBox(
+            width: 54.r,
+            height: 58.r,
+            child: TextField(
+              controller: controller.otpControllers[index],
+              focusNode: controller.otpFocusNodes[index],
+              autofocus: index == 0,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              maxLength: 1,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              onChanged: (String value) {
+                controller.onOtpDigitChanged(index, value);
+              },
+              style: TextStyle(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w800,
+                color: SettingsUi.text,
+              ),
+              decoration: InputDecoration(
+                counterText: '',
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.zero,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.r),
+                  borderSide: const BorderSide(color: SettingsUi.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.r),
+                  borderSide: const BorderSide(color: SettingsUi.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.r),
+                  borderSide: const BorderSide(
+                    color: SettingsUi.primary,
+                    width: 1.6,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _SecurityTip extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: size,
-      height: size,
+      padding: EdgeInsets.all(14.r),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.16),
-        shape: BoxShape.circle,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: color.withValues(alpha: 0.32),
-            blurRadius: 70.r,
-            spreadRadius: 20.r,
+        color: const Color(0xFFFFF7E5),
+        borderRadius: BorderRadius.circular(17.r),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(Icons.lock_outline_rounded, size: 21.r, color: const Color(0xFFA46A00)),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Text(
+              SettingsL10n.text('verification_tip'),
+              style: TextStyle(
+                fontSize: 11.5.sp,
+                height: 1.4,
+                color: const Color(0xFF7A5512),
+              ),
+            ),
           ),
         ],
       ),

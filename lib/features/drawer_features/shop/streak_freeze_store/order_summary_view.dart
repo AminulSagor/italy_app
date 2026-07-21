@@ -3,10 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'package:italir_pothe/core/themes/app_colors.dart';
-import 'package:italir_pothe/core/themes/app_constants.dart';
 import 'package:italir_pothe/core/themes/app_font.dart';
 import 'package:italir_pothe/core/widgets/custom_button.dart';
-import '../models/shop_models.dart';
 import '../shop_controller.dart';
 import '../widgets/shop_coupon_section.dart';
 
@@ -18,50 +16,29 @@ class StreakOrderSummaryView extends GetView<ShopController> {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
       appBar: const _OrderTopBar(),
+
+      // Keeps the main purchase action visible and easy to reach.
+      bottomNavigationBar: const _BottomPurchaseBar(),
+
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 42.h),
+          padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 28.h),
           child: Column(
             children: <Widget>[
-              const _CurrencySwitch(),
-              SizedBox(height: 32.h),
               const _SelectedPackCard(),
-              SizedBox(height: 26.h),
-              const ShopCouponSection(),
-              const ShopCouponError(),
-              SizedBox(height: 42.h),
+              SizedBox(height: 20.h),
               Obx(
-                () => CustomButton.primary(
-                  text: 'continue_to_checkout'.tr,
-                  icon: Icons.play_arrow_rounded,
-                  isLoading: controller.isCheckoutLoading.value,
-                  onPressed: controller.confirmStreakFreezePurchase,
-                ),
+                    () => controller.canUseCoupon
+                    ? const Column(
+                  children: <Widget>[
+                    ShopCouponSection(),
+                    ShopCouponError(),
+                  ],
+                )
+                    : const SizedBox.shrink(),
               ),
-              SizedBox(height: 23.h),
-              TextButton(
-                onPressed: Get.back,
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 8.h,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'maybe_later'.tr,
-                  style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.bodyText,
-                  ),
-                ),
-              ),
-              SizedBox(height: 42.h),
-              const _TrustedBadge(),
             ],
           ),
         ),
@@ -74,7 +51,7 @@ class _OrderTopBar extends StatelessWidget implements PreferredSizeWidget {
   const _OrderTopBar();
 
   @override
-  Size get preferredSize => Size.fromHeight(104.h);
+  Size get preferredSize => Size.fromHeight(82.h);
 
   @override
   Widget build(BuildContext context) {
@@ -83,115 +60,45 @@ class _OrderTopBar extends StatelessWidget implements PreferredSizeWidget {
       child: SizedBox(
         height: preferredSize.height,
         child: Padding(
-          padding: EdgeInsets.only(left: 24.w, right: 24.w, top: 17.h),
-          child: Stack(
-            alignment: Alignment.center,
+          padding: EdgeInsets.symmetric(
+            horizontal: 20.w,
+            vertical: 10.h,
+          ),
+          child: Row(
             children: <Widget>[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: GestureDetector(
-                  onTap: Get.back,
-                  child: SizedBox(
-                    width: 48.r,
-                    height: 48.r,
-                    child: Icon(
-                      Icons.arrow_back_rounded,
-                      size: 23.r,
-                      color: AppColors.primaryGreen,
-                    ),
+              InkWell(
+                onTap: () => Get.back<void>(),
+                borderRadius: BorderRadius.circular(22.r),
+                child: SizedBox(
+                  width: 44.r,
+                  height: 44.r,
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    size: 22.r,
+                    color: AppColors.primaryGreen,
                   ),
                 ),
               ),
-              Text(
-                'gen_order_summary'.tr,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: AppFont.font20.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.primaryGreen,
-                  letterSpacing: -0.35,
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  'gen_order_summary'.tr,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w900,
+                    height: 1.15,
+                    color: AppColors.primaryGreen,
+                  ),
                 ),
               ),
+              SizedBox(width: 10.w),
+
+              // Balances the back-button width so the title stays centered.
+              SizedBox(width: 44.r),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CurrencySwitch extends GetView<ShopController> {
-  const _CurrencySwitch();
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(
-      () => IgnorePointer(
-        ignoring: !controller.canChangeCurrency,
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 180),
-          opacity: controller.canChangeCurrency ? 1 : 0.6,
-          child: Container(
-            width: double.infinity,
-            height: 45.h,
-            padding: EdgeInsets.all(4.r),
-            decoration: BoxDecoration(
-              color: AppColors.legacyColorFFE0E1E1,
-              borderRadius: BorderRadius.circular(kRadius60.r),
-            ),
-            child: Row(
-              children: <Widget>[
-                _CurrencyPill(
-                  label: 'gen_eur'.tr,
-                  selected:
-                      controller.selectedCurrency.value == RefillCurrency.eur,
-                  onTap: () => controller.selectCurrency(RefillCurrency.eur),
-                ),
-                _CurrencyPill(
-                  label: 'gen_bdt'.tr,
-                  selected:
-                      controller.selectedCurrency.value == RefillCurrency.bdt,
-                  onTap: () => controller.selectCurrency(RefillCurrency.bdt),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CurrencyPill extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _CurrencyPill({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selected ? AppColors.white : AppColors.transparent,
-            borderRadius: BorderRadius.circular(kRadius60.r),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: AppFont.font14.sp,
-              fontWeight: FontWeight.w900,
-              color: selected ? AppColors.primaryGreen : AppColors.bodyText,
-            ),
           ),
         ),
       ),
@@ -204,104 +111,164 @@ class _SelectedPackCard extends GetView<ShopController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Container(
+    return Obx(() {
+      final bool isUnlimited =
+          controller.selectedStreakPackage?.isUnlimitedStreak ?? false;
+
+      final String packageTitle =
+      controller.selectedStreakFreezePackTitle.trim();
+
+      final String packageSummary = isUnlimited
+          ? 'unlimited_protection'.tr
+          : 'streak_freeze_pack_count'.trParams(
+        <String, String>{
+          'count': controller.selectedStreakFreezeCount.toString(),
+        },
+      );
+
+      return Container(
         width: double.infinity,
-        height: 319.h,
-        padding: EdgeInsets.fromLTRB(24.w, 31.h, 24.w, 28.h),
+        constraints: BoxConstraints(minHeight: 220.h),
+        padding: EdgeInsets.symmetric(
+          horizontal: 20.w,
+          vertical: 22.h,
+        ),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(44.r),
+          borderRadius: BorderRadius.circular(28.r),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: AppColors.black.withValues(alpha: 0.08),
-              blurRadius: 40.r,
-              spreadRadius: 8.r,
-              offset: Offset(0, 25.h),
+              color: AppColors.black.withValues(alpha: 0.05),
+              blurRadius: 20.r,
+              offset: Offset(0, 8.h),
             ),
           ],
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Container(
-              width: 96.r,
-              height: 96.r,
+              width: 76.r,
+              height: 76.r,
               decoration: BoxDecoration(
                 color: AppColors.blockSuccessBlueBg,
                 shape: BoxShape.circle,
               ),
-              child: const _TripleSnowIcon(),
+              child: _PackIcon(
+                isUnlimited: isUnlimited,
+                count:
+                controller
+                    .selectedStreakFreezeCount,
+              ),
             ),
-            SizedBox(height: 28.h),
+            SizedBox(height: 16.h),
             Text(
-              _packTitle(controller.selectedStreakFreezePackTitle),
+              packageTitle.isEmpty ? 'streak_freeze'.tr : packageTitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: AppFont.font24.sp,
+                fontSize: 21.sp,
                 fontWeight: FontWeight.w900,
-                height: 1.15,
-                letterSpacing: -0.6,
+                height: 1.2,
                 color: AppColors.headerText,
               ),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 7.h),
             Text(
-              '${controller.selectedStreakFreezeCount}x ${'streak_freezes'.tr}',
+              packageSummary,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: AppFont.font15.sp,
+                fontSize: AppFont.font14.sp,
                 fontWeight: FontWeight.w600,
-                height: 1.3,
+                height: 1.35,
                 color: AppColors.bodyText,
               ),
             ),
-            SizedBox(height: 32.h),
+            SizedBox(height: 18.h),
             _PriceLine(isCouponApplied: controller.hasDiscount),
           ],
         ),
-      ),
-    );
-  }
-
-  String _packTitle(String title) {
-    if (title.toLowerCase().contains('pack')) return title;
-    return '$title Pack';
+      );
+    });
   }
 }
 
-class _TripleSnowIcon extends StatelessWidget {
-  const _TripleSnowIcon();
+class _PackIcon extends StatelessWidget {
+  const _PackIcon({
+    required this.isUnlimited,
+    required this.count,
+  });
+
+  final bool isUnlimited;
+  final int count;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
+    if (isUnlimited) {
+      return Column(
+        mainAxisAlignment:
+        MainAxisAlignment.center,
+
+        children: <Widget>[
+          Icon(
+            Icons.ac_unit_rounded,
+
+            size: 27.r,
+
+            color: AppColors
+                .blockSuccessBlueText,
+          ),
+
+          Text(
+            '∞',
+
+            style: TextStyle(
+              fontSize: 26.sp,
+
+              fontWeight:
+              FontWeight.w900,
+
+              height: 0.75,
+
+              color: AppColors
+                  .blockSuccessBlueText,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisAlignment:
+      MainAxisAlignment.center,
+
       children: <Widget>[
-        Positioned(
-          top: 23.h,
-          child: Icon(
-            Icons.ac_unit_rounded,
-            size: 34.r,
-            color: AppColors.blockSuccessBlueText,
-          ),
+        Icon(
+          Icons.ac_unit_rounded,
+
+          size: 31.r,
+
+          color: AppColors
+              .blockSuccessBlueText,
         ),
-        Positioned(
-          left: 24.w,
-          top: 41.h,
-          child: Icon(
-            Icons.ac_unit_rounded,
-            size: 27.r,
-            color: AppColors.blockSuccessBlueText,
-          ),
-        ),
-        Positioned(
-          right: 24.w,
-          top: 41.h,
-          child: Icon(
-            Icons.ac_unit_rounded,
-            size: 27.r,
-            color: AppColors.blockSuccessBlueText,
+
+        SizedBox(height: 2.h),
+
+        Text(
+          '×$count',
+
+          style: TextStyle(
+            fontSize:
+            AppFont.font14.sp,
+
+            fontWeight:
+            FontWeight.w900,
+
+            color: AppColors
+                .blockSuccessBlueText,
           ),
         ),
       ],
@@ -310,50 +277,60 @@ class _TripleSnowIcon extends StatelessWidget {
 }
 
 class _PriceLine extends GetView<ShopController> {
-  final bool isCouponApplied;
+  const _PriceLine({
+    required this.isCouponApplied,
+  });
 
-  const _PriceLine({required this.isCouponApplied});
+  final bool isCouponApplied;
 
   @override
   Widget build(BuildContext context) {
     if (!isCouponApplied) {
-      return Text(
-        controller.streakFreezePayablePriceText,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 38.sp,
-          fontWeight: FontWeight.w900,
-          height: 1,
-          letterSpacing: -1.1,
-          color: AppColors.primaryGreen,
+      return SizedBox(
+        width: double.infinity,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            controller.streakFreezePayablePriceText,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 30.sp,
+              fontWeight: FontWeight.w900,
+              height: 1.05,
+              color: AppColors.primaryGreen,
+            ),
+          ),
         ),
       );
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.end,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.end,
+      spacing: 10.w,
+      runSpacing: 7.h,
       children: <Widget>[
         Text(
           controller.streakFreezeOriginalPriceText,
+          textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: AppFont.font20.sp,
+            fontSize: AppFont.font17.sp,
             fontWeight: FontWeight.w900,
             height: 1.25,
             color: AppColors.bodyText.withValues(alpha: 0.5),
             decoration: TextDecoration.lineThrough,
-            decorationColor: AppColors.bodyText.withValues(alpha: 0.5),
-            decorationThickness: 2.2,
+            decorationColor:
+            AppColors.bodyText.withValues(alpha: 0.5),
+            decorationThickness: 2,
           ),
         ),
-        SizedBox(width: 12.w),
         Text(
           controller.streakFreezePayablePriceText,
+          textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 38.sp,
+            fontSize: 30.sp,
             fontWeight: FontWeight.w900,
-            height: 1,
-            letterSpacing: -1.1,
+            height: 1.05,
             color: AppColors.primaryGreen,
           ),
         ),
@@ -362,69 +339,65 @@ class _PriceLine extends GetView<ShopController> {
   }
 }
 
-class _TrustedBadge extends StatelessWidget {
-  const _TrustedBadge();
+class _BottomPurchaseBar extends GetView<ShopController> {
+  const _BottomPurchaseBar();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 37.h,
-      padding: EdgeInsets.only(left: 18.w, right: 18.w),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(kRadius60.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          SizedBox(
-            width: 53.w,
-            height: 24.h,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: <Widget>[
-                _AvatarDot(left: 0.w, label: '👨'.tr),
-                _AvatarDot(left: 14.w, label: '👩'.tr),
-                _AvatarDot(left: 28.w, label: '🧑'.tr),
-              ],
-            ),
-          ),
-          SizedBox(width: 5.w),
-          Text(
-            'trusted_by_5k_learners'.tr,
-            style: TextStyle(
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.1,
-              color: AppColors.bodyText,
-            ),
+        color: AppColors.white,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: AppColors.black.withValues(alpha: 0.08),
+            blurRadius: 20.r,
+            offset: Offset(0, -5.h),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AvatarDot extends StatelessWidget {
-  final double left;
-  final String label;
-
-  const _AvatarDot({required this.left, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: left,
-      child: Container(
-        width: 24.r,
-        height: 24.r,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.headerText,
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.white, width: 1.5.w),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 12.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Obx(
+                    () => CustomButton.primary(
+                  text: 'continue_to_checkout'.tr,
+                  icon: Icons.arrow_forward_rounded,
+                  isLoading: controller.isCheckoutLoading.value,
+                  onPressed: controller.isCheckoutLoading.value
+                      ? () {}
+                      : controller.confirmStreakFreezePurchase,
+                ),
+              ),
+              SizedBox(height: 6.h),
+              TextButton(
+                onPressed: () => Get.back<void>(),
+                style: TextButton.styleFrom(
+                  minimumSize: Size(double.infinity, 42.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'maybe_later'.tr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.bodyText,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        child: Text(label, style: TextStyle(fontSize: 12.sp)),
       ),
     );
   }

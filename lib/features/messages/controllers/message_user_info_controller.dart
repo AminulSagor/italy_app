@@ -312,8 +312,11 @@ class MessageUserInfoController extends GetxController {
   }
 
   void backToMessages() {
-    Get.until(
-      (route) => route.settings.name == AppRoutes.wrapper || route.isFirst,
+    Get.offNamedUntil(
+      AppRoutes.messages,
+          (route) =>
+      route.settings.name == AppRoutes.wrapper ||
+          route.isFirst,
     );
   }
 }

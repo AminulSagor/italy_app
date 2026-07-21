@@ -56,7 +56,7 @@ class MessageChatView extends GetView<MessageChatController> {
               child: Column(
                 children: <Widget>[
                   _ChatHeader(chat: chat),
-                  SizedBox(height: 32.h),
+                  SizedBox(height: 14.h),
                   Expanded(
                     child: CustomScrollView(
                       controller: controller.chatScrollController,
@@ -85,7 +85,7 @@ class MessageChatView extends GetView<MessageChatController> {
                                   child: SizedBox.shrink(),
                                 ),
                         ),
-                        SliverToBoxAdapter(child: SizedBox(height: 32.h)),
+                        SliverToBoxAdapter(child: SizedBox(height: 6.h)),
                         SliverPadding(
                           padding: EdgeInsets.fromLTRB(
                             kChatMessageHorizontalPadding.w,
@@ -234,7 +234,12 @@ class _ChatHeader extends GetView<MessageChatController> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(24.w, 36.h, 24.w, 0),
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        14.h,
+        20.w,
+        0,
+      ),
       child: Row(
         children: <Widget>[
           GestureDetector(

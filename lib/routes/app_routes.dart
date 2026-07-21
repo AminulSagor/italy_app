@@ -2,6 +2,7 @@ class AppRoutes {
   //static const String initial = '/bootstrap';
 
   static const String login = '/login';
+  static const String accountSuspended = '/account-suspended';
   static const String signup = '/signup';
   static const String signupOtp = '/signup-otp';
   static const String accountCreated = '/account-created';

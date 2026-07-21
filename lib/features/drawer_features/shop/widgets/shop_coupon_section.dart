@@ -78,9 +78,9 @@ class ShopCouponSection extends GetView<ShopController> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Coupon applied',
+                        'coupon_applied'.tr,
                         style: TextStyle(
                           color: _textDark,
                           fontSize: 20,
@@ -103,7 +103,9 @@ class ShopCouponSection extends GetView<ShopController> {
                 if ((pricing?.discountPercentage ?? 0) > 0) ...<Widget>[
                   const SizedBox(height: 8),
                   Text(
-                    'Discount: ${pricing!.discountPercentage}%',
+                    'discount_value'.trParams(<String, String>{
+                      'discount': pricing!.discountPercentage.toString(),
+                    }),
                     style: const TextStyle(
                       color: _bodyText,
                       fontSize: 14,
@@ -112,8 +114,8 @@ class ShopCouponSection extends GetView<ShopController> {
                   ),
                 ],
                 const SizedBox(height: 10),
-                const Text(
-                  'Final price is controlled by Google Play/App Store and may include VAT, tax, currency conversion, or regional pricing.',
+                Text(
+                  'store_price_notice'.tr,
                   style: TextStyle(
                     color: _bodyText,
                     fontSize: 12,
@@ -136,8 +138,8 @@ class ShopCouponSection extends GetView<ShopController> {
                       elevation: 0,
                       shape: const StadiumBorder(),
                     ),
-                    child: const Text(
-                      'Remove coupon',
+                    child: Text(
+                      'remove_coupon'.tr,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w900,
@@ -244,10 +246,7 @@ class _CouponEntryField extends StatelessWidget {
             onPressed: isLoading ? null : onApplyTap,
             style: OutlinedButton.styleFrom(
               foregroundColor: ShopCouponSection._green,
-              side: const BorderSide(
-                color: ShopCouponSection._green,
-                width: 2,
-              ),
+              side: const BorderSide(color: ShopCouponSection._green, width: 2),
               shape: const StadiumBorder(),
               disabledForegroundColor: ShopCouponSection._bodyText,
             ),

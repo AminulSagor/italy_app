@@ -5,7 +5,6 @@ import 'package:italir_pothe/core/models/learning_activity_models.dart';
 import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../../core/themes/app_colors.dart';
-import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../../../../../core/widgets/custom_button.dart';
 import '../controllers/final_exam_controller.dart';
@@ -143,51 +142,88 @@ class FinalExamResultView extends GetView<FinalExamController> {
   }
 
   Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AppColors.homeNeutralShadow,
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            _boundedWidth(20, min: 16, max: 24),
-            _boundedHeight(10, min: 8, max: 12),
-            _boundedWidth(20, min: 16, max: 24),
-            _boundedHeight(14, min: 12, max: 18),
-          ),
-          child: Align(
-            heightFactor: 1,
-            alignment: Alignment.center,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 560,
+    return Obx(() {
+      final bool showRetake =
+          controller.retakeAvailable.value;
+
+      final bool showCertificate =
+          controller.certificateAvailable.value;
+
+      if (!showRetake && !showCertificate) {
+        return const SizedBox.shrink();
+      }
+
+      return Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: AppColors.homeNeutralShadow,
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              _boundedWidth(
+                20,
+                min: 16,
+                max: 24,
               ),
-              child: SizedBox(
-                width: double.infinity,
-                height: _boundedHeight(
-                  52,
-                  min: 48,
-                  max: 54,
+              _boundedHeight(
+                10,
+                min: 8,
+                max: 12,
+              ),
+              _boundedWidth(
+                20,
+                min: 16,
+                max: 24,
+              ),
+              _boundedHeight(
+                14,
+                min: 12,
+                max: 18,
+              ),
+            ),
+            child: Align(
+              heightFactor: 1,
+              alignment: Alignment.center,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 560,
                 ),
-                child: CustomButton.primary(
-                  onPressed: controller.openCertificate,
-                  text: 'view_official_certificate'.tr,
-                  icon: Icons.article_outlined,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: _boundedHeight(
+                    52,
+                    min: 48,
+                    max: 54,
+                  ),
+                  child: CustomButton.primary(
+                    onPressed: showRetake
+                        ? controller.startRetake
+                        : controller.openCertificate,
+                    isLoading: showRetake &&
+                        controller.isSubmitting.value,
+                    text: showRetake
+                        ? 'give_exam_again'.tr
+                        : 'view_official_certificate'
+                        .tr,
+                    icon: showRetake
+                        ? Icons.replay_rounded
+                        : Icons.article_outlined,
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildHeader() {
@@ -437,10 +473,11 @@ class FinalExamResultView extends GetView<FinalExamController> {
   String _resultTitle(
       FinalExamResultModel result,
       ) {
-    switch (result.verdict) {
+    switch (result.verdict.trim().toLowerCase()) {
       case 'passed':
         return 'final_exam_result_passed'.tr;
 
+      case 'failed':
       case 'retake_required':
         return 'final_exam_retake_required'.tr;
 

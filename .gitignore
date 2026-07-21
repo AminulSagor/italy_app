@@ -1,5 +1,9 @@
-# Miscellaneous
+# Environment and secrets
 .env
+.env.*
+!.env.example
+
+# Miscellaneous
 *.class
 *.log
 *.pyc
@@ -19,21 +23,45 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
+# VS Code
+# Keep this commented if you want to commit VS Code settings.
 #.vscode/
 
-# Flutter/Dart/Pub related
+# Flutter / Dart / Pub related
 **/doc/api/
 **/.gradle/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
-/build/
-/coverage/
+coverage/
+
+# Ignore every generated build directory
+build/
+**/build/
+
+# Android generated files
+android/.gradle/
+android/local.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# iOS generated files
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+
+# macOS generated files
+macos/Pods/
+macos/.symlinks/
+macos/Flutter/ephemeral/
+macos/Flutter/GeneratedPluginRegistrant.swift
 
 # Symbolication related
 app.*.symbols
@@ -41,13 +69,12 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Generated archives
+/lib.zip
+*.zip
 
-
-/demos
+# Demo files
+/demos/
 
 # Local scratch tooling and generated reports
 /*.py

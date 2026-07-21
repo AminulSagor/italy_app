@@ -68,21 +68,123 @@ class ShopController extends GetxController {
   }
   Future<void> _initializeShop() async {
     await loadShop();
-    await _purchaseController.retryPendingPurchase();
+
     final StorePurchaseCompletionModel? recovered =
-        _purchaseController.takeLastCompletion();
-    if (recovered != null) await _applyPurchaseCompletion(recovered);
-  }
-  StorePackageModel? get selectedAiPackage =>
+    _purchaseController.takeLastCompletion();
+
+    if (recovered != null) {
+      await _applyPurchaseCompletion(recovered);
+    }
+  }  StorePackageModel? get selectedAiPackage =>
       _findPackage(aiPackages, selectedAiPackageId.value);
   StorePackageModel? get selectedStreakPackage =>
       _findPackage(streakPackages, selectedStreakPackageId.value);
   StorePackageModel? get selectedCvPackage =>
       _findPackage(cvPackages, selectedCvPackageId.value);
-  int get aiVoiceMinutes => balances.value?.aiVoiceMinutes ?? 0;
-  int get aiTextTokens => balances.value?.aiTextTokens ?? 0;
-  int get streakFreezeBalance => balances.value?.streakFreezeCount ?? 0;
-  int get cvCreditBalance => balances.value?.cvCredits ?? 0;
+
+  int get aiVoiceMinutes =>
+      balances.value?.aiVoiceMinutes ?? 0;
+
+  int get aiTextTokens =>
+      balances.value?.aiTextTokens ?? 0;
+
+  int get streakFreezeBalance =>
+      balances.value?.streakFreezeCount ?? 0;
+
+  bool get hasActiveMonthlyStreakProtection =>
+      balances.value
+          ?.unlimitedProtectionActive ??
+          false;
+
+  DateTime?
+  get monthlyStreakProtectionExpiresAt =>
+      balances.value
+          ?.unlimitedProtectionExpiresAt;
+
+  StoreActiveSubscriptionModel?
+  get activeMonthlyStreakSubscription =>
+      balances.value
+          ?.activeStreakSubscription;
+
+  String get activeMonthlyProductId =>
+      activeMonthlyStreakSubscription
+          ?.productId ??
+          '';
+
+  bool isActiveMonthlyStreakPackage(
+      StorePackageModel package,
+      ) {
+    final StoreActiveSubscriptionModel?
+    subscription =
+        activeMonthlyStreakSubscription;
+
+    return package.isUnlimitedStreak &&
+        subscription != null &&
+        subscription.packageId == package.id;
+  }
+
+  bool isMonthlyPurchaseBlocked(
+      StorePackageModel package,
+      ) {
+    return package.isUnlimitedStreak &&
+        hasActiveMonthlyStreakProtection &&
+        !isActiveMonthlyStreakPackage(
+          package,
+        );
+  }
+
+  int get cvCreditBalance =>
+      balances.value?.cvCredits ?? 0;
+
+  /// Total free CV creations configured by admin.
+  int get freeCvGenerationsLimit =>
+      balances.value
+          ?.freeCvGenerationsLimit ??
+          3;
+
+  /// Free CV creations the user still has.
+  int get freeCvGenerationsRemaining =>
+      balances.value
+          ?.freeCvGenerationsRemaining ??
+          0;
+
+  /// Whether at least one free CV creation remains.
+  bool get hasCvFreeAllowance =>
+      freeCvGenerationsRemaining > 0;
+
+  /// Whether all free CV creations have been used.
+  bool get cvFreeLimitEnded =>
+      balances.value
+          ?.freeCvLimitExhausted ??
+          true;
+
+  /// Free CV creations plus purchased credits.
+  int get totalCvGenerationsAvailable =>
+      balances.value
+          ?.totalCvGenerationsAvailable ??
+          0;
+
+  /// Whether the user can create another new CV.
+  bool get canCreateCv =>
+      balances.value
+          ?.canCreateCv ??
+          false;
+
+  /// Possible values: free, credit, none.
+  String get nextCvGenerationUses =>
+      balances.value
+          ?.nextCvGenerationUses ??
+          'none';
+
+  /// Whether CV editing and regeneration are free.
+  bool get allowCvEditingWithoutCredit =>
+      balances.value
+          ?.allowCvEditingWithoutCredit ??
+          false;
+
+
+
+
   StoreShopSectionModel? sectionFor(StorePackageType type) {
     for (final StoreShopSectionModel item in shop.value?.sections ?? const []) {
       if (item.packageType == type) return item;
@@ -103,8 +205,12 @@ class ShopController extends GetxController {
           _apiService.getPackages(packageType: StorePackageType.cvCredit),
         ]);
       }, showError: false);
-      if (!result.isSuccess || result.data == null) {
-        shopError.value = result.error ?? 'could_not_load_the_shop'.tr;
+      if (!result.isSuccess ||
+          result.data == null) {
+        shopError.value =
+            result.error ??
+                'could_not_load_the_shop'.tr;
+
         return;
       }
       final List<Object> data = result.data!;
@@ -135,7 +241,21 @@ class ShopController extends GetxController {
     );
     if (result.isSuccess && result.data != null) {
       balances.value = result.data;
-      _syncUserSessionBalances(result.data!);
+
+      _syncUserSessionBalances(
+        result.data!,
+      );
+
+      final StorePackageModel? selected =
+          selectedStreakPackage;
+
+      if (
+      selected != null &&
+          selected.isUnlimitedStreak &&
+          hasActiveMonthlyStreakProtection
+      ) {
+        _selectDefaultStreakPackage();
+      }
     }
   }
   void selectAiPackage(String packageId) {
@@ -154,16 +274,31 @@ class ShopController extends GetxController {
   bool isStreakPackageSelected(String id) =>
       selectedStreakPackageId.value == id;
   bool isCvPackageSelected(String id) => selectedCvPackageId.value == id;
-  String packagePriceText(StorePackageModel package) {
+  String packagePriceText(
+      StorePackageModel package,
+      ) {
     final String price =
-        _billingService.localizedPrice(package.storeProduct) ??
+        _billingService.localizedPrice(
+          package.storeProduct,
+        ) ??
             '€${package.priceEur.toStringAsFixed(2)}';
-    return package.isMonthly ? '$price/mo' : price;
+
+    if (!package.isMonthly) {
+      return price;
+    }
+
+    return 'price_per_month'.trParams(
+      <String, String>{
+        'price': price,
+      },
+    );
   }
   bool get isGooglePlaySelected =>
       selectedPaymentMethod.value == CheckoutPaymentMethod.googlePlay;
   bool get canChangeCurrency => !isGooglePlaySelected;
-  bool get canUseCoupon => activePackage.value != null;
+  bool get canUseCoupon =>
+      activePackage.value?.couponEnabled ??
+          false;
   bool get hasDiscount => isCouponApplied.value && discountAmount > 0;
   Future<void> selectCurrency(RefillCurrency currency) async {
     if (!canChangeCurrency || selectedCurrency.value == currency) return;
@@ -176,20 +311,47 @@ class ShopController extends GetxController {
     if (isCouponApplied.value) isCouponApplied.value = false;
   }
   Future<void> applyCoupon() async {
-    if (!canUseCoupon) return;
-    final String code = couponTextController.text.trim();
-    if (code.isEmpty) {
-      Get.snackbar('coupon_required'.tr, 'please_enter_a_coupon_code'.tr);
+    if (!canUseCoupon) {
+      Get.snackbar(
+        'coupon_unavailable'.tr,
+        'coupon_not_available_for_package'.tr,
+      );
+
       return;
     }
-    final bool loaded = await _loadQuote(coupon: code);
+
+    final String code = couponTextController.text.trim();
+
+    if (code.isEmpty) {
+      Get.snackbar(
+        'coupon_required'.tr,
+        'please_enter_a_coupon_code'.tr,
+      );
+
+      return;
+    }
+
+    final bool loaded = await _loadQuote(
+      coupon: code,
+    );
+
     if (loaded) {
       checkoutError.value = '';
       couponCode.value = code;
       couponTextController.text = code;
       isCouponApplied.value = true;
+
+      FocusManager.instance.primaryFocus?.unfocus();
     } else {
-      checkoutError.value = 'Coupon is not valid for this item.';
+      checkoutError.value = '';
+
+      Get.snackbar(
+        'invalid_coupon'.tr,
+        'coupon_invalid_for_item'.tr,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 3),
+      );
     }
   }
   Future<void> clearCoupon() async {
@@ -262,12 +424,47 @@ class ShopController extends GetxController {
   Future<void> confirmPurchase() async {
     await _openSummary(selectedAiPackage, AppRoutes.orderSummary);
   }
-  Future<void> goToStreakFreezeOrderSummary() async {
+  Future<void>
+  goToStreakFreezeOrderSummary() async {
+    final StorePackageModel? package =
+        selectedStreakPackage;
+
+    if (package == null) {
+      Get.snackbar(
+        'select_a_package'.tr,
+        'please_select_a_package_first'.tr,
+      );
+
+      return;
+    }
+
+    if (
+    package.isUnlimitedStreak &&
+        hasActiveMonthlyStreakProtection
+    ) {
+      Get.snackbar(
+        'monthly_protection_active'.tr,
+        'active_monthly_plan_already_exists'
+            .tr,
+      );
+
+      return;
+    }
+
     await _openSummary(
-      selectedStreakPackage,
+      package,
       AppRoutes.streakFreezeOrderSummary,
     );
   }
+
+  void showMonthlyPlanAlreadyActive() {
+    Get.snackbar(
+      'monthly_protection_active'.tr,
+      'active_monthly_plan_already_exists'
+          .tr,
+    );
+  }
+
   Future<void> goToCvCreditOrderSummary() async {
     await _openSummary(selectedCvPackage, AppRoutes.cvCreditOrderSummary);
   }
@@ -435,10 +632,12 @@ class ShopController extends GetxController {
         ),
         showError: coupon.trim().isEmpty,
       );
-      if (!result.isSuccess || result.data == null) {
+      if (!result.isSuccess ||
+          result.data == null) {
         if (coupon.trim().isNotEmpty) {
-          checkoutError.value = 'Coupon is not valid for this item.';
+          checkoutError.value = '';
         }
+
         return false;
       }
       checkoutError.value = '';
@@ -522,9 +721,33 @@ class ShopController extends GetxController {
     );
   }
   void _selectDefaults() {
-    selectedAiPackageId.value = _preferred(aiPackages)?.id ?? '';
-    selectedStreakPackageId.value = _preferred(streakPackages)?.id ?? '';
-    selectedCvPackageId.value = _preferred(cvPackages)?.id ?? '';
+    selectedAiPackageId.value =
+        _preferred(aiPackages)?.id ?? '';
+
+    _selectDefaultStreakPackage();
+
+    selectedCvPackageId.value =
+        _preferred(cvPackages)?.id ?? '';
+  }
+
+  void _selectDefaultStreakPackage() {
+    final List<StorePackageModel>
+    purchasablePackages =
+    streakPackages
+        .where(
+          (StorePackageModel package) =>
+      !(
+          package.isUnlimitedStreak &&
+              hasActiveMonthlyStreakProtection
+      ),
+    )
+        .toList(growable: false);
+
+    selectedStreakPackageId.value =
+        _preferred(
+          purchasablePackages,
+        )?.id ??
+            '';
   }
   StorePackageModel? _preferred(List<StorePackageModel> packages) {
     if (packages.isEmpty) return null;
@@ -634,13 +857,23 @@ class ShopController extends GetxController {
     }
   }
   StorePackageModel? _findPackage(
-    List<StorePackageModel> packages,
-    String id,
-  ) {
-    for (final StorePackageModel item in packages) {
-      if (item.id == id) return item;
+      List<StorePackageModel> packages,
+      String id,
+      ) {
+    if (id.isEmpty) {
+      return null;
     }
-    return packages.isEmpty ? null : packages.first;
+
+    for (
+    final StorePackageModel item
+    in packages
+    ) {
+      if (item.id == id) {
+        return item;
+      }
+    }
+
+    return null;
   }
   StorePackageModel _emptyPackage(StorePackageType type) => StorePackageModel(
         id: '',

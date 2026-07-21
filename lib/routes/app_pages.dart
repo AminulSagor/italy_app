@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 
 import '../core/bootstrap/app_bootstrap_controller.dart';
 import '../core/bootstrap/app_bootstrap_view.dart';
+import '../core/models/account_restriction_details.dart';
+import '../core/services/course_purchase_recovery_service.dart';
 import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_view.dart';
 import '../features/auth/sub_features/Signup/controllers/signup_controller.dart';
@@ -57,6 +59,7 @@ import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_service.dart';
 import '../features/messages/views/messages_view.dart';
 import '../features/notifications/services/notifications_api_service.dart';
+import '../features/notifications/views/error_states/account_suspended.dart';
 import '../features/practice_hub/services/italian_tts_service.dart';
 import '../features/practice_hub/services/job_sentences_api_service.dart';
 import '../features/practice_hub/sub_features/course_catalog/controllers/course_catalog_controller.dart';
@@ -66,7 +69,6 @@ import '../core/controllers/user_session_controller.dart';
 import '../core/services/learning_activity_api_service.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/token_service.dart';
-import '../core/services/storage_service.dart';
 import '../features/messages/services/chat_socket_service.dart';
 import '../features/messages/services/presence_service.dart';
 import '../features/splash/splash_view.dart';
@@ -125,6 +127,26 @@ import '../features/practice_hub/views/job_sentences/job_sentences_view.dart';
 import '../features/practice_hub/views/job_sentences/job_details_view.dart';
 import '../features/practice_hub/views/daily_challenges/daily_challenges_view.dart';
 
+void _ensureShopDependencies() {
+  if (!Get.isRegistered<ShopApiService>()) {
+    Get.put<ShopApiService>(
+      ShopApiService(
+        apiClient: Get.find<ApiClient>(),
+      ),
+      permanent: true,
+    );
+  }
+
+  if (!Get.isRegistered<ShopController>()) {
+    Get.put<ShopController>(
+      ShopController(
+        apiService: Get.find<ShopApiService>(),
+      ),
+      permanent: true,
+    );
+  }
+}
+
 class AppPages {
   AppPages._();
 
@@ -163,6 +185,35 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut<LoginController>(() => LoginController());
       }),
+    ),
+
+    GetPage(
+      name: AppRoutes.accountSuspended,
+      page: () {
+        final dynamic rawArguments = Get.arguments;
+
+        final AccountRestrictionDetails restriction =
+        rawArguments is AccountRestrictionDetails
+            ? rawArguments
+            : AccountRestrictionDetails.fallback;
+
+        return AccountSuspendedView(
+          restriction: restriction,
+          onContactSupportTap: () {
+            Get.toNamed(AppRoutes.contactSupport);
+          },
+          onLogoutTap: () async {
+            await Get.find<AuthService>()
+                .clearLocalSessionAfterAccountDeletion();
+
+            if (Get.isRegistered<UserSessionController>()) {
+              Get.find<UserSessionController>().clear();
+            }
+
+            Get.offAllNamed(AppRoutes.login);
+          },
+        );
+      },
     ),
     GetPage(
       name: AppRoutes.signup,
@@ -455,6 +506,8 @@ class AppPages {
       }),
     ),
 
+
+
     GetPage(
       name: AppRoutes.quiz,
       page: () {
@@ -517,34 +570,29 @@ class AppPages {
       name: AppRoutes.proOrderSummary,
       page: () {
         final ProOrderSummaryRouteArguments args =
-            _arguments<ProOrderSummaryRouteArguments>();
-        return ProOrderSummaryView(controllerTag: args.controllerTag);
+        _arguments<ProOrderSummaryRouteArguments>();
+
+        return ProOrderSummaryView(
+          controllerTag: args.controllerTag,
+        );
       },
       binding: BindingsBuilder(() {
         final ProOrderSummaryRouteArguments args =
-            _arguments<ProOrderSummaryRouteArguments>();
-        Get.lazyPut<ProCheckoutApiService>(
-          () => ProCheckoutApiService(apiClient: Get.find<ApiClient>()),
-          tag: args.controllerTag,
-        );
-        Get.lazyPut<CourseGooglePlayBillingService>(
-          () => CourseGooglePlayBillingService(
-            storageService: Get.find<StorageService>(),
-          ),
-          tag: args.controllerTag,
-        );
+        _arguments<ProOrderSummaryRouteArguments>();
+
         Get.lazyPut<ProCheckoutController>(
-          () => ProCheckoutController(
-            proCheckoutApiService: Get.find<ProCheckoutApiService>(
-              tag: args.controllerTag,
-            ),
-            billingService: Get.find<CourseGooglePlayBillingService>(
-              tag: args.controllerTag,
-            ),
+              () => ProCheckoutController(
+            proCheckoutApiService:
+            Get.find<ProCheckoutApiService>(),
+            billingService:
+            Get.find<CourseGooglePlayBillingService>(),
+            recoveryService:
+            Get.find<CoursePurchaseRecoveryService>(),
             courseId: args.courseId,
             courseName: args.courseName,
             lessonCount: args.lessonCount,
-            onPurchaseCompleted: Get.find<CourseDetailController>(
+            onPurchaseCompleted:
+            Get.find<CourseDetailController>(
               tag: args.courseDetailControllerTag,
             ).refreshAfterPurchase,
           ),
@@ -750,17 +798,9 @@ class AppPages {
     GetPage(
       name: AppRoutes.shop,
       page: () => const ShopView(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<ShopApiService>()) {
-          Get.lazyPut<ShopApiService>(
-            () => ShopApiService(apiClient: Get.find<ApiClient>()),
-            fenix: true,
-          );
-        }
-        Get.lazyPut<ShopController>(
-          () => ShopController(apiService: Get.find<ShopApiService>()),
-        );
-      }),
+      binding: BindingsBuilder(
+        _ensureShopDependencies,
+      ),
     ),
     GetPage(
       name: AppRoutes.aiRefillCenter,
@@ -781,11 +821,18 @@ class AppPages {
     GetPage(
       name: AppRoutes.cvCreditStore,
       page: () => const CvCreditStoreView(),
+      binding: BindingsBuilder(
+        _ensureShopDependencies,
+      ),
     ),
 
     GetPage(
       name: AppRoutes.cvCreditOrderSummary,
-      page: () => const CvCreditOrderSummaryView(),
+      page: () =>
+      const CvCreditOrderSummaryView(),
+      binding: BindingsBuilder(
+        _ensureShopDependencies,
+      ),
     ),
     GetPage(
       name: AppRoutes.orderHistory,
@@ -1120,6 +1167,7 @@ class AppPages {
         }
       }),
     ),
+
 
     GetPage(
       name: AppRoutes.dailyChallenges,

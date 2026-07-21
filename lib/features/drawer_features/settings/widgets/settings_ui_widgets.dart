@@ -1,70 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:italir_pothe/routes/routes.dart';
+
+import '../models/settings_localization.dart';
 
 class SettingsUi {
-  static const Color bg = Color(0xFFF6F6F6);
-  static const Color green = Color(0xFF267A05);
-  static const Color darkGreen = Color(0xFF1F6B00);
-  static const Color lightGreen = Color(0xFF79F535);
-  static const Color text = Color(0xFF2D3032);
-  static const Color muted = Color(0xFF666666);
-  static const Color field = Color(0xFFF0F0F0);
-  static const Color red = Color(0xFFC92508);
-  static const Color redShadow = Color(0xFF8F1600);
+  const SettingsUi._();
+
+  static const Color background = Color(0xFFF5F8F7);
+  static const Color surface = Colors.white;
+  static const Color field = Color(0xFFF0F4F2);
+  static const Color primary = Color(0xFF0A7C58);
+  static const Color primaryDark = Color(0xFF064E3B);
+  static const Color text = Color(0xFF18211E);
+  static const Color muted = Color(0xFF69756F);
+  static const Color border = Color(0xFFE1E9E5);
+  static const Color danger = Color(0xFFC93B3B);
 }
 
 class SettingsTopBar extends StatelessWidget {
-  final String title;
-  final Color titleColor;
-
   const SettingsTopBar({
     super.key,
     required this.title,
-    this.titleColor = SettingsUi.green,
+    this.onBack,
   });
+
+  final String title;
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 46.r,
+      height: 48.h,
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
           Align(
             alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: Get.back,
-              child: Container(
-                width: 46.r,
-                height: 46.r,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.045),
-                      blurRadius: 12.r,
-                      offset: Offset(0, 5.h),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.arrow_back_rounded,
-                  size: 24.r,
-                  color: titleColor,
+            child: Material(
+              color: Colors.white,
+              shape: const CircleBorder(),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: onBack ?? Get.back,
+                child: SizedBox(
+                  width: 44.r,
+                  height: 44.r,
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    size: 23.r,
+                    color: SettingsUi.primary,
+                  ),
                 ),
               ),
             ),
           ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w900,
-              color: titleColor,
-              letterSpacing: -0.35,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 58.w),
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 19.sp,
+                fontWeight: FontWeight.w800,
+                color: SettingsUi.text,
+                letterSpacing: -0.25,
+              ),
             ),
           ),
         ],
@@ -74,77 +77,77 @@ class SettingsTopBar extends StatelessWidget {
 }
 
 class SettingsPrimaryButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onTap;
-  final IconData? icon;
-  final Color color;
-  final Color shadowColor;
-  final double height;
-  final bool enabled;
-  final bool isLoading;
-
   const SettingsPrimaryButton({
     super.key,
     required this.text,
     required this.onTap,
     this.icon,
-    this.color = SettingsUi.green,
-    this.shadowColor = SettingsUi.darkGreen,
-    this.height = 72,
+    this.height = 54,
     this.enabled = true,
     this.isLoading = false,
+    this.color = SettingsUi.primary,
+    this.loadingColor = SettingsUi.primary,
   });
+
+  final String text;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final double height;
+  final bool enabled;
+  final bool isLoading;
+  final Color color;
+  final Color loadingColor;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled && !isLoading ? onTap : null,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 180),
-        opacity: enabled ? 1 : 0.55,
-        child: Container(
-          height: height.h,
-          width: double.infinity,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(100.r),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: shadowColor,
-                blurRadius: 0,
-                offset: Offset(0, 7.h),
-              ),
-            ],
+    final Color effectiveColor = isLoading ? loadingColor : color;
+    return AnimatedOpacity(
+      opacity: enabled ? 1 : 0.48,
+      duration: const Duration(milliseconds: 160),
+      child: SizedBox(
+        height: height.h,
+        width: double.infinity,
+        child: FilledButton(
+          onPressed: enabled && !isLoading ? onTap : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: effectiveColor,
+            disabledBackgroundColor: effectiveColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18.r),
+            ),
+            elevation: 0,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              if (icon != null) ...[
-                Icon(icon, size: 22.r, color: Colors.white),
-                SizedBox(width: 12.w),
-              ],
-              if (isLoading)
-                SizedBox(
-                  width: 24.r,
-                  height: 24.r,
+          child: isLoading
+              ? SizedBox(
+                  width: 22.r,
+                  height: 22.r,
                   child: const CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    strokeWidth: 2.4,
+                    color: Colors.white,
                   ),
                 )
-              else
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: 1.3,
-                  ),
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (icon != null) ...<Widget>[
+                      Icon(icon, size: 20.r),
+                      SizedBox(width: 9.w),
+                    ],
+                    Flexible(
+                      child: Text(
+                        text,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-            ],
-          ),
         ),
       ),
     );
@@ -152,18 +155,6 @@ class SettingsPrimaryButton extends StatelessWidget {
 }
 
 class SettingsPillField extends StatelessWidget {
-  final String label;
-  final String hint;
-  final IconData icon;
-  final IconData? suffixIcon;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-  final ValueChanged<String>? onChanged;
-  final TextEditingController? controller;
-  final VoidCallback? onSuffixTap;
-  final bool readOnly;
-  final bool enabled;
-
   const SettingsPillField({
     super.key,
     required this.label,
@@ -172,12 +163,32 @@ class SettingsPillField extends StatelessWidget {
     this.suffixIcon,
     this.obscureText = false,
     this.keyboardType,
+    this.textInputAction,
     this.onChanged,
     this.controller,
     this.onSuffixTap,
     this.readOnly = false,
     this.enabled = true,
+    this.helperText,
+    this.autofillHints,
+    this.maxLength,
   });
+
+  final String label;
+  final String hint;
+  final IconData icon;
+  final IconData? suffixIcon;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onChanged;
+  final TextEditingController? controller;
+  final VoidCallback? onSuffixTap;
+  final bool readOnly;
+  final bool enabled;
+  final String? helperText;
+  final Iterable<String>? autofillHints;
+  final int? maxLength;
 
   @override
   Widget build(BuildContext context) {
@@ -185,68 +196,100 @@ class SettingsPillField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.only(left: 24.w, bottom: 10.h),
+          padding: EdgeInsets.only(left: 4.w, bottom: 7.h),
           child: Text(
-            label.toUpperCase(),
+            label,
             style: TextStyle(
               fontSize: 12.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.5,
-              color: const Color(0xFF5F6062),
+              fontWeight: FontWeight.w700,
+              color: SettingsUi.muted,
             ),
           ),
         ),
-        Container(
-          height: 64.h,
-          padding: EdgeInsets.symmetric(horizontal: 22.w),
-          decoration: BoxDecoration(
-            color: SettingsUi.field,
-            borderRadius: BorderRadius.circular(100.r),
+        TextField(
+          controller: controller,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          textInputAction: textInputAction,
+          onChanged: onChanged,
+          readOnly: readOnly,
+          enabled: enabled,
+          autofillHints: autofillHints,
+          maxLength: maxLength,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: SettingsUi.text,
           ),
-          child: TextField(
-            controller: controller,
-            obscureText: obscureText,
-            keyboardType: keyboardType,
-            onChanged: onChanged,
-            readOnly: readOnly,
-            enabled: enabled,
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w700,
-              color: SettingsUi.text,
+          decoration: InputDecoration(
+            counterText: '',
+            filled: true,
+            fillColor: enabled ? SettingsUi.field : const Color(0xFFE9ECEB),
+            prefixIcon: Icon(
+              icon,
+              size: 21.r,
+              color: enabled ? SettingsUi.primary : SettingsUi.muted,
             ),
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              icon: Icon(icon, size: 22.r, color: const Color(0xFF777777)),
-              suffixIcon: suffixIcon == null
-                  ? null
-                  : IconButton(
-                      onPressed: onSuffixTap,
-                      icon: Icon(
-                        suffixIcon,
-                        size: 22.r,
-                        color: const Color(0xFF777777),
-                      ),
+            suffixIcon: suffixIcon == null
+                ? null
+                : IconButton(
+                    onPressed: enabled ? onSuffixTap : null,
+                    icon: Icon(
+                      suffixIcon,
+                      size: 21.r,
+                      color: SettingsUi.muted,
                     ),
-              hintText: hint,
-              hintStyle: TextStyle(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFFB5B5B5),
+                  ),
+            hintText: hint,
+            hintStyle: TextStyle(
+              fontSize: 14.sp,
+              color: const Color(0xFF9AA39F),
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 16.h,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18.r),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18.r),
+              borderSide: const BorderSide(color: SettingsUi.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18.r),
+              borderSide: const BorderSide(
+                color: SettingsUi.primary,
+                width: 1.5,
+              ),
+            ),
+            disabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18.r),
+              borderSide: const BorderSide(color: SettingsUi.border),
+            ),
+          ),
+        ),
+        if (helperText != null && helperText!.trim().isNotEmpty) ...<Widget>[
+          SizedBox(height: 7.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w),
+            child: Text(
+              helperText!,
+              style: TextStyle(
+                fontSize: 11.sp,
+                height: 1.35,
+                color: SettingsUi.muted,
               ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }
 }
 
 class SettingsSuccessBottomSheet extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final VoidCallback? onDone;
-
   const SettingsSuccessBottomSheet({
     super.key,
     required this.title,
@@ -254,12 +297,16 @@ class SettingsSuccessBottomSheet extends StatelessWidget {
     this.onDone,
   });
 
+  final String title;
+  final String subtitle;
+  final VoidCallback? onDone;
+
   static Future<void> show({
     required String title,
     required String subtitle,
     VoidCallback? onDone,
   }) {
-    return Get.bottomSheet(
+    return Get.bottomSheet<void>(
       SettingsSuccessBottomSheet(
         title: title,
         subtitle: subtitle,
@@ -267,164 +314,73 @@ class SettingsSuccessBottomSheet extends StatelessWidget {
       ),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(16.r),
-      padding: EdgeInsets.fromLTRB(28.w, 14.h, 28.w, 28.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(34.r),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Container(
-            width: 42.w,
-            height: 4.h,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE2E2E2),
-              borderRadius: BorderRadius.circular(100.r),
-            ),
-          ),
-          SizedBox(height: 45.h),
-          Container(
-            width: 80.r,
-            height: 80.r,
-            decoration: BoxDecoration(
-              color: SettingsUi.lightGreen,
-              shape: BoxShape.circle,
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: SettingsUi.lightGreen.withValues(alpha: 0.35),
-                  blurRadius: 28.r,
-                  offset: Offset(0, 8.h),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.check_circle_rounded,
-              size: 54.r,
-              color: SettingsUi.green,
-            ),
-          ),
-          SizedBox(height: 27.h),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 24.sp,
-              fontWeight: FontWeight.w900,
-              color: SettingsUi.text,
-              letterSpacing: -0.45,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14.sp,
-              height: 1.35,
-              fontWeight: FontWeight.w500,
-              color: SettingsUi.muted,
-            ),
-          ),
-          SizedBox(height: 34.h),
-          SettingsPrimaryButton(
-            text: 'done'.tr,
-            height: 58,
-            onTap: onDone ?? Get.back,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class DeleteAccountDialog extends StatelessWidget {
-  const DeleteAccountDialog({super.key});
-
-  static Future<void> show() {
-    return Get.dialog(
-      const DeleteAccountDialog(),
-      barrierColor: Colors.black.withValues(alpha: 0.36),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
-      backgroundColor: Colors.transparent,
+    return SafeArea(
+      top: false,
       child: Container(
-        padding: EdgeInsets.fromLTRB(30.w, 34.h, 30.w, 28.h),
+        padding: EdgeInsets.fromLTRB(22.w, 12.h, 22.w, 24.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(38.r),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26.r)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Container(
-              width: 90.r,
-              height: 90.r,
+              width: 42.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD7DEDA),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+            ),
+            SizedBox(height: 22.h),
+            Container(
+              width: 66.r,
+              height: 66.r,
               decoration: const BoxDecoration(
-                color: Color(0xFFFFECE8),
+                color: Color(0xFFE6F7F0),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.warning_rounded,
-                size: 50.r,
-                color: SettingsUi.red,
-              ),
-            ),
-            SizedBox(height: 28.h),
-            Text(
-              'delete_account'.tr,
-              style: TextStyle(
-                fontSize: 28.sp,
-                fontWeight: FontWeight.w900,
-                color: SettingsUi.text,
-                letterSpacing: -0.6,
+                Icons.check_rounded,
+                size: 34.r,
+                color: SettingsUi.primary,
               ),
             ),
             SizedBox(height: 17.h),
             Text(
-              'Are you sure? This action is\npermanent and all your\nprogress, XP, and certificates\nwill be lost forever. This cannot\nbe undone.',
+              title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 17.sp,
-                height: 1.42,
-                fontWeight: FontWeight.w500,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w800,
+                color: SettingsUi.text,
+              ),
+            ),
+            SizedBox(height: 7.h),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13.sp,
+                height: 1.45,
                 color: SettingsUi.muted,
               ),
             ),
-            SizedBox(height: 34.h),
-            SettingsPrimaryButton(
-              text: 'delete_my_account'.tr,
-              color: SettingsUi.red,
-              shadowColor: const Color(0xFFE98A6F),
-              height: 66,
-              onTap: () {
-                Get.back();
-                Get.toNamed(AppRoutes.deleteAccountConfirm);
-              },
-            ),
             SizedBox(height: 22.h),
-            GestureDetector(
-              onTap: Get.back,
-              child: Text(
-                'keep_my_account'.tr,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
-                  color: SettingsUi.muted,
-                ),
-              ),
+            SettingsPrimaryButton(
+              text: SettingsL10n.text('done'),
+              onTap: () {
+                Get.back<void>();
+                onDone?.call();
+              },
             ),
           ],
         ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
 import '../../features/ai_chat/controllers/ai_chat_controller.dart';
@@ -17,7 +19,7 @@ import '../../features/drawer_features/settings/services/user_settings_service.d
 import '../../features/drawer_features/shop/controllers/google_play_purchase_controller.dart';
 import '../../features/drawer_features/shop/services/google_play_billing_service.dart';
 import '../../features/drawer_features/shop/services/shop_api_service.dart';
-import '../../features/home/services/home_mock_service.dart';
+
 import '../../features/leaderboard/controllers/leaderboard_controller.dart';
 import '../../features/messages/controllers/messages_controller.dart';
 import '../../features/messages/services/messages_service.dart';
@@ -33,7 +35,6 @@ import '../../features/leaderboard/services/leaderboard_service.dart';
 import '../../features/practice_hub/controllers/practice_hub_controller.dart';
 import '../services/api_client.dart';
 import '../controllers/user_session_controller.dart';
-import '../services/learning_activity_api_service.dart';
 import '../services/current_user_summary_service.dart';
 import '../widgets/app_drawer_controller.dart';
 import '../services/token_service.dart';
@@ -138,9 +139,7 @@ class InitialBindings extends Bindings {
       () => HomeController(homeApiService: Get.find<HomeApiService>()),
       fenix: true,
     );
-    if (!Get.isRegistered<HomeMockService>()) {
-      Get.lazyPut<HomeMockService>(HomeMockService.new);
-    }
+
 
     if (!Get.isRegistered<CoursesMockService>()) {
       Get.lazyPut<CoursesMockService>(CoursesMockService.new, fenix: true);
@@ -220,9 +219,11 @@ class InitialBindings extends Bindings {
                   initialSession: session,
                 );
                 Get.put<MessageCallController>(controller, permanent: true);
-                await controller.openCallScreen(
-                  replaceCurrent:
-                      callData['_replaceCurrentCallRoute'] == true,
+                unawaited(
+                  controller.openCallScreen(
+                    replaceCurrent:
+                    callData['_replaceCurrentCallRoute'] == true,
+                  ),
                 );
               },
         ),

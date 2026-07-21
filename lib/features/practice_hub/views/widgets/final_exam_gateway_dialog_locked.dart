@@ -9,135 +9,151 @@ import '../../../../core/themes/app_font.dart';
 import '../../../../core/widgets/widgets.dart';
 
 class FinalExamGatewayDialogLocked extends StatelessWidget {
-  final VoidCallback? onWatchMoreLessons;
-  final VoidCallback? onBackToChapter;
-
   const FinalExamGatewayDialogLocked({
     super.key,
     this.onWatchMoreLessons,
-    this.onBackToChapter,
   });
+
+  final VoidCallback? onWatchMoreLessons;
 
   static Future<T?> show<T>({
     VoidCallback? onWatchMoreLessons,
-    VoidCallback? onBackToChapter,
   }) {
     return Get.dialog<T>(
       FinalExamGatewayDialogLocked(
         onWatchMoreLessons: onWatchMoreLessons,
-        onBackToChapter: onBackToChapter,
       ),
       barrierDismissible: true,
-      barrierColor: Colors.black.withValues(alpha: 0.34),
+      barrierColor: Colors.black.withValues(alpha: 0.32),
     );
   }
 
   void _close() {
-    if (Get.isDialogOpen ?? false) Get.back();
+    if (Get.isDialogOpen ?? false) {
+      Get.back<void>();
+    }
+  }
+
+  void _handleWatchMoreLessons() {
+    _close();
+    onWatchMoreLessons?.call();
   }
 
   @override
   Widget build(BuildContext context) {
+    final double maximumDialogHeight =
+        MediaQuery.sizeOf(context).height * 0.78;
+
     return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 2.6, sigmaY: 2.6),
+      filter: ImageFilter.blur(
+        sigmaX: 2.2,
+        sigmaY: 2.2,
+      ),
       child: Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.symmetric(horizontal: 38.w),
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: 24.w,
+          vertical: 24.h,
+        ),
         child: Container(
+          constraints: BoxConstraints(
+            maxWidth: 400.w,
+            maxHeight: maximumDialogHeight,
+          ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(42.r),
-            boxShadow: [
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(24.r),
+            boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.36),
-                blurRadius: 30.r,
-                offset: Offset(0, 22.h),
+                color: Colors.black.withValues(alpha: 0.18),
+                blurRadius: 22.r,
+                offset: Offset(0, 10.h),
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(42.r),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.84,
-              ),
-              child: Stack(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: AppColors.white,
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: EdgeInsets.fromLTRB(30.w, 34.h, 30.w, 30.h),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset(
-                            'assets/heroes/your not ready.png',
-                            width: 180.w,
-                          ),
-                          // const _LockedIllustration(),
-                          // SizedBox(height: 28.h),
-                          Text(
-                            'Wait! Not quite\nready.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 27.sp,
-                              height: 1.12,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.8,
-                              color: AppColors.primaryGreen,
-                            ),
-                          ),
-                          SizedBox(height: 18.h),
-                          Text(
-                            'you_need_to_finish_80_of_the_video_lessons_to_unlo'.tr,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: AppFont.font16.sp,
-                              height: 1.35,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF666A6D),
-                            ),
-                          ),
-                          SizedBox(height: 34.h),
-                          const _LockedProgressCard(),
-                          SizedBox(height: 38.h),
-                          CustomButton(
-                            onPressed: onWatchMoreLessons ?? _close,
-                            text: 'watch_more_lessons'.tr,
-                            icon: Icons.play_circle_outline_rounded,
-                            height: 58,
-                            width: double.infinity,
-                            showShadow: true,
-                            btnColor: AppColors.primaryBtnColor,
-                            btnShadowColor: AppColors.primaryBtnShadow,
-                            borderColor: AppColors.primaryBtnColor,
-                            textColor: AppColors.white,
-                            fontSize: AppFont.font18,
-                            fontWeight: FontWeight.w900,
-                          ),
-                          SizedBox(height: 22.h),
-                          _BackToChapterButton(
-                            onTap: onBackToChapter ?? _close,
-                          ),
-                        ],
+            borderRadius: BorderRadius.circular(24.r),
+            child: Stack(
+              children: <Widget>[
+                SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(
+                    22.w,
+                    22.h,
+                    22.w,
+                    24.h,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Image.asset(
+                        'assets/heroes/your not ready.png',
+                        width: 145.w,
+                        height: 120.h,
+                        fit: BoxFit.contain,
                       ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'final_exam_not_ready_title'.tr,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: AppFont.font24.sp,
+                          height: 1.12,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.4,
+                          color: AppColors.primaryGreen,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        'final_exam_unlock_requirement'.tr,
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: AppFont.font14.sp,
+                          height: 1.4,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF666A6D),
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                      const _LockedProgressCard(),
+                      SizedBox(height: 22.h),
+                      CustomButton(
+                        onPressed: _handleWatchMoreLessons,
+                        text: 'watch_more_lessons'.tr,
+                        icon: Icons.play_circle_outline_rounded,
+                        height: 50,
+                        width: double.infinity,
+                        showShadow: true,
+                        btnColor: AppColors.primaryBtnColor,
+                        btnShadowColor: AppColors.primaryBtnShadow,
+                        borderColor: AppColors.primaryBtnColor,
+                        textColor: AppColors.white,
+                        fontSize: AppFont.font16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  top: 8.h,
+                  right: 8.w,
+                  child: IconButton(
+                    onPressed: _close,
+                    tooltip: MaterialLocalizations.of(context)
+                        .closeButtonTooltip,
+                    icon: Icon(
+                      Icons.close_rounded,
+                      size: 22.r,
+                      color: const Color(0xFF777777),
                     ),
                   ),
-                  Positioned(
-                    top: 22.h,
-                    right: 22.w,
-                    child: GestureDetector(
-                      onTap: _close,
-                      child: Icon(
-                        Icons.close_rounded,
-                        size: 29.r,
-                        color: const Color(0xFF777777),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -146,109 +162,76 @@ class FinalExamGatewayDialogLocked extends StatelessWidget {
   }
 }
 
-class _LockedIllustration extends StatelessWidget {
-  const _LockedIllustration();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 164.r,
-      height: 164.r,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.white,
-        border: Border.all(color: const Color(0xFFFF9900), width: 9.w),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF7CFF3B).withValues(alpha: 0.38),
-            blurRadius: 30.r,
-            spreadRadius: 3.r,
-          ),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Transform.rotate(
-            angle: 0.07,
-            child: Icon(
-              Icons.fact_check_rounded,
-              size: 90.r,
-              color: const Color(0xFF5F7E42),
-            ),
-          ),
-          Positioned(
-            right: 34.w,
-            bottom: 34.h,
-            child: Transform.rotate(
-              angle: 0.53,
-              child: Icon(
-                Icons.edit_rounded,
-                size: 58.r,
-                color: const Color(0xFF73A95B),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _LockedProgressCard extends StatelessWidget {
   const _LockedProgressCard();
+
+  static const int _currentProgress = 60;
+  static const int _requiredProgress = 80;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(22.w, 21.h, 22.w, 18.h),
+      padding: EdgeInsets.symmetric(
+        horizontal: 18.w,
+        vertical: 16.h,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFFF0F1F1),
-        borderRadius: BorderRadius.circular(27.r),
+        borderRadius: BorderRadius.circular(18.r),
       ),
       child: Column(
-        children: [
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
               Expanded(
                 child: Text(
                   'course_progress'.tr,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: AppFont.font10.sp,
-                    height: 1,
+                    height: 1.2,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
+                    letterSpacing: 0.6,
                     color: AppColors.primaryGreen,
                   ),
                 ),
               ),
               SizedBox(width: 10.w),
               Text(
-                '60%',
+                '$_currentProgress%',
                 style: TextStyle(
-                  fontSize: AppFont.font24.sp,
-                  height: 0.9,
+                  fontSize: AppFont.font22.sp,
+                  height: 1,
                   fontWeight: FontWeight.w900,
                   color: AppColors.primaryGreen,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 15.h),
-          const _LockedProgressBar(),
-          SizedBox(height: 17.h),
+          SizedBox(height: 12.h),
+          const _LockedProgressBar(
+            progress: _currentProgress / 100,
+            unlockProgress: _requiredProgress / 100,
+          ),
+          SizedBox(height: 12.h),
           Row(
-            children: [
+            children: <Widget>[
               Expanded(
                 child: Text(
-                  'Currently at\n60%\nwatched.',
+                  'currently_watched_percent'.trParams(
+                    <String, String>{
+                      'progress': _currentProgress.toString(),
+                    },
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: AppFont.font11.sp,
-                    height: 1.12,
+                    height: 1.25,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF676A6D),
                   ),
@@ -256,15 +239,17 @@ class _LockedProgressCard extends StatelessWidget {
               ),
               SizedBox(width: 10.w),
               Container(
-                height: 36.h,
-                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 7.h,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFDCE9D6),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
+                  children: <Widget>[
                     Icon(
                       Icons.lock_outline_rounded,
                       size: 13.r,
@@ -272,10 +257,14 @@ class _LockedProgressCard extends StatelessWidget {
                     ),
                     SizedBox(width: 5.w),
                     Text(
-                      '80% TO\nUNLOCK',
+                      'unlock_at_percent'.trParams(
+                        <String, String>{
+                          'progress': _requiredProgress.toString(),
+                        },
+                      ),
                       style: TextStyle(
                         fontSize: AppFont.font9.sp,
-                        height: 1.05,
+                        height: 1.1,
                         fontWeight: FontWeight.w900,
                         color: AppColors.primaryGreen,
                       ),
@@ -292,108 +281,76 @@ class _LockedProgressCard extends StatelessWidget {
 }
 
 class _LockedProgressBar extends StatelessWidget {
-  const _LockedProgressBar();
+  const _LockedProgressBar({
+    required this.progress,
+    required this.unlockProgress,
+  });
+
+  final double progress;
+  final double unlockProgress;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 26.h,
+      height: 22.h,
       child: LayoutBuilder(
-        builder: (context, constraints) {
-          final double width = constraints.maxWidth;
+        builder: (
+            BuildContext context,
+            BoxConstraints constraints,
+            ) {
+          final double availableWidth = constraints.maxWidth;
+          final double progressWidth =
+              availableWidth * progress.clamp(0.0, 1.0);
+          final double unlockPosition =
+              availableWidth * unlockProgress.clamp(0.0, 1.0);
 
           return Stack(
             clipBehavior: Clip.none,
-            children: [
+            children: <Widget>[
               Positioned(
                 left: 0,
                 right: 0,
                 top: 5.h,
                 child: Container(
-                  height: 13.h,
+                  height: 10.h,
                   decoration: BoxDecoration(
                     color: const Color(0xFFD8DADB),
-                    borderRadius: BorderRadius.circular(999.r),
+                    borderRadius: BorderRadius.circular(100.r),
                   ),
                 ),
               ),
               Positioned(
                 left: 0,
                 top: 5.h,
-                width: width * 0.60,
+                width: progressWidth,
                 child: Container(
-                  height: 13.h,
+                  height: 10.h,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF237600), Color(0xFF7CFF3B)],
+                      colors: <Color>[
+                        Color(0xFF237600),
+                        Color(0xFF7CFF3B),
+                      ],
                     ),
-                    borderRadius: BorderRadius.circular(999.r),
+                    borderRadius: BorderRadius.circular(100.r),
                   ),
                 ),
               ),
               Positioned(
-                top: -2.h,
-                left: width * 0.80,
-                child: const _DottedVerticalLine(),
+                left: unlockPosition - 1.w,
+                top: 0,
+                child: Container(
+                  width: 2.w,
+                  height: 20.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8BA17E),
+                    borderRadius: BorderRadius.circular(100.r),
+                  ),
+                ),
               ),
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _DottedVerticalLine extends StatelessWidget {
-  const _DottedVerticalLine();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(
-        6,
-        (_) => Container(
-          width: 2.w,
-          height: 3.h,
-          margin: EdgeInsets.only(bottom: 2.h),
-          decoration: BoxDecoration(
-            color: const Color(0xFF8BA17E),
-            borderRadius: BorderRadius.circular(99.r),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BackToChapterButton extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _BackToChapterButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.arrow_back_rounded,
-            size: 18.r,
-            color: const Color(0xFF62666A),
-          ),
-          SizedBox(width: 7.w),
-          Text(
-            'back_to_chapter'.tr,
-            style: TextStyle(
-              fontSize: AppFont.font14.sp,
-              height: 1,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF62666A),
-            ),
-          ),
-        ],
       ),
     );
   }

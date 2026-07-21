@@ -113,7 +113,9 @@ class GuidedLearningTopicsView extends GetView<AiChatController> {
               SizedBox(height: 28.h),
               Center(
                 child: Text(
-                  'level_level_topics'.trParams(<String, String>{'level': level.toString()}),
+                  'level_topics'.trParams(<String, String>{
+                    'level': level.toString(),
+                  }),
                   style: TextStyle(
                     fontSize: 24.sp,
                     height: 1,
@@ -301,7 +303,7 @@ class _TipCard extends StatelessWidget {
                 ),
                 SizedBox(height: 13.h),
                 Text(
-                  'The AI will play the role of that\nscenario (e.g. cashier, waiter, driver!)',
+                  'ai_scenario_tip'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     height: 1.45,

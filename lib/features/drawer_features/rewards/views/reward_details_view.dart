@@ -253,7 +253,9 @@ class _RewardMetaRow extends StatelessWidget {
         SizedBox(width: 9.w),
         Expanded(
           child: Text(
-            'Awarded\n${formatRewardDate(reward.awardedAt)}',
+            'reward_awarded_date'.trParams(<String, String>{
+              'date': formatRewardDate(reward.awardedAt),
+            }),
             style: TextStyle(
               fontSize: 12.sp,
               height: 1.3,
@@ -387,7 +389,8 @@ class _DeliveryCard extends StatelessWidget {
         ? 'Tracking: ${fulfillment!.trackingNumber}'
         : fulfillment?.carrierName?.isNotEmpty == true
         ? 'Carrier: ${fulfillment!.carrierName}'
-        : address?.addressLine ?? 'add_your_delivery_information_to_continue'.tr;
+        : address?.addressLine ??
+              'add_your_delivery_information_to_continue'.tr;
 
     return Container(
       width: double.infinity,

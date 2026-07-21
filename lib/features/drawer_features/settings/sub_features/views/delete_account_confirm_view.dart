@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../models/settings_localization.dart';
 import '../../settings_controller.dart';
 import '../../widgets/settings_ui_widgets.dart';
 
@@ -11,178 +12,179 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SettingsUi.bg,
+      backgroundColor: SettingsUi.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24.w, 49.h, 24.w, 42.h),
-          child: Column(
+        child: Obx(() {
+          final String accountName = controller.profile.value?.fullName.trim() ?? '';
+          return ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 28.h),
             children: <Widget>[
-              SizedBox(
-                height: 36.h,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: Get.back,
-                        child: Icon(
-                          Icons.arrow_back_rounded,
-                          size: 27.r,
-                          color: SettingsUi.text,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      'confirm_deletion'.tr,
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w900,
-                        color: SettingsUi.text,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 68.h),
-              Container(
-                width: 130.r,
-                height: 130.r,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF5538),
-                  borderRadius: BorderRadius.circular(38.r),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 88.r,
-                    height: 88.r,
-                    decoration: BoxDecoration(
-                      color: SettingsUi.red,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFFE24B2C),
-                        width: 5.w,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.warning_rounded,
-                      size: 52.r,
-                      color: Colors.white,
-                    ),
+              SettingsTopBar(title: SettingsL10n.text('delete_account')),
+              SizedBox(height: 24.h),
+              Center(
+                child: Container(
+                  width: 76.r,
+                  height: 76.r,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFECEC),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.delete_forever_outlined,
+                    size: 36.r,
+                    color: SettingsUi.danger,
                   ),
                 ),
               ),
-              SizedBox(height: 59.h),
+              SizedBox(height: 18.h),
               Text(
-                'are_you_absolutely_nsure'.tr,
+                SettingsL10n.text('delete_title'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 29.sp,
-                  height: 1.18,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF164D08),
-                  letterSpacing: -0.7,
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w800,
+                  color: SettingsUi.text,
                 ),
               ),
-              SizedBox(height: 27.h),
-              Obx(
-                () => Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.fromLTRB(30.w, 27.h, 30.w, 27.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0F0F0),
-                    borderRadius: BorderRadius.circular(38.r),
+              SizedBox(height: 9.h),
+              Text(
+                SettingsL10n.text('delete_warning'),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12.5.sp,
+                  height: 1.45,
+                  color: SettingsUi.muted,
+                ),
+              ),
+              SizedBox(height: 18.h),
+              _DangerInformationCard(),
+              SizedBox(height: 20.h),
+              Text(
+                SettingsL10n.text(
+                  'type_name_to_confirm',
+                  params: <String, String>{'name': accountName},
+                ),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                  color: SettingsUi.text,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              TextField(
+                enabled: accountName.isNotEmpty && !controller.isDeletingAccount.value,
+                onChanged: (String value) => controller.deleteConfirmText.value = value,
+                textInputAction: TextInputAction.done,
+                autocorrect: false,
+                enableSuggestions: false,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: SettingsUi.text,
+                ),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: accountName,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 16.h,
                   ),
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: TextStyle(
-                        fontSize: 17.sp,
-                        height: 1.45,
-                        fontWeight: FontWeight.w500,
-                        color: SettingsUi.muted,
-                      ),
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: 'to_permanently_delete_this_account_type_your_full'.tr,
-                        ),
-                        TextSpan(
-                          text: controller.displayName,
-                          style: const TextStyle(
-                            color: SettingsUi.red,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'this_action_is_irreversible'.tr,
-                        ),
-                      ],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18.r),
+                    borderSide: const BorderSide(color: SettingsUi.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18.r),
+                    borderSide: const BorderSide(color: SettingsUi.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18.r),
+                    borderSide: const BorderSide(
+                      color: SettingsUi.danger,
+                      width: 1.5,
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 31.h),
-              Container(
-                height: 64.h,
-                padding: EdgeInsets.symmetric(horizontal: 26.w),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(100.r),
-                ),
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  textCapitalization: TextCapitalization.words,
-                  onChanged: (String value) =>
-                      controller.deleteConfirmText.value = value,
+              if (controller.deleteConfirmText.value.isNotEmpty &&
+                  !controller.canDeleteAccount) ...<Widget>[
+                SizedBox(height: 7.h),
+                Text(
+                  SettingsL10n.text('name_does_not_match'),
                   style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w800,
-                    color: SettingsUi.text,
+                    fontSize: 11.sp,
+                    color: SettingsUi.danger,
                   ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'enter_your_full_name'.tr,
-                    hintStyle: TextStyle(
-                      fontSize: 16.sp,
+                ),
+              ],
+              SizedBox(height: 22.h),
+              SettingsPrimaryButton(
+                text: SettingsL10n.text('delete_my_account'),
+                icon: Icons.delete_forever_outlined,
+                color: SettingsUi.danger,
+                loadingColor: SettingsUi.danger,
+                enabled: controller.canDeleteAccount &&
+                    !controller.isDeletingAccount.value,
+                isLoading: controller.isDeletingAccount.value,
+                onTap: controller.deleteAccountPermanently,
+              ),
+              SizedBox(height: 10.h),
+              SizedBox(
+                height: 52.h,
+                child: OutlinedButton(
+                  onPressed: controller.isDeletingAccount.value ? null : Get.back,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: SettingsUi.text,
+                    side: const BorderSide(color: SettingsUi.border),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.r),
+                    ),
+                  ),
+                  child: Text(
+                    SettingsL10n.text('keep_account'),
+                    style: TextStyle(
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFFBDBDBD),
                     ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 39.h),
-              Obx(() {
-                final bool canDelete = controller.canDeleteAccount;
-
-                return Opacity(
-                  opacity: canDelete ? 1 : 0.55,
-                  child: SettingsPrimaryButton(
-                    text: 'permanently_delete'.tr,
-                    color: SettingsUi.red,
-                    shadowColor: SettingsUi.redShadow,
-                    isLoading: controller.isDeletingAccount.value,
-                    onTap: canDelete
-                        ? controller.deleteAccountPermanently
-                        : () {},
-                  ),
-                );
-              }),
-              SizedBox(height: 28.h),
-              GestureDetector(
-                onTap: Get.back,
-                child: Text(
-                  'cancel'.tr,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w900,
-                    color: SettingsUi.muted,
                   ),
                 ),
               ),
             ],
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _DangerInformationCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(15.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF3F3),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: const Color(0xFFFFD6D6)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Icon(Icons.warning_amber_rounded, size: 22.r, color: SettingsUi.danger),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Text(
+              SettingsL10n.text('delete_consequences'),
+              style: TextStyle(
+                fontSize: 11.5.sp,
+                height: 1.45,
+                color: const Color(0xFF873A3A),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

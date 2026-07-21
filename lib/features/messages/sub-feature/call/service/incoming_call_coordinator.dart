@@ -63,6 +63,8 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     });
   }
 
+
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) {
@@ -139,6 +141,36 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     presentedCallIsVideo.value = false;
     presentedCallStatus.value = '';
     presentedCallParticipantName.value = '';
+  }
+
+  Future<void> resetForLogout() async {
+    _activeIncomingCallId = null;
+    _presentationOwnerId = null;
+    _resumePresentedCall = null;
+    _incomingController = null;
+
+    _incomingRouteVisible = false;
+    _isOpeningAcceptedCall = false;
+    _restoreInProgress = false;
+
+    isCallTransitioning.value = false;
+    hasPresentedCall.value = false;
+    isPresentedCallScreenVisible.value = false;
+    presentedCallIsVideo.value = false;
+    presentedCallStatus.value = '';
+    presentedCallParticipantName.value = '';
+
+    await CallkitPendingActionStore.clear();
+
+    try {
+      await CallkitIncomingService.endAllCalls();
+    } catch (_) {}
+
+    if (Get.isRegistered<MessageIncomingCallController>()) {
+      await Get.delete<MessageIncomingCallController>(
+        force: true,
+      );
+    }
   }
 
   Future<void> _connectCallSocket() async {

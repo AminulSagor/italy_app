@@ -5,6 +5,15 @@ enum PracticeHubSkillBuilderType {
   dailyChallenges,
 }
 
+enum PracticeFinalExamAction {
+  locked,
+  startExam,
+  resultPending,
+  viewResult,
+  viewCertificate,
+  retakeExam,
+}
+
 class PracticeHubSkillBuilderModel {
   const PracticeHubSkillBuilderModel({
     required this.type,
@@ -180,37 +189,156 @@ class PracticeFinalExamCourseModel {
     required this.unlockCompletionPercent,
     required this.courseProgressPercent,
     required this.isUnlocked,
+    required this.hasAttempted,
+    required this.isEligible,
+    required this.canRetake,
+    required this.attemptId,
+    required this.attemptStatus,
+    required this.resultReady,
     required this.message,
   });
 
   final String courseId;
   final String courseName;
   final String examTitle;
+
   final int unlockCompletionPercent;
   final int courseProgressPercent;
+
   final bool isUnlocked;
+  final bool hasAttempted;
+  final bool isEligible;
+  final bool canRetake;
+  final bool resultReady;
+
+  final String attemptId;
+  final String attemptStatus;
   final String message;
 
-  factory PracticeFinalExamCourseModel.fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> course = _jsonMapOrNull(json['course']) ??
-        <String, dynamic>{};
-    final Map<String, dynamic> exam = _jsonMapOrNull(json['exam']) ??
-        <String, dynamic>{};
+  PracticeFinalExamAction get action {
+    if (!isUnlocked) {
+      return PracticeFinalExamAction.locked;
+    }
+
+    switch (attemptStatus) {
+      case 'certificate_issued':
+        return PracticeFinalExamAction.viewCertificate;
+
+      case 'retake_requested':
+        return PracticeFinalExamAction.retakeExam;
+
+      case 'in_progress':
+      case 'submitted':
+      case 'under_review':
+        return PracticeFinalExamAction.resultPending;
+
+      case 'evaluated':
+        return PracticeFinalExamAction.viewResult;
+
+      case 'cancelled':
+        return PracticeFinalExamAction.locked;
+    }
+
+    if (!hasAttempted && isEligible) {
+      return PracticeFinalExamAction.startExam;
+    }
+
+    if (resultReady && attemptId.isNotEmpty) {
+      return PracticeFinalExamAction.viewResult;
+    }
+
+    return PracticeFinalExamAction.locked;
+  }
+
+  String get actionLabelKey {
+    switch (action) {
+      case PracticeFinalExamAction.startExam:
+        return 'start_final_exam';
+
+      case PracticeFinalExamAction.resultPending:
+        return 'final_exam_result_pending';
+
+      case PracticeFinalExamAction.viewResult:
+        return 'final_exam_view_result';
+
+      case PracticeFinalExamAction.viewCertificate:
+        return 'final_exam_view_certificate';
+
+      case PracticeFinalExamAction.retakeExam:
+        return 'final_exam_retake';
+
+      case PracticeFinalExamAction.locked:
+        return 'locked';
+    }
+  }
+
+  String get statusLabelKey {
+    switch (action) {
+      case PracticeFinalExamAction.startExam:
+        return 'ready_for_your_final_challenge';
+
+      case PracticeFinalExamAction.resultPending:
+        return 'final_exam_review_in_progress';
+
+      case PracticeFinalExamAction.viewResult:
+        return 'final_exam_result_available';
+
+      case PracticeFinalExamAction.viewCertificate:
+        return 'final_exam_certificate_available';
+
+      case PracticeFinalExamAction.retakeExam:
+        return 'final_exam_retake_available';
+
+      case PracticeFinalExamAction.locked:
+        return 'final_exam_locked_1';
+    }
+  }
+
+  factory PracticeFinalExamCourseModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    final Map<String, dynamic> course =
+        _jsonMapOrNull(json['course']) ??
+            <String, dynamic>{};
+
+    final Map<String, dynamic> exam =
+        _jsonMapOrNull(json['exam']) ??
+            <String, dynamic>{};
 
     int intValue(dynamic value) {
       if (value is int) return value;
       if (value is num) return value.round();
-      return double.tryParse(value?.toString() ?? '')?.round() ?? 0;
+
+      return double.tryParse(
+        value?.toString() ?? '',
+      )?.round() ??
+          0;
     }
 
     return PracticeFinalExamCourseModel(
-      courseId: course['id']?.toString().trim() ?? '',
-      courseName: course['title']?.toString().trim() ?? 'Course',
-      examTitle: exam['title']?.toString().trim() ?? 'Final Exam',
-      unlockCompletionPercent: intValue(exam['unlockCompletionPercent']),
-      courseProgressPercent: intValue(json['courseProgressPercent']),
+      courseId:
+      course['id']?.toString().trim() ?? '',
+      courseName:
+      course['title']?.toString().trim() ??
+          'Course',
+      examTitle:
+      exam['title']?.toString().trim() ??
+          'Final Exam',
+      unlockCompletionPercent:
+      intValue(exam['unlockCompletionPercent']),
+      courseProgressPercent:
+      intValue(json['courseProgressPercent']),
       isUnlocked: json['isUnlocked'] == true,
-      message: json['message']?.toString().trim() ?? '',
+      hasAttempted: json['hasAttempted'] == true,
+      isEligible: json['isEligible'] == true,
+      canRetake: json['canRetake'] == true,
+      attemptId:
+      json['attemptId']?.toString().trim() ?? '',
+      attemptStatus:
+      json['attemptStatus']?.toString().trim() ?? '',
+      resultReady: json['resultReady'] == true,
+      message:
+      json['message']?.toString().trim() ?? '',
     );
   }
 }

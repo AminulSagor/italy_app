@@ -87,6 +87,114 @@ class StoreProviderProductModel {
   };
 }
 
+class StoreActiveSubscriptionModel {
+  const StoreActiveSubscriptionModel({
+    required this.id,
+    required this.provider,
+    required this.packageId,
+    required this.productId,
+    required this.basePlanId,
+    required this.offerId,
+    required this.status,
+    required this.entitlementStatus,
+    required this.autoRenewEnabled,
+    required this.startedAt,
+    required this.expiresAt,
+    required this.canceledAt,
+  });
+
+  final String id;
+  final String provider;
+  final String packageId;
+  final String productId;
+  final String basePlanId;
+  final String offerId;
+  final String status;
+  final String entitlementStatus;
+  final bool autoRenewEnabled;
+  final DateTime? startedAt;
+  final DateTime? expiresAt;
+  final DateTime? canceledAt;
+
+  factory StoreActiveSubscriptionModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    return StoreActiveSubscriptionModel(
+      id: _string(json['id']),
+
+      provider: _string(
+        json['provider'],
+        fallback: 'google_play',
+      ),
+
+      packageId:
+      _string(json['packageId']),
+
+      productId:
+      _string(json['productId']),
+
+      basePlanId:
+      _string(json['basePlanId']),
+
+      offerId:
+      _string(json['offerId']),
+
+      status:
+      _string(json['status']),
+
+      entitlementStatus:
+      _string(json['entitlementStatus']),
+
+      autoRenewEnabled:
+      _bool(json['autoRenewEnabled']),
+
+      startedAt:
+      _date(json['startedAt']),
+
+      expiresAt:
+      _date(json['expiresAt']),
+
+      canceledAt:
+      _date(json['canceledAt']),
+    );
+  }
+
+  Map<String, dynamic> toJson() =>
+      <String, dynamic>{
+        'id': id,
+        'provider': provider,
+        'packageId': packageId,
+        'productId': productId,
+
+        'basePlanId':
+        basePlanId.isEmpty
+            ? null
+            : basePlanId,
+
+        'offerId':
+        offerId.isEmpty
+            ? null
+            : offerId,
+
+        'status': status,
+
+        'entitlementStatus':
+        entitlementStatus,
+
+        'autoRenewEnabled':
+        autoRenewEnabled,
+
+        'startedAt':
+        startedAt?.toIso8601String(),
+
+        'expiresAt':
+        expiresAt?.toIso8601String(),
+
+        'canceledAt':
+        canceledAt?.toIso8601String(),
+      };
+}
+
 class StoreBalancesModel {
   const StoreBalancesModel({
     required this.aiVoiceMinutes,
@@ -95,58 +203,316 @@ class StoreBalancesModel {
     required this.streakFreezeCount,
     required this.unlimitedProtectionActive,
     required this.unlimitedProtectionExpiresAt,
+    required this.activeStreakSubscription,
     required this.cvCredits,
     required this.freeCvCreditsPerSignup,
+    required this.freeCvGenerationsLimit,
+    required this.freeCvGenerationsRemaining,
+    required this.freeCvLimitExhausted,
+    required this.totalCvGenerationsAvailable,
+    required this.canCreateCv,
+    required this.nextCvGenerationUses,
     required this.allowCvEditingWithoutCredit,
   });
+
   final int aiVoiceMinutes;
+
   final int aiVoiceSeconds;
+
   final int aiTextTokens;
+
   final int streakFreezeCount;
+
   final bool unlimitedProtectionActive;
+
   final DateTime? unlimitedProtectionExpiresAt;
+
+  final StoreActiveSubscriptionModel?
+  activeStreakSubscription;
+
+  /// Purchased CV credits only.
   final int cvCredits;
+
+  /// Admin-configured number of free CV creations.
+  ///
+  /// This existing field is preserved for compatibility
+  /// with the old backend response.
   final int freeCvCreditsPerSignup;
+
+  /// Total free CV creation limit configured by admin.
+  final int freeCvGenerationsLimit;
+
+  /// Number of free CV creations still available.
+  final int freeCvGenerationsRemaining;
+
+  /// True when the free CV allowance has reached zero.
+  final bool freeCvLimitExhausted;
+
+  /// Free generations plus purchased CV credits.
+  final int totalCvGenerationsAvailable;
+
+  /// Whether the user can currently create a new CV.
+  final bool canCreateCv;
+
+  /// Possible values:
+  /// free, credit, none.
+  final String nextCvGenerationUses;
+
+  /// Whether edits and regenerations are free.
   final bool allowCvEditingWithoutCredit;
-  factory StoreBalancesModel.fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> ai = _map(json['ai']);
-    final Map<String, dynamic> streak = _map(json['streakFreeze']);
-    final Map<String, dynamic> unlimited = _map(streak['unlimitedProtection']);
-    final Map<String, dynamic> cv = _map(json['cv']);
-    final int voiceSeconds = ai.containsKey('voiceSeconds')
+
+  bool get hasFreeCvGeneration =>
+      freeCvGenerationsRemaining > 0;
+
+  bool get hasPurchasedCvCredit =>
+      cvCredits > 0;
+
+  bool get nextCvUsesFreeAllowance =>
+      nextCvGenerationUses == 'free';
+
+  bool get nextCvUsesPurchasedCredit =>
+      nextCvGenerationUses == 'credit';
+
+  factory StoreBalancesModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    final Map<String, dynamic> ai =
+    _map(json['ai']);
+
+    final Map<String, dynamic> streak =
+    _map(json['streakFreeze']);
+
+    final Map<String, dynamic> unlimited =
+    _map(
+      streak['unlimitedProtection'],
+    );
+
+    final Map<String, dynamic> subscription =
+    _map(
+      unlimited['subscription'],
+    );
+
+    final Map<String, dynamic> cv =
+    _map(json['cv']);
+
+    final int voiceSeconds =
+    ai.containsKey('voiceSeconds')
         ? _int(ai['voiceSeconds'])
-        : (_double(ai['voiceMinutes']) * 60).round();
+        : (_double(ai['voiceMinutes']) * 60)
+        .round();
+
+    final int cvCredits =
+    _int(cv['credits']);
+
+    final int freeCreditsPerSignup =
+    _int(
+      cv['freeCreditsPerSignup'],
+      fallback: 3,
+    );
+
+    /*
+     * New backend field:
+     * freeGenerationsLimit
+     *
+     * Old backend fallback:
+     * freeCreditsPerSignup
+     */
+    final int freeGenerationsLimit =
+    cv.containsKey(
+      'freeGenerationsLimit',
+    )
+        ? _int(
+      cv['freeGenerationsLimit'],
+      fallback:
+      freeCreditsPerSignup,
+    )
+        : freeCreditsPerSignup;
+
+    /*
+     * New backend field:
+     * freeGenerationsRemaining
+     *
+     * The fallback preserves compatibility with an
+     * older backend that only returned the signup
+     * free-credit configuration.
+     */
+    final int freeGenerationsRemaining =
+    cv.containsKey(
+      'freeGenerationsRemaining',
+    )
+        ? _int(
+      cv[
+      'freeGenerationsRemaining'],
+    )
+        : freeCreditsPerSignup;
+
+    final bool freeLimitExhausted =
+    cv.containsKey(
+      'freeLimitExhausted',
+    )
+        ? _bool(
+      cv['freeLimitExhausted'],
+    )
+        : freeGenerationsRemaining <= 0;
+
+    final int totalGenerationsAvailable =
+    cv.containsKey(
+      'totalGenerationsAvailable',
+    )
+        ? _int(
+      cv[
+      'totalGenerationsAvailable'],
+    )
+        : freeGenerationsRemaining +
+        cvCredits;
+
+    final bool canCreate =
+    cv.containsKey('canCreate')
+        ? _bool(cv['canCreate'])
+        : totalGenerationsAvailable > 0;
+
+    final String nextGenerationUses =
+    _string(
+      cv['nextGenerationUses'],
+      fallback:
+      freeGenerationsRemaining > 0
+          ? 'free'
+          : cvCredits > 0
+          ? 'credit'
+          : 'none',
+    );
+
     return StoreBalancesModel(
-      aiVoiceMinutes: voiceSeconds <= 0 ? 0 : (voiceSeconds / 60).ceil(),
-      aiVoiceSeconds: voiceSeconds,
-      aiTextTokens: _int(ai['textTokens']),
-      streakFreezeCount: _int(streak['count']),
-      unlimitedProtectionActive: _bool(unlimited['active']),
-      unlimitedProtectionExpiresAt: _date(unlimited['expiresAt']),
-      cvCredits: _int(cv['credits']),
-      freeCvCreditsPerSignup: _int(cv['freeCreditsPerSignup']),
-      allowCvEditingWithoutCredit: _bool(cv['allowEditingWithoutCredit']),
+      aiVoiceMinutes:
+      voiceSeconds <= 0
+          ? 0
+          : (voiceSeconds / 60).ceil(),
+
+      aiVoiceSeconds:
+      voiceSeconds,
+
+      aiTextTokens:
+      _int(ai['textTokens']),
+
+      streakFreezeCount:
+      _int(streak['count']),
+
+      unlimitedProtectionActive:
+      _bool(unlimited['active']),
+
+      unlimitedProtectionExpiresAt:
+      _date(unlimited['expiresAt']),
+
+      activeStreakSubscription:
+      subscription.isEmpty
+          ? null
+          : StoreActiveSubscriptionModel
+          .fromJson(
+        subscription,
+      ),
+
+      cvCredits:
+      cvCredits,
+
+      freeCvCreditsPerSignup:
+      freeCreditsPerSignup,
+
+      freeCvGenerationsLimit:
+      freeGenerationsLimit,
+
+      freeCvGenerationsRemaining:
+      freeGenerationsRemaining,
+
+      freeCvLimitExhausted:
+      freeLimitExhausted,
+
+      totalCvGenerationsAvailable:
+      totalGenerationsAvailable,
+
+      canCreateCv:
+      canCreate,
+
+      nextCvGenerationUses:
+      nextGenerationUses,
+
+      allowCvEditingWithoutCredit:
+      _bool(
+        cv['allowEditingWithoutCredit'],
+      ),
     );
   }
-  Map<String, dynamic> toJson() => <String, dynamic>{
-    'ai': <String, dynamic>{
-      'voiceMinutes': aiVoiceMinutes,
-      'voiceSeconds': aiVoiceSeconds,
-      'textTokens': aiTextTokens,
-    },
-    'streakFreeze': <String, dynamic>{
-      'count': streakFreezeCount,
-      'unlimitedProtection': <String, dynamic>{
-        'active': unlimitedProtectionActive,
-        'expiresAt': unlimitedProtectionExpiresAt?.toIso8601String(),
-      },
-    },
-    'cv': <String, dynamic>{
-      'credits': cvCredits,
-      'freeCreditsPerSignup': freeCvCreditsPerSignup,
-      'allowEditingWithoutCredit': allowCvEditingWithoutCredit,
-    },
-  };
+
+  Map<String, dynamic> toJson() =>
+      <String, dynamic>{
+        'ai': <String, dynamic>{
+          'voiceMinutes':
+          aiVoiceMinutes,
+
+          'voiceSeconds':
+          aiVoiceSeconds,
+
+          'textTokens':
+          aiTextTokens,
+        },
+
+        'streakFreeze':
+        <String, dynamic>{
+          'count':
+          streakFreezeCount,
+
+          'unlimitedProtection':
+          <String, dynamic>{
+            'active':
+            unlimitedProtectionActive,
+
+            'expiresAt':
+            unlimitedProtectionExpiresAt
+                ?.toIso8601String(),
+
+            'subscription':
+            activeStreakSubscription
+                ?.toJson(),
+          },
+        },
+
+        'cv': <String, dynamic>{
+          /*
+           * Purchased CV credits.
+           */
+          'credits':
+          cvCredits,
+
+          /*
+           * Existing field preserved.
+           */
+          'freeCreditsPerSignup':
+          freeCvCreditsPerSignup,
+
+          /*
+           * New free-generation fields.
+           */
+          'freeGenerationsLimit':
+          freeCvGenerationsLimit,
+
+          'freeGenerationsRemaining':
+          freeCvGenerationsRemaining,
+
+          'freeLimitExhausted':
+          freeCvLimitExhausted,
+
+          'totalGenerationsAvailable':
+          totalCvGenerationsAvailable,
+
+          'canCreate':
+          canCreateCv,
+
+          'nextGenerationUses':
+          nextCvGenerationUses,
+
+          'allowEditingWithoutCredit':
+          allowCvEditingWithoutCredit,
+        },
+      };
 }
 
 class StorePackageModel {
@@ -190,18 +556,10 @@ class StorePackageModel {
   bool get isMonthly => billingModel == 'monthly';
   bool get isUnlimitedStreak => streakProtectionMode == 'monthly_unlimited';
 
-  String get badgeLabel {
-    switch (marketingBadge) {
-      case 'limited_time':
-        return 'LIMITED TIME';
-      case 'most_popular':
-        return 'MOST POPULAR';
-      case 'best_value':
-        return 'BEST VALUE';
-      default:
-        return '';
-    }
-  }
+  String get badgeLabel =>
+      marketingBadge == 'none'
+          ? ''
+          : marketingBadge;
 
   String get entitlementSummary {
     switch (type) {

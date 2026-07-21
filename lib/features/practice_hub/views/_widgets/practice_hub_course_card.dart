@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
@@ -125,7 +126,7 @@ class PracticeHubCourseCard extends StatelessWidget {
                   Row(
                     children: <Widget>[
                       Text(
-                        'PROGRESS',
+                        'progress'.tr.toUpperCase(),
                         style: TextStyle(
                           fontSize: AppFont.font10.sp,
                           height: 1,
@@ -147,10 +148,7 @@ class PracticeHubCourseCard extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 9.h),
-                  _ProgressLine(
-                    progress: course.progress,
-                    isActive: isActive,
-                  ),
+                  _ProgressLine(progress: course.progress, isActive: isActive),
                 ],
               ),
             ),

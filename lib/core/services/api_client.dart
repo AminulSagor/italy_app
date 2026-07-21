@@ -5,6 +5,8 @@ import 'package:get/get.dart' hide Response;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../../routes/app_routes.dart';
+import '../controllers/user_session_controller.dart';
+import '../models/account_restriction_details.dart';
 import 'storage_service.dart';
 import 'token_service.dart';
 
@@ -41,9 +43,17 @@ class ApiClient {
           handler.next(options);
         },
         onError: (DioException error, ErrorInterceptorHandler handler) async {
-          if (_isAuthenticatedUnauthorized(error)) {
+          final AccountRestrictionDetails? restriction =
+          AccountRestrictionDetails.tryFromResponseData(
+            error.response?.data,
+          );
+
+          if (restriction != null) {
+            await _handleBannedSession(restriction);
+          } else if (_isAuthenticatedUnauthorized(error)) {
             await _handleUnauthorizedSession();
           }
+
           handler.next(error);
         },
       ),
@@ -68,7 +78,7 @@ class ApiClient {
   final TokenService _tokenService;
   final StorageService _storageService;
   late final Dio _dio;
-  bool _isHandlingUnauthorized = false;
+  bool _isHandlingSessionFailure = false;
 
   Dio get dio => _dio;
 
@@ -89,25 +99,68 @@ class ApiClient {
     return authorization != null && authorization.toString().trim().isNotEmpty;
   }
 
-  Future<void> _handleUnauthorizedSession() async {
-    if (_isHandlingUnauthorized) {
+  Future<void> _handleBannedSession(
+      AccountRestrictionDetails restriction,
+      ) async {
+    if (_isHandlingSessionFailure) {
       return;
     }
 
-    _isHandlingUnauthorized = true;
-    try {
-      await Future.wait<void>(<Future<void>>[
-        _tokenService.clearTokens(),
-        _storageService.clearLoggedInData(),
-      ]);
+    _isHandlingSessionFailure = true;
 
-      if (Get.currentRoute != AppRoutes.login) {
+    try {
+      await _clearLocalSession();
+
+      if (Get.currentRoute != AppRoutes.accountSuspended) {
         await Future<void>.delayed(Duration.zero);
+
+        Get.offAllNamed(
+          AppRoutes.accountSuspended,
+          arguments: restriction,
+        );
+      }
+    } finally {
+      await Future<void>.delayed(
+        const Duration(milliseconds: 300),
+      );
+
+      _isHandlingSessionFailure = false;
+    }
+  }
+
+  Future<void> _handleUnauthorizedSession() async {
+    if (_isHandlingSessionFailure) {
+      return;
+    }
+
+    _isHandlingSessionFailure = true;
+
+    try {
+      await _clearLocalSession();
+
+      if (Get.currentRoute != AppRoutes.login &&
+          Get.currentRoute != AppRoutes.accountSuspended) {
+        await Future<void>.delayed(Duration.zero);
+
         Get.offAllNamed(AppRoutes.login);
       }
     } finally {
-      await Future<void>.delayed(const Duration(milliseconds: 300));
-      _isHandlingUnauthorized = false;
+      await Future<void>.delayed(
+        const Duration(milliseconds: 300),
+      );
+
+      _isHandlingSessionFailure = false;
+    }
+  }
+
+  Future<void> _clearLocalSession() async {
+    await Future.wait<void>(<Future<void>>[
+      _tokenService.clearTokens(),
+      _storageService.clearLoggedInData(),
+    ]);
+
+    if (Get.isRegistered<UserSessionController>()) {
+      Get.find<UserSessionController>().clear();
     }
   }
 }

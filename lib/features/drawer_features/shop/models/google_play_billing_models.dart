@@ -9,6 +9,7 @@ class PendingGooglePlayPurchaseModel {
     required this.productType,
     required this.basePlanId,
     required this.offerId,
+    required this.obfuscatedAccountId,
     required this.createdAt,
     this.verifiedCompletion,
   });
@@ -19,13 +20,17 @@ class PendingGooglePlayPurchaseModel {
   final StoreProviderProductType productType;
   final String basePlanId;
   final String offerId;
+  final String obfuscatedAccountId;
   final DateTime createdAt;
   final StorePurchaseCompletionModel? verifiedCompletion;
 
-  factory PendingGooglePlayPurchaseModel.fromJson(Map<String, dynamic> json) {
+  factory PendingGooglePlayPurchaseModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     final Map<String, dynamic> completion = shopJsonMap(
       json['verifiedCompletion'],
     );
+
     return PendingGooglePlayPurchaseModel(
       orderId: shopString(json['orderId']),
       packageId: shopString(json['packageId']),
@@ -35,11 +40,19 @@ class PendingGooglePlayPurchaseModel {
       ),
       basePlanId: shopString(json['basePlanId']),
       offerId: shopString(json['offerId']),
-      createdAt: DateTime.tryParse(shopString(json['createdAt']))?.toLocal() ??
+      obfuscatedAccountId: shopString(
+        json['obfuscatedAccountId'],
+      ).trim().toLowerCase(),
+      createdAt:
+      DateTime.tryParse(
+        shopString(json['createdAt']),
+      )?.toLocal() ??
           DateTime.now(),
       verifiedCompletion: completion.isEmpty
           ? null
-          : StorePurchaseCompletionModel.fromJson(completion),
+          : StorePurchaseCompletionModel.fromJson(
+        completion,
+      ),
     );
   }
 
@@ -50,6 +63,7 @@ class PendingGooglePlayPurchaseModel {
     'productType': productType.apiValue,
     'basePlanId': basePlanId,
     'offerId': offerId,
+    'obfuscatedAccountId': obfuscatedAccountId,
     'createdAt': createdAt.toUtc().toIso8601String(),
     'verifiedCompletion': verifiedCompletion?.toJson(),
   };
@@ -64,8 +78,10 @@ class PendingGooglePlayPurchaseModel {
       productType: productType,
       basePlanId: basePlanId,
       offerId: offerId,
+      obfuscatedAccountId: obfuscatedAccountId,
       createdAt: createdAt,
-      verifiedCompletion: verifiedCompletion ?? this.verifiedCompletion,
+      verifiedCompletion:
+      verifiedCompletion ?? this.verifiedCompletion,
     );
   }
 }

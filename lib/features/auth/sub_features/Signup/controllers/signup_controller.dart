@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/localization/translation_service.dart';
 import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../core/controllers/user_session_controller.dart';
+import '../../../../../core/services/course_purchase_recovery_service.dart';
 import '../../../../../core/services/learning_activity_tracker_service.dart';
 import '../../../../../core/utils/otp_resend_cooldown.dart';
 import '../../../../../core/services/auth_service.dart';
@@ -33,6 +35,14 @@ class SignupController extends GetxController {
   late final List<TextEditingController> otpControllers;
   late final List<FocusNode> otpFocusNodes;
 
+  static final Uri _termsAndConditionsUrl = Uri.parse(
+    'https://www.italirpothe.com/terms-and-conditions',
+  );
+
+  static final Uri _privacyPolicyUrl = Uri.parse(
+    'https://www.italirpothe.com/privacy-policy',
+  );
+
   @override
   void onInit() {
     super.onInit();
@@ -53,11 +63,14 @@ class SignupController extends GetxController {
     passwordController.addListener(_onFormInputChanged);
   }
 
-  void setLanguage(String value) {
-    _translationService.setLanguageLabel(value);
+  Future<void> setLanguage(String value) async {
+    final Future<void> saveFuture = _translationService.setLanguageLabel(value);
+
     form.value = form.value.copyWith(
       selectedLanguage: _translationService.selectedLabel.value,
     );
+
+    await saveFuture;
   }
 
   void setSignupMode(String value) {
@@ -69,6 +82,32 @@ class SignupController extends GetxController {
     form.value = form.value.copyWith(
       obscurePassword: !form.value.obscurePassword,
     );
+  }
+
+  Future<void> openTermsAndConditions() async {
+    await _openExternalUrl(_termsAndConditionsUrl);
+  }
+
+  Future<void> openPrivacyPolicy() async {
+    await _openExternalUrl(_privacyPolicyUrl);
+  }
+
+  Future<void> _openExternalUrl(Uri uri) async {
+    try {
+      final bool opened = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!opened) {
+        Get.snackbar('Unable to open link', 'Please try again.');
+      }
+    } catch (_) {
+      Get.snackbar(
+        'Unable to open link',
+        'Please check your internet connection.',
+      );
+    }
   }
 
   void toggleTermsAgreement() {
@@ -165,10 +204,6 @@ class SignupController extends GetxController {
         ),
       );
 
-      if (signupResult.devOtp != null && signupResult.devOtp!.isNotEmpty) {
-        Get.snackbar('otp'.tr, signupResult.devOtp!);
-      }
-
       resendCooldown.start();
       Get.toNamed(AppRoutes.signupOtp);
     } finally {
@@ -220,13 +255,7 @@ class SignupController extends GetxController {
 
       _clearOtpInputs();
       resendCooldown.start();
-      final String? devOtp = result.data?.devOtp;
-      Get.snackbar(
-        'snack_code_resent'.tr,
-        devOtp != null && devOtp.isNotEmpty
-            ? devOtp
-            : 'snack_fresh_code_sent'.tr,
-      );
+      Get.snackbar('snack_code_resent'.tr, 'snack_fresh_code_sent'.tr);
     } finally {
       otpUi.value = otpUi.value.copyWith(isResending: false);
     }
@@ -309,6 +338,10 @@ class SignupController extends GetxController {
       if (Get.isRegistered<UserSessionController>()) {
         await Get.find<UserSessionController>().loadUser(forceRefresh: true);
       }
+      if (Get.isRegistered<CoursePurchaseRecoveryService>()) {
+        await Get.find<CoursePurchaseRecoveryService>()
+            .recoverPendingPurchase();
+      }
       if (Get.isRegistered<LearningActivityTrackerService>()) {
         await Get.find<LearningActivityTrackerService>().startSession();
       }
@@ -360,10 +393,6 @@ class SignupController extends GetxController {
     );
     _clearOtpInputs();
     resendCooldown.start();
-
-    if (devOtp != null && devOtp.isNotEmpty) {
-      Get.snackbar('otp'.tr, devOtp);
-    }
   }
 
   void _applyVerifiedAccountInfo(AuthUserModel user) {
@@ -373,8 +402,8 @@ class SignupController extends GetxController {
     final String verifiedIdentifier = isEmailIdentifier
         ? user.email!.trim()
         : (user.phone?.trim().isNotEmpty == true
-            ? user.phone!.trim()
-            : fallbackIdentifier);
+              ? user.phone!.trim()
+              : fallbackIdentifier);
 
     accountCreatedUi.value = accountCreatedUi.value.copyWith(
       fullName: user.fullName.trim().isNotEmpty
@@ -440,28 +469,7 @@ class SignupController extends GetxController {
     required String identifier,
     required bool isEmailMode,
   }) {
-    if (isEmailMode) {
-      final List<String> emailParts = identifier.split('@');
-      if (emailParts.length != 2) {
-        return identifier;
-      }
-      final String name = emailParts.first;
-      final String domain = emailParts.last;
-      if (name.length <= 2) {
-        return '$name@$domain';
-      }
-      final String visiblePrefix = name.substring(0, 2);
-      return '$visiblePrefix***@$domain';
-    }
-
-    final String digitsOnly = identifier.replaceAll(RegExp(r'\D'), '');
-    if (digitsOnly.length <= 4) {
-      return identifier;
-    }
-
-    final String prefix = digitsOnly.substring(0, 2);
-    final String suffix = digitsOnly.substring(digitsOnly.length - 2);
-    return '+$prefix* *** *$suffix';
+    return identifier.trim();
   }
 
   @override

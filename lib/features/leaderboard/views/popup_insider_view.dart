@@ -74,7 +74,7 @@ class PopupInsiderView extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 42.w),
                         child: Text(
-                          'XP increases as you complete lessons, practice\nconversations, and master Italian vocabulary.',
+                          'leaderboard_xp_explanation'.tr,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: AppFont.font10.sp,

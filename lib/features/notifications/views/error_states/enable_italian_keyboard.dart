@@ -71,7 +71,7 @@ class ItalianKeyboardWarningView extends StatelessWidget {
                           SizedBox(height: 17.h),
 
                           Text(
-                            "You'll need Italian accents (like à, è, ì)\nto answer writing questions correctly.",
+                            'italian_keyboard_accents_help'.tr,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: StatusColors.bodyText,
@@ -85,7 +85,7 @@ class ItalianKeyboardWarningView extends StatelessWidget {
                           SizedBox(height: 7.h),
 
                           Text(
-                            'সঠিকভাবে উত্তর দিতে আপনার ফোনে ইটালিয়ান\nকিবোর্ড সেটআপ করে নিন।',
+                            'italian_keyboard_setup_help'.tr,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: const Color(0xFF8E8E8E),
@@ -181,7 +181,7 @@ class ItalianKeyboardWarningView extends StatelessWidget {
                                     SizedBox(
                                       width: 108.w,
                                       child: Text(
-                                        'Accents\nchange the\nmeaning and\npronunciation\nof words.',
+                                        'italian_accents_explanation'.tr,
                                         style: TextStyle(
                                           color: StatusColors.bodyText,
                                           fontSize: 15.sp,

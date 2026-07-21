@@ -128,22 +128,39 @@ class ProHeroIllustration extends StatelessWidget {
 class ProFeatureGrid extends StatelessWidget {
   final List<ProFeatureModel> features;
 
-  const ProFeatureGrid({super.key, required this.features});
+  const ProFeatureGrid({
+    super.key,
+    required this.features,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      itemCount: features.length,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 8.w,
-        mainAxisSpacing: 8.h,
-        childAspectRatio: 1.1,
-      ),
-      itemBuilder: (_, int index) {
-        return ProFeatureCard(feature: features[index]);
+    return LayoutBuilder(
+      builder: (
+          BuildContext context,
+          BoxConstraints constraints,
+          ) {
+        final bool useSingleColumn = constraints.maxWidth < 300;
+
+        return GridView.builder(
+          itemCount: features.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: useSingleColumn ? 1 : 2,
+            crossAxisSpacing: 8.w,
+            mainAxisSpacing: 8.h,
+            childAspectRatio: useSingleColumn ? 4.2 : 2.15,
+          ),
+          itemBuilder: (
+              BuildContext context,
+              int index,
+              ) {
+            return ProFeatureCard(
+              feature: features[index],
+            );
+          },
+        );
       },
     );
   }
@@ -152,39 +169,53 @@ class ProFeatureGrid extends StatelessWidget {
 class ProFeatureCard extends StatelessWidget {
   final ProFeatureModel feature;
 
-  const ProFeatureCard({super.key, required this.feature});
+  const ProFeatureCard({
+    super.key,
+    required this.feature,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final Color bg = _bgColor(feature.tone);
+    final Color backgroundColor = _bgColor(feature.tone);
     final Color iconColor = _iconColor(feature.tone);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(kRadius48.r),
+      padding: EdgeInsets.symmetric(
+        horizontal: 10.w,
+        vertical: 9.h,
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Row(
         children: <Widget>[
           Container(
-            padding: EdgeInsets.all(12.w),
+            width: 34.w,
+            height: 34.w,
+            alignment: Alignment.center,
             decoration: const BoxDecoration(
               color: AppColors.white,
               shape: BoxShape.circle,
             ),
-            child: Icon(_icon(feature.iconName), color: iconColor, size: 24.w),
+            child: Icon(
+              _icon(feature.iconName),
+              color: iconColor,
+              size: 17.w,
+            ),
           ),
-          SizedBox(height: 14.h),
-          Text(
-            feature.title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: AppFont.font16.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.homePrimaryText,
-              height: 1.12,
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              feature.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: AppFont.font12.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.homePrimaryText,
+                height: 1.2,
+              ),
             ),
           ),
         ],
@@ -231,6 +262,8 @@ class ProFeatureCard extends StatelessWidget {
     }
   }
 }
+
+
 
 class ProCurrencyToggle extends StatelessWidget {
   final ProCurrency selectedCurrency;

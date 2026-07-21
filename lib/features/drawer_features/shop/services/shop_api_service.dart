@@ -73,6 +73,19 @@ class ShopApiService {
     return StoreQuoteResponseModel.fromJson(_responseMap(response));
   }
 
+  Future<void> cancelOrder(
+      String orderId, {
+        String reason =
+        'Checkout setup failed before Google Play opened.',
+      }) async {
+    await _apiClient.dio.post(
+      '$_endpoint/orders/$orderId/cancel',
+      data: <String, dynamic>{
+        'reason': reason,
+      },
+    );
+  }
+
   Future<StoreOrderModel> createOrder(
     CreateStoreOrderPayloadModel payload,
   ) async {

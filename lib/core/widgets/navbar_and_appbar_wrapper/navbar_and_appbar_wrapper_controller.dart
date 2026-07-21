@@ -15,10 +15,15 @@ import '../../../features/messages/services/messages_service.dart';
 import '../../../features/messages/services/chat_socket_service.dart';
 import '../../../features/messages/services/presence_service.dart';
 import '../../../features/messages/models/message_models.dart';
+import '../../../features/messages/sub-feature/call/controllers/message_call_controller.dart';
+import '../../../features/messages/sub-feature/call/service/call_socket_service.dart';
+import '../../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
+import '../../../features/practice_hub/controllers/practice_hub_controller.dart';
 import '../../services/api_client.dart';
 import '../../controllers/user_session_controller.dart';
 import '../../services/api_error_handler.dart';
 import '../../services/learning_activity_tracker_service.dart';
+import '../../services/notification_deep_link_service.dart';
 import '../../services/notification_summary_service.dart';
 import '../../services/token_service.dart';
 import '../../../features/notifications/controllers/notifications_controller.dart';
@@ -38,13 +43,13 @@ class NavbarAndAppbarWrapperController extends GetxController
   final RxInt currentIndex = 0.obs;
   final RxBool hasUnreadNotifications = false.obs;
   final RxSet<int> visitedTabs = <int>{0}.obs;
+  final RxBool isLoggingOut = false.obs;
   // Presence listener registration flag
   bool _presenceInitialized = false;
   String? _currentUserId;
+  int _notificationRefreshVersion = 0;
 
   void onBottomNavTap(int index) {
-
-
     if (index == currentIndex.value) {
       if (Get.isRegistered<LearningActivityTrackerService>()) {
         Get.find<LearningActivityTrackerService>().setShellTab(index);
@@ -99,6 +104,16 @@ class NavbarAndAppbarWrapperController extends GetxController
           NotificationsController(
             notificationsApiService: Get.find<NotificationsApiService>(),
             onNotificationOpen: _openNotificationDestination,
+            onUnreadStateChanged: (bool hasUnread) {
+              /*
+   * The NotificationsController already knows the
+   * latest state after mark-read/mark-all-read.
+   * Update the app-bar dot immediately.
+   */
+              _notificationRefreshVersion++;
+
+              hasUnreadNotifications.value = hasUnread;
+            },
           ),
         );
     Get.bottomSheet<void>(
@@ -129,7 +144,16 @@ class NavbarAndAppbarWrapperController extends GetxController
       Get.back<void>();
       await Future<void>.delayed(const Duration(milliseconds: 180));
     }
-    if (deepLink.isEmpty) return;
+    if (deepLink.isEmpty) {
+      return;
+    }
+
+    final bool handled = await NotificationDeepLinkService.open(deepLink);
+
+    if (handled) {
+      return;
+    }
+
     final Uri? uri = Uri.tryParse(deepLink);
     final String path = uri?.path.toLowerCase() ?? deepLink.toLowerCase();
     final String host = uri?.host.toLowerCase() ?? '';
@@ -149,8 +173,7 @@ class NavbarAndAppbarWrapperController extends GetxController
       return;
     }
 
-    if (
-        path.startsWith('/daily-challenges') ||
+    if (path.startsWith('/daily-challenges') ||
         path.startsWith('/practice-hub') ||
         notification.eventType == 'streak_reminder') {
       onBottomNavTap(1);
@@ -165,16 +188,14 @@ class NavbarAndAppbarWrapperController extends GetxController
       return;
     }
 
-    if (
-        path.startsWith('/courses') ||
+    if (path.startsWith('/courses') ||
         host == 'final-exams' ||
         host == 'certificates') {
       onBottomNavTap(1);
       return;
     }
 
-    if (
-        path.startsWith('/ai-tutor') ||
+    if (path.startsWith('/ai-tutor') ||
         path.startsWith('/ai-chat') ||
         host == 'ai-tutor') {
       onBottomNavTap(2);
@@ -185,8 +206,7 @@ class NavbarAndAppbarWrapperController extends GetxController
       return;
     }
 
-    if (
-        path.startsWith('/service-hub') ||
+    if (path.startsWith('/service-hub') ||
         path.startsWith('/cv-builder') ||
         host == 'cv-builder') {
       onBottomNavTap(4);
@@ -219,9 +239,6 @@ class NavbarAndAppbarWrapperController extends GetxController
   void openMessages() {
     Get.toNamed<void>(AppRoutes.messages);
   }
-
-
-
 
   Future<bool> onWillPop() async {
     if (currentIndex.value != 0) {
@@ -256,9 +273,7 @@ class NavbarAndAppbarWrapperController extends GetxController
   }
 
   @override
-  void didChangeAppLifecycleState(
-      AppLifecycleState state,
-      ) {
+  void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
     if (state != AppLifecycleState.resumed ||
@@ -484,24 +499,60 @@ class NavbarAndAppbarWrapperController extends GetxController
     } catch (_) {}
   }
 
+  Future<void> _refreshLocalizedCardData() async {
+    final List<Future<void>> refreshTasks = <Future<void>>[];
+
+    if (Get.isRegistered<HomeController>()) {
+      refreshTasks.add(
+        Get.find<HomeController>().loadDashboard(
+          force: true,
+        ),
+      );
+    }
+
+    if (Get.isRegistered<PracticeHubController>()) {
+      refreshTasks.add(
+        Get.find<PracticeHubController>().refreshPracticeHub(),
+      );
+    }
+
+    if (refreshTasks.isEmpty) {
+      return;
+    }
+
+    await Future.wait<void>(refreshTasks);
+  }
+
   // drawer callbacks
   Future<void> onLanguageTap(BuildContext context) async {
-    final BuildContext dialogContext = Get.context ?? context;
+    final BuildContext dialogContext =
+        Get.context ?? context;
 
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
     }
 
-    final AppLanguage? selectedLanguage = await showLanguageDialog(
+    final AppLanguage previousLanguage =
+        _translationService.currentLanguage;
+
+    final AppLanguage? selectedLanguage =
+    await showLanguageDialog(
       context: dialogContext,
-      initialLanguage: _translationService.currentLanguage,
+      initialLanguage: previousLanguage,
     );
 
-    if (selectedLanguage == null) {
+    if (selectedLanguage == null ||
+        selectedLanguage == previousLanguage) {
       return;
     }
 
-    _translationService.setLanguage(selectedLanguage);
+    // Direct .tr widgets update immediately here.
+    await _translationService.setLanguage(
+      selectedLanguage,
+    );
+
+    // Rebuild model/service-generated translated card content.
+    await _refreshLocalizedCardData();
   }
 
   void onShopTap() {
@@ -509,11 +560,25 @@ class NavbarAndAppbarWrapperController extends GetxController
   }
 
   Future<void> refreshNotificationState() async {
-    if (!Get.isRegistered<NotificationSummaryService>()) return;
+    if (!Get.isRegistered<NotificationSummaryService>()) {
+      return;
+    }
+
+    final int requestVersion = ++_notificationRefreshVersion;
+
     final ApiResult<bool> result = await ApiErrorHandler.call<bool>(
       Get.find<NotificationSummaryService>().hasUnreadNotifications,
       showError: false,
     );
+
+    /*
+   * Ignore an older request when a newer local
+   * or server notification state already exists.
+   */
+    if (requestVersion != _notificationRefreshVersion) {
+      return;
+    }
+
     if (result.isSuccess && result.data != null) {
       hasUnreadNotifications.value = result.data!;
     }
@@ -525,23 +590,105 @@ class NavbarAndAppbarWrapperController extends GetxController
   }
 
   Future<void> onLogoutTap() async {
-    try {
-      if (Get.isRegistered<ChatSocketService>()) {
-        await Get.find<ChatSocketService>().disconnect();
-      }
-    } catch (_) {}
+    if (isLoggingOut.value) {
+      return;
+    }
 
-    if (Get.isRegistered<LearningActivityTrackerService>()) {
-      await Get.find<LearningActivityTrackerService>().endSession();
+    isLoggingOut.value = true;
+
+    try {
+      /*
+     * End an active call before removing the JWT.
+     */
+      try {
+        if (Get.isRegistered<MessageCallController>()) {
+          await Get.find<MessageCallController>().endCall().timeout(
+            const Duration(seconds: 3),
+            onTimeout: () {},
+          );
+        }
+      } catch (_) {}
+
+      /*
+     * Close native CallKit screens and clear pending
+     * incoming-call actions.
+     */
+      try {
+        if (Get.isRegistered<IncomingCallCoordinator>()) {
+          await Get.find<IncomingCallCoordinator>().resetForLogout();
+        }
+      } catch (_) {}
+
+      /*
+     * Disconnect the call socket.
+     */
+      try {
+        if (Get.isRegistered<CallSocketService>()) {
+          await Get.find<CallSocketService>().disconnect();
+        }
+      } catch (_) {}
+
+      /*
+     * Disconnect chat and clear cached presence.
+     */
+      try {
+        if (Get.isRegistered<PresenceService>()) {
+          await Get.find<PresenceService>().clearForLogout();
+        } else if (Get.isRegistered<ChatSocketService>()) {
+          await Get.find<ChatSocketService>().disconnect();
+        }
+      } catch (_) {}
+
+      /*
+     * End the learning session while the JWT is
+     * still available.
+     */
+      try {
+        if (Get.isRegistered<LearningActivityTrackerService>()) {
+          await Get.find<LearningActivityTrackerService>().endSession();
+        }
+      } catch (_) {}
+
+      /*
+     * Calls POST /auth/logout before deleting
+     * the local JWT.
+     */
+      await _authService.logout();
+    } catch (_) {
+      /*
+     * Network failure must not prevent local logout.
+     */
+    } finally {
+      /*
+     * These are permanent/global controllers, so clear
+     * their logged-in user information manually.
+     */
+      if (Get.isRegistered<UserSessionController>()) {
+        Get.find<UserSessionController>().clear();
+      }
+
+      if (Get.isRegistered<AppDrawerController>()) {
+        Get.find<AppDrawerController>().clear();
+      }
+
+      /*
+     * Do not manually delete screen controllers here.
+     *
+     * GetX will dispose them after the wrapper route is
+     * removed. Deleting them before navigation disposes
+     * their TextEditingControllers while TextFields are
+     * still mounted.
+     */
+
+      /*
+     * The API interceptor might already have opened the
+     * login route after receiving a 401. Avoid navigating
+     * to login a second time.
+     */
+      if (Get.currentRoute != AppRoutes.login) {
+        Get.offAllNamed(AppRoutes.login);
+      }
     }
-    await _authService.logout();
-    if (Get.isRegistered<UserSessionController>()) {
-      Get.find<UserSessionController>().clear();
-    }
-    if (Get.isRegistered<AppDrawerController>()) {
-      Get.find<AppDrawerController>().clear();
-    }
-    Get.offAllNamed(AppRoutes.login);
   }
 
   String _formatTimeLabel(String? iso) {

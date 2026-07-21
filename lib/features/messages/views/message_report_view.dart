@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../core/themes/app_colors.dart';
+import '../../../core/themes/app_font.dart';
+import '../../../core/widgets/custom_button.dart';
 import '../controllers/message_report_controller.dart';
 import '../widgets/report_evidence_picker.dart';
 import '../widgets/report_profile_card.dart';
 import '../widgets/report_reason_chip.dart';
-import '../../../core/themes/app_colors.dart';
-import '../../../core/themes/app_constants.dart';
-import '../../../core/themes/app_font.dart';
-import '../../../core/widgets/custom_button.dart';
 
-class MessageReportView extends GetView<MessageReportController> {
+class MessageReportView
+    extends GetView<MessageReportController> {
   const MessageReportView({super.key});
 
   @override
@@ -19,42 +19,93 @@ class MessageReportView extends GetView<MessageReportController> {
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(28.w, 28.h, 28.w, 150.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const _ReportHeader(),
-                  SizedBox(height: 44.h),
-                  ReportProfileCard(profile: controller.profile),
-                  SizedBox(height: 42.h),
-                  _SectionLabel(text: 'why_are_you_reporting_this_user'.tr),
-                  SizedBox(height: 22.h),
-                  const _ReasonSelector(),
-                  SizedBox(height: 42.h),
-                  _SectionLabel(text: 'detailed_description'.tr),
-                  SizedBox(height: 20.h),
-                  const _DescriptionField(),
-                  SizedBox(height: 42.h),
-                  _SectionLabel(text: 'evidence_optional'.tr),
-                  SizedBox(height: 20.h),
-                  Obx(
-                    () => ReportEvidencePicker(
-                      selectedImage: controller.evidenceImage.value,
-                      onPickImage: controller.pickEvidenceImage,
-                      onRemoveImage: controller.removeEvidenceImage,
+        bottom: false,
+        child: GestureDetector(
+          onTap: () {
+            FocusManager.instance.primaryFocus
+                ?.unfocus();
+          },
+          child: SingleChildScrollView(
+            physics:
+            const BouncingScrollPhysics(),
+            keyboardDismissBehavior:
+            ScrollViewKeyboardDismissBehavior
+                .onDrag,
+            padding: EdgeInsets.fromLTRB(
+              20.w,
+              14.h,
+              20.w,
+              28.h,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 600,
+                ),
+                child: Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const _ReportHeader(),
+
+                    SizedBox(height: 22.h),
+
+                    ReportProfileCard(
+                      profile: controller.profile,
                     ),
-                  ),
-                ],
+
+                    SizedBox(height: 26.h),
+
+                    _SectionLabel(
+                      text:
+                      'why_are_you_reporting_this_user'
+                          .tr,
+                    ),
+
+                    SizedBox(height: 12.h),
+
+                    const _ReasonSelector(),
+
+                    SizedBox(height: 26.h),
+
+                    _SectionLabel(
+                      text:
+                      'detailed_description'.tr,
+                    ),
+
+                    SizedBox(height: 12.h),
+
+                    const _DescriptionField(),
+
+                    SizedBox(height: 26.h),
+
+                    _SectionLabel(
+                      text: 'evidence_optional'.tr,
+                    ),
+
+                    SizedBox(height: 12.h),
+
+                    Obx(
+                          () => ReportEvidencePicker(
+                        selectedImage: controller
+                            .evidenceImage.value,
+                        onPickImage:
+                        controller
+                            .pickEvidenceImage,
+                        onRemoveImage:
+                        controller
+                            .removeEvidenceImage,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const _SubmitFooter(),
-          ],
+          ),
         ),
       ),
+      bottomNavigationBar:
+      const _SubmitFooter(),
     );
   }
 }
@@ -65,42 +116,48 @@ class _ReportHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 70.h,
+      height: 48.h,
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
           Align(
             alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: () => Get.back<void>(),
-              child: Container(
-                width: 64.w,
-                height: 64.w,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: AppColors.homeNeutralShadow,
-                      blurRadius: 18.r,
-                      offset: Offset(0, 8.h),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.arrow_back_rounded,
-                  color: AppColors.homePrimaryText,
-                  size: 34.w,
+            child: Material(
+              color: AppColors.white,
+              shape: const CircleBorder(),
+              child: InkWell(
+                onTap: () => Get.back<void>(),
+                customBorder:
+                const CircleBorder(),
+                child: SizedBox(
+                  width: 44.w,
+                  height: 44.w,
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    color: AppColors
+                        .homePrimaryText,
+                    size: 22.w,
+                  ),
                 ),
               ),
             ),
           ),
-          Text(
-            'report_user'.tr,
-            style: TextStyle(
-              fontSize: AppFont.font24.sp,
-              fontWeight: FontWeight.w900,
-              color: AppColors.primaryGreen,
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 56.w,
+            ),
+            child: Text(
+              'report_user'.tr,
+              maxLines: 1,
+              overflow:
+              TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: AppFont.font20.sp,
+                fontWeight: FontWeight.w700,
+                color:
+                AppColors.primaryGreen,
+              ),
             ),
           ),
         ],
@@ -110,24 +167,28 @@ class _ReportHeader extends StatelessWidget {
 }
 
 class _SectionLabel extends StatelessWidget {
-  final String text;
+  const _SectionLabel({
+    required this.text,
+  });
 
-  const _SectionLabel({required this.text});
+  final String text;
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
       style: TextStyle(
-        fontSize: AppFont.font18.sp,
-        fontWeight: FontWeight.w900,
-        color: AppColors.bodyText,
+        fontSize: AppFont.font14.sp,
+        fontWeight: FontWeight.w700,
+        height: 1.35,
+        color: AppColors.homePrimaryText,
       ),
     );
   }
 }
 
-class _ReasonSelector extends GetView<MessageReportController> {
+class _ReasonSelector
+    extends GetView<MessageReportController> {
   const _ReasonSelector();
 
   @override
@@ -135,108 +196,168 @@ class _ReasonSelector extends GetView<MessageReportController> {
     return Obx(() {
       if (controller.isLoadingReasons.value) {
         return SizedBox(
-          height: 80.h,
-          child: const Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen),
+          height: 56.h,
+          child: Center(
+            child: SizedBox(
+              width: 22.w,
+              height: 22.w,
+              child:
+              const CircularProgressIndicator(
+                strokeWidth: 2.2,
+                color:
+                AppColors.primaryGreen,
+              ),
+            ),
           ),
         );
       }
 
-      // Error state: backend returned nothing or non-UUID ids.
-      if (controller.hasReasonsError.value || controller.reportReasons.isEmpty) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'could_not_load_report_reasons_please_check_your_co'.tr,
-              style: TextStyle(
-                fontSize: AppFont.font16.sp,
-                color: AppColors.bodyText,
+      if (controller.hasReasonsError.value ||
+          controller.reportReasons.isEmpty) {
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius:
+            BorderRadius.circular(16.r),
+          ),
+          child: Column(
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'could_not_load_report_reasons_please_check_your_co'
+                    .tr,
+                style: TextStyle(
+                  fontSize:
+                  AppFont.font13.sp,
+                  height: 1.4,
+                  color: AppColors.bodyText,
+                ),
               ),
-            ),
-            SizedBox(height: 14.h),
-            GestureDetector(
-              onTap: controller.retryLoadReasons,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryGreen,
-                  borderRadius: BorderRadius.circular(30.r),
+              SizedBox(height: 12.h),
+              TextButton(
+                onPressed:
+                controller.retryLoadReasons,
+                style: TextButton.styleFrom(
+                  foregroundColor:
+                  AppColors.primaryGreen,
+                  padding:
+                  EdgeInsets.symmetric(
+                    horizontal: 14.w,
+                    vertical: 8.h,
+                  ),
+                  minimumSize: Size.zero,
+                  tapTargetSize:
+                  MaterialTapTargetSize
+                      .shrinkWrap,
                 ),
                 child: Text(
                   'reload_reasons'.tr,
                   style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.white,
+                    fontSize:
+                    AppFont.font13.sp,
+                    fontWeight:
+                    FontWeight.w700,
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       }
 
       return Wrap(
-        spacing: 18.w,
-        runSpacing: 18.h,
+        spacing: 10.w,
+        runSpacing: 10.h,
         children: controller.reportReasons
             .map(
-              (Map<String, dynamic> r) => ReportReasonChip(
-                label:
-                    r['title']?.toString() ?? r['name']?.toString() ?? 'reason'.tr,
-                isSelected:
-                    controller.selectedReasonId.value ==
-                    (r['id']?.toString() ?? ''),
-                onTap: () => controller.selectReason(r['id']?.toString() ?? ''),
-              ),
-            )
-            .toList(),
+              (
+              Map<String, dynamic> reason,
+              ) {
+            final String reasonId =
+                reason['id']
+                    ?.toString() ??
+                    '';
+
+            final String label =
+                reason['title']
+                    ?.toString() ??
+                    reason['name']
+                        ?.toString() ??
+                    'reason'.tr;
+
+            return ReportReasonChip(
+              label: label,
+              isSelected: controller
+                  .selectedReasonId
+                  .value ==
+                  reasonId,
+              onTap: () => controller
+                  .selectReason(reasonId),
+            );
+          },
+        )
+            .toList(growable: false),
       );
     });
   }
 }
 
-class _DescriptionField extends GetView<MessageReportController> {
+class _DescriptionField
+    extends GetView<MessageReportController> {
   const _DescriptionField();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kReportDescriptionHeight.h,
-      padding: EdgeInsets.symmetric(horizontal: 36.w, vertical: 26.h),
+      width: double.infinity,
+      constraints: BoxConstraints(
+        minHeight: 142.h,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: 16.w,
+        vertical: 12.h,
+      ),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(kRadius38.r),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AppColors.homeNeutralShadow,
-            blurRadius: 20.r,
-            offset: Offset(0, 8.h),
-          ),
-        ],
+        borderRadius:
+        BorderRadius.circular(18.r),
+        border: Border.all(
+          color: AppColors.modalBorderGrey
+              .withValues(alpha: 0.7),
+        ),
       ),
       child: TextField(
-        controller: controller.descriptionController,
-        maxLines: null,
-        expands: true,
-        keyboardType: TextInputType.multiline,
-        textInputAction: TextInputAction.newline,
+        controller:
+        controller.descriptionController,
+        minLines: 5,
+        maxLines: 7,
+        keyboardType:
+        TextInputType.multiline,
+        textInputAction:
+        TextInputAction.newline,
         style: TextStyle(
-          fontSize: AppFont.font20.sp,
-          fontWeight: FontWeight.w500,
+          fontSize: AppFont.font14.sp,
+          fontWeight: FontWeight.w400,
           height: 1.45,
-          color: AppColors.homePrimaryText,
+          color:
+          AppColors.homePrimaryText,
         ),
         decoration: InputDecoration(
+          isDense: true,
           border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
           hintText:
-              'gen_describe_what_happened_e_g_n_t'.tr,
+          'gen_describe_what_happened_e_g_n_t'
+              .tr,
           hintStyle: TextStyle(
-            fontSize: AppFont.font20.sp,
-            fontWeight: FontWeight.w500,
+            fontSize: AppFont.font14.sp,
+            fontWeight: FontWeight.w400,
             height: 1.45,
-            color: AppColors.messageCheckGrey,
+            color:
+            AppColors.messageCheckGrey,
           ),
         ),
       ),
@@ -244,34 +365,43 @@ class _DescriptionField extends GetView<MessageReportController> {
   }
 }
 
-class _SubmitFooter extends GetView<MessageReportController> {
+class _SubmitFooter
+    extends GetView<MessageReportController> {
   const _SubmitFooter();
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      left: 28.w,
-      right: 28.w,
-      bottom: 24.h,
-      child: DecoratedBox(
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(
+          20.w,
+          12.h,
+          20.w,
+          16.h,
+        ),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: <Color>[
-              AppColors.homeBackground.withValues(alpha: 0),
-              AppColors.homeBackground,
-            ],
+          color: AppColors.homeBackground,
+          border: Border(
+            top: BorderSide(
+              color: AppColors.modalBorderGrey
+                  .withValues(alpha: 0.45),
+            ),
           ),
         ),
-        child: Padding(
-          padding: EdgeInsets.only(top: 26.h),
-          child: Obx(
-            () => CustomButton.primary(
-              text: 'submit_report'.tr,
-              isLoading: controller.isSubmitting.value,
-              onPressed: controller.submitReport,
-            ),
+        child: Obx(
+              () => CustomButton.primary(
+            text: 'submit_report'.tr,
+            isLoading:
+            controller.isSubmitting.value,
+            onPressed: () {
+              if (controller
+                  .isSubmitting.value) {
+                return;
+              }
+
+              controller.submitReport();
+            },
           ),
         ),
       ),

@@ -33,6 +33,49 @@ class PracticeHubView extends GetView<PracticeHubController> {
     );
   }
 
+  Future<void> _handleFinalExamAction(
+      PracticeFinalExamCourseModel exam,
+      ) async {
+    switch (exam.action) {
+      case PracticeFinalExamAction.startExam:
+      case PracticeFinalExamAction.retakeExam:
+        FinalExamGatewayDialogUnlocked.show(
+          onStartFinalExam: () async {
+            if (Get.isDialogOpen ?? false) {
+              Get.back<void>();
+            }
+
+            await controller.onFinalExamCardTap(exam);
+          },
+        );
+        return;
+
+      case PracticeFinalExamAction.locked:
+        _showLockedFinalExamDialog(exam);
+        return;
+
+      case PracticeFinalExamAction.resultPending:
+      case PracticeFinalExamAction.viewResult:
+      case PracticeFinalExamAction.viewCertificate:
+        await controller.onFinalExamCardTap(exam);
+        return;
+    }
+  }
+
+  void _showLockedFinalExamDialog(
+      PracticeFinalExamCourseModel exam,
+      ) {
+    FinalExamGatewayDialogLocked.show<void>(
+      onWatchMoreLessons: () async {
+        if (Get.isDialogOpen ?? false) {
+          Get.back<void>();
+        }
+
+        await controller.openCourseFromFinalExam(exam);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -106,28 +149,14 @@ class PracticeHubView extends GetView<PracticeHubController> {
                         ),
                         child: PracticeHubFinalExamCard(
                           exam: exam,
-                          onTap: () => controller.onFinalExamCardTap(exam),
+                          onTap: () {
+                            _handleFinalExamAction(exam);
+                          },
                           onStartTap: () {
-                            FinalExamGatewayDialogUnlocked.show(
-                              onStartFinalExam: () {
-                                if (Get.isDialogOpen ?? false) Get.back<void>();
-                                controller.openFinalExam(exam);
-                              },
-                              onBackToChapter: () {
-                                if (Get.isDialogOpen ?? false) Get.back<void>();
-                              },
-                            );
+                            _handleFinalExamAction(exam);
                           },
                           onWatchMoreLessonsTap: () {
-                            FinalExamGatewayDialogLocked.show(
-                              onWatchMoreLessons: () {
-                                if (Get.isDialogOpen ?? false) Get.back<void>();
-                                controller.openCourseFromFinalExam(exam);
-                              },
-                              onBackToChapter: () {
-                                if (Get.isDialogOpen ?? false) Get.back<void>();
-                              },
-                            );
+                            _showLockedFinalExamDialog(exam);
                           },
                         ),
                       );

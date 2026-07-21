@@ -19,6 +19,7 @@ class OrderSummaryPage extends StatelessWidget {
   static const Color muted = AppColors.bodyText;
 
   @override
+  @override
   Widget build(BuildContext context) {
     final ShopController controller = Get.find<ShopController>();
 
@@ -29,85 +30,106 @@ class OrderSummaryPage extends StatelessWidget {
         onBackTap: () => Navigator.maybePop(context),
       ),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 28.h),
-
-                      Obx(
-                        () => _currencySwitcher(
-                          selectedCurrency: controller.selectedCurrency.value,
-                          enabled: controller.canChangeCurrency,
-                          onEurTap: () =>
-                              controller.selectCurrency(RefillCurrency.eur),
-                          onBdtTap: () =>
-                              controller.selectCurrency(RefillCurrency.bdt),
-                        ),
-                      ),
-
-                      SizedBox(height: 34.h),
-
-                      Obx(
-                        () => _summaryCard(
-                          title: controller.selectedPlanTitle,
-                          subtitle: controller.selectedPlanSubtitle,
-                          price: controller.payablePriceText,
-                          originalPrice: controller.checkoutOriginalPriceText,
-                          savedAmount: controller.savedAmountText,
-                          isCouponApplied: controller.hasDiscount,
-                        ),
-                      ),
-
-                      SizedBox(height: 26.h),
-
-                      Obx(
-                        () => controller.canUseCoupon
-                            ? const Column(
-                                children: <Widget>[
-                                  ShopCouponSection(),
-                                  ShopCouponError(),
-                                ],
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-
-                      SizedBox(height: 34.h),
-
-                      CustomButton.primary(
-                        text: 'continue_to_checkout'.tr,
-                        onPressed: controller.buySelectedPlan,
-                        btnColor: green,
-                        borderRadius: 30,
-                        btnShadowColor: darkGreen,
-                      ),
-
-                      SizedBox(height: 24.h),
-
-                      CustomButton(
-                        onPressed: () => Get.back(),
-                        text: 'maybe_later'.tr,
-                        height: 44,
-                        showShadow: false,
-                        btnColor: Colors.transparent,
-                        borderColor: Colors.transparent,
-                        textColor: const Color(0xFF696969),
-                      ),
-
-                      SizedBox(height: 46.h),
-                      _trustedLearners(),
-                      SizedBox(height: 58.h),
-                    ],
-                  ),
+        bottom: false,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            20.w,
+            20.h,
+            20.w,
+            130.h,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Obx(
+                    () => _summaryCard(
+                  title: controller.selectedPlanTitle,
+                  subtitle: controller.selectedPlanSubtitle,
+                  price: controller.payablePriceText,
+                  originalPrice:
+                  controller.checkoutOriginalPriceText,
+                  savedAmount: controller.savedAmountText,
+                  isCouponApplied: controller.hasDiscount,
                 ),
               ),
-            );
-          },
+
+              SizedBox(height: 18.h),
+
+              Obx(
+                    () {
+                  if (!controller.canUseCoupon) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return const Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      ShopCouponSection(),
+                      ShopCouponError(),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          padding: EdgeInsets.fromLTRB(
+            20.w,
+            14.h,
+            20.w,
+            18.h,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(
+                color: const Color(0xFFE8ECE9),
+                width: 1.w,
+              ),
+            ),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .06),
+                blurRadius: 18.r,
+                offset: Offset(0, -5.h),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SizedBox(
+                width: double.infinity,
+                child: CustomButton.primary(
+                  text: 'continue_to_checkout'.tr,
+                  onPressed: controller.buySelectedPlan,
+                  btnColor: green,
+                  borderRadius: 26.r,
+                  btnShadowColor: darkGreen,
+                ),
+              ),
+
+              SizedBox(height: 8.h),
+
+              SizedBox(
+                width: double.infinity,
+                child: CustomButton(
+                  onPressed: () => Get.back(),
+                  text: 'maybe_later'.tr,
+                  height: 38.h,
+                  showShadow: false,
+                  btnColor: Colors.transparent,
+                  borderColor: Colors.transparent,
+                  textColor: const Color(0xFF696969),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -195,98 +217,127 @@ class OrderSummaryPage extends StatelessWidget {
     required String savedAmount,
     required bool isCouponApplied,
   }) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
       width: double.infinity,
-      height: 240.h,
-      padding: EdgeInsets.fromLTRB(32.w, 32.h, 32.w, 28.h),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(44.r),
+        borderRadius: BorderRadius.circular(24.r),
         gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.topRight,
-          colors: [Colors.white, Colors.white, Color(0xFFE4FFDA)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Colors.white,
+            Color(0xFFF7FFF3),
+          ],
         ),
+        border: Border.all(
+          color: const Color(0xFFDCECD6),
+          width: 1.w,
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .045),
+            blurRadius: 18.r,
+            offset: Offset(0, 7.h),
+          ),
+        ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'gen_order_summary'.tr,
-            style: TextStyle(
-              color: green,
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: 10.w,
+              vertical: 5.h,
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F5E3),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Text(
+              'gen_order_summary'.tr.toUpperCase(),
+              style: TextStyle(
+                color: green,
+                fontSize: 9.5.sp,
+                fontWeight: FontWeight.w900,
+                letterSpacing: .8,
+              ),
             ),
           ),
-          SizedBox(height: 8.h),
+
+          SizedBox(height: 14.h),
+
           Text(
             title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: textDark,
-              fontSize: 25.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.7,
-            ),
-          ),
-          SizedBox(height: 18.h),
-          Text(
-            subtitle,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: muted,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
+              color: textDark,
+              fontSize: 20.sp,
+              height: 1.15,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          const Spacer(),
+
+          if (subtitle.trim().isNotEmpty) ...<Widget>[
+            SizedBox(height: 7.h),
+            Text(
+              subtitle,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: muted,
+                fontSize: 12.5.sp,
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+
+          SizedBox(height: 18.h),
+
+          Divider(
+            height: 1.h,
+            color: const Color(0xFFE4EAE5),
+          ),
+
+          SizedBox(height: 17.h),
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Flexible(
-                child: Text(
-                  price,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: textDark,
-                    fontSize: 39.sp,
-                    height: 1,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1.2,
-                  ),
-                ),
-              ),
-              if (!isCouponApplied) ...[
-                SizedBox(width: 6.w),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 4.h),
+            children: <Widget>[
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
                   child: Text(
-                    'one_time'.tr,
+                    price,
+                    maxLines: 1,
                     style: TextStyle(
-                      color: const Color(0xFF575A60),
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
+                      color: textDark,
+                      fontSize: 28.sp,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
-              ],
-              if (isCouponApplied) ...[
-                SizedBox(width: 8.w),
+              ),
+
+              if (isCouponApplied) ...<Widget>[
+                SizedBox(width: 10.w),
                 Padding(
-                  padding: EdgeInsets.only(bottom: 3.h),
+                  padding: EdgeInsets.only(bottom: 2.h),
                   child: Text(
                     originalPrice,
+                    maxLines: 1,
                     style: TextStyle(
-                      color: const Color(0xFFA0A0A0),
-                      fontSize: 19.sp,
-                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF9A9E9B),
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
                       decoration: TextDecoration.lineThrough,
-                      decorationThickness: 2.w,
+                      decorationThickness: 1.8.w,
                     ),
                   ),
                 ),
@@ -294,113 +345,68 @@ class OrderSummaryPage extends StatelessWidget {
             ],
           ),
 
-          if (isCouponApplied) ...[
-            SizedBox(height: 8.h),
-            Row(
-              children: [
+          SizedBox(height: 9.h),
+
+          if (isCouponApplied)
+            Wrap(
+              spacing: 8.w,
+              runSpacing: 6.h,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
                 Container(
-                  height: 18.h,
-                  padding: EdgeInsets.symmetric(horizontal: 7.w),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 9.w,
+                    vertical: 5.h,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFE4F3DC),
-                    borderRadius: BorderRadius.circular(5.r),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
+                    children: <Widget>[
                       Icon(
                         Icons.redeem_outlined,
-                        size: 11.w,
+                        size: 13.w,
                         color: green,
                       ),
-                      SizedBox(width: 3.w),
+                      SizedBox(width: 4.w),
                       Text(
                         savedAmount,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: green,
-                          fontSize: 9.sp,
+                          fontSize: 9.5.sp,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: .25,
                         ),
                       ),
                     ],
                   ),
                 ),
-                SizedBox(width: 8.w),
                 Text(
                   'one_time'.tr,
                   style: TextStyle(
-                    color: const Color(0xFF575A60),
-                    fontSize: 14.sp,
+                    color: const Color(0xFF626763),
+                    fontSize: 11.5.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
+            )
+          else
+            Text(
+              'one_time'.tr,
+              style: TextStyle(
+                color: const Color(0xFF626763),
+                fontSize: 11.5.sp,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ],
         ],
       ),
     );
   }
 
-  Widget _trustedLearners() {
-    return Container(
-      height: 38.h,
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F4F4),
-        borderRadius: BorderRadius.circular(24.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 56.w,
-            height: 24.r,
-            child: Stack(
-              children: [
-                _avatar(left: 0, color: const Color(0xFF111111), text: '👤'),
-                _avatar(left: 16, color: const Color(0xFFD7F1FF), text: '🎓'),
-                _avatar(left: 32, color: const Color(0xFF253647), text: '👥'),
-              ],
-            ),
-          ),
-          SizedBox(width: 8.w),
-          Text(
-            'trusted_by_5k_learners'.tr,
-            style: TextStyle(
-              color: Color(0xFF5B5E63),
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: .2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _avatar({
-    required double left,
-    required Color color,
-    required String text,
-  }) {
-    return Positioned(
-      left: left.w,
-      child: Container(
-        height: 24.r,
-        width: 24.r,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 2.w),
-        ),
-        child: Center(
-          child: Text(text, style: TextStyle(fontSize: 10.sp)),
-        ),
-      ),
-    );
-  }
+
+
 }

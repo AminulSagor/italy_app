@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../models/settings_localization.dart';
 import '../../settings_controller.dart';
 import '../../widgets/settings_ui_widgets.dart';
 
@@ -11,182 +12,136 @@ class ChangePasswordView extends GetView<SettingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SettingsUi.bg,
+      backgroundColor: SettingsUi.background,
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: ListView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 39.h),
-          child: Column(
-            children: <Widget>[
-              SettingsTopBar(title: 'gen_change_password'.tr),
-              SizedBox(height: 52.h),
-              Container(
-                width: 80.r,
-                height: 80.r,
-                decoration: const BoxDecoration(
-                  color: SettingsUi.lightGreen,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.lock_reset_rounded,
-                  size: 42.r,
-                  color: SettingsUi.green,
-                ),
+          padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 28.h),
+          children: <Widget>[
+            SettingsTopBar(title: SettingsL10n.text('change_password')),
+            SizedBox(height: 20.h),
+            _PasswordHeader(),
+            SizedBox(height: 20.h),
+            Obx(
+              () => SettingsPillField(
+                label: SettingsL10n.text('current_password'),
+                hint: SettingsL10n.text('current_password_hint'),
+                icon: Icons.lock_outline_rounded,
+                controller: controller.currentPasswordController,
+                obscureText: controller.obscureCurrentPassword.value,
+                suffixIcon: controller.obscureCurrentPassword.value
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                onSuffixTap: controller.toggleCurrentPasswordVisibility,
+                textInputAction: TextInputAction.next,
+                autofillHints: const <String>[AutofillHints.password],
               ),
-              SizedBox(height: 27.h),
-              Text(
-                'Keep your account secure by updating your\ncredentials frequently.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  height: 1.45,
-                  fontWeight: FontWeight.w500,
-                  color: SettingsUi.muted,
-                ),
+            ),
+            SizedBox(height: 16.h),
+            Obx(
+              () => SettingsPillField(
+                label: SettingsL10n.text('new_password'),
+                hint: SettingsL10n.text('new_password_hint'),
+                icon: Icons.password_rounded,
+                controller: controller.newPasswordController,
+                obscureText: controller.obscureNewPassword.value,
+                suffixIcon: controller.obscureNewPassword.value
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                onSuffixTap: controller.toggleNewPasswordVisibility,
+                onChanged: controller.onNewPasswordChanged,
+                textInputAction: TextInputAction.next,
+                autofillHints: const <String>[AutofillHints.newPassword],
               ),
-              SizedBox(height: 43.h),
-              Obx(
-                () => SettingsPillField(
-                  label: 'gen_current_password'.tr,
-                  hint: 'enter_current_password'.tr,
-                  icon: Icons.lock_outline_rounded,
-                  suffixIcon: controller.obscureCurrentPassword.value
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  obscureText: controller.obscureCurrentPassword.value,
-                  controller: controller.currentPasswordController,
-                  onSuffixTap: controller.toggleCurrentPasswordVisibility,
-                ),
+            ),
+            SizedBox(height: 16.h),
+            Obx(
+              () => SettingsPillField(
+                label: SettingsL10n.text('confirm_password'),
+                hint: SettingsL10n.text('confirm_password_hint'),
+                icon: Icons.check_circle_outline_rounded,
+                controller: controller.confirmPasswordController,
+                obscureText: controller.obscureConfirmPassword.value,
+                suffixIcon: controller.obscureConfirmPassword.value
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                onSuffixTap: controller.toggleConfirmPasswordVisibility,
+                onChanged: controller.onConfirmPasswordChanged,
+                textInputAction: TextInputAction.done,
+                autofillHints: const <String>[AutofillHints.newPassword],
               ),
-              SizedBox(height: 28.h),
-              Obx(
-                () => SettingsPillField(
-                  label: 'gen_new_password'.tr,
-                  hint: 'create_a_new_password'.tr,
-                  icon: Icons.key_rounded,
-                  suffixIcon: controller.obscureNewPassword.value
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  obscureText: controller.obscureNewPassword.value,
-                  controller: controller.newPasswordController,
-                  onChanged: controller.onNewPasswordChanged,
-                  onSuffixTap: controller.toggleNewPasswordVisibility,
-                ),
+            ),
+            SizedBox(height: 18.h),
+            Obx(
+              () => _PasswordRequirements(
+                minimum: controller.hasPasswordMinimumLength,
+                uppercase: controller.hasPasswordUppercase,
+                number: controller.hasPasswordNumber,
+                special: controller.hasPasswordSpecialCharacter,
+                allowed: controller.hasPasswordAllowedCharacters,
+                matches: controller.passwordsMatch,
               ),
-              SizedBox(height: 28.h),
-              Obx(
-                () => SettingsPillField(
-                  label: 'gen_confirm_new_password'.tr,
-                  hint: 'repeat_new_password'.tr,
-                  icon: Icons.verified_user_outlined,
-                  suffixIcon: controller.obscureConfirmPassword.value
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  obscureText: controller.obscureConfirmPassword.value,
-                  controller: controller.confirmPasswordController,
-                  onChanged: controller.onConfirmPasswordChanged,
-                  onSuffixTap: controller.toggleConfirmPasswordVisibility,
-                ),
+            ),
+            SizedBox(height: 22.h),
+            Obx(
+              () => SettingsPrimaryButton(
+                text: SettingsL10n.text('update_password'),
+                icon: Icons.lock_reset_rounded,
+                enabled: !controller.isChangingPassword.value,
+                isLoading: controller.isChangingPassword.value,
+                onTap: () async {
+                  final bool saved = await controller.submitPasswordChange();
+                  if (!saved) return;
+                  await SettingsSuccessBottomSheet.show(
+                    title: SettingsL10n.text('password_updated'),
+                    subtitle: SettingsL10n.text('password_updated_desc'),
+                    onDone: Get.back,
+                  );
+                },
               ),
-              SizedBox(height: 36.h),
-              Obx(
-                () => _SecurityRequirementsCard(
-                  hasMinimumLength: controller.hasPasswordMinimumLength,
-                  hasUppercase: controller.hasPasswordUppercase,
-                  hasNumber: controller.hasPasswordNumber,
-                  hasSpecialCharacter:
-                      controller.hasPasswordSpecialCharacter,
-                  passwordsMatch: controller.passwordsMatch,
-                ),
-              ),
-              SizedBox(height: 48.h),
-              Obx(
-                () => SettingsPrimaryButton(
-                  text: 'reset_password_1'.tr,
-                  isLoading: controller.isChangingPassword.value,
-                  onTap: () async {
-                    final bool changed =
-                        await controller.submitPasswordChange();
-                    if (!changed) return;
-
-                    await SettingsSuccessBottomSheet.show(
-                      title: 'gen_password_updated'.tr,
-                      subtitle: 'your_password_has_been_updated_successfully'.tr,
-                      onDone: () {
-                        Get.back<void>();
-                        Get.back<void>();
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _SecurityRequirementsCard extends StatelessWidget {
-  const _SecurityRequirementsCard({
-    required this.hasMinimumLength,
-    required this.hasUppercase,
-    required this.hasNumber,
-    required this.hasSpecialCharacter,
-    required this.passwordsMatch,
-  });
-
-  final bool hasMinimumLength;
-  final bool hasUppercase;
-  final bool hasNumber;
-  final bool hasSpecialCharacter;
-  final bool passwordsMatch;
-
+class _PasswordHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(25.w, 25.h, 25.w, 25.h),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F0),
-        borderRadius: BorderRadius.circular(38.r),
+        color: const Color(0xFFEAF8F2),
+        borderRadius: BorderRadius.circular(20.r),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: <Widget>[
-          Text(
-            'security_requirements'.tr,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w900,
-              color: SettingsUi.text,
+          Container(
+            width: 48.r,
+            height: 48.r,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.security_rounded,
+              size: 25.r,
+              color: SettingsUi.primary,
             ),
           ),
-          SizedBox(height: 19.h),
-          _RequirementItem(
-            text: 'at_least_8_characters'.tr,
-            isDone: hasMinimumLength,
-          ),
-          SizedBox(height: 14.h),
-          _RequirementItem(
-            text: 'one_uppercase_letter_a_z'.tr,
-            isDone: hasUppercase,
-          ),
-          SizedBox(height: 14.h),
-          _RequirementItem(
-            text: 'include_a_number_0_9'.tr,
-            isDone: hasNumber,
-          ),
-          SizedBox(height: 14.h),
-          _RequirementItem(
-            text: 'One special character (!@#\$)',
-            isDone: hasSpecialCharacter,
-          ),
-          SizedBox(height: 14.h),
-          _RequirementItem(
-            text: 'both_new_passwords_match'.tr,
-            isDone: passwordsMatch,
+          SizedBox(width: 13.w),
+          Expanded(
+            child: Text(
+              SettingsL10n.text('password_intro'),
+              style: TextStyle(
+                fontSize: 12.5.sp,
+                height: 1.45,
+                fontWeight: FontWeight.w600,
+                color: SettingsUi.primaryDark,
+              ),
+            ),
           ),
         ],
       ),
@@ -194,41 +149,95 @@ class _SecurityRequirementsCard extends StatelessWidget {
   }
 }
 
-class _RequirementItem extends StatelessWidget {
-  const _RequirementItem({required this.text, required this.isDone});
+class _PasswordRequirements extends StatelessWidget {
+  const _PasswordRequirements({
+    required this.minimum,
+    required this.uppercase,
+    required this.number,
+    required this.special,
+    required this.allowed,
+    required this.matches,
+  });
 
-  final String text;
-  final bool isDone;
+  final bool minimum;
+  final bool uppercase;
+  final bool number;
+  final bool special;
+  final bool allowed;
+  final bool matches;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Container(
-          width: 24.r,
-          height: 24.r,
-          decoration: BoxDecoration(
-            color: isDone ? SettingsUi.green : const Color(0xFFD9D9D9),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            isDone ? Icons.check_rounded : Icons.circle,
-            size: isDone ? 16.r : 7.r,
-            color: isDone ? Colors.white : const Color(0xFF8A8A8A),
-          ),
-        ),
-        SizedBox(width: 14.w),
-        Expanded(
-          child: Text(
-            text,
+    return Container(
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: SettingsUi.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            SettingsL10n.text('password_requirements'),
             style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w800,
               color: SettingsUi.text,
             ),
           ),
-        ),
-      ],
+          SizedBox(height: 12.h),
+          _Requirement(text: SettingsL10n.text('password_minimum'), met: minimum),
+          _Requirement(text: SettingsL10n.text('password_uppercase'), met: uppercase),
+          _Requirement(text: SettingsL10n.text('password_number'), met: number),
+          _Requirement(text: SettingsL10n.text('password_special'), met: special),
+          _Requirement(text: SettingsL10n.text('password_allowed'), met: allowed),
+          _Requirement(
+            text: SettingsL10n.text('password_match'),
+            met: matches,
+            showBottomPadding: false,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Requirement extends StatelessWidget {
+  const _Requirement({
+    required this.text,
+    required this.met,
+    this.showBottomPadding = true,
+  });
+
+  final String text;
+  final bool met;
+  final bool showBottomPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: showBottomPadding ? 9.h : 0),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            met ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+            size: 18.r,
+            color: met ? SettingsUi.primary : const Color(0xFFA7B0AC),
+          ),
+          SizedBox(width: 9.w),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 11.5.sp,
+                color: met ? SettingsUi.primaryDark : SettingsUi.muted,
+                fontWeight: met ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

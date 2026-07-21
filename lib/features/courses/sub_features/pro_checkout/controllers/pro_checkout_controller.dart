@@ -7,6 +7,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 import '../../../../../core/services/api_error_handler.dart';
+import '../../../../../core/services/course_purchase_recovery_service.dart';
 import '../../../../../routes/app_route_arguments.dart';
 import '../../../../../routes/app_routes.dart';
 import '../models/pro_checkout_models.dart';
@@ -17,18 +18,21 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   ProCheckoutController({
     required ProCheckoutApiService proCheckoutApiService,
     required CourseGooglePlayBillingService billingService,
+    required CoursePurchaseRecoveryService recoveryService,
     required this.courseId,
     required this.courseName,
     required this.lessonCount,
     required this.onPurchaseCompleted,
   }) : _proCheckoutApiService = proCheckoutApiService,
-       _billingService = billingService;
+        _billingService = billingService,
+        _recoveryService = recoveryService;
 
   static const Duration _purchaseTimeout = Duration(minutes: 2);
   static const Duration _billingReturnDelay = Duration(milliseconds: 900);
 
   final ProCheckoutApiService _proCheckoutApiService;
   final CourseGooglePlayBillingService _billingService;
+  final CoursePurchaseRecoveryService _recoveryService;
   final String courseId;
   final String courseName;
   final int lessonCount;
@@ -61,6 +65,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   @override
   void onInit() {
     super.onInit();
+    _recoveryService.suspend();
     WidgetsBinding.instance.addObserver(this);
     _purchaseSubscription = _billingService.purchaseUpdates.listen(
       (PurchaseDetails purchase) => unawaited(_handlePurchase(purchase)),
@@ -329,7 +334,11 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       final ProPendingGooglePlayPurchaseModel? existing = _billingService
           .loadPendingPurchase();
       if (existing != null && existing.courseId != courseId) {
-        await _billingService.clearPendingPurchase();
+        Get.snackbar(
+          'Payment Pending',
+          'A previous course purchase is still being recovered. Please try again shortly.',
+        );
+        return;
       } else if (existing != null) {
         _lastOutcome = null;
         final bool recovered = await _retryPendingPurchase();
@@ -500,9 +509,14 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         return;
       case PurchaseStatus.error:
         _billingFlowActive = false;
-        await _billingService.clearPendingPurchase();
+
+        /*
+   * Keep the pending order. A generic Billing error does not always prove
+   * that no charge or purchase transition occurred.
+   */
         final String message =
             purchase.error?.message ?? 'The Google Play purchase failed.';
+
         _completeActive(
           ProPurchaseOutcome(
             status: ProPurchaseOutcomeStatus.failed,
@@ -616,7 +630,20 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     couponTextController.dispose();
-    unawaited(_purchaseSubscription?.cancel());
+
+    final StreamSubscription<PurchaseDetails>? subscription =
+        _purchaseSubscription;
+
+    if (subscription == null) {
+      _recoveryService.resume();
+    } else {
+      unawaited(
+        subscription.cancel().whenComplete(
+              () => _recoveryService.resume(),
+        ),
+      );
+    }
+
     super.onClose();
   }
 }

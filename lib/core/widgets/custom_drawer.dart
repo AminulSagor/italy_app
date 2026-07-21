@@ -16,6 +16,7 @@ class AppDrawer extends GetView<AppDrawerController> {
     this.onLanguageTap,
     this.onSettingsTap,
     this.onLogoutTap,
+    this.isLoggingOut = false,
   });
 
   final VoidCallback? onShopTap;
@@ -25,6 +26,7 @@ class AppDrawer extends GetView<AppDrawerController> {
   final VoidCallback? onLanguageTap;
   final VoidCallback? onSettingsTap;
   final VoidCallback? onLogoutTap;
+  final bool isLoggingOut;
 
   @override
   Widget build(BuildContext context) {
@@ -128,13 +130,14 @@ class AppDrawer extends GetView<AppDrawerController> {
                       CustomButton(
                         text: 'log_out'.tr,
                         height: 56.h,
-                        isLoading: false,
+                        isLoading: isLoggingOut,
                         showShadow: false,
                         prefixIcon: Icons.logout,
                         btnColor: const Color(0xFFFBE8E3),
                         borderColor: const Color(0xFFFBE8E3),
                         textColor: const Color(0xFFD9300D),
-                        onPressed: onLogoutTap ?? () {},
+                        onPressed:
+                        isLoggingOut ? () {} : (onLogoutTap ?? () {}),
                       ),
                       SizedBox(height: 18.h),
                       Text(

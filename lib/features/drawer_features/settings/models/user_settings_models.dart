@@ -2,17 +2,17 @@ class UserSettingsProfileModel {
   const UserSettingsProfileModel({
     required this.id,
     required this.fullName,
+    required this.email,
+    required this.phone,
     required this.isEmailVerified,
     required this.isPhoneVerified,
+    required this.profilePhotoFileId,
+    required this.avatarUrl,
     required this.canChangeEmail,
     required this.canChangePhone,
     required this.streakFreezeCount,
     required this.currentStreakDays,
     required this.learnerLevel,
-    this.email,
-    this.phone,
-    this.profilePhotoFileId,
-    this.avatarUrl,
   });
 
   final String id;
@@ -31,8 +31,8 @@ class UserSettingsProfileModel {
 
   factory UserSettingsProfileModel.fromJson(Map<String, dynamic> json) {
     return UserSettingsProfileModel(
-      id: json['id']?.toString() ?? '',
-      fullName: json['fullName']?.toString() ?? '',
+      id: _string(json['id']),
+      fullName: _string(json['fullName']),
       email: _nullableString(json['email']),
       phone: _nullableString(json['phone']),
       isEmailVerified: json['isEmailVerified'] == true,
@@ -43,27 +43,27 @@ class UserSettingsProfileModel {
       canChangePhone: json['canChangePhone'] != false,
       streakFreezeCount: _asInt(json['streakFreezeCount']),
       currentStreakDays: _asInt(json['currentStreakDays']),
-      learnerLevel: _stringOrDefault(json['learnerLevel'], 'A1'),
+      learnerLevel: _string(json['learnerLevel']).isEmpty
+          ? 'A1'
+          : _string(json['learnerLevel']),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'id': id,
-      'fullName': fullName,
-      'email': email,
-      'phone': phone,
-      'isEmailVerified': isEmailVerified,
-      'isPhoneVerified': isPhoneVerified,
-      'profilePhotoFileId': profilePhotoFileId,
-      'avatarUrl': avatarUrl,
-      'canChangeEmail': canChangeEmail,
-      'canChangePhone': canChangePhone,
-      'streakFreezeCount': streakFreezeCount,
-      'currentStreakDays': currentStreakDays,
-      'learnerLevel': learnerLevel,
-    };
-  }
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'fullName': fullName,
+        'email': email,
+        'phone': phone,
+        'isEmailVerified': isEmailVerified,
+        'isPhoneVerified': isPhoneVerified,
+        'profilePhotoFileId': profilePhotoFileId,
+        'avatarUrl': avatarUrl,
+        'canChangeEmail': canChangeEmail,
+        'canChangePhone': canChangePhone,
+        'streakFreezeCount': streakFreezeCount,
+        'currentStreakDays': currentStreakDays,
+        'learnerLevel': learnerLevel,
+      };
 
   UserSettingsProfileModel copyWith({
     String? id,
@@ -96,21 +96,6 @@ class UserSettingsProfileModel {
       learnerLevel: learnerLevel ?? this.learnerLevel,
     );
   }
-
-  static String? _nullableString(dynamic value) {
-    final String text = value?.toString().trim() ?? '';
-    return text.isEmpty ? null : text;
-  }
-
-  static int _asInt(dynamic value) {
-    if (value is int) return value;
-    return int.tryParse(value?.toString() ?? '') ?? 0;
-  }
-
-  static String _stringOrDefault(dynamic value, String fallback) {
-    final String text = value?.toString().trim() ?? '';
-    return text.isEmpty ? fallback : text;
-  }
 }
 
 class UserSettingsProfileResponseModel {
@@ -125,23 +110,23 @@ class UserSettingsProfileResponseModel {
   factory UserSettingsProfileResponseModel.fromJson(
     Map<String, dynamic> json,
   ) {
-    final dynamic rawProfile = json['profile'];
-    final Map<String, dynamic> profileJson = rawProfile is Map
-        ? Map<String, dynamic>.from(rawProfile)
-        : <String, dynamic>{};
+    final dynamic rawProfile = json['profile'] ?? json['user'] ?? json['data'];
+    if (rawProfile is! Map) {
+      throw const FormatException('Profile response is missing profile data.');
+    }
 
     return UserSettingsProfileResponseModel(
-      profile: UserSettingsProfileModel.fromJson(profileJson),
-      message: json['message']?.toString(),
+      profile: UserSettingsProfileModel.fromJson(
+        Map<String, dynamic>.from(rawProfile),
+      ),
+      message: _nullableString(json['message']),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      if (message != null) 'message': message,
-      'profile': profile.toJson(),
-    };
-  }
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        if (message != null) 'message': message,
+        'profile': profile.toJson(),
+      };
 }
 
 class ContactOtpResponseModel {
@@ -158,17 +143,30 @@ class ContactOtpResponseModel {
   final String? devOtp;
 
   factory ContactOtpResponseModel.fromJson(Map<String, dynamic> json) {
+    final String explicitType = _string(json['contactType']).toLowerCase();
+    final String email = _string(json['email']);
+    final String phone = _string(json['phone']);
+    final String type = explicitType == 'phone' || explicitType == 'email'
+        ? explicitType
+        : phone.isNotEmpty
+            ? 'phone'
+            : 'email';
+    final String destination = _string(json['destination']).isNotEmpty
+        ? _string(json['destination'])
+        : type == 'phone'
+            ? phone
+            : email;
+
+    if (destination.isEmpty) {
+      throw const FormatException('OTP response is missing its destination.');
+    }
+
     return ContactOtpResponseModel(
-      message: json['message']?.toString() ?? 'Verification code sent.',
-      contactType: json['contactType']?.toString() ?? '',
-      destination: json['destination']?.toString() ?? '',
+      message: _string(json['message']),
+      contactType: type,
+      destination: destination,
       devOtp: _nullableString(json['devOtp']),
     );
-  }
-
-  static String? _nullableString(dynamic value) {
-    final String text = value?.toString().trim() ?? '';
-    return text.isEmpty ? null : text;
   }
 }
 
@@ -177,35 +175,40 @@ class AvatarUploadPreparationModel {
     required this.storageKey,
     required this.signedUploadUrl,
     required this.publicUrl,
+    required this.method,
+    required this.headers,
+    required this.expiresInSeconds,
     required this.maxSizeBytes,
   });
 
   final String storageKey;
   final String signedUploadUrl;
   final String publicUrl;
+  final String method;
+  final Map<String, String> headers;
+  final int expiresInSeconds;
   final int maxSizeBytes;
 
   factory AvatarUploadPreparationModel.fromJson(Map<String, dynamic> json) {
+    final dynamic rawHeaders = json['headers'];
+    final Map<String, String> headers = <String, String>{};
+    if (rawHeaders is Map) {
+      for (final MapEntry<dynamic, dynamic> entry in rawHeaders.entries) {
+        headers[entry.key.toString()] = entry.value.toString();
+      }
+    }
+
     return AvatarUploadPreparationModel(
-      storageKey: json['storageKey']?.toString() ?? '',
-      signedUploadUrl: json['signedUploadUrl']?.toString() ?? '',
-      publicUrl: json['publicUrl']?.toString() ?? '',
+      storageKey: _string(json['storageKey']),
+      signedUploadUrl: _string(json['signedUploadUrl']),
+      publicUrl: _string(json['publicUrl']),
+      method: _string(json['method']).isEmpty
+          ? 'PUT'
+          : _string(json['method']).toUpperCase(),
+      headers: headers,
+      expiresInSeconds: _asInt(json['expiresInSeconds']),
       maxSizeBytes: _asInt(json['maxSizeBytes']),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'storageKey': storageKey,
-      'signedUploadUrl': signedUploadUrl,
-      'publicUrl': publicUrl,
-      'maxSizeBytes': maxSizeBytes,
-    };
-  }
-
-  static int _asInt(dynamic value) {
-    if (value is int) return value;
-    return int.tryParse(value?.toString() ?? '') ?? 0;
   }
 }
 
@@ -222,28 +225,12 @@ class ConfirmAvatarUploadPayloadModel {
   final String mimeType;
   final int sizeBytes;
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'storageKey': storageKey,
-      'originalName': originalName,
-      'mimeType': mimeType,
-      'sizeBytes': sizeBytes,
-    };
-  }
-
-  ConfirmAvatarUploadPayloadModel copyWith({
-    String? storageKey,
-    String? originalName,
-    String? mimeType,
-    int? sizeBytes,
-  }) {
-    return ConfirmAvatarUploadPayloadModel(
-      storageKey: storageKey ?? this.storageKey,
-      originalName: originalName ?? this.originalName,
-      mimeType: mimeType ?? this.mimeType,
-      sizeBytes: sizeBytes ?? this.sizeBytes,
-    );
-  }
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'storageKey': storageKey,
+        'originalName': originalName,
+        'mimeType': mimeType,
+        'sizeBytes': sizeBytes,
+      };
 }
 
 class ChangeUserPasswordPayloadModel {
@@ -257,25 +244,11 @@ class ChangeUserPasswordPayloadModel {
   final String newPassword;
   final String confirmNewPassword;
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'currentPassword': currentPassword,
-      'newPassword': newPassword,
-      'confirmNewPassword': confirmNewPassword,
-    };
-  }
-
-  ChangeUserPasswordPayloadModel copyWith({
-    String? currentPassword,
-    String? newPassword,
-    String? confirmNewPassword,
-  }) {
-    return ChangeUserPasswordPayloadModel(
-      currentPassword: currentPassword ?? this.currentPassword,
-      newPassword: newPassword ?? this.newPassword,
-      confirmNewPassword: confirmNewPassword ?? this.confirmNewPassword,
-    );
-  }
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+        'confirmNewPassword': confirmNewPassword,
+      };
 }
 
 class UserSettingsMessageModel {
@@ -284,10 +257,18 @@ class UserSettingsMessageModel {
   final String message;
 
   factory UserSettingsMessageModel.fromJson(Map<String, dynamic> json) {
-    return UserSettingsMessageModel(
-      message: json['message']?.toString() ?? 'Request completed successfully.',
-    );
+    return UserSettingsMessageModel(message: _string(json['message']));
   }
+}
 
-  Map<String, dynamic> toJson() => <String, dynamic>{'message': message};
+String _string(dynamic value) => value?.toString().trim() ?? '';
+
+String? _nullableString(dynamic value) {
+  final String text = _string(value);
+  return text.isEmpty ? null : text;
+}
+
+int _asInt(dynamic value) {
+  if (value is int) return value;
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }

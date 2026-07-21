@@ -90,7 +90,9 @@ class LeaguePromotionScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'leaguename_league'.trParams(<String, String>{'leaguename': leagueName.toString()}),
+                      'league_name_value'.trParams(<String, String>{
+                        'leagueName': leagueName,
+                      }),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 34.sp,
@@ -402,7 +404,9 @@ class _LeagueCard extends StatelessWidget {
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    'Lasts for ${boostFooter ?? ''}. Practice more!',
+                    'boost_duration_message'.trParams(<String, String>{
+                      'duration': boostFooter ?? '',
+                    }),
                     style: TextStyle(
                       fontSize: AppFont.font10.sp,
                       fontWeight: FontWeight.w500,

@@ -235,7 +235,9 @@ class LoginView extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 2.w),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(kRadius22.r),
-                    onTap: () => controller.setLanguage(language),
+                    onTap: () async {
+                      await controller.setLanguage(language);
+                    },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
                       padding: EdgeInsets.symmetric(

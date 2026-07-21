@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/services/api_client.dart';
+import '../models/settings_localization.dart';
 import '../models/user_settings_models.dart';
-import 'package:get/get.dart' hide Response;
 
 class UserSettingsService {
   UserSettingsService({required ApiClient apiClient}) : _apiClient = apiClient;
@@ -13,11 +13,11 @@ class UserSettingsService {
   final ApiClient _apiClient;
 
   static const String _settingsEndpoint = '/user-settings';
+  static const int _fallbackMaximumAvatarBytes = 5 * 1024 * 1024;
 
   Future<UserSettingsProfileModel> getProfile() async {
-    final Response<dynamic> response = await _apiClient.dio.get(
-      _settingsEndpoint,
-    );
+    final Response<dynamic> response =
+        await _apiClient.dio.get<dynamic>(_settingsEndpoint);
     return UserSettingsProfileResponseModel.fromJson(
       _responseMap(response),
     ).profile;
@@ -26,7 +26,7 @@ class UserSettingsService {
   Future<UserSettingsProfileResponseModel> updateFullName(
     String fullName,
   ) async {
-    final Response<dynamic> response = await _apiClient.dio.patch(
+    final Response<dynamic> response = await _apiClient.dio.patch<dynamic>(
       '$_settingsEndpoint/full-name',
       data: <String, dynamic>{'fullName': fullName.trim()},
     );
@@ -34,7 +34,7 @@ class UserSettingsService {
   }
 
   Future<ContactOtpResponseModel> requestEmailChangeOtp(String email) async {
-    final Response<dynamic> response = await _apiClient.dio.post(
+    final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '$_settingsEndpoint/email/request-otp',
       data: <String, dynamic>{'email': email.trim().toLowerCase()},
     );
@@ -45,7 +45,7 @@ class UserSettingsService {
     required String email,
     required String otp,
   }) async {
-    final Response<dynamic> response = await _apiClient.dio.post(
+    final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '$_settingsEndpoint/email/verify-otp',
       data: <String, dynamic>{
         'email': email.trim().toLowerCase(),
@@ -56,9 +56,10 @@ class UserSettingsService {
   }
 
   Future<ContactOtpResponseModel> requestPhoneChangeOtp(String phone) async {
-    final Response<dynamic> response = await _apiClient.dio.post(
+    final String normalizedPhone = normalizePhone(phone);
+    final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '$_settingsEndpoint/phone/request-otp',
-      data: <String, dynamic>{'phone': phone.trim()},
+      data: <String, dynamic>{'phone': normalizedPhone},
     );
     return ContactOtpResponseModel.fromJson(_responseMap(response));
   }
@@ -67,9 +68,12 @@ class UserSettingsService {
     required String phone,
     required String otp,
   }) async {
-    final Response<dynamic> response = await _apiClient.dio.post(
+    final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '$_settingsEndpoint/phone/verify-otp',
-      data: <String, dynamic>{'phone': phone.trim(), 'otp': otp.trim()},
+      data: <String, dynamic>{
+        'phone': normalizePhone(phone),
+        'otp': otp.trim(),
+      },
     );
     return UserSettingsProfileResponseModel.fromJson(_responseMap(response));
   }
@@ -79,6 +83,13 @@ class UserSettingsService {
     final String mimeType = _imageMimeType(image);
     final int sizeBytes = await image.length();
 
+    if (sizeBytes <= 0) {
+      throw StateError(SettingsL10n.text('choose_photo_first'));
+    }
+    if (sizeBytes > _fallbackMaximumAvatarBytes) {
+      throw StateError(SettingsL10n.text('photo_too_large'));
+    }
+
     final AvatarUploadPreparationModel prepared = await _prepareAvatarUpload(
       originalName: originalName,
       mimeType: mimeType,
@@ -86,33 +97,42 @@ class UserSettingsService {
     );
 
     if (prepared.signedUploadUrl.isEmpty || prepared.storageKey.isEmpty) {
-      throw StateError('Could not prepare the profile photo upload.');
+      throw StateError(SettingsL10n.text('request_failed'));
     }
-
+    if (prepared.method != 'PUT') {
+      throw StateError(SettingsL10n.text('request_failed'));
+    }
     if (prepared.maxSizeBytes > 0 && sizeBytes > prepared.maxSizeBytes) {
-      throw StateError('Profile photo is larger than the allowed size.');
+      throw StateError(SettingsL10n.text('photo_too_large'));
     }
 
     final Uint8List bytes = await image.readAsBytes();
+    final Map<String, String> headers = <String, String>{
+      ...prepared.headers,
+      'Content-Type': mimeType,
+    };
+
     await Dio().put<dynamic>(
       prepared.signedUploadUrl,
       data: bytes,
       options: Options(
-        headers: <String, String>{'Content-Type': mimeType},
+        headers: headers,
         contentType: mimeType,
         responseType: ResponseType.plain,
+        sendTimeout: const Duration(seconds: 45),
+        receiveTimeout: const Duration(seconds: 45),
       ),
     );
 
     final ConfirmAvatarUploadPayloadModel payload =
         ConfirmAvatarUploadPayloadModel(
-          storageKey: prepared.storageKey,
-          originalName: originalName,
-          mimeType: mimeType,
-          sizeBytes: sizeBytes,
-        );
+      storageKey: prepared.storageKey,
+      originalName: originalName,
+      mimeType: mimeType,
+      sizeBytes: sizeBytes,
+    );
 
-    final Response<dynamic> response = await _apiClient.dio.post(
+    final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '$_settingsEndpoint/avatar/confirm',
       data: payload.toJson(),
     );
@@ -123,20 +143,18 @@ class UserSettingsService {
   Future<UserSettingsMessageModel> changePassword(
     ChangeUserPasswordPayloadModel payload,
   ) async {
-    final Response<dynamic> response = await _apiClient.dio.patch(
+    final Response<dynamic> response = await _apiClient.dio.patch<dynamic>(
       '$_settingsEndpoint/password',
       data: payload.toJson(),
     );
-
     return UserSettingsMessageModel.fromJson(_responseMap(response));
   }
 
   Future<UserSettingsMessageModel> deleteAccount(String fullName) async {
-    final Response<dynamic> response = await _apiClient.dio.delete(
+    final Response<dynamic> response = await _apiClient.dio.delete<dynamic>(
       '$_settingsEndpoint/account',
       data: <String, dynamic>{'fullName': fullName.trim()},
     );
-
     return UserSettingsMessageModel.fromJson(_responseMap(response));
   }
 
@@ -145,7 +163,7 @@ class UserSettingsService {
     required String mimeType,
     required int sizeBytes,
   }) async {
-    final Response<dynamic> response = await _apiClient.dio.post(
+    final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '$_settingsEndpoint/avatar/upload-url',
       data: <String, dynamic>{
         'originalName': originalName,
@@ -153,7 +171,6 @@ class UserSettingsService {
         'sizeBytes': sizeBytes,
       },
     );
-
     return AvatarUploadPreparationModel.fromJson(_responseMap(response));
   }
 
@@ -161,20 +178,20 @@ class UserSettingsService {
     final dynamic data = response.data;
     if (data is Map<String, dynamic>) return data;
     if (data is Map) return Map<String, dynamic>.from(data);
-
     throw DioException(
       requestOptions: response.requestOptions,
-      message: 'response_is_not_a_valid_json_object_1'.tr,
+      message: SettingsL10n.text('request_failed'),
     );
   }
 
   String _safeOriginalName(XFile image) {
-    final String name = image.name.trim();
-    if (name.isNotEmpty) return name;
-
-    final List<String> parts = image.path.split(RegExp(r'[\\/]'));
-    final String pathName = parts.isEmpty ? '' : parts.last.trim();
-    return pathName.isEmpty ? 'profile-avatar.jpg' : pathName;
+    final String suppliedName = image.name.trim();
+    final String pathName = image.path.split(RegExp(r'[\\/]')).last.trim();
+    final String candidate = suppliedName.isNotEmpty ? suppliedName : pathName;
+    if (candidate.isEmpty) {
+      throw StateError(SettingsL10n.text('unsupported_photo'));
+    }
+    return candidate;
   }
 
   String _imageMimeType(XFile image) {
@@ -186,8 +203,25 @@ class UserSettingsService {
     }
 
     final String name = _safeOriginalName(image).toLowerCase();
+    if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'image/jpeg';
     if (name.endsWith('.png')) return 'image/png';
     if (name.endsWith('.webp')) return 'image/webp';
-    return 'image/jpeg';
+
+    throw StateError(SettingsL10n.text('unsupported_photo'));
+  }
+
+  static String normalizePhone(String value) {
+    String phone = value.trim().replaceAll(RegExp(r'[\s()\-]'), '');
+    if (phone.startsWith('00')) phone = '+${phone.substring(2)}';
+    if (RegExp(r'^01\d{9}$').hasMatch(phone)) {
+      phone = '+88$phone';
+    }
+    if (RegExp(r'^8801\d{9}$').hasMatch(phone)) {
+      phone = '+$phone';
+    }
+    if (RegExp(r'^39\d{8,11}$').hasMatch(phone)) {
+      phone = '+$phone';
+    }
+    return phone;
   }
 }

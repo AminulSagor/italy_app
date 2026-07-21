@@ -245,7 +245,7 @@ class _CommunityCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Join our Facebook\nCommunity',
+                        'join_our_facebook_community'.tr,
                         style: TextStyle(
                           fontSize: 18.sp,
                           height: 1.15,

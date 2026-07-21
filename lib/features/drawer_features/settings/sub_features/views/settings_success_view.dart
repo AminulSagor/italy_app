@@ -1,305 +1,156 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:italir_pothe/features/drawer_features/settings/widgets/settings_ui_widgets.dart';
-import 'package:italir_pothe/routes/routes.dart';
+
+import '../../../../../routes/routes.dart';
+import '../../models/settings_localization.dart';
+import '../../widgets/settings_ui_widgets.dart';
 
 class SettingsSuccessView extends StatelessWidget {
   const SettingsSuccessView({super.key});
 
-  String get _type {
-    final args = Get.arguments;
-    if (args is Map && args['type'] is String) return args['type'] as String;
-    return 'emailupdated'.tr;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final String type = _type;
-    final bool isDelete = type == 'accountDeleted';
-    final bool isPhone = type == 'phoneUpdated';
+    final Map<String, dynamic> arguments = Get.arguments is Map
+        ? Map<String, dynamic>.from(Get.arguments as Map)
+        : <String, dynamic>{};
+    final String type = arguments['type']?.toString() ?? 'emailUpdated';
+    final _SuccessContent content = _contentFor(type);
 
     return Scaffold(
-      backgroundColor: SettingsUi.bg,
+      backgroundColor: SettingsUi.background,
       body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              right: -80.w,
-              top: isDelete ? 10.h : 70.h,
-              child: _SuccessGlow(size: 230.r),
-            ),
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 44.h),
-              child: Column(
-                children: <Widget>[
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: Get.back,
-                      child: Container(
-                        width: 46.r,
-                        height: 46.r,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.arrow_back_rounded,
-                          size: 24.r,
-                          color: SettingsUi.text,
-                        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 28.h),
+          child: Column(
+            children: <Widget>[
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Material(
+                  color: Colors.white,
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => _navigate(type),
+                    child: SizedBox(
+                      width: 44.r,
+                      height: 44.r,
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 22.r,
+                        color: SettingsUi.primary,
                       ),
                     ),
                   ),
-                  SizedBox(height: isDelete ? 98.h : 67.h),
-                  isDelete ? const _DeletedHeroIcon() : const _SecureHeroIcon(),
-                  SizedBox(height: isDelete ? 39.h : 45.h),
-                  Text(
-                    isDelete
-                        ? 'account_deleted'.tr
-                        : isPhone
-                        ? 'phone_updated'.tr
-                        : 'email_updated'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: isDelete ? 29.sp : 37.sp,
-                      fontWeight: FontWeight.w900,
-                      color: isDelete ? SettingsUi.green : SettingsUi.text,
-                      letterSpacing: -1.0,
-                    ),
-                  ),
-                  SizedBox(height: 25.h),
-                  Text(
-                    isDelete
-                        ? 'your_data_progress_and_certificates_nhave_been_per'.tr
-                        : isPhone
-                        ? 'your_phone_number_has_been_nsuccessfully_updated_y'.tr
-                        : 'your_email_id_has_been_nsuccessfully_updated_you_c'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      height: 1.48,
-                      fontWeight: FontWeight.w500,
-                      color: SettingsUi.muted,
-                    ),
-                  ),
-                  if (!isDelete) ...[
-                    SizedBox(height: 47.h),
-                    const _LoginReadyCard(),
-                  ],
-                  SizedBox(height: isDelete ? 69.h : 64.h),
-                  SettingsPrimaryButton(
-                    text: isDelete
-                        ? 'back_to_login'.tr.toUpperCase()
-                        : 'back_to_edit_profile'.tr,
-                    height: isDelete ? 62 : 68,
-                    onTap: () {
-                      if (isDelete) {
-                        Get.offAllNamed(AppRoutes.login);
-                      } else {
-                        Get.offNamed(AppRoutes.profileSecurity);
-                      }
-                    },
-                  ),
-                  SizedBox(height: 28.h),
-                  Text(
-                    isDelete ? '' : '🔒  SECURE & PROTECTED',
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFFB1B1B1),
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SecureHeroIcon extends StatelessWidget {
-  const _SecureHeroIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 196.r,
-      height: 204.r,
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          Container(
-            width: 160.r,
-            height: 160.r,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEDEEEF),
-              borderRadius: BorderRadius.circular(42.r),
-            ),
-          ),
-          Container(
-            width: 96.r,
-            height: 96.r,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(34.r),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.13),
-                  blurRadius: 22.r,
-                  offset: Offset(0, 12.h),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.shield_rounded,
-              size: 58.r,
-              color: SettingsUi.green,
-            ),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 38.h,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFA015),
-                borderRadius: BorderRadius.circular(100.r),
-              ),
-              child: Text(
-                'secure'.tr,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF111111),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DeletedHeroIcon extends StatelessWidget {
-  const _DeletedHeroIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 142.r,
-      height: 142.r,
-      padding: EdgeInsets.all(18.r),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SettingsUi.lightGreen.withValues(alpha: 0.28),
-            blurRadius: 28.r,
-          ),
-        ],
-      ),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: SettingsUi.lightGreen,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          Icons.restore_from_trash_rounded,
-          size: 54.r,
-          color: SettingsUi.green,
-        ),
-      ),
-    );
-  }
-}
-
-class _LoginReadyCard extends StatelessWidget {
-  const _LoginReadyCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 82.h,
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 25.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F0),
-        borderRadius: BorderRadius.circular(38.r),
-      ),
-      child: Row(
-        children: <Widget>[
-          Container(
-            width: 48.r,
-            height: 48.r,
-            decoration: const BoxDecoration(
-              color: Color(0xFFA9D0FF),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.key_rounded,
-              size: 24.r,
-              color: const Color(0xFF005A97),
-            ),
-          ),
-          SizedBox(width: 17.w),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
+              const Spacer(),
+              Container(
+                width: 104.r,
+                height: 104.r,
+                decoration: BoxDecoration(
+                  color: content.backgroundColor,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  content.icon,
+                  size: 51.r,
+                  color: content.iconColor,
+                ),
+              ),
+              SizedBox(height: 24.h),
               Text(
-                'login_ready'.tr,
+                content.title,
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
+                  fontSize: 25.sp,
+                  fontWeight: FontWeight.w800,
                   color: SettingsUi.text,
                 ),
               ),
-              SizedBox(height: 3.h),
+              SizedBox(height: 9.h),
               Text(
-                'login_ready_desc'.tr,
+                content.subtitle,
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 13.sp,
+                  height: 1.5,
                   color: SettingsUi.muted,
                 ),
               ),
+              const Spacer(),
+              SettingsPrimaryButton(
+                text: content.buttonText,
+                icon: content.buttonIcon,
+                onTap: () => _navigate(type),
+              ),
             ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  _SuccessContent _contentFor(String type) {
+    switch (type) {
+      case 'phoneUpdated':
+        return _SuccessContent(
+          title: SettingsL10n.text('phone_updated'),
+          subtitle: SettingsL10n.text('phone_updated_desc'),
+          buttonText: SettingsL10n.text('back_to_profile'),
+          icon: Icons.phone_iphone_rounded,
+          buttonIcon: Icons.arrow_back_rounded,
+          iconColor: SettingsUi.primary,
+          backgroundColor: const Color(0xFFE6F7F0),
+        );
+      case 'accountDeleted':
+        return _SuccessContent(
+          title: SettingsL10n.text('account_deleted'),
+          subtitle: SettingsL10n.text('account_deleted_desc'),
+          buttonText: SettingsL10n.text('back_to_login'),
+          icon: Icons.person_off_outlined,
+          buttonIcon: Icons.login_rounded,
+          iconColor: SettingsUi.danger,
+          backgroundColor: const Color(0xFFFFECEC),
+        );
+      default:
+        return _SuccessContent(
+          title: SettingsL10n.text('email_updated'),
+          subtitle: SettingsL10n.text('email_updated_desc'),
+          buttonText: SettingsL10n.text('back_to_profile'),
+          icon: Icons.mark_email_read_outlined,
+          buttonIcon: Icons.arrow_back_rounded,
+          iconColor: SettingsUi.primary,
+          backgroundColor: const Color(0xFFE6F7F0),
+        );
+    }
+  }
+
+  void _navigate(String type) {
+    if (type == 'accountDeleted') {
+      Get.offAllNamed(AppRoutes.login);
+      return;
+    }
+    Get.back<void>();
   }
 }
 
-class _SuccessGlow extends StatelessWidget {
-  final double size;
+class _SuccessContent {
+  const _SuccessContent({
+    required this.title,
+    required this.subtitle,
+    required this.buttonText,
+    required this.icon,
+    required this.buttonIcon,
+    required this.iconColor,
+    required this.backgroundColor,
+  });
 
-  const _SuccessGlow({required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: SettingsUi.lightGreen.withValues(alpha: 0.18),
-        shape: BoxShape.circle,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SettingsUi.lightGreen.withValues(alpha: 0.34),
-            blurRadius: 70.r,
-            spreadRadius: 20.r,
-          ),
-        ],
-      ),
-    );
-  }
+  final String title;
+  final String subtitle;
+  final String buttonText;
+  final IconData icon;
+  final IconData buttonIcon;
+  final Color iconColor;
+  final Color backgroundColor;
 }

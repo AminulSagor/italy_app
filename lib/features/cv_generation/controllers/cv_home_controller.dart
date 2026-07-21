@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/api_error_handler.dart';
+import '../../../routes/routes.dart';
+import '../../drawer_features/shop/models/shop_models.dart';
 import '../models/cv_assistant_models.dart';
 import '../models/cv_template_model.dart';
 import '../services/cv_generation_api_service.dart';
@@ -28,7 +30,9 @@ class CvHomeController extends GetxController {
   final RxString searchQuery = ''.obs;
 
   final RxString errorMessage = ''.obs;
-  final RxBool isTemplateOverlayVisible = false.obs;
+
+  final RxBool isTemplateOverlayVisible =
+      false.obs;
 
   /*
    * The template currently selected by the user.
@@ -69,19 +73,115 @@ class CvHomeController extends GetxController {
 
   final RxInt totalItems = 0.obs;
 
+  /*
+   * CV free-generation and purchased-credit information.
+   */
+  final Rxn<StoreBalancesModel> cvAccess =
+  Rxn<StoreBalancesModel>();
+
+  final RxBool isLoadingCvAccess = false.obs;
+
   Worker? _searchWorker;
 
   bool get canLoadMore {
-    return currentPage.value < totalPages.value;
+    return currentPage.value <
+        totalPages.value;
   }
 
   bool get isAnalyzingTemplate {
-    return analyzingTemplateId.value.isNotEmpty;
+    return analyzingTemplateId
+        .value.isNotEmpty;
   }
 
   bool get isStartingAnySession {
     return isAnalyzingTemplate ||
         isStartingScratch.value;
+  }
+
+  /*
+   * Total free CV creation limit configured by admin.
+   */
+  int get freeCvGenerationsLimit {
+    return cvAccess.value
+        ?.freeCvGenerationsLimit ??
+        3;
+  }
+
+  /*
+   * Free CV creations still remaining.
+   *
+   * Before the balance request finishes, use the configured
+   * default optimistically so a temporary network issue does
+   * not incorrectly tell the user that the free limit ended.
+   */
+  int get freeCvGenerationsRemaining {
+    return cvAccess.value
+        ?.freeCvGenerationsRemaining ??
+        freeCvGenerationsLimit;
+  }
+
+  /*
+   * Purchased CV credits only.
+   */
+  int get paidCvCredits {
+    return cvAccess.value?.cvCredits ?? 0;
+  }
+
+  bool get hasFreeCvGeneration {
+    return freeCvGenerationsRemaining > 0;
+  }
+
+  bool get freeCvLimitEnded {
+    return cvAccess.value
+        ?.freeCvLimitExhausted ??
+        false;
+  }
+
+  int get totalCvGenerationsAvailable {
+    return cvAccess.value
+        ?.totalCvGenerationsAvailable ??
+        freeCvGenerationsRemaining +
+            paidCvCredits;
+  }
+
+  /*
+   * Keep this optimistic when the balance request fails.
+   * The backend remains authoritative and will return HTTP
+   * 402 when the user has no free generation or paid credit.
+   */
+  bool get canCreateCv {
+    return cvAccess.value?.canCreateCv ??
+        true;
+  }
+
+  /*
+   * Possible values:
+   * free, credit, none.
+   */
+  String get nextCvGenerationUses {
+    return cvAccess.value
+        ?.nextCvGenerationUses ??
+        (freeCvGenerationsRemaining > 0
+            ? 'free'
+            : paidCvCredits > 0
+            ? 'credit'
+            : 'none');
+  }
+
+  bool get nextCvUsesFreeAllowance {
+    return nextCvGenerationUses ==
+        'free';
+  }
+
+  bool get nextCvUsesPaidCredit {
+    return nextCvGenerationUses ==
+        'credit';
+  }
+
+  bool get allowCvEditingWithoutCredit {
+    return cvAccess.value
+        ?.allowCvEditingWithoutCredit ??
+        true;
   }
 
   bool isTemplateSelected(
@@ -146,6 +246,10 @@ class CvHomeController extends GetxController {
         reset: true,
       ),
     );
+
+    unawaited(
+      loadCvAccess(),
+    );
   }
 
   void onSearchChanged(
@@ -160,9 +264,17 @@ class CvHomeController extends GetxController {
     searchQuery.value = '';
   }
 
-  Future<void> refreshTemplates() {
-    return loadTemplates(
-      reset: true,
+  /*
+   * Refresh both template data and CV access information.
+   */
+  Future<void> refreshTemplates() async {
+    await Future.wait<void>(
+      <Future<void>>[
+        loadTemplates(
+          reset: true,
+        ),
+        loadCvAccess(),
+      ],
     );
   }
 
@@ -192,7 +304,8 @@ class CvHomeController extends GetxController {
           ? 1
           : currentPage.value + 1;
 
-      final CvTemplateListResponseModel response =
+      final CvTemplateListResponseModel
+      response =
       await _apiService.fetchTemplates(
         page: requestedPage,
         limit: pageSize,
@@ -229,11 +342,123 @@ class CvHomeController extends GetxController {
     }
   }
 
+  /*
+   * Loads:
+   * - remaining free CV creations
+   * - purchased CV credits
+   * - whether another CV can be created
+   *
+   * A temporary balance-loading failure must not block the
+   * existing CV assistant functionality. The backend still
+   * validates access during final generation.
+   */
+  Future<void> loadCvAccess() async {
+    if (isLoadingCvAccess.value) {
+      return;
+    }
+
+    isLoadingCvAccess.value = true;
+
+    try {
+      cvAccess.value =
+      await _apiService.fetchCvAccess();
+    } catch (_) {
+      /*
+       * Do not replace the template error or prevent the
+       * user from opening the assistant due to a temporary
+       * balance request failure.
+       */
+    } finally {
+      isLoadingCvAccess.value = false;
+    }
+  }
+
+  /*
+   * Checks the current free/paid CV access before opening a
+   * new assistant session.
+   *
+   * This is an early UX check only. The backend performs the
+   * final atomic access validation when generation begins.
+   */
+  Future<bool>
+  ensureNewCvAccessAvailable() async {
+    await loadCvAccess();
+
+    if (canCreateCv) {
+      return true;
+    }
+
+    await Get.dialog<void>(
+      AlertDialog(
+        title: Text(
+          'cv_credit_required_title'.tr,
+        ),
+        content: Text(
+          'cv_credit_required_message'.tr,
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Get.back<void>();
+            },
+            child: Text(
+              'cancel'.tr,
+            ),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              Get.back<void>();
+
+              unawaited(
+                Future<void>.delayed(
+                  Duration.zero,
+                  openCvCreditStore,
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.add_card_rounded,
+            ),
+            label: Text(
+              'buy_cv_credits'.tr,
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
+
+    return false;
+  }
+
+  /*
+   * Opens the CV Credit Store and refreshes the balance when
+   * the user returns.
+   */
+  Future<void> openCvCreditStore() async {
+    await Get.toNamed(
+      AppRoutes.cvCreditStore,
+    );
+
+    await loadCvAccess();
+  }
+
   Future<void> startTemplateChat(
       CvTemplateModel template, {
         VoidCallback? onChatOpened,
       }) async {
     if (isStartingAnySession) {
+      return;
+    }
+
+    /*
+     * Prevent opening a new CV assistant when all three free
+     * creations are used and no purchased credit remains.
+     */
+    final bool accessAvailable =
+    await ensureNewCvAccessAvailable();
+
+    if (!accessAvailable) {
       return;
     }
 
@@ -253,9 +478,11 @@ class CvHomeController extends GetxController {
     analyzingTemplateId.value =
         templateId;
 
-    isTemplateOverlayVisible.value = true;
+    isTemplateOverlayVisible.value =
+    true;
 
-    analysisFailedTemplateId.value = '';
+    analysisFailedTemplateId.value =
+    '';
 
     analysisErrorMessage.value = '';
 
@@ -266,7 +493,8 @@ class CvHomeController extends GetxController {
        * "Analyzing template..." state rather than a fake
        * percentage.
        */
-      final CvAssistantSessionModel session =
+      final CvAssistantSessionModel
+      session =
       await _apiService
           .createCvAssistantSession(
         templateId: templateId,
@@ -281,7 +509,8 @@ class CvHomeController extends GetxController {
        */
       analyzingTemplateId.value = '';
 
-      analysisFailedTemplateId.value = '';
+      analysisFailedTemplateId.value =
+      '';
 
       analysisErrorMessage.value = '';
 
@@ -289,12 +518,16 @@ class CvHomeController extends GetxController {
         session: session,
         selectedTemplate: template,
         onChatOpened: () {
-          isTemplateOverlayVisible.value = false;
+          isTemplateOverlayVisible.value =
+          false;
+
           onChatOpened?.call();
         },
       );
     } catch (error) {
-      isTemplateOverlayVisible.value = false;
+      isTemplateOverlayVisible.value =
+      false;
+
       analyzingTemplateId.value = '';
 
       analysisFailedTemplateId.value =
@@ -327,7 +560,8 @@ class CvHomeController extends GetxController {
     selectedTemplateId.value =
         template.id.trim();
 
-    analysisFailedTemplateId.value = '';
+    analysisFailedTemplateId.value =
+    '';
 
     analysisErrorMessage.value = '';
 
@@ -338,7 +572,8 @@ class CvHomeController extends GetxController {
   }
 
   void clearTemplateAnalysisFailure() {
-    analysisFailedTemplateId.value = '';
+    analysisFailedTemplateId.value =
+    '';
 
     analysisErrorMessage.value = '';
   }
@@ -349,18 +584,31 @@ class CvHomeController extends GetxController {
     }
 
     /*
+     * Prevent opening a new scratch CV assistant when the
+     * free allowance and purchased balance are both zero.
+     */
+    final bool accessAvailable =
+    await ensureNewCvAccessAvailable();
+
+    if (!accessAvailable) {
+      return;
+    }
+
+    /*
      * Scratch mode does not use a selected template.
      */
     selectedTemplateId.value = '';
 
-    analysisFailedTemplateId.value = '';
+    analysisFailedTemplateId.value =
+    '';
 
     analysisErrorMessage.value = '';
 
     isStartingScratch.value = true;
 
     try {
-      final CvAssistantSessionModel session =
+      final CvAssistantSessionModel
+      session =
       await _apiService
           .createCvAssistantSession();
 
@@ -404,7 +652,8 @@ class CvHomeController extends GetxController {
             CvChatController(
               apiService: _apiService,
               initialSession: session,
-              selectedTemplate: selectedTemplate,
+              selectedTemplate:
+              selectedTemplate,
             ),
             tag: controllerTag,
           );
@@ -416,7 +665,9 @@ class CvHomeController extends GetxController {
 
     await Future<void>.delayed(
       transitionDuration +
-          const Duration(milliseconds: 80),
+          const Duration(
+            milliseconds: 80,
+          ),
     );
 
     onChatOpened?.call();
@@ -424,6 +675,13 @@ class CvHomeController extends GetxController {
     if (navigationFuture != null) {
       await navigationFuture;
     }
+
+    /*
+   * The user may have generated a CV while inside the
+   * assistant. Refresh the free allowance and purchased
+   * CV-credit balance after returning.
+   */
+    await loadCvAccess();
   }
 
   void _showScratchError(

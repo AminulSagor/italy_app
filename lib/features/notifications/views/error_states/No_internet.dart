@@ -53,7 +53,7 @@ class NoInternetStatusView extends StatelessWidget {
                     SizedBox(height: 39.h),
 
                     Text(
-                      "Oops! You're\nOffline.",
+                      'offline_screen_title'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: StatusColors.primaryGreen,
@@ -67,7 +67,7 @@ class NoInternetStatusView extends StatelessWidget {
                     SizedBox(height: 24.h),
 
                     Text(
-                      'Please check your internet\nconnection to continue learning\nyour favorite Italian phrases.',
+                      'offline_learning_message'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: StatusColors.bodyText,

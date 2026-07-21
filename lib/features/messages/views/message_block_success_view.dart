@@ -2,164 +2,254 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../controllers/message_user_info_controller.dart';
-import '../models/message_models.dart';
 import '../../../core/themes/app_colors.dart';
-import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
 import '../../../core/widgets/custom_button.dart';
+import '../controllers/message_user_info_controller.dart';
+import '../models/message_models.dart';
 
-class MessageBlockSuccessView extends GetView<MessageUserInfoController> {
-  const MessageBlockSuccessView({super.key});
+class MessageBlockSuccessView
+    extends GetView<MessageUserInfoController> {
+  const MessageBlockSuccessView({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
-        child: Obx(
-          () {
-            final MessageUserProfileModel? profile = controller.profile.value;
-            final String userName = profile?.name ?? 'user'.tr;
+        child: Obx(() {
+          final MessageUserProfileModel? profile =
+              controller.profile.value;
 
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(30.w, 96.h, 30.w, 48.h),
-              child: Column(
-                children: <Widget>[
-                  const _BlockedHeroIcon(),
-                  SizedBox(height: 64.h),
-                  Text(
-                    'user_blocked'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFont.font40.sp,
-                      fontWeight: FontWeight.w900,
-                      height: 1,
-                      color: AppColors.primaryGreen,
+          final String rawUserName =
+              profile?.name.trim() ?? '';
+
+          final String userName =
+          rawUserName.isEmpty
+              ? 'user'.tr
+              : rawUserName;
+
+          return SingleChildScrollView(
+            physics:
+            const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              24.w,
+              36.h,
+              24.w,
+              28.h,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 560,
+                ),
+                child: Column(
+                  children: <Widget>[
+                    const _BlockedHeroIcon(),
+
+                    SizedBox(height: 28.h),
+
+                    Text(
+                      'user_blocked'.tr,
+                      maxLines: 2,
+                      overflow:
+                      TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize:
+                        AppFont.font28.sp,
+                        fontWeight:
+                        FontWeight.w800,
+                        height: 1.15,
+                        color:
+                        AppColors.primaryGreen,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 22.h),
-                  Text(
-                    'safe_learning_environment_restored'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFont.font24.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.modalTextGrey,
+
+                    SizedBox(height: 10.h),
+
+                    Padding(
+                      padding:
+                      EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                      ),
+                      child: Text(
+                        'safe_learning_environment_restored'
+                            .tr,
+                        textAlign:
+                        TextAlign.center,
+                        style: TextStyle(
+                          fontSize:
+                          AppFont.font15.sp,
+                          fontWeight:
+                          FontWeight.w400,
+                          height: 1.45,
+                          color:
+                          AppColors.modalTextGrey,
+                        ),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 54.h),
-                  _PrivacyInfoCard(userName: userName),
-                  SizedBox(height: 38.h),
-                  const _SafetyStatusCards(),
-                  SizedBox(height: 64.h),
-                  CustomButton.primary(
-                    text: 'back_to_message'.tr,
-                    onPressed: controller.backToMessage,
-                  ),
-                  SizedBox(height: 28.h),
-                  CustomButton(
-                    text: 'unblock_user'.tr,
-                    width: double.infinity,
-                    height: kButtonDefaultHeight,
-                    btnColor: AppColors.white,
-                    borderColor: AppColors.primaryGreen,
-                    textColor: AppColors.primaryGreen,
-                    showShadow: false,
-                    onPressed: controller.openUnblockUserSheet,
-                  ),
-                ],
+
+                    SizedBox(height: 28.h),
+
+                    _PrivacyInfoCard(
+                      userName: userName,
+                    ),
+
+                    SizedBox(height: 18.h),
+
+                    const _SafetyStatusCards(),
+
+                    SizedBox(height: 32.h),
+
+                    CustomButton.primary(
+                      text:
+                      'back_to_message'.tr,
+                      onPressed:
+                      controller.backToMessage,
+                    ),
+
+                    SizedBox(height: 12.h),
+
+                    CustomButton(
+                      text: 'unblock_user'.tr,
+                      width: double.infinity,
+                      height: 52.h,
+                      btnColor: AppColors.white,
+                      borderColor:
+                      AppColors.primaryGreen,
+                      textColor:
+                      AppColors.primaryGreen,
+                      showShadow: false,
+                      onPressed: controller
+                          .openUnblockUserSheet,
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        }),
       ),
     );
   }
 }
 
-class _BlockedHeroIcon extends StatelessWidget {
+class _BlockedHeroIcon
+    extends StatelessWidget {
   const _BlockedHeroIcon();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: kSafetySuccessHeroSize.w,
-      height: kSafetySuccessHeroSize.w,
+      width: 92.w,
+      height: 92.w,
       decoration: BoxDecoration(
-        color: AppColors.blockSuccessIconBg,
-        borderRadius: BorderRadius.circular(kRadius42.r),
+        color:
+        AppColors.blockSuccessIconBg,
+        borderRadius:
+        BorderRadius.circular(28.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppColors.blockSuccessGlow,
-            blurRadius: 58.r,
-            spreadRadius: 26.r,
+            color: AppColors
+                .blockSuccessGlow
+                .withValues(alpha: 0.5),
+            blurRadius: 28.r,
+            spreadRadius: 8.r,
           ),
         ],
       ),
       child: Icon(
         Icons.verified_user_rounded,
         color: AppColors.homePaleGreen,
-        size: 88.w,
+        size: 46.w,
       ),
     );
   }
 }
 
-class _PrivacyInfoCard extends StatelessWidget {
-  final String userName;
+class _PrivacyInfoCard
+    extends StatelessWidget {
+  const _PrivacyInfoCard({
+    required this.userName,
+  });
 
-  const _PrivacyInfoCard({required this.userName});
+  final String userName;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(minHeight: kSafetySuccessInfoCardMinHeight.h),
-      padding: EdgeInsets.fromLTRB(34.w, 28.h, 28.w, 28.h),
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: AppColors.blockSuccessBlueBg,
-        borderRadius: BorderRadius.circular(kSafetySuccessInfoCardRadius.r),
+        color:
+        AppColors.blockSuccessBlueBg,
+        borderRadius:
+        BorderRadius.circular(20.r),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            width: 58.w,
-            height: 58.w,
+            width: 44.w,
+            height: 44.w,
             decoration: const BoxDecoration(
-              color: AppColors.blockSuccessBlueIconBg,
+              color: AppColors
+                  .blockSuccessBlueIconBg,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.visibility_off_outlined,
-              color: AppColors.profileBlueText,
-              size: 34.w,
+              color:
+              AppColors.profileBlueText,
+              size: 23.w,
             ),
           ),
-          SizedBox(width: 24.w),
+
+          SizedBox(width: 14.w),
+
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'username_has_been_hidden_from_your_app'.trParams(<String, String>{'username': userName.toString()}),
+                  'username_has_been_hidden_from_your_app'
+                      .trParams(
+                    <String, String>{
+                      'username': userName,
+                    },
+                  ),
                   style: TextStyle(
-                    fontSize: AppFont.font22.sp,
-                    fontWeight: FontWeight.w900,
+                    fontSize:
+                    AppFont.font15.sp,
+                    fontWeight:
+                    FontWeight.w700,
                     height: 1.35,
-                    color: AppColors.blockSuccessBlueText,
+                    color: AppColors
+                        .blockSuccessBlueText,
                   ),
                 ),
-                SizedBox(height: 18.h),
+
+                SizedBox(height: 8.h),
+
                 Text(
-                  'they_will_not_be_notified_that_you_blocked_them_yo'.tr,
+                  'they_will_not_be_notified_that_you_blocked_them_yo'
+                      .tr,
                   style: TextStyle(
-                    fontSize: AppFont.font20.sp,
-                    fontWeight: FontWeight.w500,
-                    height: 1.3,
-                    color: AppColors.blockSuccessBlueText.withValues(alpha: 0.74),
+                    fontSize:
+                    AppFont.font13.sp,
+                    fontWeight:
+                    FontWeight.w400,
+                    height: 1.45,
+                    color: AppColors
+                        .blockSuccessBlueText
+                        .withValues(
+                      alpha: 0.75,
+                    ),
                   ),
                 ),
               ],
@@ -171,7 +261,8 @@ class _PrivacyInfoCard extends StatelessWidget {
   }
 }
 
-class _SafetyStatusCards extends StatelessWidget {
+class _SafetyStatusCards
+    extends StatelessWidget {
   const _SafetyStatusCards();
 
   @override
@@ -180,11 +271,14 @@ class _SafetyStatusCards extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: _SafetyStatusCard(
-            icon: Icons.lock_outline_rounded,
+            icon:
+            Icons.lock_outline_rounded,
             title: 'gen_secure'.tr,
           ),
         ),
-        SizedBox(width: 26.w),
+
+        SizedBox(width: 12.w),
+
         Expanded(
           child: _SafetyStatusCard(
             icon: Icons.shield_outlined,
@@ -196,31 +290,54 @@ class _SafetyStatusCards extends StatelessWidget {
   }
 }
 
-class _SafetyStatusCard extends StatelessWidget {
+class _SafetyStatusCard
+    extends StatelessWidget {
+  const _SafetyStatusCard({
+    required this.icon,
+    required this.title,
+  });
+
   final IconData icon;
   final String title;
-
-  const _SafetyStatusCard({required this.icon, required this.title});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kSafetySuccessSmallCardHeight.h,
+      constraints: BoxConstraints(
+        minHeight: 84.h,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: 10.w,
+        vertical: 14.h,
+      ),
       decoration: BoxDecoration(
-        color: AppColors.messageTileInactiveBg,
-        borderRadius: BorderRadius.circular(kRadius36.r),
+        color:
+        AppColors.messageTileInactiveBg,
+        borderRadius:
+        BorderRadius.circular(18.r),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+        MainAxisAlignment.center,
         children: <Widget>[
-          Icon(icon, color: AppColors.primaryGreen, size: 34.w),
-          SizedBox(height: 12.h),
+          Icon(
+            icon,
+            color: AppColors.primaryGreen,
+            size: 25.w,
+          ),
+
+          SizedBox(height: 8.h),
+
           Text(
             title,
+            maxLines: 1,
+            overflow:
+            TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: AppFont.font16.sp,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 2.6,
+              fontSize: AppFont.font12.sp,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
               color: AppColors.bodyText,
             ),
           ),

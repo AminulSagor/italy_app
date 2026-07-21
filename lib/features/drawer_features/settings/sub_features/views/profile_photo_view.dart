@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../models/settings_localization.dart';
 import '../../settings_controller.dart';
 import '../../widgets/settings_ui_widgets.dart';
 
@@ -14,246 +15,71 @@ class ProfilePhotoView extends GetView<SettingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SettingsUi.bg,
+      backgroundColor: SettingsUi.background,
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: ListView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 28.h),
-          child: Column(
-            children: <Widget>[
-              SettingsTopBar(title: 'gen_profile_photo'.tr),
-              SizedBox(height: 61.h),
-              Obx(
-                () => _PhotoPreview(
-                  selectedPath: controller.selectedAvatar.value?.path,
-                  avatarUrl: controller.profile.value?.avatarUrl,
-                ),
-              ),
-              SizedBox(height: 34.h),
-              Text(
-                'say_cheese'.tr,
-                style: TextStyle(
-                  fontSize: 25.sp,
-                  fontWeight: FontWeight.w900,
-                  color: SettingsUi.text,
-                  letterSpacing: -0.4,
-                ),
-              ),
-              SizedBox(height: 10.h),
-              Text(
-                'Add a photo so your friends can\nrecognize you in the Italian class.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  height: 1.45,
-                  fontWeight: FontWeight.w500,
-                  color: SettingsUi.muted,
-                ),
-              ),
-              SizedBox(height: 47.h),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: _PhotoOptionCard(
-                      title: 'gen_take_a_photo'.tr,
-                      icon: Icons.camera_alt_outlined,
-                      bgColor: const Color(0xFFD7FFC6),
-                      iconBgColor: SettingsUi.lightGreen,
-                      iconColor: SettingsUi.green,
-                      onTap: () => controller.pickAvatar(ImageSource.camera),
-                    ),
-                  ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: _PhotoOptionCard(
-                      title: 'gen_choose_from_ngallery'.tr,
-                      icon: Icons.image_rounded,
-                      bgColor: const Color(0xFFDCEBFF),
-                      iconBgColor: const Color(0xFFA9D0FF),
-                      iconColor: const Color(0xFF005A97),
-                      onTap: () => controller.pickAvatar(ImageSource.gallery),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 48.h),
-              const _PhotoTipCard(),
-              SizedBox(height: 39.h),
-              Obx(
-                () => SettingsPrimaryButton(
-                  text: 'confirm_photo'.tr,
-                  enabled: controller.selectedAvatar.value != null,
-                  isLoading: controller.isUploadingAvatar.value,
-                  onTap: () async {
-                    final bool uploaded =
-                        await controller.uploadSelectedAvatar();
-                    if (!uploaded) return;
-
-                    await SettingsSuccessBottomSheet.show(
-                      title: 'gen_profile_picture_updated'.tr,
-                      subtitle:
-                          'your_profile_picture_has_been_updated_successfully'.tr,
-                      onDone: () {
-                        Get.back<void>();
-                        Get.back<void>();
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PhotoPreview extends StatelessWidget {
-  const _PhotoPreview({required this.selectedPath, required this.avatarUrl});
-
-  final String? selectedPath;
-  final String? avatarUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 246.r,
-      height: 246.r,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          Container(
-            width: 246.r,
-            height: 246.r,
-            padding: EdgeInsets.all(8.r),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: SettingsUi.lightGreen.withValues(alpha: 0.18),
-                  blurRadius: 50.r,
-                  spreadRadius: 18.r,
-                ),
-              ],
-            ),
-            child: ClipOval(child: _SelectedPhoto(path: selectedPath, url: avatarUrl)),
-          ),
-          Positioned(
-            right: 14.w,
-            bottom: 25.h,
-            child: Container(
-              width: 55.r,
-              height: 55.r,
-              decoration: const BoxDecoration(
-                color: SettingsUi.green,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.camera_alt_rounded,
-                color: Colors.white,
-                size: 28.r,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SelectedPhoto extends StatelessWidget {
-  const _SelectedPhoto({required this.path, required this.url});
-
-  final String? path;
-  final String? url;
-
-  @override
-  Widget build(BuildContext context) {
-    final String localPath = path?.trim() ?? '';
-    if (localPath.isNotEmpty) {
-      return Image.file(
-        File(localPath),
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => const _PhotoFallback(),
-      );
-    }
-
-    final String networkUrl = url?.trim() ?? '';
-    if (networkUrl.isNotEmpty) {
-      return Image.network(
-        networkUrl,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => const _PhotoFallback(),
-      );
-    }
-
-    return const _PhotoFallback();
-  }
-}
-
-class _PhotoFallback extends StatelessWidget {
-  const _PhotoFallback();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFFD1DCE2),
-      child: Icon(
-        Icons.person_rounded,
-        size: 150.r,
-        color: const Color(0xFFE8D6CE),
-      ),
-    );
-  }
-}
-
-class _PhotoOptionCard extends StatelessWidget {
-  const _PhotoOptionCard({
-    required this.title,
-    required this.icon,
-    required this.bgColor,
-    required this.iconBgColor,
-    required this.iconColor,
-    required this.onTap,
-  });
-
-  final String title;
-  final IconData icon;
-  final Color bgColor;
-  final Color iconBgColor;
-  final Color iconColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 160.h,
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(38.r),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 28.h),
           children: <Widget>[
-            Container(
-              width: 56.r,
-              height: 56.r,
-              decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
-              child: Icon(icon, size: 27.r, color: iconColor),
+            SettingsTopBar(title: SettingsL10n.text('profile_photo')),
+            SizedBox(height: 22.h),
+            Obx(
+              () => Center(
+                child: _PhotoPreview(
+                  selectedImage: controller.selectedAvatar.value,
+                  currentAvatarUrl: controller.profile.value?.avatarUrl,
+                ),
+              ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 18.h),
             Text(
-              title,
+              SettingsL10n.text('photo_title'),
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 15.sp,
-                height: 1.25,
-                fontWeight: FontWeight.w900,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w800,
                 color: SettingsUi.text,
+              ),
+            ),
+            SizedBox(height: 6.h),
+            Text(
+              SettingsL10n.text('photo_desc'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12.5.sp,
+                height: 1.4,
+                color: SettingsUi.muted,
+              ),
+            ),
+            SizedBox(height: 22.h),
+            _PhotoSourceButton(
+              icon: Icons.camera_alt_outlined,
+              title: SettingsL10n.text('take_photo'),
+              onTap: () => controller.pickAvatar(ImageSource.camera),
+            ),
+            SizedBox(height: 10.h),
+            _PhotoSourceButton(
+              icon: Icons.photo_library_outlined,
+              title: SettingsL10n.text('choose_gallery'),
+              onTap: () => controller.pickAvatar(ImageSource.gallery),
+            ),
+            SizedBox(height: 20.h),
+            Obx(
+              () => SettingsPrimaryButton(
+                text: SettingsL10n.text('confirm_photo'),
+                icon: Icons.check_rounded,
+                enabled: controller.selectedAvatar.value != null &&
+                    !controller.isUploadingAvatar.value,
+                isLoading: controller.isUploadingAvatar.value,
+                onTap: () async {
+                  final bool saved = await controller.uploadSelectedAvatar();
+                  if (!saved) return;
+                  await SettingsSuccessBottomSheet.show(
+                    title: SettingsL10n.text('photo_updated'),
+                    subtitle: SettingsL10n.text('photo_updated_desc'),
+                    onDone: Get.back,
+                  );
+                },
               ),
             ),
           ],
@@ -263,46 +89,125 @@ class _PhotoOptionCard extends StatelessWidget {
   }
 }
 
-class _PhotoTipCard extends StatelessWidget {
-  const _PhotoTipCard();
+class _PhotoPreview extends StatelessWidget {
+  const _PhotoPreview({
+    required this.selectedImage,
+    required this.currentAvatarUrl,
+  });
+
+  final XFile? selectedImage;
+  final String? currentAvatarUrl;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
+      width: 184.r,
+      height: 184.r,
+      padding: EdgeInsets.all(5.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F0),
-        borderRadius: BorderRadius.circular(28.r),
-      ),
-      child: Row(
-        children: <Widget>[
-          Container(
-            width: 40.r,
-            height: 40.r,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFFE9BD),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.lightbulb_outline_rounded,
-              size: 24.r,
-              color: const Color(0xFFFF9900),
-            ),
-          ),
-          SizedBox(width: 17.w),
-          Expanded(
-            child: Text(
-              'use_a_clear_jpg_png_or_webp_image_smaller_than_5_m'.tr,
-              style: TextStyle(
-                fontSize: 14.sp,
-                height: 1.35,
-                fontWeight: FontWeight.w600,
-                color: SettingsUi.muted,
-              ),
-            ),
+        color: const Color(0xFFD7F2E8),
+        shape: BoxShape.circle,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: SettingsUi.primary.withValues(alpha: 0.12),
+            blurRadius: 24.r,
+            offset: Offset(0, 10.h),
           ),
         ],
+      ),
+      child: ClipOval(child: _image()),
+    );
+  }
+
+  Widget _image() {
+    if (selectedImage != null) {
+      return Image.file(
+        File(selectedImage!.path),
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const _FallbackPhoto(),
+      );
+    }
+
+    final String url = currentAvatarUrl?.trim() ?? '';
+    if (url.isNotEmpty) {
+      return Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const _FallbackPhoto(),
+      );
+    }
+
+    return const _FallbackPhoto();
+  }
+}
+
+class _FallbackPhoto extends StatelessWidget {
+  const _FallbackPhoto();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: SettingsUi.primaryDark,
+      child: Icon(Icons.person_rounded, size: 105.r, color: Colors.white),
+    );
+  }
+}
+
+class _PhotoSourceButton extends StatelessWidget {
+  const _PhotoSourceButton({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 14.h),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(color: SettingsUi.border),
+          ),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 42.r,
+                height: 42.r,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEAF8F2),
+                  borderRadius: BorderRadius.circular(13.r),
+                ),
+                child: Icon(icon, size: 22.r, color: SettingsUi.primary),
+              ),
+              SizedBox(width: 13.w),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: SettingsUi.text,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 23.r,
+                color: SettingsUi.muted,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

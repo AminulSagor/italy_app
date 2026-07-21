@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+
 import '../../../../../routes/routes.dart';
+import '../../models/settings_localization.dart';
 import '../../settings_controller.dart';
 import '../../widgets/settings_ui_widgets.dart';
 
@@ -11,216 +13,208 @@ class ProfileSecurityView extends GetView<SettingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SettingsUi.bg,
+      backgroundColor: SettingsUi.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24.w, 39.h, 24.w, 58.h),
-          child: Column(
+        child: Obx(() {
+          final profile = controller.profile.value;
+          if (profile == null) {
+            return Center(
+              child: CircularProgressIndicator(color: SettingsUi.primary),
+            );
+          }
+
+          return ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 28.h),
             children: <Widget>[
-              SettingsTopBar(title: 'gen_edit_profile'.tr),
-              SizedBox(height: 49.h),
-              Obx(
-                () => _ProfileAvatar(
-                  avatarUrl: controller.profile.value?.avatarUrl,
+              SettingsTopBar(title: SettingsL10n.text('edit_profile')),
+              SizedBox(height: 18.h),
+              Center(
+                child: _EditableAvatar(
+                  avatarUrl: profile.avatarUrl,
                   onTap: () => Get.toNamed(AppRoutes.profilePhoto),
                 ),
               ),
-              SizedBox(height: 27.h),
+              SizedBox(height: 20.h),
               SettingsPillField(
-                label: 'gen_full_name_1'.tr,
-                hint: 'enter_your_full_name'.tr,
+                label: SettingsL10n.text('full_name'),
+                hint: SettingsL10n.text('full_name_hint'),
                 icon: Icons.person_outline_rounded,
                 controller: controller.fullNameController,
-                keyboardType: TextInputType.name,
+                textInputAction: TextInputAction.next,
+                maxLength: 120,
+                autofillHints: const <String>[AutofillHints.name],
               ),
-              SizedBox(height: 24.h),
-              Obx(
-                () => _SegmentedSwitch(
-                  isEmail: controller.selectedContactIsEmail,
-                  onEmailTap: () => controller.setEditProfileTab('email'),
-                  onPhoneTap: () => controller.setEditProfileTab('phone'),
-                ),
+              SizedBox(height: 18.h),
+              _ContactSelector(
+                selected: controller.editProfileTab.value,
+                emailEnabled: profile.canChangeEmail,
+                phoneEnabled: profile.canChangePhone,
+                onSelected: controller.setEditProfileTab,
               ),
-              SizedBox(height: 13.h),
-              Obx(
-                () => SettingsPillField(
-                  label: controller.selectedContactIsEmail ? 'email'.tr : 'phone'.tr,
-                  hint: controller.selectedContactIsEmail
-                      ? 'enter_your_new_email'.tr
-                      : 'enter_your_new_phone_number'.tr,
-                  icon: controller.selectedContactIsEmail
-                      ? Icons.alternate_email_rounded
-                      : Icons.phone_rounded,
-                  controller: controller.selectedContactController,
-                  onChanged: controller.selectedContactIsEmail
-                      ? controller.onEmailChanged
-                      : controller.onPhoneChanged,
-                  keyboardType: controller.selectedContactIsEmail
-                      ? TextInputType.emailAddress
-                      : TextInputType.phone,
-                  suffixIcon: controller.selectedContactChanged
-                      ? Icons.verified_user_outlined
-                      : Icons.verified_rounded,
-                ),
+              SizedBox(height: 12.h),
+              SettingsPillField(
+                label: controller.selectedContactIsEmail
+                    ? SettingsL10n.text('email')
+                    : SettingsL10n.text('phone'),
+                hint: controller.selectedContactIsEmail
+                    ? SettingsL10n.text('email_hint')
+                    : SettingsL10n.text('phone_hint'),
+                icon: controller.selectedContactIsEmail
+                    ? Icons.email_outlined
+                    : Icons.phone_outlined,
+                controller: controller.selectedContactController,
+                keyboardType: controller.selectedContactIsEmail
+                    ? TextInputType.emailAddress
+                    : TextInputType.phone,
+                textInputAction: TextInputAction.done,
+                enabled: controller.canChangeSelectedContact,
+                autofillHints: controller.selectedContactIsEmail
+                    ? const <String>[AutofillHints.email]
+                    : const <String>[AutofillHints.telephoneNumber],
+                onChanged: controller.selectedContactIsEmail
+                    ? controller.onEmailChanged
+                    : controller.onPhoneChanged,
+                helperText: controller.canChangeSelectedContact
+                    ? null
+                    : SettingsL10n.text('change_unavailable'),
               ),
-              SizedBox(height: 24.h),
-              Obx(
-                () => _ContactVerificationCard(
-                  isVerified: controller.selectedContactVerified,
-                  isEmail: controller.selectedContactIsEmail,
-                  hasChanged: controller.selectedContactChanged,
-                ),
+              SizedBox(height: 10.h),
+              _VerificationStatus(
+                isVerified: controller.selectedContactVerified,
               ),
-              SizedBox(height: 36.h),
-              Obx(
-                () => SettingsPrimaryButton(
-                  text: controller.selectedContactChanged
-                      ? 'save_verify'.tr
-                      : 'save_changes'.tr,
-                  icon: controller.selectedContactChanged
-                      ? Icons.mark_email_read_outlined
-                      : Icons.save_rounded,
-                  isLoading:
-                      controller.isSavingName.value ||
-                      controller.isRequestingContactOtp.value,
-                  onTap: () async {
-                    final ProfileSaveResult result =
-                        await controller.saveProfileAndContinue();
-                    if (result == ProfileSaveResult.saved) {
-                      await SettingsSuccessBottomSheet.show(
-                        title: 'profile_updated'.tr,
-                        subtitle:
-                            'your_profile_information_has_been_updated_successf'.tr,
-                      );
-                    } else if (result == ProfileSaveResult.noChanges) {
-                      Get.snackbar('profile'.tr, 'there_are_no_changes_to_save'.tr);
-                    }
-                  },
-                ),
+              SizedBox(height: 14.h),
+              _OtpInformationCard(),
+              SizedBox(height: 22.h),
+              SettingsPrimaryButton(
+                text: SettingsL10n.text('save_changes'),
+                icon: Icons.save_outlined,
+                enabled: !controller.isProfileBusy,
+                isLoading: controller.isProfileBusy,
+                onTap: () async {
+                  final ProfileSaveResult result =
+                      await controller.saveProfileAndContinue();
+                  if (result == ProfileSaveResult.saved) {
+                    await SettingsSuccessBottomSheet.show(
+                      title: SettingsL10n.text('profile_updated'),
+                      subtitle: SettingsL10n.text('profile_updated_desc'),
+                    );
+                  }
+                },
               ),
             ],
-          ),
-        ),
+          );
+        }),
       ),
     );
   }
 }
 
-class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar({required this.avatarUrl, required this.onTap});
+class _EditableAvatar extends StatelessWidget {
+  const _EditableAvatar({required this.avatarUrl, required this.onTap});
 
   final String? avatarUrl;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 128.r,
-      height: 128.r,
-      child: Stack(
-        children: <Widget>[
-          Container(
-            width: 128.r,
-            height: 128.r,
-            padding: EdgeInsets.all(5.r),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: SettingsUi.lightGreen, width: 4.w),
+    return Semantics(
+      button: true,
+      label: SettingsL10n.text('profile_photo'),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            Container(
+              width: 94.r,
+              height: 94.r,
+              padding: EdgeInsets.all(3.r),
+              decoration: const BoxDecoration(
+                color: Color(0xFFD7F2E8),
+                shape: BoxShape.circle,
+              ),
+              child: ClipOval(
+                child: avatarUrl?.trim().isNotEmpty == true
+                    ? Image.network(
+                        avatarUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _fallback(),
+                      )
+                    : _fallback(),
+              ),
             ),
-            child: ClipOval(child: _AvatarImage(avatarUrl: avatarUrl)),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 9.h,
-            child: GestureDetector(
-              onTap: onTap,
+            Positioned(
+              right: -1.w,
+              bottom: 1.h,
               child: Container(
-                width: 42.r,
-                height: 42.r,
+                width: 32.r,
+                height: 32.r,
                 decoration: BoxDecoration(
-                  color: SettingsUi.green,
+                  color: SettingsUi.primary,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4.w),
+                  border: Border.all(color: Colors.white, width: 2.w),
                 ),
                 child: Icon(
-                  Icons.edit_rounded,
-                  size: 22.r,
+                  Icons.camera_alt_outlined,
+                  size: 17.r,
                   color: Colors.white,
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+
+  Widget _fallback() => Container(
+        color: SettingsUi.primaryDark,
+        child: Icon(Icons.person_rounded, size: 57.r, color: Colors.white),
+      );
 }
 
-class _AvatarImage extends StatelessWidget {
-  const _AvatarImage({required this.avatarUrl});
-
-  final String? avatarUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    final String url = avatarUrl?.trim() ?? '';
-    if (url.isEmpty) return const _AvatarFallback();
-
-    return Image.network(
-      url,
-      fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => const _AvatarFallback(),
-    );
-  }
-}
-
-class _AvatarFallback extends StatelessWidget {
-  const _AvatarFallback();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF1B242D),
-      child: Icon(Icons.person_rounded, size: 72.r, color: Colors.white),
-    );
-  }
-}
-
-class _SegmentedSwitch extends StatelessWidget {
-  const _SegmentedSwitch({
-    required this.isEmail,
-    required this.onEmailTap,
-    required this.onPhoneTap,
+class _ContactSelector extends StatelessWidget {
+  const _ContactSelector({
+    required this.selected,
+    required this.emailEnabled,
+    required this.phoneEnabled,
+    required this.onSelected,
   });
 
-  final bool isEmail;
-  final VoidCallback onEmailTap;
-  final VoidCallback onPhoneTap;
+  final String selected;
+  final bool emailEnabled;
+  final bool phoneEnabled;
+  final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 60.h,
-      padding: EdgeInsets.all(5.r),
+      padding: EdgeInsets.all(4.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8E8E8),
-        borderRadius: BorderRadius.circular(100.r),
+        color: const Color(0xFFE9EFEC),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
         children: <Widget>[
           Expanded(
-            child: _SegmentButton(
-              text: 'field_email'.tr,
-              selected: isEmail,
-              onTap: onEmailTap,
+            child: _ContactTab(
+              title: SettingsL10n.text('email'),
+              icon: Icons.email_outlined,
+              selected: selected == 'email',
+              enabled: emailEnabled,
+              onTap: () => onSelected('email'),
             ),
           ),
+          SizedBox(width: 5.w),
           Expanded(
-            child: _SegmentButton(
-              text: 'field_phone'.tr,
-              selected: !isEmail,
-              onTap: onPhoneTap,
+            child: _ContactTab(
+              title: SettingsL10n.text('phone'),
+              icon: Icons.phone_outlined,
+              selected: selected == 'phone',
+              enabled: phoneEnabled,
+              onTap: () => onSelected('phone'),
             ),
           ),
         ],
@@ -229,34 +223,57 @@ class _SegmentedSwitch extends StatelessWidget {
   }
 }
 
-class _SegmentButton extends StatelessWidget {
-  const _SegmentButton({
-    required this.text,
+class _ContactTab extends StatelessWidget {
+  const _ContactTab({
+    required this.title,
+    required this.icon,
     required this.selected,
+    required this.enabled,
     required this.onTap,
   });
 
-  final String text;
+  final String title;
+  final IconData icon;
   final bool selected;
+  final bool enabled;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(100.r),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w900,
-            color: selected ? SettingsUi.green : SettingsUi.muted,
+    return AnimatedOpacity(
+      opacity: enabled ? 1 : 0.45,
+      duration: const Duration(milliseconds: 160),
+      child: Material(
+        color: selected ? Colors.white : Colors.transparent,
+        borderRadius: BorderRadius.circular(13.r),
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          borderRadius: BorderRadius.circular(13.r),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 11.h, horizontal: 8.w),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  icon,
+                  size: 18.r,
+                  color: selected ? SettingsUi.primary : SettingsUi.muted,
+                ),
+                SizedBox(width: 7.w),
+                Flexible(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w700,
+                      color: selected ? SettingsUi.text : SettingsUi.muted,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -264,52 +281,55 @@ class _SegmentButton extends StatelessWidget {
   }
 }
 
-class _ContactVerificationCard extends StatelessWidget {
-  const _ContactVerificationCard({
-    required this.isVerified,
-    required this.isEmail,
-    required this.hasChanged,
-  });
+class _VerificationStatus extends StatelessWidget {
+  const _VerificationStatus({required this.isVerified});
 
   final bool isVerified;
-  final bool isEmail;
-  final bool hasChanged;
 
   @override
   Widget build(BuildContext context) {
-    final String contactName = isEmail ? 'email_address'.tr : 'phone_number'.tr;
-    final String message = hasChanged
-        ? 'otp_will_be_sent'.trParams({'contact': contactName})
-        : isVerified
-        ? 'current_contact_verified'.trParams({'contact': contactName})
-        : 'enter_contact_and_verify'.trParams({'contact': contactName});
+    return Row(
+      children: <Widget>[
+        Icon(
+          isVerified ? Icons.verified_rounded : Icons.info_outline_rounded,
+          size: 18.r,
+          color: isVerified ? SettingsUi.primary : SettingsUi.muted,
+        ),
+        SizedBox(width: 7.w),
+        Text(
+          SettingsL10n.text(isVerified ? 'verified' : 'not_verified'),
+          style: TextStyle(
+            fontSize: 11.5.sp,
+            fontWeight: FontWeight.w700,
+            color: isVerified ? SettingsUi.primary : SettingsUi.muted,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
+class _OtpInformationCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 18.h),
+      padding: EdgeInsets.all(14.r),
       decoration: BoxDecoration(
-        color: hasChanged
-            ? const Color(0xFFDCEBFF)
-            : const Color(0xFFE3F8D9),
-        borderRadius: BorderRadius.circular(28.r),
+        color: const Color(0xFFEAF8F2),
+        borderRadius: BorderRadius.circular(17.r),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(
-            hasChanged
-                ? Icons.mark_email_unread_outlined
-                : Icons.verified_user_outlined,
-            color: hasChanged ? const Color(0xFF0064A8) : SettingsUi.green,
-          ),
-          SizedBox(width: 14.w),
+          Icon(Icons.shield_outlined, size: 21.r, color: SettingsUi.primary),
+          SizedBox(width: 10.w),
           Expanded(
             child: Text(
-              message,
+              SettingsL10n.text('otp_required_notice'),
               style: TextStyle(
-                fontSize: 13.sp,
-                height: 1.35,
-                fontWeight: FontWeight.w700,
-                color: SettingsUi.text,
+                fontSize: 11.5.sp,
+                height: 1.4,
+                color: SettingsUi.primaryDark,
               ),
             ),
           ),

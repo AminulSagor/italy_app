@@ -175,7 +175,7 @@ class _CvDesignInstructionSheetState
                         (String example) {
                       return ActionChip(
                         label: Text(
-                          example,
+                          example.tr,
                           style: TextStyle(
                             fontSize: 10.5.sp,
                           ),

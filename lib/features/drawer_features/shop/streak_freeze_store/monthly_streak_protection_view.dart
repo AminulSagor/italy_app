@@ -57,8 +57,17 @@ class _MonthlyStreakProtectionViewState
     setState(() => _openingGooglePlay = true);
 
     try {
+      final String activeProductId =
+      _controller.activeMonthlyProductId
+          .trim();
+
       final String productId =
-          widget.package?.storeProduct?.productId.trim() ?? '';
+      activeProductId.isNotEmpty
+          ? activeProductId
+          : widget.package?.storeProduct
+          ?.productId
+          .trim() ??
+          '';
 
       final Map<String, String> queryParameters = <String, String>{
         'package': _androidPackageName,
@@ -128,6 +137,22 @@ class _MonthlyStreakProtectionViewState
         child: Obx(() {
           final bool active =
               _controller.hasActiveMonthlyStreakProtection;
+          final StoreActiveSubscriptionModel?
+          subscription =
+              _controller
+                  .activeMonthlyStreakSubscription;
+
+          final String renewalStatus =
+          !active
+              ? 'monthly_protection_inactive'
+              .tr
+              : subscription
+              ?.autoRenewEnabled ==
+              true
+              ? 'monthly_plan_auto_renews'
+              .tr
+              : 'monthly_plan_cancelled_active'
+              .tr;
 
           final DateTime? expiresAt =
               _controller.monthlyStreakProtectionExpiresAt;
@@ -206,6 +231,24 @@ class _MonthlyStreakProtectionViewState
                                   ? AppColors.blockSuccessBlueText
                                   : AppColors.bodyText,
                             ),
+                          ),
+                        ),
+                        SizedBox(height: 9.h),
+
+                        Text(
+                          renewalStatus,
+
+                          textAlign: TextAlign.center,
+
+                          style: TextStyle(
+                            fontSize: AppFont.font12.sp,
+
+                            fontWeight:
+                            FontWeight.w700,
+
+                            height: 1.35,
+
+                            color: AppColors.bodyText,
                           ),
                         ),
                         SizedBox(height: 16.h),
@@ -312,6 +355,8 @@ class _MonthlyStreakProtectionViewState
                         ? 'opening_google_play'.tr
                         : 'manage_or_cancel_google_play'.tr,
                     icon: Icons.open_in_new_rounded,
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w800,
                     onPressed: _openingGooglePlay
                         ? () {}
                         : _openGooglePlaySubscription,

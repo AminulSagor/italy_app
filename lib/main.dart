@@ -14,10 +14,12 @@ import 'core/bootstrap/app_bootstrap_controller.dart';
 import 'core/localization/translation_service.dart';
 import 'core/services/callkit_background_action_handler.dart';
 import 'core/services/callkit_incoming_service.dart';
+import 'core/services/connectivity_service.dart';
 import 'core/services/local_notification_service.dart';
 import 'core/services/learning_activity_tracker_service.dart';
 import 'core/services/screen_protection_service.dart';
 import 'core/themes/app_theme.dart';
+import 'core/widgets/connectivity_offline_view.dart';
 import 'features/messages/sub-feature/call/widgets/global_call_status_card.dart';
 import 'core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import 'features/home/controllers/home_controller.dart';
@@ -54,6 +56,14 @@ Future<void> main() async {
    * CallKit callbacks try to access them through Get.find().
    */
   InitialBindings().dependencies();
+
+  final ConnectivityService connectivityService =
+  Get.put<ConnectivityService>(
+    ConnectivityService(),
+    permanent: true,
+  );
+
+  await connectivityService.init();
 
   // Attach foreground FCM and CallKit event listeners before the first frame
   // so the first incoming call after installation cannot be missed.
@@ -217,7 +227,7 @@ class ItalyApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         final TranslationService translationService =
-            Get.find<TranslationService>();
+        Get.find<TranslationService>();
 
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
@@ -227,23 +237,66 @@ class ItalyApp extends StatelessWidget {
           fallbackLocale: TranslationService.fallbackLocale,
           theme: AppTheme.lightTheme,
           getPages: AppPages.pages,
+
           builder: (BuildContext context, Widget? navigator) {
-            if (!Get.isRegistered<IncomingCallCoordinator>()) {
-              return navigator ?? const SizedBox.shrink();
+            final Widget navigatorChild =
+                navigator ?? const SizedBox.shrink();
+
+            final ConnectivityService? connectivityService =
+            Get.isRegistered<ConnectivityService>()
+                ? Get.find<ConnectivityService>()
+                : null;
+
+            final IncomingCallCoordinator? callCoordinator =
+            Get.isRegistered<IncomingCallCoordinator>()
+                ? Get.find<IncomingCallCoordinator>()
+                : null;
+
+            if (connectivityService == null && callCoordinator == null) {
+              return navigatorChild;
             }
 
-            final IncomingCallCoordinator coordinator =
-                Get.find<IncomingCallCoordinator>();
-
             return Obx(() {
-              final bool showCallCard =
-                  coordinator.hasPresentedCall.value &&
-                  !coordinator.isPresentedCallScreenVisible.value;
+              final bool isOffline =
+                  connectivityService?.isOffline ?? false;
 
-              if (!showCallCard) {
-                return navigator ?? const SizedBox.shrink();
+              final bool showCallCard =
+                  callCoordinator != null &&
+                      callCoordinator.hasPresentedCall.value &&
+                      !callCoordinator.isPresentedCallScreenVisible.value;
+
+              /*
+     * Completely hide the current application page while offline.
+     * The navigator remains mounted internally, so the user returns
+     * to the same page when connectivity is restored.
+     */
+              if (isOffline) {
+                return Column(
+                  children: <Widget>[
+                    /*
+           * Preserve the existing active-call functionality without
+           * exposing the application page underneath.
+           */
+                    if (showCallCard)
+                      const GlobalCallStatusCard(),
+
+                    const Expanded(
+                      child: ConnectivityOfflineView(),
+                    ),
+                  ],
+                );
               }
 
+              /*
+     * Normal online state without an active call.
+     */
+              if (!showCallCard) {
+                return navigatorChild;
+              }
+
+              /*
+     * Preserve the existing global call-status-card behavior.
+     */
               return Column(
                 children: <Widget>[
                   const GlobalCallStatusCard(),
@@ -252,13 +305,14 @@ class ItalyApp extends StatelessWidget {
                       data: MediaQuery.of(
                         context,
                       ).removePadding(removeTop: true),
-                      child: navigator ?? const SizedBox.shrink(),
+                      child: navigatorChild,
                     ),
                   ),
                 ],
               );
             });
           },
+
           routingCallback: (Routing? routing) {
             final String? currentRoute = routing?.current;
 
@@ -292,6 +346,7 @@ class ItalyApp extends StatelessWidget {
               );
             }
           },
+
           initialRoute: initialRoute,
         );
       },

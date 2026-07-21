@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/api_client.dart';
+import '../../drawer_features/shop/models/shop_models.dart';
 import '../models/cv_assistant_models.dart';
 import '../models/cv_generation_models.dart';
 import '../models/cv_template_model.dart';
@@ -32,6 +33,18 @@ class CvGenerationApiService {
     );
 
     return CvTemplateListResponseModel.fromJson(
+      _responseMap(response),
+    );
+  }
+
+  Future<StoreBalancesModel>
+  fetchCvAccess() async {
+    final Response<dynamic> response =
+    await _apiClient.dio.get<dynamic>(
+      '/package-store/balances',
+    );
+
+    return StoreBalancesModel.fromJson(
       _responseMap(response),
     );
   }
@@ -240,15 +253,27 @@ class CvGenerationApiService {
         _responseMap(response),
       );
     } on DioException catch (error) {
+      /*
+     * The backend returns HTTP 402 when the user has
+     * used all free CV generations and has no paid
+     * CV credit remaining.
+     */
+      if (error.response?.statusCode == 402) {
+        throw CvCreditRequiredException(
+          _extractDioErrorMessage(error) ??
+              'Your free CV limit has ended. Purchase a CV credit to continue.',
+        );
+      }
+
       if (!_isConflict(error)) {
         rethrow;
       }
 
       /*
-       * Another request may already have started generation.
-       * Refresh the assistant session and reuse the generation
-       * ID when the backend has already linked it.
-       */
+     * Another request may already have started the
+     * generation. Refresh the assistant session and
+     * reuse its generation ID when available.
+     */
       try {
         final CvAssistantSessionModel session =
         await getCvAssistantSession(
@@ -263,9 +288,9 @@ class CvGenerationApiService {
         }
       } catch (_) {
         /*
-         * Preserve the original 409 response when refreshing
-         * the session also fails.
-         */
+       * Preserve the original 409 error when the
+       * session refresh also fails.
+       */
       }
 
       throw CvGenerationAlreadyStartedException(
@@ -311,19 +336,30 @@ class CvGenerationApiService {
       );
     }
 
-    final Response<dynamic> response =
-    await _apiClient.dio.post<dynamic>(
-      '/cv-generations/'
-          '$normalizedGenerationId/regenerate',
-      data: <String, dynamic>{
-        'designInstruction':
-        normalizedInstruction,
-      },
-    );
+    try {
+      final Response<dynamic> response =
+      await _apiClient.dio.post<dynamic>(
+        '/cv-generations/'
+            '$normalizedGenerationId/regenerate',
+        data: <String, dynamic>{
+          'designInstruction':
+          normalizedInstruction,
+        },
+      );
 
-    return CvGenerationModel.fromJson(
-      _responseMap(response),
-    );
+      return CvGenerationModel.fromJson(
+        _responseMap(response),
+      );
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 402) {
+        throw CvCreditRequiredException(
+          _extractDioErrorMessage(error) ??
+              'A CV credit is required for this generation.',
+        );
+      }
+
+      rethrow;
+    }
   }
 
   Future<String> uploadCvImage({
@@ -626,4 +662,16 @@ String? _nullableValue(
   return normalized.isEmpty
       ? null
       : normalized;
+}
+
+class CvCreditRequiredException
+    implements Exception {
+  const CvCreditRequiredException(
+      this.message,
+      );
+
+  final String message;
+
+  @override
+  String toString() => message;
 }

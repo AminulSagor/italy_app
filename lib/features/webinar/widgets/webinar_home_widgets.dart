@@ -98,7 +98,9 @@ class WebinarLiveHeroCard extends StatelessWidget {
                     ),
                     SizedBox(height: 10.h),
                     Text(
-                      'Host: ${webinar.hostTeacherName}',
+                      'webinar_host_value'.trParams(<String, String>{
+                        'host': webinar.hostTeacherName,
+                      }),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: AppFont.font16.sp,
@@ -310,7 +312,9 @@ class WebinarSessionCard extends StatelessWidget {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        'Starts at ${_timeLabel(dateTime)}',
+                        'webinar_starts_at'.trParams(<String, String>{
+                          'time': _timeLabel(dateTime),
+                        }),
                         style: TextStyle(
                           fontSize: AppFont.font14.sp,
                           fontWeight: FontWeight.w400,
@@ -320,7 +324,9 @@ class WebinarSessionCard extends StatelessWidget {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        'Host: ${webinar.hostTeacherName}',
+                        'webinar_host_value'.trParams(<String, String>{
+                          'host': webinar.hostTeacherName,
+                        }),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -407,9 +413,7 @@ class WebinarCourseAccessDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
-            'This session is available to users enrolled in any of these courses:',
-          ),
+          Text('webinar_course_access_description'.tr),
           SizedBox(height: 14.h),
           if (courseNames.isEmpty)
             Text('not_available'.tr)
@@ -461,7 +465,7 @@ class _RestrictedAudienceLink extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Text(
-        'For selected course only',
+        'webinar_selected_course_only'.tr,
         style: TextStyle(
           fontSize: AppFont.font12.sp,
           fontWeight: FontWeight.w700,

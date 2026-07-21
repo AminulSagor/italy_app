@@ -437,7 +437,7 @@ class _TranslationPanel extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: Text(
-            'lesson_translationlabel'.trParams(<String, String>{'translationlabel': lesson.translationLabel.toString()}),
+            lesson.translationLabel,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: AppFont.font10.sp,

@@ -15,6 +15,9 @@ class ProfileSafetyActionCard extends StatelessWidget {
   final bool isBlockedAction;
   final VoidCallback? onTap;
 
+  final double? cardHeight;
+  final double? titleFontSize;
+
   const ProfileSafetyActionCard({
     super.key,
     required this.icon,
@@ -23,6 +26,8 @@ class ProfileSafetyActionCard extends StatelessWidget {
     this.isDashed = false,
     this.isBlockedAction = false,
     this.onTap,
+    this.cardHeight,
+    this.titleFontSize,
   });
 
   Color get _backgroundColor {
@@ -70,7 +75,7 @@ class ProfileSafetyActionCard extends StatelessWidget {
       child: CustomPaint(
         painter: isDashed ? _DashedBorderPainter() : null,
         child: Container(
-          height: kProfileSafetyCardHeight.h,
+          height: (cardHeight ?? kProfileSafetyCardHeight).h,
           padding: EdgeInsets.fromLTRB(28.w, 32.h, 18.w, 24.h),
           decoration: BoxDecoration(
             color: _backgroundColor,
@@ -97,8 +102,11 @@ class ProfileSafetyActionCard extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: AppFont.font16.sp,
+                      fontSize: (titleFontSize ?? AppFont.font16).sp,
+                      height: 1.2,
                       fontWeight: FontWeight.w700,
                       color: _titleColor,
                     ),
@@ -106,6 +114,8 @@ class ProfileSafetyActionCard extends StatelessWidget {
                   SizedBox(height: 4.h),
                   Text(
                     subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: AppFont.font10.sp,
                       fontWeight: FontWeight.w500,

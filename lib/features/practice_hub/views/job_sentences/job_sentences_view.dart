@@ -19,53 +19,54 @@ class JobSentencesView extends GetView<JobSentencesController> {
       activityKind: LearningActivityKind.jobSentences,
       sourceId: 'job_sentences_view',
       child: Scaffold(
-      backgroundColor: AppColors.homeBackground,
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          color: AppColors.primaryGreen,
-          onRefresh: controller.refreshCareerTracks,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 48.h),
-            child: Column(
-              children: <Widget>[
-                const _JobSentencesTopBar(),
-                SizedBox(height: 28.h),
-                Text(
-                  'career_tracks'.tr,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 35.sp,
-                    height: 1,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1.1,
-                    color: const Color(0xFF2D3236),
+        backgroundColor: AppColors.homeBackground,
+        body: SafeArea(
+          bottom: false,
+          child: RefreshIndicator(
+            color: AppColors.primaryGreen,
+            onRefresh: controller.refreshCareerTracks,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 48.h),
+              child: Column(
+                children: <Widget>[
+                  const _JobSentencesTopBar(),
+                  SizedBox(height: 28.h),
+                  Text(
+                    'career_tracks'.tr,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 35.sp,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1.1,
+                      color: const Color(0xFF2D3236),
+                    ),
                   ),
-                ),
-                SizedBox(height: 10.h),
-                Text(
-                  'label_lib_features_practice_hub_views_job_sentences_job_sentences_view_45'.tr,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    height: 1,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF8A8E92),
+                  SizedBox(height: 10.h),
+                  Text(
+                    'gen_job_sentences'.tr,
+
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      height: 1,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF8A8E92),
+                    ),
                   ),
-                ),
-                SizedBox(height: 40.h),
-                const _CareerTrackList(),
-                SizedBox(height: 8.h),
-                const _JobTipCard(),
-              ],
+                  SizedBox(height: 40.h),
+                  const _CareerTrackList(),
+                  SizedBox(height: 8.h),
+                  const _JobTipCard(),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 }
@@ -215,7 +216,10 @@ class _CareerTrackCard extends GetView<JobSentencesController> {
                   ],
                   SizedBox(height: 9.h),
                   Text(
-                    '${item.learnedSentenceCount}/${item.sentenceCount} sentences completed',
+                    'sentences_completed'.trParams(<String, String>{
+                      'learned': item.learnedSentenceCount.toString(),
+                      'total': item.sentenceCount.toString(),
+                    }),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -282,10 +286,7 @@ class _MessageState extends StatelessWidget {
           ),
           if (onRetry != null) ...<Widget>[
             SizedBox(height: 10.h),
-            TextButton(
-              onPressed: onRetry,
-              child: Text('retry'.tr),
-            ),
+            TextButton(onPressed: onRetry, child: Text('retry'.tr)),
           ],
         ],
       ),

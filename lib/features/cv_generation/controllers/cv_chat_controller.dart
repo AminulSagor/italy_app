@@ -5,11 +5,13 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/api_error_handler.dart';
+import '../../../routes/app_routes.dart';
 import '../models/cv_assistant_models.dart';
 import '../models/cv_template_model.dart';
 import '../services/cv_generation_api_service.dart';
 import '../views/cv_generation_view.dart';
 import 'cv_generation_controller.dart';
+import 'cv_home_controller.dart';
 
 class CvChatController extends GetxController {
   CvChatController({
@@ -543,11 +545,63 @@ class CvChatController extends GetxController {
         session.value.id,
       );
 
+      /*
+     * A new CV was successfully started.
+     * Refresh the free allowance and purchased-credit
+     * balance shown on the CV home page.
+     */
+      if (Get.isRegistered<CvHomeController>()) {
+        unawaited(
+          Get.find<CvHomeController>()
+              .loadCvAccess(),
+        );
+      }
+
       await _openGeneration(
         generationId,
       );
-    } on CvGenerationAlreadyStartedException
-    catch (error) {
+    } on CvCreditRequiredException catch (error) {
+      /*
+     * The backend returns HTTP 402 when all free CV
+     * creations are used and no purchased credit remains.
+     */
+      await Get.dialog<void>(
+        AlertDialog(
+          title: Text(
+            'cv_credit_required_title'.tr,
+          ),
+          content: Text(
+            error.message,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Get.back<void>();
+              },
+              child: Text(
+                'cancel'.tr,
+              ),
+            ),
+            FilledButton.icon(
+              onPressed: () {
+                Get.back<void>();
+
+                Get.toNamed(
+                  AppRoutes.cvCreditStore,
+                );
+              },
+              icon: const Icon(
+                Icons.add_card_rounded,
+              ),
+              label: Text(
+                'buy_cv_credits'.tr,
+              ),
+            ),
+          ],
+        ),
+        barrierDismissible: true,
+      );
+    } on CvGenerationAlreadyStartedException catch (error) {
       final bool recovered =
       await _recoverGenerationAfterConflict();
 

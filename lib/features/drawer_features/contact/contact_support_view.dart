@@ -7,132 +7,83 @@ import 'contact_controller.dart';
 class ContactSupportView extends GetView<ContactController> {
   const ContactSupportView({super.key});
 
-  static const Color _bg = Color(0xFFF7F7F7);
-  static const Color _green = Color(0xFF267A05);
-  static const Color _darkGreen = Color(0xFF217000);
-  static const Color _text = Color(0xFF2D3032);
+  static const Color _background = Color(0xFFF5F8F7);
+
+  static const Color _primary = Color(0xFF0A7C58);
+
+  static const Color _primaryDark = Color(0xFF064E3B);
+
+  static const Color _dark = Color(0xFF161F1D);
+
+  static const Color _muted = Color(0xFF66736E);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: _background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(40.w, 39.h, 40.w, 58.h),
-          child: Column(
-            children: <Widget>[
-              const _ContactTopBar(),
+        child: Column(
+          children: <Widget>[
+            const _ContactTopBar(),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 36.h),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 620),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const _SupportIntroduction(),
 
-              // SizedBox(height: 53.h),
-              Image.asset(
-                'assets/heroes/Hero Section customer support.png',
-                width: double.infinity,
-              ),
+                        SizedBox(height: 22.h),
 
-              // const _SupportAvatar(),
-              // SizedBox(height: 23.h),
+                        _WhatsAppSupportCard(
+                          phone: controller.supportPhoneDisplay,
+                          onTap: controller.chatOnWhatsapp,
+                        ),
 
-              // Text(
-              //   'how_can_we_help_you'.tr,
-              //   textAlign: TextAlign.center,
-              //   style: TextStyle(
-              //     fontSize: 30.sp,
-              //     height: 1.12,
-              //     fontWeight: FontWeight.w900,
-              //     color: const Color(0xFF185E04),
-              //     letterSpacing: -0.75,
-              //   ),
-              // ),
-              // SizedBox(height: 9.h),
+                        SizedBox(height: 16.h),
 
-              // Text(
-              //   'Select a way to connect with our team.',
-              //   textAlign: TextAlign.center,
-              //   style: TextStyle(
-              //     fontSize: 16.sp,
-              //     fontWeight: FontWeight.w500,
-              //     color: const Color(0xFF666666),
-              //     letterSpacing: -0.1,
-              //   ),
-              // ),
-              SizedBox(height: 35.h),
-              GestureDetector(
-                onTap: controller.chatOnWhatsapp,
-                // onTap: () =>
-                //     Get.snackbar("In Progress", "Feature comming soon"),
-                child: SizedBox(
-                  height: 210.h,
-                  width: double.infinity,
-                  child: Transform.scale(
-                    scale: 1.45,
-                    child: Image.asset(
-                      'assets/heroes/Priority Card (WhatsApp).png',
-                      fit: BoxFit.contain,
+                        Column(
+                          children: <Widget>[
+                            _ContactActionCard(
+                              icon: Icons.call_rounded,
+                              title: 'gen_call_support'.tr,
+                              value: controller.supportPhoneDisplay,
+                              helper: 'Tap to start a phone call',
+                              onTap: controller.callSupport,
+                            ),
+
+                            SizedBox(height: 14.h),
+
+                            _ContactActionCard(
+                              icon: Icons.email_rounded,
+                              title: 'gen_send_email'.tr,
+                              value: controller.supportEmail,
+                              helper: 'Send us a support email',
+                              onTap: controller.sendEmail,
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 16.h),
+
+                        _FacebookCommunityCard(
+                          onTap: controller.joinFacebookCommunity,
+                        ),
+
+                        SizedBox(height: 18.h),
+
+                        const _ResponsePromiseCard(),
+                      ],
                     ),
                   ),
                 ),
               ),
-
-              //_WhatsAppCard(onTap: controller.chatOnWhatsapp),
-              SizedBox(height: 16.h),
-
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: _SmallContactCard(
-                      icon: Icons.call_rounded,
-                      title: 'gen_call_support'.tr,
-                      subtitle: ContactController.supportPhoneDisplay,
-                      bgColor: const Color(0xFFE8FFDD),
-                      iconBgColor: Colors.white,
-                      iconColor: _green,
-                      subtitleColor: _green,
-                      onTap: controller.callSupport,
-                      // onTap: () =>
-                      //     Get.snackbar("In Progress", "Feature comming soon"),
-                    ),
-                  ),
-                  SizedBox(width: 18.w),
-                  Expanded(
-                    child: _SmallContactCard(
-                      icon: Icons.email_rounded,
-                      title: 'gen_send_email'.tr,
-                      subtitle: ContactController.supportEmail,
-                      bgColor: Colors.white,
-                      iconBgColor: const Color(0xFFF1F1F1),
-                      iconColor: const Color(0xFF4C4C4C),
-                      subtitleColor: const Color(0xFF555555),
-                      onTap: controller.sendEmail,
-                      // onTap: () =>
-                      //     Get.snackbar("In Progress", "Feature comming soon"),
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 31.h),
-
-              _FacebookCommunityCard(
-                onTap: controller.joinFacebookCommunity,
-                // onTap: () =>
-                //     Get.snackbar("In Progress", "Feature comming soon"),
-              ),
-
-              SizedBox(height: 62.h),
-
-              Text(
-                '🛡️ Our Guarantee: We aim to respond to all\ninquiries within 24 hours.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  height: 1.55,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF8B8B8B),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -142,48 +93,103 @@ class ContactSupportView extends GetView<ContactController> {
 class _ContactTopBar extends StatelessWidget {
   const _ContactTopBar();
 
-  static const Color _green = Color(0xFF267A05);
-
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 46.r,
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: Get.back,
-              child: Container(
-                width: 46.r,
-                height: 46.r,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.045),
-                      blurRadius: 12.r,
-                      offset: Offset(0, 5.h),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(12.w, 8.h, 18.w, 8.h),
+      child: SizedBox(
+        height: 52.h,
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Material(
+                color: Colors.white,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: Get.back,
+                  child: SizedBox(
+                    width: 46.r,
+                    height: 46.r,
+                    child: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: ContactSupportView._primary,
                     ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.arrow_back_rounded,
-                  size: 25.r,
-                  color: _green,
+                  ),
                 ),
               ),
             ),
+            Text(
+              'help_support'.tr,
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w800,
+                color: ContactSupportView._dark,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SupportIntroduction extends StatelessWidget {
+  const _SupportIntroduction();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(22.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(color: const Color(0xFFE4ECE8)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            width: 62.r,
+            height: 62.r,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE6F7F0),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Icon(
+              Icons.support_agent_rounded,
+              size: 34.r,
+              color: ContactSupportView._primary,
+            ),
           ),
-          Text(
-            'help_support'.tr,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w900,
-              color: _green,
-              letterSpacing: -0.35,
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'how_can_we_help_you'.tr,
+                  style: TextStyle(
+                    fontSize: 21.sp,
+                    fontWeight: FontWeight.w800,
+                    color: ContactSupportView._dark,
+                  ),
+                ),
+                SizedBox(height: 5.h),
+                Text(
+                  'support_contact_description'.tr,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    height: 1.4,
+                    fontWeight: FontWeight.w500,
+                    color: ContactSupportView._muted,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -192,287 +198,200 @@ class _ContactTopBar extends StatelessWidget {
   }
 }
 
-// class _SupportAvatar extends StatelessWidget {
-//   const _SupportAvatar();
+class _WhatsAppSupportCard extends StatelessWidget {
+  const _WhatsAppSupportCard({required this.phone, required this.onTap});
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 156.r,
-//       height: 156.r,
-//       padding: EdgeInsets.all(5.r),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         shape: BoxShape.circle,
-//         boxShadow: <BoxShadow>[
-//           BoxShadow(
-//             color: const Color(0xFF79F535).withValues(alpha: 0.28),
-//             blurRadius: 42.r,
-//             spreadRadius: 8.r,
-//           ),
-//         ],
-//       ),
-//       // child: ClipOval(
-//       //   child: Image.asset(
-//       //     'assets/support/support_agent.png',
-//       //     fit: BoxFit.cover,
-//       //     errorBuilder: (_, __, ___) => Container(
-//       //       decoration: const BoxDecoration(
-//       //         shape: BoxShape.circle,
-//       //         gradient: LinearGradient(
-//       //           begin: Alignment.topCenter,
-//       //           end: Alignment.bottomCenter,
-//       //           colors: <Color>[Color(0xFF315F5C), Color(0xFF173D45)],
-//       //         ),
-//       //       ),
-//       //       child: Icon(
-//       //         Icons.support_agent_rounded,
-//       //         size: 104.r,
-//       //         color: Colors.white.withValues(alpha: 0.95),
-//       //       ),
-//       //     ),
-//       //   ),
-//       // ),
-//     );
-//   }
-// }
-
-// class _WhatsAppCard extends StatelessWidget {
-//   final VoidCallback onTap;
-
-//   const _WhatsAppCard({required this.onTap});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onTap: onTap,
-//       child: Container(
-//         height: 210.h,
-//         width: double.infinity,
-//         padding: EdgeInsets.fromLTRB(32.w, 32.h, 26.w, 30.h),
-//         decoration: BoxDecoration(
-//           borderRadius: BorderRadius.circular(52.r),
-//           gradient: const LinearGradient(
-//             begin: Alignment.topLeft,
-//             end: Alignment.bottomRight,
-//             colors: <Color>[Color(0xFF46D900), Color(0xFF217000)],
-//           ),
-//           boxShadow: <BoxShadow>[
-//             BoxShadow(
-//               color: const Color(0xFF79F535).withValues(alpha: 0.28),
-//               blurRadius: 34.r,
-//               offset: Offset(-14.w, 18.h),
-//             ),
-//           ],
-//         ),
-//         child: Stack(
-//           children: <Widget>[
-//             Positioned(
-//               right: -4.w,
-//               top: -8.h,
-//               child: Container(
-//                 width: 100.w,
-//                 height: 100.h,
-//                 decoration: BoxDecoration(
-//                   color: Colors.white.withValues(alpha: 0.18),
-//                   borderRadius: BorderRadius.circular(10.r),
-//                 ),
-//               ),
-//             ),
-//             Positioned(
-//               right: 20.w,
-//               top: 24.h,
-//               child: CustomPaint(
-//                 size: Size(78.w, 78.h),
-//                 painter: _BubbleTailPainter(),
-//               ),
-//             ),
-//             Positioned(
-//               right: 6.w,
-//               top: 31.h,
-//               child: Container(
-//                 height: 29.h,
-//                 padding: EdgeInsets.symmetric(horizontal: 13.w),
-//                 decoration: BoxDecoration(
-//                   color: Colors.white.withValues(alpha: 0.22),
-//                   borderRadius: BorderRadius.circular(100.r),
-//                   border: Border.all(
-//                     color: Colors.white.withValues(alpha: 0.35),
-//                   ),
-//                 ),
-//                 child: Row(
-//                   children: <Widget>[
-//                     Container(
-//                       width: 11.r,
-//                       height: 11.r,
-//                       decoration: const BoxDecoration(
-//                         color: Colors.white,
-//                         shape: BoxShape.circle,
-//                       ),
-//                     ),
-//                     SizedBox(width: 8.w),
-//                     Text(
-//                       'ONLINE NOW',
-//                       style: TextStyle(
-//                         fontSize: 10.sp,
-//                         fontWeight: FontWeight.w900,
-//                         color: Colors.white,
-//                         letterSpacing: 1,
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//             Container(
-//               width: 64.r,
-//               height: 64.r,
-//               decoration: BoxDecoration(
-//                 color: Colors.white,
-//                 borderRadius: BorderRadius.circular(22.r),
-//               ),
-//               child: Icon(
-//                 Icons.chat_bubble_outline_rounded,
-//                 size: 33.r,
-//                 color: const Color(0xFF36B900),
-//               ),
-//             ),
-//             Positioned(
-//               left: 0,
-//               bottom: 1.h,
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: <Widget>[
-//                   Text(
-//                     'Chat on WhatsApp',
-//                     style: TextStyle(
-//                       fontSize: 24.sp,
-//                       height: 1,
-//                       fontWeight: FontWeight.w900,
-//                       color: Colors.white,
-//                       letterSpacing: -0.5,
-//                     ),
-//                   ),
-//                   SizedBox(height: 6.h),
-//                   Text(
-//                     'Fastest response for learning help.',
-//                     style: TextStyle(
-//                       fontSize: 14.sp,
-//                       fontWeight: FontWeight.w600,
-//                       color: Colors.white.withValues(alpha: 0.84),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// class _BubbleTailPainter extends CustomPainter {
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final Paint paint = Paint()
-//       ..color = Colors.white.withValues(alpha: 0.16)
-//       ..style = PaintingStyle.fill;
-
-//     final Path path = Path()
-//       ..moveTo(0, 0)
-//       ..lineTo(size.width, 0)
-//       ..lineTo(0, size.height)
-//       ..close();
-
-//     canvas.drawPath(path, paint);
-//   }
-
-//   @override
-//   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-// }
-
-class _SmallContactCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color bgColor;
-  final Color iconBgColor;
-  final Color iconColor;
-  final Color subtitleColor;
+  final String phone;
   final VoidCallback onTap;
-
-  const _SmallContactCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.bgColor,
-    required this.iconBgColor,
-    required this.iconColor,
-    required this.subtitleColor,
-    required this.onTap,
-  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 154.h,
-        padding: EdgeInsets.fromLTRB(24.w, 25.h, 16.w, 20.h),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(46.r),
-          border: Border.all(
-            color: bgColor == Colors.white
-                ? const Color(0xFFEDEDED)
-                : Colors.transparent,
-          ),
-          boxShadow: bgColor == Colors.white
-              ? <BoxShadow>[
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.035),
-                    blurRadius: 15.r,
-                    offset: Offset(0, 7.h),
+    return Semantics(
+      button: true,
+      label: 'chat_on_whatsapp'.tr,
+      child: Material(
+        color: ContactSupportView._primary,
+        borderRadius: BorderRadius.circular(24.r),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24.r),
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(22.r),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 58.r,
+                  height: 58.r,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18.r),
                   ),
-                ]
-              : null,
+                  child: Icon(
+                    Icons.chat_rounded,
+                    size: 30.r,
+                    color: ContactSupportView._primary,
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'chat_on_whatsapp'.tr,
+                        style: TextStyle(
+                          fontSize: 19.sp,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        phone,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.88),
+                        ),
+                      ),
+                      SizedBox(height: 3.h),
+                      Text(
+                        'fastest_response_recommended'.tr,
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: Colors.white.withValues(alpha: 0.72),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.white,
+                  size: 25.r,
+                ),
+              ],
+            ),
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              width: 48.r,
-              height: 48.r,
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                borderRadius: BorderRadius.circular(16.r),
-              ),
-              child: Icon(icon, size: 23.r, color: iconColor),
+      ),
+    );
+  }
+}
+
+class _ContactActionCard extends StatelessWidget {
+  const _ContactActionCard({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.helper,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String value;
+  final String helper;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: '$title: $value',
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22.r),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(22.r),
+          child: Container(
+            width: double.infinity,
+            constraints: BoxConstraints(minHeight: 104.h),
+            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 17.h),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22.r),
+              border: Border.all(color: const Color(0xFFE2EAE6)),
             ),
-            const Spacer(),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 17.sp,
-                fontWeight: FontWeight.w900,
-                color: const Color(0xFF2D3032),
-                letterSpacing: -0.25,
-              ),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 54.r,
+                  height: 54.r,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEAF8F2),
+                    borderRadius: BorderRadius.circular(17.r),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 26.r,
+                    color: ContactSupportView._primary,
+                  ),
+                ),
+
+                SizedBox(width: 15.w),
+
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w800,
+                          color: ContactSupportView._dark,
+                        ),
+                      ),
+
+                      SizedBox(height: 4.h),
+
+                      Text(
+                        value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w700,
+                          color: ContactSupportView._primary,
+                        ),
+                      ),
+
+                      SizedBox(height: 4.h),
+
+                      Text(
+                        helper,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10.5.sp,
+                          color: ContactSupportView._muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(width: 10.w),
+
+                Container(
+                  width: 38.r,
+                  height: 38.r,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F6F4),
+                    borderRadius: BorderRadius.circular(13.r),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 20.r,
+                    color: ContactSupportView._primary,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 3.h),
-            Text(
-              subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11.sp,
-                fontWeight: FontWeight.w800,
-                color: subtitleColor,
-                letterSpacing: -0.15,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -480,104 +399,109 @@ class _SmallContactCard extends StatelessWidget {
 }
 
 class _FacebookCommunityCard extends StatelessWidget {
-  final VoidCallback onTap;
-
   const _FacebookCommunityCard({required this.onTap});
+
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 145.h,
-        width: double.infinity,
-        padding: EdgeInsets.fromLTRB(24.w, 24.h, 20.w, 22.h),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2D3030),
-          borderRadius: BorderRadius.circular(46.r),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.18),
-              blurRadius: 27.r,
-              offset: Offset(0, 15.h),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              right: -2.w,
-              bottom: -1.h,
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    width: 14.r,
-                    height: 14.r,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.14),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Container(
-                    width: 19.r,
-                    height: 19.r,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.14),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
+    return Semantics(
+      button: true,
+      label: 'Join our Facebook community',
+      child: Material(
+        color: ContactSupportView._dark,
+        borderRadius: BorderRadius.circular(24.r),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24.r),
+          child: Padding(
+            padding: EdgeInsets.all(21.r),
+            child: Row(
               children: <Widget>[
                 Container(
-                  width: 64.r,
-                  height: 64.r,
+                  width: 56.r,
+                  height: 56.r,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF48DC00),
-                    borderRadius: BorderRadius.circular(22.r),
+                    color: ContactSupportView._primary,
+                    borderRadius: BorderRadius.circular(18.r),
                   ),
                   child: Icon(
                     Icons.groups_rounded,
-                    size: 35.r,
+                    size: 31.r,
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(width: 18.w),
+                SizedBox(width: 16.w),
                 Expanded(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Join our Facebook\nCommunity',
+                        'Join our Facebook community',
                         style: TextStyle(
-                          fontSize: 18.sp,
-                          height: 1.14,
-                          fontWeight: FontWeight.w900,
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.w800,
                           color: Colors.white,
-                          letterSpacing: -0.35,
                         ),
                       ),
-                      SizedBox(height: 7.h),
+                      SizedBox(height: 5.h),
                       Text(
-                        'Connect with 10k+ Bengali learners in\nItaly.',
+                        'facebook_community_description'.tr,
                         style: TextStyle(
-                          fontSize: 12.sp,
-                          height: 1.25,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.48),
+                          fontSize: 11.sp,
+                          height: 1.35,
+                          color: Colors.white.withValues(alpha: 0.68),
                         ),
                       ),
                     ],
                   ),
                 ),
+                Icon(
+                  Icons.open_in_new_rounded,
+                  size: 22.r,
+                  color: Colors.white,
+                ),
               ],
             ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _ResponsePromiseCard extends StatelessWidget {
+  const _ResponsePromiseCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 14.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEAF8F2),
+        borderRadius: BorderRadius.circular(18.r),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            Icons.verified_user_outlined,
+            size: 22.r,
+            color: ContactSupportView._primary,
+          ),
+          SizedBox(width: 11.w),
+          Expanded(
+            child: Text(
+              'support_response_time'.tr,
+              style: TextStyle(
+                fontSize: 11.sp,
+                height: 1.4,
+                fontWeight: FontWeight.w600,
+                color: ContactSupportView._primaryDark,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -35,14 +35,8 @@ class CheckoutPage extends StatelessWidget {
             // const SizedBox(height: 44),
             // _CheckoutHeader(onBackTap: () => Navigator.maybePop(context)),
             const SizedBox(height: 28),
-            Obx(
-              () => _CurrencySelector(
-                selectedCurrency: controller.selectedCurrency.value,
-                enabled: controller.canChangeCurrency,
-                onChanged: controller.selectCurrency,
-              ),
-            ),
-            const SizedBox(height: 32),
+
+
             Obx(
               () => _OrderSummaryCard(
                 title: controller.selectedPlanTitle,

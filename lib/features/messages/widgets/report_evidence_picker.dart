@@ -3,18 +3,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/themes/app_colors.dart';
-import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
-import 'package:get/get.dart';
 
-class ReportEvidencePicker extends StatelessWidget {
-  final XFile? selectedImage;
-  final VoidCallback onPickImage;
-  final VoidCallback onRemoveImage;
-
+class ReportEvidencePicker
+    extends StatelessWidget {
   const ReportEvidencePicker({
     super.key,
     required this.selectedImage,
@@ -22,63 +18,269 @@ class ReportEvidencePicker extends StatelessWidget {
     required this.onRemoveImage,
   });
 
+  final XFile? selectedImage;
+  final VoidCallback onPickImage;
+  final VoidCallback onRemoveImage;
+
+  @override
+  Widget build(BuildContext context) {
+    final XFile? image = selectedImage;
+
+    return AnimatedSwitcher(
+      duration:
+      const Duration(milliseconds: 180),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: image == null
+          ? _EmptyEvidencePicker(
+        key: const ValueKey<String>(
+          'empty-evidence',
+        ),
+        onTap: onPickImage,
+      )
+          : _SelectedEvidencePreview(
+        key: ValueKey<String>(
+          image.path,
+        ),
+        image: image,
+        onReplace: onPickImage,
+        onRemove: onRemoveImage,
+      ),
+    );
+  }
+}
+
+class _EmptyEvidencePicker
+    extends StatelessWidget {
+  const _EmptyEvidencePicker({
+    super.key,
+    required this.onTap,
+  });
+
+  final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      foregroundPainter: _ReportDashedBorderPainter(),
-      child: GestureDetector(
-        onTap: onPickImage,
-        child: Container(
-          width: double.infinity,
-          height: kReportEvidenceBoxHeight.h,
-          padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 34.h),
-          decoration: BoxDecoration(
-            color: AppColors.homeBackground,
-            borderRadius: BorderRadius.circular(kRadius38.r),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                width: 74.w,
-                height: 74.w,
-                decoration: BoxDecoration(
-                  color: AppColors.reportUploadIconBg,
-                  borderRadius: BorderRadius.circular(kRadius20.r),
+      foregroundPainter:
+      const _ReportDashedBorderPainter(),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius:
+          BorderRadius.circular(18.r),
+          child: Container(
+            width: double.infinity,
+            height: 144.h,
+            padding: EdgeInsets.symmetric(
+              horizontal: 20.w,
+              vertical: 18.h,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.white
+                  .withValues(alpha: 0.55),
+              borderRadius:
+              BorderRadius.circular(18.r),
+            ),
+            child: Column(
+              mainAxisAlignment:
+              MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  width: 48.w,
+                  height: 48.w,
+                  decoration: BoxDecoration(
+                    color: AppColors
+                        .reportUploadIconBg,
+                    borderRadius:
+                    BorderRadius.circular(
+                      14.r,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.add_photo_alternate_outlined,
+                    color:
+                    AppColors.primaryGreen,
+                    size: 25.w,
+                  ),
                 ),
-                child: Icon(
-                  Icons.image_rounded,
-                  color: AppColors.primaryGreen,
-                  size: 34.w,
+                SizedBox(height: 12.h),
+                Text(
+                  'add_screenshot_evidence'.tr,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize:
+                    AppFont.font14.sp,
+                    fontWeight:
+                    FontWeight.w700,
+                    color: AppColors
+                        .homePrimaryText,
+                  ),
                 ),
-              ),
-              SizedBox(height: 28.h),
-              Text(
-                'add_screenshot_evidence'.tr,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: AppFont.font20.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.homePrimaryText,
-                ),
-              ),
-              SizedBox(height: 12.h),
-              Text(
-                'png_or_jpg_max_5mb'.tr,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: AppFont.font16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.bodyText,
-                ),
-              ),
-              if (selectedImage != null) ...<Widget>[
-                SizedBox(height: 28.h),
-                _SelectedEvidenceImage(
-                  image: selectedImage!,
-                  onRemoveImage: onRemoveImage,
+                SizedBox(height: 4.h),
+                Text(
+                  'png_or_jpg_max_5mb'.tr,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize:
+                    AppFont.font12.sp,
+                    fontWeight:
+                    FontWeight.w400,
+                    color:
+                    AppColors.bodyText,
+                  ),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectedEvidencePreview
+    extends StatelessWidget {
+  const _SelectedEvidencePreview({
+    super.key,
+    required this.image,
+    required this.onReplace,
+    required this.onRemove,
+  });
+
+  final XFile image;
+  final VoidCallback onReplace;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.white,
+      borderRadius:
+      BorderRadius.circular(18.r),
+      child: InkWell(
+        onTap: onReplace,
+        borderRadius:
+        BorderRadius.circular(18.r),
+        child: Container(
+          width: double.infinity,
+          height: 128.h,
+          padding: EdgeInsets.all(10.w),
+          decoration: BoxDecoration(
+            borderRadius:
+            BorderRadius.circular(18.r),
+            border: Border.all(
+              color:
+              AppColors.reportDashedBorder,
+              width: 1.2,
+            ),
+          ),
+          child: Row(
+            children: <Widget>[
+              ClipRRect(
+                borderRadius:
+                BorderRadius.circular(12.r),
+                child: SizedBox(
+                  width: 108.w,
+                  height: 108.h,
+                  child: Image.file(
+                    File(image.path),
+                    fit: BoxFit.cover,
+                    errorBuilder: (
+                        BuildContext context,
+                        Object error,
+                        StackTrace? stackTrace,
+                        ) {
+                      return ColoredBox(
+                        color: AppColors
+                            .reportUploadIconBg,
+                        child: Icon(
+                          Icons
+                              .broken_image_outlined,
+                          color: AppColors
+                              .primaryGreen,
+                          size: 30.w,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+              SizedBox(width: 12.w),
+
+              Expanded(
+                child: Column(
+                  mainAxisAlignment:
+                  MainAxisAlignment.center,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      image.name,
+                      maxLines: 2,
+                      overflow:
+                      TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize:
+                        AppFont.font13.sp,
+                        fontWeight:
+                        FontWeight.w700,
+                        height: 1.3,
+                        color: AppColors
+                            .homePrimaryText,
+                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    Text(
+                      'png_or_jpg_max_5mb'.tr,
+                      maxLines: 1,
+                      overflow:
+                      TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize:
+                        AppFont.font11.sp,
+                        height: 1.3,
+                        color:
+                        AppColors.bodyText,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Icon(
+                      Icons.edit_outlined,
+                      size: 20.w,
+                      color:
+                      AppColors.primaryGreen,
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(width: 8.w),
+
+              GestureDetector(
+                onTap: onRemove,
+                behavior:
+                HitTestBehavior.opaque,
+                child: Container(
+                  width: 36.w,
+                  height: 36.w,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors
+                        .blockDangerRed
+                        .withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: AppColors
+                        .blockDangerRed,
+                    size: 20.w,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -87,81 +289,52 @@ class ReportEvidencePicker extends StatelessWidget {
   }
 }
 
-class _SelectedEvidenceImage extends StatelessWidget {
-  final XFile image;
-  final VoidCallback onRemoveImage;
+class _ReportDashedBorderPainter
+    extends CustomPainter {
+  const _ReportDashedBorderPainter();
 
-  const _SelectedEvidenceImage({
-    required this.image,
-    required this.onRemoveImage,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: kReportEvidencePreviewSize.w + 30.w,
-      height: kReportEvidencePreviewSize.w + 30.w,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(kRadius14.r),
-              child: Image.file(
-                File(image.path),
-                width: kReportEvidencePreviewSize.w,
-                height: kReportEvidencePreviewSize.w,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Positioned(
-            right: 0,
-            top: 0,
-            child: GestureDetector(
-              onTap: onRemoveImage,
-              child: Container(
-                width: 46.w,
-                height: 46.w,
-                decoration: const BoxDecoration(
-                  color: AppColors.blockDangerRed,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.close_rounded, color: AppColors.white, size: 26.w),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ReportDashedBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = AppColors.reportDashedBorder
-      ..strokeWidth = 2.4.w
+      ..color =
+          AppColors.reportDashedBorder
+      ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
-    final RRect border = RRect.fromRectAndRadius(
+    final RRect border =
+    RRect.fromRectAndRadius(
       Offset.zero & size,
-      Radius.circular(kRadius38.r),
+      Radius.circular(18.r),
     );
-    final Path path = Path()..addRRect(border);
 
-    for (final PathMetric metric in path.computeMetrics()) {
+    final Path path =
+    Path()..addRRect(border);
+
+    for (final PathMetric metric
+    in path.computeMetrics()) {
       double distance = 0;
+
       while (distance < metric.length) {
-        final double next = distance + 10.w;
-        canvas.drawPath(metric.extractPath(distance, next), paint);
-        distance = next + 8.w;
+        final double end =
+            distance + 7.w;
+
+        canvas.drawPath(
+          metric.extractPath(
+            distance,
+            end,
+          ),
+          paint,
+        );
+
+        distance = end + 5.w;
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(
+      covariant CustomPainter oldDelegate,
+      ) {
+    return false;
+  }
 }

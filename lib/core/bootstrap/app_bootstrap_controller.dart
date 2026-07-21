@@ -58,17 +58,14 @@ class AppBootstrapController extends GetxController {
       );
     }
 
-    if (!Get.isRegistered<AuthService>()) {
-      Get.put<AuthService>(
-        AuthService(
-          apiClient: Get.find<ApiClient>(),
-          tokenService: Get.find<TokenService>(),
-          storageService: Get.find<StorageService>(),
-        ),
-        permanent: true,
-      );
-    }
-
+    /*
+ * Register DevicePushTokenService first.
+ *
+ * AuthService needs this service to get:
+ * - deviceId
+ * - platform
+ * - FCM logout cleanup
+ */
     if (!Get.isRegistered<DevicePushTokenService>()) {
       final DevicePushTokenService devicePushTokenService =
       DevicePushTokenService(
@@ -80,6 +77,22 @@ class AppBootstrapController extends GetxController {
 
       Get.put<DevicePushTokenService>(
         devicePushTokenService,
+        permanent: true,
+      );
+    }
+
+/*
+ * Register AuthService after DevicePushTokenService.
+ */
+    if (!Get.isRegistered<AuthService>()) {
+      Get.put<AuthService>(
+        AuthService(
+          apiClient: Get.find<ApiClient>(),
+          tokenService: Get.find<TokenService>(),
+          storageService: Get.find<StorageService>(),
+          devicePushTokenService:
+          Get.find<DevicePushTokenService>(),
+        ),
         permanent: true,
       );
     }
@@ -231,9 +244,12 @@ class AppBootstrapController extends GetxController {
       final TokenService tokenService =
       Get.find<TokenService>();
 
+      final bool hasStoredToken =
+      await tokenService.hasToken();
+
       final bool hasValidLocalSession =
           storageService.isLoggedIn &&
-              await tokenService.hasToken();
+              hasStoredToken;
 
       if (hasValidLocalSession) {
         final bool hasValidServerSession =
@@ -340,8 +356,22 @@ class AppBootstrapController extends GetxController {
       await Get.find<LearningActivityTrackerService>()
           .discardSession();
 
+      /*
+ * Clear the login marker when it exists.
+ */
       if (storageService.isLoggedIn) {
         await storageService.clearLoggedInData();
+      }
+
+/*
+ * Clear stale JWT data independently.
+ *
+ * Example:
+ * isLoggedIn = false
+ * token still exists = true
+ * → token must still be deleted.
+ */
+      if (hasStoredToken) {
         await tokenService.clearTokens();
       }
 

@@ -32,7 +32,7 @@ class GuidedLearningLevelSelectionView extends GetView<AiChatController> {
               _GuidedHeader(title: 'gen_guided_ai_tour'.tr),
               SizedBox(height: 47.h),
               Text(
-                'label_lib_features_ai_chat_views_guided_learning_level_selection_view_35'.tr,
+                'guided_learning_level_selection'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 23.sp,
@@ -81,7 +81,8 @@ class GuidedLearningLevelSelectionView extends GetView<AiChatController> {
                 icon: Icons.chat_bubble_rounded,
                 title: 'gen_level_b1'.tr,
                 levelLabel: 'level_label_advanced'.tr,
-                description: 'natural_role_play_conversations_in_nreal_life_ital'.tr,
+                description:
+                    'natural_role_play_conversations_in_nreal_life_ital'.tr,
                 buttonText: 'gen_explore_b1_topics'.tr,
                 onTap: () => controller.openGuidedTopics(
                   level: 'b1'.tr,

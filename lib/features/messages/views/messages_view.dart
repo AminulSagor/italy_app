@@ -154,13 +154,18 @@ class MessagesView extends GetView<MessagesController> {
                                 Map<String, dynamic>
                                 user,
                                 ) =>
-                                _SearchUserItem(
-                                  user: user,
-                                  onTap: () => controller
-                                      .startDirectConversation(
-                                    user,
-                                  ),
-                                ),
+                                    _SearchUserItem(
+                                      user: user,
+                                      isLoading:
+                                      controller.openingUserId.value ==
+                                          (user['id'] ?? user['userId'])
+                                              ?.toString()
+                                              .trim(),
+                                      onTap: () =>
+                                          controller.startDirectConversation(
+                                            user,
+                                          ),
+                                    ),
                           )
                               .toList(
                             growable: false,
@@ -335,10 +340,12 @@ class _MessagesList extends StatelessWidget {
 class _SearchUserItem extends StatelessWidget {
   const _SearchUserItem({
     required this.user,
+    required this.isLoading,
     required this.onTap,
   });
 
   final Map<String, dynamic> user;
+  final bool isLoading;
   final VoidCallback onTap;
 
   @override
@@ -349,70 +356,87 @@ class _SearchUserItem extends StatelessWidget {
             'User';
 
     final String avatar =
-        user['avatarUrl']?.toString() ?? '';
+        user['avatarUrl']?.toString() ??
+            '';
 
     final bool isOnline =
-        user['isOnline'] as bool? ?? false;
+        user['isOnline'] as bool? ??
+            false;
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: 10.h,
-        ),
-        child: Row(
-          children: <Widget>[
-            MessageAvatar(
-              imageUrl: avatar,
-              size: 40,
-            ),
-
-            SizedBox(width: 10.w),
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    name,
-                    maxLines: 1,
-                    overflow:
-                    TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize:
-                      AppFont.font14.sp,
-                      fontWeight:
-                      FontWeight.w600,
-                      color: AppColors
-                          .homePrimaryText,
-                    ),
-                  ),
-
-                  SizedBox(height: 4.h),
-
-                  Text(
-                    isOnline
-                        ? 'online'.tr
-                        : 'offline'.tr,
-                    style: TextStyle(
-                      fontSize:
-                      AppFont.font12.sp,
-                      color:
-                      AppColors.bodyText,
-                    ),
-                  ),
-                ],
+    return AnimatedOpacity(
+      duration:
+      const Duration(milliseconds: 180),
+      opacity: isLoading ? 0.72 : 1,
+      child: GestureDetector(
+        onTap: isLoading ? null : onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            vertical: 10.h,
+          ),
+          child: Row(
+            children: <Widget>[
+              MessageAvatar(
+                imageUrl: avatar,
+                size: 40,
               ),
-            ),
-
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 22.w,
-              color: AppColors.bodyText,
-            ),
-          ],
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow:
+                      TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize:
+                        AppFont.font14.sp,
+                        fontWeight:
+                        FontWeight.w600,
+                        color: AppColors
+                            .homePrimaryText,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      isLoading
+                          ? 'opening_conversation'
+                          .tr
+                          : isOnline
+                          ? 'online'.tr
+                          : 'offline'.tr,
+                      style: TextStyle(
+                        fontSize:
+                        AppFont.font12.sp,
+                        color:
+                        AppColors.bodyText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isLoading)
+                SizedBox(
+                  width: 22.w,
+                  height: 22.w,
+                  child:
+                  const CircularProgressIndicator(
+                    strokeWidth: 2.2,
+                    color:
+                    AppColors.primaryGreen,
+                  ),
+                )
+              else
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22.w,
+                  color: AppColors.bodyText,
+                ),
+            ],
+          ),
         ),
       ),
     );

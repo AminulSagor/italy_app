@@ -260,10 +260,26 @@ class _SafetyActions extends GetView<MessageUserInfoController> {
 
   @override
   Widget build(BuildContext context) {
+    final String languageCode = Get.locale?.languageCode ?? 'en';
+
+    final bool isBanglaOrItalian = languageCode == 'bn' || languageCode == 'it';
+
+    final double safetyCardHeight = isBanglaOrItalian
+        ? 176
+        : kProfileSafetyCardHeight;
+
+    final double safetyTitleFontSize = isBanglaOrItalian ? 13 : AppFont.font16;
+
+    final double cardsGap = isBanglaOrItalian ? 14 : 24;
+
     return Obx(() {
-      final bool isBlocked = controller.blockStatus.value == 'blocked_by_me' ||
+      final bool isBlocked =
+          controller.blockStatus.value == 'blocked_by_me' ||
           controller.blockStatus.value == 'both_blocked';
+
       return Row(
+        // Do not use CrossAxisAlignment.stretch here.
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Expanded(
             child: ProfileSafetyActionCard(
@@ -271,18 +287,22 @@ class _SafetyActions extends GetView<MessageUserInfoController> {
               title: isBlocked ? 'unblock_user'.tr : 'block_user'.tr,
               subtitle: 'gen_stop_contact'.tr,
               isBlockedAction: isBlocked,
+              cardHeight: safetyCardHeight,
+              titleFontSize: safetyTitleFontSize,
               onTap: isBlocked
                   ? controller.openUnblockUserSheet
                   : controller.openBlockUserSheet,
             ),
           ),
-          SizedBox(width: 24.w),
+          SizedBox(width: cardsGap.w),
           Expanded(
             child: ProfileSafetyActionCard(
               icon: Icons.warning_amber_rounded,
               title: 'gen_report_profile'.tr,
               subtitle: 'gen_notify_admin'.tr,
               isDashed: true,
+              cardHeight: safetyCardHeight,
+              titleFontSize: safetyTitleFontSize,
               onTap: controller.openReportUser,
             ),
           ),
@@ -291,7 +311,6 @@ class _SafetyActions extends GetView<MessageUserInfoController> {
     });
   }
 }
-
 
 bool _canLoadAvatar(String value) {
   final Uri? uri = Uri.tryParse(value.trim());

@@ -76,7 +76,9 @@ class LessonXpPill extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  complete.hasXpBoost ? complete.xpBoostLabel : 'points_earned'.tr,
+                  complete.hasXpBoost
+                      ? complete.xpBoostLabel
+                      : 'points_earned'.tr,
                   style: TextStyle(
                     fontSize: AppFont.font12.sp,
                     fontWeight: FontWeight.w900,
@@ -85,7 +87,9 @@ class LessonXpPill extends StatelessWidget {
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  'complete_xpearned_xp'.trParams(<String, String>{'xpearned': complete.xpEarned.toString()}),
+                  'score_xp_value'.trParams(<String, String>{
+                    'xp': complete.xpEarned.toString(),
+                  }),
                   style: TextStyle(
                     fontSize: AppFont.font30.sp,
                     fontWeight: FontWeight.w900,
@@ -376,7 +380,7 @@ class LessonMilestoneDialog extends StatelessWidget {
                     child: Column(
                       children: <Widget>[
                         Text(
-                          'complete_appname'.trParams(<String, String>{'appname': complete.appName.toString()}),
+                          complete.appName,
                           style: TextStyle(
                             fontSize: AppFont.font16.sp,
                             fontWeight: FontWeight.w800,
@@ -395,7 +399,9 @@ class LessonMilestoneDialog extends StatelessWidget {
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          'you_completed_chapter'.trParams(<String, String>{'chapter': complete.chapterTitle}),
+                          'you_completed_chapter'.trParams(<String, String>{
+                            'chapter': complete.chapterTitle,
+                          }),
                           style: TextStyle(
                             fontSize: AppFont.font18.sp,
                             fontWeight: FontWeight.w500,
@@ -408,14 +414,26 @@ class LessonMilestoneDialog extends StatelessWidget {
                           spacing: 14.w,
                           runSpacing: 12.h,
                           children: <Widget>[
-                            _MilestoneChip(label: 'xp_earned_value'.trParams(<String, String>{'xp': '${complete.xpEarned}'})),
                             _MilestoneChip(
-                              label: 'day_streak_value'.trParams(<String, String>{'days': '${complete.streakDays}'}),
+                              label: 'xp_earned_value'.trParams(
+                                <String, String>{'xp': '${complete.xpEarned}'},
+                              ),
+                            ),
+                            _MilestoneChip(
+                              label: 'day_streak_value'.trParams(
+                                <String, String>{
+                                  'days': '${complete.streakDays}',
+                                },
+                              ),
                               color: AppColors.lessonStreakBg,
                               textColor: AppColors.blockDangerRed,
                             ),
                             _MilestoneChip(
-                              label: 'accuracy_percent_value'.trParams(<String, String>{'accuracy': '${complete.accuracyPercent}'}),
+                              label: 'accuracy_percent_value'.trParams(
+                                <String, String>{
+                                  'accuracy': '${complete.accuracyPercent}',
+                                },
+                              ),
                               color: AppColors.lessonAccuracyBg,
                               textColor: AppColors.primaryGreen,
                             ),

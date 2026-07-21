@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../core/services/token_service.dart';
 import '../models/presence_model.dart';
 import 'chat_socket_service.dart';
 
@@ -69,19 +70,47 @@ class PresenceService extends GetxService with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (Get.isRegistered<ChatSocketService>()) {
-        try {
-          final ChatSocketService svc = Get.find<ChatSocketService>();
-          svc.connect(deviceId: _deviceId);
-        } catch (_) {}
-      }
-    } else if (state == AppLifecycleState.paused ||
+      unawaited(_connectIfAuthenticated());
+      return;
+    }
+
+    if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       if (Get.isRegistered<ChatSocketService>()) {
-        try {
-          Get.find<ChatSocketService>().disconnect();
-        } catch (_) {}
+        unawaited(
+          Get.find<ChatSocketService>().disconnect(),
+        );
       }
+    }
+  }
+
+  Future<void> _connectIfAuthenticated() async {
+    if (!Get.isRegistered<TokenService>() ||
+        !Get.isRegistered<ChatSocketService>()) {
+      return;
+    }
+
+    final bool hasToken =
+    await Get.find<TokenService>().hasToken();
+
+    if (!hasToken) {
+      return;
+    }
+
+    if (_deviceId.isEmpty) {
+      await _initDeviceId();
+    }
+
+    await Get.find<ChatSocketService>().connect(
+      deviceId: _deviceId,
+    );
+  }
+
+  Future<void> clearForLogout() async {
+    presenceMap.clear();
+
+    if (Get.isRegistered<ChatSocketService>()) {
+      await Get.find<ChatSocketService>().disconnect();
     }
   }
 

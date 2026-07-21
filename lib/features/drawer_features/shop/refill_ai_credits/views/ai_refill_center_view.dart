@@ -61,25 +61,27 @@ class AiRefillCenterPage extends StatelessWidget {
                                   title: package.name,
                                   subtitle: package.entitlementSummary,
                                   price: controller.packagePriceText(package),
-                                  isPopular: package.badgeLabel.isNotEmpty,
+                                  badgeText: _badgeText(package.marketingBadge),
                                   isSelected: controller.isAiPackageSelected(
                                     package.id,
                                   ),
-                                  onTap: () => controller.selectAiPackage(
-                                    package.id,
-                                  ),
-                                  unselectedBgColor:
-                                      warmCard ? paleOrange : Colors.white,
+                                  onTap: () =>
+                                      controller.selectAiPackage(package.id),
+                                  unselectedBgColor: warmCard
+                                      ? paleOrange
+                                      : Colors.white,
                                   unselectedBorderColor: warmCard
                                       ? const Color(0xFFFFEBC0)
                                       : const Color(0xFFEDEDED),
-                                  unselectedSubtitleColor:
-                                      warmCard ? orange : muted,
+                                  unselectedSubtitleColor: warmCard
+                                      ? orange
+                                      : muted,
                                   unselectedPriceBgColor: warmCard
                                       ? Colors.white
                                       : const Color(0xFFE8E6E6),
-                                  unselectedPriceTextColor:
-                                      warmCard ? orange : const Color(0xFF3A3434),
+                                  unselectedPriceTextColor: warmCard
+                                      ? orange
+                                      : const Color(0xFF3A3434),
                                   unselectedPriceBorderColor: warmCard
                                       ? const Color(0xFFF8D564)
                                       : Colors.transparent,
@@ -103,7 +105,8 @@ class AiRefillCenterPage extends StatelessWidget {
                   text: controller.isLoadingQuote.value
                       ? 'loading'.tr
                       : 'confirm_purchase_1'.tr,
-                  onPressed: controller.isLoadingQuote.value ||
+                  onPressed:
+                      controller.isLoadingQuote.value ||
                           controller.aiPackages.isEmpty
                       ? () {}
                       : controller.confirmPurchase,
@@ -138,7 +141,9 @@ class AiRefillCenterPage extends StatelessWidget {
           Expanded(
             child: _statItem(
               icon: Icons.mic,
-              label: '${controller.aiVoiceMinutes} Mins',
+              label: 'voice_minutes_value'.trParams(<String, String>{
+                'count': controller.aiVoiceMinutes.toString(),
+              }),
               color: green,
             ),
           ),
@@ -146,7 +151,9 @@ class AiRefillCenterPage extends StatelessWidget {
           Expanded(
             child: _statItem(
               icon: Symbols.deployed_code,
-              label: '${controller.aiTextTokens} Tokens',
+              label: 'text_tokens_value'.trParams(<String, String>{
+                'count': controller.aiTextTokens.toString(),
+              }),
               color: const Color.fromARGB(255, 202, 114, 42),
             ),
           ),
@@ -179,61 +186,68 @@ class AiRefillCenterPage extends StatelessWidget {
 
   Widget _heroCard() {
     return Container(
-      height: 149,
       width: double.infinity,
+      height: 118,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(42),
+        borderRadius: BorderRadius.circular(28),
         gradient: const LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [Color(0xFF287A04), Color(0xFF176700)],
+          colors: <Color>[Color(0xFF287A04), Color(0xFF176700)],
         ),
-        boxShadow: [
+        boxShadow: <BoxShadow>[
           BoxShadow(
-            color: green.withValues(alpha: .25),
-            blurRadius: 24,
-            offset: const Offset(0, 14),
+            color: green.withValues(alpha: .18),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Stack(
-        children: [
-          Positioned(
-            left: 32,
-            top: 31,
+        clipBehavior: Clip.hardEdge,
+        children: <Widget>[
+          const Positioned(
+            right: -8,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Icon(
+                Icons.forum_rounded,
+                size: 82,
+                color: Color(0x38FFFFFF),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 Text(
                   'ai_mastery'.tr,
-                  style: TextStyle(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 31,
-                    height: 1,
+                    fontSize: 22,
+                    height: 1.1,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: -1.1,
+                    letterSpacing: -.4,
                   ),
                 ),
-                SizedBox(height: 14),
+                const SizedBox(height: 8),
                 Text(
-                  'Voice for speaking,\nTokens for chatting.',
+                  'ai_credit_usage_description'.tr,
                   style: TextStyle(
                     color: Color(0xFFD5E5CC),
-                    fontSize: 17,
-                    height: 1.28,
+                    fontSize: 13,
+                    height: 1.3,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
-            ),
-          ),
-          Positioned(
-            right: -8,
-            top: 22,
-            child: Icon(
-              Icons.forum_rounded,
-              size: 126,
-              color: Colors.white.withValues(alpha: .24),
             ),
           ),
         ],
@@ -247,7 +261,7 @@ class AiRefillCenterPage extends StatelessWidget {
     required String price,
     required bool isSelected,
     required VoidCallback onTap,
-    bool isPopular = false,
+    String badgeText = '',
     Color unselectedBgColor = Colors.white,
     Color unselectedBorderColor = const Color(0xFFEDEDED),
     Color unselectedSubtitleColor = muted,
@@ -255,6 +269,7 @@ class AiRefillCenterPage extends StatelessWidget {
     Color unselectedPriceTextColor = const Color(0xFF3A3434),
     Color unselectedPriceBorderColor = Colors.transparent,
   }) {
+    final bool hasBadge = badgeText.isNotEmpty;
     return GestureDetector(
       onTap: onTap,
       child: Stack(
@@ -262,8 +277,8 @@ class AiRefillCenterPage extends StatelessWidget {
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            height: isPopular ? 123 : 102,
-            padding: const EdgeInsets.symmetric(horizontal: 26),
+            constraints: const BoxConstraints(minHeight: 82),
+            padding: EdgeInsets.fromLTRB(16, hasBadge ? 16 : 12, 14, 12),
             decoration: BoxDecoration(
               color: isSelected ? Colors.white : unselectedBgColor,
               borderRadius: BorderRadius.circular(35),
@@ -290,6 +305,7 @@ class AiRefillCenterPage extends StatelessWidget {
                     subtitleColor: isSelected ? green : unselectedSubtitleColor,
                   ),
                 ),
+                const SizedBox(width: 8),
                 _pricePill(
                   price: price,
                   bgColor: isSelected ? green : unselectedPriceBgColor,
@@ -305,7 +321,7 @@ class AiRefillCenterPage extends StatelessWidget {
             ),
           ),
 
-          if (isPopular)
+          if (hasBadge)
             Positioned(
               top: -14,
               left: 34,
@@ -318,7 +334,7 @@ class AiRefillCenterPage extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'most_popular'.tr,
+                    badgeText,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -340,25 +356,29 @@ class AiRefillCenterPage extends StatelessWidget {
     Color subtitleColor = muted,
   }) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: textDark,
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.2,
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            height: 1.15,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 5),
         Text(
           subtitle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: subtitleColor,
-            fontSize: 15,
-            height: 1.35,
+            fontSize: 12,
+            height: 1.25,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -374,29 +394,32 @@ class AiRefillCenterPage extends StatelessWidget {
     bool shadow = false,
   }) {
     return Container(
-      height: 40,
-      width: 90,
+      height: 34,
+      constraints: const BoxConstraints(minWidth: 68, maxWidth: 100),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: borderColor, width: 1.5),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor, width: 1.2),
         boxShadow: shadow
             ? [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: .17),
-                  blurRadius: 0,
-                  offset: const Offset(0, 4),
+                  offset: const Offset(0, 3),
                 ),
               ]
             : null,
       ),
-      child: Center(
+      alignment: Alignment.center,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
         child: Text(
           price,
+          maxLines: 1,
           style: TextStyle(
             color: textColor,
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),
@@ -486,5 +509,21 @@ class AiRefillCenterPage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _badgeText(String badge) {
+    switch (badge.trim().toLowerCase()) {
+      case 'most_popular':
+        return 'most_popular'.tr;
+
+      case 'best_value':
+        return 'best_value'.tr;
+
+      case 'limited_time':
+        return 'limited_time'.tr;
+
+      default:
+        return '';
+    }
   }
 }

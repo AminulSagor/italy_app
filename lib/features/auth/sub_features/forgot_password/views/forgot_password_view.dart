@@ -104,7 +104,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
                               Text(
-                                'send_reset_link'.tr,
+                                'send_otp'.tr,
                                 style: TextStyle(
                                   color: AppColors.legacyColorFFE8F4DF,
                                   fontSize: AppFont.font18.sp,

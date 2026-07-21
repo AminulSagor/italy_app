@@ -25,10 +25,6 @@ class LanguageDialogController extends GetxController {
   }
 
   void confirmLanguage() {
-    final translationService = Get.find<TranslationService>();
-
-    translationService.setLanguage(selectedLanguage.value);
-
     Get.back<AppLanguage>(result: selectedLanguage.value);
   }
 }

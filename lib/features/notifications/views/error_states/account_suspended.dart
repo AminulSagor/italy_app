@@ -183,7 +183,7 @@ class AccountSuspendedView extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Spacer(),
+                  SizedBox(height: 42.h),
                   ThinOutlineButton(
                     width: 244.w,
                     height: 47.h,

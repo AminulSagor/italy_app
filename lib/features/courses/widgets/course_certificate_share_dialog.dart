@@ -97,7 +97,7 @@ class CourseCertificateShareDialog extends StatelessWidget {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      "You've reached a new milestone",
+                      'certificate_milestone_message'.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: AppFont.font16.sp,
@@ -145,7 +145,9 @@ class CourseCertificateShareDialog extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        'proficiency_level_certificate_proficiencylevel'.trParams(<String, String>{'proficiencylevel': certificate.proficiencyLevel.toString()}),
+                        'proficiency_level_value'.trParams(<String, String>{
+                          'level': certificate.proficiencyLevel.toString(),
+                        }),
                         style: TextStyle(
                           fontSize: AppFont.font14.sp,
                           fontWeight: FontWeight.w700,

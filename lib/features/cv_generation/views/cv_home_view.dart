@@ -22,6 +22,7 @@ class CvHomeView extends GetView<CvHomeController> {
             color: AppColors.homeBackground,
             child: SafeArea(
               top: false,
+              bottom: false,
               child: RefreshIndicator(
                 onRefresh:
                 controller.refreshTemplates,
@@ -43,17 +44,11 @@ class CvHomeView extends GetView<CvHomeController> {
                         AppColors.primaryGreen,
                       ),
                     ),
-                    SizedBox(height: 7.h),
-                    Text(
-                      'cv_home_description'.tr,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        height: 1.5,
-                        color: AppColors
-                            .homeSecondaryText,
-                      ),
-                    ),
                     SizedBox(height: 22.h),
+
+                    const _CvAccessCard(),
+
+                    SizedBox(height: 20.h),
 
                     Obx(
                           () => _ScratchCard(
@@ -582,5 +577,144 @@ class _EmptyState extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+
+class _CvAccessCard
+    extends GetView<CvHomeController> {
+  const _CvAccessCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final int freeRemaining =
+          controller.freeCvGenerationsRemaining;
+
+      final int paidCredits =
+          controller.paidCvCredits;
+
+      final bool freeEnded =
+          controller.freeCvLimitEnded;
+
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(
+          horizontal: 12.w,
+          vertical: 10.h,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(
+            16.r,
+          ),
+          border: Border.all(
+            color: freeEnded
+                ? const Color(0xFFFFD7C2)
+                : const Color(0xFFDCEEDB),
+          ),
+        ),
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 34.r,
+              height: 34.r,
+              decoration: BoxDecoration(
+                color: freeEnded
+                    ? const Color(0xFFFFEEE5)
+                    : const Color(0xFFEAF8E8),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                freeEnded
+                    ? Icons.hourglass_bottom_rounded
+                    : Icons.auto_awesome_rounded,
+                size: 18.r,
+                color: freeEnded
+                    ? const Color(0xFFB35320)
+                    : AppColors.primaryGreen,
+              ),
+            ),
+
+            SizedBox(width: 9.w),
+
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment:
+                CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    freeEnded
+                        ? 'cv_free_limit_ended'.tr
+                        : 'cv_free_creations_remaining'
+                        .trParams(
+                      <String, String>{
+                        'count':
+                        freeRemaining.toString(),
+                      },
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13.5.sp,
+                      fontWeight: FontWeight.w700,
+                      color:
+                      AppColors.homePrimaryText,
+                    ),
+                  ),
+
+                  SizedBox(height: 2.h),
+
+                  Text(
+                    'cv_paid_credit_balance'.trParams(
+                      <String, String>{
+                        'count': paidCredits.toString(),
+                      },
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.5.sp,
+                      color:
+                      AppColors.homeSecondaryText,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            if (freeEnded) ...<Widget>[
+              SizedBox(width: 6.w),
+
+              Tooltip(
+                message: 'buy_cv_credits'.tr,
+                child: IconButton(
+                  onPressed:
+                  controller.openCvCreditStore,
+                  padding: EdgeInsets.zero,
+                  visualDensity:
+                  VisualDensity.compact,
+                  constraints: BoxConstraints.tightFor(
+                    width: 36.r,
+                    height: 36.r,
+                  ),
+                  style: IconButton.styleFrom(
+                    backgroundColor:
+                    const Color(0xFFFFEEE5),
+                    foregroundColor:
+                    const Color(0xFFB35320),
+                  ),
+                  icon: Icon(
+                    Icons.add_card_rounded,
+                    size: 18.r,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    });
   }
 }

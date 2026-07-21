@@ -12,7 +12,8 @@ class SearchSuggestionOverlay extends GetView<ImportantVerbsController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final List<ImportantVerbSummaryModel> results = controller.searchSuggestions;
+      final List<ImportantVerbSummaryModel> results =
+          controller.searchSuggestions;
       final bool isLoading = controller.isSearchLoading.value;
 
       return Container(
@@ -133,7 +134,7 @@ class _SearchSuggestionTile extends StatelessWidget {
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    'verb_englishmeaning_verb_banglameaning_1'.trParams(<String, String>{'englishmeaning': verb.englishMeaning.toString(), 'banglameaning': verb.banglaMeaning.toString()}),
+                    '${verb.englishMeaning} • ${verb.banglaMeaning}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -333,7 +334,10 @@ class _VerbListMessage extends StatelessWidget {
           ),
           if (onAction != null) ...<Widget>[
             SizedBox(height: 12.h),
-            TextButton(onPressed: onAction, child: Text(actionLabel ?? 'retry'.tr)),
+            TextButton(
+              onPressed: onAction,
+              child: Text(actionLabel ?? 'retry'.tr),
+            ),
           ],
         ],
       ),
@@ -396,7 +400,7 @@ class VerbLibraryCard extends GetView<ImportantVerbsController> {
                   ),
                   SizedBox(height: 7.h),
                   Text(
-                    'verb_englishmeaning'.trParams(<String, String>{'englishmeaning': verb.englishMeaning.toString()}),
+                    verb.englishMeaning,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

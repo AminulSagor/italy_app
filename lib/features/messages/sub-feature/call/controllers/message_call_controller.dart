@@ -125,8 +125,14 @@ class MessageCallController extends GetxController {
         isVideoCall: callType.isVideo,
       );
 
+      if (_endRequested ||
+          _routeClosed ||
+          _remoteTerminal) {
+        return;
+      }
+
       final Map<String, dynamic> response =
-          await _callSocketService.initiateCall(
+      await _callSocketService.initiateCall(
             conversationId: conversationId,
             callType: callType.value,
             clientCallId: const Uuid().v4(),

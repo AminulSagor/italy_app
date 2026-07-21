@@ -11,39 +11,53 @@ import '../../../../../core/services/storage_service.dart';
 import '../models/pro_checkout_models.dart';
 
 class CourseGooglePlayBillingService extends GetxService {
-  CourseGooglePlayBillingService({required StorageService storageService})
-      : _storageService = storageService;
+  CourseGooglePlayBillingService({
+    required StorageService storageService,
+  }) : _storageService = storageService;
 
-  static const String _pendingKey = 'course_pending_google_play_purchase';
+  static const String _pendingKey =
+      'course_pending_google_play_purchase';
+
+  static final RegExp _sha256Pattern = RegExp(r'^[a-f0-9]{64}$');
 
   final StorageService _storageService;
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
+
   final StreamController<PurchaseDetails> _purchaseController =
-      StreamController<PurchaseDetails>.broadcast();
+  StreamController<PurchaseDetails>.broadcast();
 
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
+
   ProductDetails? _productDetails;
   Future<void>? _initialization;
+
   bool pendingPurchaseQueryFailed = false;
 
   final RxBool isAvailable = false.obs;
   final RxBool isLoadingProduct = false.obs;
   final RxString lastError = ''.obs;
 
-  Stream<PurchaseDetails> get purchaseUpdates => _purchaseController.stream;
-  String get localizedPrice => _productDetails?.price ?? '';
-  String get localizedCurrencyCode => _productDetails?.currencyCode ?? '';
+  Stream<PurchaseDetails> get purchaseUpdates =>
+      _purchaseController.stream;
 
-  Future<void> initialize() => _initialization ??= _initializeInternal();
+  String get localizedPrice => _productDetails?.price ?? '';
+
+  String get localizedCurrencyCode =>
+      _productDetails?.currencyCode ?? '';
+
+  Future<void> initialize() {
+    return _initialization ??= _initializeInternal();
+  }
 
   Future<void> _initializeInternal() async {
     if (!Platform.isAndroid) {
-      lastError.value = 'Google Play Billing is available only on Android.';
+      lastError.value =
+      'Google Play Billing is available only on Android.';
       return;
     }
 
     _purchaseSubscription ??= _inAppPurchase.purchaseStream.listen(
-      (List<PurchaseDetails> purchases) {
+          (List<PurchaseDetails> purchases) {
         for (final PurchaseDetails purchase in purchases) {
           if (!_purchaseController.isClosed) {
             _purchaseController.add(purchase);
@@ -52,6 +66,7 @@ class CourseGooglePlayBillingService extends GetxService {
       },
       onError: (Object error, StackTrace stackTrace) {
         lastError.value = 'Google Play purchase updates failed.';
+
         dev.log(
           lastError.value,
           name: 'CourseGooglePlayBillingService',
@@ -63,12 +78,16 @@ class CourseGooglePlayBillingService extends GetxService {
 
     try {
       isAvailable.value = await _inAppPurchase.isAvailable();
+
       if (!isAvailable.value) {
-        lastError.value = 'Google Play Billing is unavailable on this device.';
+        lastError.value =
+        'Google Play Billing is unavailable on this device.';
       }
     } catch (error, stackTrace) {
       isAvailable.value = false;
-      lastError.value = 'Could not connect to Google Play Billing.';
+      lastError.value =
+      'Could not connect to Google Play Billing.';
+
       dev.log(
         lastError.value,
         name: 'CourseGooglePlayBillingService',
@@ -78,41 +97,58 @@ class CourseGooglePlayBillingService extends GetxService {
     }
   }
 
-  Future<bool> prepareProduct(ProStoreProductModel product) async {
+  Future<bool> prepareProduct(
+      ProStoreProductModel product,
+      ) async {
     await initialize();
-    final bool isSupportedMapping = product.isActive &&
-        product.provider.toLowerCase() == 'google_play' &&
-        product.productType.toLowerCase() == 'non_consumable' &&
-        product.productId.isNotEmpty;
+
+    final bool isSupportedMapping =
+        product.isActive &&
+            product.provider.toLowerCase() == 'google_play' &&
+            product.productType.toLowerCase() == 'non_consumable' &&
+            product.productId.trim().isNotEmpty;
+
     if (!isAvailable.value || !isSupportedMapping) {
-      lastError.value = 'This course has no active Google Play product.';
+      lastError.value =
+      'This course has no active Google Play product.';
       return false;
     }
 
     isLoadingProduct.value = true;
     lastError.value = '';
+
     try {
-      final ProductDetailsResponse response = await _inAppPurchase
-          .queryProductDetails(<String>{product.productId});
+      final ProductDetailsResponse response =
+      await _inAppPurchase.queryProductDetails(
+        <String>{product.productId},
+      );
+
       if (response.error != null) {
         throw StateError(response.error!.message);
       }
+
       _productDetails = response.productDetails.firstWhereOrNull(
-        (ProductDetails item) => item.id == product.productId,
+            (ProductDetails item) => item.id == product.productId,
       );
+
       if (_productDetails == null) {
-        lastError.value = 'This course is not available in Google Play.';
+        lastError.value =
+        'This course is not available in Google Play.';
         return false;
       }
+
       return true;
     } catch (error, stackTrace) {
-      lastError.value = 'Could not load this course from Google Play.';
+      lastError.value =
+      'Could not load this course from Google Play.';
+
       dev.log(
         lastError.value,
         name: 'CourseGooglePlayBillingService',
         error: error,
         stackTrace: stackTrace,
       );
+
       return false;
     } finally {
       isLoadingProduct.value = false;
@@ -123,61 +159,116 @@ class CourseGooglePlayBillingService extends GetxService {
     required ProStoreProductModel product,
     required ProPendingGooglePlayPurchaseModel pendingPurchase,
   }) async {
-    final bool ready = _productDetails?.id == product.productId ||
-        await prepareProduct(product);
-    if (!ready || _productDetails == null) return false;
+    final bool ready =
+        _productDetails?.id == product.productId ||
+            await prepareProduct(product);
+
+    if (!ready || _productDetails == null) {
+      return false;
+    }
+
+    final String obfuscatedAccountId =
+    pendingPurchase.obfuscatedAccountId.trim().toLowerCase();
+
+    if (!_sha256Pattern.hasMatch(obfuscatedAccountId)) {
+      lastError.value =
+      'The purchase could not be securely linked to your account.';
+
+      dev.log(
+        'Invalid Google Play obfuscated account ID.',
+        name: 'CourseGooglePlayBillingService',
+      );
+
+      return false;
+    }
 
     await savePendingPurchase(pendingPurchase);
+
     try {
       final GooglePlayPurchaseParam purchaseParam =
-          GooglePlayPurchaseParam(productDetails: _productDetails!);
-      final bool launched = await _inAppPurchase.buyNonConsumable(
+      GooglePlayPurchaseParam(
+        productDetails: _productDetails!,
+        applicationUserName: obfuscatedAccountId,
+      );
+
+      final bool launched =
+      await _inAppPurchase.buyNonConsumable(
         purchaseParam: purchaseParam,
       );
-      if (!launched) await clearPendingPurchase();
+
+      if (!launched) {
+        await clearPendingPurchase();
+      }
+
       return launched;
     } catch (error, stackTrace) {
-      await clearPendingPurchase();
-      lastError.value = 'Google Play could not start the course purchase.';
+      /*
+   * Keep the pending backend order. An exception can occur after Google Play
+   * has already started processing the billing flow.
+   */
+      lastError.value =
+      'Google Play could not confirm that the purchase screen started.';
+
       dev.log(
         lastError.value,
         name: 'CourseGooglePlayBillingService',
         error: error,
         stackTrace: stackTrace,
       );
+
       return false;
     }
   }
 
   Future<PurchaseDetails?> queryPendingPurchase() async {
     pendingPurchaseQueryFailed = false;
-    final ProPendingGooglePlayPurchaseModel? pending = loadPendingPurchase();
-    if (pending == null || !Platform.isAndroid) return null;
+
+    final ProPendingGooglePlayPurchaseModel? pending =
+    loadPendingPurchase();
+
+    if (pending == null || !Platform.isAndroid) {
+      return null;
+    }
 
     await initialize();
-    if (!isAvailable.value) return null;
+
+    if (!isAvailable.value) {
+      return null;
+    }
+
     try {
-      final InAppPurchaseAndroidPlatformAddition addition = _inAppPurchase
-          .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+      final InAppPurchaseAndroidPlatformAddition addition =
+      _inAppPurchase.getPlatformAddition<
+          InAppPurchaseAndroidPlatformAddition>();
+
       final QueryPurchaseDetailsResponse response =
-          await addition.queryPastPurchases();
-      if (response.error != null) throw StateError(response.error!.message);
+      await addition.queryPastPurchases();
+
+      if (response.error != null) {
+        throw StateError(response.error!.message);
+      }
+
       return response.pastPurchases.firstWhereOrNull(
-        (PurchaseDetails purchase) => purchase.productID == pending.productId,
+            (PurchaseDetails purchase) =>
+        purchase.productID == pending.productId,
       );
     } catch (error, stackTrace) {
       pendingPurchaseQueryFailed = true;
+
       dev.log(
         'Could not recover the pending course purchase.',
         name: 'CourseGooglePlayBillingService',
         error: error,
         stackTrace: stackTrace,
       );
+
       return null;
     }
   }
 
-  Future<void> finishVerifiedPurchase(PurchaseDetails purchase) async {
+  Future<void> finishVerifiedPurchase(
+      PurchaseDetails purchase,
+      ) async {
     if (purchase.pendingCompletePurchase) {
       await _inAppPurchase.completePurchase(purchase);
     }
@@ -185,10 +276,18 @@ class CourseGooglePlayBillingService extends GetxService {
 
   ProPendingGooglePlayPurchaseModel? loadPendingPurchase() {
     final String? raw = _storageService.readString(_pendingKey);
-    if (raw == null || raw.trim().isEmpty) return null;
+
+    if (raw == null || raw.trim().isEmpty) {
+      return null;
+    }
+
     try {
       final dynamic decoded = jsonDecode(raw);
-      if (decoded is! Map) return null;
+
+      if (decoded is! Map) {
+        return null;
+      }
+
       return ProPendingGooglePlayPurchaseModel.fromJson(
         Map<String, dynamic>.from(decoded),
       );
@@ -199,20 +298,23 @@ class CourseGooglePlayBillingService extends GetxService {
         error: error,
         stackTrace: stackTrace,
       );
+
       return null;
     }
   }
 
   Future<void> savePendingPurchase(
-    ProPendingGooglePlayPurchaseModel pendingPurchase,
-  ) {
+      ProPendingGooglePlayPurchaseModel pendingPurchase,
+      ) {
     return _storageService.writeString(
       _pendingKey,
       jsonEncode(pendingPurchase.toJson()),
     );
   }
 
-  Future<void> clearPendingPurchase() => _storageService.remove(_pendingKey);
+  Future<void> clearPendingPurchase() {
+    return _storageService.remove(_pendingKey);
+  }
 
   @override
   void onClose() {
