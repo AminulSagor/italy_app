@@ -16,7 +16,7 @@ class SplashController extends GetxController {
 
   late final RxString selectedLanguage;
 
-  static const int totalPages = 4;
+  static const int totalPages = 3;
 
   bool _isNavigating = false;
 

@@ -18,7 +18,20 @@ class ImportantVerbsController extends GetxController {
   }) : _apiService = apiService,
        _ttsService = ttsService;
 
-  static const String _language = 'en';
+  String get _language {
+    final String languageCode =
+        Get.locale?.languageCode.toLowerCase() ?? 'en';
+
+    if (languageCode == 'bn') {
+      return 'bn';
+    }
+
+    if (languageCode == 'it') {
+      return 'it';
+    }
+
+    return 'en';
+  }
   static const int _pageSize = 10;
   static const Duration _searchDebounceDuration = Duration(milliseconds: 450);
 
@@ -37,6 +50,7 @@ class ImportantVerbsController extends GetxController {
   final RxList<ImportantVerbSummaryModel> searchSuggestions =
       <ImportantVerbSummaryModel>[].obs;
   final RxSet<String> savedVerbIds = <String>{}.obs;
+  final RxSet<String> savingVerbIds = <String>{}.obs;
 
   final RxBool isVerbsLoading = false.obs;
   final RxBool isLoadingMoreVerbs = false.obs;
@@ -90,6 +104,10 @@ class ImportantVerbsController extends GetxController {
 
   List<ImportantVerbSummaryModel> get savedVerbPreviewItems {
     return savedVerbItems.take(6).toList(growable: false);
+  }
+
+  bool isVerbSavePending(String verbId) {
+    return savingVerbIds.contains(verbId);
   }
 
   bool get hasMoreVerbs => _verbsPage < _verbsTotalPages;
@@ -448,22 +466,60 @@ class ImportantVerbsController extends GetxController {
 
   bool isVerbSaved(String verbId) => savedVerbIds.contains(verbId);
 
-  Future<void> toggleVerbSaved(ImportantVerbSummaryModel verb) async {
-    final bool wasSaved = isVerbSaved(verb.id);
-    _setVerbSavedState(verb.id, !wasSaved);
-
-    final ApiResult<void> result = await ApiErrorHandler.call<void>(
-      () => wasSaved
-          ? _apiService.removeSavedVerb(verbId: verb.id)
-          : _apiService.saveVerb(verbId: verb.id),
-    );
-
-    if (!result.isSuccess) {
-      _setVerbSavedState(verb.id, wasSaved);
+  Future<void> toggleVerbSaved(
+      ImportantVerbSummaryModel verb,
+      ) async {
+    if (isVerbSavePending(verb.id)) {
       return;
     }
 
-    unawaited(loadSavedVerbs(showError: false));
+    final bool wasSaved = isVerbSaved(verb.id);
+
+    savingVerbIds.add(verb.id);
+    savingVerbIds.refresh();
+
+    // Keep the optimistic UI update.
+    _setVerbSavedState(
+      verb.id,
+      !wasSaved,
+    );
+
+    bool wasSuccessful = false;
+
+    try {
+      final ApiResult<void> result =
+      await ApiErrorHandler.call<void>(
+            () => wasSaved
+            ? _apiService.removeSavedVerb(
+          verbId: verb.id,
+        )
+            : _apiService.saveVerb(
+          verbId: verb.id,
+        ),
+      );
+
+      if (!result.isSuccess) {
+        // Restore the previous state when the API fails.
+        _setVerbSavedState(
+          verb.id,
+          wasSaved,
+        );
+        return;
+      }
+
+      wasSuccessful = true;
+    } finally {
+      savingVerbIds.remove(verb.id);
+      savingVerbIds.refresh();
+    }
+
+    if (wasSuccessful) {
+      unawaited(
+        loadSavedVerbs(
+          showError: false,
+        ),
+      );
+    }
   }
 
   Future<void> speak(ImportantVerbTtsModel tts) async {
@@ -564,18 +620,34 @@ class ImportantVerbsController extends GetxController {
   }
 
   _VerbFilterQuery _filterFor(String label) {
-    if (label == 'regular'.tr) {
-      return _VerbFilterQuery(regularity: 'regular');
-    } else if (label == 'irregular'.tr) {
-      return const _VerbFilterQuery(regularity: 'irregular');
-    } else if (label == '-ARE') {
-      return const _VerbFilterQuery(endingType: '-are');
-    } else if (label == '-ERE') {
-      return const _VerbFilterQuery(endingType: '-ere');
-    } else if (label == '-IRE') {
-      return const _VerbFilterQuery(endingType: '-ire');
-    } else {
-      return const _VerbFilterQuery();
+    switch (label.trim().toLowerCase()) {
+      case 'regular':
+        return const _VerbFilterQuery(
+          regularity: 'regular',
+        );
+
+      case 'irregular':
+        return const _VerbFilterQuery(
+          regularity: 'irregular',
+        );
+
+      case '-are':
+        return const _VerbFilterQuery(
+          endingType: '-are',
+        );
+
+      case '-ere':
+        return const _VerbFilterQuery(
+          endingType: '-ere',
+        );
+
+      case '-ire':
+        return const _VerbFilterQuery(
+          endingType: '-ire',
+        );
+
+      default:
+        return const _VerbFilterQuery();
     }
   }
 

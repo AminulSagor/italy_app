@@ -3,6 +3,52 @@
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
+    'expert_tip_complete_chapters_in_order':
+    'Complete chapters in order so the course progress and final exam eligibility stay up to date.',
+    'guide_video': 'Guide Video',
+    'watch_app_guide': 'Watch the app guide',
+    'guide_video_unavailable':
+    'The guide video is unavailable.',
+    'chat_with_us_on_whatsapp': 'Chat with our support team on WhatsApp',
+    'unable_to_open_whatsapp': 'Unable to open WhatsApp',
+    'webinar_stage_permission_required':
+    'Microphone and camera permissions are required to join the webinar stage.',
+    'webinar_stage_permission_settings_required':
+    'Allow microphone and camera access from app settings to join the webinar stage.',
+    'notification_permission_title': 'Stay updated',
+    'notification_permission_description':
+    'Allow notifications for messages, incoming calls, learning reminders, and important account updates.',
+    'notification_permission_not_now': 'Not now',
+    'notification_permission_enable': 'Enable notifications',
+    'full_screen_call_permission_title':
+    'Show incoming calls on screen',
+    'full_screen_call_permission_description':
+    'Allow Italir Pothe to show incoming calls over the lock screen so you do not miss calls.',
+    'ai_report_action': 'Report',
+    'ai_report_title': 'Report AI content',
+    'ai_report_description':
+    'Tell us what is wrong with this AI-generated content.',
+    'ai_report_issue_required': 'Issue *',
+    'ai_report_details_optional': 'Details (optional)',
+    'ai_report_add_screenshot': 'Add screenshot',
+    'ai_report_change_screenshot': 'Change screenshot',
+    'ai_report_screenshot_selected': 'Screenshot selected',
+    'ai_report_submit': 'Submit report',
+    'ai_report_select_issue': 'Please select an issue.',
+    'ai_report_content_missing': 'The AI content could not be attached.',
+    'ai_report_success_title': 'Report submitted',
+    'ai_report_success_message':
+    'Thank you for helping us improve AI safety.',
+    'ai_report_error_title': 'Submission failed',
+    'ai_report_error_message':
+    'Unable to submit the report. Please try again.',
+    'ai_report_offensive_or_hateful': 'Offensive or hateful content',
+    'ai_report_sexual_or_inappropriate': 'Sexual or inappropriate content',
+    'ai_report_dangerous_or_harmful': 'Dangerous or harmful content',
+    'ai_report_harassment': 'Harassment',
+    'ai_report_false_or_misleading': 'False or misleading information',
+    'ai_report_privacy_concern': 'Privacy concern',
+    'ai_report_other': 'Other',
     'guided_learning_level_selection':
     'Guided Learning Level Selection',
     'notification_filter_all': 'All',
@@ -1534,7 +1580,7 @@ appTranslations = <String, Map<String, String>>{
     'create_a_cv_from_an_admin_provided_template_comple':
         'Create a CV from an admin-provided template.',
     'create_a_new_password': 'Create a New Password',
-    'create_a_professional_italian_cv': 'Create a Professional Italian CV',
+    'create_a_professional_italian_cv': 'Create a Professional CV',
     'create_cv': 'Create CV',
     'create_new_cv': 'Create New CV',
     'create_your_cv': 'Create Your CV',
@@ -2006,7 +2052,7 @@ appTranslations = <String, Map<String, String>>{
     'previous': 'Previous',
     'primary': 'Primary',
     'pro': 'Pro',
-    'pro_tip': 'Pro Tip',
+    'pro_tip': 'Pro Tip ',
     'pro_tip_1': 'Pro Tip',
     'pro_tips_cv': 'Pro Tips CV',
     'processing': 'Processing',
@@ -2523,7 +2569,7 @@ appTranslations = <String, Map<String, String>>{
     '🧑': '🧑',
     'question_x_of_y': 'Question @current of @total',
     'xp_earned_value': '⚡ +@xp XP',
-    'day_streak_value': '🔥 @days Day Streak',
+    'day_streak_value': '@days Day Streak',
     'accuracy_percent_value': '🎯 @accuracy% Accuracy',
     'correct_answer_value': 'Correct: @answer',
     'you_completed_chapter': 'You completed @chapter!',
@@ -3727,7 +3773,7 @@ appTranslations = <String, Map<String, String>>{
     'create_a_cv_from_an_admin_provided_template_comple':
         'অ্যাডমিনের দেওয়া টেমপ্লেট থেকে একটি সিভি তৈরি করুন',
     'create_a_new_password': 'নতুন পাসওয়ার্ড তৈরি করুন',
-    'create_a_professional_italian_cv': 'পেশাদার ইতালিয়ান সিভি তৈরি করুন',
+    'create_a_professional_italian_cv': 'পেশাদার সিভি তৈরি করুন',
     'create_cv': 'সিভি তৈরি করুন',
     'create_new_cv': 'নতুন সিভি তৈরি করুন',
     'create_your_cv': 'আপনার সিভি তৈরি করুন',
@@ -4205,7 +4251,7 @@ appTranslations = <String, Map<String, String>>{
     'previous': 'আগের',
     'primary': 'প্রাথমিক',
     'pro': 'Pro',
-    'pro_tip': 'প্রো টিপ',
+    'pro_tip': 'প্রো টিপ ',
     'pro_tip_1': 'প্রো টিপ',
     'pro_tips_cv': 'সিভির প্রো টিপস',
     'processing': 'প্রক্রিয়াকরণ হচ্ছে',
@@ -4735,7 +4781,7 @@ appTranslations = <String, Map<String, String>>{
     '🧑': '🧑',
     'question_x_of_y': '@total-এর মধ্যে প্রশ্ন @current',
     'xp_earned_value': '⚡ +@xp XP',
-    'day_streak_value': '🔥 @days দিনের স্ট্রিক',
+    'day_streak_value': '@days দিনের স্ট্রিক',
     'accuracy_percent_value': '🎯 @accuracy% নির্ভুলতা',
     'correct_answer_value': 'সঠিক: @answer',
     'you_completed_chapter': 'আপনি @chapter সম্পন্ন করেছেন!',
@@ -5229,8 +5275,108 @@ appTranslations = <String, Map<String, String>>{
     'home_greeting': 'হাই, @name',
     'guided_learning_level_selection':
     'গাইডেড লার্নিং লেভেল নির্বাচন',
+    'ai_report_action': 'রিপোর্ট করুন',
+    'ai_report_title': 'AI কনটেন্ট রিপোর্ট করুন',
+    'ai_report_description':
+    'এই AI তৈরি করা কনটেন্টে কী সমস্যা আছে তা আমাদের জানান।',
+    'ai_report_issue_required': 'সমস্যার ধরন *',
+    'ai_report_details_optional': 'বিস্তারিত তথ্য (ঐচ্ছিক)',
+    'ai_report_add_screenshot': 'স্ক্রিনশট যোগ করুন',
+    'ai_report_change_screenshot': 'স্ক্রিনশট পরিবর্তন করুন',
+    'ai_report_screenshot_selected': 'স্ক্রিনশট নির্বাচন করা হয়েছে',
+    'ai_report_submit': 'রিপোর্ট জমা দিন',
+    'ai_report_select_issue': 'অনুগ্রহ করে সমস্যার ধরন নির্বাচন করুন।',
+    'ai_report_content_missing': 'AI কনটেন্টটি সংযুক্ত করা যায়নি।',
+    'ai_report_success_title': 'রিপোর্ট জমা হয়েছে',
+    'ai_report_success_message':
+    'AI নিরাপত্তা উন্নত করতে সাহায্য করার জন্য ধন্যবাদ।',
+    'ai_report_error_title': 'রিপোর্ট জমা হয়নি',
+    'ai_report_error_message':
+    'রিপোর্ট জমা দেওয়া যায়নি। আবার চেষ্টা করুন।',
+    'ai_report_offensive_or_hateful': 'আপত্তিকর বা ঘৃণামূলক কনটেন্ট',
+    'ai_report_sexual_or_inappropriate': 'যৌন বা অনুপযুক্ত কনটেন্ট',
+    'ai_report_dangerous_or_harmful': 'বিপজ্জনক বা ক্ষতিকর কনটেন্ট',
+    'ai_report_harassment': 'হয়রানি',
+    'ai_report_false_or_misleading': 'মিথ্যা বা বিভ্রান্তিকর তথ্য',
+    'ai_report_privacy_concern': 'গোপনীয়তা সম্পর্কিত সমস্যা',
+    'ai_report_other': 'অন্যান্য',
+    'full_screen_call_permission_title':
+    'স্ক্রিনে ইনকামিং কল দেখান',
+    'full_screen_call_permission_description':
+    'কল মিস না করতে লক স্ক্রিনের ওপর ইনকামিং কল দেখানোর অনুমতি দিন।',
+    'notification_permission_title': 'আপডেট পেতে থাকুন',
+    'notification_permission_description':
+    'মেসেজ, ইনকামিং কল, শেখার রিমাইন্ডার এবং গুরুত্বপূর্ণ অ্যাকাউন্ট আপডেটের নোটিফিকেশন চালু করুন।',
+    'notification_permission_not_now': 'এখন নয়',
+    'notification_permission_enable': 'নোটিফিকেশন চালু করুন',
+    'webinar_stage_permission_required':
+    'ওয়েবিনার স্টেজে যোগ দিতে মাইক্রোফোন ও ক্যামেরার অনুমতি প্রয়োজন।',
+    'webinar_stage_permission_settings_required':
+    'ওয়েবিনার স্টেজে যোগ দিতে অ্যাপ সেটিংস থেকে মাইক্রোফোন ও ক্যামেরার অনুমতি দিন।',
+    'chat_with_us_on_whatsapp':
+    'WhatsApp-এ আমাদের সাপোর্ট টিমের সঙ্গে কথা বলুন',
+    'unable_to_open_whatsapp': 'WhatsApp খোলা যাচ্ছে না',
+    'guide_video': 'গাইড ভিডিও',
+    'watch_app_guide':
+    'অ্যাপ ব্যবহারের গাইড দেখুন',
+    'guide_video_unavailable':
+    'গাইড ভিডিওটি পাওয়া যাচ্ছে না।',
+    'expert_tip_complete_chapters_in_order':
+    'অধ্যায়গুলো ধারাবাহিকভাবে সম্পন্ন করুন, যাতে কোর্সের অগ্রগতি এবং চূড়ান্ত পরীক্ষার যোগ্যতা সঠিকভাবে হালনাগাদ থাকে.',
   },
   'it_IT': <String, String>{
+    'expert_tip_complete_chapters_in_order':
+    'Completa i capitoli in ordine per mantenere aggiornati i progressi del corso e l’idoneità all’esame finale.',
+    'guide_video': 'Video guida',
+    'watch_app_guide':
+    'Guarda la guida dell’app',
+    'guide_video_unavailable':
+    'Il video guida non è disponibile.',
+    'chat_with_us_on_whatsapp':
+    'Chatta con il nostro team di supporto su WhatsApp',
+    'unable_to_open_whatsapp': 'Impossibile aprire WhatsApp',
+    'webinar_stage_permission_required':
+    'Le autorizzazioni per microfono e fotocamera sono necessarie per partecipare al webinar.',
+    'webinar_stage_permission_settings_required':
+    'Consenti l’accesso a microfono e fotocamera dalle impostazioni dell’app per partecipare al webinar.',
+    'notification_permission_title': 'Rimani aggiornato',
+    'notification_permission_description':
+    'Consenti le notifiche per messaggi, chiamate in arrivo, promemoria di studio e aggiornamenti importanti dell’account.',
+    'notification_permission_not_now': 'Non ora',
+    'notification_permission_enable': 'Attiva notifiche',
+    'full_screen_call_permission_title':
+    'Mostra le chiamate in arrivo',
+    'full_screen_call_permission_description':
+    'Consenti a Italir Pothe di mostrare le chiamate in arrivo sopra la schermata di blocco per non perdere le chiamate.',
+    'ai_report_action': 'Segnala',
+    'ai_report_title': 'Segnala contenuto AI',
+    'ai_report_description':
+    'Dicci cosa non va in questo contenuto generato dall’AI.',
+    'ai_report_issue_required': 'Problema *',
+    'ai_report_details_optional': 'Dettagli (facoltativi)',
+    'ai_report_add_screenshot': 'Aggiungi screenshot',
+    'ai_report_change_screenshot': 'Cambia screenshot',
+    'ai_report_screenshot_selected': 'Screenshot selezionato',
+    'ai_report_submit': 'Invia segnalazione',
+    'ai_report_select_issue': 'Seleziona un problema.',
+    'ai_report_content_missing':
+    'Non è stato possibile allegare il contenuto AI.',
+    'ai_report_success_title': 'Segnalazione inviata',
+    'ai_report_success_message':
+    'Grazie per averci aiutato a migliorare la sicurezza dell’AI.',
+    'ai_report_error_title': 'Invio non riuscito',
+    'ai_report_error_message':
+    'Impossibile inviare la segnalazione. Riprova.',
+    'ai_report_offensive_or_hateful': 'Contenuto offensivo o d’odio',
+    'ai_report_sexual_or_inappropriate':
+    'Contenuto sessuale o inappropriato',
+    'ai_report_dangerous_or_harmful':
+    'Contenuto pericoloso o dannoso',
+    'ai_report_harassment': 'Molestie',
+    'ai_report_false_or_misleading':
+    'Informazioni false o fuorvianti',
+    'ai_report_privacy_concern': 'Problema di privacy',
+    'ai_report_other': 'Altro',
     'guided_learning_level_selection':
     'Selezione del livello di apprendimento guidato',
     'notification_filter_all': 'Tutte',
@@ -6417,7 +6563,7 @@ appTranslations = <String, Map<String, String>>{
     'gen_inizia_a_scrivere_qui_la_tua_s':
         'Inizia a scrivere qui la tua storia...',
     'gen_pages_unavailable': 'Pagine non disponibili',
-    'gen_theory_book': 'Libro di teoria',
+    'gen_theory_book': 'Testo teorico',
     'gen_not_given': 'Non dato',
     'gen_previous_1': 'Precedente',
     'gen_next_1': 'Prossimo',
@@ -6564,7 +6710,7 @@ appTranslations = <String, Map<String, String>>{
         'L’IA sta monitorando le operazioni di copia e incolla',
     'ai_mastery': 'Padronanza IA',
     'ai_refills': 'Ricariche IA',
-    'ai_speaking_lab': 'Laboratorio di conversazione IA',
+    'ai_speaking_lab': 'Conversazione IA',
     'ai_suggested': 'Suggerito dall’IA',
     'ai_tutor': 'Tutor IA',
     'ai_tutor_1': 'Tutor IA',
@@ -6802,7 +6948,7 @@ appTranslations = <String, Map<String, String>>{
     'create_a_cv_from_an_admin_provided_template_comple':
         'Crea un CV da un modello fornito dall’amministratore',
     'create_a_new_password': 'Crea una nuova password',
-    'create_a_professional_italian_cv': 'Crea un CV professionale italiano',
+    'create_a_professional_italian_cv': 'Crea un CV professionale',
     'create_cv': 'Crea CV',
     'create_new_cv': 'Crea nuovo CV',
     'create_your_cv': 'Crea il tuo CV',
@@ -7287,7 +7433,7 @@ appTranslations = <String, Map<String, String>>{
     'previous': 'Precedente',
     'primary': 'Primario',
     'pro': 'Pro',
-    'pro_tip': 'Consiglio pro',
+    'pro_tip': 'Consiglio pro ',
     'pro_tip_1': 'Consiglio pro',
     'pro_tips_cv': 'Consigli pro per il CV',
     'processing': 'Elaborazione',
@@ -7820,7 +7966,7 @@ appTranslations = <String, Map<String, String>>{
     '🧑': '🧑',
     'question_x_of_y': 'Domanda @current di @total',
     'xp_earned_value': '⚡ +@xp XP',
-    'day_streak_value': '🔥 Serie di @days giorni',
+    'day_streak_value': 'Serie di @days giorni',
     'accuracy_percent_value': '🎯 Precisione @accuracy%',
     'correct_answer_value': 'Corretto: @answer',
     'you_completed_chapter': 'Hai completato @chapter!',

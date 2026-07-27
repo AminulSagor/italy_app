@@ -1,5 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
+import org.gradle.api.GradleException
 
 plugins {
     id("com.android.application")
@@ -17,19 +18,67 @@ if (keystorePropertiesFile.exists()) {
     }
 }
 
-val hasReleaseKeystore = listOf(
+val requiredKeystoreProperties = listOf(
     "keyAlias",
     "keyPassword",
     "storeFile",
     "storePassword",
-).all { propertyName ->
-    !keystoreProperties.getProperty(propertyName).isNullOrBlank()
+)
+
+val missingKeystoreProperties = requiredKeystoreProperties.filter {
+    keystoreProperties.getProperty(it).isNullOrBlank()
 }
+
+val hasReleaseKeystore =
+    keystorePropertiesFile.exists() &&
+            missingKeystoreProperties.isEmpty()
+
+val releaseStoreFile = keystoreProperties
+    .getProperty("storeFile")
+    ?.trim()
+    ?.takeIf { it.isNotEmpty() }
+    ?.let { file(it) }
+
+
+val isReleaseBuildRequested = gradle.startParameter.taskNames.any { taskName ->
+    taskName.contains("release", ignoreCase = true)
+}
+
+if (isReleaseBuildRequested) {
+    if (!keystorePropertiesFile.exists()) {
+        throw GradleException(
+            "Release build blocked: android/key.properties is missing.",
+        )
+    }
+
+    if (missingKeystoreProperties.isNotEmpty()) {
+        throw GradleException(
+            "Release build blocked: missing key.properties values: " +
+                    missingKeystoreProperties.joinToString(),
+        )
+    }
+
+    if (releaseStoreFile == null || !releaseStoreFile.exists()) {
+        throw GradleException(
+            "Release build blocked: upload keystore was not found at " +
+                    "${releaseStoreFile?.absolutePath}",
+        )
+    }
+}
+
+
+val requiredTargetSdk = 36
 
 android {
     namespace = "com.shafacode.italir_pothe"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+
+    compileSdk = maxOf(
+        flutter.compileSdkVersion,
+        requiredTargetSdk,
+    )
+
+
+    ndkVersion = "28.0.13004108"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -43,8 +92,10 @@ android {
 
     defaultConfig {
         applicationId = "com.shafacode.italir_pothe"
+
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = requiredTargetSdk
+
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -52,11 +103,14 @@ android {
     signingConfigs {
         if (hasReleaseKeystore) {
             create("release") {
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
-                storeFile = file(
-                    keystoreProperties.getProperty("storeFile"),
-                )
+                keyAlias =
+                    keystoreProperties.getProperty("keyAlias")
+
+                keyPassword =
+                    keystoreProperties.getProperty("keyPassword")
+
+                storeFile = releaseStoreFile
+
                 storePassword =
                     keystoreProperties.getProperty("storePassword")
             }
@@ -65,11 +119,10 @@ android {
 
     buildTypes {
         getByName("release") {
-            signingConfig = if (hasReleaseKeystore) {
-                signingConfigs.getByName("release")
-            } else {
-                // Allows local release testing when key.properties is absent.
-                signingConfigs.getByName("debug")
+
+            if (hasReleaseKeystore) {
+                signingConfig =
+                    signingConfigs.getByName("release")
             }
 
             proguardFiles(

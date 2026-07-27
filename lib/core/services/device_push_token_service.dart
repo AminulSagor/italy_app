@@ -23,15 +23,11 @@ class DevicePushTokenService {
   bool _allowBackendSync = false;
   bool _refreshListenerStarted = false;
 
-  String get platformValue =>
-      Platform.isIOS ? 'ios' : 'android';
+  String get platformValue => Platform.isIOS ? 'ios' : 'android';
 
   Future<String> getOrCreateDeviceId() async {
     final String existing =
-        _storageService
-            .readString(_deviceIdStorageKey)
-            ?.trim() ??
-            '';
+        _storageService.readString(_deviceIdStorageKey)?.trim() ?? '';
 
     if (existing.isNotEmpty) {
       return existing;
@@ -47,24 +43,23 @@ class DevicePushTokenService {
     return newDeviceId;
   }
 
+  /// Silently registers the device only when notification permission
+  /// has already been granted.
+  ///
+  /// This method never opens the notification permission popup.
   Future<void> registerCurrentDevice() async {
-    _allowBackendSync = true;
-
     try {
-      await FirebaseMessaging.instance.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      final NotificationSettings settings =
+      await FirebaseMessaging.instance.getNotificationSettings();
 
-      final String? token =
-      await FirebaseMessaging.instance.getToken();
-
-      if (token == null || token.trim().isEmpty) {
+      if (!_isAuthorized(settings.authorizationStatus)) {
+        _allowBackendSync = false;
         return;
       }
 
-      await _sendTokenToBackend(token.trim());
+      _allowBackendSync = true;
+
+      await _registerCurrentToken();
     } catch (error, stackTrace) {
       dev.log(
         'Failed to register FCM token',
@@ -72,6 +67,60 @@ class DevicePushTokenService {
         stackTrace: stackTrace,
         name: 'DevicePushTokenService',
       );
+    }
+  }
+
+  /// Call this only after showing your own explanation and after
+  /// the user presses the Enable Notifications button.
+  Future<AuthorizationStatus>
+  requestPermissionAndRegisterCurrentDevice() async {
+    try {
+      final NotificationSettings settings =
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      if (!_isAuthorized(settings.authorizationStatus)) {
+        _allowBackendSync = false;
+        return settings.authorizationStatus;
+      }
+
+      _allowBackendSync = true;
+
+      await _registerCurrentToken();
+
+      return settings.authorizationStatus;
+    } catch (error, stackTrace) {
+      _allowBackendSync = false;
+
+      dev.log(
+        'Failed to request notification permission',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'DevicePushTokenService',
+      );
+
+      return AuthorizationStatus.denied;
+    }
+  }
+
+  Future<bool> hasNotificationPermission() async {
+    try {
+      final NotificationSettings settings =
+      await FirebaseMessaging.instance.getNotificationSettings();
+
+      return _isAuthorized(settings.authorizationStatus);
+    } catch (error, stackTrace) {
+      dev.log(
+        'Failed to read notification permission',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'DevicePushTokenService',
+      );
+
+      return false;
     }
   }
 
@@ -84,13 +133,18 @@ class DevicePushTokenService {
 
     FirebaseMessaging.instance.onTokenRefresh.listen(
           (String newToken) async {
-        if (!_allowBackendSync ||
-            !_storageService.isLoggedIn) {
+        if (!_allowBackendSync || !_storageService.isLoggedIn) {
+          return;
+        }
+
+        final String token = newToken.trim();
+
+        if (token.isEmpty) {
           return;
         }
 
         try {
-          await _sendTokenToBackend(newToken.trim());
+          await _sendTokenToBackend(token);
         } catch (error, stackTrace) {
           dev.log(
             'Failed to update refreshed FCM token',
@@ -120,15 +174,30 @@ class DevicePushTokenService {
     }
   }
 
-  Future<void> _sendTokenToBackend(
-      String fcmToken,
-      ) async {
+  Future<void> _registerCurrentToken() async {
+    final String? rawToken =
+    await FirebaseMessaging.instance.getToken();
+
+    final String token = rawToken?.trim() ?? '';
+
+    if (token.isEmpty) {
+      return;
+    }
+
+    await _sendTokenToBackend(token);
+  }
+
+  bool _isAuthorized(AuthorizationStatus status) {
+    return status == AuthorizationStatus.authorized ||
+        status == AuthorizationStatus.provisional;
+  }
+
+  Future<void> _sendTokenToBackend(String fcmToken) async {
     if (fcmToken.isEmpty) {
       return;
     }
 
-    final String deviceId =
-    await getOrCreateDeviceId();
+    final String deviceId = await getOrCreateDeviceId();
 
     await _apiClient.dio.post(
       _registerEndpoint,

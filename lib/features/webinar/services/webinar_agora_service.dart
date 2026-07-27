@@ -4,6 +4,16 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../models/webinar_models.dart';
 
+
+
+class WebinarAgoraPermissionException implements Exception {
+  const WebinarAgoraPermissionException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
 class WebinarAgoraService {
   RtcEngine? _engine;
   AgoraTokenModel? _activeToken;
@@ -21,7 +31,6 @@ class WebinarAgoraService {
       remoteVideoUids.isEmpty ? null : remoteVideoUids.last;
 
   Future<void> joinAsAudience(AgoraTokenModel token) async {
-    await _ensurePermissions();
     await _initializeEngine(token.appId);
     _activeToken = token;
     remoteHostUid.value = null;
@@ -47,21 +56,36 @@ class WebinarAgoraService {
     isCameraEnabled.value = false;
   }
 
-  Future<void> promoteToSpeaker(AgoraTokenModel token) async {
-    if (_engine == null) return;
+  Future<void> promoteToSpeaker(
+      AgoraTokenModel token,
+      ) async {
+    if (_engine == null) {
+      return;
+    }
+
+    // Ask only when the participant is approved as a speaker.
+    await _ensureSpeakerPermissions();
+
     _activeToken = token;
 
     await _engine?.renewToken(token.rtcToken);
-    await _engine?.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+
+    await _engine?.setClientRole(
+      role: ClientRoleType.clientRoleBroadcaster,
+    );
+
     await _engine?.enableLocalAudio(true);
     await _engine?.enableLocalVideo(true);
     await _engine?.muteLocalAudioStream(false);
     await _engine?.muteLocalVideoStream(false);
     await _engine?.startPreview();
+
     await _engine?.updateChannelMediaOptions(
       const ChannelMediaOptions(
-        channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
-        clientRoleType: ClientRoleType.clientRoleBroadcaster,
+        channelProfile:
+        ChannelProfileType.channelProfileLiveBroadcasting,
+        clientRoleType:
+        ClientRoleType.clientRoleBroadcaster,
         autoSubscribeAudio: true,
         autoSubscribeVideo: true,
         publishCameraTrack: true,
@@ -205,7 +229,35 @@ class WebinarAgoraService {
     }
   }
 
-  Future<void> _ensurePermissions() async {
-    await <Permission>[Permission.microphone, Permission.camera].request();
+
+  Future<void> _ensureSpeakerPermissions() async {
+    final Map<Permission, PermissionStatus> statuses =
+    await <Permission>[
+      Permission.microphone,
+      Permission.camera,
+    ].request();
+
+    final PermissionStatus microphoneStatus =
+        statuses[Permission.microphone] ??
+            await Permission.microphone.status;
+
+    final PermissionStatus cameraStatus =
+        statuses[Permission.camera] ??
+            await Permission.camera.status;
+
+    if (microphoneStatus.isGranted &&
+        cameraStatus.isGranted) {
+      return;
+    }
+
+    final bool permanentlyDenied =
+        microphoneStatus.isPermanentlyDenied ||
+            cameraStatus.isPermanentlyDenied;
+
+    throw WebinarAgoraPermissionException(
+      permanentlyDenied
+          ? 'webinar_stage_permission_settings_required'.tr
+          : 'webinar_stage_permission_required'.tr,
+    );
   }
 }

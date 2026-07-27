@@ -5,6 +5,7 @@ import 'package:italir_pothe/core/models/learning_activity_models.dart';
 import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../core/themes/app_colors.dart';
+import '../../../core/widgets/native_bottom_inset.dart';
 import '../controllers/ai_tutor_level_test_controller.dart';
 import 'widgets/ai_tutor_level_test_widgets.dart';
 
@@ -116,47 +117,63 @@ class AiLevelTestView extends GetView<AiTutorLevelTestController> {
                 left: 30.w,
                 right: 30.w,
                 bottom: 0,
-                child: Container(
-                  height: 149.h,
-                  padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 0),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(34.r),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.025),
-                        blurRadius: 16.r,
-                        offset: Offset(0, -6.h),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: <Widget>[
-                      AiTutorLevelPrimaryButton(
-                        text: 'start_10_question_test'.tr,
-                        onTap: controller.startTest,
-                      ),
-                      SizedBox(height: 18.h),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(
-                            Icons.lock_outline_rounded,
-                            size: 12.r,
-                            color: const Color(0xFF808784),
+                child: NativeBottomInset(
+                  child: Container(
+                    height: 149.h,
+                    padding: EdgeInsets.fromLTRB(
+                      20.w,
+                      24.h,
+                      20.w,
+                      0,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(34.r),
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: 0.025,
                           ),
-                          SizedBox(width: 5.w),
-                          Text(
-                            'takes_about_5_minutes_results_stay_private'.tr,
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w500,
+                          blurRadius: 16.r,
+                          offset: Offset(0, -6.h),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        AiTutorLevelPrimaryButton(
+                          text: 'start_10_question_test'.tr,
+                          onTap: controller.startTest,
+                        ),
+                        SizedBox(height: 18.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.lock_outline_rounded,
+                              size: 12.r,
                               color: const Color(0xFF808784),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            SizedBox(width: 5.w),
+                            Flexible(
+                              child: Text(
+                                'takes_about_5_minutes_'
+                                    'results_stay_private'
+                                    .tr,
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF808784),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

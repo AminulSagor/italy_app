@@ -32,14 +32,17 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (
-          RequestOptions options,
-          RequestInterceptorHandler handler,
-        ) async {
-          final String? token = await _tokenService.getAccessToken();
-          if (token != null && token.isNotEmpty) {
-            final String tokenType = await _tokenService.getTokenType();
-            options.headers['Authorization'] = '$tokenType $token';
+            RequestOptions options,
+            RequestInterceptorHandler handler,
+            ) {
+          final String? authorizationHeader =
+              _tokenService.authorizationHeader;
+
+          if (authorizationHeader != null) {
+            options.headers['Authorization'] =
+                authorizationHeader;
           }
+
           handler.next(options);
         },
         onError: (DioException error, ErrorInterceptorHandler handler) async {
@@ -63,9 +66,9 @@ class ApiClient {
       _dio.interceptors.add(
         PrettyDioLogger(
           requestHeader: false,
-          requestBody: true,
+          requestBody: false,
           responseHeader: false,
-          responseBody: true,
+          responseBody: false,
           error: true,
           compact: true,
           maxWidth: 90,

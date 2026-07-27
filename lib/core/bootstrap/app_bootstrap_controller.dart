@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as dev;
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -42,8 +43,8 @@ class AppBootstrapController extends GetxController {
     );
 
     if (!Get.isRegistered<TokenService>()) {
-      Get.put<TokenService>(
-        TokenService(),
+      await Get.putAsync<TokenService>(
+            () => TokenService().init(),
         permanent: true,
       );
     }
@@ -59,13 +60,13 @@ class AppBootstrapController extends GetxController {
     }
 
     /*
- * Register DevicePushTokenService first.
- *
- * AuthService needs this service to get:
- * - deviceId
- * - platform
- * - FCM logout cleanup
- */
+     * Register DevicePushTokenService first.
+     *
+     * AuthService needs this service to get:
+     * - deviceId
+     * - platform
+     * - FCM logout cleanup
+     */
     if (!Get.isRegistered<DevicePushTokenService>()) {
       final DevicePushTokenService devicePushTokenService =
       DevicePushTokenService(
@@ -81,17 +82,16 @@ class AppBootstrapController extends GetxController {
       );
     }
 
-/*
- * Register AuthService after DevicePushTokenService.
- */
+    /*
+     * Register AuthService after DevicePushTokenService.
+     */
     if (!Get.isRegistered<AuthService>()) {
       Get.put<AuthService>(
         AuthService(
           apiClient: Get.find<ApiClient>(),
           tokenService: Get.find<TokenService>(),
           storageService: Get.find<StorageService>(),
-          devicePushTokenService:
-          Get.find<DevicePushTokenService>(),
+          devicePushTokenService: Get.find<DevicePushTokenService>(),
         ),
         permanent: true,
       );
@@ -109,8 +109,8 @@ class AppBootstrapController extends GetxController {
     if (!Get.isRegistered<UserSessionController>()) {
       Get.put<UserSessionController>(
         UserSessionController(
-          currentUserSummaryService:
-          Get.find<CurrentUserSummaryService>(),
+          currentUserSummaryService: Get.find<CurrentUserSummaryService>(),
+          storageService: Get.find<StorageService>(),
         ),
         permanent: true,
       );
@@ -144,8 +144,7 @@ class AppBootstrapController extends GetxController {
     if (!Get.isRegistered<CoursePurchaseRecoveryService>()) {
       await Get.putAsync<CoursePurchaseRecoveryService>(
             () => CoursePurchaseRecoveryService(
-          billingService:
-          Get.find<CourseGooglePlayBillingService>(),
+          billingService: Get.find<CourseGooglePlayBillingService>(),
           apiService: Get.find<ProCheckoutApiService>(),
         ).init(),
         permanent: true,
@@ -189,8 +188,10 @@ class AppBootstrapController extends GetxController {
       );
     }
 
-    // Ensure presence and socket services are registered early so we can
-    // establish a single persistent socket connection when the user logs in.
+    /*
+     * Presence and socket services stay global so messaging and calls keep
+     * their existing persistent-connection behavior.
+     */
     if (!Get.isRegistered<PresenceService>()) {
       Get.put<PresenceService>(
         PresenceService(),
@@ -207,9 +208,6 @@ class AppBootstrapController extends GetxController {
       );
     }
 
-    // Ensure presence listener is attached if both services are available.
-    // This avoids a short startup race where presence updates may arrive
-    // before PresenceService had a chance to register.
     try {
       if (Get.isRegistered<ChatSocketService>() &&
           Get.isRegistered<PresenceService>()) {
@@ -225,162 +223,67 @@ class AppBootstrapController extends GetxController {
         name: 'AppBootstrap',
       );
     }
-
-    // Network connections are deferred to _bootstrap so a terminated-app
-    // CallKit accept can open the call screen before normal home loading.
   }
 
   @override
   void onReady() {
     super.onReady();
-    _bootstrap();
+    unawaited(_bootstrap());
   }
 
   Future<void> _bootstrap() async {
     try {
-      final StorageService storageService =
-      Get.find<StorageService>();
+      final StorageService storageService = Get.find<StorageService>();
+      final TokenService tokenService = Get.find<TokenService>();
 
-      final TokenService tokenService =
-      Get.find<TokenService>();
-
-      final bool hasStoredToken =
-      await tokenService.hasToken();
+      /*
+       * TokenService already loaded secure storage during application startup,
+       * so this check reads the in-memory token and returns immediately.
+       */
+      final bool hasStoredToken = await tokenService.hasToken();
 
       final bool hasValidLocalSession =
-          storageService.isLoggedIn &&
-              hasStoredToken;
+          storageService.isLoggedIn && hasStoredToken;
 
       if (hasValidLocalSession) {
-        final bool hasValidServerSession =
-            await Get.find<AuthService>().validateStoredSession();
-
-        if (Get.currentRoute == AppRoutes.accountSuspended) {
-          return;
-        }
-
-        if (!hasValidServerSession) {
-          await Get.find<LearningActivityTrackerService>().discardSession();
-          await storageService.clearLoggedInData();
-          await tokenService.clearTokens();
-
-          if (storageService.isFirstTimeUser) {
-            Get.offAllNamed(AppRoutes.splash);
-          } else {
-            Get.offAllNamed(AppRoutes.login);
-          }
-          return;
-        }
-
+        /*
+         * Preserve the existing terminated-app accepted-call behavior.
+         *
+         * In the normal no-call case this returns immediately. When a native
+         * call was accepted, the call screen still receives priority.
+         */
         if (Get.isRegistered<IncomingCallCoordinator>()) {
-          // Handle a native accepted call before user/profile/home requests.
-          // The accepted call route is awaited, so the bootstrap screen stays
-          // as a touch blocker behind the call instead of flashing home.
           await Get.find<IncomingCallCoordinator>()
               .restorePendingAcceptedCall();
         }
 
-        // Connect the global chat socket once.
-        try {
-          final ChatSocketService socketService =
-          Get.find<ChatSocketService>();
-
-          String? deviceId;
-
-          try {
-            final PresenceService presenceService =
-            Get.find<PresenceService>();
-
-            // Wait briefly for device ID initialization.
-            for (
-            int attempt = 0;
-            attempt < 10 && presenceService.deviceId.isEmpty;
-            attempt++
-            ) {
-              await Future<void>.delayed(
-                const Duration(milliseconds: 50),
-              );
-            }
-
-            deviceId = presenceService.deviceId;
-          } catch (error, stackTrace) {
-            deviceId = null;
-
-            dev.log(
-              'Could not resolve presence device ID',
-              error: error,
-              stackTrace: stackTrace,
-              name: 'AppBootstrap',
-            );
-          }
-
-          await socketService.connect(
-            deviceId: deviceId,
-          );
-        } catch (error, stackTrace) {
-          dev.log(
-            'Chat socket connection during bootstrap failed',
-            error: error,
-            stackTrace: stackTrace,
-            name: 'AppBootstrap',
-          );
-        }
-
-        await _registerFcmTokenSafely();
-
         /*
-         * Load the authenticated user first. Purchase recovery uses an
-         * authenticated backend endpoint and must belong to the current user.
+         * The cached user summary is restored synchronously when
+         * UserSessionController is created. Therefore the wrapper, profile UI,
+         * and user-specific Home cache can render without waiting for APIs.
          */
-        await Get.find<UserSessionController>().loadUser();
-
-        /*
-         * Recover a Google Play course purchase that completed while:
-         *
-         * - the app was closed;
-         * - the network was unavailable;
-         * - backend verification temporarily failed;
-         * - the payment completed outside the checkout page.
-         *
-         * Recovery failure must not stop the user from opening the app.
-         */
-        await _recoverCoursePurchaseSafely();
-
-        await Get.find<LearningActivityTrackerService>()
-            .startSession();
-
         Get.offAllNamed(AppRoutes.wrapper);
+
+        /*
+         * Validate the server session and refresh user information after the
+         * first screen is visible. Invalid, expired, revoked, or suspended
+         * sessions still follow the same redirect and cleanup behavior.
+         */
+        unawaited(
+          _validateAndStartAuthenticatedSession(
+            storageService: storageService,
+            tokenService: tokenService,
+          ),
+        );
+
         return;
       }
 
-      await Get.find<LearningActivityTrackerService>()
-          .discardSession();
-
-      /*
- * Clear the login marker when it exists.
- */
-      if (storageService.isLoggedIn) {
-        await storageService.clearLoggedInData();
-      }
-
-/*
- * Clear stale JWT data independently.
- *
- * Example:
- * isLoggedIn = false
- * token still exists = true
- * → token must still be deleted.
- */
-      if (hasStoredToken) {
-        await tokenService.clearTokens();
-      }
-
-      if (storageService.isFirstTimeUser) {
-        Get.offAllNamed(AppRoutes.splash);
-        return;
-      }
-
-      Get.offAllNamed(AppRoutes.login);
+      await _clearLocalUnauthenticatedState(
+        storageService: storageService,
+        tokenService: tokenService,
+        hadStoredToken: hasStoredToken,
+      );
     } catch (error, stackTrace) {
       dev.log(
         'Bootstrap failed',
@@ -389,7 +292,209 @@ class AppBootstrapController extends GetxController {
         name: 'AppBootstrap',
       );
 
+      if (Get.currentRoute != AppRoutes.accountSuspended &&
+          Get.currentRoute != AppRoutes.login) {
+        Get.offAllNamed(AppRoutes.login);
+      }
+    }
+  }
+
+  Future<void> _validateAndStartAuthenticatedSession({
+    required StorageService storageService,
+    required TokenService tokenService,
+  }) async {
+    try {
+      final bool hasValidServerSession =
+      await Get.find<AuthService>().validateStoredSession();
+
+      /*
+       * ApiClient performs the suspended-account navigation as soon as a
+       * restriction response is received. Never override that route.
+       */
+      if (Get.currentRoute == AppRoutes.accountSuspended) {
+        return;
+      }
+
+      if (!hasValidServerSession) {
+        await _clearInvalidAuthenticatedSession(
+          storageService: storageService,
+          tokenService: tokenService,
+        );
+        return;
+      }
+
+      /*
+       * Replace the locally cached summary with fresh settings and balances.
+       * A temporary profile request failure leaves the cached summary visible.
+       */
+      await Get.find<UserSessionController>().loadUser(
+        forceRefresh: true,
+        showError: false,
+      );
+
+      if (Get.currentRoute == AppRoutes.accountSuspended) {
+        return;
+      }
+
+      await _startAuthenticatedBackgroundTasks();
+    } catch (error, stackTrace) {
+      /*
+       * An unexpected startup-task error must not hide the application or
+       * destroy a locally valid session. Protected API requests and ApiClient
+       * continue to enforce 401 and account-restriction handling.
+       */
+      dev.log(
+        'Authenticated startup validation failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'AppBootstrap',
+      );
+    }
+  }
+
+  Future<void> _clearInvalidAuthenticatedSession({
+    required StorageService storageService,
+    required TokenService tokenService,
+  }) async {
+    await Get.find<LearningActivityTrackerService>().discardSession();
+
+    try {
+      await storageService.clearLoggedInData();
+    } finally {
+      await tokenService.clearTokens();
+    }
+
+    if (Get.isRegistered<UserSessionController>()) {
+      Get.find<UserSessionController>().clear();
+    }
+
+    if (Get.currentRoute == AppRoutes.accountSuspended) {
+      return;
+    }
+
+    if (storageService.isFirstTimeUser) {
+      if (Get.currentRoute != AppRoutes.splash) {
+        Get.offAllNamed(AppRoutes.splash);
+      }
+      return;
+    }
+
+    if (Get.currentRoute != AppRoutes.login) {
       Get.offAllNamed(AppRoutes.login);
+    }
+  }
+
+  Future<void> _clearLocalUnauthenticatedState({
+    required StorageService storageService,
+    required TokenService tokenService,
+    required bool hadStoredToken,
+  }) async {
+    await Get.find<LearningActivityTrackerService>().discardSession();
+
+    if (storageService.isLoggedIn) {
+      await storageService.clearLoggedInData();
+    }
+
+    if (hadStoredToken) {
+      await tokenService.clearTokens();
+    }
+
+    if (Get.isRegistered<UserSessionController>()) {
+      Get.find<UserSessionController>().clear();
+    }
+
+    if (storageService.isFirstTimeUser) {
+      Get.offAllNamed(AppRoutes.splash);
+      return;
+    }
+
+    Get.offAllNamed(AppRoutes.login);
+  }
+
+  Future<void> _startAuthenticatedBackgroundTasks() async {
+    await Future.wait<void>(
+      <Future<void>>[
+        _connectChatSocketSafely(),
+        _registerFcmTokenSafely(),
+        _recoverCoursePurchaseSafely(),
+        _startLearningActivitySafely(),
+      ],
+    );
+  }
+
+  Future<void> _connectChatSocketSafely() async {
+    try {
+      if (!Get.isRegistered<ChatSocketService>()) {
+        return;
+      }
+
+      final ChatSocketService socketService =
+      Get.find<ChatSocketService>();
+
+      String? deviceId;
+
+      try {
+        if (Get.isRegistered<PresenceService>()) {
+          final PresenceService presenceService =
+          Get.find<PresenceService>();
+
+          /*
+           * Preserve the existing short wait for device-ID initialization.
+           */
+          for (
+          int attempt = 0;
+          attempt < 10 && presenceService.deviceId.isEmpty;
+          attempt++
+          ) {
+            await Future<void>.delayed(
+              const Duration(milliseconds: 50),
+            );
+          }
+
+          final String resolvedDeviceId =
+          presenceService.deviceId.trim();
+
+          if (resolvedDeviceId.isNotEmpty) {
+            deviceId = resolvedDeviceId;
+          }
+        }
+      } catch (error, stackTrace) {
+        dev.log(
+          'Could not resolve presence device ID',
+          error: error,
+          stackTrace: stackTrace,
+          name: 'AppBootstrap',
+        );
+      }
+
+      await socketService.connect(
+        deviceId: deviceId,
+      );
+    } catch (error, stackTrace) {
+      dev.log(
+        'Chat socket connection during bootstrap failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'AppBootstrap',
+      );
+    }
+  }
+
+  Future<void> _startLearningActivitySafely() async {
+    try {
+      if (!Get.isRegistered<LearningActivityTrackerService>()) {
+        return;
+      }
+
+      await Get.find<LearningActivityTrackerService>()
+          .startSession();
+    } catch (error, stackTrace) {
+      dev.log(
+        'Learning activity startup failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'AppBootstrap',
+      );
     }
   }
 

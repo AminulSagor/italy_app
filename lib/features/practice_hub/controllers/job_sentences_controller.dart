@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/api_error_handler.dart';
+import '../../../core/widgets/app_pdf_viewer.dart';
 import '../../../routes/app_routes.dart';
 import '../models/job_sentence_models.dart';
 import '../models/job_track_models.dart';
@@ -397,10 +398,8 @@ class JobSentencesController extends GetxController {
       _markTheoryOpened(details.id),
     );
 
-    Get.toNamed<void>(
-      AppRoutes.practiceHubPdfViewer,
-      arguments:
-      PracticeHubPdfDocumentModel(
+    Get.to<void>(
+          () => AppPdfViewer(
         title:
         resource.originalName.isEmpty
             ? '${details.title} '
@@ -408,8 +407,9 @@ class JobSentencesController extends GetxController {
             : resource.originalName,
         source: resource.url,
         sourceType:
-        PracticeHubPdfSourceType
-            .network,
+        AppPdfSourceType.network,
+        sourceId:
+        'job_sentences_theory_pdf_viewer',
       ),
     );
   }

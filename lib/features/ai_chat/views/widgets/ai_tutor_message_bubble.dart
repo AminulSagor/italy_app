@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/themes/app_colors.dart';
+import '../../../ai_content_reports/models/ai_content_report_model.dart';
+import '../../../ai_content_reports/widgets/ai_report_button.dart';
 import '../../controllers/ai_chat_controller.dart';
 import '../../models/ai_tutor_models.dart';
 
@@ -135,13 +137,35 @@ class AiTutorMessageBubble extends GetView<AiChatController> {
                   child: _CorrectionCard(correction: message.correction!),
                 ),
               SizedBox(height: 5.h),
-              Text(
-                _formatTime(message.createdAt),
-                style: TextStyle(
-                  fontSize: 9.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFFA7AFAB),
-                ),
+
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    _formatTime(message.createdAt),
+                    style: TextStyle(
+                      fontSize: 9.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFFA7AFAB),
+                    ),
+                  ),
+
+                  if (!message.isUser && message.primary.trim().isNotEmpty) ...<Widget>[
+                    SizedBox(width: 6.w),
+
+                    AiReportButton(
+                      source: AiContentReportSource(
+                        featureType: AiReportFeatureType.writing,
+
+                        // Automatically sends the exact AI response.
+                        aiContentText: message.primary,
+
+                        // Automatically identifies the selected AI message.
+                        messageReference: message.id,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),

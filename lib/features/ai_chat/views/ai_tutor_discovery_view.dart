@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_font.dart';
+import '../../../core/widgets/native_bottom_inset.dart';
 import '../controllers/ai_chat_controller.dart';
 import '../models/ai_tutor_models.dart';
 import 'ai_tutor_chat_view.dart';
@@ -83,8 +84,10 @@ class _AiTutorDiscoveryViewState extends State<AiTutorDiscoveryView> {
               Positioned(
                 left: 24.w,
                 right: 24.w,
-                bottom: 22.h,
-                child: Obx(() {
+                bottom: 0,
+                child: NativeBottomInset(
+                  additionalBottom: 22.h,
+                  child: Obx(() {
                   final bool active =
                       _controller.isTextConversationActive.value;
                   final bool sending = _controller.isSendingMessage.value;
@@ -113,7 +116,7 @@ class _AiTutorDiscoveryViewState extends State<AiTutorDiscoveryView> {
                   );
                 }),
               ),
-            ],
+              )],
           ),
         ),
       ),

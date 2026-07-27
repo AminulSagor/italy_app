@@ -68,11 +68,14 @@ class ImportantVerbsView extends GetView<ImportantVerbsController> {
                     const SavedVerbPreviewSection(),
                     SizedBox(height: 21.h),
                     Obx(
-                      () => VerbFilterChips(
+                          () => VerbFilterChips(
                         filters: controller.verbFilters,
                         selectedFilter:
-                            controller.selectedImportantVerbFilter.value,
-                        onSelected: controller.selectImportantVerbFilter,
+                        controller.selectedImportantVerbFilter.value,
+                        isLoading:
+                        controller.isVerbsLoading.value,
+                        onSelected:
+                        controller.selectImportantVerbFilter,
                       ),
                     ),
                     SizedBox(height: 27.h),

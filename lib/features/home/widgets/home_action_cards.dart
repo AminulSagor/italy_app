@@ -84,117 +84,212 @@ class WebinarCard extends StatelessWidget {
   final HomeWebinarModel webinar;
   final VoidCallback? onJoinTap;
 
-  const WebinarCard({super.key, required this.webinar, this.onJoinTap});
+  const WebinarCard({
+    super.key,
+    required this.webinar,
+    this.onJoinTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onJoinTap,
-      child: Container(
-        height: kHomeWebinarCardHeight.h,
-        padding: EdgeInsets.fromLTRB(30.w, 26.h, 26.w, 24.h),
-        decoration: BoxDecoration(
-          color: AppColors.homeDeepGreen,
-          borderRadius: BorderRadius.circular(kHomeCardRadius.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(kHomePillRadius.r),
+    return Semantics(
+      button: onJoinTap != null,
+      label: '${'upcoming_webinar'.tr}: ${webinar.title}',
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: BoxDecoration(
+            color: AppColors.homeDeepGreen,
+            borderRadius: BorderRadius.circular(kHomeCardRadius.r),
+          ),
+          child: InkWell(
+            onTap: onJoinTap,
+            borderRadius: BorderRadius.circular(kHomeCardRadius.r),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 22.w,
+                vertical: 22.h,
               ),
-              child: Text(
-                'upcoming_webinar'.tr,
-                style: TextStyle(
-                  fontSize: AppFont.font9.sp,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.0,
-                  color: AppColors.white,
-                ),
-              ),
-            ),
-            const Spacer(),
-            Text(
-              webinar.title,
-              style: TextStyle(
-                fontSize: AppFont.font22.sp,
-                fontWeight: FontWeight.w900,
-                color: AppColors.white,
-              ),
-            ),
-            const Spacer(),
-            Row(
-              children: <Widget>[
-                Container(
-                  width: kHomeIconCircleSize.w,
-                  height: kHomeIconCircleSize.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.homePrimaryText,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.white, width: 2.w),
-                  ),
-                  child: Icon(
-                    Icons.person_rounded,
-                    color: AppColors.white,
-                    size: kHomeTopIconSize.w,
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
+              child: LayoutBuilder(
+                builder: (
+                    BuildContext context,
+                    BoxConstraints constraints,
+                    ) {
+                  final bool useCompactLayout =
+                      constraints.maxWidth < 330;
+
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
+                      _buildWebinarBadge(),
+
+                      SizedBox(height: 18.h),
+
                       Text(
-                        webinar.hostName,
+                        webinar.title.trim().isEmpty
+                            ? 'upcoming_webinar'.tr
+                            : webinar.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: AppFont.font12.sp,
+                          fontSize: AppFont.font22.sp,
                           fontWeight: FontWeight.w900,
-                          height: 1.1,
+                          height: 1.2,
                           color: AppColors.white,
                         ),
                       ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        webinar.timeLabel,
-                        style: TextStyle(
-                          fontSize: AppFont.font11.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.homePaleGreen,
+
+                      SizedBox(height: 22.h),
+
+                      if (useCompactLayout) ...<Widget>[
+                        _buildHostInformation(),
+
+                        SizedBox(height: 18.h),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 46.h,
+                          child: _buildViewButton(),
                         ),
-                      ),
+                      ] else
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Expanded(
+                              child: _buildHostInformation(),
+                            ),
+
+                            SizedBox(width: 14.w),
+
+                            SizedBox(
+                              height: 42.h,
+                              child: _buildViewButton(),
+                            ),
+                          ],
+                        ),
                     ],
-                  ),
-                ),
-                SizedBox(
-                  height: 38.h,
-                  width: 76.w,
-                  child: ElevatedButton(
-                    onPressed: onJoinTap,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.white,
-                      foregroundColor: AppColors.primaryGreen,
-                      elevation: 0,
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(kHomePillRadius.r),
-                      ),
-                    ),
-                    child: Text(
-                      'view'.tr,
-                      style: TextStyle(
-                        fontSize: AppFont.font13.sp,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.primaryGreen,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWebinarBadge() {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 12.w,
+        vertical: 7.h,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.white.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(kHomePillRadius.r),
+      ),
+      child: Text(
+        'upcoming_webinar'.tr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: AppFont.font10.sp,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.7,
+          color: AppColors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHostInformation() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          width: 46.r,
+          height: 46.r,
+          decoration: BoxDecoration(
+            color: AppColors.homePrimaryText,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppColors.white.withValues(alpha: 0.8),
+              width: 2,
+            ),
+          ),
+          child: Icon(
+            Icons.person_rounded,
+            color: AppColors.white,
+            size: 23.r,
+          ),
+        ),
+
+        SizedBox(width: 12.w),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                webinar.hostName.trim().isEmpty
+                    ? 'upcoming_webinar'.tr
+                    : webinar.hostName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: AppFont.font13.sp,
+                  fontWeight: FontWeight.w800,
+                  height: 1.25,
+                  color: AppColors.white,
+                ),
+              ),
+
+              SizedBox(height: 4.h),
+
+              Text(
+                webinar.timeLabel,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: AppFont.font11.sp,
+                  fontWeight: FontWeight.w600,
+                  height: 1.3,
+                  color: AppColors.homePaleGreen,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildViewButton() {
+    return ElevatedButton(
+      onPressed: onJoinTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.primaryGreen,
+        disabledBackgroundColor:
+        AppColors.white.withValues(alpha: 0.55),
+        disabledForegroundColor:
+        AppColors.primaryGreen.withValues(alpha: 0.55),
+        elevation: 0,
+        minimumSize: Size(88.w, 42.h),
+        padding: EdgeInsets.symmetric(horizontal: 18.w),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(kHomePillRadius.r),
+        ),
+      ),
+      child: Text(
+        'view'.tr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: AppFont.font13.sp,
+          fontWeight: FontWeight.w900,
         ),
       ),
     );

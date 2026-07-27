@@ -4,6 +4,7 @@ import '../core/bootstrap/app_bootstrap_controller.dart';
 import '../core/bootstrap/app_bootstrap_view.dart';
 import '../core/models/account_restriction_details.dart';
 import '../core/services/course_purchase_recovery_service.dart';
+import '../core/services/storage_service.dart';
 import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import '../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_view.dart';
 import '../features/auth/sub_features/Signup/controllers/signup_controller.dart';
@@ -54,6 +55,7 @@ import '../features/courses/views/course_detail_view.dart';
 import '../features/courses/views/course_certificate_view.dart';
 import '../features/home/controllers/home_controller.dart';
 import '../features/home/services/home_api_service.dart';
+import '../features/home/services/home_dashboard_cache_service.dart';
 import '../features/home/views/home_view.dart';
 import '../features/messages/controllers/messages_controller.dart';
 import '../features/messages/services/messages_service.dart';
@@ -122,7 +124,7 @@ import '../features/practice_hub/models/job_track_models.dart';
 import '../features/practice_hub/services/practice_hub_api_service.dart';
 import '../features/practice_hub/views/important_verbs/verb_details.dart';
 import '../features/practice_hub/views/survival_italian/survival_italian_view.dart';
-import '../features/practice_hub/views/widgets/pdf_viewer.dart';
+
 import '../features/practice_hub/views/job_sentences/job_sentences_view.dart';
 import '../features/practice_hub/views/job_sentences/job_details_view.dart';
 import '../features/practice_hub/views/daily_challenges/daily_challenges_view.dart';
@@ -173,6 +175,39 @@ class AppPages {
     if (!Get.isRegistered<CoursesApiService>()) {
       Get.lazyPut<CoursesApiService>(
         () => CoursesApiService(apiClient: Get.find<ApiClient>()),
+        fenix: true,
+      );
+    }
+  }
+
+  static void _ensureHomeDependencies() {
+    if (!Get.isRegistered<HomeApiService>()) {
+      Get.lazyPut<HomeApiService>(
+            () => HomeApiService(
+          apiClient: Get.find<ApiClient>(),
+        ),
+        fenix: true,
+      );
+    }
+
+    if (!Get.isRegistered<HomeDashboardCacheService>()) {
+      Get.lazyPut<HomeDashboardCacheService>(
+            () => HomeDashboardCacheService(
+          storageService: Get.find<StorageService>(),
+        ),
+        fenix: true,
+      );
+    }
+
+    if (!Get.isRegistered<HomeController>()) {
+      Get.lazyPut<HomeController>(
+            () => HomeController(
+          homeApiService: Get.find<HomeApiService>(),
+          homeDashboardCacheService:
+          Get.find<HomeDashboardCacheService>(),
+          userSessionController:
+          Get.find<UserSessionController>(),
+        ),
         fenix: true,
       );
     }
@@ -297,20 +332,9 @@ class AppPages {
     GetPage(
       name: AppRoutes.home,
       page: () => const HomeView(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<HomeApiService>()) {
-          Get.lazyPut<HomeApiService>(
-            () => HomeApiService(apiClient: Get.find<ApiClient>()),
-            fenix: true,
-          );
-        }
-        if (!Get.isRegistered<HomeController>()) {
-          Get.lazyPut<HomeController>(
-            () => HomeController(homeApiService: Get.find<HomeApiService>()),
-            fenix: true,
-          );
-        }
-      }),
+      binding: BindingsBuilder(
+        _ensureHomeDependencies,
+      ),
     ),
     GetPage(
       name: AppRoutes.wrapper,
@@ -322,18 +346,8 @@ class AppPages {
             fenix: true,
           );
         }
-        if (!Get.isRegistered<HomeApiService>()) {
-          Get.lazyPut<HomeApiService>(
-            () => HomeApiService(apiClient: Get.find<ApiClient>()),
-            fenix: true,
-          );
-        }
-        if (!Get.isRegistered<HomeController>()) {
-          Get.lazyPut<HomeController>(
-            () => HomeController(homeApiService: Get.find<HomeApiService>()),
-            fenix: true,
-          );
-        }
+
+
         _ensureCoursesApiService();
         if (!Get.isRegistered<CoursesController>()) {
           Get.lazyPut<CoursesController>(
@@ -405,6 +419,7 @@ class AppPages {
       binding: BindingsBuilder(() {
         final CourseDetailRouteArguments args =
             _arguments<CourseDetailRouteArguments>();
+        _ensureHomeDependencies();
         _ensureCoursesApiService();
         Get.lazyPut<CourseDetailController>(
           () => CourseDetailController(
@@ -1078,21 +1093,7 @@ class AppPages {
       }),
     ),
 
-    GetPage(
-      name: AppRoutes.practiceHubPdfViewer,
-      page: () => const PracticeHubPdfViewer(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<PracticeHubController>()) {
-          Get.lazyPut<PracticeHubController>(
-            () => PracticeHubController(
-              coursesApiService: Get.find<CoursesApiService>(),
-              practiceHubApiService: Get.find<PracticeHubApiService>(),
-            ),
-            fenix: true,
-          );
-        }
-      }),
-    ),
+
 
     GetPage(
       name: AppRoutes.jobSentences,

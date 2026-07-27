@@ -80,26 +80,33 @@ class LeaderboardChatDialog extends StatelessWidget {
                   ),
                   SizedBox(height: 18.h),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      _InfoPill(
-                        bgColor: const Color(0xFFFFE9D2),
-                        icon: Icons.local_fire_department_rounded,
-                        iconColor: const Color(0xFFE9511B),
-                        text: 'day_streak_value'.trParams(<String, String>{
-                          'count': streakDays.toString(),
-                        }),
-                        textColor: const Color(0xFFC94D1F),
+                      Expanded(
+                        child: _InfoPill(
+                          bgColor: const Color(0xFFFFE9D2),
+                          icon: Icons.local_fire_department_rounded,
+                          iconColor: const Color(0xFFE9511B),
+                          text: 'day_streak_value'.trParams(
+                            <String, String>{
+                              'days': streakDays.toString(),
+                            },
+                          ),
+                          textColor: const Color(0xFFC94D1F),
+                        ),
                       ),
-                      SizedBox(width: 10.w),
-                      _InfoPill(
-                        bgColor: const Color(0xFFD9E9FF),
-                        icon: Icons.flash_on_rounded,
-                        iconColor: const Color(0xFF2764E8),
-                        text: 'score_xp_value'.trParams(<String, String>{
-                          'xp': xp.toString(),
-                        }),
-                        textColor: const Color(0xFF2764E8),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: _InfoPill(
+                          bgColor: const Color(0xFFD9E9FF),
+                          icon: Icons.flash_on_rounded,
+                          iconColor: const Color(0xFF2764E8),
+                          text: 'score_xp_value'.trParams(
+                            <String, String>{
+                              'xp': xp,
+                            },
+                          ),
+                          textColor: const Color(0xFF2764E8),
+                        ),
                       ),
                     ],
                   ),
@@ -307,20 +314,28 @@ class _InfoPill extends StatelessWidget {
         color: bgColor,
         borderRadius: BorderRadius.circular(999.r),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(icon, size: 17.r, color: iconColor),
-          SizedBox(width: 5.w),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w900,
-              color: textColor,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              icon,
+              size: 17.r,
+              color: iconColor,
             ),
-          ),
-        ],
+            SizedBox(width: 5.w),
+            Text(
+              text,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: AppFont.font12.sp,
+                fontWeight: FontWeight.w900,
+                color: textColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

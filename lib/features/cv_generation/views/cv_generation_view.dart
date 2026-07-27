@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/simple_appbar.dart';
+import '../../ai_content_reports/models/ai_content_report_model.dart';
+import '../../ai_content_reports/widgets/ai_report_button.dart';
 import '../controllers/cv_generation_controller.dart';
 import '../models/cv_generation_models.dart';
 import '../widgets/cv_design_instruction_sheet.dart';
@@ -510,7 +512,21 @@ class _CompletedState extends StatelessWidget {
           ),
         ),
 
+        SizedBox(height: 8.h),
 
+        Align(
+          alignment: Alignment.centerRight,
+          child: AiReportButton(
+            source: AiContentReportSource(
+              featureType: AiReportFeatureType.cvBuilder,
+
+              // Automatically attaches the generated CV preview.
+              aiContentUrl: imageUrl,
+            ),
+          ),
+        ),
+
+        SizedBox(height: 12.h),
 
         Container(
           padding: EdgeInsets.all(14.w),

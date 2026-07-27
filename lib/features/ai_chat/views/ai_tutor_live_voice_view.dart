@@ -10,6 +10,9 @@ import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_font.dart';
+import '../../../core/widgets/native_bottom_inset.dart';
+import '../../ai_content_reports/models/ai_content_report_model.dart';
+import '../../ai_content_reports/widgets/ai_report_button.dart';
 import '../controllers/ai_chat_controller.dart';
 import '../services/ai_tutor_voice_service.dart';
 import 'widgets/ai_tutor_common_widgets.dart';
@@ -140,20 +143,35 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
                               ),
                             SizedBox(height: 42.h),
                             if (assistantText.isNotEmpty)
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 140),
-                                child: Text(
-                                  assistantText,
-                                  key: ValueKey<String>(assistantText),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: AppFont.font22.sp,
-                                    height: 1.22,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -.6,
-                                    color: const Color(0xFF26312E),
+                              Column(
+                                children: <Widget>[
+                                  AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 140),
+                                    child: Text(
+                                      assistantText,
+                                      key: ValueKey<String>(assistantText),
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: AppFont.font22.sp,
+                                        height: 1.22,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -.6,
+                                        color: const Color(0xFF26312E),
+                                      ),
+                                    ),
                                   ),
-                                ),
+
+                                  SizedBox(height: 8.h),
+
+                                  AiReportButton(
+                                    source: AiContentReportSource(
+                                      featureType: AiReportFeatureType.talking,
+
+                                      // Automatically attaches the visible AI transcript.
+                                      aiContentText: assistantText,
+                                    ),
+                                  ),
+                                ],
                               ),
                             if (userText.isNotEmpty) ...<Widget>[
                               SizedBox(height: 24.h),
@@ -193,11 +211,13 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
                   ),
                 ],
               ),
-              const Positioned(
+              Positioned(
                 left: 0,
                 right: 0,
                 bottom: 0,
-                child: _LiveVoiceControls(),
+                child: NativeBottomInset(
+                  child: const _LiveVoiceControls(),
+                ),
               ),
             ],
           ),

@@ -23,20 +23,29 @@ class ItalianTtsService {
     );
   }
 
-  // Reusable method for Job Sentences.
+
   Future<void> speakText(
       String text, {
         String locale = 'it-IT',
       }) async {
-    final String normalizedText = text.trim();
+    final String normalizedText = text
+        .replaceAll(
+      RegExp(r'\s+'),
+      ' ',
+    )
+        .trim();
 
     if (normalizedText.isEmpty) {
       return;
     }
 
     await _initialize(locale);
+
+    // Stop any previous pronunciation first.
     await _flutterTts.stop();
+
     await _setItalianLanguage(locale);
+
 
     final dynamic result = await _flutterTts.speak(
       normalizedText,

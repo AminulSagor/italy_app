@@ -11,11 +11,16 @@ class QuickToolsSection extends StatelessWidget {
   const QuickToolsSection({super.key, required this.tools, this.onToolTap});
 
   final List<HomeToolModel> tools;
-  final void Function(HomeToolModel tool)? onToolTap;
+  final ValueChanged<HomeToolModel>? onToolTap;
 
   @override
   Widget build(BuildContext context) {
-    if (tools.isEmpty) return const SizedBox.shrink();
+    if (tools.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final int columnCount = tools.length == 1 ? 1 : 2;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -27,16 +32,25 @@ class QuickToolsSection extends StatelessWidget {
             color: AppColors.homePrimaryText,
           ),
         ),
-        SizedBox(height: 16.h),
-        ...tools.map(
-          (HomeToolModel tool) => Padding(
-            padding: EdgeInsets.only(bottom: 12.h),
-            child: _QuickToolCard(
+        SizedBox(height: 12.h),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: tools.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columnCount,
+            crossAxisSpacing: 14.w,
+            mainAxisSpacing: 14.h,
+            mainAxisExtent: 130.h,
+          ),
+          itemBuilder: (BuildContext context, int index) {
+            final HomeToolModel tool = tools[index];
+
+            return _QuickToolCard(
               tool: tool,
               onTap: () => onToolTap?.call(tool),
-              // onTap: () => Get.snackbar("In Progress", "Feature coming soon"),
-            ),
-          ),
+            );
+          },
         ),
       ],
     );
@@ -49,63 +63,98 @@ class _QuickToolCard extends StatelessWidget {
   final HomeToolModel tool;
   final VoidCallback? onTap;
 
+  bool get _isGuideVideo => tool.type == HomeToolType.guideVideo;
+
+  Color get _backgroundColor {
+    if (_isGuideVideo) {
+      return const Color(0xFFFF9800);
+    }
+
+    return AppColors.homeBlueCard;
+  }
+
+  Color get _iconColor {
+    if (_isGuideVideo) {
+      return const Color(0xFF8A4A00);
+    }
+
+    return AppColors.homeBlueIcon;
+  }
+
+  Color get _subtitleColor {
+    if (_isGuideVideo) {
+      return const Color(0xFF5F3200);
+    }
+
+    return AppColors.homeSecondaryText;
+  }
+
+  IconData get _icon {
+    if (_isGuideVideo) {
+      return Icons.play_arrow_rounded;
+    }
+
+    return Icons.description_rounded;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(kHomeSmallCardRadius.r),
-      child: Container(
-        width: double.infinity,
-        constraints: BoxConstraints(minHeight: 112.h),
-        padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 20.h),
-        decoration: BoxDecoration(
-          color: AppColors.homeBlueCard,
-          borderRadius: BorderRadius.circular(kHomeSmallCardRadius.r),
-        ),
-        child: Row(
-          children: <Widget>[
-            Container(
-              width: kHomeIconCircleSize.w,
-              height: kHomeIconCircleSize.w,
-              decoration: const BoxDecoration(
-                color: AppColors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.description_rounded,
-                color: AppColors.homeBlueIcon,
-              ),
+    final BorderRadius borderRadius = BorderRadius.circular(
+      kHomeSmallCardRadius.r,
+    );
+
+    return Semantics(
+      button: true,
+      label: tool.title,
+      child: Material(
+        color: _backgroundColor,
+        borderRadius: borderRadius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 12.r,
+              vertical: 10.r,
             ),
-            SizedBox(width: 18.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    tool.title,
-                    style: TextStyle(
-                      fontSize: AppFont.font17.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.homePrimaryText,
-                    ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: 38.r,
+                  height: 38.r,
+                  decoration: const BoxDecoration(
+                    color: AppColors.white,
+                    shape: BoxShape.circle,
                   ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    tool.subtitle,
-                    style: TextStyle(
-                      fontSize: AppFont.font12.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.homeSecondaryText,
-                    ),
+                  child: Icon(_icon, size: 22.r, color: _iconColor),
+                ),
+                SizedBox(height: 14.h),
+                Text(
+                  tool.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.homePrimaryText,
                   ),
-                ],
-              ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  tool.subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    height: 1.3,
+                    fontWeight: FontWeight.w600,
+                    color: _subtitleColor,
+                  ),
+                ),
+              ],
             ),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: AppColors.homeBlueIcon,
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../features/ai_chat/ai_chat_view.dart';
@@ -11,181 +14,199 @@ import '../../../features/messages/sub-feature/call/service/incoming_call_coordi
 import '../../../features/practice_hub/views/practice_hub_view.dart';
 
 import '../../controllers/user_session_controller.dart';
-import '../../themes/app_constants.dart';
 import '../app_home_bottom_navigation_bar.dart';
 import '../app_home_top_bar.dart';
 import '../custom_drawer.dart';
 import 'navbar_and_appbar_wrapper_controller.dart';
 
+const MethodChannel _systemInsetsChannel =
+MethodChannel('italir_pothe/system_insets');
+
 class NavbarAndAppbarWrapper
     extends GetView<NavbarAndAppbarWrapperController> {
   const NavbarAndAppbarWrapper({super.key});
 
-
-
-
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> scaffoldKey =
-    GlobalKey<ScaffoldState>();
+    return _NativeBottomInsetBuilder(
+      builder: (
+          BuildContext context,
+          double nativeBottomInset,
+          ) {
+        final MediaQueryData mediaQuery =
+        MediaQuery.of(context);
 
-    final UserSessionController session =
-    Get.find<UserSessionController>();
+        final bool isKeyboardVisible =
+            mediaQuery.viewInsets.bottom > 0;
 
-    final MessagesController messagesController =
-    Get.find<MessagesController>();
+        /*
+         * Use whichever inset is larger:
+         *
+         * 1. Flutter's MediaQuery inset.
+         * 2. The native Android WindowInsets value.
+         *
+         * This prevents Samsung and other Android three-button
+         * navigation bars from covering the app navigation bar.
+         */
+        final double systemBottomInset = math.max(
+          mediaQuery.viewPadding.bottom,
+          nativeBottomInset,
+        );
 
-    final IncomingCallCoordinator? callCoordinator =
-    Get.isRegistered<IncomingCallCoordinator>()
-        ? Get.find<IncomingCallCoordinator>()
-        : null;
+        final GlobalKey<ScaffoldState> scaffoldKey =
+        GlobalKey<ScaffoldState>();
 
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
+        final UserSessionController session =
+        Get.find<UserSessionController>();
 
+        final MessagesController messagesController =
+        Get.find<MessagesController>();
 
+        final IncomingCallCoordinator? callCoordinator =
+        Get.isRegistered<IncomingCallCoordinator>()
+            ? Get.find<IncomingCallCoordinator>()
+            : null;
 
-    final bool isKeyboardVisible =
-        mediaQuery.viewInsets.bottom > 0;
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (
+              bool didPop,
+              Object? result,
+              ) async {
+            if (didPop) {
+              return;
+            }
 
-    final double bottomNavigationSpace = isKeyboardVisible
-        ? 0
-        : kHomeBottomNavHeight.h +
-        kHomeBottomNavOuterPadding.h +
-        mediaQuery.padding.bottom;
+            final bool shouldPop =
+            await controller.onWillPop();
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (
-          bool didPop,
-          Object? result,
-          ) async {
-        if (didPop) {
-          return;
-        }
+            if (shouldPop) {
+              Get.back<void>();
+            }
+          },
+          child: Stack(
+            children: <Widget>[
+              Scaffold(
+                key: scaffoldKey,
 
-        final bool shouldPop = await controller.onWillPop();
+                // Allows forms and chat inputs to move above the keyboard.
+                resizeToAvoidBottomInset: true,
 
-        if (shouldPop) {
-          Get.back<void>();
-        }
-      },
-      child: Stack(
-        children: <Widget>[
-          Scaffold(
-            key: scaffoldKey,
-
-            // Allows forms and chat inputs to move above the keyboard.
-            resizeToAvoidBottomInset: true,
-
-            appBar: PreferredSize(
-              preferredSize: Size.fromHeight(
-                AppHomeTopBar.preferredHeight,
-              ),
-              child: Obx(
-                    () => AppHomeTopBar(
-                  greeting: 'buongiorno'.tr,
-                  userName: session.displayName.trim(),
-                  avatarUrl: session.avatarUrl,
-                  streakLabel: '${session.currentStreakDays}d',
-                  showNotificationDot:
-                  controller.hasUnreadNotifications.value,
-                  messageCount:
-                  messagesController.totalUnreadMessageCount,
-                  onNotificationTap:
-                  controller.openNotifications,
-                  onMessageTap: controller.openMessages,
-                  onProfileTap: () {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    scaffoldKey.currentState?.openDrawer();
-                  },
-                ),
-              ),
-            ),
-
-            onDrawerChanged: controller.onDrawerChanged,
-
-            drawer: Obx(
-                  () => AppDrawer(
-                onLanguageTap: () {
-                  controller.onLanguageTap(context);
-                },
-                onShopTap: controller.onShopTap,
-                onLogoutTap: controller.onLogoutTap,
-                isLoggingOut:
-                controller.isLoggingOut.value,
-              ),
-            ),
-
-            body: Stack(
-              children: <Widget>[
-                // Prevents page content from being covered by the
-                // floating bottom navigation bar.
-                Padding(
-                  padding: EdgeInsets.only(
-                    bottom: bottomNavigationSpace,
+                appBar: PreferredSize(
+                  preferredSize: Size.fromHeight(
+                    AppHomeTopBar.preferredHeight,
                   ),
                   child: Obx(
-                        () => Stack(
-                      fit: StackFit.expand,
-                      children: List<Widget>.generate(
-                        5,
-                            (int index) {
-                          final bool isVisited =
-                          controller.visitedTabs.contains(index);
+                        () => AppHomeTopBar(
+                      greeting: 'buongiorno'.tr,
+                      userName: session.displayName.trim(),
+                      avatarUrl: session.avatarUrl,
+                      streakLabel:
+                      '${session.currentStreakDays}d',
+                      showNotificationDot:
+                      controller
+                          .hasUnreadNotifications
+                          .value,
+                      messageCount:
+                      messagesController
+                          .totalUnreadMessageCount,
+                      onNotificationTap:
+                      controller.openNotifications,
+                      onMessageTap:
+                      controller.openMessages,
+                      onProfileTap: () {
+                        FocusManager.instance.primaryFocus
+                            ?.unfocus();
 
-                          if (!isVisited) {
-                            return const SizedBox.shrink();
-                          }
-
-                          final bool isCurrentTab =
-                              controller.currentIndex.value == index;
-
-                          return Offstage(
-                            offstage: !isCurrentTab,
-                            child: TickerMode(
-                              enabled: isCurrentTab,
-                              child: _buildTab(index),
-                            ),
-                          );
-                        },
-                      ),
+                        scaffoldKey.currentState
+                            ?.openDrawer();
+                      },
                     ),
                   ),
                 ),
 
-                // Hide the navigation bar while typing.
-                if (!isKeyboardVisible)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: SafeArea(
-                      top: false,
-                      child: Obx(
-                            () => AppHomeBottomNavigationBar(
-                          selectedIndex:
-                          controller.currentIndex.value,
-                          items:
-                          AppHomeBottomNavigationBar.defaultItems,
-                          onTap: controller.onBottomNavTap,
-                        ),
-                      ),
+                onDrawerChanged:
+                controller.onDrawerChanged,
+
+                drawer: Obx(
+                      () => AppDrawer(
+                    onLanguageTap: () {
+                      controller.onLanguageTap(context);
+                    },
+                    onShopTap: controller.onShopTap,
+                    onLogoutTap:
+                    controller.onLogoutTap,
+                    isLoggingOut:
+                    controller.isLoggingOut.value,
+                  ),
+                ),
+
+                body: Obx(
+                      () => Stack(
+                    fit: StackFit.expand,
+                    children: List<Widget>.generate(
+                      5,
+                          (int index) {
+                        final bool isVisited =
+                        controller.visitedTabs
+                            .contains(index);
+
+                        if (!isVisited) {
+                          return const SizedBox.shrink();
+                        }
+
+                        final bool isCurrentTab =
+                            controller
+                                .currentIndex.value ==
+                                index;
+
+                        return Offstage(
+                          offstage: !isCurrentTab,
+                          child: TickerMode(
+                            enabled: isCurrentTab,
+                            child: _buildTab(index),
+                          ),
+                        );
+                      },
                     ),
                   ),
-              ],
-            ),
-          ),
+                ),
 
-          if (callCoordinator != null)
-            Obx(
-                  () => callCoordinator.isCallTransitioning.value
-                  ? const Positioned.fill(
-                child: _CallTransitionBlocker(),
-              )
-                  : const SizedBox.shrink(),
-            ),
-        ],
-      ),
+                /*
+                 * Do not wrap this with SafeArea.
+                 *
+                 * The native Android inset is applied directly,
+                 * avoiding incorrect SafeArea values on affected
+                 * Android devices.
+                 */
+                bottomNavigationBar: isKeyboardVisible
+                    ? null
+                    : Obx(
+                      () => AppHomeBottomNavigationBar(
+                    selectedIndex:
+                    controller.currentIndex.value,
+                    items:
+                    AppHomeBottomNavigationBar.defaultItems,
+                    onTap: controller.onBottomNavTap,
+                  ),
+                ),
+              ),
+
+              if (callCoordinator != null)
+                Obx(
+                      () => callCoordinator
+                      .isCallTransitioning
+                      .value
+                      ? const Positioned.fill(
+                    child:
+                    _CallTransitionBlocker(),
+                  )
+                      : const SizedBox.shrink(),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -227,6 +248,106 @@ class NavbarAndAppbarWrapper
   }
 }
 
+/*
+ * Reads the native Android navigation-bar inset.
+ *
+ * It refreshes when Android reports a metrics change, such as:
+ *
+ * - Switching between gesture and three-button navigation.
+ * - Rotating the device.
+ * - Showing or hiding system bars.
+ */
+class _NativeBottomInsetBuilder extends StatefulWidget {
+  const _NativeBottomInsetBuilder({
+    required this.builder,
+  });
+
+  final Widget Function(
+      BuildContext context,
+      double nativeBottomInset,
+      ) builder;
+
+  @override
+  State<_NativeBottomInsetBuilder> createState() =>
+      _NativeBottomInsetBuilderState();
+}
+
+class _NativeBottomInsetBuilderState
+    extends State<_NativeBottomInsetBuilder>
+    with WidgetsBindingObserver {
+  double _nativeBottomInset = 0;
+  bool _requestInProgress = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+
+    WidgetsBinding.instance.addPostFrameCallback(
+          (_) {
+        _loadNativeBottomInset();
+      },
+    );
+  }
+
+  @override
+  void didChangeMetrics() {
+    _loadNativeBottomInset();
+  }
+
+  Future<void> _loadNativeBottomInset() async {
+    if (_requestInProgress ||
+        defaultTargetPlatform !=
+            TargetPlatform.android) {
+      return;
+    }
+
+    _requestInProgress = true;
+
+    try {
+      final num? result =
+      await _systemInsetsChannel.invokeMethod<num>(
+        'getNavigationBarBottomInset',
+      );
+
+      final double updatedInset =
+      (result?.toDouble() ?? 0)
+          .clamp(0, 200)
+          .toDouble();
+
+      if (!mounted ||
+          updatedInset == _nativeBottomInset) {
+        return;
+      }
+
+      setState(() {
+        _nativeBottomInset = updatedInset;
+      });
+    } on MissingPluginException {
+      // Keep using Flutter's MediaQuery inset.
+    } on PlatformException {
+      // Keep using Flutter's MediaQuery inset.
+    } finally {
+      _requestInProgress = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(
+      context,
+      _nativeBottomInset,
+    );
+  }
+}
+
 class _CallTransitionBlocker extends StatelessWidget {
   const _CallTransitionBlocker();
 
@@ -250,7 +371,8 @@ class _CallTransitionBlocker extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius:
+              BorderRadius.circular(18),
               boxShadow: const <BoxShadow>[
                 BoxShadow(
                   color: Colors.black26,
@@ -273,13 +395,15 @@ class _CallTransitionBlocker extends StatelessWidget {
                 Text(
                   'loading'.tr,
                   maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  overflow:
+                  TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium
                       ?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight:
+                    FontWeight.w600,
                   ),
                 ),
               ],

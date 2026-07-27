@@ -33,9 +33,7 @@ class LearningActivityRouteResolver {
       return LearningActivityKind.exam;
     }
     if (route == AppRoutes.courseDetail) return LearningActivityKind.course;
-    if (route == AppRoutes.practiceHubPdfViewer) {
-      return LearningActivityKind.pdf;
-    }
+
     if (route.startsWith('/practice-hub/job')) {
       return LearningActivityKind.jobSentences;
     }

@@ -66,7 +66,6 @@ class AppRoutes {
   static const String termsOfService = '/settings/terms-of-service';
   static const String verbDetails = '/practice-hub/verb-details';
   static const String survivalItalian = '/practice-hub/survival-italian';
-  static const String practiceHubPdfViewer = '/practice-hub/pdf-viewer';
   static const String jobSentences = '/practice-hub/job-sentences';
   static const String jobDetails = '/practice-hub/job-details';
   static const String jobPhraseDetails = '/practice-hub/job-phrase-details';

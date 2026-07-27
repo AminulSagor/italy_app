@@ -14,7 +14,6 @@ class SplashView extends GetView<SplashController> {
   static const List<String> _splashHeaderImages = <String>[
     'assets/decor_png/splash-1.png',
     'assets/decor_png/splash-2.png',
-    'assets/decor_png/splash-3.png',
   ];
 
   @override
@@ -46,14 +45,7 @@ class SplashView extends GetView<SplashController> {
                     titleSuffix: 'splash_slide_2_suffix'.tr,
                     description: 'splash_slide_2_desc'.tr,
                   ),
-                  _buildOnboardingPage(
-                    context: context,
-                    index: 3,
-                    title: 'splash_slide_3_title'.tr,
-                    highlight: 'splash_slide_3_highlight'.tr,
-                    titleSuffix: 'splash_slide_3_suffix'.tr,
-                    description: 'splash_slide_3_desc'.tr,
-                  ),
+
                 ],
               ),
 
@@ -486,7 +478,7 @@ class SplashView extends GetView<SplashController> {
   Widget _buildPageIndicator(BuildContext context, int activeIndex) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(3, (i) {
+      children: List.generate(2, (i) {
         final bool isActive = i == (activeIndex - 1);
 
         return AnimatedContainer(

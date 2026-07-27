@@ -304,16 +304,55 @@ class WebinarController extends GetxController {
     await loadWebinars();
   }
 
-  Future<void> _promoteToSpeaker(String webinarId) async {
-    final ApiResult<AgoraTokenModel> tokenResult = await ApiErrorHandler.call(
-      () => _webinarApiService.getSpeakerToken(webinarId: webinarId),
+  Future<void> _promoteToSpeaker(
+      String webinarId,
+      ) async {
+    final ApiResult<AgoraTokenModel> tokenResult =
+    await ApiErrorHandler.call(
+          () => _webinarApiService.getSpeakerToken(
+        webinarId: webinarId,
+      ),
     );
-    if (!tokenResult.isSuccess || tokenResult.data == null) return;
 
-    await agoraService.promoteToSpeaker(tokenResult.data!);
-    speakerRequestStatus.value = 'granted';
-    isParticipating.value = true;
-    isChatFocused.value = false;
+    if (!tokenResult.isSuccess ||
+        tokenResult.data == null) {
+      return;
+    }
+
+    try {
+      await agoraService.promoteToSpeaker(
+        tokenResult.data!,
+      );
+
+      speakerRequestStatus.value = 'granted';
+      isParticipating.value = true;
+      isChatFocused.value = false;
+    } on WebinarAgoraPermissionException catch (error) {
+      speakerRequestStatus.value = 'none';
+      isParticipating.value = false;
+      isTalking.value = false;
+
+      final ApiResult<WebinarParticipantModel>
+      leaveResult = await ApiErrorHandler.call(
+            () => _webinarApiService.leaveStage(
+          webinarId: webinarId,
+        ),
+        showError: false,
+      );
+
+      if (leaveResult.isSuccess &&
+          leaveResult.data != null) {
+        currentParticipant.value = leaveResult.data;
+      }
+
+      await agoraService.demoteToAudience();
+
+      Get.snackbar(
+        'permission_needed'.tr,
+        error.message,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   void _connectSocket(String webinarId) {
@@ -330,7 +369,9 @@ class WebinarController extends GetxController {
       onSpeakerApproved: (WebinarParticipantModel participant) {
         if (!_isCurrentUser(participant.userId)) return;
         currentParticipant.value = participant;
-        _promoteToSpeaker(webinarId);
+        unawaited(
+          _promoteToSpeaker(webinarId),
+        );
       },
       onSpeakerRejected: (WebinarParticipantModel participant) async {
         if (!_isCurrentUser(participant.userId)) return;

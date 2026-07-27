@@ -9,6 +9,7 @@ import '../models/home_models.dart';
 import '../widgets/current_chapter_card.dart';
 import '../widgets/daily_overview_section.dart';
 import '../widgets/home_action_cards.dart';
+import '../widgets/home_dashboard_skeleton.dart';
 import '../widgets/home_info_cards.dart';
 import '../widgets/learn_for_work_section.dart';
 import '../widgets/quick_tools_section.dart';
@@ -42,9 +43,7 @@ class HomeView extends GetView<HomeController> {
            * The full dashboard is not shown yet because there is
            * no successful dashboard response available.
            */
-          if (isInitialLoading && !hasLoadedOnce) {
-            return const _HomeInitialLoadingView();
-          }
+
 
           /*
            * First request failed.
@@ -67,20 +66,19 @@ class HomeView extends GetView<HomeController> {
            */
           return _HomeDashboardContent(
             data: data,
+            isInitialLoading: isInitialLoading && !hasLoadedOnce,
             isRefreshing: controller.isRefreshing.value,
-            refreshErrorMessage:
-            hasLoadedOnce ? errorMessage : '',
+            refreshErrorMessage: hasLoadedOnce ? errorMessage : '',
             onRefresh: controller.refreshDashboard,
             onRetryRefresh: controller.refreshDashboard,
             onContinueChapter: controller.openCurrentChapter,
-            onOpenCvBuilder: controller.openCvBuilder,
+            onOpenQuickTool: controller.openQuickTool,
             onOpenCareerTracks: controller.openCareerTracks,
             onOpenCareerTrack: controller.openCareerTrack,
-            onOpenCommunity: controller.openCommunity,
+            onOpenWhatsAppSupport: controller.openWhatsAppSupport,
             onOpenWebinars: controller.openWebinars,
             onOpenAiTutor: controller.openAiTutor,
-            onOpenDailyChallenges:
-            controller.openDailyChallenges,
+            onOpenDailyChallenges: controller.openDailyChallenges,
           );
         }),
       ),
@@ -91,15 +89,16 @@ class HomeView extends GetView<HomeController> {
 class _HomeDashboardContent extends StatelessWidget {
   const _HomeDashboardContent({
     required this.data,
+    required this.isInitialLoading,
     required this.isRefreshing,
     required this.refreshErrorMessage,
     required this.onRefresh,
     required this.onRetryRefresh,
     required this.onContinueChapter,
-    required this.onOpenCvBuilder,
+    required this.onOpenQuickTool,
     required this.onOpenCareerTracks,
     required this.onOpenCareerTrack,
-    required this.onOpenCommunity,
+    required this.onOpenWhatsAppSupport,
     required this.onOpenWebinars,
     required this.onOpenAiTutor,
     required this.onOpenDailyChallenges,
@@ -108,15 +107,17 @@ class _HomeDashboardContent extends StatelessWidget {
   final HomeDashboardModel data;
   final bool isRefreshing;
   final String refreshErrorMessage;
+  final bool isInitialLoading;
 
   final Future<void> Function() onRefresh;
   final Future<void> Function() onRetryRefresh;
 
   final VoidCallback onContinueChapter;
-  final VoidCallback onOpenCvBuilder;
+  final ValueChanged<HomeToolModel>
+  onOpenQuickTool;
   final VoidCallback onOpenCareerTracks;
   final ValueChanged<HomeWorkItemModel> onOpenCareerTrack;
-  final Future<void> Function() onOpenCommunity;
+  final Future<void> Function() onOpenWhatsAppSupport;
   final VoidCallback onOpenWebinars;
   final VoidCallback onOpenAiTutor;
   final VoidCallback onOpenDailyChallenges;
@@ -192,18 +193,21 @@ class _HomeDashboardContent extends StatelessWidget {
                             SizedBox(height: 16.h),
                           ],
 
-                          DailyOverviewSection(
-                            overview: data.overview,
-                          ),
+                          if (isInitialLoading)
+                            const HomeOverviewSkeleton()
+                          else
+                            DailyOverviewSection(
+                              overview: data.overview,
+                            ),
 
-                          if (data.currentChapter != null) ...<
-                              Widget>[
+                          if (isInitialLoading) ...<Widget>[
+                            SizedBox(height: 20.h),
+                            const HomeCurrentChapterSkeleton(),
+                          ] else if (data.currentChapter != null) ...<Widget>[
                             SizedBox(height: 20.h),
                             CurrentChapterCard(
-                              chapter:
-                              data.currentChapter!,
-                              onContinueTap:
-                              onContinueChapter,
+                              chapter: data.currentChapter!,
+                              onContinueTap: onContinueChapter,
                             ),
                           ],
 
@@ -215,75 +219,62 @@ class _HomeDashboardContent extends StatelessWidget {
                             ),
                             QuickToolsSection(
                               tools: data.quickTools,
-                              onToolTap: (
-                                  HomeToolModel tool,
-                                  ) {
-                                /*
-                                 * At present the API/model contains
-                                 * the CV Builder quick tool.
-                                 *
-                                 * More tool routes can be added here
-                                 * later based on a stable backend key.
-                                 */
-                                onOpenCvBuilder();
-                              },
+                              onToolTap: onOpenQuickTool,
                             ),
                           ],
 
-                          if (data.workItems.isNotEmpty) ...<
-                              Widget>[
-                            SizedBox(
-                              height:
-                              kHomeSectionSpacing.h,
-                            ),
+                          if (isInitialLoading) ...<Widget>[
+                            SizedBox(height: kHomeSectionSpacing.h),
+                            const HomeCareerTracksSkeleton(),
+                          ] else if (data.workItems.isNotEmpty) ...<Widget>[
+                            SizedBox(height: kHomeSectionSpacing.h),
                             LearnForWorkSection(
                               items: data.workItems,
-                              onViewAllTap:
-                              onOpenCareerTracks,
-                              onItemTap:
-                              onOpenCareerTrack,
+                              onViewAllTap: onOpenCareerTracks,
+                              onItemTap: onOpenCareerTrack,
                             ),
                           ],
 
-                          SizedBox(height: 22.h),
+                          SizedBox(height: 12.h),
 
                           SupportCommunityCard(
                             support: data.support,
                             onTap: () {
-                              onOpenCommunity();
+                              onOpenWhatsAppSupport();
                             },
                           ),
 
-                          if (data.webinar != null) ...<
-                              Widget>[
-                            SizedBox(height: 22.h),
+                          if (isInitialLoading) ...<Widget>[
+                            SizedBox(height: 12.h),
+                            const HomeWebinarSkeleton(),
+                          ] else if (data.webinar != null) ...<Widget>[
+                            SizedBox(height: 12.h),
                             WebinarCard(
                               webinar: data.webinar!,
-                              onJoinTap:
-                              onOpenWebinars,
+                              onJoinTap: onOpenWebinars,
                             ),
                           ],
 
-                          SizedBox(height: 22.h),
+                          SizedBox(height: 12.h),
 
                           CulturalTipCard(
                             tip: data.culturalTip,
                           ),
 
-                          SizedBox(height: 22.h),
+                          SizedBox(height: 12.h),
 
                           StreakCard(
                             streak: data.streak,
                           ),
 
-                          SizedBox(height: 22.h),
+                          SizedBox(height: 12.h),
 
                           AiTutorCard(
                             tutor: data.aiTutor,
                             onStartTap: onOpenAiTutor,
                           ),
 
-                          SizedBox(height: 22.h),
+                          SizedBox(height: 12.h),
 
                           DailyChallengesCard(
                             challenges:

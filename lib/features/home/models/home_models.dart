@@ -12,6 +12,7 @@ class HomeDashboardModel {
     required this.dailyChallenges,
     this.currentChapter,
     this.webinar,
+    this.guideVideo,
   });
 
   final HomeOverviewModel overview;
@@ -20,6 +21,7 @@ class HomeDashboardModel {
   final List<HomeWorkItemModel> workItems;
   final HomeSupportModel support;
   final HomeWebinarModel? webinar;
+  final HomeGuideVideoModel? guideVideo;
   final HomeInfoCardModel culturalTip;
   final HomeInfoCardModel streak;
   final HomeInfoCardModel aiTutor;
@@ -34,6 +36,8 @@ class HomeDashboardModel {
     HomeSupportModel? support,
     HomeWebinarModel? webinar,
     bool clearWebinar = false,
+    HomeGuideVideoModel? guideVideo,
+    bool clearGuideVideo = false,
     HomeInfoCardModel? culturalTip,
     HomeInfoCardModel? streak,
     HomeInfoCardModel? aiTutor,
@@ -48,6 +52,9 @@ class HomeDashboardModel {
       workItems: workItems ?? this.workItems,
       support: support ?? this.support,
       webinar: clearWebinar ? null : webinar ?? this.webinar,
+      guideVideo: clearGuideVideo
+          ? null
+          : guideVideo ?? this.guideVideo,
       culturalTip: culturalTip ?? this.culturalTip,
       streak: streak ?? this.streak,
       aiTutor: aiTutor ?? this.aiTutor,
@@ -55,25 +62,78 @@ class HomeDashboardModel {
     );
   }
 
-  factory HomeDashboardModel.fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic>? chapter = _mapValue(json['currentChapter']);
-    final Map<String, dynamic>? webinar = _mapValue(json['webinar']);
-    final List<HomeWorkItemModel> workItems = _listValue(
+  factory HomeDashboardModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
+    final Map<String, dynamic>? chapter =
+    _mapValue(json['currentChapter']);
+
+    final Map<String, dynamic>? webinar =
+    _mapValue(json['webinar']);
+
+    final Map<String, dynamic>? guideVideoJson =
+    _mapValue(json['guideVideo']);
+
+    final String guideVideoId = _stringValue(
+      guideVideoJson?['videoId'],
+    );
+
+    final bool hasValidGuideVideo =
+    RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(
+      guideVideoId,
+    );
+
+    final HomeGuideVideoModel? guideVideo =
+    hasValidGuideVideo
+        ? HomeGuideVideoModel(videoId: guideVideoId)
+        : null;
+
+    final List<HomeToolModel> quickTools =
+    <HomeToolModel>[
+      HomeToolModel(
+        type: HomeToolType.cvBuilder,
+        title: 'cv_services'.tr,
+        subtitle:
+        'create_a_professional_italian_cv'.tr,
+        iconKey: 'document',
+      ),
+      if (guideVideo != null)
+        HomeToolModel(
+          type: HomeToolType.guideVideo,
+          title: 'guide_video'.tr,
+          subtitle: 'watch_app_guide'.tr,
+          iconKey: 'guide-video',
+          videoId: guideVideo.videoId,
+        ),
+    ];
+
+    final List<HomeWorkItemModel> workItems =
+    _listValue(
       json['careerTracks'],
-    ).map(HomeWorkItemModel.fromJson).toList(growable: false);
-    final int streakDays = _intValue(json['streakDays']);
+    ).map(HomeWorkItemModel.fromJson).toList(
+      growable: false,
+    );
+
+    final int streakDays =
+    _intValue(json['streakDays']);
 
     return initial.copyWith(
       overview: HomeOverviewModel.fromJson(
-        _mapValue(json['overview']) ?? <String, dynamic>{},
+        _mapValue(json['overview']) ??
+            <String, dynamic>{},
       ),
       currentChapter: chapter == null
           ? null
           : HomeChapterModel.fromJson(chapter),
       clearCurrentChapter: chapter == null,
+      quickTools: quickTools,
       workItems: workItems,
-      webinar: webinar == null ? null : HomeWebinarModel.fromJson(webinar),
+      webinar: webinar == null
+          ? null
+          : HomeWebinarModel.fromJson(webinar),
       clearWebinar: webinar == null,
+      guideVideo: guideVideo,
+      clearGuideVideo: guideVideo == null,
       streak: HomeInfoCardModel(
         eyebrow: 'day_streak'.tr,
         title: streakDays == 1
@@ -88,52 +148,67 @@ class HomeDashboardModel {
             : 'start_learning_today'.tr,
         actionLabel: '',
       ),
-      dailyChallenges: HomeDailyChallengesModel.fromJson(
-        _mapValue(json['dailyChallenges']) ?? <String, dynamic>{},
+      dailyChallenges:
+      HomeDailyChallengesModel.fromJson(
+        _mapValue(json['dailyChallenges']) ??
+            <String, dynamic>{},
       ),
     );
   }
 
-  static HomeDashboardModel get initial => HomeDashboardModel(
-    overview: HomeOverviewModel(totalSeconds: 0, days: <HomeActivityModel>[]),
-    currentChapter: null,
-    quickTools: <HomeToolModel>[
-      HomeToolModel(
-        title: 'cv_services'.tr,
-        subtitle: 'create_a_professional_italian_cv'.tr,
-        iconKey: 'document',
-      ),
-    ],
-    workItems: <HomeWorkItemModel>[],
-    support: HomeSupportModel(
-      title: 'gen_need_help'.tr,
-      subtitle: 'join_our_facebook_community'.tr,
-    ),
-    webinar: null,
-    culturalTip: HomeInfoCardModel(
-      eyebrow: 'gen_cultural_tip_of_the_day'.tr,
-      title: 'a_little_italian_goes_a_long_way'.tr,
-      body: 'practice_a_few_useful_phrases_every_day_to_build_confidence'.tr,
-      actionLabel: '',
-    ),
-    streak: HomeInfoCardModel(
-      eyebrow: 'day_streak'.tr,
-      title: '0 ${'gen_days'.tr}',
-      body: 'start_learning_today'.tr,
-      actionLabel: '',
-    ),
-    aiTutor: HomeInfoCardModel(
-      eyebrow: 'ai_tutor_1'.tr,
-      title: 'practice_italian_anytime'.tr,
-      body: 'chat_or_speak_with_your_ai_tutor_and_get_instant_support'.tr,
-      actionLabel: 'start_chatting'.tr,
-    ),
-    dailyChallenges: HomeDailyChallengesModel(
-      label: 'gen_daily_challenges_1'.tr,
-      completed: 0,
-      total: 0,
-    ),
-  );
+  static HomeDashboardModel get initial =>
+      HomeDashboardModel(
+        overview: HomeOverviewModel(
+          totalSeconds: 0,
+          days: <HomeActivityModel>[],
+        ),
+        currentChapter: null,
+        quickTools: <HomeToolModel>[
+          HomeToolModel(
+            type: HomeToolType.cvBuilder,
+            title: 'cv_services'.tr,
+            subtitle:
+            'create_a_professional_italian_cv'.tr,
+            iconKey: 'document',
+          ),
+        ],
+        workItems: <HomeWorkItemModel>[],
+        support: HomeSupportModel(
+          title: 'gen_need_help'.tr,
+          subtitle: 'chat_with_us_on_whatsapp'.tr,
+        ),
+        webinar: null,
+        guideVideo: null,
+        culturalTip: HomeInfoCardModel(
+          eyebrow: 'gen_cultural_tip_of_the_day'.tr,
+          title:
+          'a_little_italian_goes_a_long_way'.tr,
+          body:
+          'practice_a_few_useful_phrases_every_day_to_build_confidence'
+              .tr,
+          actionLabel: '',
+        ),
+        streak: HomeInfoCardModel(
+          eyebrow: 'day_streak'.tr,
+          title: '0 ${'gen_days'.tr}',
+          body: 'start_learning_today'.tr,
+          actionLabel: '',
+        ),
+        aiTutor: HomeInfoCardModel(
+          eyebrow: 'ai_tutor_1'.tr,
+          title: 'practice_italian_anytime'.tr,
+          body:
+          'chat_or_speak_with_your_ai_tutor_and_get_instant_support'
+              .tr,
+          actionLabel: 'start_chatting'.tr,
+        ),
+        dailyChallenges:
+        HomeDailyChallengesModel(
+          label: 'gen_daily_challenges_1'.tr,
+          completed: 0,
+          total: 0,
+        ),
+      );
 }
 
 class HomeOverviewModel {
@@ -232,16 +307,33 @@ class HomeChapterModel {
   }
 }
 
+enum HomeToolType {
+  cvBuilder,
+  guideVideo,
+}
+
 class HomeToolModel {
   const HomeToolModel({
+    required this.type,
     required this.title,
     required this.subtitle,
     required this.iconKey,
+    this.videoId,
   });
 
+  final HomeToolType type;
   final String title;
   final String subtitle;
   final String iconKey;
+  final String? videoId;
+}
+
+class HomeGuideVideoModel {
+  const HomeGuideVideoModel({
+    required this.videoId,
+  });
+
+  final String videoId;
 }
 
 class HomeWorkItemModel {

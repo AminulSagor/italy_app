@@ -7,7 +7,7 @@ import '../controllers/ai_tutor_level_test_controller.dart';
 import '../models/ai_tutor_level_test_models.dart';
 import 'widgets/ai_tutor_level_test_speaking_recorder.dart';
 import 'widgets/ai_tutor_level_test_widgets.dart';
-
+import '../../../core/widgets/native_bottom_inset.dart';
 class AiTutorLevelTestQuestionView
     extends GetView<AiTutorLevelTestController> {
   const AiTutorLevelTestQuestionView({super.key});
@@ -122,25 +122,35 @@ class AiTutorLevelTestQuestionView
                   ),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 24.h),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.035),
-                      blurRadius: 18.r,
-                      offset: Offset(0, -7.h),
+              ColoredBox(
+                color: AppColors.white,
+                child: NativeBottomInset(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(
+                      24.w,
+                      16.h,
+                      24.w,
+                      24.h,
                     ),
-                  ],
-                ),
-                child: AiTutorLevelPrimaryButton(
-                  text: controller.isLastQuestion
-                      ? 'analyze_my_level'.tr
-                      : 'continue_1'.tr,
-                  onTap: controller.submitCurrentAnswer,
-                  isLoading: controller.isSubmitting.value,
-                  isEnabled: controller.canContinue,
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.035),
+                          blurRadius: 18.r,
+                          offset: Offset(0, -7.h),
+                        ),
+                      ],
+                    ),
+                    child: AiTutorLevelPrimaryButton(
+                      text: controller.isLastQuestion
+                          ? 'analyze_my_level'.tr
+                          : 'continue_1'.tr,
+                      onTap: controller.submitCurrentAnswer,
+                      isLoading: controller.isSubmitting.value,
+                      isEnabled: controller.canContinue,
+                    ),
+                  ),
                 ),
               ),
             ],

@@ -6,6 +6,8 @@ import '../themes/app_colors.dart';
 import '../themes/app_constants.dart';
 import 'package:get/get.dart';
 
+import 'native_bottom_inset.dart';
+
 class AppBottomNavItem {
   final IconData icon;
   final String semanticLabel;
@@ -43,73 +45,90 @@ class AppHomeBottomNavigationBar extends StatelessWidget {
 
   @override
   @override
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        kHomeHorizontalPadding.w,
-        0,
-        kHomeHorizontalPadding.w,
-        kHomeBottomNavOuterPadding.h,
-      ),
-      child: Container(
-        height: kHomeBottomNavHeight.h,
-        clipBehavior: Clip.antiAlias,
+    return NativeBottomInset(
+      additionalBottom:
+      kHomeBottomNavOuterPadding.h,
+      child: Padding(
         padding: EdgeInsets.symmetric(
-          horizontal: 10.w,
-          vertical: 9.h,
+          horizontal: kHomeHorizontalPadding.w,
         ),
-        decoration: BoxDecoration(
-          color: AppColors.homeBottomNavBg,
-          borderRadius: BorderRadius.circular(kHomeCardRadius.r),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: AppColors.homeNeutralShadow,
-              blurRadius: 22.r,
-              offset: Offset(0, 8.h),
+        child: Container(
+          height: kHomeBottomNavHeight.h,
+          clipBehavior: Clip.antiAlias,
+          padding: EdgeInsets.symmetric(
+            horizontal: 10.w,
+            vertical: 9.h,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.homeBottomNavBg,
+            borderRadius: BorderRadius.circular(
+              kHomeCardRadius.r,
             ),
-          ],
-        ),
-        child: Row(
-          children: List<Widget>.generate(
-            items.length,
-                (int index) {
-              final bool isActive = selectedIndex == index;
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: AppColors.homeNeutralShadow,
+                blurRadius: 22.r,
+                offset: Offset(0, 8.h),
+              ),
+            ],
+          ),
+          child: Row(
+            children: List<Widget>.generate(
+              items.length,
+                  (int index) {
+                final bool isActive =
+                    selectedIndex == index;
 
-              return Expanded(
-                child: Semantics(
-                  label: items[index].semanticLabel,
-                  button: true,
-                  selected: isActive,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(
-                      kHomePillRadius.r,
-                    ),
-                    onTap: () => onTap?.call(index),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      height: double.infinity,
-                      margin: EdgeInsets.symmetric(horizontal: 3.w),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? AppColors.homeBottomNavActiveBg
-                            : AppColors.transparent,
-                        borderRadius: BorderRadius.circular(
-                          kHomePillRadius.r,
-                        ),
+                return Expanded(
+                  child: Semantics(
+                    label:
+                    items[index].semanticLabel,
+                    button: true,
+                    selected: isActive,
+                    child: InkWell(
+                      borderRadius:
+                      BorderRadius.circular(
+                        kHomePillRadius.r,
                       ),
-                      child: Icon(
-                        items[index].icon,
-                        size: kHomeTopIconSize.w,
-                        color: isActive
-                            ? AppColors.primaryGreen
-                            : AppColors.homeBottomNavInactive,
+                      onTap: () =>
+                          onTap?.call(index),
+                      child: AnimatedContainer(
+                        duration: const Duration(
+                          milliseconds: 180,
+                        ),
+                        height: double.infinity,
+                        margin:
+                        EdgeInsets.symmetric(
+                          horizontal: 3.w,
+                        ),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? AppColors
+                              .homeBottomNavActiveBg
+                              : AppColors.transparent,
+                          borderRadius:
+                          BorderRadius.circular(
+                            kHomePillRadius.r,
+                          ),
+                        ),
+                        child: Icon(
+                          items[index].icon,
+                          size:
+                          kHomeTopIconSize.w,
+                          color: isActive
+                              ? AppColors.primaryGreen
+                              : AppColors
+                              .homeBottomNavInactive,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

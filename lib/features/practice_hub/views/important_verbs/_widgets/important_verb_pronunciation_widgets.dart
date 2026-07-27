@@ -19,16 +19,51 @@ class VerbConjugationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String pronoun = conjugation.pronounIt.isNotEmpty
-        ? conjugation.pronounIt
-        : conjugation.pronoun;
+    /*
+     * Examples:
+     *
+     * Normal:
+     * pronounIt       = "io"
+     * conjugatedText  = "abbandono"
+     * fullItalianText = "io abbandono"
+     *
+     * Subjunctive:
+     * pronounIt       = "che io"
+     * conjugatedText  = "abbandoni"
+     * fullItalianText = "che io abbandoni"
+     *
+     * Compound subjunctive:
+     * pronounIt       = "che io"
+     * conjugatedText  = "abbia abbandonato"
+     * fullItalianText = "che io abbia abbandonato"
+     */
+    final String fullItalianText =
+    _buildFullItalianConjugationText(conjugation);
+
+    /*
+     * Replace the backend TTS text with the complete visible phrase.
+     *
+     * This does not append to the backend text, so it will not produce:
+     * "io io abbandono".
+     */
+    final ImportantVerbTtsModel effectiveTts =
+    conjugation.tts.copyWith(
+      locale: 'it-IT',
+      text: fullItalianText,
+    );
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(15.r),
       decoration: BoxDecoration(
-        color: highlighted ? const Color(0xFFF7FBF4) : const Color(0xFFF7F9F7),
+        color: highlighted
+            ? const Color(0xFFF7FBF4)
+            : const Color(0xFFF7F9F7),
         borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: const Color(0xFFE8F1E2), width: 1.w),
+        border: Border.all(
+          color: const Color(0xFFE8F1E2),
+          width: 1.w,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +72,7 @@ class VerbConjugationCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  '$pronoun ${conjugation.conjugatedText}'.trim(),
+                  fullItalianText,
                   style: TextStyle(
                     fontSize: 18.sp,
                     height: 1.15,
@@ -46,9 +81,15 @@ class VerbConjugationCard extends StatelessWidget {
                   ),
                 ),
               ),
-              PronunciationButton(tts: conjugation.tts),
+
+              SizedBox(width: 8.w),
+
+              PronunciationButton(
+                tts: effectiveTts,
+              ),
             ],
           ),
+
           if (conjugation.banglaMeaning.isNotEmpty ||
               conjugation.englishMeaning.isNotEmpty) ...<Widget>[
             SizedBox(height: 7.h),
@@ -62,30 +103,56 @@ class VerbConjugationCard extends StatelessWidget {
               ),
             ),
           ],
+
           if (conjugation.examples.isNotEmpty) ...<Widget>[
             SizedBox(height: 12.h),
-            ...conjugation.examples.map(VerbExampleTile.new),
+            ...conjugation.examples.map(
+              VerbExampleTile.new,
+            ),
           ],
         ],
       ),
     );
   }
 
-  String _translationText(ImportantVerbConjugationModel item) {
-    final String bangla = item.banglaMeaning;
-    final String english = item.englishMeaning;
-    if (bangla.isNotEmpty && english.isNotEmpty) return '$bangla ($english)';
+  String _translationText(
+      ImportantVerbConjugationModel item,
+      ) {
+    final String bangla = item.banglaMeaning.trim();
+    final String english = item.englishMeaning.trim();
+
+    if (bangla.isNotEmpty && english.isNotEmpty) {
+      return '$bangla ($english)';
+    }
+
     return bangla.isNotEmpty ? bangla : english;
   }
 }
 
 class VerbExampleTile extends StatelessWidget {
-  const VerbExampleTile(this.example, {super.key});
+  const VerbExampleTile(
+      this.example, {
+        super.key,
+      });
 
   final ImportantVerbExampleModel example;
 
   @override
   Widget build(BuildContext context) {
+    final String completeItalianSentence =
+    example.italianText
+        .replaceAll(
+      RegExp(r'\s+'),
+      ' ',
+    )
+        .trim();
+
+    final ImportantVerbTtsModel effectiveTts =
+    example.tts.copyWith(
+      locale: 'it-IT',
+      text: completeItalianSentence,
+    );
+
     return Padding(
       padding: EdgeInsets.only(top: 10.h),
       child: Column(
@@ -95,7 +162,7 @@ class VerbExampleTile extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  example.italianText,
+                  completeItalianSentence,
                   style: TextStyle(
                     fontSize: 15.sp,
                     height: 1.2,
@@ -104,10 +171,15 @@ class VerbExampleTile extends StatelessWidget {
                   ),
                 ),
               ),
+
               SizedBox(width: 8.w),
-              PronunciationButton(tts: example.tts),
+
+              PronunciationButton(
+                tts: effectiveTts,
+              ),
             ],
           ),
+
           if (example.banglaText.isNotEmpty ||
               example.englishText.isNotEmpty) ...<Widget>[
             SizedBox(height: 7.h),
@@ -126,11 +198,20 @@ class VerbExampleTile extends StatelessWidget {
     );
   }
 
-  String _exampleTranslation(ImportantVerbExampleModel item) {
-    if (item.banglaText.isNotEmpty && item.englishText.isNotEmpty) {
-      return '${item.banglaText} (${item.englishText})';
+  String _exampleTranslation(
+      ImportantVerbExampleModel item,
+      ) {
+    final String bangla =
+    item.banglaText.trim();
+
+    final String english =
+    item.englishText.trim();
+
+    if (bangla.isNotEmpty && english.isNotEmpty) {
+      return '$bangla ($english)';
     }
-    return item.banglaText.isNotEmpty ? item.banglaText : item.englishText;
+
+    return bangla.isNotEmpty ? bangla : english;
   }
 }
 
@@ -180,4 +261,54 @@ class PronunciationButton extends GetView<ImportantVerbsController> {
       );
     });
   }
+}
+String _buildFullItalianConjugationText(
+    ImportantVerbConjugationModel conjugation,
+    ) {
+  final String pronoun =
+  (conjugation.pronounIt.isNotEmpty
+      ? conjugation.pronounIt
+      : conjugation.pronoun)
+      .replaceAll(
+    RegExp(r'\s+'),
+    ' ',
+  )
+      .trim();
+
+  final String conjugatedText =
+  conjugation.conjugatedText
+      .replaceAll(
+    RegExp(r'\s+'),
+    ' ',
+  )
+      .trim();
+
+  if (pronoun.isEmpty) {
+    return conjugatedText;
+  }
+
+  if (conjugatedText.isEmpty) {
+    return pronoun;
+  }
+
+  final String lowercasePronoun =
+  pronoun.toLowerCase();
+
+  final String lowercaseConjugation =
+  conjugatedText.toLowerCase();
+
+  /*
+   * Prevent duplication when the backend already returns:
+   * "che io abbandoni"
+   * instead of only:
+   * "abbandoni"
+   */
+  if (lowercaseConjugation == lowercasePronoun ||
+      lowercaseConjugation.startsWith(
+        '$lowercasePronoun ',
+      )) {
+    return conjugatedText;
+  }
+
+  return '$pronoun $conjugatedText';
 }

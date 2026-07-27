@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -6,7 +7,6 @@
     <!-- Network -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
     <!-- Calling, voice and media -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -20,15 +20,12 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
 
-    <!--
-        Legacy storage support.
+    <!-- Remove unused Agora screen-sharing permission -->
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
+        tools:node="remove" />
 
-        Android 10 and newer use MediaStore for saving the PDF into
-        the public Downloads folder.
-
-        WRITE_EXTERNAL_STORAGE is only used through Android 10/API 29.
-        READ_EXTERNAL_STORAGE is only relevant through API 32.
-    -->
+    <!-- Legacy storage support -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29" />
@@ -39,7 +36,7 @@
 
     <application
         android:name="${applicationName}"
-        android:label="italir_pothe"
+        android:label="Italir Pothe"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true">
 
@@ -62,6 +59,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Remove unused Agora screen-sharing components -->
+        <activity
+            android:name="io.agora.rtc2.extensions.MediaProjectionMgr$LocalScreenCaptureAssistantActivity"
+            tools:node="remove" />
+
+        <service
+            android:name="io.agora.rtc2.extensions.MediaProjectionMgr$LocalScreenSharingService"
+            tools:node="remove" />
 
         <!-- Required by Flutter embedding -->
         <meta-data

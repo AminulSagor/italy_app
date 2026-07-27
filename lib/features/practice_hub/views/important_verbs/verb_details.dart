@@ -9,6 +9,7 @@ import '../../controllers/important_verbs_controller.dart';
 import '../../models/important_verb_detail_models.dart';
 import '../../models/important_verb_models.dart';
 import '_widgets/important_verb_detail_widgets.dart';
+import '_widgets/important_verb_loading_widgets.dart';
 
 class VerbDetailsView extends GetView<ImportantVerbsController> {
   const VerbDetailsView({super.key});
@@ -25,6 +26,7 @@ class VerbDetailsView extends GetView<ImportantVerbsController> {
         child: Obx(() {
           final ImportantVerbSummaryModel? summary =
               controller.currentVerbSummary;
+
           final ImportantVerbDetailModel? details =
               controller.selectedVerbDetails.value;
 
@@ -35,69 +37,139 @@ class VerbDetailsView extends GetView<ImportantVerbsController> {
             );
           }
 
-
-
           return RefreshIndicator(
-            onRefresh: () => controller.loadVerbDetails(summary.id),
+            onRefresh: () async {
+              if (controller.isVerbDetailsLoading.value) {
+                return;
+              }
+
+              await controller.loadVerbDetails(
+                summary.id,
+              );
+            },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
-              padding: EdgeInsets.fromLTRB(24.w, 15.h, 24.w, 42.h),
+              padding: EdgeInsets.fromLTRB(
+                24.w,
+                15.h,
+                24.w,
+                42.h,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   const VerbDetailsTopBar(),
+
                   SizedBox(height: 13.h),
-                  VerbHeroCard(verb: summary),
+
+                  // This information already exists from the list,
+                  // so it appears immediately.
+                  VerbHeroCard(
+                    verb: summary,
+                  ),
+
                   SizedBox(height: 20.h),
-                  if (controller.isVerbDetailsLoading.value && details == null)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 42.h),
-                      child: const Center(child: CircularProgressIndicator()),
-                    )
+
+                  // First API load.
+                  if (controller.isVerbDetailsLoading.value &&
+                      details == null)
+                    const VerbDetailsSkeleton()
+
+                  // Initial API request failed.
                   else if (controller.verbDetailsError.value.isNotEmpty &&
                       details == null)
                     _VerbDetailsRetry(
                       message: controller.verbDetailsError.value,
-                      onRetry: () => controller.loadVerbDetails(summary.id),
+                      onRetry: () =>
+                          controller.loadVerbDetails(summary.id),
                     )
+
+                  // Details are already available.
                   else if (details != null) ...<Widget>[
-                    VerbInformationCard(information: details.information),
-                    SizedBox(height: 32.h),
-                    Text(
-                      'verb_forms_tenses'.tr,
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        height: 1,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.45,
-                        color: const Color(0xFF33383C),
-                      ),
-                    ),
-                    SizedBox(height: 24.h),
-                    if (details.forms.isEmpty)
-                      Text(
-                        'no_verb_forms_are_available'.tr,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF747A80),
+                      // Show a small loading bar during refresh while
+                      // keeping the existing content visible.
+                      AnimatedSwitcher(
+                        duration: const Duration(
+                          milliseconds: 180,
                         ),
-                      )
-                    else
-                      ...details.forms.asMap().entries.map(
-                        (MapEntry<int, ImportantVerbFormModel> entry) =>
-                            Padding(
+                        child: controller.isVerbDetailsLoading.value
+                            ? Padding(
+                          key: const ValueKey<String>(
+                            'verb-detail-refreshing',
+                          ),
+                          padding: EdgeInsets.only(
+                            bottom: 14.h,
+                          ),
+                          child: ClipRRect(
+                            borderRadius:
+                            BorderRadius.circular(999.r),
+                            child:
+                            const LinearProgressIndicator(
+                              minHeight: 3,
+                              color: AppColors.primaryGreen,
+                              backgroundColor:
+                              Color(0xFFDDE8D8),
+                            ),
+                          ),
+                        )
+                            : const SizedBox.shrink(
+                          key: ValueKey<String>(
+                            'verb-detail-ready',
+                          ),
+                        ),
+                      ),
+
+                      VerbInformationCard(
+                        information: details.information,
+                      ),
+
+                      SizedBox(height: 32.h),
+
+                      Text(
+                        'verb_forms_tenses'.tr,
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          height: 1,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.45,
+                          color: const Color(0xFF33383C),
+                        ),
+                      ),
+
+                      SizedBox(height: 24.h),
+
+                      if (details.forms.isEmpty)
+                        Text(
+                          'no_verb_forms_are_available'.tr,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF747A80),
+                          ),
+                        )
+                      else
+                        ...details.forms.asMap().entries.map(
+                              (
+                              MapEntry<int, ImportantVerbFormModel>
+                              entry,
+                              ) {
+                            return Padding(
                               padding: EdgeInsets.only(
-                                bottom: entry.key == details.forms.length - 1
+                                bottom:
+                                entry.key ==
+                                    details.forms.length - 1
                                     ? 0
                                     : 14.h,
                               ),
-                              child: VerbFormSection(form: entry.value),
-                            ),
-                      ),
-                  ],
+                              child: VerbFormSection(
+                                form: entry.value,
+                              ),
+                            );
+                          },
+                        ),
+                    ],
                 ],
               ),
             ),

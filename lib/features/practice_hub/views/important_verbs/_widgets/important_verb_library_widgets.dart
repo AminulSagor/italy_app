@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../controllers/important_verbs_controller.dart';
 import '../../../models/important_verb_models.dart';
+import 'important_verb_loading_widgets.dart';
 
 class SearchSuggestionOverlay extends GetView<ImportantVerbsController> {
   const SearchSuggestionOverlay({super.key});
@@ -31,10 +32,7 @@ class SearchSuggestionOverlay extends GetView<ImportantVerbsController> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(26.r),
           child: isLoading && results.isEmpty
-              ? SizedBox(
-                  height: 88.h,
-                  child: const Center(child: CircularProgressIndicator()),
-                )
+              ? const SearchSuggestionSkeleton()
               : results.isEmpty
               ? SizedBox(
                   height: 88.h,
@@ -191,11 +189,13 @@ class VerbFilterChips extends StatelessWidget {
     required this.filters,
     required this.selectedFilter,
     required this.onSelected,
+    this.isLoading = false,
   });
 
   final List<String> filters;
   final String selectedFilter;
   final ValueChanged<String> onSelected;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -207,32 +207,74 @@ class VerbFilterChips extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         itemCount: filters.length,
         separatorBuilder: (_, _) => SizedBox(width: 8.w),
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (
+            BuildContext context,
+            int index,
+            ) {
           final String filter = filters[index];
-          final bool isSelected = filter == selectedFilter;
+          final bool isSelected =
+              filter == selectedFilter;
+
+          final bool showSpinner =
+              isLoading && isSelected;
+
           return GestureDetector(
-            onTap: () => onSelected(filter),
-            child: Container(
-              height: 40.h,
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primaryGreen : AppColors.white,
-                borderRadius: BorderRadius.circular(999.r),
-                border: Border.all(
+            onTap: isLoading
+                ? null
+                : () => onSelected(filter),
+            child: AnimatedOpacity(
+              duration: const Duration(
+                milliseconds: 180,
+              ),
+              opacity: isLoading && !isSelected
+                  ? 0.55
+                  : 1,
+              child: Container(
+                height: 40.h,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 20.w,
+                ),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.primaryGreen
-                      : const Color(0xFFE0E3E5),
-                  width: 1.5.w,
+                      : AppColors.white,
+                  borderRadius:
+                  BorderRadius.circular(999.r),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primaryGreen
+                        : const Color(0xFFE0E3E5),
+                    width: 1.5.w,
+                  ),
                 ),
-              ),
-              child: Text(
-                filter,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  height: 1,
-                  fontWeight: FontWeight.w900,
-                  color: isSelected ? AppColors.white : AppColors.primaryGreen,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (showSpinner) ...<Widget>[
+                      SizedBox(
+                        width: 14.r,
+                        height: 14.r,
+                        child:
+                        const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 7.w),
+                    ],
+                    Text(
+                      filter,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        height: 1,
+                        fontWeight: FontWeight.w900,
+                        color: isSelected
+                            ? AppColors.white
+                            : AppColors.primaryGreen,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -261,12 +303,11 @@ class VerbLibraryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // First load, filter with no existing data, or empty search.
     if (isLoading && verbs.isEmpty) {
-      return Padding(
-        padding: EdgeInsets.only(top: 38.h),
-        child: const Center(child: CircularProgressIndicator()),
-      );
+      return const VerbLibrarySkeleton();
     }
+
     if (error.isNotEmpty && verbs.isEmpty) {
       return _VerbListMessage(
         message: error,
@@ -274,32 +315,74 @@ class VerbLibraryList extends StatelessWidget {
         onAction: onRetry,
       );
     }
+
     if (verbs.isEmpty) {
-      return _VerbListMessage(message: 'no_verbs_found'.tr);
+      return _VerbListMessage(
+        message: 'no_verbs_found'.tr,
+      );
     }
 
     return Column(
       children: <Widget>[
-        ListView.separated(
-          itemCount: verbs.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          separatorBuilder: (_, _) => SizedBox(height: 14.h),
-          itemBuilder: (BuildContext context, int index) {
-            return VerbLibraryCard(verb: verbs[index]);
-          },
-        ),
-        if (isLoadingMore) ...<Widget>[
-          SizedBox(height: 22.h),
-          SizedBox(
-            width: 22.r,
-            height: 22.r,
-            child: const CircularProgressIndicator(
-              color: AppColors.primaryGreen,
-              strokeWidth: 2.4,
+        AnimatedSwitcher(
+          duration: const Duration(
+            milliseconds: 180,
+          ),
+          child: isLoading
+              ? Padding(
+            key: const ValueKey<String>(
+              'verb-list-refreshing',
+            ),
+            padding: EdgeInsets.only(
+              bottom: 14.h,
+            ),
+            child: ClipRRect(
+              borderRadius:
+              BorderRadius.circular(999.r),
+              child:
+              const LinearProgressIndicator(
+                minHeight: 3,
+                color: AppColors.primaryGreen,
+                backgroundColor:
+                Color(0xFFDDE8D8),
+              ),
+            ),
+          )
+              : const SizedBox.shrink(
+            key: ValueKey<String>(
+              'verb-list-ready',
             ),
           ),
+        ),
+        AnimatedOpacity(
+          duration: const Duration(
+            milliseconds: 180,
+          ),
+          opacity: isLoading ? 0.65 : 1,
+          child: IgnorePointer(
+            ignoring: isLoading,
+            child: ListView.separated(
+              itemCount: verbs.length,
+              shrinkWrap: true,
+              physics:
+              const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              separatorBuilder: (_, _) =>
+                  SizedBox(height: 14.h),
+              itemBuilder: (
+                  BuildContext context,
+                  int index,
+                  ) {
+                return VerbLibraryCard(
+                  verb: verbs[index],
+                );
+              },
+            ),
+          ),
+        ),
+        if (isLoadingMore) ...<Widget>[
+          SizedBox(height: 14.h),
+          const VerbLoadMoreSkeleton(),
         ],
       ],
     );
@@ -427,14 +510,18 @@ class VerbLibraryCard extends GetView<ImportantVerbsController> {
               ),
             ),
             SizedBox(width: 11.w),
-            Obx(
-              () => CircleVerbActionButton(
+            Obx(() {
+              final bool isSaving =
+              controller.isVerbSavePending(verb.id);
+
+              return CircleVerbActionButton(
                 icon: controller.isVerbSaved(verb.id)
                     ? Icons.favorite_rounded
                     : Icons.favorite_border_rounded,
+                isLoading: isSaving,
                 onTap: () => controller.toggleVerbSaved(verb),
-              ),
-            ),
+              );
+            }),
             SizedBox(width: 9.w),
             CircleVerbActionButton(
               icon: Icons.arrow_forward_rounded,
@@ -483,23 +570,44 @@ class CircleVerbActionButton extends StatelessWidget {
     super.key,
     required this.icon,
     required this.onTap,
+    this.isLoading = false,
   });
 
   final IconData icon;
   final VoidCallback onTap;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
+      onTap: isLoading ? null : onTap,
+      child: AnimatedContainer(
+        duration: const Duration(
+          milliseconds: 180,
+        ),
         width: 40.r,
         height: 40.r,
         decoration: const BoxDecoration(
           color: Color(0xFFEFF9E9),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 21.r, color: AppColors.primaryGreen),
+        child: Center(
+          child: isLoading
+              ? SizedBox(
+            width: 18.r,
+            height: 18.r,
+            child:
+            const CircularProgressIndicator(
+              strokeWidth: 2.2,
+              color: AppColors.primaryGreen,
+            ),
+          )
+              : Icon(
+            icon,
+            size: 21.r,
+            color: AppColors.primaryGreen,
+          ),
+        ),
       ),
     );
   }

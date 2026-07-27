@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../controllers/important_verbs_controller.dart';
 import '../../../models/important_verb_models.dart';
+import 'important_verb_loading_widgets.dart';
 
 class SavedVerbPreviewSection extends GetView<ImportantVerbsController> {
   const SavedVerbPreviewSection({super.key});
@@ -83,11 +84,9 @@ class SavedVerbPreviewSection extends GetView<ImportantVerbsController> {
           ),
           if (expanded) ...<Widget>[
             SizedBox(height: 19.h),
-            if (controller.isSavedVerbsLoading.value && items.isEmpty)
-              SizedBox(
-                height: 100.h,
-                child: const Center(child: CircularProgressIndicator()),
-              )
+            if (controller.isSavedVerbsLoading.value &&
+                items.isEmpty)
+              const SavedVerbPreviewSkeleton()
             else if (items.isEmpty)
               SizedBox(
                 height: 72.h,

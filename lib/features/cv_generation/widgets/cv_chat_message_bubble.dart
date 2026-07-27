@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 
 import '../../../core/themes/app_colors.dart';
+import '../../ai_content_reports/models/ai_content_report_model.dart';
+import '../../ai_content_reports/widgets/ai_report_button.dart';
 import '../models/cv_assistant_models.dart';
 
 class CvChatMessageBubble extends StatelessWidget {
@@ -27,14 +29,18 @@ class CvChatMessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isUser = message.isUser;
 
+    final bool canReportAiMessage =
+        !isUser &&
+            !_isPending &&
+            !_isFailed &&
+            message.text.trim().isNotEmpty;
+
     return Align(
       alignment: isUser
           ? Alignment.centerRight
           : Alignment.centerLeft,
       child: AnimatedOpacity(
-        duration: const Duration(
-          milliseconds: 180,
-        ),
+        duration: const Duration(milliseconds: 180),
         opacity: _isPending ? 0.68 : 1,
         child: Container(
           constraints: BoxConstraints(
@@ -80,8 +86,7 @@ class CvChatMessageBubble extends StatelessWidget {
             ],
           ),
           child: Column(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
                 message.text,
@@ -106,8 +111,7 @@ class CvChatMessageBubble extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                       color: isUser
                           ? Colors.white70
-                          : AppColors
-                          .homeSecondaryText,
+                          : AppColors.homeSecondaryText,
                     ),
                   ),
 
@@ -116,8 +120,7 @@ class CvChatMessageBubble extends StatelessWidget {
                     SizedBox(
                       width: 11.w,
                       height: 11.w,
-                      child:
-                      CircularProgressIndicator(
+                      child: CircularProgressIndicator(
                         strokeWidth: 1.5,
                         color: isUser
                             ? Colors.white70
@@ -131,8 +134,7 @@ class CvChatMessageBubble extends StatelessWidget {
                         fontSize: 10.sp,
                         color: isUser
                             ? Colors.white70
-                            : AppColors
-                            .homeSecondaryText,
+                            : AppColors.homeSecondaryText,
                       ),
                     ),
                   ],
@@ -161,41 +163,51 @@ class CvChatMessageBubble extends StatelessWidget {
                 ],
               ),
 
-              if (_isFailed &&
-                  onRetry != null) ...<Widget>[
+              // Report button only appears under completed AI messages.
+              if (canReportAiMessage) ...<Widget>[
+                SizedBox(height: 2.h),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: AiReportButton(
+                    source: AiContentReportSource(
+                      featureType: AiReportFeatureType.cvBuilder,
+
+                      // Automatically attaches this exact AI response.
+                      aiContentText: message.text,
+                    ),
+                  ),
+                ),
+              ],
+
+              if (_isFailed && onRetry != null) ...<Widget>[
                 SizedBox(height: 7.h),
                 InkWell(
                   onTap: onRetry,
-                  borderRadius:
-                  BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(10.r),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: 8.w,
                       vertical: 5.h,
                     ),
                     child: Row(
-                      mainAxisSize:
-                      MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Icon(
                           Icons.refresh_rounded,
                           size: 16.w,
                           color: isUser
                               ? Colors.white
-                              : AppColors
-                              .primaryGreen,
+                              : AppColors.primaryGreen,
                         ),
                         SizedBox(width: 4.w),
                         Text(
                           'cv_chat_message_retry'.tr,
                           style: TextStyle(
                             fontSize: 11.sp,
-                            fontWeight:
-                            FontWeight.w800,
+                            fontWeight: FontWeight.w800,
                             color: isUser
                                 ? Colors.white
-                                : AppColors
-                                .primaryGreen,
+                                : AppColors.primaryGreen,
                           ),
                         ),
                       ],
@@ -210,17 +222,14 @@ class CvChatMessageBubble extends StatelessWidget {
     );
   }
 
-  String _formatTime(
-      DateTime? dateTime,
-      ) {
+  String _formatTime(DateTime? dateTime) {
     if (dateTime == null) {
       return '';
     }
 
     final DateTime local = dateTime.toLocal();
 
-    final int hour =
-    local.hour == 0
+    final int hour = local.hour == 0
         ? 12
         : local.hour > 12
         ? local.hour - 12

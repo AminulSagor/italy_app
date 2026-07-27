@@ -9,12 +9,23 @@ class HomeApiService {
 
   final ApiClient _apiClient;
 
-  Future<HomeDashboardModel> fetchDashboard() async {
-    final Response<dynamic> response = await _apiClient.dio.get(
+  Future<Map<String, dynamic>> fetchDashboardJson() async {
+    final Response<dynamic> response =
+    await _apiClient.dio.get(
       '/home/dashboard',
-      queryParameters: <String, dynamic>{'weekStart': _currentWeekStart()},
+      queryParameters: <String, dynamic>{
+        'weekStart': _currentWeekStart(),
+      },
     );
-    return HomeDashboardModel.fromJson(_responseMap(response));
+
+    return _responseMap(response);
+  }
+
+  Future<HomeDashboardModel> fetchDashboard() async {
+    final Map<String, dynamic> json =
+    await fetchDashboardJson();
+
+    return HomeDashboardModel.fromJson(json);
   }
 
   Map<String, dynamic> _responseMap(Response<dynamic> response) {

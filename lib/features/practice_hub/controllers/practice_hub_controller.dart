@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/api_error_handler.dart';
+import '../../../core/widgets/app_pdf_viewer.dart';
 import '../../courses/models/course_models.dart';
 import '../../courses/services/courses_api_service.dart';
 import '../views/important_verbs/important_verbs_view.dart';
@@ -1119,17 +1120,42 @@ class PracticeHubController extends GetxController {
         return;
       }
 
-      selectedPracticePdf.value = PracticeHubPdfDocumentModel(
-        title: result.data!.situation.title,
-        source: resource.signedReadUrl,
-        sourceType: PracticeHubPdfSourceType.network,
-        situationId: result.data!.situation.id,
-        isSituationCompleted: result.data!.situation.isCompleted,
+      final PracticeHubPdfDocumentModel document =
+      PracticeHubPdfDocumentModel(
+        title:
+        result.data!.situation.title,
+        source:
+        resource.signedReadUrl,
+        sourceType:
+        PracticeHubPdfSourceType.network,
+        situationId:
+        result.data!.situation.id,
+        isSituationCompleted:
+        result.data!.situation.isCompleted,
       );
+
+      selectedPracticePdf.value = document;
+
       currentSurvivalPdfPage.value = 1;
       currentSurvivalPdfTotalPages.value = 1;
 
-      await Get.toNamed(AppRoutes.practiceHubPdfViewer);
+      await Get.to<void>(
+            () => AppPdfViewer(
+          title: document.title,
+          source: document.source,
+          sourceType:
+          AppPdfSourceType.network,
+          sourceId:
+          'survival_italian_pdf_viewer',
+
+          // Required for completing the
+          // situation after the final page.
+          onDocumentLoaded:
+          onSurvivalPdfDocumentLoaded,
+          onPageChanged:
+          onSurvivalPdfPageChanged,
+        ),
+      );
     } finally {
       isOpeningSurvivalPdf.value = false;
     }
@@ -1498,19 +1524,44 @@ class PracticeHubController extends GetxController {
   }
 
   void openJobTheoryBook() {
-    final Map<String, dynamic> job = currentJobTrack;
+    final Map<String, dynamic> job =
+        currentJobTrack;
 
-    selectedPracticePdf.value = PracticeHubPdfDocumentModel(
-      title: 'lesson_basics_title'.trParams(<String, String>{
-        'lesson': (job['detailsTitle'] as String? ?? '').toString(),
-      }),
-      source: job['theoryPdfAsset'] as String,
-      sourceType: PracticeHubPdfSourceType.asset,
+    final String source =
+    (job['theoryPdfAsset']
+    as String? ??
+        '')
+        .trim();
+
+    if (source.isEmpty) {
+      Get.snackbar(
+        'gen_theory_book'.tr,
+        'theory_resource_is_not_available'.tr,
+      );
+      return;
+    }
+
+    final String title =
+    'lesson_basics_title'.trParams(
+      <String, String>{
+        'lesson':
+        (job['detailsTitle']
+        as String? ??
+            '')
+            .toString(),
+      },
     );
-    currentSurvivalPdfPage.value = 1;
-    currentSurvivalPdfTotalPages.value = 1;
 
-    Get.toNamed(AppRoutes.practiceHubPdfViewer);
+    Get.to<void>(
+          () => AppPdfViewer(
+        title: title,
+        source: source,
+        sourceType:
+        AppPdfSourceType.asset,
+        sourceId:
+        'job_theory_asset_pdf_viewer',
+      ),
+    );
   }
 
   final RxBool isDailyChallengesLoading = false.obs;

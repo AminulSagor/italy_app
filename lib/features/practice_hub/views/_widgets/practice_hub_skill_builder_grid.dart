@@ -169,7 +169,7 @@ class _SkillBuilderCard extends StatelessWidget {
                   SizedBox(height: 13.h),
                   Text(
                     title,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                     style: TextStyle(

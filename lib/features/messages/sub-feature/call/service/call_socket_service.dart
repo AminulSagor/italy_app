@@ -525,8 +525,6 @@ class CallSocketService extends GetxService {
     final Completer<Map<String, dynamic>> completer =
         Completer<Map<String, dynamic>>();
 
-    debugPrint('[CallSocket] Sending $event $payload');
-
     socket.emitWithAck(
       event,
       payload,

@@ -8,12 +8,9 @@ class AppBootstrapView extends GetView<AppBootstrapController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ),
+
+    return const Scaffold(
+      body: SizedBox.expand(),
     );
   }
 }

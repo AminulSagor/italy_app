@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
+import '../../../core/widgets/native_bottom_inset.dart';
 import '../../../core/widgets/simple_appbar.dart';
 import '../controllers/cv_chat_controller.dart';
 import '../models/cv_assistant_models.dart';
@@ -154,24 +155,17 @@ class CvChatView extends GetView<CvChatController> {
                   controller.generateNow,
                 ),
 
-                CvChatInputBar(
-                  controller:
-                  controller.messageController,
-                  currentQuestion:
-                  controller.currentQuestion,
-                  isSending:
-                  controller.isSending.value,
-                  isUploading:
-                  controller.isUploading.value,
-
-                  // This becomes true only when the backend
-                  // says the session is ready to generate.
-
-                  onAttach: () {
-                    _showAttachmentSheet(context);
-                  },
-                  onSend:
-                  controller.sendMessage,
+                NativeBottomInset(
+                  child: CvChatInputBar(
+                    controller: controller.messageController,
+                    currentQuestion: controller.currentQuestion,
+                    isSending: controller.isSending.value,
+                    isUploading: controller.isUploading.value,
+                    onAttach: () {
+                      _showAttachmentSheet(context);
+                    },
+                    onSend: controller.sendMessage,
+                  ),
                 ),
 
 

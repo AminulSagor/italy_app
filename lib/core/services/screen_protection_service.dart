@@ -13,6 +13,7 @@ class ScreenProtectionService extends GetxService {
     final bool shouldProtect =
         route == '/courses' || route.startsWith('/courses/');
 
+
     if (_isProtected == shouldProtect) return;
 
     _isProtected = shouldProtect;
@@ -26,7 +27,6 @@ class ScreenProtectionService extends GetxService {
 
   Future<void> enable() async {
     if (_isProtected) return;
-
     _isProtected = true;
     await ScreenProtector.preventScreenshotOn();
   }

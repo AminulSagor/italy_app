@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/services/api_error_handler.dart';
+import '../../../../../core/widgets/app_pdf_viewer.dart';
 import '../../../../../routes/app_route_arguments.dart';
 import '../../../../../routes/app_routes.dart';
 import '../../../models/course_models.dart';
@@ -14,7 +15,7 @@ import '../../vocabulary/controllers/vocabulary_controller.dart';
 import '../../vocabulary/services/vocabulary_api_service.dart';
 import '../models/chapter_detail_models.dart';
 import '../services/chapter_detail_api_service.dart';
-import '../widgets/chapter_pdf_viewer.dart';
+
 
 class ChapterDetailController extends GetxController {
   final CourseChapterModel chapter;
@@ -417,7 +418,14 @@ class ChapterDetailController extends GetxController {
     );
 
     Get.to<void>(
-      () => ChapterPdfViewer(title: theoryBook.title, pdfUrl: pdfUrl),
+          () => AppPdfViewer(
+        title: theoryBook.title,
+        source: pdfUrl,
+        sourceType:
+        AppPdfSourceType.network,
+        sourceId:
+        'chapter_theory_pdf_viewer',
+      ),
     );
   }
 

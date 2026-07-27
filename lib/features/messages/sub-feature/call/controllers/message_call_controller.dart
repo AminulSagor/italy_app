@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../models/message_call_models.dart';
 import '../service/call_agora_service.dart';
 import '../service/call_socket_service.dart';
+import '../service/full_screen_call_permission_service.dart';
 import '../service/incoming_call_coordinator.dart';
 import '../views/message_call_view.dart';
 import 'message_call_duration_tracker.dart';
@@ -79,6 +80,10 @@ class MessageCallController extends GetxController {
   RtcEngine? get agoraEngine => _callAgoraService.engine;
   String? get agoraChannelName => _callAgoraService.channelName;
 
+  final FullScreenCallPermissionService
+  _fullScreenCallPermissionService =
+  FullScreenCallPermissionService();
+
   @override
   void onInit() {
     super.onInit();
@@ -121,27 +126,37 @@ class MessageCallController extends GetxController {
     durationLabel.value = 'loading'.tr;
 
     try {
+      // Ask for full-screen incoming-call permission only when
+      // the user starts their first outgoing call.
+      await _fullScreenCallPermissionService
+          .requestWhenStartingFirstCall();
+
+      if (_endRequested || _routeClosed || _remoteTerminal) {
+        return;
+      }
+
+      // Request microphone permission for audio calls.
+      // Request microphone and camera permissions for video calls.
       await _callAgoraService.ensurePermissionsForCall(
         isVideoCall: callType.isVideo,
       );
 
-      if (_endRequested ||
-          _routeClosed ||
-          _remoteTerminal) {
+      if (_endRequested || _routeClosed || _remoteTerminal) {
         return;
       }
 
       final Map<String, dynamic> response =
       await _callSocketService.initiateCall(
-            conversationId: conversationId,
-            callType: callType.value,
-            clientCallId: const Uuid().v4(),
-          );
+        conversationId: conversationId,
+        callType: callType.value,
+        clientCallId: const Uuid().v4(),
+      );
+
       final MessageCallSessionModel session =
-          MessageCallSessionModel.fromInitiateResponse(
-            response: response,
-            participant: participant,
-          );
+      MessageCallSessionModel.fromInitiateResponse(
+        response: response,
+        participant: participant,
+      );
 
       if (session.id.isEmpty) {
         throw CallSocketException(
@@ -153,7 +168,7 @@ class MessageCallController extends GetxController {
       _callId = session.id;
       callSession.value = session;
 
-      if (_endRequested || _routeClosed) {
+      if (_endRequested || _routeClosed || _remoteTerminal) {
         await _terminateCall(showError: false);
         return;
       }
@@ -161,11 +176,16 @@ class MessageCallController extends GetxController {
       if (_terminalStatuses.contains(session.status)) {
         _terminationSent = true;
         _remoteTerminal = true;
-        await _showTerminalState(_labelForStatus(session.status));
+
+        await _showTerminalState(
+          _labelForStatus(session.status),
+        );
+
         return;
       }
 
       durationLabel.value = 'pending'.tr;
+
       _startCallStatusPolling();
       _startRingingTimeout();
     } on CallSocketException catch (error) {

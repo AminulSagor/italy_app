@@ -6,21 +6,35 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/services/api_error_handler.dart';
+import '../../../core/services/notification_permission_service.dart';
 import '../../../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import '../../../routes/app_route_arguments.dart';
 import '../../../routes/app_routes.dart';
 import '../models/home_models.dart';
 import '../services/home_api_service.dart';
+import '../services/home_dashboard_cache_service.dart';
+import '../views/guide_video_view.dart';
 
 class HomeController extends GetxController
     with WidgetsBindingObserver {
   HomeController({
     required HomeApiService homeApiService,
-  }) : _homeApiService = homeApiService;
+    required HomeDashboardCacheService
+    homeDashboardCacheService,
+    required UserSessionController userSessionController,
+  })  : _homeApiService = homeApiService,
+        _homeDashboardCacheService =
+            homeDashboardCacheService,
+        _userSessionController = userSessionController;
 
-  static const String _fallbackCommunityUrl =
-      'https://www.facebook.com/groups/1816913385931720';
+  final HomeDashboardCacheService
+  _homeDashboardCacheService;
+
+  final UserSessionController _userSessionController;
+
+  static const String _fallbackWhatsAppNumber = '393510066920';
 
   /*
    * Prevents automatic refresh calls from repeatedly hitting
@@ -30,6 +44,10 @@ class HomeController extends GetxController
   Duration(seconds: 30);
 
   final HomeApiService _homeApiService;
+
+  final NotificationPermissionService
+  _notificationPermissionService =
+  NotificationPermissionService();
 
   /*
    * Existing UI can continue using isLoading.
@@ -67,7 +85,12 @@ class HomeController extends GetxController
   @override
   void onInit() {
     super.onInit();
+
     WidgetsBinding.instance.addObserver(this);
+
+    isLoading.value = true;
+
+    unawaited(_initializeDashboard());
   }
 
   @override
@@ -75,9 +98,8 @@ class HomeController extends GetxController
     super.onReady();
 
     unawaited(
-      loadDashboard(
-        force: true,
-      ),
+      _notificationPermissionService
+          .requestAfterHomeShown(),
     );
   }
 
@@ -98,8 +120,91 @@ class HomeController extends GetxController
     unawaited(loadDashboard());
   }
 
+  Future<void> _initializeDashboard() async {
+    final Stopwatch stopwatch = Stopwatch()..start();
+
+    dev.log(
+      'Home initialization started: ${stopwatch.elapsedMilliseconds}ms',
+      name: 'HomePerformance',
+    );
+
+    final bool restored = await _restoreCachedDashboard();
+
+    dev.log(
+      'Cache restore finished: ${stopwatch.elapsedMilliseconds}ms',
+      name: 'HomePerformance',
+    );
+
+    if (isClosed) {
+      return;
+    }
+
+    if (restored) {
+      isLoading.value = false;
+    }
+
+    await loadDashboard(
+      force: true,
+      performanceStopwatch: stopwatch,
+    );
+
+    dev.log(
+      'Home initialization completed: ${stopwatch.elapsedMilliseconds}ms',
+      name: 'HomePerformance',
+    );
+  }
+
+  Future<bool> _restoreCachedDashboard() async {
+    final String userId = _currentUserId;
+
+    if (userId.isEmpty) {
+      return false;
+    }
+
+    final HomeDashboardCacheEntry? cache =
+    await _homeDashboardCacheService.read(
+      userId: userId,
+    );
+
+    if (cache == null || isClosed) {
+      return false;
+    }
+
+    try {
+      dashboard.value =
+          HomeDashboardModel.fromJson(cache.json);
+
+      hasLoadedOnce.value = true;
+      errorMessage.value = '';
+      _lastSuccessfulLoadAt = cache.cachedAt;
+
+      return true;
+    } catch (error, stackTrace) {
+      dev.log(
+        'Failed to restore cached Home dashboard',
+        name: 'HomeController',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      await _homeDashboardCacheService.clear(
+        userId: userId,
+      );
+
+      return false;
+    }
+  }
+
+  String get _currentUserId {
+    return _userSessionController.user.value?.id.trim() ??
+        '';
+  }
+
+
+
   Future<void> loadDashboard({
     bool force = false,
+    Stopwatch? performanceStopwatch,
   }) async {
     if (_requestInProgress) {
       return;
@@ -119,28 +224,73 @@ class HomeController extends GetxController
     }
 
     try {
-      final ApiResult<HomeDashboardModel> result =
-      await ApiErrorHandler.call<HomeDashboardModel>(
-        _homeApiService.fetchDashboard,
+      dev.log(
+        'Home API started: '
+            '${performanceStopwatch?.elapsedMilliseconds ?? 0}ms',
+        name: 'HomePerformance',
+      );
+
+      final Stopwatch apiStopwatch = Stopwatch()..start();
+
+      final ApiResult<Map<String, dynamic>> result =
+      await ApiErrorHandler.call<Map<String, dynamic>>(
+        _homeApiService.fetchDashboardJson,
         showError: false,
+      );
+
+      apiStopwatch.stop();
+
+      dev.log(
+        'Home API finished in ${apiStopwatch.elapsedMilliseconds}ms. '
+            'Total: ${performanceStopwatch?.elapsedMilliseconds ?? 0}ms',
+        name: 'HomePerformance',
       );
 
       if (isClosed) {
         return;
       }
 
-      final HomeDashboardModel? data = result.data;
+      final Map<String, dynamic>? responseJson = result.data;
 
-      if (!result.isSuccess || data == null) {
-        errorMessage.value =
-            'home_dashboard_load_failed'.tr;
+      if (!result.isSuccess || responseJson == null) {
+        errorMessage.value = 'home_dashboard_load_failed'.tr;
         return;
       }
+
+      final Stopwatch parsingStopwatch = Stopwatch()..start();
+
+      final HomeDashboardModel data =
+      HomeDashboardModel.fromJson(responseJson);
+
+      parsingStopwatch.stop();
+
+      dev.log(
+        'Home JSON parsing finished in '
+            '${parsingStopwatch.elapsedMilliseconds}ms',
+        name: 'HomePerformance',
+      );
 
       dashboard.value = data;
       hasLoadedOnce.value = true;
       errorMessage.value = '';
       _lastSuccessfulLoadAt = DateTime.now();
+
+      dev.log(
+        'Home data assigned to UI. Total: '
+            '${performanceStopwatch?.elapsedMilliseconds ?? 0}ms',
+        name: 'HomePerformance',
+      );
+
+      final String userId = _currentUserId;
+
+      if (userId.isNotEmpty) {
+        unawaited(
+          _homeDashboardCacheService.write(
+            userId: userId,
+            json: responseJson,
+          ),
+        );
+      }
     } catch (error, stackTrace) {
       dev.log(
         'Failed to load the Home dashboard',
@@ -150,8 +300,7 @@ class HomeController extends GetxController
       );
 
       if (!isClosed) {
-        errorMessage.value =
-            'home_dashboard_load_failed'.tr;
+        errorMessage.value = 'home_dashboard_load_failed'.tr;
       }
     } finally {
       _requestInProgress = false;
@@ -228,6 +377,35 @@ class HomeController extends GetxController
     );
   }
 
+  void openQuickTool(HomeToolModel tool) {
+    switch (tool.type) {
+      case HomeToolType.cvBuilder:
+        openCvBuilder();
+        return;
+
+      case HomeToolType.guideVideo:
+        final String videoId =
+            tool.videoId?.trim() ?? '';
+
+        if (videoId.isEmpty) {
+          Get.snackbar(
+            'guide_video'.tr,
+            'guide_video_unavailable'.tr,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
+
+        Get.to<void>(
+              () => GuideVideoView(
+            videoId: videoId,
+          ),
+          transition: Transition.cupertino,
+        );
+        return;
+    }
+  }
+
   void openCvBuilder() {
     if (!Get.isRegistered<NavbarAndAppbarWrapperController>()) {
       Get.snackbar(
@@ -274,33 +452,43 @@ class HomeController extends GetxController
     );
   }
 
-  Future<void> openCommunity() async {
-    final Uri? communityUri =
-    _resolveCommunityUri();
+  Future<void> openWhatsAppSupport() async {
+    final String configuredNumber =
+        dotenv.env['SUPPORT_PHONE_INTERNATIONAL']?.trim() ?? '';
 
-    if (communityUri == null) {
-      _showCommunityLaunchFailure();
-      return;
-    }
+    final String phoneNumber = configuredNumber
+        .replaceAll(RegExp(r'[^0-9]'), '');
+
+    final String finalPhoneNumber = phoneNumber.isEmpty
+        ? _fallbackWhatsAppNumber
+        : phoneNumber;
+
+    final Uri whatsappUri = Uri.https(
+      'wa.me',
+      '/$finalPhoneNumber',
+      <String, String>{
+        'text': 'Hello, I need help with Italir Pothe.',
+      },
+    );
 
     try {
       final bool launched = await launchUrl(
-        communityUri,
+        whatsappUri,
         mode: LaunchMode.externalApplication,
       );
 
       if (!launched) {
-        _showCommunityLaunchFailure();
+        _showWhatsAppLaunchFailure();
       }
     } catch (error, stackTrace) {
       dev.log(
-        'Failed to open Facebook community: $communityUri',
+        'Failed to open WhatsApp support: $whatsappUri',
         name: 'HomeController',
         error: error,
         stackTrace: stackTrace,
       );
 
-      _showCommunityLaunchFailure();
+      _showWhatsAppLaunchFailure();
     }
   }
 
@@ -346,38 +534,12 @@ class HomeController extends GetxController
         _automaticRefreshInterval;
   }
 
-  Uri? _resolveCommunityUri() {
-    final String configuredUrl =
-        dotenv.env['FACEBOOK_COMMUNITY_URL']
-            ?.trim() ??
-            '';
 
-    final String url = configuredUrl.isEmpty
-        ? _fallbackCommunityUrl
-        : configuredUrl;
 
-    final Uri? uri = Uri.tryParse(url);
-
-    if (uri == null ||
-        !uri.hasScheme ||
-        !uri.hasAuthority ||
-        (uri.scheme != 'https' &&
-            uri.scheme != 'http')) {
-      dev.log(
-        'Invalid FACEBOOK_COMMUNITY_URL: $url',
-        name: 'HomeController',
-      );
-
-      return null;
-    }
-
-    return uri;
-  }
-
-  void _showCommunityLaunchFailure() {
+  void _showWhatsAppLaunchFailure() {
     Get.snackbar(
-      'community'.tr,
-      'unable_to_open_the_facebook_community'.tr,
+      'gen_need_help'.tr,
+      'unable_to_open_whatsapp'.tr,
       snackPosition: SnackPosition.BOTTOM,
     );
   }

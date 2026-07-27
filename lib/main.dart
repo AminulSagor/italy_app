@@ -1,14 +1,11 @@
 import 'dart:async';
 import 'dart:developer' as dev;
-import 'dart:io';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-
 import 'core/bindings/initial_bindings.dart';
 import 'core/bootstrap/app_bootstrap_controller.dart';
 import 'core/localization/translation_service.dart';
@@ -180,39 +177,20 @@ Future<void> _initializeCallKitListeners() async {
 Future<void> _completeCallKitStartup() async {
   if (Get.isRegistered<IncomingCallCoordinator>()) {
     final IncomingCallCoordinator coordinator =
-        Get.find<IncomingCallCoordinator>();
+    Get.find<IncomingCallCoordinator>();
+
     unawaited(
       coordinator.restorePendingAcceptedCall(
         waitForBackgroundHandler: const Duration(milliseconds: 800),
       ),
     );
+
     unawaited(coordinator.restoreNativeIncomingCall());
   }
 
-  unawaited(_requestFullScreenCallPermission());
+
 }
 
-Future<void> _requestFullScreenCallPermission() async {
-  if (!Platform.isAndroid) {
-    return;
-  }
-
-  try {
-    final bool canUseFullScreenIntent =
-        await FlutterCallkitIncoming.canUseFullScreenIntent();
-
-    if (!canUseFullScreenIntent) {
-      await FlutterCallkitIncoming.requestFullIntentPermission();
-    }
-  } catch (error, stackTrace) {
-    dev.log(
-      'Unable to request full-screen call permission',
-      name: 'CallKit',
-      error: error,
-      stackTrace: stackTrace,
-    );
-  }
-}
 
 class ItalyApp extends StatelessWidget {
   final String initialRoute;

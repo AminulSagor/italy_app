@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
+import '../../../core/widgets/native_bottom_inset.dart';
 
 class LeaguePromotionScreen extends StatelessWidget {
   final String headerAssetPath;
@@ -127,8 +128,10 @@ class LeaguePromotionScreen extends StatelessWidget {
                 left: 28.w,
                 right: 28.w,
                 bottom: 28.h,
-                child: _ContinueButton(
-                  onTap: onContinueTap ?? () => Get.back<void>(),
+                child: NativeBottomInset(
+                  child: _ContinueButton(
+                    onTap: onContinueTap ?? () => Get.back<void>(),
+                  ),
                 ),
               ),
             ],

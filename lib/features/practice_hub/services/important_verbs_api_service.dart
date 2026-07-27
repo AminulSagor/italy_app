@@ -36,7 +36,6 @@ class ImportantVerbsApiService {
     return ImportantVerbListResponseModel.fromJson(_responseMap(response));
   }
 
-
   Future<List<ImportantVerbSummaryModel>> fetchAllVerbs({
     String? search,
     String? regularity,
@@ -51,8 +50,9 @@ class ImportantVerbsApiService {
       endingType: endingType,
       language: language,
     );
-    final List<ImportantVerbSummaryModel> items =
-        <ImportantVerbSummaryModel>[...firstPage.items];
+    final List<ImportantVerbSummaryModel> items = <ImportantVerbSummaryModel>[
+      ...firstPage.items,
+    ];
     for (int page = 2; page <= firstPage.meta.totalPages; page++) {
       final ImportantVerbListResponseModel response = await fetchVerbs(
         page: page,
@@ -81,9 +81,9 @@ class ImportantVerbsApiService {
       },
     );
     final Map<String, dynamic> data = _responseMap(response);
-    return _jsonList(data['items'])
-        .map(ImportantVerbSummaryModel.fromJson)
-        .toList(growable: false);
+    return _jsonList(
+      data['items'],
+    ).map(ImportantVerbSummaryModel.fromJson).toList(growable: false);
   }
 
   Future<ImportantVerbListResponseModel> fetchSavedVerbs({
@@ -108,7 +108,6 @@ class ImportantVerbsApiService {
     return ImportantVerbListResponseModel.fromJson(_responseMap(response));
   }
 
-
   Future<List<ImportantVerbSummaryModel>> fetchAllSavedVerbs({
     String? search,
     String? regularity,
@@ -123,8 +122,9 @@ class ImportantVerbsApiService {
       endingType: endingType,
       language: language,
     );
-    final List<ImportantVerbSummaryModel> items =
-        <ImportantVerbSummaryModel>[...firstPage.items];
+    final List<ImportantVerbSummaryModel> items = <ImportantVerbSummaryModel>[
+      ...firstPage.items,
+    ];
     for (int page = 2; page <= firstPage.meta.totalPages; page++) {
       final ImportantVerbListResponseModel response = await fetchSavedVerbs(
         page: page,
@@ -143,16 +143,11 @@ class ImportantVerbsApiService {
     required String verbId,
     String language = 'en',
   }) async {
-    debugPrint('fetchVerbDetails CALLED');
-    debugPrint('verbId: $verbId');
-    debugPrint('language: $language');
-
     final Response<dynamic> response = await _apiClient.dio.get(
       '/important-verbs/$verbId',
       queryParameters: <String, dynamic>{'language': language},
     );
 
-    print("entered");
     return ImportantVerbDetailModel.fromJson(_responseMap(response));
   }
 
@@ -186,10 +181,8 @@ class ImportantVerbsApiService {
       'limit': limit,
       'language': language,
       if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
-      if (regularity != null && regularity.isNotEmpty)
-        'regularity': regularity,
-      if (endingType != null && endingType.isNotEmpty)
-        'endingType': endingType,
+      if (regularity != null && regularity.isNotEmpty) 'regularity': regularity,
+      if (endingType != null && endingType.isNotEmpty) 'endingType': endingType,
     };
   }
 
