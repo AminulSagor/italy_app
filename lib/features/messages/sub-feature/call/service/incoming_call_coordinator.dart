@@ -266,15 +266,21 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     _activeIncomingCallId = callId;
 
     try {
-      try {
-        await _callSocketService.acknowledgeIncomingCall(callId: callId);
-      } catch (_) {}
-
+      // First show the incoming call and start the receiver ringtone.
       if (showNativeRingtone) {
         try {
-          await CallkitIncomingService.showIncomingCallFromSocketPayload(payload);
+          await CallkitIncomingService.showIncomingCallFromSocketPayload(
+            payload,
+          );
         } catch (_) {}
       }
+
+      // Now tell the backend that the receiver device is actually ringing.
+      try {
+        await _callSocketService.acknowledgeIncomingCall(
+          callId: callId,
+        );
+      } catch (_) {}
 
       if (Get.isRegistered<MessageIncomingCallController>()) {
         await Get.delete<MessageIncomingCallController>(force: true);

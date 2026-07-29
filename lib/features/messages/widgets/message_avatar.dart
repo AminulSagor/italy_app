@@ -55,17 +55,20 @@ class MessageAvatar extends StatelessWidget {
           ),
           if (showStatus)
             Positioned(
-              right: -1.w,
-              bottom: 4.h,
+              right: 0,
+              bottom: 2.h,
               child: Container(
-                width: 20.w,
-                height: 20.w,
+                width: 12.w,
+                height: 12.w,
                 decoration: BoxDecoration(
                   color: isOnline
                       ? AppColors.messageOnlineGreen
                       : AppColors.messageOfflineGrey,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.white, width: 4.w),
+                  border: Border.all(
+                    color: AppColors.white,
+                    width: 2.w,
+                  ),
                 ),
               ),
             ),

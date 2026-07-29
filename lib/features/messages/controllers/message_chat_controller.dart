@@ -39,11 +39,14 @@ class MessageChatController extends GetxController
   bool _shouldAutoScrollChat = true;
   String? _currentUserId;
   ChatSocketService? _socketService;
+  late final void Function(Map<String, dynamic>) _chatMessageListener =
+      _handleServerMessage;
   CallSocketService? _callHistorySocketService;
   final List<Map<String, String>> _pendingSends = <Map<String, String>>[];
   final RxBool isSending = false.obs;
   final RxBool isLoadingMore = false.obs;
   final RxString blockStatus = 'none'.obs;
+  final RxBool isInitialScrollReady = false.obs;
   int _currentPage = 1;
 
   @override
@@ -123,18 +126,29 @@ class MessageChatController extends GetxController
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
+
+    final ChatSocketService? socketService = _socketService;
+
+    // Remove this chat screen's message listeners first
+    if (socketService != null) {
+      socketService
+        ..removeMessageListener(_chatMessageListener)
+        ..removeNewMessageListener(_chatMessageListener)
+        ..removeReceiveListener(_chatMessageListener);
+    }
+
+    try {
+      socketService?.leaveInbox(thread.id);
+      socketService?.leaveConversation(thread.id);
+    } catch (_) {}
+
+    _removeCallHistorySync();
+
+    LocalNotificationService.instance.unsuppressConversation(thread.id);
+
     chatTextController.dispose();
     chatScrollController.dispose();
-    try {
-      // Tell backend we left this conversation's inbox
-      _socketService?.leaveInbox(thread.id);
-      if (chat.value != null) {
-        _socketService?.leaveConversation(thread.id);
-      }
-    } catch (_) {}
-    _removeCallHistorySync();
-    // Remove client-side notification suppression
-    LocalNotificationService.instance.unsuppressConversation(thread.id);
+
     super.onClose();
   }
 
@@ -204,6 +218,11 @@ class MessageChatController extends GetxController
   }
 
   Future<void> loadChat() async {
+    final bool isInitialLoad = chat.value == null;
+
+    if (isInitialLoad) {
+      isInitialScrollReady.value = false;
+    }
     isLoading.value = true;
     try {
       final MessageChatModel fetched = await _messagesMockService.fetchChat(
@@ -294,7 +313,9 @@ class MessageChatController extends GetxController
       } catch (_) {}
 
       // Scroll to bottom to show latest messages after chat loads
-      _autoScrollToBottom();
+      if (isInitialLoad) {
+        await _prepareInitialScrollPosition();
+      }
       // Persist read state on server (non-blocking)
       try {
         _messagesMockService.markConversationRead(thread.id);
@@ -331,10 +352,9 @@ class MessageChatController extends GetxController
     await _socketService?.connect(
       deviceId: deviceId,
       conversationId: thread.id,
-      onMessage: (Map<String, dynamic> data) => _handleServerMessage(data),
-      onNewMessage: (Map<String, dynamic> data) => _handleServerMessage(data),
-      onReceiveMessage: (Map<String, dynamic> data) =>
-          _handleServerMessage(data),
+      onMessage: _chatMessageListener,
+      onNewMessage: _chatMessageListener,
+      onReceiveMessage: _chatMessageListener,
       onBlockChange: (Map<String, dynamic> data) {
         try {
           final String userId =
@@ -419,18 +439,23 @@ class MessageChatController extends GetxController
     }
   }
 
-  void _autoScrollToBottom() {
-    try {
-      if (chatScrollController.hasClients) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (chatScrollController.hasClients) {
-            chatScrollController.jumpTo(
-              chatScrollController.position.maxScrollExtent,
-            );
-          }
-        });
+  Future<void> _prepareInitialScrollPosition() async {
+    // Wait until the messages are rendered and the scroll height is calculated.
+    for (int attempt = 0; attempt < 3; attempt++) {
+      await WidgetsBinding.instance.endOfFrame;
+
+      if (!chatScrollController.hasClients) {
+        continue;
       }
-    } catch (_) {}
+
+      chatScrollController.jumpTo(
+        chatScrollController.position.maxScrollExtent,
+      );
+    }
+
+    _shouldAutoScrollChat = true;
+    showScrollToBottom.value = false;
+    isInitialScrollReady.value = true;
   }
 
   Future<void> _loadMore() async {
@@ -488,34 +513,72 @@ class MessageChatController extends GetxController
 
   void _handleServerMessage(Map<String, dynamic> msg) {
     try {
-      // Support multiple server payload shapes: prefer `messageId`, fallback to `id`.
+      // Some socket events may wrap the actual message inside "message".
+      final dynamic rawMessage = msg['message'];
+
+      final Map<String, dynamic> data = rawMessage is Map
+          ? Map<String, dynamic>.from(rawMessage)
+          : msg;
+
+      final dynamic rawConversation = data['conversation'];
+
+      final String conversationId =
+          data['conversationId']?.toString() ??
+              data['directConversationId']?.toString() ??
+              data['threadId']?.toString() ??
+              msg['conversationId']?.toString() ??
+              msg['directConversationId']?.toString() ??
+              (rawConversation is Map
+                  ? rawConversation['id']?.toString()
+                  : null) ??
+              '';
+
+      // Ignore messages belonging to another conversation.
+      if (conversationId.isEmpty || conversationId != thread.id) {
+        return;
+      }
+
       final String messageId =
-          msg['messageId']?.toString() ?? msg['id']?.toString() ?? '';
+          data['messageId']?.toString() ??
+              data['id']?.toString() ??
+              '';
+
       final String content =
-          msg['content']?.toString() ?? msg['text']?.toString() ?? '';
+          data['content']?.toString() ??
+              data['text']?.toString() ??
+              '';
+
       final String createdAt =
-          msg['createdAt']?.toString() ??
-          msg['created_at']?.toString() ??
-          DateTime.now().toIso8601String();
+          data['createdAt']?.toString() ??
+              data['created_at']?.toString() ??
+              DateTime.now().toIso8601String();
+
       final String senderId =
-          msg['senderId']?.toString() ?? msg['userId']?.toString() ?? '';
+          data['senderId']?.toString() ??
+              data['userId']?.toString() ??
+              '';
+
       final String clientMessageId =
-          msg['clientMessageId']?.toString() ??
-          msg['client_msg_id']?.toString() ??
-          '';
-      final String statusFromServer = msg['status']?.toString() ?? '';
+          data['clientMessageId']?.toString() ??
+              data['client_msg_id']?.toString() ??
+              '';
+
+      final String statusFromServer =
+          data['status']?.toString() ?? '';
 
       final MessageChatItemModel item = MessageChatItemModel(
         id: messageId.isNotEmpty
             ? messageId
-            : (clientMessageId.isNotEmpty
-                  ? clientMessageId
-                  : DateTime.now().millisecondsSinceEpoch.toString()),
+            : clientMessageId.isNotEmpty
+            ? clientMessageId
+            : DateTime.now().millisecondsSinceEpoch.toString(),
         text: content,
         timeLabel: _formatTimeLabel(createdAt),
         createdAtIso: createdAt,
         statusLabel: senderId == _currentUserId
-            ? (statusFromServer.isNotEmpty ? statusFromServer : 'delivered'.tr)
+            ? statusFromServer.isNotEmpty
+            ? statusFromServer
+            : 'delivered'.tr
             : '',
         isMine: senderId == _currentUserId,
       );
@@ -523,39 +586,51 @@ class MessageChatController extends GetxController
       final MessageChatModel? current = chat.value;
       if (current == null) return;
 
-      // Find existing by server id or by clientMessageId (optimistic id)
-      final int existingIndex = current.messages.indexWhere((
-        MessageChatItemModel m,
-      ) {
-        final String mid = m.id;
-        return (messageId.isNotEmpty && mid == messageId) ||
-            (clientMessageId.isNotEmpty && mid == clientMessageId);
-      });
+      final int existingIndex = current.messages.indexWhere(
+            (MessageChatItemModel message) {
+          return (messageId.isNotEmpty && message.id == messageId) ||
+              (clientMessageId.isNotEmpty &&
+                  message.id == clientMessageId);
+        },
+      );
 
       final List<MessageChatItemModel> updated =
-          List<MessageChatItemModel>.from(current.messages);
+      List<MessageChatItemModel>.from(current.messages);
+
       if (existingIndex >= 0) {
-        // Replace optimistic message with server-backed message (preserve ordering)
+        // Replace the optimistic message with the server message.
         updated[existingIndex] = item;
       } else {
         updated.add(item);
       }
 
-      // keep original ordering (new messages appended)
-
-      // keep size limit
       if (updated.length > 200) {
         updated.removeRange(0, updated.length - 200);
       }
 
       chat.value = current.copyWith(messages: updated);
 
-      // Update conversation preview in messages list
+      // Always scroll to the newly sent message.
+      _shouldAutoScrollChat = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!chatScrollController.hasClients) return;
+
+        chatScrollController.animateTo(
+          chatScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+
+      // Update only the matching conversation preview.
       try {
         if (Get.isRegistered<MessagesController>()) {
-          final MessagesController mc = Get.find<MessagesController>();
-          mc.updateThreadPreview(
-            threadId: thread.id,
+          final MessagesController messagesController =
+          Get.find<MessagesController>();
+
+          messagesController.updateThreadPreview(
+            threadId: conversationId,
             lastMessage: item.text,
             isoTime: createdAt,
             isMine: item.isMine,
@@ -565,13 +640,13 @@ class MessageChatController extends GetxController
 
       if (_shouldAutoScrollChat) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (chatScrollController.hasClients) {
-            chatScrollController.animateTo(
-              chatScrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
-          }
+          if (!chatScrollController.hasClients) return;
+
+          chatScrollController.animateTo(
+            chatScrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
         });
       }
     } catch (_) {}

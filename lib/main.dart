@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:developer' as dev;
+import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'core/bindings/initial_bindings.dart';
@@ -15,6 +18,7 @@ import 'core/services/connectivity_service.dart';
 import 'core/services/local_notification_service.dart';
 import 'core/services/learning_activity_tracker_service.dart';
 import 'core/services/screen_protection_service.dart';
+import 'core/services/token_service.dart';
 import 'core/themes/app_theme.dart';
 import 'core/widgets/connectivity_offline_view.dart';
 import 'features/messages/sub-feature/call/widgets/global_call_status_card.dart';
@@ -26,9 +30,43 @@ import 'routes/routes.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  DartPluginRegistrant.ensureInitialized();
   await Firebase.initializeApp();
 
+  final Map<String, dynamic> data = Map<String, dynamic>.from(message.data);
+
+  // Show the native incoming-call screen and start its ringtone first.
   await CallkitIncomingService.showIncomingCallFromBackgroundMessage(message);
+
+  final String type = data['type']?.toString().trim() ?? '';
+
+  final String callId = data['callId']?.toString().trim() ?? '';
+
+  if (type != 'incoming_call' || callId.isEmpty) {
+    return;
+  }
+
+  try {
+    await dotenv.load(fileName: '.env');
+
+    final TokenService tokenService = await TokenService().init();
+
+    final CallSocketService callService = CallSocketService(
+      tokenService: tokenService,
+    );
+
+    // Background isolates should use HTTP, not the foreground socket.
+    await callService.acknowledgeIncomingCallOverHttp(callId: callId);
+  } catch (error, stackTrace) {
+    if (kDebugMode) {
+      dev.log(
+        'Background incoming-call acknowledgement failed',
+        name: 'CallBackground',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
 }
 
 Future<void> main() async {
@@ -41,8 +79,6 @@ Future<void> main() async {
     callkitBackgroundActionHandler,
   );
 
-
-
   await LocalNotificationService.instance.initialize();
   LocalNotificationService.instance.listenToForegroundMessages();
 
@@ -54,8 +90,7 @@ Future<void> main() async {
    */
   InitialBindings().dependencies();
 
-  final ConnectivityService connectivityService =
-  Get.put<ConnectivityService>(
+  final ConnectivityService connectivityService = Get.put<ConnectivityService>(
     ConnectivityService(),
     permanent: true,
   );
@@ -66,12 +101,7 @@ Future<void> main() async {
   // so the first incoming call after installation cannot be missed.
   await _initializeCallKitListeners();
 
-
-  Get.put<ScreenProtectionService>(
-    ScreenProtectionService(),
-    permanent: true,
-  );
-
+  Get.put<ScreenProtectionService>(ScreenProtectionService(), permanent: true);
 
   runApp(ItalyApp(initialRoute: AppPages.initial));
 
@@ -120,12 +150,14 @@ Future<void> _initializeCallKitListeners() async {
           Get.find<IncomingCallCoordinator>().dismissIncomingCall(callId);
         }
       } catch (error, stackTrace) {
-        dev.log(
-          'Unable to synchronize declined call',
-          name: 'CallKit',
-          error: error,
-          stackTrace: stackTrace,
-        );
+        if (kDebugMode) {
+          dev.log(
+            'Unable to synchronize declined call',
+            name: 'CallKit',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
       }
     },
     onTimeout: (String callId, Map<String, dynamic> data) async {
@@ -177,7 +209,7 @@ Future<void> _initializeCallKitListeners() async {
 Future<void> _completeCallKitStartup() async {
   if (Get.isRegistered<IncomingCallCoordinator>()) {
     final IncomingCallCoordinator coordinator =
-    Get.find<IncomingCallCoordinator>();
+        Get.find<IncomingCallCoordinator>();
 
     unawaited(
       coordinator.restorePendingAcceptedCall(
@@ -187,10 +219,7 @@ Future<void> _completeCallKitStartup() async {
 
     unawaited(coordinator.restoreNativeIncomingCall());
   }
-
-
 }
-
 
 class ItalyApp extends StatelessWidget {
   final String initialRoute;
@@ -205,7 +234,7 @@ class ItalyApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         final TranslationService translationService =
-        Get.find<TranslationService>();
+            Get.find<TranslationService>();
 
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
@@ -217,16 +246,15 @@ class ItalyApp extends StatelessWidget {
           getPages: AppPages.pages,
 
           builder: (BuildContext context, Widget? navigator) {
-            final Widget navigatorChild =
-                navigator ?? const SizedBox.shrink();
+            final Widget navigatorChild = navigator ?? const SizedBox.shrink();
 
             final ConnectivityService? connectivityService =
-            Get.isRegistered<ConnectivityService>()
+                Get.isRegistered<ConnectivityService>()
                 ? Get.find<ConnectivityService>()
                 : null;
 
             final IncomingCallCoordinator? callCoordinator =
-            Get.isRegistered<IncomingCallCoordinator>()
+                Get.isRegistered<IncomingCallCoordinator>()
                 ? Get.find<IncomingCallCoordinator>()
                 : null;
 
@@ -235,13 +263,12 @@ class ItalyApp extends StatelessWidget {
             }
 
             return Obx(() {
-              final bool isOffline =
-                  connectivityService?.isOffline ?? false;
+              final bool isOffline = connectivityService?.isOffline ?? false;
 
               final bool showCallCard =
                   callCoordinator != null &&
-                      callCoordinator.hasPresentedCall.value &&
-                      !callCoordinator.isPresentedCallScreenVisible.value;
+                  callCoordinator.hasPresentedCall.value &&
+                  !callCoordinator.isPresentedCallScreenVisible.value;
 
               /*
      * Completely hide the current application page while offline.
@@ -255,12 +282,9 @@ class ItalyApp extends StatelessWidget {
            * Preserve the existing active-call functionality without
            * exposing the application page underneath.
            */
-                    if (showCallCard)
-                      const GlobalCallStatusCard(),
+                    if (showCallCard) const GlobalCallStatusCard(),
 
-                    const Expanded(
-                      child: ConnectivityOfflineView(),
-                    ),
+                    const Expanded(child: ConnectivityOfflineView()),
                   ],
                 );
               }
@@ -314,8 +338,8 @@ class ItalyApp extends StatelessWidget {
             if (currentRoute == AppRoutes.wrapper &&
                 Get.isRegistered<NavbarAndAppbarWrapperController>() &&
                 Get.find<NavbarAndAppbarWrapperController>()
-                    .currentIndex
-                    .value ==
+                        .currentIndex
+                        .value ==
                     0 &&
                 Get.isRegistered<HomeController>()) {
               unawaited(

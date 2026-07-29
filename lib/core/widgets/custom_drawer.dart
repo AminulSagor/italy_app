@@ -80,32 +80,19 @@ class AppDrawer extends GetView<AppDrawerController> {
                       _DrawerItem(
                         icon: Icons.menu_book_outlined,
                         title: 'gen_guide'.tr,
-                        onTap:
-                            onGuideTap ??
-                            () {
-                              Get.back<void>();
-                              Get.toNamed(AppRoutes.guide);
-                            },
+                        onTap: onGuideTap ?? () => Get.toNamed(AppRoutes.guide),
                       ),
+
                       _DrawerItem(
                         icon: Icons.card_giftcard_outlined,
                         title: 'gen_reward'.tr,
-                        onTap:
-                            onRewardTap ??
-                            () {
-                              Get.back<void>();
-                              Get.toNamed(AppRoutes.rewards);
-                            },
+                        onTap: onRewardTap ?? () => Get.toNamed(AppRoutes.rewards),
                       ),
+
                       _DrawerItem(
                         icon: Icons.help_outline,
                         title: 'gen_support'.tr,
-                        onTap:
-                            onSupportTap ??
-                            () {
-                              Get.back<void>();
-                              Get.toNamed(AppRoutes.contactSupport);
-                            },
+                        onTap: onSupportTap ?? () => Get.toNamed(AppRoutes.contactSupport),
                       ),
                       _DrawerItem(
                         icon: Icons.translate,
@@ -115,12 +102,7 @@ class AppDrawer extends GetView<AppDrawerController> {
                       _DrawerItem(
                         icon: Icons.settings_outlined,
                         title: 'gen_settings'.tr,
-                        onTap:
-                            onSettingsTap ??
-                            () {
-                              Get.back<void>();
-                              Get.toNamed(AppRoutes.settings);
-                            },
+                        onTap: onSettingsTap ?? () => Get.toNamed(AppRoutes.settings),
                       ),
                       Divider(
                         color: Colors.grey.withValues(alpha: 0.28),

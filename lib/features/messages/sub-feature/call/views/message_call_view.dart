@@ -19,7 +19,8 @@ class MessageCallView extends GetView<MessageCallController> {
     return Obx(() {
       final MessageCallType callType = controller.callType;
 
-      final bool showVideoStage = callType.isVideo && controller.isActive.value;
+      final bool showVideoStage = callType.isVideo;
+      final bool isCallConnected = controller.isActive.value;
 
       return Scaffold(
         backgroundColor: showVideoStage
@@ -27,7 +28,12 @@ class MessageCallView extends GetView<MessageCallController> {
             : AppColors.homeBackground,
         body: Stack(
           children: <Widget>[
-            if (showVideoStage) Positioned.fill(child: _buildRemoteVideo()),
+            if (showVideoStage)
+              Positioned.fill(
+                child: isCallConnected
+                    ? _buildRemoteVideo()
+                    : _buildLocalVideoBackground(),
+              ),
             SafeArea(
               child: Column(
                 children: <Widget>[
@@ -63,7 +69,8 @@ class MessageCallView extends GetView<MessageCallController> {
                 ],
               ),
             ),
-            if (showVideoStage) _buildLocalVideoPreview(),
+            if (showVideoStage && isCallConnected)
+              _buildLocalVideoPreview(),
           ],
         ),
       );
@@ -133,6 +140,26 @@ class MessageCallView extends GetView<MessageCallController> {
         durationLabel:
         controller.durationLabel.value,
         isVideoCall: showVideoStage,
+      ),
+    );
+  }
+
+  Widget _buildLocalVideoBackground() {
+    final RtcEngine? engine = controller.agoraEngine;
+
+    if (engine == null ||
+        !controller.agora.isInitialized.value ||
+        controller.isCameraOff.value) {
+      return const MessageVideoPlaceholder();
+    }
+
+    return AgoraVideoView(
+      controller: VideoViewController(
+        rtcEngine: engine,
+        canvas: const VideoCanvas(
+          uid: 0,
+          renderMode: RenderModeType.renderModeHidden,
+        ),
       ),
     );
   }

@@ -20,6 +20,7 @@ class CallAgoraService extends GetxService {
   RtcEngine? _engine;
   MessageCallMediaModel? _activeMedia;
   Completer<void>? _joinCompleter;
+  String? _initializedAppId;
 
   final RxBool isInitialized = false.obs;
   final RxBool isJoined = false.obs;
@@ -39,10 +40,76 @@ class CallAgoraService extends GetxService {
 
   bool get supportsVideo => _supportsVideo;
 
-  /// Joins the call with audio enabled.
-  ///
-  /// For video calls, remote-video subscription is enabled,
-  /// but the local camera is not published until activateVideo().
+
+  Future<bool> prepareLocalVideoPreview({
+    required String appId,
+  }) async {
+    final String normalizedAppId = appId.trim();
+
+    if (normalizedAppId.isEmpty) {
+      throw const CallAgoraException(
+        'Invalid Agora app ID.',
+      );
+    }
+
+    await leaveCall();
+
+    final bool cameraWasRequested =
+    await _ensureCameraPermission();
+
+    if (cameraWasRequested) {
+      await _waitUntilAppResumed();
+    }
+
+    _supportsVideo = true;
+    _initializedAppId = normalizedAppId;
+
+    remoteUid.value = null;
+    isRemoteCameraEnabled.value = false;
+    isJoined.value = false;
+    isCameraEnabled.value = false;
+
+    final RtcEngine engine = createAgoraRtcEngine();
+    _engine = engine;
+
+    try {
+      await engine.initialize(
+        RtcEngineContext(
+          appId: normalizedAppId,
+        ),
+      );
+
+      isInitialized.value = true;
+      await engine.disableAudio();
+      _ensureJoinStillActive(engine);
+
+      // Video only. Do not enable Agora audio here.
+      await engine.enableVideo();
+      _ensureJoinStillActive(engine);
+
+      await engine.enableLocalVideo(true);
+      await engine.startPreview();
+      _ensureJoinStillActive(engine);
+
+      isCameraEnabled.value = true;
+
+      return true;
+    } catch (error) {
+      if (identical(_engine, engine)) {
+        await leaveCall();
+      }
+
+      if (error is CallAgoraException) {
+        rethrow;
+      }
+
+      throw CallAgoraException(
+        'Unable to start camera preview: $error',
+      );
+    }
+  }
+
+
   Future<void> joinCall({
     required MessageCallMediaModel media,
     required bool isVideoCall,
@@ -56,31 +123,60 @@ class CallAgoraService extends GetxService {
       );
     }
 
-    await leaveCall();
-    await ensurePermissionsForCall(isVideoCall: isVideoCall);
+
+    await ensurePermissionsForCall(
+      isVideoCall: isVideoCall,
+    );
+
+    final String normalizedAppId =
+    media.appId.trim();
+
+    final RtcEngine? preparedEngine = _engine;
+
+    final bool reusePreparedEngine =
+        isVideoCall &&
+            preparedEngine != null &&
+            isInitialized.value &&
+            _initializedAppId == normalizedAppId;
+
+    if (!reusePreparedEngine) {
+      await leaveCall();
+    }
 
     _activeMedia = media;
     _supportsVideo = isVideoCall;
 
     remoteUid.value = null;
     isRemoteCameraEnabled.value = false;
-    isCameraEnabled.value = false;
+    isJoined.value = false;
 
-    final RtcEngine engine = createAgoraRtcEngine();
-    _engine = engine;
+    late final RtcEngine engine;
+
+    if (reusePreparedEngine) {
+      engine = preparedEngine!;
+    } else {
+      isCameraEnabled.value = false;
+
+      engine = createAgoraRtcEngine();
+      _engine = engine;
+    }
 
     final Completer<void> joinCompleter = Completer<void>();
     CallAgoraException? joinError;
     _joinCompleter = joinCompleter;
 
     try {
-      await engine.initialize(
-        RtcEngineContext(
-          appId: media.appId,
-        ),
-      );
+      if (!reusePreparedEngine) {
+        await engine.initialize(
+          RtcEngineContext(
+            appId: normalizedAppId,
+          ),
+        );
 
-      isInitialized.value = true;
+        isInitialized.value = true;
+        _initializedAppId = normalizedAppId;
+      }
+
       _ensureJoinStillActive(engine);
 
       engine.registerEventHandler(
@@ -180,17 +276,19 @@ class CallAgoraService extends GetxService {
       isMicrophoneEnabled.value = true;
 
       if (isVideoCall) {
-        // Enable the video module for receiving remote video,
-        // but do not publish the local camera while ringing.
         await engine.enableVideo();
-        await engine.enableLocalVideo(false);
-        await engine.muteLocalVideoStream(true);
+
+        // Do not stop the camera when reusing the outgoing preview.
+        if (!reusePreparedEngine) {
+          await engine.enableLocalVideo(false);
+          await engine.muteLocalVideoStream(true);
+        }
       } else {
         await engine.disableVideo();
       }
 
       await _setSpeakerphone(
-        enabled: true,
+        enabled: isVideoCall,
       );
 
       _ensureJoinStillActive(engine);
@@ -303,7 +401,7 @@ class CallAgoraService extends GetxService {
   Future<bool> toggleMicrophone() async {
     final RtcEngine? activeEngine = _engine;
 
-    if (activeEngine == null) {
+    if (activeEngine == null || !isJoined.value) {
       return isMicrophoneEnabled.value;
     }
 
@@ -323,7 +421,11 @@ class CallAgoraService extends GetxService {
   }
 
   Future<bool> toggleSpeaker() async {
+    if (!isJoined.value) {
+      return isSpeakerEnabled.value;
+    }
     final bool nextValue = !isSpeakerEnabled.value;
+
 
     await _setSpeakerphone(
       enabled: nextValue,
@@ -339,7 +441,7 @@ class CallAgoraService extends GetxService {
 
     final RtcEngine? activeEngine = _engine;
 
-    if (activeEngine == null) {
+    if (activeEngine == null || !isJoined.value) {
       return isCameraEnabled.value;
     }
 
@@ -383,6 +485,7 @@ class CallAgoraService extends GetxService {
     _engine = null;
     _activeMedia = null;
     _supportsVideo = false;
+    _initializedAppId = null;
 
     remoteUid.value = null;
     isRemoteCameraEnabled.value = false;

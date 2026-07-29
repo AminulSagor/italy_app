@@ -6,6 +6,8 @@ import 'package:uuid/uuid.dart';
 
 import '../models/message_call_models.dart';
 import '../service/call_agora_service.dart';
+import '../service/call_proximity_service.dart';
+import '../service/call_ringback_service.dart';
 import '../service/call_socket_service.dart';
 import '../service/full_screen_call_permission_service.dart';
 import '../service/incoming_call_coordinator.dart';
@@ -41,10 +43,13 @@ class MessageCallController extends GetxController {
   final MessageCallParticipantModel participant;
   final CallSocketService _callSocketService;
   final CallAgoraService _callAgoraService;
+  final CallRingbackService _ringbackService = CallRingbackService();
   final MessageCallSessionModel? _initialSession;
   final MessageCallDurationTracker _durationTracker =
       MessageCallDurationTracker();
   final String _presentationId = 'message-call-${const Uuid().v4()}';
+  final CallProximityService _proximityService =
+  CallProximityService();
 
   late final IncomingCallCoordinator _callCoordinator;
   late final Worker _statusWorker;
@@ -61,6 +66,7 @@ class MessageCallController extends GetxController {
       Rxn<MessageCallSessionModel>();
 
   late final Future<void> _startCallFuture;
+  late final CallSocketListener _ringingCallListener;
   late final CallSocketListener _answeredCallListener;
   late final CallSocketListener _rejectedCallListener;
   late final CallSocketListener _endedCallListener;
@@ -69,6 +75,7 @@ class MessageCallController extends GetxController {
   Timer? _statusPollTimer;
   Timer? _ringingTimeoutTimer;
   Future<void>? _terminalCloseFuture;
+  Future<void>? _localPreviewFuture;
   bool _statusPollInProgress = false;
   bool _mediaJoinInProgress = false;
   bool _endRequested = false;
@@ -76,22 +83,24 @@ class MessageCallController extends GetxController {
   bool _remoteTerminal = false;
   bool _routeClosed = false;
 
+
   CallAgoraService get agora => _callAgoraService;
   RtcEngine? get agoraEngine => _callAgoraService.engine;
   String? get agoraChannelName => _callAgoraService.channelName;
 
-  final FullScreenCallPermissionService
-  _fullScreenCallPermissionService =
-  FullScreenCallPermissionService();
+  final FullScreenCallPermissionService _fullScreenCallPermissionService =
+      FullScreenCallPermissionService();
 
   @override
   void onInit() {
     super.onInit();
 
+    _ringingCallListener = _handleCallRinging;
     _answeredCallListener = _handleCallAnswered;
     _rejectedCallListener = _handleCallRejected;
     _endedCallListener = _handleCallEnded;
 
+    _callSocketService.addRingingCallListener(_ringingCallListener);
     _callSocketService.addAnsweredCallListener(_answeredCallListener);
     _callSocketService.addRejectedCallListener(_rejectedCallListener);
     _callSocketService.addEndedCallListener(_endedCallListener);
@@ -128,8 +137,7 @@ class MessageCallController extends GetxController {
     try {
       // Ask for full-screen incoming-call permission only when
       // the user starts their first outgoing call.
-      await _fullScreenCallPermissionService
-          .requestWhenStartingFirstCall();
+      await _fullScreenCallPermissionService.requestWhenStartingFirstCall();
 
       if (_endRequested || _routeClosed || _remoteTerminal) {
         return;
@@ -145,18 +153,24 @@ class MessageCallController extends GetxController {
         return;
       }
 
-      final Map<String, dynamic> response =
-      await _callSocketService.initiateCall(
-        conversationId: conversationId,
-        callType: callType.value,
-        clientCallId: const Uuid().v4(),
+// The request is now being sent to the server.
+      durationLabel.value = 'calling'.tr;
+      await _ringbackService.startCalling(
+        forceRestart: true,
       );
 
+      final Map<String, dynamic> response = await _callSocketService
+          .initiateCall(
+            conversationId: conversationId,
+            callType: callType.value,
+            clientCallId: const Uuid().v4(),
+          );
+
       final MessageCallSessionModel session =
-      MessageCallSessionModel.fromInitiateResponse(
-        response: response,
-        participant: participant,
-      );
+          MessageCallSessionModel.fromInitiateResponse(
+            response: response,
+            participant: participant,
+          );
 
       if (session.id.isEmpty) {
         throw CallSocketException(
@@ -167,6 +181,9 @@ class MessageCallController extends GetxController {
 
       _callId = session.id;
       callSession.value = session;
+
+      final bool receiverIsRinging =
+          response['foregroundAcknowledged'] == true;
 
       if (_endRequested || _routeClosed || _remoteTerminal) {
         await _terminateCall(showError: false);
@@ -184,7 +201,22 @@ class MessageCallController extends GetxController {
         return;
       }
 
-      durationLabel.value = 'pending'.tr;
+      if (callType.isVideo) {
+        final Future<void> previewFuture =
+        _prepareOutgoingVideoPreview(session);
+
+        _localPreviewFuture = previewFuture;
+
+        unawaited(previewFuture);
+      }
+
+      if (receiverIsRinging) {
+        await _enterRingingState();
+      }
+
+
+
+
 
       _startCallStatusPolling();
       _startRingingTimeout();
@@ -223,6 +255,39 @@ class MessageCallController extends GetxController {
     }
   }
 
+  void _handleCallRinging(Map<String, dynamic> payload) {
+    if (!_matchesCurrentCall(payload)) {
+      return;
+    }
+
+    unawaited(_enterRingingState());
+  }
+
+  Future<void> _enterRingingState() async {
+    if (_routeClosed ||
+        _remoteTerminal ||
+        _endRequested ||
+        isEnding.value ||
+        isActive.value) {
+      return;
+    }
+
+
+    durationLabel.value = 'ringing'.tr;
+
+    // Agora may currently be taking control of the audio session.
+    // The correct sound will be restarted after joining finishes.
+    if (_mediaJoinInProgress) {
+      return;
+    }
+
+    await _ringbackService.startRinging(
+      forceRestart: true,
+    );
+  }
+
+
+
   void _handleCallAnswered(Map<String, dynamic> payload) {
     if (!_matchesCurrentCall(payload)) {
       return;
@@ -232,29 +297,59 @@ class MessageCallController extends GetxController {
   }
 
   Future<void> _connectAnsweredOutgoingCall() async {
-    final MessageCallSessionModel? session = callSession.value;
+    final MessageCallSessionModel? session =
+        callSession.value;
+
     if (session == null ||
         _mediaJoinInProgress ||
         _routeClosed ||
         _remoteTerminal ||
         _endRequested ||
-        _callAgoraService.isJoined.value) {
+        isActive.value) {
       return;
     }
 
-    _stopRingingTimeout();
+    // Prevent duplicate socket and polling events from
+    // starting Agora more than once.
     isActive.value = true;
     isLoading.value = true;
     durationLabel.value = 'loading'.tr;
 
+    _stopRingingTimeout();
+
+
+    // Completely stop the MP3 before enabling Agora audio.
+    await _ringbackService.stop();
+
     try {
-      await _joinMedia(session);
-      if (_routeClosed || _remoteTerminal || _endRequested) {
+      final Future<void>? previewFuture =
+          _localPreviewFuture;
+
+      if (previewFuture != null) {
+        await previewFuture;
+      }
+
+      if (_routeClosed ||
+          _remoteTerminal ||
+          _endRequested) {
+        return;
+      }
+
+      if (!_callAgoraService.isJoined.value) {
+        await _joinMedia(session);
+      } else {
+        _syncMediaControls();
+      }
+
+      if (_routeClosed ||
+          _remoteTerminal ||
+          _endRequested) {
         return;
       }
 
       _stopCallStatusPolling();
       _startDurationTimer();
+
       await _activateVideoIfNeeded();
     } on CallAgoraException catch (error) {
       await _handleMediaFailure(error.message);
@@ -273,6 +368,7 @@ class MessageCallController extends GetxController {
         isVideoCall: callType.isVideo,
       );
       _syncMediaControls();
+      await _syncProximityLock();
     } finally {
       _mediaJoinInProgress = false;
     }
@@ -333,7 +429,8 @@ class MessageCallController extends GetxController {
     isActive.value = false;
 
     final Map<String, dynamic> call = _toMap(payload['call']);
-    final bool timedOut = payload['reason']?.toString() == 'timeout' ||
+    final bool timedOut =
+        payload['reason']?.toString() == 'timeout' ||
         call['status']?.toString() == 'missed';
     unawaited(
       _showTerminalState(timedOut ? 'missed_call'.tr : 'call_ended'.tr),
@@ -395,8 +492,9 @@ class MessageCallController extends GetxController {
 
     _statusPollInProgress = true;
     try {
-      final Map<String, dynamic> response =
-          await _callSocketService.fetchCall(callId: callId);
+      final Map<String, dynamic> response = await _callSocketService.fetchCall(
+        callId: callId,
+      );
       final Map<String, dynamic> call = _toMap(response['call']);
       final String status = call['status']?.toString() ?? '';
 
@@ -436,16 +534,13 @@ class MessageCallController extends GetxController {
 
   Future<void> _handleRingingTimeout() async {
     final String? callId = _callId;
-    if (_routeClosed ||
-        isActive.value ||
-        callId == null ||
-        callId.isEmpty) {
+    if (_routeClosed || isActive.value || callId == null || callId.isEmpty) {
       return;
     }
 
     try {
-      final Map<String, dynamic> response =
-          await _callSocketService.timeoutCall(callId: callId);
+      final Map<String, dynamic> response = await _callSocketService
+          .timeoutCall(callId: callId);
       final Map<String, dynamic> call = _toMap(response['call']);
       if (call['status']?.toString() == 'active') {
         unawaited(_connectAnsweredOutgoingCall());
@@ -484,10 +579,9 @@ class MessageCallController extends GetxController {
         // Close the screen even if call creation or media setup is delayed.
       }
 
-      await _terminateCall(showError: true).timeout(
-        const Duration(seconds: 2),
-        onTimeout: () {},
-      );
+      await _terminateCall(
+        showError: true,
+      ).timeout(const Duration(seconds: 2), onTimeout: () {});
     } finally {
       _stopAllTimers();
       await _leaveMediaSafely();
@@ -527,8 +621,9 @@ class MessageCallController extends GetxController {
 
   Future<bool> _isCallTerminal(String callId) async {
     try {
-      final Map<String, dynamic> response =
-          await _callSocketService.fetchCall(callId: callId);
+      final Map<String, dynamic> response = await _callSocketService.fetchCall(
+        callId: callId,
+      );
       final Map<String, dynamic> call = _toMap(response['call']);
       return _terminalStatuses.contains(call['status']?.toString() ?? '');
     } catch (_) {
@@ -559,6 +654,7 @@ class MessageCallController extends GetxController {
   }
 
   Future<void> _leaveMediaSafely() async {
+    await _proximityService.disable();
     try {
       await _callAgoraService.leaveCall().timeout(const Duration(seconds: 2));
     } catch (_) {
@@ -568,10 +664,14 @@ class MessageCallController extends GetxController {
 
   void _stopAllTimers() {
     _durationTracker.stop();
+
     _statusPollTimer?.cancel();
     _statusPollTimer = null;
     _statusPollInProgress = false;
+
     _stopRingingTimeout();
+
+    unawaited(_ringbackService.stop());
   }
 
   void _stopCallStatusPolling() {
@@ -608,15 +708,18 @@ class MessageCallController extends GetxController {
   void onClose() {
     _statusWorker.dispose();
     _callCoordinator.clearPresentedCall(_presentationId);
+    _callSocketService.removeRingingCallListener(_ringingCallListener);
     _callSocketService.removeAnsweredCallListener(_answeredCallListener);
     _callSocketService.removeRejectedCallListener(_rejectedCallListener);
     _callSocketService.removeEndedCallListener(_endedCallListener);
     _stopAllTimers();
+    unawaited(_ringbackService.dispose());
 
     if (!_terminationSent && _callId?.isNotEmpty == true) {
       unawaited(_terminateCall(showError: false));
     }
     unawaited(_callAgoraService.leaveCall());
+    unawaited(_proximityService.disable());
     super.onClose();
   }
 }

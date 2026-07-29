@@ -620,24 +620,28 @@ class MessagesController extends GetxController {
     }
   }
 
-  void openChat(MessageThreadModel thread) {
-    // Clear unread/highlight when opening the chat so the UI updates instantly
+  Future<void> openChat(MessageThreadModel thread) async {
     try {
-      final int idx = threads.indexWhere(
-            (t) => t.id == thread.id || t.contactId == thread.contactId,
+      final int index = threads.indexWhere(
+            (item) => item.id == thread.id || item.contactId == thread.contactId,
       );
-      if (idx >= 0) {
-        final MessageThreadModel old = threads[idx];
-        threads[idx] = old.copyWith(unreadCount: 0, isHighlighted: false);
-      }
-    } catch (_) {}
 
-    // Persist read state on server (do not block navigation)
-    try {
+      if (index >= 0) {
+        threads[index] = threads[index].copyWith(
+          unreadCount: 0,
+          isHighlighted: false,
+        );
+      }
+
       _messagesMockService.markConversationRead(thread.id);
     } catch (_) {}
 
-    Get.to<void>(
+    // Prevent previous conversation messages from flashing.
+    if (Get.isRegistered<MessageChatController>()) {
+      await Get.delete<MessageChatController>(force: true);
+    }
+
+    await Get.to<void>(
           () => const MessageChatView(),
       binding: BindingsBuilder(() {
         Get.put<MessageChatController>(

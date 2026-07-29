@@ -13,10 +13,7 @@ import 'token_service.dart';
 Future<void> callkitBackgroundActionHandler(CallEvent event) async {
   DartPluginRegistrant.ensureInitialized();
 
-  dev.log(
-    'Received ${event.runtimeType}',
-    name: 'CallKitBackground',
-  );
+  dev.log('Received ${event.runtimeType}', name: 'CallKitBackground');
 
   if (event is CallEventActionCallTimeout) {
     final String callId = event.id.trim();
@@ -38,8 +35,9 @@ Future<void> callkitBackgroundActionHandler(CallEvent event) async {
 
   final Map<String, dynamic> extra = _extractExtra(callKitParams.extra);
   final String extraCallId = extra['callId']?.toString().trim() ?? '';
-  final String callId =
-      extraCallId.isNotEmpty ? extraCallId : callKitParams.id.trim();
+  final String callId = extraCallId.isNotEmpty
+      ? extraCallId
+      : callKitParams.id.trim();
 
   if (callId.isEmpty) {
     dev.log(
@@ -67,17 +65,14 @@ Future<void> callkitBackgroundActionHandler(CallEvent event) async {
 
   await _runBackgroundAction((CallSocketService callService) async {
     if (event is CallEventActionCallDecline) {
-      dev.log(
-        'Rejecting call over HTTP',
-        name: 'CallKitBackground',
-      );
       await callService.rejectCallOverHttp(callId: callId);
       await CallkitPendingActionStore.clear();
       return;
     }
 
-    final Map<String, dynamic> current =
-        await callService.fetchCall(callId: callId);
+    final Map<String, dynamic> current = await callService.fetchCall(
+      callId: callId,
+    );
     final Map<String, dynamic> call = _extractExtra(current['call']);
     final String status = call['status']?.toString() ?? '';
 

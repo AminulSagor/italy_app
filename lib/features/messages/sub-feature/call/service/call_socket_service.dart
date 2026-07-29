@@ -53,6 +53,8 @@ class CallSocketService extends GetxService {
 
   final List<CallSocketListener> _incomingCallListeners =
       <CallSocketListener>[];
+  final List<CallSocketListener> _ringingCallListeners =
+  <CallSocketListener>[];
 
   final List<CallSocketListener> _answeredCallListeners =
       <CallSocketListener>[];
@@ -152,6 +154,15 @@ class CallSocketService extends GetxService {
         data: data,
         listeners: _incomingCallListeners,
         listenerName: 'Incoming call',
+      );
+    });
+
+    socket.on('call:ringing', (dynamic data) {
+      _handleSocketEvent(
+        event: 'call:ringing',
+        data: data,
+        listeners: _ringingCallListeners,
+        listenerName: 'Ringing call',
       );
     });
 
@@ -323,6 +334,16 @@ class CallSocketService extends GetxService {
     );
   }
 
+  Future<Map<String, dynamic>> acknowledgeIncomingCallOverHttp({
+    required String callId,
+  }) {
+    return _sendHttpCallAction(
+      method: 'POST',
+      path: '/calls/${callId.trim()}/incoming-ack',
+    );
+  }
+
+
   Future<Map<String, dynamic>> fetchCall({required String callId}) {
     return _sendHttpCallAction(method: 'GET', path: '/calls/${callId.trim()}');
   }
@@ -444,7 +465,9 @@ class CallSocketService extends GetxService {
     );
   }
 
-  Future<void> acknowledgeIncomingCall({required String callId}) async {
+  Future<void> acknowledgeIncomingCall({
+    required String callId,
+  }) async {
     final String normalizedCallId = callId.trim();
 
     if (normalizedCallId.isEmpty) {
@@ -456,52 +479,68 @@ class CallSocketService extends GetxService {
 
     final io.Socket? socket = _socket;
 
+    // Background/resuming app may not have a connected socket yet.
     if (socket == null || !socket.connected) {
-      throw const CallSocketException(
-        code: 'CALL_SOCKET_NOT_CONNECTED',
-        message: 'The call socket is not connected.',
+      await acknowledgeIncomingCallOverHttp(
+        callId: normalizedCallId,
       );
+      return;
     }
 
     final Completer<Map<String, dynamic>> completer =
-        Completer<Map<String, dynamic>>();
+    Completer<Map<String, dynamic>>();
 
     debugPrint(
-      '[CallSocket] Sending call:incoming:ack '
-      '$normalizedCallId',
+      '[CallSocket] Sending call:incoming:ack $normalizedCallId',
     );
 
     socket.emitWithAck(
       'call:incoming:ack',
-      <String, dynamic>{'callId': normalizedCallId},
+      <String, dynamic>{
+        'callId': normalizedCallId,
+      },
       ack: (dynamic rawResponse) {
-        if (completer.isCompleted) {
-          return;
-        }
+        if (completer.isCompleted) return;
 
-        final Map<String, dynamic> response = _toMap(rawResponse);
+        final Map<String, dynamic> response =
+        _toMap(rawResponse);
 
         debugPrint(
-          '[CallSocket] call:incoming:ack '
-          'response $response',
+          '[CallSocket] call:incoming:ack response $response',
         );
 
         completer.complete(response);
       },
     );
 
-    final Map<String, dynamic> response = await completer.future.timeout(
-      const Duration(seconds: 3),
-      onTimeout: () {
-        throw const CallSocketException(
-          code: 'CALL_INCOMING_ACK_TIMEOUT',
-          message: 'The incoming call acknowledgement timed out.',
-        );
-      },
-    );
+    try {
+      final Map<String, dynamic> response =
+      await completer.future.timeout(
+        const Duration(seconds: 3),
+        onTimeout: () {
+          throw const CallSocketException(
+            code: 'CALL_INCOMING_ACK_TIMEOUT',
+            message:
+            'The incoming call acknowledgement timed out.',
+          );
+        },
+      );
 
-    if (response['ok'] != true) {
-      throw CallSocketException.fromResponse(response);
+      if (response['ok'] != true) {
+        throw CallSocketException.fromResponse(response);
+      }
+    } on CallSocketException catch (error) {
+      if (error.code != 'CALL_INCOMING_ACK_TIMEOUT') {
+        rethrow;
+      }
+
+      debugPrint(
+        '[CallSocket] Socket ACK timed out; retrying over HTTP',
+      );
+
+      await acknowledgeIncomingCallOverHttp(
+        callId: normalizedCallId,
+      );
     }
   }
 
@@ -578,6 +617,14 @@ class CallSocketService extends GetxService {
 
   void removeIncomingCallListener(CallSocketListener listener) {
     _incomingCallListeners.remove(listener);
+  }
+
+  void addRingingCallListener(CallSocketListener listener) {
+    _addListener(_ringingCallListeners, listener);
+  }
+
+  void removeRingingCallListener(CallSocketListener listener) {
+    _ringingCallListeners.remove(listener);
   }
 
   void addAnsweredCallListener(CallSocketListener listener) {

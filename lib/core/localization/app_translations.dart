@@ -3,6 +3,8 @@
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
+    'ringing': 'Ringing…',
+    'calling': 'Calling…',
     'expert_tip_complete_chapters_in_order':
     'Complete chapters in order so the course progress and final exam eligibility stay up to date.',
     'guide_video': 'Guide Video',
@@ -5323,8 +5325,12 @@ appTranslations = <String, Map<String, String>>{
     'গাইড ভিডিওটি পাওয়া যাচ্ছে না।',
     'expert_tip_complete_chapters_in_order':
     'অধ্যায়গুলো ধারাবাহিকভাবে সম্পন্ন করুন, যাতে কোর্সের অগ্রগতি এবং চূড়ান্ত পরীক্ষার যোগ্যতা সঠিকভাবে হালনাগাদ থাকে.',
+    'calling': 'কল করা হচ্ছে…',
+    'ringing': 'রিং হচ্ছে…',
   },
   'it_IT': <String, String>{
+    'ringing': 'Sta squillando…',
+    'calling': 'Chiamata in corso…',
     'expert_tip_complete_chapters_in_order':
     'Completa i capitoli in ordine per mantenere aggiornati i progressi del corso e l’idoneità all’esame finale.',
     'guide_video': 'Video guida',

@@ -58,84 +58,107 @@ class MessageChatView extends GetView<MessageChatController> {
                   _ChatHeader(chat: chat),
                   SizedBox(height: 14.h),
                   Expanded(
-                    child: CustomScrollView(
-                      controller: controller.chatScrollController,
-                      physics: const BouncingScrollPhysics(),
-                      slivers: <Widget>[
-                        Obx(
-                          () => controller.isLoadingMore.value
-                              ? SliverToBoxAdapter(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                      top: 12.h,
-                                      bottom: 8.h,
-                                    ),
-                                    child: Center(
-                                      child: SizedBox(
-                                        width: 20.w,
-                                        height: 20.w,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                    child: Obx(() {
+                      final bool isReady = controller.isInitialScrollReady.value;
+
+                      return Stack(
+                        children: <Widget>[
+                          AnimatedOpacity(
+                            opacity: isReady ? 1 : 0,
+                            duration: const Duration(milliseconds: 120),
+                            child: IgnorePointer(
+                              ignoring: !isReady,
+                              child: CustomScrollView(
+                                controller: controller.chatScrollController,
+                                physics: const BouncingScrollPhysics(),
+                                slivers: <Widget>[
+                                  Obx(
+                                        () => controller.isLoadingMore.value
+                                        ? SliverToBoxAdapter(
+                                      child: Padding(
+                                        padding: EdgeInsets.only(
+                                          top: 12.h,
+                                          bottom: 8.h,
                                         ),
+                                        child: Center(
+                                          child: SizedBox(
+                                            width: 20.w,
+                                            height: 20.w,
+                                            child: const CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                        : const SliverToBoxAdapter(
+                                      child: SizedBox.shrink(),
+                                    ),
+                                  ),
+                                  SliverToBoxAdapter(
+                                    child: SizedBox(height: 6.h),
+                                  ),
+                                  SliverPadding(
+                                    padding: EdgeInsets.fromLTRB(
+                                      kChatMessageHorizontalPadding.w,
+                                      0,
+                                      kChatMessageHorizontalPadding.w,
+                                      170.h,
+                                    ),
+                                    sliver: SliverList(
+                                      delegate: SliverChildBuilderDelegate(
+                                            (BuildContext context, int index) {
+                                          final MessageChatItemModel item =
+                                          chat.messages[index];
+
+                                          final bool showDate =
+                                              index == 0 ||
+                                                  !_isSameDay(
+                                                    chat.messages[index - 1].createdAtIso,
+                                                    item.createdAtIso,
+                                                  );
+
+                                          return Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                            children: <Widget>[
+                                              if (showDate) ...<Widget>[
+                                                SizedBox(height: 12.h),
+                                                _DateChipLabel(
+                                                  iso: item.createdAtIso ??
+                                                      DateTime.now()
+                                                          .toIso8601String(),
+                                                ),
+                                                SizedBox(height: 12.h),
+                                              ],
+                                              ChatMessageBubble(
+                                                message: item,
+                                                onTap: item.canCallBack
+                                                    ? () => controller.callBack(item)
+                                                    : null,
+                                              ),
+                                              SizedBox(height: 12.h),
+                                            ],
+                                          );
+                                        },
+                                        childCount: chat.messages.length,
                                       ),
                                     ),
                                   ),
-                                )
-                              : const SliverToBoxAdapter(
-                                  child: SizedBox.shrink(),
-                                ),
-                        ),
-                        SliverToBoxAdapter(child: SizedBox(height: 6.h)),
-                        SliverPadding(
-                          padding: EdgeInsets.fromLTRB(
-                            kChatMessageHorizontalPadding.w,
-                            0,
-                            kChatMessageHorizontalPadding.w,
-                            170.h,
-                          ),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate((
-                              BuildContext context,
-                              int index,
-                            ) {
-                              final int i = index;
-                              final MessageChatItemModel item =
-                                  chat.messages[i];
-
-                              // determine if we need a date chip before this message
-                              final bool showDate =
-                                  i == 0 ||
-                                  !_isSameDay(
-                                    chat.messages[i - 1].createdAtIso,
-                                    item.createdAtIso,
-                                  );
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: <Widget>[
-                                  if (showDate) ...<Widget>[
-                                    SizedBox(height: 12.h),
-                                    _DateChipLabel(
-                                      iso:
-                                          item.createdAtIso ??
-                                          DateTime.now().toIso8601String(),
-                                    ),
-                                    SizedBox(height: 12.h),
-                                  ],
-                                  ChatMessageBubble(
-                                    message: item,
-                                    onTap: item.canCallBack
-                                        ? () => controller.callBack(item)
-                                        : null,
-                                  ),
-                                  SizedBox(height: 12.h),
                                 ],
-                              );
-                            }, childCount: chat.messages.length),
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+
+                          if (!isReady)
+                            const Positioned.fill(
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                        ],
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -229,108 +252,166 @@ class _DateChipLabel extends StatelessWidget {
 class _ChatHeader extends GetView<MessageChatController> {
   final MessageChatModel chat;
 
-  const _ChatHeader({required this.chat});
+  const _ChatHeader({
+    required this.chat,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        14.h,
-        20.w,
-        0,
-      ),
-      child: Row(
-        children: <Widget>[
-          GestureDetector(
-            onTap: () => Get.back<void>(),
-            child: Icon(
-              Icons.arrow_back_rounded,
-              size: 18.w,
-              color: AppColors.homePrimaryText,
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          8.w,
+          8.h,
+          8.w,
+          6.h,
+        ),
+        child: Row(
+          children: <Widget>[
+            _HeaderIconButton(
+              icon: Icons.arrow_back_rounded,
+              onTap: () => Get.back<void>(),
+              semanticLabel: 'Back',
             ),
-          ),
-          SizedBox(width: 22.w),
-          GestureDetector(
-            onTap: controller.openUserInfo,
-            child: MessageAvatar(
-              imageUrl: chat.contactAvatarUrl,
-              size: 48.w,
-              showStatus: true,
-              isOnline: chat.isOnline,
-            ),
-          ),
-          SizedBox(width: 18.w),
-          Expanded(
-            child: GestureDetector(
+
+            SizedBox(width: 2.w),
+
+            GestureDetector(
               onTap: controller.openUserInfo,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    chat.contactName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppFont.font18.sp,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                      color: AppColors.homePrimaryText,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    chat.contactStatus,
-                    style: TextStyle(
-                      fontSize: AppFont.font12.sp,
-                      fontWeight: FontWeight.w600,
-                      height: 1,
-                      color: AppColors.bodyText,
-                    ),
-                  ),
-                ],
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 4.w,
+                  vertical: 2.h,
+                ),
+                child: MessageAvatar(
+                  imageUrl: chat.contactAvatarUrl,
+                  size: 42.w,
+                  showStatus: true,
+                  isOnline: chat.isOnline,
+                ),
               ),
             ),
-          ),
-          Obx(() {
-            final bool blocked = controller.blockStatus.value != 'none';
-            if (blocked) return const SizedBox.shrink();
-            return Row(
-              children: <Widget>[
-                _HeaderAction(
-                  icon: Icons.call_outlined,
-                  onTap: controller.openAudioCall,
+
+            SizedBox(width: 7.w),
+
+            // The name section gets all remaining available space.
+            Expanded(
+              child: GestureDetector(
+                onTap: controller.openUserInfo,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 6.h),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        chat.contactName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: AppFont.font14.sp,
+                          fontWeight: FontWeight.w700,
+                          height: 1.15,
+                          color: AppColors.homePrimaryText,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        chat.contactStatus,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: AppFont.font11.sp,
+                          fontWeight: FontWeight.w500,
+                          height: 1.1,
+                          color: chat.isOnline
+                              ? AppColors.primaryGreen
+                              : AppColors.bodyText,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                SizedBox(width: 20.w),
-                _HeaderAction(
-                  icon: Icons.videocam_outlined,
-                  onTap: controller.openVideoCall,
-                ),
-                SizedBox(width: 20.w),
-              ],
-            );
-          }),
-          _HeaderAction(
-            icon: Icons.info_outline_rounded,
-            onTap: controller.openUserInfo,
-          ),
-        ],
+              ),
+            ),
+
+            SizedBox(width: 2.w),
+
+            Obx(() {
+              final bool isBlocked =
+                  controller.blockStatus.value != 'none';
+
+              if (isBlocked) {
+                return _HeaderIconButton(
+                  icon: Icons.info_outline_rounded,
+                  onTap: controller.openUserInfo,
+                  semanticLabel: 'Conversation information',
+                );
+              }
+
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _HeaderIconButton(
+                    icon: Icons.call_outlined,
+                    onTap: controller.openAudioCall,
+                    semanticLabel: 'Audio call',
+                  ),
+                  _HeaderIconButton(
+                    icon: Icons.videocam_outlined,
+                    onTap: controller.openVideoCall,
+                    semanticLabel: 'Video call',
+                  ),
+                  _HeaderIconButton(
+                    icon: Icons.info_outline_rounded,
+                    onTap: controller.openUserInfo,
+                    semanticLabel: 'Conversation information',
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _HeaderAction extends StatelessWidget {
+class _HeaderIconButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
+  final String semanticLabel;
 
-  const _HeaderAction({required this.icon, this.onTap});
+  const _HeaderIconButton({
+    required this.icon,
+    required this.onTap,
+    required this.semanticLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Icon(icon, color: AppColors.primaryGreen, size: 26.w),
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24.r),
+          child: SizedBox(
+            width: 42.w,
+            height: 42.w,
+            child: Icon(
+              icon,
+              size: 22.w,
+              color: AppColors.homePrimaryText,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
