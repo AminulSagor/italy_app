@@ -3,33 +3,38 @@
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
+    // English
+    'matching_pairs_drag_instruction':
+        'Move the words on the right to match them with the words on the left.',
+    'play': 'Play',
+    'mute': 'Mute',
+    'unmute': 'Unmute',
+    'playback_speed': 'Playback speed',
     'ringing': 'Ringing…',
     'calling': 'Calling…',
     'expert_tip_complete_chapters_in_order':
-    'Complete chapters in order so the course progress and final exam eligibility stay up to date.',
+        'Complete chapters in order so the course progress and final exam eligibility stay up to date.',
     'guide_video': 'Guide Video',
     'watch_app_guide': 'Watch the app guide',
-    'guide_video_unavailable':
-    'The guide video is unavailable.',
+    'guide_video_unavailable': 'The guide video is unavailable.',
     'chat_with_us_on_whatsapp': 'Chat with our support team on WhatsApp',
     'unable_to_open_whatsapp': 'Unable to open WhatsApp',
     'webinar_stage_permission_required':
-    'Microphone and camera permissions are required to join the webinar stage.',
+        'Microphone and camera permissions are required to join the webinar stage.',
     'webinar_stage_permission_settings_required':
-    'Allow microphone and camera access from app settings to join the webinar stage.',
+        'Allow microphone and camera access from app settings to join the webinar stage.',
     'notification_permission_title': 'Stay updated',
     'notification_permission_description':
-    'Allow notifications for messages, incoming calls, learning reminders, and important account updates.',
+        'Allow notifications for messages, incoming calls, learning reminders, and important account updates.',
     'notification_permission_not_now': 'Not now',
     'notification_permission_enable': 'Enable notifications',
-    'full_screen_call_permission_title':
-    'Show incoming calls on screen',
+    'full_screen_call_permission_title': 'Show incoming calls on screen',
     'full_screen_call_permission_description':
-    'Allow Italir Pothe to show incoming calls over the lock screen so you do not miss calls.',
+        'Allow Italir Pothe to show incoming calls over the lock screen so you do not miss calls.',
     'ai_report_action': 'Report',
     'ai_report_title': 'Report AI content',
     'ai_report_description':
-    'Tell us what is wrong with this AI-generated content.',
+        'Tell us what is wrong with this AI-generated content.',
     'ai_report_issue_required': 'Issue *',
     'ai_report_details_optional': 'Details (optional)',
     'ai_report_add_screenshot': 'Add screenshot',
@@ -39,11 +44,9 @@ appTranslations = <String, Map<String, String>>{
     'ai_report_select_issue': 'Please select an issue.',
     'ai_report_content_missing': 'The AI content could not be attached.',
     'ai_report_success_title': 'Report submitted',
-    'ai_report_success_message':
-    'Thank you for helping us improve AI safety.',
+    'ai_report_success_message': 'Thank you for helping us improve AI safety.',
     'ai_report_error_title': 'Submission failed',
-    'ai_report_error_message':
-    'Unable to submit the report. Please try again.',
+    'ai_report_error_message': 'Unable to submit the report. Please try again.',
     'ai_report_offensive_or_hateful': 'Offensive or hateful content',
     'ai_report_sexual_or_inappropriate': 'Sexual or inappropriate content',
     'ai_report_dangerous_or_harmful': 'Dangerous or harmful content',
@@ -51,8 +54,7 @@ appTranslations = <String, Map<String, String>>{
     'ai_report_false_or_misleading': 'False or misleading information',
     'ai_report_privacy_concern': 'Privacy concern',
     'ai_report_other': 'Other',
-    'guided_learning_level_selection':
-    'Guided Learning Level Selection',
+    'guided_learning_level_selection': 'Guided Learning Level Selection',
     'notification_filter_all': 'All',
     'notification_filter_learning': 'Learning',
     'notification_filter_system': 'System',
@@ -60,77 +62,68 @@ appTranslations = <String, Map<String, String>>{
 
     'offline_screen_title': 'Oops! You’re\nOffline.',
     'offline_learning_message':
-    'Please check your internet connection to continue learning your favorite Italian phrases.',
+        'Please check your internet connection to continue learning your favorite Italian phrases.',
     'search_no_match_message':
-    'We couldn’t find what you were looking for. Try a different keyword.',
+        'We couldn’t find what you were looking for. Try a different keyword.',
 
     'italian_keyboard_accents_help':
-    'You’ll need Italian accents like à, è, and ì to answer writing questions correctly.',
+        'You’ll need Italian accents like à, è, and ì to answer writing questions correctly.',
     'italian_keyboard_setup_help':
-    'Set up the Italian keyboard on your phone to answer correctly.',
+        'Set up the Italian keyboard on your phone to answer correctly.',
     'italian_accents_explanation':
-    'Accents change the meaning and pronunciation of words.',
+        'Accents change the meaning and pronunciation of words.',
 
     'ai_level_test_description':
-    'Find your current level through only 10 questions.',
-    'ai_tutor_intro':
-    'I am your AI Tutor. Let’s practice Italian together.',
+        'Find your current level through only 10 questions.',
+    'ai_tutor_intro': 'I am your AI Tutor. Let’s practice Italian together.',
     'ai_scenario_tip':
-    'The AI will play the role in that scenario, such as a cashier, waiter, or driver.',
+        'The AI will play the role in that scenario, such as a cashier, waiter, or driver.',
 
     'level_mastered': 'Level @level\nMastered',
-    'certificate_milestone_message':
-    'You’ve reached a new milestone',
-    'course_information_unavailable':
-    'Unable to load course information.',
+    'certificate_milestone_message': 'You’ve reached a new milestone',
+    'course_information_unavailable': 'Unable to load course information.',
     'purchase_success_description':
-    'You now have full lifetime access to all Italir Pothe features. Your journey to fluency starts today.',
+        'You now have full lifetime access to all Italir Pothe features. Your journey to fluency starts today.',
 
     'coupon_applied': 'Coupon applied',
     'discount_value': 'Discount: @discount%',
     'remove_coupon': 'Remove coupon',
     'store_price_notice':
-    'The final price is controlled by Google Play or the App Store and may include VAT, tax, currency conversion, or regional pricing.',
+        'The final price is controlled by Google Play or the App Store and may include VAT, tax, currency conversion, or regional pricing.',
 
     'support_contact_description':
-    'Choose the most convenient way to contact the Italir Pothe support team.',
+        'Choose the most convenient way to contact the Italir Pothe support team.',
     'chat_on_whatsapp': 'Chat on WhatsApp',
-    'fastest_response_recommended':
-    'Recommended for the fastest response',
+    'fastest_response_recommended': 'Recommended for the fastest response',
     'facebook_community_description':
-    'Ask questions, share experiences, and connect with other learners.',
+        'Ask questions, share experiences, and connect with other learners.',
     'support_response_time':
-    'We aim to respond to support inquiries within 24 hours.',
+        'We aim to respond to support inquiries within 24 hours.',
 
     'reward_awarded_date': 'Awarded\n@date',
     'voice_minutes_value': '@count Mins',
     'text_tokens_value': '@count Tokens',
-    'ai_credit_usage_description':
-    'Voice for speaking, tokens for chatting.',
+    'ai_credit_usage_description': 'Voice for speaking, tokens for chatting.',
 
     'course_search_hint': 'Search courses by name',
-    'sentences_completed':
-    '@learned/@total sentences completed',
-    'sentences_learned_progress':
-    '@learned of @total sentences learned',
+    'sentences_completed': '@learned/@total sentences completed',
+    'sentences_learned_progress': '@learned of @total sentences learned',
     'final_exam_unlocked_message':
-    'You’ve completed 80% of the lessons. The Final Exam is now unlocked!',
+        'You’ve completed 80% of the lessons. The Final Exam is now unlocked!',
 
     'leaderboard_xp_explanation':
-    'XP increases as you complete lessons, practice conversations, and master Italian vocabulary.',
+        'XP increases as you complete lessons, practice conversations, and master Italian vocabulary.',
 
-    'boost_duration_message':
-    'Lasts for @duration. Practice more!',
+    'boost_duration_message': 'Lasts for @duration. Practice more!',
 
     'report_received_description':
-    'Thank you for keeping our community safe. Our admin team will review your report shortly.',
+        'Thank you for keeping our community safe. Our admin team will review your report shortly.',
 
     'webinar_host_value': 'Host: @host',
     'webinar_starts_at': 'Starts at @time',
     'webinar_course_access_description':
-    'This session is available to users enrolled in any of these courses:',
-    'webinar_selected_course_only':
-    'For selected course only',
+        'This session is available to users enrolled in any of these courses:',
+    'webinar_selected_course_only': 'For selected course only',
 
     'home_greeting': 'Hi, @name',
     'level_tutor': 'Level @level Tutor',
@@ -143,59 +136,47 @@ appTranslations = <String, Map<String, String>>{
     'invalid_coupon': 'Invalid coupon',
     'you_ve_been_promoted_to': 'You’ve been promoted to',
     'league_name_value': '@leagueName League',
-    'you_re_in_the_top_20_of_learners':
-    'You’re in the top 20% of learners',
+    'you_re_in_the_top_20_of_learners': 'You’re in the top 20% of learners',
     'playing_pronunciation_for': 'Playing pronunciation for @text',
     'playing_text': 'Playing @text',
-    'exam_progress_requirement':
-    '@progress% completed · @required% required',
+    'exam_progress_requirement': '@progress% completed · @required% required',
     'daily_chest_total_xp': '@xp XP',
     'daily_chest_streak_freezes_awarded': '@count awarded',
     'daily_streak_message': 'Your streak is @days days',
     'webinar_message_preview': '@sender: @message',
     'no_internet_title': 'No internet connection',
     'no_internet_message':
-    'Please check your Wi-Fi or mobile data connection and try again.',
+        'Please check your Wi-Fi or mobile data connection and try again.',
     'try_again': 'Try Again',
     'checking_connection': 'Checking connection...',
-    'no_internet_connection':
-    'No internet connection',
+    'no_internet_connection': 'No internet connection',
     'final_exam_not_ready_title': 'Not Quite Ready',
     'final_exam_unlock_requirement':
-    'Complete at least 80% of the video lessons to unlock the Final Exam.',
+        'Complete at least 80% of the video lessons to unlock the Final Exam.',
     'currently_watched_percent': 'Currently @progress% watched',
     'unlock_at_percent': '@progress% to unlock',
     // English
     'final_exam_result_pending': 'Result Pending',
     'final_exam_view_certificate': 'View Certificate',
     'final_exam_retake': 'Retake Exam',
-    'final_exam_review_in_progress':
-    'Your result is being reviewed',
-    'final_exam_result_available':
-    'Your final exam result is available',
-    'final_exam_certificate_available':
-    'Your certificate is ready',
-    'final_exam_retake_available':
-    'You are eligible to retake the exam',
+    'final_exam_review_in_progress': 'Your result is being reviewed',
+    'final_exam_result_available': 'Your final exam result is available',
+    'final_exam_certificate_available': 'Your certificate is ready',
+    'final_exam_retake_available': 'You are eligible to retake the exam',
     'you_re_ready': "You're Ready!",
-    'home_cv_builder_unavailable':
-    'CV services are currently unavailable.',
+    'home_cv_builder_unavailable': 'CV services are currently unavailable.',
     'daily_streak_count': '@count Day Streak!',
     'keep_the_flame_alive': 'Keep the flame alive',
     'claim_xp': 'Claim +@xp XP',
     'reward_xp': '+@xp XP',
-    'complete_all_tasks_to_open':
-    'Complete all @count tasks to open',
-    'home_no_activity_this_week':
-    'No learning activity recorded this week.',
+    'complete_all_tasks_to_open': 'Complete all @count tasks to open',
+    'home_no_activity_this_week': 'No learning activity recorded this week.',
     'home_dashboard_load_failed':
-    'We could not load your home information. Please try again.',
-    'home_chapter_unavailable':
-    'This lesson is currently unavailable.',
+        'We could not load your home information. Please try again.',
+    'home_chapter_unavailable': 'This lesson is currently unavailable.',
     'home_career_track_unavailable':
-    'This career track is currently unavailable.',
-    'home_ai_tutor_unavailable':
-    'The AI Tutor is currently unavailable.',
+        'This career track is currently unavailable.',
+    'home_ai_tutor_unavailable': 'The AI Tutor is currently unavailable.',
     'home_one_day': '1 Day',
     'home_days_count': '@count Days',
     'home_keep_learning_today': 'Keep learning today!',
@@ -227,87 +208,75 @@ appTranslations = <String, Map<String, String>>{
     'home_month_12': 'Dec',
     'leaderboard_you': 'You',
     'send_otp': 'Send OTP',
-    'snack_need_special_character':
-    'Include at least one special character.',
+    'snack_need_special_character': 'Include at least one special character.',
     'account_access_restricted_description':
-    'Your access to Italir Pothe has been restricted by the administration.',
+        'Your access to Italir Pothe has been restricted by the administration.',
     'restriction_reason_unavailable':
-    'No additional restriction reason was provided.',
-    'effective_date_unavailable':
-    'Effective date is unavailable',
-    'effective_as_of':
-    'Effective as of @date',
-    'moderation_case_reference':
-    'Case reference: @caseNumber',
+        'No additional restriction reason was provided.',
+    'effective_date_unavailable': 'Effective date is unavailable',
+    'effective_as_of': 'Effective as of @date',
+    'moderation_case_reference': 'Case reference: @caseNumber',
     'account_restriction_appeal_message':
-    'If you believe this decision is a mistake, contact our support team to request a review.',
+        'If you believe this decision is a mistake, contact our support team to request a review.',
     'user_unblocked': 'User unblocked',
     'username_has_been_successfully_unblocked_you_can_now_send_messages_and_view_their_profile_again':
-    '@username has been successfully unblocked. You can now send messages and view their profile again.',
+        '@username has been successfully unblocked. You can now send messages and view their profile again.',
     'communication_restored': 'Communication restored',
     'unblock_username': 'Unblock @username?',
     'username_has_been_hidden_from_your_app':
-    '@username has been hidden from your app.',
+        '@username has been hidden from your app.',
     'block_username': 'Block @username?',
     'opening_conversation': 'Opening conversation...',
     'choose_package': 'Choose a Package',
     'your_cv_allowance': 'YOUR CV ALLOWANCE',
-    'cv_free_creations_remaining':
-    '@count free CV creations remaining',
-    'cv_paid_credit_balance':
-    '@count purchased CV credits',
-    'cv_free_limit_ended':
-    'Your free CV limit has ended',
+    'cv_free_creations_remaining': '@count free CV creations remaining',
+    'cv_paid_credit_balance': '@count purchased CV credits',
+    'cv_free_limit_ended': 'Your free CV limit has ended',
     'cv_next_creation_uses_credit':
-    'Your next new CV will use 1 purchased credit.',
+        'Your next new CV will use 1 purchased credit.',
     'cv_purchase_credit_to_continue':
-    'Purchase a CV credit to create another CV.',
+        'Purchase a CV credit to create another CV.',
     'buy_cv_credits': 'Buy CV credits',
-    'cv_credit_required_title':
-    'CV credit required',
+    'cv_credit_required_title': 'CV credit required',
     'cv_credit_required_message':
-    'You have used all three free CV creations and have no purchased credits remaining.',
+        'You have used all three free CV creations and have no purchased credits remaining.',
 
     // English
     'review_your_order': 'Review your order',
     'confirm_package_before_checkout':
-    'Check the package details before continuing.',
+        'Check the package details before continuing.',
     'total_price': 'Total',
     'change_package': 'Change package',
     'subscription_renews_automatically':
-    'This subscription renews automatically until cancelled.',
+        'This subscription renews automatically until cancelled.',
     'secure_payment': 'Secure payment',
     'payment_processed_securely':
-    'Your payment is securely processed through Google Play.',
+        'Your payment is securely processed through Google Play.',
     'recurring_purchase': 'Recurring subscription',
     'one_time_purchase': 'One-time purchase',
     'cancel_subscription_anytime':
-    'You can manage or cancel it from Google Play.',
+        'You can manage or cancel it from Google Play.',
     'you_will_only_be_charged_once':
-    'You will only be charged once for this purchase.',
-    'price_per_month':
-    '@price / month',
+        'You will only be charged once for this purchase.',
+    'price_per_month': '@price / month',
 
-    'monthly_plan_auto_renews':
-    'Renews automatically each month',
+    'monthly_plan_auto_renews': 'Renews automatically each month',
 
     'monthly_plan_cancelled_active':
-    'Renewal is cancelled. Protection remains active until the date below.',
+        'Renewal is cancelled. Protection remains active until the date below.',
 
     'active_monthly_plan_already_exists':
-    'Manage your current monthly plan before purchasing another one.',
+        'Manage your current monthly plan before purchasing another one.',
 
-    'monthly_plan_already_active_badge':
-    'MONTHLY PLAN ALREADY ACTIVE',
+    'monthly_plan_already_active_badge': 'MONTHLY PLAN ALREADY ACTIVE',
 
-    'coupon_unavailable':
-    'Coupon unavailable',
+    'coupon_unavailable': 'Coupon unavailable',
 
     'coupon_not_available_for_package':
-    'Coupons are not available for this package.',
+        'Coupons are not available for this package.',
 
     'coupon_invalid_for_item':
-    'This coupon is not valid for the selected package.',
+        'This coupon is not valid for the selected package.',
     'streak_freeze_refiller': 'Streak Freeze Refills',
     'streak_freeze_store': 'Streak Freeze Store',
     'protect_your_progress_in_italian': 'Protect your learning progress',
@@ -315,7 +284,7 @@ appTranslations = <String, Map<String, String>>{
     'streak_freeze_balance': '@count freezes',
     'streak_freeze_pack_count': '@count streak freezes',
     'no_streak_freeze_packages_are_available':
-    'No streak-freeze packages are currently available.',
+        'No streak-freeze packages are currently available.',
     'confirm_purchase': 'Confirm purchase',
     'one_time_streak_freezes': 'One-time streak freezes',
     'monthly_streak_protection': 'Monthly streak protection',
@@ -326,20 +295,20 @@ appTranslations = <String, Map<String, String>>{
     'manage_monthly_plan': 'Manage monthly plan',
     'manage_or_cancel_google_play': 'Manage or cancel in Google Play',
     'monthly_cancellation_information':
-    'Cancellation stops the next renewal. Your protection remains active until the current paid period ends.',
+        'Cancellation stops the next renewal. Your protection remains active until the current paid period ends.',
     'unlimited_streak_protection_description':
-    'Unlimited protection for missed learning days while the monthly plan is active.',
+        'Unlimited protection for missed learning days while the monthly plan is active.',
     'unlimited_protection': 'Unlimited protection',
     'monthly_protection_page_description':
-    'Your streak stays protected while this monthly plan remains active.',
+        'Your streak stays protected while this monthly plan remains active.',
     'expiry_date_not_available': 'Expiry date unavailable',
     'not_currently_protected': 'Not currently protected',
     'opening_google_play': 'Opening Google Play...',
     'unable_to_open_google_play': 'Could not open Google Play',
     'open_google_play_subscriptions_manually':
-    'Open Google Play and go to Payments & subscriptions > Subscriptions.',
+        'Open Google Play and go to Payments & subscriptions > Subscriptions.',
     'google_play_handles_subscription_changes':
-    'Google Play handles cancellation, renewal, payment method changes, and resubscription.',
+        'Google Play handles cancellation, renewal, payment method changes, and resubscription.',
     'active': 'ACTIVE',
 
     'best_value': 'BEST VALUE',
@@ -349,12 +318,11 @@ appTranslations = <String, Map<String, String>>{
     'applying_coupon': 'Applying coupon…',
     'unlock_this_course': 'Unlock this course!',
     'unlock_course_access_description':
-    'Unlock @coursename to access all @lessoncount lessons and all included course features.',
+        'Unlock @coursename to access all @lessoncount lessons and all included course features.',
     'give_exam_again': 'Give Exam Again',
-    'final_exam_retake_not_available':
-    'A new exam attempt is not available.',
+    'final_exam_retake_not_available': 'A new exam attempt is not available.',
     'final_exam_course_not_found':
-    'The course for this exam could not be found.',
+        'The course for this exam could not be found.',
     'close': 'Close',
     'official_certificate': 'Official Certificate',
     'certificate_unavailable': 'Certificate unavailable',
@@ -369,14 +337,12 @@ appTranslations = <String, Map<String, String>>{
     'not_available': 'Not available',
     'certificate_download': 'Certificate download',
     'certificate_information_unavailable':
-    'Certificate information is unavailable.',
+        'Certificate information is unavailable.',
     'certificate_not_active': 'This certificate is not active.',
-    'certificate_pdf_unavailable':
-    'The certificate PDF is unavailable.',
+    'certificate_pdf_unavailable': 'The certificate PDF is unavailable.',
     'invalid_certificate_download_url':
-    'The certificate download URL is invalid.',
-    'unable_to_open_certificate_pdf':
-    'Unable to open the certificate PDF.',
+        'The certificate download URL is invalid.',
+    'unable_to_open_certificate_pdf': 'Unable to open the certificate PDF.',
     'final_exam_results_title': 'Exam Results',
     'final_exam_mark_achieved': 'MARK ACHIEVED',
     'final_exam_xp_awarded': '@xp XP Awarded',
@@ -389,28 +355,26 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_back_to_practice_hub': 'Back to Practice Hub',
     'final_exam_submitted_title': 'Exam submitted!',
     'final_exam_submitted_message':
-    'Bravissimo! You have completed the hard work. Our teachers will now review your answers.',
+        'Bravissimo! You have completed the hard work. Our teachers will now review your answers.',
     'final_exam_reference_id': 'Reference ID: @value',
     'final_exam_reference_id_unavailable': 'Reference ID is not available',
     'final_exam_evaluation_timeline': 'EVALUATION TIMELINE',
     'final_exam_received': 'Exam received',
-    'final_exam_uploaded_successfully':
-    'Successfully uploaded to the server',
+    'final_exam_uploaded_successfully': 'Successfully uploaded to the server',
     'final_exam_teacher_review': 'Teacher review',
-    'final_exam_manual_review_completed':
-    'Manual review completed',
+    'final_exam_manual_review_completed': 'Manual review completed',
     'final_exam_reviewing_answers':
-    'Reviewing your speaking and writing answers',
+        'Reviewing your speaking and writing answers',
     'final_exam_result_certificate': 'Result and certificate',
     'final_exam_result_ready': 'Your result is ready',
     'final_exam_unlock_achievement':
-    'Your achievement will unlock after the review',
+        'Your achievement will unlock after the review',
     'final_exam_view_result': 'View result',
     'final_exam_estimated_result_unavailable':
-    'Estimated result time is not available',
+        'Estimated result time is not available',
     'final_exam_estimated_result': 'Estimated result: @value',
     'final_exam_waiting_tip':
-    'While you wait, try a daily challenge or continue practising.',
+        'While you wait, try a daily challenge or continue practising.',
     'common_back': 'Back',
     'final_exam_submit_answer': 'Submit answer',
     'final_exam_recording': 'Recording…',
@@ -423,34 +387,31 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_pause_recording': 'Pause recording',
     'final_exam_no_speaking_task': 'No speaking task is available.',
     'submit': 'Submit',
-    'review_quiz_subtitle':
-    'Let’s review your answers and see how you did.',
-    'quiz_result_not_available':
-    'The quiz result is not available.',
+    'review_quiz_subtitle': 'Let’s review your answers and see how you did.',
+    'quiz_result_not_available': 'The quiz result is not available.',
     'your_answer_is_correct': 'Your answer is correct.',
     'that_s_not_quite_right': 'That’s not quite right.',
     'current_total': '@current / @total',
     'audio_speed_multiplier': '@speed×',
     'if_you_quit_now_you_ll_lose_your_progress':
-    'If you quit now, you’ll lose your progress.',
+        'If you quit now, you’ll lose your progress.',
     'community_link_error': 'Unable to open community',
-    'community_link_not_available':
-    'The community link is not configured.',
+    'community_link_not_available': 'The community link is not configured.',
     'community_link_could_not_open':
-    'The Facebook community could not be opened.',
+        'The Facebook community could not be opened.',
     'vocabulary_words_count': '@count words',
     'you_reviewed_complete_reviewedcount_words':
-    'You reviewed @reviewedcount words',
+        'You reviewed @reviewedcount words',
     'vocabulary_card_progress': 'Card @current of @total',
     'no_vocabulary_available': 'No vocabulary available',
     'no_vocabulary_available_description':
-    'There is no vocabulary available for this lesson yet.',
+        'There is no vocabulary available for this lesson yet.',
     'italian_voice_unavailable_message':
-    'Install or enable an Italian voice on this device and try again.',
+        'Install or enable an Italian voice on this device and try again.',
     'pause': 'Pause',
     'course_final_exam_title': 'Final Exam',
     'course_final_exam_description':
-    'Complete the final exam to test your knowledge and finish the course.',
+        'Complete the final exam to test your knowledge and finish the course.',
     'course_final_exam_action': 'Complete all chapters to unlock',
     'course_final_exam_helper': 'Finish every chapter before taking the exam',
     'current_lesson': 'Current lesson',
@@ -465,249 +426,190 @@ appTranslations = <String, Map<String, String>>{
     'claimed_xp': 'Claimed +@xp XP',
     'daily_challenge_xp': '@xp XP',
     'verb_learn_types_forms_examples':
-    'Learn verb types, forms, and real examples to master Italian fluency.',
+        'Learn verb types, forms, and real examples to master Italian fluency.',
     'pdf_page_counter': 'Page @current of @total',
-    'cv_preview_load_failed':
-    'CV preview could not be loaded.',
+    'cv_preview_load_failed': 'CV preview could not be loaded.',
     'cv_validation_title': 'Complete your CV',
-    'cv_validation_subtitle':
-    'Resolve the remaining items before generating.',
+    'cv_validation_subtitle': 'Resolve the remaining items before generating.',
 
-    'cv_validation_generation_requirements':
-    'Generation requirements',
-    'cv_validation_required_information':
-    'Required information',
-    'cv_validation_template_sections':
-    'Template sections',
-    'cv_validation_optional_sections':
-    'Optional sections',
+    'cv_validation_generation_requirements': 'Generation requirements',
+    'cv_validation_required_information': 'Required information',
+    'cv_validation_template_sections': 'Template sections',
+    'cv_validation_optional_sections': 'Optional sections',
     'cv_validation_suggestions': 'Suggestions',
 
     'cv_validation_one_suggestion':
-    'One suggestion needs Accept, Edit, or Reject.',
+        'One suggestion needs Accept, Edit, or Reject.',
     'cv_validation_multiple_suggestions':
-    '@count suggestions need Accept, Edit, or Reject.',
+        '@count suggestions need Accept, Edit, or Reject.',
 
     'cv_validation_profile_photo': 'Profile photo',
     'cv_validation_photo_instruction':
-    'Choose a photo or continue without one.',
+        'Choose a photo or continue without one.',
     'cv_validation_quality_issues': 'Quality issues',
 
     'cv_validation_remaining_steps':
-    'Complete the remaining assistant steps before generating your CV.',
+        'Complete the remaining assistant steps before generating your CV.',
     'cv_thinking_default': 'Thinking…',
-    'cv_template_card_use_template':
-    'Use this template',
-    'cv_template_card_analyzing':
-    'Analyzing template…',
-    'cv_template_card_analysis_failed':
-    'Template analysis failed',
+    'cv_template_card_use_template': 'Use this template',
+    'cv_template_card_analyzing': 'Analyzing template…',
+    'cv_template_card_analysis_failed': 'Template analysis failed',
     'cv_template_card_analysis_default_error':
-    'The template could not be analyzed.',
-    'cv_template_card_retry':
-    'Retry',
-    'cv_selected_template_label':
-    'Selected template',
-    'cv_photo_decision_title':
-    'Would you like to add a photo?',
+        'The template could not be analyzed.',
+    'cv_template_card_retry': 'Retry',
+    'cv_selected_template_label': 'Selected template',
+    'cv_photo_decision_title': 'Would you like to add a photo?',
     'cv_photo_decision_description':
-    'Choose a professional profile photo or continue without one.',
-    'cv_photo_decision_without_photo':
-    'Avoid photo',
-    'cv_photo_decision_upload_photo':
-    'Upload photo',
+        'Choose a professional profile photo or continue without one.',
+    'cv_photo_decision_without_photo': 'Avoid photo',
+    'cv_photo_decision_upload_photo': 'Upload photo',
     'cv_edit_options_title': 'Edit Your CV',
-    'cv_edit_options_subtitle':
-    'Choose what you want to update.',
+    'cv_edit_options_subtitle': 'Choose what you want to update.',
 
-    'cv_edit_options_information_title':
-    'Edit information',
+    'cv_edit_options_information_title': 'Edit information',
     'cv_edit_options_information_description':
-    'Update CV facts while preserving the existing design.',
+        'Update CV facts while preserving the existing design.',
 
-    'cv_edit_options_information_design_title':
-    'Edit information and design',
+    'cv_edit_options_information_design_title': 'Edit information and design',
     'cv_edit_options_information_design_description':
-    'Update CV facts and then provide a new design instruction.',
+        'Update CV facts and then provide a new design instruction.',
 
-    'cv_edit_options_design_only_title':
-    'Change design only',
+    'cv_edit_options_design_only_title': 'Change design only',
     'cv_edit_options_design_only_description':
-    'Keep all existing information and change only the design.',
+        'Keep all existing information and change only the design.',
 
     'cv_edit_options_version_notice':
-    'A new CV version will be created. Your original CV will remain unchanged.',
+        'A new CV version will be created. Your original CV will remain unchanged.',
     'cv_design_title': 'Change CV Design',
     'cv_design_description':
-    'Describe the visual change. Your existing CV information will be preserved.',
+        'Describe the visual change. Your existing CV information will be preserved.',
     'cv_design_hint':
-    'Example: Use a clean dark-blue design with stronger headings.',
+        'Example: Use a clean dark-blue design with stronger headings.',
     'cv_design_examples': 'Examples',
     'cv_design_generate': 'Generate New Design',
-    'cv_design_empty_error':
-    'Describe how you want the design to change.',
+    'cv_design_empty_error': 'Describe how you want the design to change.',
 
-    'cv_design_example_dark_blue':
-    'Use a dark-blue professional theme.',
-    'cv_design_example_minimal':
-    'Make the layout more minimal.',
-    'cv_design_example_two_column':
-    'Use a modern two-column design.',
+    'cv_design_example_dark_blue': 'Use a dark-blue professional theme.',
+    'cv_design_example_minimal': 'Make the layout more minimal.',
+    'cv_design_example_two_column': 'Use a modern two-column design.',
     'cv_chat_message_sending': 'Sending',
     'cv_chat_message_failed': 'Failed',
     'cv_chat_message_retry': 'Retry',
-    'cv_chat_input_email_hint':
-    'Enter your email address',
-    'cv_chat_input_phone_hint':
-    'Enter your phone number',
-    'cv_chat_input_url_hint':
-    'Enter the website URL',
-    'cv_chat_input_list_hint':
-    'Enter items separated by commas',
-    'cv_chat_input_choice_hint':
-    'Select or type your answer',
-    'cv_chat_input_long_text_hint':
-    'Write your answer',
-    'cv_chat_input_default_hint':
-    'Type your answer...',
+    'cv_chat_input_email_hint': 'Enter your email address',
+    'cv_chat_input_phone_hint': 'Enter your phone number',
+    'cv_chat_input_url_hint': 'Enter the website URL',
+    'cv_chat_input_list_hint': 'Enter items separated by commas',
+    'cv_chat_input_choice_hint': 'Select or type your answer',
+    'cv_chat_input_long_text_hint': 'Write your answer',
+    'cv_chat_input_default_hint': 'Type your answer...',
     'cv_chat_action_generating': 'Generating CV...',
     'cv_chat_action_generate': 'Generate CV',
     'cv_attachment_title': 'Add CV Image',
-    'cv_attachment_profile_photo':
-    'Upload Profile Photo',
+    'cv_attachment_profile_photo': 'Upload Profile Photo',
     'cv_attachment_profile_photo_description':
-    'Add the candidate photo that should appear in the CV.',
-    'cv_attachment_reference':
-    'Upload Reference CV or Design',
+        'Add the candidate photo that should appear in the CV.',
+    'cv_attachment_reference': 'Upload Reference CV or Design',
     'cv_attachment_reference_description':
-    'Add a CV, layout, color, or design image for visual reference.',
+        'Add a CV, layout, color, or design image for visual reference.',
     'cv_generation_title': 'Generated CV',
-    'cv_generation_image_unavailable':
-    'The generated CV image is unavailable.',
+    'cv_generation_image_unavailable': 'The generated CV image is unavailable.',
 
-    'cv_generation_opening_information_editor':
-    'Opening information editor',
+    'cv_generation_opening_information_editor': 'Opening information editor',
     'cv_generation_preparing_information_editor':
-    'Preparing your existing CV details for editing. Please wait…',
-    'cv_generation_preparing_cv_editor':
-    'Preparing CV editor',
+        'Preparing your existing CV details for editing. Please wait…',
+    'cv_generation_preparing_cv_editor': 'Preparing CV editor',
     'cv_generation_loading_information_design':
-    'Loading your information and design settings. Please wait…',
-    'cv_generation_opening_design_editor':
-    'Opening design editor',
+        'Loading your information and design settings. Please wait…',
+    'cv_generation_opening_design_editor': 'Opening design editor',
     'cv_generation_preparing_design_form':
-    'Preparing the design instruction form…',
+        'Preparing the design instruction form…',
 
-    'cv_generation_creating_title':
-    'Creating Your CV',
+    'cv_generation_creating_title': 'Creating Your CV',
     'cv_generation_creating_description':
-    'AI generation may take a few minutes. Please stay on this page while we create your CV.',
-    'cv_generation_do_not_leave':
-    'Do not close the app or leave this screen.',
+        'AI generation may take a few minutes. Please stay on this page while we create your CV.',
+    'cv_generation_do_not_leave': 'Do not close the app or leave this screen.',
 
-    'cv_generation_open_fullscreen':
-    'Open full-screen preview',
-    'cv_generation_reset_zoom':
-    'Reset zoom',
+    'cv_generation_open_fullscreen': 'Open full-screen preview',
+    'cv_generation_reset_zoom': 'Reset zoom',
 
     'cv_generation_new_version_notice':
-    'This is a new CV version. The original CV remains unchanged.',
+        'This is a new CV version. The original CV remains unchanged.',
     'cv_generation_edit_version_notice':
-    'Editing or changing the design will create a new CV version. Your original CV will remain unchanged.',
+        'Editing or changing the design will create a new CV version. Your original CV will remain unchanged.',
     'cv_generation_review_notice':
-    'Review the spelling, dates, phone number, email, and all other details before using this CV.',
+        'Review the spelling, dates, phone number, email, and all other details before using this CV.',
 
-    'cv_generation_download_started':
-    'Download started',
-    'cv_generation_applying_design':
-    'Applying your design changes',
-    'cv_generation_opening_editor':
-    'Opening the CV editor',
+    'cv_generation_download_started': 'Download started',
+    'cv_generation_applying_design': 'Applying your design changes',
+    'cv_generation_opening_editor': 'Opening the CV editor',
 
     'cv_generation_pdf_preparing_saving':
-    'Your A4 PDF is being prepared and saved directly to your phone.',
+        'Your A4 PDF is being prepared and saved directly to your phone.',
     'cv_generation_ai_creating_version':
-    'AI is creating a new CV version with your requested design changes.',
+        'AI is creating a new CV version with your requested design changes.',
     'cv_generation_preparing_edit_information':
-    'Please wait while we prepare your CV information for editing.',
+        'Please wait while we prepare your CV information for editing.',
 
-    'cv_generation_opening_editor_button':
-    'Opening editor...',
-    'cv_generation_applying_design_button':
-    'Applying design changes...',
-    'cv_generation_edit_design_button':
-    'Edit or Change Design',
+    'cv_generation_opening_editor_button': 'Opening editor...',
+    'cv_generation_applying_design_button': 'Applying design changes...',
+    'cv_generation_edit_design_button': 'Edit or Change Design',
 
     'cv_generation_download_snackbar':
-    'Preparing your A4 PDF. It will be saved directly to your phone.',
-    'cv_generation_preparing_download':
-    'Preparing download...',
-    'cv_generation_download_pdf':
-    'Download A4 PDF',
+        'Preparing your A4 PDF. It will be saved directly to your phone.',
+    'cv_generation_preparing_download': 'Preparing download...',
+    'cv_generation_download_pdf': 'Download A4 PDF',
 
-    'cv_generation_close_preview':
-    'Close preview',
-    'cv_generation_zoom_in':
-    'Zoom in',
-    'cv_generation_zoom_out':
-    'Zoom out',
+    'cv_generation_close_preview': 'Close preview',
+    'cv_generation_zoom_in': 'Zoom in',
+    'cv_generation_zoom_out': 'Zoom out',
 
-    'cv_generation_failed':
-    'CV Generation Failed',
-    'cv_generation_try_again':
-    'Try Again',
-    'cv_generation_do_not_close_page':
-    'Please do not close this page',
+    'cv_generation_failed': 'CV Generation Failed',
+    'cv_generation_try_again': 'Try Again',
+    'cv_generation_do_not_close_page': 'Please do not close this page',
     'cv_chat_assistant_title': 'CV Assistant',
-    'cv_chat_reviewing_information':
-    'Reviewing your CV information…',
+    'cv_chat_reviewing_information': 'Reviewing your CV information…',
 
     'cv_chat_edit_facts_title': 'Update CV Information',
     'cv_chat_edit_design_title': 'Update Information and Design',
     'cv_chat_edit_facts_description':
-    'Update your information. The existing design will be preserved.',
+        'Update your information. The existing design will be preserved.',
     'cv_chat_edit_design_description':
-    'Update your information first, then provide the new design instruction.',
+        'Update your information first, then provide the new design instruction.',
 
     'cv_chat_mode_one_by_one': 'One by One',
     'cv_chat_mode_all_at_once': 'All at Once',
 
-    'cv_chat_status_collecting':
-    'Collecting CV information',
-    'cv_chat_status_ready':
-    'Ready to generate',
-    'cv_chat_status_generating':
-    'Generating CV',
+    'cv_chat_status_collecting': 'Collecting CV information',
+    'cv_chat_status_ready': 'Ready to generate',
+    'cv_chat_status_generating': 'Generating CV',
     'cv_chat_status_completed': 'Completed',
     'cv_chat_status_cancelled': 'Cancelled',
 
-    'cv_chat_starting_assistant':
-    'Starting CV Assistant',
+    'cv_chat_starting_assistant': 'Starting CV Assistant',
     'cv_chat_starting_description':
-    'The assistant will ask for the information needed to create your CV.',
+        'The assistant will ask for the information needed to create your CV.',
     'cv_home_create_your_cv': 'Create Your CV',
     'cv_home_description':
-    'Choose a CV template or let the CV assistant create a design from scratch.',
+        'Choose a CV template or let the CV assistant create a design from scratch.',
     'cv_home_choose_template': 'Choose a Template',
     'cv_home_search_templates': 'Search CV templates...',
     'cv_home_could_not_load_templates': 'Could not load templates',
     'cv_home_try_again': 'Try Again',
     'cv_home_no_templates_found': 'No templates found',
     'cv_home_no_templates_available':
-    'No CV templates are currently available.',
-    'cv_home_no_search_match':
-    'No template matches your search.',
+        'No CV templates are currently available.',
+    'cv_home_no_search_match': 'No template matches your search.',
     'cv_home_clear_search': 'Clear Search',
     'cv_home_load_more': 'Load More',
     'cv_home_analyzing_template': 'Analyzing Template',
     'cv_home_analyzing_description':
-    'The CV assistant is reviewing the layout, sections, colors, and design of this template.',
+        'The CV assistant is reviewing the layout, sections, colors, and design of this template.',
     'cv_home_assistant_open_automatically':
-    'The CV Assistant will open automatically when the analysis is complete.',
+        'The CV Assistant will open automatically when the analysis is complete.',
     'cv_home_stay_on_page': 'Please stay on this page.',
     'cv_home_build_from_scratch': 'Build From Scratch',
     'cv_home_build_from_scratch_description':
-    'Chat with the CV assistant, share your preferences, and generate a professional CV.',
+        'Chat with the CV assistant, share your preferences, and generate a professional CV.',
     'discover_your_exact_level': 'Discover your exact\nlevel.',
     'climb_the_tiers_and_become_an_italian_master':
         'Climb the tiers and become\nan Italian Master.',
@@ -1501,7 +1403,7 @@ appTranslations = <String, Map<String, String>>{
     'come_fare': 'Come Fare',
     'community': 'Community',
     'complete_at_least_80_of_the_course_to_unlock_its_f':
-        'Complete at Least 80 of the Course to Unlock Its F',
+        'Complete at least 80% of the course to unlock the final exam.',
     'complete_each_task': 'Complete Each Task',
     'complete_ieri_maria_al_mercato': 'Complete Ieri Maria Al Mercato',
     'complete_noi_italiano_ogni_giorno': 'Complete Noi Italiano Ogni Giorno',
@@ -1683,7 +1585,7 @@ appTranslations = <String, Map<String, String>>{
     'failed': 'Failed',
     'failed_1': 'Failed',
     'false': 'False',
-    'faq': 'Faq',
+    'faq': 'FAQ',
     'file_too_large': 'File Too Large',
     'fill_in_the_blanks': 'Fill in the Blanks',
     'final_cv_theme': 'Final CV Theme',
@@ -2167,7 +2069,7 @@ appTranslations = <String, Map<String, String>>{
     'say_cheese': 'Say Cheese',
     'school_or_institution_name': 'School or Institution Name',
     'search_for_another_user_open_a_conversation_exchan':
-        'Search for Another User Open a Conversation Exchan',
+        'Search for another user, open a conversation, and exchange messages.',
     'search_results': 'Search Results',
     'secure_ssl_encryption': 'Secure Ssl Encryption',
     'security_requirements': 'Security Requirements',
@@ -2646,62 +2548,49 @@ appTranslations = <String, Map<String, String>>{
   },
   'bn_BD': <String, String>{
     'cv_chat_assistant_title': 'সিভি অ্যাসিস্ট্যান্ট',
-    'cv_chat_reviewing_information':
-    'আপনার সিভির তথ্য পর্যালোচনা করা হচ্ছে…',
+    'cv_chat_reviewing_information': 'আপনার সিভির তথ্য পর্যালোচনা করা হচ্ছে…',
 
-    'cv_chat_edit_facts_title':
-    'সিভির তথ্য আপডেট করুন',
-    'cv_chat_edit_design_title':
-    'তথ্য ও ডিজাইন আপডেট করুন',
+    'cv_chat_edit_facts_title': 'সিভির তথ্য আপডেট করুন',
+    'cv_chat_edit_design_title': 'তথ্য ও ডিজাইন আপডেট করুন',
     'cv_chat_edit_facts_description':
-    'আপনার তথ্য আপডেট করুন। বর্তমান ডিজাইন অপরিবর্তিত রাখা হবে।',
+        'আপনার তথ্য আপডেট করুন। বর্তমান ডিজাইন অপরিবর্তিত রাখা হবে।',
     'cv_chat_edit_design_description':
-    'প্রথমে আপনার তথ্য আপডেট করুন, তারপর নতুন ডিজাইনের নির্দেশনা দিন।',
+        'প্রথমে আপনার তথ্য আপডেট করুন, তারপর নতুন ডিজাইনের নির্দেশনা দিন।',
 
     'cv_chat_mode_one_by_one': 'একটি একটি করে',
     'cv_chat_mode_all_at_once': 'সব একসঙ্গে',
 
-    'cv_chat_status_collecting':
-    'সিভির তথ্য সংগ্রহ করা হচ্ছে',
-    'cv_chat_status_ready':
-    'তৈরি করার জন্য প্রস্তুত',
-    'cv_chat_status_generating':
-    'সিভি তৈরি করা হচ্ছে',
+    'cv_chat_status_collecting': 'সিভির তথ্য সংগ্রহ করা হচ্ছে',
+    'cv_chat_status_ready': 'তৈরি করার জন্য প্রস্তুত',
+    'cv_chat_status_generating': 'সিভি তৈরি করা হচ্ছে',
     'cv_chat_status_completed': 'সম্পন্ন হয়েছে',
     'cv_chat_status_cancelled': 'বাতিল করা হয়েছে',
 
-    'cv_chat_starting_assistant':
-    'সিভি অ্যাসিস্ট্যান্ট চালু হচ্ছে',
+    'cv_chat_starting_assistant': 'সিভি অ্যাসিস্ট্যান্ট চালু হচ্ছে',
     'cv_chat_starting_description':
-    'আপনার সিভি তৈরি করার জন্য প্রয়োজনীয় তথ্য অ্যাসিস্ট্যান্ট জিজ্ঞাসা করবে।',
+        'আপনার সিভি তৈরি করার জন্য প্রয়োজনীয় তথ্য অ্যাসিস্ট্যান্ট জিজ্ঞাসা করবে।',
     'cv_home_create_your_cv': 'আপনার সিভি তৈরি করুন',
     'cv_home_description':
-    'একটি সিভি টেমপ্লেট বেছে নিন অথবা সিভি অ্যাসিস্ট্যান্টকে শুরু থেকে একটি ডিজাইন তৈরি করতে দিন।',
+        'একটি সিভি টেমপ্লেট বেছে নিন অথবা সিভি অ্যাসিস্ট্যান্টকে শুরু থেকে একটি ডিজাইন তৈরি করতে দিন।',
     'cv_home_choose_template': 'একটি টেমপ্লেট বেছে নিন',
     'cv_home_search_templates': 'সিভি টেমপ্লেট খুঁজুন...',
-    'cv_home_could_not_load_templates':
-    'টেমপ্লেট লোড করা যায়নি',
+    'cv_home_could_not_load_templates': 'টেমপ্লেট লোড করা যায়নি',
     'cv_home_try_again': 'আবার চেষ্টা করুন',
-    'cv_home_no_templates_found':
-    'কোনো টেমপ্লেট পাওয়া যায়নি',
-    'cv_home_no_templates_available':
-    'বর্তমানে কোনো সিভি টেমপ্লেট উপলভ্য নেই।',
+    'cv_home_no_templates_found': 'কোনো টেমপ্লেট পাওয়া যায়নি',
+    'cv_home_no_templates_available': 'বর্তমানে কোনো সিভি টেমপ্লেট উপলভ্য নেই।',
     'cv_home_no_search_match':
-    'আপনার অনুসন্ধানের সঙ্গে মিলছে এমন কোনো টেমপ্লেট নেই।',
+        'আপনার অনুসন্ধানের সঙ্গে মিলছে এমন কোনো টেমপ্লেট নেই।',
     'cv_home_clear_search': 'অনুসন্ধান পরিষ্কার করুন',
     'cv_home_load_more': 'আরও লোড করুন',
-    'cv_home_analyzing_template':
-    'টেমপ্লেট বিশ্লেষণ করা হচ্ছে',
+    'cv_home_analyzing_template': 'টেমপ্লেট বিশ্লেষণ করা হচ্ছে',
     'cv_home_analyzing_description':
-    'সিভি অ্যাসিস্ট্যান্ট এই টেমপ্লেটের লেআউট, সেকশন, রং এবং ডিজাইন পর্যালোচনা করছে।',
+        'সিভি অ্যাসিস্ট্যান্ট এই টেমপ্লেটের লেআউট, সেকশন, রং এবং ডিজাইন পর্যালোচনা করছে।',
     'cv_home_assistant_open_automatically':
-    'বিশ্লেষণ সম্পূর্ণ হলে সিভি অ্যাসিস্ট্যান্ট স্বয়ংক্রিয়ভাবে খুলবে।',
-    'cv_home_stay_on_page':
-    'অনুগ্রহ করে এই পেজে থাকুন।',
-    'cv_home_build_from_scratch':
-    'শুরু থেকে তৈরি করুন',
+        'বিশ্লেষণ সম্পূর্ণ হলে সিভি অ্যাসিস্ট্যান্ট স্বয়ংক্রিয়ভাবে খুলবে।',
+    'cv_home_stay_on_page': 'অনুগ্রহ করে এই পেজে থাকুন।',
+    'cv_home_build_from_scratch': 'শুরু থেকে তৈরি করুন',
     'cv_home_build_from_scratch_description':
-    'সিভি অ্যাসিস্ট্যান্টের সঙ্গে চ্যাট করুন, আপনার পছন্দগুলো জানান এবং একটি পেশাদার সিভি তৈরি করুন।',
+        'সিভি অ্যাসিস্ট্যান্টের সঙ্গে চ্যাট করুন, আপনার পছন্দগুলো জানান এবং একটি পেশাদার সিভি তৈরি করুন।',
     'fill_form_and_submit':
         'সঠিকভাবে ফরম পূরণ করুন এবং প্রয়োজনীয় কাগজপত্র জমা সংযুক্ত করুন।',
     'course_resources': 'কোর্স রিসোর্স',
@@ -3264,202 +3153,147 @@ appTranslations = <String, Map<String, String>>{
     'gen_language': 'ভাষা',
     'gen_settings': 'সেটিংস',
     'cv_generation_title': 'তৈরি করা সিভি',
-    'cv_generation_image_unavailable':
-    'তৈরি করা সিভির ছবিটি পাওয়া যাচ্ছে না।',
+    'cv_generation_image_unavailable': 'তৈরি করা সিভির ছবিটি পাওয়া যাচ্ছে না।',
 
     'cv_generation_opening_information_editor':
-    'তথ্য সম্পাদনা পৃষ্ঠা খোলা হচ্ছে',
+        'তথ্য সম্পাদনা পৃষ্ঠা খোলা হচ্ছে',
     'cv_generation_preparing_information_editor':
-    'সম্পাদনার জন্য আপনার বর্তমান সিভির তথ্য প্রস্তুত করা হচ্ছে। অনুগ্রহ করে অপেক্ষা করুন…',
-    'cv_generation_preparing_cv_editor':
-    'সিভি এডিটর প্রস্তুত করা হচ্ছে',
+        'সম্পাদনার জন্য আপনার বর্তমান সিভির তথ্য প্রস্তুত করা হচ্ছে। অনুগ্রহ করে অপেক্ষা করুন…',
+    'cv_generation_preparing_cv_editor': 'সিভি এডিটর প্রস্তুত করা হচ্ছে',
     'cv_generation_loading_information_design':
-    'আপনার তথ্য ও ডিজাইন সেটিংস লোড করা হচ্ছে। অনুগ্রহ করে অপেক্ষা করুন…',
-    'cv_generation_opening_design_editor':
-    'ডিজাইন এডিটর খোলা হচ্ছে',
+        'আপনার তথ্য ও ডিজাইন সেটিংস লোড করা হচ্ছে। অনুগ্রহ করে অপেক্ষা করুন…',
+    'cv_generation_opening_design_editor': 'ডিজাইন এডিটর খোলা হচ্ছে',
     'cv_generation_preparing_design_form':
-    'ডিজাইন নির্দেশনার ফর্ম প্রস্তুত করা হচ্ছে…',
+        'ডিজাইন নির্দেশনার ফর্ম প্রস্তুত করা হচ্ছে…',
 
-    'cv_generation_creating_title':
-    'আপনার সিভি তৈরি করা হচ্ছে',
+    'cv_generation_creating_title': 'আপনার সিভি তৈরি করা হচ্ছে',
     'cv_generation_creating_description':
-    'এআই দিয়ে সিভি তৈরি করতে কয়েক মিনিট সময় লাগতে পারে। আমরা আপনার সিভি তৈরি করার সময় এই পেজে থাকুন।',
+        'এআই দিয়ে সিভি তৈরি করতে কয়েক মিনিট সময় লাগতে পারে। আমরা আপনার সিভি তৈরি করার সময় এই পেজে থাকুন।',
     'cv_generation_do_not_leave':
-    'অ্যাপ বন্ধ করবেন না বা এই স্ক্রিন থেকে বের হবেন না।',
+        'অ্যাপ বন্ধ করবেন না বা এই স্ক্রিন থেকে বের হবেন না।',
 
-    'cv_generation_open_fullscreen':
-    'পূর্ণস্ক্রিন প্রিভিউ খুলুন',
-    'cv_generation_reset_zoom':
-    'জুম রিসেট করুন',
+    'cv_generation_open_fullscreen': 'পূর্ণস্ক্রিন প্রিভিউ খুলুন',
+    'cv_generation_reset_zoom': 'জুম রিসেট করুন',
 
     'cv_generation_new_version_notice':
-    'এটি সিভির একটি নতুন সংস্করণ। মূল সিভি অপরিবর্তিত থাকবে।',
+        'এটি সিভির একটি নতুন সংস্করণ। মূল সিভি অপরিবর্তিত থাকবে।',
     'cv_generation_edit_version_notice':
-    'তথ্য সম্পাদনা বা ডিজাইন পরিবর্তন করলে সিভির একটি নতুন সংস্করণ তৈরি হবে। আপনার মূল সিভি অপরিবর্তিত থাকবে।',
+        'তথ্য সম্পাদনা বা ডিজাইন পরিবর্তন করলে সিভির একটি নতুন সংস্করণ তৈরি হবে। আপনার মূল সিভি অপরিবর্তিত থাকবে।',
     'cv_generation_review_notice':
-    'এই সিভি ব্যবহারের আগে বানান, তারিখ, ফোন নম্বর, ইমেইল এবং অন্যান্য সব তথ্য যাচাই করুন।',
+        'এই সিভি ব্যবহারের আগে বানান, তারিখ, ফোন নম্বর, ইমেইল এবং অন্যান্য সব তথ্য যাচাই করুন।',
 
-    'cv_generation_download_started':
-    'ডাউনলোড শুরু হয়েছে',
-    'cv_generation_applying_design':
-    'আপনার ডিজাইন পরিবর্তন প্রয়োগ করা হচ্ছে',
-    'cv_generation_opening_editor':
-    'সিভি এডিটর খোলা হচ্ছে',
+    'cv_generation_download_started': 'ডাউনলোড শুরু হয়েছে',
+    'cv_generation_applying_design': 'আপনার ডিজাইন পরিবর্তন প্রয়োগ করা হচ্ছে',
+    'cv_generation_opening_editor': 'সিভি এডিটর খোলা হচ্ছে',
 
     'cv_generation_pdf_preparing_saving':
-    'আপনার A4 PDF প্রস্তুত করে সরাসরি ফোনে সংরক্ষণ করা হচ্ছে।',
+        'আপনার A4 PDF প্রস্তুত করে সরাসরি ফোনে সংরক্ষণ করা হচ্ছে।',
     'cv_generation_ai_creating_version':
-    'আপনার চাওয়া ডিজাইন পরিবর্তনসহ এআই সিভির একটি নতুন সংস্করণ তৈরি করছে।',
+        'আপনার চাওয়া ডিজাইন পরিবর্তনসহ এআই সিভির একটি নতুন সংস্করণ তৈরি করছে।',
     'cv_generation_preparing_edit_information':
-    'সম্পাদনার জন্য আপনার সিভির তথ্য প্রস্তুত করা হচ্ছে। অনুগ্রহ করে অপেক্ষা করুন।',
+        'সম্পাদনার জন্য আপনার সিভির তথ্য প্রস্তুত করা হচ্ছে। অনুগ্রহ করে অপেক্ষা করুন।',
 
-    'cv_generation_opening_editor_button':
-    'এডিটর খোলা হচ্ছে...',
+    'cv_generation_opening_editor_button': 'এডিটর খোলা হচ্ছে...',
     'cv_generation_applying_design_button':
-    'ডিজাইন পরিবর্তন প্রয়োগ করা হচ্ছে...',
-    'cv_generation_edit_design_button':
-    'সম্পাদনা করুন বা ডিজাইন পরিবর্তন করুন',
+        'ডিজাইন পরিবর্তন প্রয়োগ করা হচ্ছে...',
+    'cv_generation_edit_design_button': 'সম্পাদনা করুন বা ডিজাইন পরিবর্তন করুন',
 
     'cv_generation_download_snackbar':
-    'আপনার A4 PDF প্রস্তুত করা হচ্ছে। এটি সরাসরি আপনার ফোনে সংরক্ষণ করা হবে।',
-    'cv_generation_preparing_download':
-    'ডাউনলোড প্রস্তুত করা হচ্ছে...',
-    'cv_generation_download_pdf':
-    'A4 PDF ডাউনলোড করুন',
+        'আপনার A4 PDF প্রস্তুত করা হচ্ছে। এটি সরাসরি আপনার ফোনে সংরক্ষণ করা হবে।',
+    'cv_generation_preparing_download': 'ডাউনলোড প্রস্তুত করা হচ্ছে...',
+    'cv_generation_download_pdf': 'A4 PDF ডাউনলোড করুন',
 
-    'cv_generation_close_preview':
-    'প্রিভিউ বন্ধ করুন',
-    'cv_generation_zoom_in':
-    'জুম বড় করুন',
-    'cv_generation_zoom_out':
-    'জুম ছোট করুন',
+    'cv_generation_close_preview': 'প্রিভিউ বন্ধ করুন',
+    'cv_generation_zoom_in': 'জুম বড় করুন',
+    'cv_generation_zoom_out': 'জুম ছোট করুন',
 
-    'cv_generation_failed':
-    'সিভি তৈরি ব্যর্থ হয়েছে',
-    'cv_generation_try_again':
-    'আবার চেষ্টা করুন',
-    'cv_generation_do_not_close_page':
-    'অনুগ্রহ করে এই পেজটি বন্ধ করবেন না',
+    'cv_generation_failed': 'সিভি তৈরি ব্যর্থ হয়েছে',
+    'cv_generation_try_again': 'আবার চেষ্টা করুন',
+    'cv_generation_do_not_close_page': 'অনুগ্রহ করে এই পেজটি বন্ধ করবেন না',
     'cv_attachment_title': 'সিভির ছবি যোগ করুন',
-    'cv_attachment_profile_photo':
-    'প্রোফাইল ছবি আপলোড করুন',
+    'cv_attachment_profile_photo': 'প্রোফাইল ছবি আপলোড করুন',
     'cv_attachment_profile_photo_description':
-    'সিভিতে প্রদর্শনের জন্য প্রার্থীর ছবি যোগ করুন।',
-    'cv_attachment_reference':
-    'রেফারেন্স সিভি বা ডিজাইন আপলোড করুন',
+        'সিভিতে প্রদর্শনের জন্য প্রার্থীর ছবি যোগ করুন।',
+    'cv_attachment_reference': 'রেফারেন্স সিভি বা ডিজাইন আপলোড করুন',
     'cv_attachment_reference_description':
-    'ভিজ্যুয়াল রেফারেন্স হিসেবে একটি সিভি, লেআউট, রং বা ডিজাইনের ছবি যোগ করুন।',
-    'cv_chat_action_generating':
-    'সিভি তৈরি করা হচ্ছে...',
-    'cv_chat_action_generate':
-    'সিভি তৈরি করুন',
-    'cv_chat_input_email_hint':
-    'আপনার ইমেইল ঠিকানা লিখুন',
-    'cv_chat_input_phone_hint':
-    'আপনার ফোন নম্বর লিখুন',
-    'cv_chat_input_url_hint':
-    'ওয়েবসাইটের URL লিখুন',
-    'cv_chat_input_list_hint':
-    'কমা দিয়ে আলাদা করে আইটেমগুলো লিখুন',
-    'cv_chat_input_choice_hint':
-    'আপনার উত্তর নির্বাচন করুন অথবা লিখুন',
-    'cv_chat_input_long_text_hint':
-    'আপনার উত্তর লিখুন',
-    'cv_chat_input_default_hint':
-    'আপনার উত্তর টাইপ করুন...',
+        'ভিজ্যুয়াল রেফারেন্স হিসেবে একটি সিভি, লেআউট, রং বা ডিজাইনের ছবি যোগ করুন।',
+    'cv_chat_action_generating': 'সিভি তৈরি করা হচ্ছে...',
+    'cv_chat_action_generate': 'সিভি তৈরি করুন',
+    'cv_chat_input_email_hint': 'আপনার ইমেইল ঠিকানা লিখুন',
+    'cv_chat_input_phone_hint': 'আপনার ফোন নম্বর লিখুন',
+    'cv_chat_input_url_hint': 'ওয়েবসাইটের URL লিখুন',
+    'cv_chat_input_list_hint': 'কমা দিয়ে আলাদা করে আইটেমগুলো লিখুন',
+    'cv_chat_input_choice_hint': 'আপনার উত্তর নির্বাচন করুন অথবা লিখুন',
+    'cv_chat_input_long_text_hint': 'আপনার উত্তর লিখুন',
+    'cv_chat_input_default_hint': 'আপনার উত্তর টাইপ করুন...',
     'cv_chat_message_sending': 'পাঠানো হচ্ছে',
     'cv_chat_message_failed': 'পাঠানো ব্যর্থ হয়েছে',
     'cv_chat_message_retry': 'আবার চেষ্টা করুন',
     'cv_design_title': 'সিভির ডিজাইন পরিবর্তন করুন',
     'cv_design_description':
-    'আপনি কী ধরনের ভিজ্যুয়াল পরিবর্তন চান তা লিখুন। আপনার বর্তমান সিভির তথ্য অপরিবর্তিত থাকবে।',
+        'আপনি কী ধরনের ভিজ্যুয়াল পরিবর্তন চান তা লিখুন। আপনার বর্তমান সিভির তথ্য অপরিবর্তিত থাকবে।',
     'cv_design_hint':
-    'উদাহরণ: আরও স্পষ্ট শিরোনামসহ একটি পরিষ্কার গাঢ় নীল ডিজাইন ব্যবহার করুন।',
+        'উদাহরণ: আরও স্পষ্ট শিরোনামসহ একটি পরিষ্কার গাঢ় নীল ডিজাইন ব্যবহার করুন।',
     'cv_design_examples': 'উদাহরণ',
     'cv_design_generate': 'নতুন ডিজাইন তৈরি করুন',
-    'cv_design_empty_error':
-    'আপনি কীভাবে ডিজাইন পরিবর্তন করতে চান তা লিখুন।',
+    'cv_design_empty_error': 'আপনি কীভাবে ডিজাইন পরিবর্তন করতে চান তা লিখুন।',
 
-    'cv_design_example_dark_blue':
-    'একটি পেশাদার গাঢ় নীল থিম ব্যবহার করুন।',
-    'cv_design_example_minimal':
-    'লেআউটটি আরও মিনিমাল করুন।',
+    'cv_design_example_dark_blue': 'একটি পেশাদার গাঢ় নীল থিম ব্যবহার করুন।',
+    'cv_design_example_minimal': 'লেআউটটি আরও মিনিমাল করুন।',
     'cv_design_example_two_column':
-    'একটি আধুনিক দুই-কলামের ডিজাইন ব্যবহার করুন।',
-    'cv_edit_options_title':
-    'আপনার সিভি সম্পাদনা করুন',
-    'cv_edit_options_subtitle':
-    'আপনি কী আপডেট করতে চান তা নির্বাচন করুন।',
+        'একটি আধুনিক দুই-কলামের ডিজাইন ব্যবহার করুন।',
+    'cv_edit_options_title': 'আপনার সিভি সম্পাদনা করুন',
+    'cv_edit_options_subtitle': 'আপনি কী আপডেট করতে চান তা নির্বাচন করুন।',
 
-    'cv_edit_options_information_title':
-    'তথ্য সম্পাদনা করুন',
+    'cv_edit_options_information_title': 'তথ্য সম্পাদনা করুন',
     'cv_edit_options_information_description':
-    'বর্তমান ডিজাইন অপরিবর্তিত রেখে সিভির তথ্য আপডেট করুন।',
+        'বর্তমান ডিজাইন অপরিবর্তিত রেখে সিভির তথ্য আপডেট করুন।',
 
-    'cv_edit_options_information_design_title':
-    'তথ্য ও ডিজাইন সম্পাদনা করুন',
+    'cv_edit_options_information_design_title': 'তথ্য ও ডিজাইন সম্পাদনা করুন',
     'cv_edit_options_information_design_description':
-    'সিভির তথ্য আপডেট করুন এবং এরপর নতুন ডিজাইনের নির্দেশনা দিন।',
+        'সিভির তথ্য আপডেট করুন এবং এরপর নতুন ডিজাইনের নির্দেশনা দিন।',
 
-    'cv_edit_options_design_only_title':
-    'শুধু ডিজাইন পরিবর্তন করুন',
+    'cv_edit_options_design_only_title': 'শুধু ডিজাইন পরিবর্তন করুন',
     'cv_edit_options_design_only_description':
-    'বর্তমান সব তথ্য অপরিবর্তিত রেখে শুধু ডিজাইন পরিবর্তন করুন।',
+        'বর্তমান সব তথ্য অপরিবর্তিত রেখে শুধু ডিজাইন পরিবর্তন করুন।',
 
     'cv_edit_options_version_notice':
-    'সিভির একটি নতুন সংস্করণ তৈরি হবে। আপনার মূল সিভি অপরিবর্তিত থাকবে।',
-    'cv_photo_decision_title':
-    'আপনি কি একটি ছবি যোগ করতে চান?',
+        'সিভির একটি নতুন সংস্করণ তৈরি হবে। আপনার মূল সিভি অপরিবর্তিত থাকবে।',
+    'cv_photo_decision_title': 'আপনি কি একটি ছবি যোগ করতে চান?',
     'cv_photo_decision_description':
-    'একটি পেশাদার প্রোফাইল ছবি নির্বাচন করুন অথবা ছবি ছাড়াই চালিয়ে যান।',
-    'cv_photo_decision_without_photo':
-    'ছবি ছাড়া',
-    'cv_photo_decision_upload_photo':
-    'ছবি আপলোড করুন',
-    'cv_selected_template_label':
-    'নির্বাচিত টেমপ্লেট',
-    'cv_template_card_use_template':
-    'এই টেমপ্লেটটি ব্যবহার করুন',
-    'cv_template_card_analyzing':
-    'টেমপ্লেট বিশ্লেষণ করা হচ্ছে…',
-    'cv_template_card_analysis_failed':
-    'টেমপ্লেট বিশ্লেষণ ব্যর্থ হয়েছে',
+        'একটি পেশাদার প্রোফাইল ছবি নির্বাচন করুন অথবা ছবি ছাড়াই চালিয়ে যান।',
+    'cv_photo_decision_without_photo': 'ছবি ছাড়া',
+    'cv_photo_decision_upload_photo': 'ছবি আপলোড করুন',
+    'cv_selected_template_label': 'নির্বাচিত টেমপ্লেট',
+    'cv_template_card_use_template': 'এই টেমপ্লেটটি ব্যবহার করুন',
+    'cv_template_card_analyzing': 'টেমপ্লেট বিশ্লেষণ করা হচ্ছে…',
+    'cv_template_card_analysis_failed': 'টেমপ্লেট বিশ্লেষণ ব্যর্থ হয়েছে',
     'cv_template_card_analysis_default_error':
-    'টেমপ্লেটটি বিশ্লেষণ করা যায়নি।',
-    'cv_template_card_retry':
-    'আবার চেষ্টা করুন',
+        'টেমপ্লেটটি বিশ্লেষণ করা যায়নি।',
+    'cv_template_card_retry': 'আবার চেষ্টা করুন',
     'cv_thinking_default': 'ভাবা হচ্ছে…',
-    'cv_validation_title':
-    'আপনার সিভি সম্পূর্ণ করুন',
-    'cv_validation_subtitle':
-    'সিভি তৈরি করার আগে বাকি বিষয়গুলো সম্পন্ন করুন।',
+    'cv_validation_title': 'আপনার সিভি সম্পূর্ণ করুন',
+    'cv_validation_subtitle': 'সিভি তৈরি করার আগে বাকি বিষয়গুলো সম্পন্ন করুন।',
 
-    'cv_validation_generation_requirements':
-    'সিভি তৈরির প্রয়োজনীয়তা',
-    'cv_validation_required_information':
-    'প্রয়োজনীয় তথ্য',
-    'cv_validation_template_sections':
-    'টেমপ্লেট সেকশন',
-    'cv_validation_optional_sections':
-    'ঐচ্ছিক সেকশন',
+    'cv_validation_generation_requirements': 'সিভি তৈরির প্রয়োজনীয়তা',
+    'cv_validation_required_information': 'প্রয়োজনীয় তথ্য',
+    'cv_validation_template_sections': 'টেমপ্লেট সেকশন',
+    'cv_validation_optional_sections': 'ঐচ্ছিক সেকশন',
     'cv_validation_suggestions': 'পরামর্শ',
 
     'cv_validation_one_suggestion':
-    'একটি পরামর্শ গ্রহণ, সম্পাদনা অথবা প্রত্যাখ্যান করতে হবে।',
+        'একটি পরামর্শ গ্রহণ, সম্পাদনা অথবা প্রত্যাখ্যান করতে হবে।',
     'cv_validation_multiple_suggestions':
-    '@countটি পরামর্শ গ্রহণ, সম্পাদনা অথবা প্রত্যাখ্যান করতে হবে।',
+        '@countটি পরামর্শ গ্রহণ, সম্পাদনা অথবা প্রত্যাখ্যান করতে হবে।',
 
-    'cv_validation_profile_photo':
-    'প্রোফাইল ছবি',
+    'cv_validation_profile_photo': 'প্রোফাইল ছবি',
     'cv_validation_photo_instruction':
-    'একটি ছবি নির্বাচন করুন অথবা ছবি ছাড়াই চালিয়ে যান।',
-    'cv_validation_quality_issues':
-    'গুণগত সমস্যাগুলো',
+        'একটি ছবি নির্বাচন করুন অথবা ছবি ছাড়াই চালিয়ে যান।',
+    'cv_validation_quality_issues': 'গুণগত সমস্যাগুলো',
 
     'cv_validation_remaining_steps':
-    'সিভি তৈরি করার আগে অ্যাসিস্ট্যান্টের বাকি ধাপগুলো সম্পন্ন করুন।',
-    'cv_preview_load_failed':
-    'সিভির প্রিভিউ লোড করা যায়নি।',
+        'সিভি তৈরি করার আগে অ্যাসিস্ট্যান্টের বাকি ধাপগুলো সম্পন্ন করুন।',
+    'cv_preview_load_failed': 'সিভির প্রিভিউ লোড করা যায়নি।',
 
     // ── Cleaned synchronized translations ──
     '10_intellectual_property': '10. মেধাস্বত্ব',
@@ -4858,7 +4692,7 @@ appTranslations = <String, Map<String, String>>{
     'score_xp_delta': '+@xp XP',
     'pdf_page_counter': 'পৃষ্ঠা @current / @total', // Bengali
     'verb_learn_types_forms_examples':
-    'ইতালীয় ভাষায় দক্ষতা অর্জনের জন্য ক্রিয়ার ধরন, রূপ এবং বাস্তব উদাহরণ শিখুন।',
+        'ইতালীয় ভাষায় দক্ষতা অর্জনের জন্য ক্রিয়ার ধরন, রূপ এবং বাস্তব উদাহরণ শিখুন।',
     'daily_challenge_xp': '@xp এক্সপি',
     'claimed_xp': '+@xp এক্সপি সংগ্রহ করা হয়েছে',
     'task_progress': '@target @unit-এর মধ্যে @current',
@@ -4872,37 +4706,32 @@ appTranslations = <String, Map<String, String>>{
     'course_tag_free': 'ফ্রি',
     'course_final_exam_title': 'চূড়ান্ত পরীক্ষা',
     'course_final_exam_description':
-    'আপনার জ্ঞান যাচাই করতে এবং কোর্স সম্পন্ন করতে চূড়ান্ত পরীক্ষা দিন।',
+        'আপনার জ্ঞান যাচাই করতে এবং কোর্স সম্পন্ন করতে চূড়ান্ত পরীক্ষা দিন।',
     'course_final_exam_action': 'আনলক করতে সব অধ্যায় সম্পন্ন করুন',
     'course_final_exam_helper':
-    'পরীক্ষায় অংশ নেওয়ার আগে প্রতিটি অধ্যায় সম্পন্ন করুন',
+        'পরীক্ষায় অংশ নেওয়ার আগে প্রতিটি অধ্যায় সম্পন্ন করুন',
     'pause': 'বিরতি দিন',
-    'vocabulary_card_progress':
-    '@totalটির মধ্যে @current নম্বর কার্ড',
-    'no_vocabulary_available':
-    'কোনো শব্দভাণ্ডার পাওয়া যায়নি',
+    'vocabulary_card_progress': '@totalটির মধ্যে @current নম্বর কার্ড',
+    'no_vocabulary_available': 'কোনো শব্দভাণ্ডার পাওয়া যায়নি',
     'no_vocabulary_available_description':
-    'এই পাঠের জন্য এখনো কোনো শব্দভাণ্ডার পাওয়া যায়নি।',
+        'এই পাঠের জন্য এখনো কোনো শব্দভাণ্ডার পাওয়া যায়নি।',
     'italian_voice_unavailable_message':
-    'ডিভাইসে ইতালীয় ভয়েস ইনস্টল বা চালু করে আবার চেষ্টা করুন।',
+        'ডিভাইসে ইতালীয় ভয়েস ইনস্টল বা চালু করে আবার চেষ্টা করুন।',
     'vocabulary_words_count': '@countটি শব্দ',
     'you_reviewed_complete_reviewedcount_words':
-    'আপনি @reviewedcountটি শব্দ পর্যালোচনা করেছেন',
+        'আপনি @reviewedcountটি শব্দ পর্যালোচনা করেছেন',
     'community_link_error': 'কমিউনিটি খোলা যায়নি',
-    'community_link_not_available':
-    'কমিউনিটি লিংকটি কনফিগার করা হয়নি।',
-    'community_link_could_not_open':
-    'ফেসবুক কমিউনিটিটি খোলা যায়নি।',
+    'community_link_not_available': 'কমিউনিটি লিংকটি কনফিগার করা হয়নি।',
+    'community_link_could_not_open': 'ফেসবুক কমিউনিটিটি খোলা যায়নি।',
     'if_you_quit_now_you_ll_lose_your_progress':
-    'এখন বের হলে আপনার অগ্রগতি হারিয়ে যাবে।',
+        'এখন বের হলে আপনার অগ্রগতি হারিয়ে যাবে।',
     'current_total': '@current / @total',
     'audio_speed_multiplier': '@speed×',
     'that_s_not_quite_right': 'উত্তরটি সঠিক হয়নি।',
     'your_answer_is_correct': 'আপনার উত্তরটি সঠিক।',
-    'quiz_result_not_available':
-    'কুইজের ফলাফল পাওয়া যায়নি।',
+    'quiz_result_not_available': 'কুইজের ফলাফল পাওয়া যায়নি।',
     'review_quiz_subtitle':
-    'চলুন আপনার উত্তরগুলো পর্যালোচনা করে দেখি আপনি কেমন করেছেন।',
+        'চলুন আপনার উত্তরগুলো পর্যালোচনা করে দেখি আপনি কেমন করেছেন।',
     'submit': 'জমা দিন',
     'common_back': 'পেছনে যান',
     'final_exam_submit_answer': 'উত্তর জমা দিন',
@@ -4916,40 +4745,28 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_pause_recording': 'রেকর্ডিং বিরতি দিন',
     'final_exam_no_speaking_task': 'কোনো স্পিকিং টাস্ক পাওয়া যায়নি।',
     'final_exam_success_title': 'পরীক্ষা সম্পন্ন',
-    'final_exam_back_to_practice_hub':
-    'অনুশীলন কেন্দ্রে ফিরে যান',
+    'final_exam_back_to_practice_hub': 'অনুশীলন কেন্দ্রে ফিরে যান',
     'final_exam_submitted_title': 'পরীক্ষা জমা হয়েছে!',
     'final_exam_submitted_message':
-    'দারুণ! কঠিন অংশটি তুমি শেষ করেছ। এখন আমাদের শিক্ষকরা তোমার উত্তরগুলো পর্যালোচনা করবেন।',
+        'দারুণ! কঠিন অংশটি তুমি শেষ করেছ। এখন আমাদের শিক্ষকরা তোমার উত্তরগুলো পর্যালোচনা করবেন।',
     'final_exam_reference_id': 'রেফারেন্স আইডি: @value',
-    'final_exam_reference_id_unavailable':
-    'রেফারেন্স আইডি পাওয়া যায়নি',
-    'final_exam_evaluation_timeline':
-    'মূল্যায়নের ধাপসমূহ',
-    'final_exam_received':
-    'পরীক্ষা গ্রহণ করা হয়েছে',
-    'final_exam_uploaded_successfully':
-    'সার্ভারে সফলভাবে আপলোড হয়েছে',
-    'final_exam_teacher_review':
-    'শিক্ষকের পর্যালোচনা',
-    'final_exam_manual_review_completed':
-    'ম্যানুয়াল পর্যালোচনা সম্পন্ন',
+    'final_exam_reference_id_unavailable': 'রেফারেন্স আইডি পাওয়া যায়নি',
+    'final_exam_evaluation_timeline': 'মূল্যায়নের ধাপসমূহ',
+    'final_exam_received': 'পরীক্ষা গ্রহণ করা হয়েছে',
+    'final_exam_uploaded_successfully': 'সার্ভারে সফলভাবে আপলোড হয়েছে',
+    'final_exam_teacher_review': 'শিক্ষকের পর্যালোচনা',
+    'final_exam_manual_review_completed': 'ম্যানুয়াল পর্যালোচনা সম্পন্ন',
     'final_exam_reviewing_answers':
-    'তোমার বলা ও লেখা উত্তর পর্যালোচনা করা হচ্ছে',
-    'final_exam_result_certificate':
-    'ফলাফল ও সার্টিফিকেট',
-    'final_exam_result_ready':
-    'তোমার ফলাফল প্রস্তুত',
-    'final_exam_unlock_achievement':
-    'পর্যালোচনা শেষ হলে তোমার অর্জন আনলক হবে',
-    'final_exam_view_result':
-    'ফলাফল দেখুন',
+        'তোমার বলা ও লেখা উত্তর পর্যালোচনা করা হচ্ছে',
+    'final_exam_result_certificate': 'ফলাফল ও সার্টিফিকেট',
+    'final_exam_result_ready': 'তোমার ফলাফল প্রস্তুত',
+    'final_exam_unlock_achievement': 'পর্যালোচনা শেষ হলে তোমার অর্জন আনলক হবে',
+    'final_exam_view_result': 'ফলাফল দেখুন',
     'final_exam_estimated_result_unavailable':
-    'ফলাফল প্রকাশের আনুমানিক সময় এখনো পাওয়া যায়নি',
-    'final_exam_estimated_result':
-    'আনুমানিক ফলাফল: @value',
+        'ফলাফল প্রকাশের আনুমানিক সময় এখনো পাওয়া যায়নি',
+    'final_exam_estimated_result': 'আনুমানিক ফলাফল: @value',
     'final_exam_waiting_tip':
-    'অপেক্ষার সময় একটি দৈনিক চ্যালেঞ্জ চেষ্টা করো অথবা অনুশীলন চালিয়ে যাও।',
+        'অপেক্ষার সময় একটি দৈনিক চ্যালেঞ্জ চেষ্টা করো অথবা অনুশীলন চালিয়ে যাও।',
     'final_exam_results_title': 'পরীক্ষার ফলাফল',
     'final_exam_mark_achieved': 'প্রাপ্ত নম্বর',
     'final_exam_xp_awarded': '@xp XP অর্জিত',
@@ -4957,7 +4774,8 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_result_passed': 'চূড়ান্ত ফলাফল: উত্তীর্ণ!',
     'final_exam_retake_required': 'পুনরায় পরীক্ষা প্রয়োজন',
     'final_exam_evaluation_ready': 'আপনার চূড়ান্ত মূল্যায়ন প্রস্তুত।',
-    'final_exam_result_unavailable': 'চূড়ান্ত পরীক্ষার ফলাফল পাওয়া যাচ্ছে না।',
+    'final_exam_result_unavailable':
+        'চূড়ান্ত পরীক্ষার ফলাফল পাওয়া যাচ্ছে না।',
     'close': 'বন্ধ করুন',
     'official_certificate': 'অফিশিয়াল সার্টিফিকেট',
     'certificate_unavailable': 'সার্টিফিকেট পাওয়া যাচ্ছে না',
@@ -4968,33 +4786,26 @@ appTranslations = <String, Map<String, String>>{
     'certificate_number_value': 'সার্টিফিকেট নম্বর: @number',
     'certificate_download': 'সার্টিফিকেট ডাউনলোড',
     'certificate_information_unavailable':
-    'সার্টিফিকেটের তথ্য পাওয়া যাচ্ছে না।',
+        'সার্টিফিকেটের তথ্য পাওয়া যাচ্ছে না।',
     'certificate_not_active': 'এই সার্টিফিকেটটি সক্রিয় নয়।',
-    'certificate_pdf_unavailable':
-    'সার্টিফিকেটের PDF পাওয়া যাচ্ছে না।',
-    'invalid_certificate_download_url':
-    'সার্টিফিকেট ডাউনলোড লিংকটি সঠিক নয়।',
-    'unable_to_open_certificate_pdf':
-    'সার্টিফিকেটের PDF খোলা যায়নি।',
+    'certificate_pdf_unavailable': 'সার্টিফিকেটের PDF পাওয়া যাচ্ছে না।',
+    'invalid_certificate_download_url': 'সার্টিফিকেট ডাউনলোড লিংকটি সঠিক নয়।',
+    'unable_to_open_certificate_pdf': 'সার্টিফিকেটের PDF খোলা যায়নি।',
     'give_exam_again': 'আবার পরীক্ষা দিন',
     'final_exam_retake_not_available':
-    'নতুন পরীক্ষার প্রচেষ্টা এখন উপলব্ধ নয়।',
-    'final_exam_course_not_found':
-    'এই পরীক্ষার কোর্সটি পাওয়া যায়নি।',
+        'নতুন পরীক্ষার প্রচেষ্টা এখন উপলব্ধ নয়।',
+    'final_exam_course_not_found': 'এই পরীক্ষার কোর্সটি পাওয়া যায়নি।',
     'unlock_this_course': 'এই কোর্সটি আনলক করুন!',
     'unlock_course_access_description':
-    '@coursename আনলক করে সব @lessoncountটি লেসন এবং কোর্সের অন্তর্ভুক্ত সব ফিচার ব্যবহার করুন।',
+        '@coursename আনলক করে সব @lessoncountটি লেসন এবং কোর্সের অন্তর্ভুক্ত সব ফিচার ব্যবহার করুন।',
     'course_features': 'কোর্সের ফিচারসমূহ',
     'coupon_code': 'কুপন কোড',
     'applying_coupon': 'কুপন প্রয়োগ করা হচ্ছে…',
     'best_value': 'সেরা মূল্য',
     'limited_time': 'সীমিত সময়',
 
-
-
     'streak_freeze_balance': '@countটি ফ্রিজ',
     'streak_freeze_pack_count': '@countটি স্ট্রিক ফ্রিজ',
-
 
     'one_time_streak_freezes': 'এককালীন স্ট্রিক ফ্রিজ',
     'monthly_streak_protection': 'মাসিক স্ট্রিক সুরক্ষা',
@@ -5003,104 +4814,89 @@ appTranslations = <String, Map<String, String>>{
     'protected_until': '@date পর্যন্ত সুরক্ষিত',
     'protected_until_label': 'সুরক্ষিত থাকবে',
     'manage_monthly_plan': 'মাসিক প্ল্যান পরিচালনা করুন',
-    'manage_or_cancel_google_play':
-    'Google Play-এ পরিচালনা বা বাতিল করুন',
+    'manage_or_cancel_google_play': 'Google Play-এ পরিচালনা বা বাতিল করুন',
     'monthly_cancellation_information':
-    'বাতিল করলে পরবর্তী নবায়ন বন্ধ হবে। বর্তমান পরিশোধিত সময় শেষ হওয়া পর্যন্ত সুরক্ষা সক্রিয় থাকবে।',
+        'বাতিল করলে পরবর্তী নবায়ন বন্ধ হবে। বর্তমান পরিশোধিত সময় শেষ হওয়া পর্যন্ত সুরক্ষা সক্রিয় থাকবে।',
     'unlimited_streak_protection_description':
-    'মাসিক প্ল্যান সক্রিয় থাকলে শেখার দিন বাদ গেলেও আনলিমিটেড সুরক্ষা পাবেন।',
+        'মাসিক প্ল্যান সক্রিয় থাকলে শেখার দিন বাদ গেলেও আনলিমিটেড সুরক্ষা পাবেন।',
     'unlimited_protection': 'আনলিমিটেড সুরক্ষা',
     'monthly_protection_page_description':
-    'এই মাসিক প্ল্যান সক্রিয় থাকা পর্যন্ত আপনার স্ট্রিক সুরক্ষিত থাকবে।',
+        'এই মাসিক প্ল্যান সক্রিয় থাকা পর্যন্ত আপনার স্ট্রিক সুরক্ষিত থাকবে।',
     'expiry_date_not_available': 'মেয়াদ শেষের তারিখ পাওয়া যায়নি',
     'not_currently_protected': 'বর্তমানে সুরক্ষিত নয়',
     'opening_google_play': 'Google Play খোলা হচ্ছে...',
     'unable_to_open_google_play': 'Google Play খোলা যায়নি',
     'open_google_play_subscriptions_manually':
-    'Google Play খুলে Payments & subscriptions > Subscriptions-এ যান।',
+        'Google Play খুলে Payments & subscriptions > Subscriptions-এ যান।',
     'google_play_handles_subscription_changes':
-    'বাতিল, নবায়ন, পেমেন্ট পদ্ধতি পরিবর্তন ও পুনরায় সাবস্ক্রাইব Google Play পরিচালনা করে।',
-    'price_per_month':
-    '@price / মাস',
+        'বাতিল, নবায়ন, পেমেন্ট পদ্ধতি পরিবর্তন ও পুনরায় সাবস্ক্রাইব Google Play পরিচালনা করে।',
+    'price_per_month': '@price / মাস',
 
-    'monthly_plan_auto_renews':
-    'প্রতি মাসে স্বয়ংক্রিয়ভাবে নবায়ন হবে',
+    'monthly_plan_auto_renews': 'প্রতি মাসে স্বয়ংক্রিয়ভাবে নবায়ন হবে',
 
     'monthly_plan_cancelled_active':
-    'নবায়ন বাতিল করা হয়েছে। নিচে দেখানো তারিখ পর্যন্ত সুরক্ষা সক্রিয় থাকবে।',
+        'নবায়ন বাতিল করা হয়েছে। নিচে দেখানো তারিখ পর্যন্ত সুরক্ষা সক্রিয় থাকবে।',
 
     'active_monthly_plan_already_exists':
-    'অন্য প্ল্যান কেনার আগে আপনার বর্তমান মাসিক প্ল্যান পরিচালনা করুন।',
+        'অন্য প্ল্যান কেনার আগে আপনার বর্তমান মাসিক প্ল্যান পরিচালনা করুন।',
 
-    'monthly_plan_already_active_badge':
-    'মাসিক প্ল্যান ইতোমধ্যে সক্রিয়',
+    'monthly_plan_already_active_badge': 'মাসিক প্ল্যান ইতোমধ্যে সক্রিয়',
 
-    'coupon_unavailable':
-    'কুপন উপলভ্য নয়',
+    'coupon_unavailable': 'কুপন উপলভ্য নয়',
 
-    'coupon_not_available_for_package':
-    'এই প্যাকেজে কুপন ব্যবহার করা যাবে না।',
+    'coupon_not_available_for_package': 'এই প্যাকেজে কুপন ব্যবহার করা যাবে না।',
 
-    'coupon_invalid_for_item':
-    'এই কুপনটি নির্বাচিত প্যাকেজের জন্য বৈধ নয়।',
+    'coupon_invalid_for_item': 'এই কুপনটি নির্বাচিত প্যাকেজের জন্য বৈধ নয়।',
     // Bangla
     'review_your_order': 'আপনার অর্ডার পর্যালোচনা করুন',
     'confirm_package_before_checkout':
-    'এগিয়ে যাওয়ার আগে প্যাকেজের তথ্য যাচাই করুন।',
+        'এগিয়ে যাওয়ার আগে প্যাকেজের তথ্য যাচাই করুন।',
 
     'total_price': 'মোট',
     'change_package': 'প্যাকেজ পরিবর্তন করুন',
     'subscription_renews_automatically':
-    'বাতিল না করা পর্যন্ত সাবস্ক্রিপশনটি স্বয়ংক্রিয়ভাবে নবায়ন হবে।',
+        'বাতিল না করা পর্যন্ত সাবস্ক্রিপশনটি স্বয়ংক্রিয়ভাবে নবায়ন হবে।',
     'secure_payment': 'নিরাপদ পেমেন্ট',
     'payment_processed_securely':
-    'আপনার পেমেন্ট Google Play-এর মাধ্যমে নিরাপদে প্রক্রিয়া করা হবে।',
+        'আপনার পেমেন্ট Google Play-এর মাধ্যমে নিরাপদে প্রক্রিয়া করা হবে।',
     'recurring_purchase': 'নিয়মিত সাবস্ক্রিপশন',
     'one_time_purchase': 'এককালীন ক্রয়',
     'cancel_subscription_anytime':
-    'Google Play থেকে এটি পরিচালনা বা বাতিল করতে পারবেন।',
+        'Google Play থেকে এটি পরিচালনা বা বাতিল করতে পারবেন।',
     'you_will_only_be_charged_once':
-    'এই ক্রয়ের জন্য আপনাকে শুধু একবার চার্জ করা হবে।',
+        'এই ক্রয়ের জন্য আপনাকে শুধু একবার চার্জ করা হবে।',
     'your_cv_allowance': 'আপনার সিভি সুবিধা',
-    'cv_free_creations_remaining':
-    '@countটি ফ্রি সিভি তৈরি বাকি',
-    'cv_paid_credit_balance':
-    '@countটি কেনা সিভি ক্রেডিট',
-    'cv_free_limit_ended':
-    'আপনার ফ্রি সিভি সীমা শেষ হয়েছে',
+    'cv_free_creations_remaining': '@countটি ফ্রি সিভি তৈরি বাকি',
+    'cv_paid_credit_balance': '@countটি কেনা সিভি ক্রেডিট',
+    'cv_free_limit_ended': 'আপনার ফ্রি সিভি সীমা শেষ হয়েছে',
     'cv_next_creation_uses_credit':
-    'পরবর্তী নতুন সিভি তৈরিতে ১টি কেনা ক্রেডিট ব্যবহার হবে।',
+        'পরবর্তী নতুন সিভি তৈরিতে ১টি কেনা ক্রেডিট ব্যবহার হবে।',
     'cv_purchase_credit_to_continue':
-    'আরেকটি সিভি তৈরি করতে একটি সিভি ক্রেডিট কিনুন।',
+        'আরেকটি সিভি তৈরি করতে একটি সিভি ক্রেডিট কিনুন।',
     'buy_cv_credits': 'সিভি ক্রেডিট কিনুন',
-    'cv_credit_required_title':
-    'সিভি ক্রেডিট প্রয়োজন',
+    'cv_credit_required_title': 'সিভি ক্রেডিট প্রয়োজন',
     'cv_credit_required_message':
-    'আপনি তিনটি ফ্রি সিভি তৈরির সুযোগ ব্যবহার করেছেন এবং কোনো কেনা ক্রেডিট অবশিষ্ট নেই।',
+        'আপনি তিনটি ফ্রি সিভি তৈরির সুযোগ ব্যবহার করেছেন এবং কোনো কেনা ক্রেডিট অবশিষ্ট নেই।',
     'choose_package': 'একটি প্যাকেজ নির্বাচন করুন',
     'opening_conversation': 'কথোপকথন খোলা হচ্ছে...',
     'block_username': '@username-কে ব্লক করবেন?',
     'username_has_been_hidden_from_your_app':
-    '@username-কে আপনার অ্যাপ থেকে লুকানো হয়েছে।',
+        '@username-কে আপনার অ্যাপ থেকে লুকানো হয়েছে।',
     'unblock_username': '@username-কে আনব্লক করবেন?',
     'user_unblocked': 'ব্যবহারকারীকে আনব্লক করা হয়েছে',
     'username_has_been_successfully_unblocked_you_can_now_send_messages_and_view_their_profile_again':
-    '@username-কে সফলভাবে আনব্লক করা হয়েছে। এখন আপনি আবার মেসেজ পাঠাতে এবং তার প্রোফাইল দেখতে পারবেন।',
+        '@username-কে সফলভাবে আনব্লক করা হয়েছে। এখন আপনি আবার মেসেজ পাঠাতে এবং তার প্রোফাইল দেখতে পারবেন।',
     'communication_restored': 'যোগাযোগ পুনরায় চালু হয়েছে',
     'account_access_restricted_description':
-    'প্রশাসন আপনার ইতালির পথে অ্যাকাউন্টের ব্যবহার সীমাবদ্ধ করেছে।',
+        'প্রশাসন আপনার ইতালির পথে অ্যাকাউন্টের ব্যবহার সীমাবদ্ধ করেছে।',
     'restriction_reason_unavailable':
-    'অ্যাকাউন্ট সীমাবদ্ধ করার অতিরিক্ত কোনো কারণ দেওয়া হয়নি।',
-    'effective_date_unavailable':
-    'কার্যকর হওয়ার তারিখ পাওয়া যায়নি',
-    'effective_as_of':
-    '@date থেকে কার্যকর',
-    'moderation_case_reference':
-    'কেস রেফারেন্স: @caseNumber',
+        'অ্যাকাউন্ট সীমাবদ্ধ করার অতিরিক্ত কোনো কারণ দেওয়া হয়নি।',
+    'effective_date_unavailable': 'কার্যকর হওয়ার তারিখ পাওয়া যায়নি',
+    'effective_as_of': '@date থেকে কার্যকর',
+    'moderation_case_reference': 'কেস রেফারেন্স: @caseNumber',
     'account_restriction_appeal_message':
-    'আপনার মনে হলে সিদ্ধান্তটি ভুল, পর্যালোচনার অনুরোধ করতে আমাদের সহায়তা দলের সঙ্গে যোগাযোগ করুন।',
-    'snack_need_special_character':
-    'কমপক্ষে একটি বিশেষ চিহ্ন ব্যবহার করুন।',
+        'আপনার মনে হলে সিদ্ধান্তটি ভুল, পর্যালোচনার অনুরোধ করতে আমাদের সহায়তা দলের সঙ্গে যোগাযোগ করুন।',
+    'snack_need_special_character': 'কমপক্ষে একটি বিশেষ চিহ্ন ব্যবহার করুন।',
     'send_otp': 'ওটিপি পাঠান',
     'leaderboard_you': 'আপনি',
     'home_one_day': '১ দিন',
@@ -5133,51 +4929,42 @@ appTranslations = <String, Map<String, String>>{
     'home_month_11': 'নভে',
     'home_month_12': 'ডিসে',
     'home_dashboard_load_failed':
-    'হোমের তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।',
-    'home_chapter_unavailable':
-    'এই লেসনটি বর্তমানে পাওয়া যাচ্ছে না।',
+        'হোমের তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।',
+    'home_chapter_unavailable': 'এই লেসনটি বর্তমানে পাওয়া যাচ্ছে না।',
     'home_career_track_unavailable':
-    'এই ক্যারিয়ার ট্র্যাকটি বর্তমানে পাওয়া যাচ্ছে না।',
-    'home_ai_tutor_unavailable':
-    'এআই টিউটর বর্তমানে পাওয়া যাচ্ছে না।',
+        'এই ক্যারিয়ার ট্র্যাকটি বর্তমানে পাওয়া যাচ্ছে না।',
+    'home_ai_tutor_unavailable': 'এআই টিউটর বর্তমানে পাওয়া যাচ্ছে না।',
     'home_no_activity_this_week':
-    'এই সপ্তাহে এখনো কোনো শেখার কার্যক্রম রেকর্ড হয়নি।',
+        'এই সপ্তাহে এখনো কোনো শেখার কার্যক্রম রেকর্ড হয়নি।',
     'daily_streak_count': '@count দিনের স্ট্রিক!',
     'keep_the_flame_alive': 'আপনার স্ট্রিক চালিয়ে যান',
     'claim_xp': '+@xp XP সংগ্রহ করুন',
     'reward_xp': '+@xp XP',
-    'complete_all_tasks_to_open':
-    'খোলার জন্য সব @countটি কাজ সম্পন্ন করুন',
-    'home_cv_builder_unavailable':
-    'সিভি সেবা বর্তমানে পাওয়া যাচ্ছে না।',
+    'complete_all_tasks_to_open': 'খোলার জন্য সব @countটি কাজ সম্পন্ন করুন',
+    'home_cv_builder_unavailable': 'সিভি সেবা বর্তমানে পাওয়া যাচ্ছে না।',
     'you_re_ready': 'আপনি প্রস্তুত!',
     // Bangla
     'final_exam_result_pending': 'ফলাফল অপেক্ষমাণ',
     'final_exam_view_certificate': 'সার্টিফিকেট দেখুন',
     'final_exam_retake': 'আবার পরীক্ষা দিন',
-    'final_exam_review_in_progress':
-    'আপনার ফলাফল পর্যালোচনা করা হচ্ছে',
-    'final_exam_result_available':
-    'আপনার চূড়ান্ত পরীক্ষার ফলাফল প্রস্তুত',
-    'final_exam_certificate_available':
-    'আপনার সার্টিফিকেট প্রস্তুত',
-    'final_exam_retake_available':
-    'আপনি আবার পরীক্ষা দেওয়ার সুযোগ পেয়েছেন',
+    'final_exam_review_in_progress': 'আপনার ফলাফল পর্যালোচনা করা হচ্ছে',
+    'final_exam_result_available': 'আপনার চূড়ান্ত পরীক্ষার ফলাফল প্রস্তুত',
+    'final_exam_certificate_available': 'আপনার সার্টিফিকেট প্রস্তুত',
+    'final_exam_retake_available': 'আপনি আবার পরীক্ষা দেওয়ার সুযোগ পেয়েছেন',
     'final_exam_not_ready_title': 'এখনও পুরোপুরি প্রস্তুত নন',
     'final_exam_unlock_requirement':
-    'ফাইনাল পরীক্ষা আনলক করতে অন্তত ৮০% ভিডিও লেসন সম্পন্ন করুন।',
+        'ফাইনাল পরীক্ষা আনলক করতে অন্তত ৮০% ভিডিও লেসন সম্পন্ন করুন।',
     'currently_watched_percent': 'বর্তমানে @progress% দেখা হয়েছে',
     'unlock_at_percent': 'আনলক করতে @progress%',
-    'no_internet_connection':
-    'ইন্টারনেট সংযোগ নেই',
+    'no_internet_connection': 'ইন্টারনেট সংযোগ নেই',
     'no_internet_title': 'ইন্টারনেট সংযোগ নেই',
     'no_internet_message':
-    'আপনার ওয়াই-ফাই বা মোবাইল ডাটা সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।',
+        'আপনার ওয়াই-ফাই বা মোবাইল ডাটা সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।',
     'checking_connection': 'সংযোগ পরীক্ষা করা হচ্ছে...',
     'level_tutor': 'লেভেল @level টিউটর',
     'level_topics': 'লেভেল @level-এর বিষয়সমূহ',
     'final_exam_attempt_not_found':
-    'চূড়ান্ত পরীক্ষার চেষ্টা খুঁজে পাওয়া যায়নি।',
+        'চূড়ান্ত পরীক্ষার চেষ্টা খুঁজে পাওয়া যায়নি।',
     'score_label': 'স্কোর: @score',
     'xp_label': 'XP: @xp',
     'time_label': 'সময়: @time',
@@ -5185,12 +4972,10 @@ appTranslations = <String, Map<String, String>>{
     'invalid_coupon': 'অবৈধ কুপন',
     'you_ve_been_promoted_to': 'আপনাকে পদোন্নতি দেওয়া হয়েছে',
     'league_name_value': '@leagueName লিগ',
-    'you_re_in_the_top_20_of_learners':
-    'আপনি শীর্ষ ২০% শিক্ষার্থীর মধ্যে আছেন',
+    'you_re_in_the_top_20_of_learners': 'আপনি শীর্ষ ২০% শিক্ষার্থীর মধ্যে আছেন',
     'playing_pronunciation_for': '@text-এর উচ্চারণ চালানো হচ্ছে',
     'playing_text': '@text চালানো হচ্ছে',
-    'exam_progress_requirement':
-    '@progress% সম্পন্ন · @required% প্রয়োজন',
+    'exam_progress_requirement': '@progress% সম্পন্ন · @required% প্রয়োজন',
     'daily_chest_total_xp': '@xp XP',
     'daily_chest_streak_freezes_awarded': '@countটি দেওয়া হয়েছে',
     'daily_streak_message': 'আপনার স্ট্রিক @days দিন',
@@ -5202,85 +4987,77 @@ appTranslations = <String, Map<String, String>>{
 
     'offline_screen_title': 'ওহো!\nআপনি অফলাইনে আছেন।',
     'offline_learning_message':
-    'আপনার পছন্দের ইতালীয় বাক্য শেখা চালিয়ে যেতে ইন্টারনেট সংযোগ পরীক্ষা করুন।',
+        'আপনার পছন্দের ইতালীয় বাক্য শেখা চালিয়ে যেতে ইন্টারনেট সংযোগ পরীক্ষা করুন।',
     'search_no_match_message':
-    'আপনি যা খুঁজছেন তা পাওয়া যায়নি। অন্য একটি শব্দ দিয়ে চেষ্টা করুন।',
+        'আপনি যা খুঁজছেন তা পাওয়া যায়নি। অন্য একটি শব্দ দিয়ে চেষ্টা করুন।',
 
     'italian_keyboard_accents_help':
-    'লিখিত প্রশ্নের সঠিক উত্তর দিতে à, è এবং ì-এর মতো ইতালীয় অ্যাকসেন্ট প্রয়োজন হবে।',
+        'লিখিত প্রশ্নের সঠিক উত্তর দিতে à, è এবং ì-এর মতো ইতালীয় অ্যাকসেন্ট প্রয়োজন হবে।',
     'italian_keyboard_setup_help':
-    'সঠিকভাবে উত্তর দিতে ফোনে ইতালীয় কিবোর্ড সেটআপ করুন।',
+        'সঠিকভাবে উত্তর দিতে ফোনে ইতালীয় কিবোর্ড সেটআপ করুন।',
     'italian_accents_explanation':
-    'অ্যাকসেন্ট শব্দের অর্থ ও উচ্চারণ পরিবর্তন করে।',
+        'অ্যাকসেন্ট শব্দের অর্থ ও উচ্চারণ পরিবর্তন করে।',
 
     'ai_level_test_description':
-    'মাত্র ১০টি প্রশ্নের মাধ্যমে আপনার বর্তমান লেভেল জানুন।',
-    'ai_tutor_intro':
-    'আমি আপনার AI টিউটর। চলুন একসঙ্গে ইতালীয় অনুশীলন করি।',
+        'মাত্র ১০টি প্রশ্নের মাধ্যমে আপনার বর্তমান লেভেল জানুন।',
+    'ai_tutor_intro': 'আমি আপনার AI টিউটর। চলুন একসঙ্গে ইতালীয় অনুশীলন করি।',
     'ai_scenario_tip':
-    'AI সেই পরিস্থিতিতে ক্যাশিয়ার, ওয়েটার বা ড্রাইভারের মতো একটি চরিত্রে অভিনয় করবে।',
+        'AI সেই পরিস্থিতিতে ক্যাশিয়ার, ওয়েটার বা ড্রাইভারের মতো একটি চরিত্রে অভিনয় করবে।',
 
     'level_mastered': 'লেভেল @level\nসম্পন্ন',
-    'certificate_milestone_message':
-    'আপনি একটি নতুন মাইলফলক অর্জন করেছেন',
-    'course_information_unavailable':
-    'কোর্সের তথ্য লোড করা যায়নি।',
+    'certificate_milestone_message': 'আপনি একটি নতুন মাইলফলক অর্জন করেছেন',
+    'course_information_unavailable': 'কোর্সের তথ্য লোড করা যায়নি।',
     'purchase_success_description':
-    'আপনি এখন Italir Pothe-এর সব ফিচারে আজীবন পূর্ণ প্রবেশাধিকার পেয়েছেন। আজ থেকেই আপনার সাবলীলতার যাত্রা শুরু।',
+        'আপনি এখন Italir Pothe-এর সব ফিচারে আজীবন পূর্ণ প্রবেশাধিকার পেয়েছেন। আজ থেকেই আপনার সাবলীলতার যাত্রা শুরু।',
 
     'coupon_applied': 'কুপন প্রয়োগ করা হয়েছে',
     'discount_value': 'ছাড়: @discount%',
     'remove_coupon': 'কুপন সরান',
     'store_price_notice':
-    'চূড়ান্ত মূল্য Google Play বা App Store দ্বারা নির্ধারিত হয় এবং এতে VAT, কর, মুদ্রা রূপান্তর বা অঞ্চলভিত্তিক মূল্য অন্তর্ভুক্ত থাকতে পারে।',
+        'চূড়ান্ত মূল্য Google Play বা App Store দ্বারা নির্ধারিত হয় এবং এতে VAT, কর, মুদ্রা রূপান্তর বা অঞ্চলভিত্তিক মূল্য অন্তর্ভুক্ত থাকতে পারে।',
 
     'support_contact_description':
-    'Italir Pothe সাপোর্ট টিমের সঙ্গে যোগাযোগের সবচেয়ে সুবিধাজনক মাধ্যমটি বেছে নিন।',
+        'Italir Pothe সাপোর্ট টিমের সঙ্গে যোগাযোগের সবচেয়ে সুবিধাজনক মাধ্যমটি বেছে নিন।',
     'chat_on_whatsapp': 'WhatsApp-এ চ্যাট করুন',
-    'fastest_response_recommended':
-    'দ্রুততম উত্তরের জন্য প্রস্তাবিত',
+    'fastest_response_recommended': 'দ্রুততম উত্তরের জন্য প্রস্তাবিত',
     'facebook_community_description':
-    'প্রশ্ন করুন, অভিজ্ঞতা শেয়ার করুন এবং অন্য শিক্ষার্থীদের সঙ্গে যুক্ত হন।',
+        'প্রশ্ন করুন, অভিজ্ঞতা শেয়ার করুন এবং অন্য শিক্ষার্থীদের সঙ্গে যুক্ত হন।',
     'support_response_time':
-    'আমরা ২৪ ঘণ্টার মধ্যে সাপোর্ট অনুরোধের উত্তর দেওয়ার চেষ্টা করি।',
+        'আমরা ২৪ ঘণ্টার মধ্যে সাপোর্ট অনুরোধের উত্তর দেওয়ার চেষ্টা করি।',
 
     'reward_awarded_date': 'প্রদান করা হয়েছে\n@date',
     'voice_minutes_value': '@count মিনিট',
     'text_tokens_value': '@count টোকেন',
     'ai_credit_usage_description':
-    'কথা বলার জন্য ভয়েস এবং চ্যাটের জন্য টোকেন।',
+        'কথা বলার জন্য ভয়েস এবং চ্যাটের জন্য টোকেন।',
 
     'course_search_hint': 'নাম দিয়ে কোর্স খুঁজুন',
-    'sentences_completed':
-    '@learned/@totalটি বাক্য সম্পন্ন',
+    'sentences_completed': '@learned/@totalটি বাক্য সম্পন্ন',
     'sentences_learned_progress':
-    '@totalটির মধ্যে @learnedটি বাক্য শেখা হয়েছে',
+        '@totalটির মধ্যে @learnedটি বাক্য শেখা হয়েছে',
     'final_exam_unlocked_message':
-    'আপনি ৮০% লেসন সম্পন্ন করেছেন। চূড়ান্ত পরীক্ষা এখন আনলক হয়েছে!',
+        'আপনি ৮০% লেসন সম্পন্ন করেছেন। চূড়ান্ত পরীক্ষা এখন আনলক হয়েছে!',
 
     'leaderboard_xp_explanation':
-    'লেসন সম্পন্ন, কথোপকথন অনুশীলন এবং ইতালীয় শব্দভান্ডার আয়ত্ত করার সঙ্গে সঙ্গে XP বৃদ্ধি পায়।',
+        'লেসন সম্পন্ন, কথোপকথন অনুশীলন এবং ইতালীয় শব্দভান্ডার আয়ত্ত করার সঙ্গে সঙ্গে XP বৃদ্ধি পায়।',
 
-    'boost_duration_message':
-    'এটি @duration পর্যন্ত থাকবে। আরও অনুশীলন করুন!',
+    'boost_duration_message': 'এটি @duration পর্যন্ত থাকবে। আরও অনুশীলন করুন!',
 
     'report_received_description':
-    'আমাদের কমিউনিটিকে নিরাপদ রাখতে সাহায্য করার জন্য ধন্যবাদ। আমাদের অ্যাডমিন টিম শিগগিরই আপনার রিপোর্ট পর্যালোচনা করবে।',
+        'আমাদের কমিউনিটিকে নিরাপদ রাখতে সাহায্য করার জন্য ধন্যবাদ। আমাদের অ্যাডমিন টিম শিগগিরই আপনার রিপোর্ট পর্যালোচনা করবে।',
 
     'webinar_host_value': 'হোস্ট: @host',
     'webinar_starts_at': 'শুরু হবে @time-এ',
     'webinar_course_access_description':
-    'এই সেশনটি নিচের যেকোনো কোর্সে নিবন্ধিত ব্যবহারকারীদের জন্য উপলভ্য:',
-    'webinar_selected_course_only':
-    'শুধু নির্বাচিত কোর্সের জন্য',
+        'এই সেশনটি নিচের যেকোনো কোর্সে নিবন্ধিত ব্যবহারকারীদের জন্য উপলভ্য:',
+    'webinar_selected_course_only': 'শুধু নির্বাচিত কোর্সের জন্য',
 
     'home_greeting': 'হাই, @name',
-    'guided_learning_level_selection':
-    'গাইডেড লার্নিং লেভেল নির্বাচন',
+    'guided_learning_level_selection': 'গাইডেড লার্নিং লেভেল নির্বাচন',
     'ai_report_action': 'রিপোর্ট করুন',
     'ai_report_title': 'AI কনটেন্ট রিপোর্ট করুন',
     'ai_report_description':
-    'এই AI তৈরি করা কনটেন্টে কী সমস্যা আছে তা আমাদের জানান।',
+        'এই AI তৈরি করা কনটেন্টে কী সমস্যা আছে তা আমাদের জানান।',
     'ai_report_issue_required': 'সমস্যার ধরন *',
     'ai_report_details_optional': 'বিস্তারিত তথ্য (ঐচ্ছিক)',
     'ai_report_add_screenshot': 'স্ক্রিনশট যোগ করুন',
@@ -5291,10 +5068,9 @@ appTranslations = <String, Map<String, String>>{
     'ai_report_content_missing': 'AI কনটেন্টটি সংযুক্ত করা যায়নি।',
     'ai_report_success_title': 'রিপোর্ট জমা হয়েছে',
     'ai_report_success_message':
-    'AI নিরাপত্তা উন্নত করতে সাহায্য করার জন্য ধন্যবাদ।',
+        'AI নিরাপত্তা উন্নত করতে সাহায্য করার জন্য ধন্যবাদ।',
     'ai_report_error_title': 'রিপোর্ট জমা হয়নি',
-    'ai_report_error_message':
-    'রিপোর্ট জমা দেওয়া যায়নি। আবার চেষ্টা করুন।',
+    'ai_report_error_message': 'রিপোর্ট জমা দেওয়া যায়নি। আবার চেষ্টা করুন।',
     'ai_report_offensive_or_hateful': 'আপত্তিকর বা ঘৃণামূলক কনটেন্ট',
     'ai_report_sexual_or_inappropriate': 'যৌন বা অনুপযুক্ত কনটেন্ট',
     'ai_report_dangerous_or_harmful': 'বিপজ্জনক বা ক্ষতিকর কনটেন্ট',
@@ -5302,62 +5078,70 @@ appTranslations = <String, Map<String, String>>{
     'ai_report_false_or_misleading': 'মিথ্যা বা বিভ্রান্তিকর তথ্য',
     'ai_report_privacy_concern': 'গোপনীয়তা সম্পর্কিত সমস্যা',
     'ai_report_other': 'অন্যান্য',
-    'full_screen_call_permission_title':
-    'স্ক্রিনে ইনকামিং কল দেখান',
+    'full_screen_call_permission_title': 'স্ক্রিনে ইনকামিং কল দেখান',
     'full_screen_call_permission_description':
-    'কল মিস না করতে লক স্ক্রিনের ওপর ইনকামিং কল দেখানোর অনুমতি দিন।',
+        'কল মিস না করতে লক স্ক্রিনের ওপর ইনকামিং কল দেখানোর অনুমতি দিন।',
     'notification_permission_title': 'আপডেট পেতে থাকুন',
     'notification_permission_description':
-    'মেসেজ, ইনকামিং কল, শেখার রিমাইন্ডার এবং গুরুত্বপূর্ণ অ্যাকাউন্ট আপডেটের নোটিফিকেশন চালু করুন।',
+        'মেসেজ, ইনকামিং কল, শেখার রিমাইন্ডার এবং গুরুত্বপূর্ণ অ্যাকাউন্ট আপডেটের নোটিফিকেশন চালু করুন।',
     'notification_permission_not_now': 'এখন নয়',
     'notification_permission_enable': 'নোটিফিকেশন চালু করুন',
     'webinar_stage_permission_required':
-    'ওয়েবিনার স্টেজে যোগ দিতে মাইক্রোফোন ও ক্যামেরার অনুমতি প্রয়োজন।',
+        'ওয়েবিনার স্টেজে যোগ দিতে মাইক্রোফোন ও ক্যামেরার অনুমতি প্রয়োজন।',
     'webinar_stage_permission_settings_required':
-    'ওয়েবিনার স্টেজে যোগ দিতে অ্যাপ সেটিংস থেকে মাইক্রোফোন ও ক্যামেরার অনুমতি দিন।',
+        'ওয়েবিনার স্টেজে যোগ দিতে অ্যাপ সেটিংস থেকে মাইক্রোফোন ও ক্যামেরার অনুমতি দিন।',
     'chat_with_us_on_whatsapp':
-    'WhatsApp-এ আমাদের সাপোর্ট টিমের সঙ্গে কথা বলুন',
+        'WhatsApp-এ আমাদের সাপোর্ট টিমের সঙ্গে কথা বলুন',
     'unable_to_open_whatsapp': 'WhatsApp খোলা যাচ্ছে না',
     'guide_video': 'গাইড ভিডিও',
-    'watch_app_guide':
-    'অ্যাপ ব্যবহারের গাইড দেখুন',
-    'guide_video_unavailable':
-    'গাইড ভিডিওটি পাওয়া যাচ্ছে না।',
+    'watch_app_guide': 'অ্যাপ ব্যবহারের গাইড দেখুন',
+    'guide_video_unavailable': 'গাইড ভিডিওটি পাওয়া যাচ্ছে না।',
     'expert_tip_complete_chapters_in_order':
-    'অধ্যায়গুলো ধারাবাহিকভাবে সম্পন্ন করুন, যাতে কোর্সের অগ্রগতি এবং চূড়ান্ত পরীক্ষার যোগ্যতা সঠিকভাবে হালনাগাদ থাকে.',
+        'অধ্যায়গুলো ধারাবাহিকভাবে সম্পন্ন করুন, যাতে কোর্সের অগ্রগতি এবং চূড়ান্ত পরীক্ষার যোগ্যতা সঠিকভাবে হালনাগাদ থাকে.',
     'calling': 'কল করা হচ্ছে…',
     'ringing': 'রিং হচ্ছে…',
+    'play': 'চালান',
+    'mute': 'শব্দ বন্ধ করুন',
+    'unmute': 'শব্দ চালু করুন',
+    'playback_speed': 'প্লেব্যাকের গতি',
+    // Bangla
+    'matching_pairs_drag_instruction':
+        'বাম পাশের শব্দগুলোর সঙ্গে মিলাতে ডান পাশের শব্দগুলো সরান।',
   },
   'it_IT': <String, String>{
+    // Italian
+    'matching_pairs_drag_instruction':
+        'Sposta le parole a destra per abbinarle alle parole a sinistra.',
+    'play': 'Riproduci',
+    'mute': 'Disattiva audio',
+    'unmute': 'Riattiva audio',
+    'playback_speed': 'Velocità di riproduzione',
     'ringing': 'Sta squillando…',
     'calling': 'Chiamata in corso…',
     'expert_tip_complete_chapters_in_order':
-    'Completa i capitoli in ordine per mantenere aggiornati i progressi del corso e l’idoneità all’esame finale.',
+        'Completa i capitoli in ordine per mantenere aggiornati i progressi del corso e l’idoneità all’esame finale.',
     'guide_video': 'Video guida',
-    'watch_app_guide':
-    'Guarda la guida dell’app',
-    'guide_video_unavailable':
-    'Il video guida non è disponibile.',
+    'watch_app_guide': 'Guarda la guida dell’app',
+    'guide_video_unavailable': 'Il video guida non è disponibile.',
     'chat_with_us_on_whatsapp':
-    'Chatta con il nostro team di supporto su WhatsApp',
+        'Chatta con il nostro team di supporto su WhatsApp',
     'unable_to_open_whatsapp': 'Impossibile aprire WhatsApp',
     'webinar_stage_permission_required':
-    'Le autorizzazioni per microfono e fotocamera sono necessarie per partecipare al webinar.',
+        'Le autorizzazioni per microfono e fotocamera sono necessarie per partecipare al webinar.',
     'webinar_stage_permission_settings_required':
-    'Consenti l’accesso a microfono e fotocamera dalle impostazioni dell’app per partecipare al webinar.',
+        'Consenti l’accesso a microfono e fotocamera dalle impostazioni dell’app per partecipare al webinar.',
     'notification_permission_title': 'Rimani aggiornato',
     'notification_permission_description':
-    'Consenti le notifiche per messaggi, chiamate in arrivo, promemoria di studio e aggiornamenti importanti dell’account.',
+        'Consenti le notifiche per messaggi, chiamate in arrivo, promemoria di studio e aggiornamenti importanti dell’account.',
     'notification_permission_not_now': 'Non ora',
     'notification_permission_enable': 'Attiva notifiche',
-    'full_screen_call_permission_title':
-    'Mostra le chiamate in arrivo',
+    'full_screen_call_permission_title': 'Mostra le chiamate in arrivo',
     'full_screen_call_permission_description':
-    'Consenti a Italir Pothe di mostrare le chiamate in arrivo sopra la schermata di blocco per non perdere le chiamate.',
+        'Consenti a Italir Pothe di mostrare le chiamate in arrivo sopra la schermata di blocco per non perdere le chiamate.',
     'ai_report_action': 'Segnala',
     'ai_report_title': 'Segnala contenuto AI',
     'ai_report_description':
-    'Dicci cosa non va in questo contenuto generato dall’AI.',
+        'Dicci cosa non va in questo contenuto generato dall’AI.',
     'ai_report_issue_required': 'Problema *',
     'ai_report_details_optional': 'Dettagli (facoltativi)',
     'ai_report_add_screenshot': 'Aggiungi screenshot',
@@ -5366,25 +5150,21 @@ appTranslations = <String, Map<String, String>>{
     'ai_report_submit': 'Invia segnalazione',
     'ai_report_select_issue': 'Seleziona un problema.',
     'ai_report_content_missing':
-    'Non è stato possibile allegare il contenuto AI.',
+        'Non è stato possibile allegare il contenuto AI.',
     'ai_report_success_title': 'Segnalazione inviata',
     'ai_report_success_message':
-    'Grazie per averci aiutato a migliorare la sicurezza dell’AI.',
+        'Grazie per averci aiutato a migliorare la sicurezza dell’AI.',
     'ai_report_error_title': 'Invio non riuscito',
-    'ai_report_error_message':
-    'Impossibile inviare la segnalazione. Riprova.',
+    'ai_report_error_message': 'Impossibile inviare la segnalazione. Riprova.',
     'ai_report_offensive_or_hateful': 'Contenuto offensivo o d’odio',
-    'ai_report_sexual_or_inappropriate':
-    'Contenuto sessuale o inappropriato',
-    'ai_report_dangerous_or_harmful':
-    'Contenuto pericoloso o dannoso',
+    'ai_report_sexual_or_inappropriate': 'Contenuto sessuale o inappropriato',
+    'ai_report_dangerous_or_harmful': 'Contenuto pericoloso o dannoso',
     'ai_report_harassment': 'Molestie',
-    'ai_report_false_or_misleading':
-    'Informazioni false o fuorvianti',
+    'ai_report_false_or_misleading': 'Informazioni false o fuorvianti',
     'ai_report_privacy_concern': 'Problema di privacy',
     'ai_report_other': 'Altro',
     'guided_learning_level_selection':
-    'Selezione del livello di apprendimento guidato',
+        'Selezione del livello di apprendimento guidato',
     'notification_filter_all': 'Tutte',
     'notification_filter_learning': 'Apprendimento',
     'notification_filter_system': 'Sistema',
@@ -5392,82 +5172,74 @@ appTranslations = <String, Map<String, String>>{
 
     'offline_screen_title': 'Ops!\nSei offline.',
     'offline_learning_message':
-    'Controlla la connessione Internet per continuare a imparare le tue frasi italiane preferite.',
+        'Controlla la connessione Internet per continuare a imparare le tue frasi italiane preferite.',
     'search_no_match_message':
-    'Non abbiamo trovato ciò che cercavi. Prova con una parola diversa.',
+        'Non abbiamo trovato ciò che cercavi. Prova con una parola diversa.',
 
     'italian_keyboard_accents_help':
-    'Avrai bisogno di accenti italiani come à, è e ì per rispondere correttamente alle domande scritte.',
+        'Avrai bisogno di accenti italiani come à, è e ì per rispondere correttamente alle domande scritte.',
     'italian_keyboard_setup_help':
-    'Configura la tastiera italiana sul telefono per rispondere correttamente.',
+        'Configura la tastiera italiana sul telefono per rispondere correttamente.',
     'italian_accents_explanation':
-    'Gli accenti cambiano il significato e la pronuncia delle parole.',
+        'Gli accenti cambiano il significato e la pronuncia delle parole.',
 
     'ai_level_test_description':
-    'Scopri il tuo livello attuale con soltanto 10 domande.',
+        'Scopri il tuo livello attuale con soltanto 10 domande.',
     'ai_tutor_intro':
-    'Sono il tuo tutor AI. Esercitiamoci insieme in italiano.',
+        'Sono il tuo tutor AI. Esercitiamoci insieme in italiano.',
     'ai_scenario_tip':
-    'L’AI interpreterà un ruolo nello scenario, come cassiere, cameriere o autista.',
+        'L’AI interpreterà un ruolo nello scenario, come cassiere, cameriere o autista.',
 
     'level_mastered': 'Livello @level\ncompletato',
-    'certificate_milestone_message':
-    'Hai raggiunto un nuovo traguardo',
+    'certificate_milestone_message': 'Hai raggiunto un nuovo traguardo',
     'course_information_unavailable':
-    'Impossibile caricare le informazioni del corso.',
+        'Impossibile caricare le informazioni del corso.',
     'purchase_success_description':
-    'Ora hai accesso completo a vita a tutte le funzionalità di Italir Pothe. Il tuo percorso verso la padronanza inizia oggi.',
+        'Ora hai accesso completo a vita a tutte le funzionalità di Italir Pothe. Il tuo percorso verso la padronanza inizia oggi.',
 
     'coupon_applied': 'Coupon applicato',
     'discount_value': 'Sconto: @discount%',
     'remove_coupon': 'Rimuovi coupon',
     'store_price_notice':
-    'Il prezzo finale è stabilito da Google Play o App Store e può includere IVA, tasse, conversione valutaria o prezzi regionali.',
+        'Il prezzo finale è stabilito da Google Play o App Store e può includere IVA, tasse, conversione valutaria o prezzi regionali.',
 
     'support_contact_description':
-    'Scegli il modo più comodo per contattare il team di supporto di Italir Pothe.',
+        'Scegli il modo più comodo per contattare il team di supporto di Italir Pothe.',
     'chat_on_whatsapp': 'Chatta su WhatsApp',
-    'fastest_response_recommended':
-    'Consigliato per una risposta più rapida',
+    'fastest_response_recommended': 'Consigliato per una risposta più rapida',
     'facebook_community_description':
-    'Fai domande, condividi esperienze e connettiti con altri studenti.',
+        'Fai domande, condividi esperienze e connettiti con altri studenti.',
     'support_response_time':
-    'Cerchiamo di rispondere alle richieste di supporto entro 24 ore.',
+        'Cerchiamo di rispondere alle richieste di supporto entro 24 ore.',
 
     'reward_awarded_date': 'Assegnato\n@date',
     'voice_minutes_value': '@count minuti',
     'text_tokens_value': '@count token',
-    'ai_credit_usage_description':
-    'Voce per parlare, token per chattare.',
+    'ai_credit_usage_description': 'Voce per parlare, token per chattare.',
 
     'course_search_hint': 'Cerca corsi per nome',
-    'sentences_completed':
-    '@learned/@total frasi completate',
-    'sentences_learned_progress':
-    '@learned di @total frasi apprese',
+    'sentences_completed': '@learned/@total frasi completate',
+    'sentences_learned_progress': '@learned di @total frasi apprese',
     'final_exam_unlocked_message':
-    'Hai completato l’80% delle lezioni. L’esame finale è ora sbloccato!',
+        'Hai completato l’80% delle lezioni. L’esame finale è ora sbloccato!',
 
     'leaderboard_xp_explanation':
-    'Gli XP aumentano quando completi lezioni, pratichi conversazioni e impari il vocabolario italiano.',
-    'boost_duration_message':
-    'Dura per @duration. Esercitati ancora!',
+        'Gli XP aumentano quando completi lezioni, pratichi conversazioni e impari il vocabolario italiano.',
+    'boost_duration_message': 'Dura per @duration. Esercitati ancora!',
 
     'report_received_description':
-    'Grazie per contribuire alla sicurezza della community. Il nostro team amministrativo esaminerà presto la segnalazione.',
+        'Grazie per contribuire alla sicurezza della community. Il nostro team amministrativo esaminerà presto la segnalazione.',
 
     'webinar_host_value': 'Host: @host',
     'webinar_starts_at': 'Inizia alle @time',
     'webinar_course_access_description':
-    'Questa sessione è disponibile per gli utenti iscritti a uno dei seguenti corsi:',
-    'webinar_selected_course_only':
-    'Solo per il corso selezionato',
+        'Questa sessione è disponibile per gli utenti iscritti a uno dei seguenti corsi:',
+    'webinar_selected_course_only': 'Solo per il corso selezionato',
 
     'home_greeting': 'Ciao, @name',
     'level_tutor': 'Tutor di livello @level',
     'level_topics': 'Argomenti del livello @level',
-    'final_exam_attempt_not_found':
-    'Tentativo dell’esame finale non trovato.',
+    'final_exam_attempt_not_found': 'Tentativo dell’esame finale non trovato.',
     'score_label': 'Punteggio: @score',
     'xp_label': 'XP: @xp',
     'time_label': 'Tempo: @time',
@@ -5475,59 +5247,50 @@ appTranslations = <String, Map<String, String>>{
     'invalid_coupon': 'Coupon non valido',
     'you_ve_been_promoted_to': 'Sei stato promosso a',
     'league_name_value': 'Lega @leagueName',
-    'you_re_in_the_top_20_of_learners':
-    'Sei nel 20% migliore degli studenti',
-    'playing_pronunciation_for':
-    'Riproduzione della pronuncia di @text',
+    'you_re_in_the_top_20_of_learners': 'Sei nel 20% migliore degli studenti',
+    'playing_pronunciation_for': 'Riproduzione della pronuncia di @text',
     'playing_text': 'Riproduzione di @text',
-    'exam_progress_requirement':
-    '@progress% completato · @required% richiesto',
+    'exam_progress_requirement': '@progress% completato · @required% richiesto',
     'daily_chest_total_xp': '@xp XP',
     'daily_chest_streak_freezes_awarded': '@count assegnati',
     'daily_streak_message': 'La tua serie è di @days giorni',
     'webinar_message_preview': '@sender: @message',
     'no_internet_title': 'Nessuna connessione Internet',
     'no_internet_message':
-    'Controlla la connessione Wi-Fi o dati mobili e riprova.',
+        'Controlla la connessione Wi-Fi o dati mobili e riprova.',
     'checking_connection': 'Controllo della connessione...',
-    'no_internet_connection':
-    'Nessuna connessione Internet',
+    'no_internet_connection': 'Nessuna connessione Internet',
     'final_exam_not_ready_title': 'Non sei ancora pronto',
     'final_exam_unlock_requirement':
-    'Completa almeno l’80% delle videolezioni per sbloccare l’esame finale.',
+        'Completa almeno l’80% delle videolezioni per sbloccare l’esame finale.',
     'currently_watched_percent': 'Attualmente completato il @progress%',
     'unlock_at_percent': '@progress% per sbloccare',
     // Italian
     'final_exam_result_pending': 'Risultato in attesa',
     'final_exam_view_certificate': 'Visualizza certificato',
     'final_exam_retake': 'Ripeti l’esame',
-    'final_exam_review_in_progress':
-    'Il risultato è in fase di revisione',
+    'final_exam_review_in_progress': 'Il risultato è in fase di revisione',
     'final_exam_result_available':
-    'Il risultato dell’esame finale è disponibile',
-    'final_exam_certificate_available':
-    'Il certificato è pronto',
-    'final_exam_retake_available':
-    'Puoi ripetere l’esame',
+        'Il risultato dell’esame finale è disponibile',
+    'final_exam_certificate_available': 'Il certificato è pronto',
+    'final_exam_retake_available': 'Puoi ripetere l’esame',
     'you_re_ready': 'Sei pronto!',
     'home_cv_builder_unavailable':
-    'I servizi CV non sono attualmente disponibili.',
+        'I servizi CV non sono attualmente disponibili.',
     'daily_streak_count': 'Serie di @count giorni!',
     'keep_the_flame_alive': 'Mantieni viva la serie',
     'claim_xp': 'Riscatta +@xp XP',
     'reward_xp': '+@xp XP',
     'complete_all_tasks_to_open':
-    'Completa tutte le @count attività per aprire',
+        'Completa tutte le @count attività per aprire',
     'home_no_activity_this_week':
-    'Nessuna attività di apprendimento registrata questa settimana.',
+        'Nessuna attività di apprendimento registrata questa settimana.',
     'home_dashboard_load_failed':
-    'Impossibile caricare le informazioni della home. Riprova.',
-    'home_chapter_unavailable':
-    'Questa lezione non è attualmente disponibile.',
+        'Impossibile caricare le informazioni della home. Riprova.',
+    'home_chapter_unavailable': 'Questa lezione non è attualmente disponibile.',
     'home_career_track_unavailable':
-    'Questo percorso professionale non è attualmente disponibile.',
-    'home_ai_tutor_unavailable':
-    'Il tutor IA non è attualmente disponibile.',
+        'Questo percorso professionale non è attualmente disponibile.',
+    'home_ai_tutor_unavailable': 'Il tutor IA non è attualmente disponibile.',
     'home_one_day': '1 giorno',
     'home_days_count': '@count giorni',
     'home_keep_learning_today': 'Continua a imparare oggi!',
@@ -5559,96 +5322,84 @@ appTranslations = <String, Map<String, String>>{
     'home_month_12': 'dic',
     'leaderboard_you': 'Tu',
     'send_otp': 'Invia OTP',
-    'snack_need_special_character':
-    'Inserisci almeno un carattere speciale.',
+    'snack_need_special_character': 'Inserisci almeno un carattere speciale.',
     'account_access_restricted_description':
-    'L’amministrazione ha limitato il tuo accesso a Italir Pothe.',
+        'L’amministrazione ha limitato il tuo accesso a Italir Pothe.',
     'restriction_reason_unavailable':
-    'Non è stato fornito alcun motivo aggiuntivo per la restrizione.',
-    'effective_date_unavailable':
-    'Data di entrata in vigore non disponibile',
-    'effective_as_of':
-    'In vigore dal @date',
-    'moderation_case_reference':
-    'Riferimento del caso: @caseNumber',
+        'Non è stato fornito alcun motivo aggiuntivo per la restrizione.',
+    'effective_date_unavailable': 'Data di entrata in vigore non disponibile',
+    'effective_as_of': 'In vigore dal @date',
+    'moderation_case_reference': 'Riferimento del caso: @caseNumber',
     'account_restriction_appeal_message':
-    'Se ritieni che la decisione sia un errore, contatta il nostro team di assistenza per richiedere una revisione.',
+        'Se ritieni che la decisione sia un errore, contatta il nostro team di assistenza per richiedere una revisione.',
     'user_unblocked': 'Utente sbloccato',
     'username_has_been_successfully_unblocked_you_can_now_send_messages_and_view_their_profile_again':
-    '@username è stato sbloccato correttamente. Ora puoi inviare messaggi e visualizzare nuovamente il suo profilo.',
+        '@username è stato sbloccato correttamente. Ora puoi inviare messaggi e visualizzare nuovamente il suo profilo.',
     'communication_restored': 'Comunicazione ripristinata',
     'unblock_username': 'Sbloccare @username?',
     'username_has_been_hidden_from_your_app':
-    '@username è stato nascosto dalla tua app.',
+        '@username è stato nascosto dalla tua app.',
     'block_username': 'Bloccare @username?',
     'opening_conversation': 'Apertura della conversazione...',
     'choose_package': 'Scegli un pacchetto',
     'your_cv_allowance': 'LA TUA DISPONIBILITÀ CV',
-    'cv_free_creations_remaining':
-    '@count creazioni CV gratuite rimaste',
-    'cv_paid_credit_balance':
-    '@count crediti CV acquistati',
-    'cv_free_limit_ended':
-    'Il limite gratuito dei CV è terminato',
+    'cv_free_creations_remaining': '@count creazioni CV gratuite rimaste',
+    'cv_paid_credit_balance': '@count crediti CV acquistati',
+    'cv_free_limit_ended': 'Il limite gratuito dei CV è terminato',
     'cv_next_creation_uses_credit':
-    'Il prossimo nuovo CV utilizzerà 1 credito acquistato.',
+        'Il prossimo nuovo CV utilizzerà 1 credito acquistato.',
     'cv_purchase_credit_to_continue':
-    'Acquista un credito CV per creare un altro CV.',
+        'Acquista un credito CV per creare un altro CV.',
     'buy_cv_credits': 'Acquista crediti CV',
-    'cv_credit_required_title':
-    'Credito CV richiesto',
+    'cv_credit_required_title': 'Credito CV richiesto',
     'cv_credit_required_message':
-    'Hai utilizzato tutte e tre le creazioni CV gratuite e non hai crediti acquistati disponibili.',
+        'Hai utilizzato tutte e tre le creazioni CV gratuite e non hai crediti acquistati disponibili.',
 
     // Italian
     'review_your_order': 'Controlla il tuo ordine',
     'confirm_package_before_checkout':
-    'Verifica i dettagli del pacchetto prima di continuare.',
+        'Verifica i dettagli del pacchetto prima di continuare.',
     'total_price': 'Totale',
     'change_package': 'Cambia pacchetto',
     'subscription_renews_automatically':
-    'L’abbonamento si rinnova automaticamente finché non viene annullato.',
+        'L’abbonamento si rinnova automaticamente finché non viene annullato.',
     'secure_payment': 'Pagamento sicuro',
     'payment_processed_securely':
-    'Il pagamento viene elaborato in modo sicuro tramite Google Play.',
+        'Il pagamento viene elaborato in modo sicuro tramite Google Play.',
     'recurring_purchase': 'Abbonamento ricorrente',
     'one_time_purchase': 'Acquisto singolo',
     'cancel_subscription_anytime':
-    'Puoi gestirlo o annullarlo tramite Google Play.',
+        'Puoi gestirlo o annullarlo tramite Google Play.',
     'you_will_only_be_charged_once':
-    'Ti verrà addebitato l’importo una sola volta.',
-    'price_per_month':
-    '@price / mese',
+        'Ti verrà addebitato l’importo una sola volta.',
+    'price_per_month': '@price / mese',
 
-    'monthly_plan_auto_renews':
-    'Si rinnova automaticamente ogni mese',
+    'monthly_plan_auto_renews': 'Si rinnova automaticamente ogni mese',
 
     'monthly_plan_cancelled_active':
-    'Il rinnovo è stato annullato. La protezione resta attiva fino alla data indicata sotto.',
+        'Il rinnovo è stato annullato. La protezione resta attiva fino alla data indicata sotto.',
 
     'active_monthly_plan_already_exists':
-    'Gestisci il piano mensile attuale prima di acquistarne un altro.',
+        'Gestisci il piano mensile attuale prima di acquistarne un altro.',
 
-    'monthly_plan_already_active_badge':
-    'PIANO MENSILE GIÀ ATTIVO',
+    'monthly_plan_already_active_badge': 'PIANO MENSILE GIÀ ATTIVO',
 
-    'coupon_unavailable':
-    'Coupon non disponibile',
+    'coupon_unavailable': 'Coupon non disponibile',
 
     'coupon_not_available_for_package':
-    'I coupon non sono disponibili per questo pacchetto.',
+        'I coupon non sono disponibili per questo pacchetto.',
 
     'coupon_invalid_for_item':
-    'Questo coupon non è valido per il pacchetto selezionato.',
+        'Questo coupon non è valido per il pacchetto selezionato.',
     'streak_freeze_refiller': 'Ricariche blocco serie',
     'streak_freeze_store': 'Negozio blocchi serie',
     'protect_your_progress_in_italian':
-    'Proteggi i tuoi progressi di apprendimento',
+        'Proteggi i tuoi progressi di apprendimento',
     'your_inventory': 'LE TUE SCORTE',
     'streak_freeze_balance': '@count blocchi serie',
     'streak_freeze_pack_count': '@count blocchi serie',
     'no_streak_freeze_packages_are_available':
-    'Al momento non sono disponibili pacchetti blocco serie.',
+        'Al momento non sono disponibili pacchetti blocco serie.',
     'confirm_purchase': 'Conferma acquisto',
     'one_time_streak_freezes': 'Blocchi serie una tantum',
     'monthly_streak_protection': 'Protezione mensile della serie',
@@ -5657,23 +5408,22 @@ appTranslations = <String, Map<String, String>>{
     'protected_until': 'Protetto fino al @date',
     'protected_until_label': 'PROTETTO FINO AL',
     'manage_monthly_plan': 'Gestisci il piano mensile',
-    'manage_or_cancel_google_play':
-    'Gestisci o annulla su Google Play',
+    'manage_or_cancel_google_play': 'Gestisci o annulla su Google Play',
     'monthly_cancellation_information':
-    'L’annullamento interrompe il prossimo rinnovo. La protezione resta attiva fino alla fine del periodo già pagato.',
+        'L’annullamento interrompe il prossimo rinnovo. La protezione resta attiva fino alla fine del periodo già pagato.',
     'unlimited_streak_protection_description':
-    'Protezione illimitata per i giorni di studio saltati mentre il piano mensile è attivo.',
+        'Protezione illimitata per i giorni di studio saltati mentre il piano mensile è attivo.',
     'unlimited_protection': 'Protezione illimitata',
     'monthly_protection_page_description':
-    'La tua serie resta protetta finché questo piano mensile è attivo.',
+        'La tua serie resta protetta finché questo piano mensile è attivo.',
     'expiry_date_not_available': 'Data di scadenza non disponibile',
     'not_currently_protected': 'Protezione non attiva',
     'opening_google_play': 'Apertura di Google Play...',
     'unable_to_open_google_play': 'Impossibile aprire Google Play',
     'open_google_play_subscriptions_manually':
-    'Apri Google Play e vai su Pagamenti e abbonamenti > Abbonamenti.',
+        'Apri Google Play e vai su Pagamenti e abbonamenti > Abbonamenti.',
     'google_play_handles_subscription_changes':
-    'Google Play gestisce annullamento, rinnovo, metodo di pagamento e nuova iscrizione.',
+        'Google Play gestisce annullamento, rinnovo, metodo di pagamento e nuova iscrizione.',
     'best_value': 'MIGLIOR VALORE',
     'limited_time': 'TEMPO LIMITATO',
     'course_features': 'Funzionalità del corso',
@@ -5681,12 +5431,12 @@ appTranslations = <String, Map<String, String>>{
     'applying_coupon': 'Applicazione del coupon…',
     'unlock_this_course': 'Sblocca questo corso!',
     'unlock_course_access_description':
-    'Sblocca @coursename per accedere a tutte le @lessoncount lezioni e a tutte le funzionalità incluse nel corso.',
+        'Sblocca @coursename per accedere a tutte le @lessoncount lezioni e a tutte le funzionalità incluse nel corso.',
     'give_exam_again': 'Ripeti l’esame',
     'final_exam_retake_not_available':
-    'Non è disponibile un nuovo tentativo d’esame.',
+        'Non è disponibile un nuovo tentativo d’esame.',
     'final_exam_course_not_found':
-    'Il corso relativo a questo esame non è stato trovato.',
+        'Il corso relativo a questo esame non è stato trovato.',
     'final_exam_results_title': 'Risultati dell’esame',
     'final_exam_mark_achieved': 'PUNTEGGIO OTTENUTO',
     'final_exam_xp_awarded': '@xp XP ottenuti',
@@ -5695,7 +5445,7 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_retake_required': 'Esame da ripetere',
     'final_exam_evaluation_ready': 'La valutazione finale è pronta.',
     'final_exam_result_unavailable':
-    'Il risultato dell’esame finale non è disponibile.',
+        'Il risultato dell’esame finale non è disponibile.',
 
     'close': 'Chiudi',
     'official_certificate': 'Certificato ufficiale',
@@ -5707,49 +5457,38 @@ appTranslations = <String, Map<String, String>>{
     'certificate_number_value': 'Numero del certificato: @number',
     'certificate_download': 'Download del certificato',
     'certificate_information_unavailable':
-    'Le informazioni del certificato non sono disponibili.',
+        'Le informazioni del certificato non sono disponibili.',
     'certificate_not_active': 'Questo certificato non è attivo.',
-    'certificate_pdf_unavailable':
-    'Il PDF del certificato non è disponibile.',
+    'certificate_pdf_unavailable': 'Il PDF del certificato non è disponibile.',
     'invalid_certificate_download_url':
-    'L’URL per scaricare il certificato non è valido.',
+        'L’URL per scaricare il certificato non è valido.',
     'unable_to_open_certificate_pdf':
-    'Impossibile aprire il PDF del certificato.',
+        'Impossibile aprire il PDF del certificato.',
 
     'final_exam_success_title': 'Esame completato',
-    'final_exam_back_to_practice_hub':
-    'Torna all’area pratica',
+    'final_exam_back_to_practice_hub': 'Torna all’area pratica',
     'final_exam_submitted_title': 'Esame inviato!',
     'final_exam_submitted_message':
-    'Bravissimo! Hai completato la parte più difficile. Ora i nostri insegnanti esamineranno le tue risposte.',
+        'Bravissimo! Hai completato la parte più difficile. Ora i nostri insegnanti esamineranno le tue risposte.',
     'final_exam_reference_id': 'ID di riferimento: @value',
-    'final_exam_reference_id_unavailable':
-    'ID di riferimento non disponibile',
-    'final_exam_evaluation_timeline':
-    'CRONOLOGIA DELLA VALUTAZIONE',
+    'final_exam_reference_id_unavailable': 'ID di riferimento non disponibile',
+    'final_exam_evaluation_timeline': 'CRONOLOGIA DELLA VALUTAZIONE',
     'final_exam_received': 'Esame ricevuto',
-    'final_exam_uploaded_successfully':
-    'Caricato correttamente sul server',
-    'final_exam_teacher_review':
-    'Revisione dell’insegnante',
-    'final_exam_manual_review_completed':
-    'Revisione manuale completata',
+    'final_exam_uploaded_successfully': 'Caricato correttamente sul server',
+    'final_exam_teacher_review': 'Revisione dell’insegnante',
+    'final_exam_manual_review_completed': 'Revisione manuale completata',
     'final_exam_reviewing_answers':
-    'Stiamo esaminando le tue risposte orali e scritte',
-    'final_exam_result_certificate':
-    'Risultato e certificato',
-    'final_exam_result_ready':
-    'Il tuo risultato è pronto',
+        'Stiamo esaminando le tue risposte orali e scritte',
+    'final_exam_result_certificate': 'Risultato e certificato',
+    'final_exam_result_ready': 'Il tuo risultato è pronto',
     'final_exam_unlock_achievement':
-    'Il tuo traguardo sarà sbloccato al termine della revisione',
-    'final_exam_view_result':
-    'Visualizza risultato',
+        'Il tuo traguardo sarà sbloccato al termine della revisione',
+    'final_exam_view_result': 'Visualizza risultato',
     'final_exam_estimated_result_unavailable':
-    'L’orario stimato del risultato non è disponibile',
-    'final_exam_estimated_result':
-    'Risultato previsto: @value',
+        'L’orario stimato del risultato non è disponibile',
+    'final_exam_estimated_result': 'Risultato previsto: @value',
     'final_exam_waiting_tip':
-    'Nell’attesa, prova una sfida giornaliera o continua a esercitarti.',
+        'Nell’attesa, prova una sfida giornaliera o continua a esercitarti.',
     'common_back': 'Indietro',
     'final_exam_submit_answer': 'Invia risposta',
     'final_exam_recording': 'Registrazione…',
@@ -5763,38 +5502,35 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_no_speaking_task': 'Nessuna prova orale disponibile.',
     'submit': 'Invia',
     'review_quiz_subtitle':
-    'Rivediamo le tue risposte e vediamo come te la sei cavata.',
-    'quiz_result_not_available':
-    'Il risultato del quiz non è disponibile.',
+        'Rivediamo le tue risposte e vediamo come te la sei cavata.',
+    'quiz_result_not_available': 'Il risultato del quiz non è disponibile.',
     'your_answer_is_correct': 'La tua risposta è corretta.',
     'that_s_not_quite_right': 'La risposta non è corretta.',
     'current_total': '@current / @total',
     'audio_speed_multiplier': '@speed×',
     'if_you_quit_now_you_ll_lose_your_progress':
-    'Se esci ora, perderai i tuoi progressi.',
+        'Se esci ora, perderai i tuoi progressi.',
     'community_link_error': 'Impossibile aprire la community',
     'community_link_not_available':
-    'Il link della community non è configurato.',
+        'Il link della community non è configurato.',
     'community_link_could_not_open':
-    'Non è stato possibile aprire la community Facebook.',
+        'Non è stato possibile aprire la community Facebook.',
     'you_reviewed_complete_reviewedcount_words':
-    'Hai ripassato @reviewedcount parole',
+        'Hai ripassato @reviewedcount parole',
     'vocabulary_words_count': '@count parole',
-    'vocabulary_card_progress':
-    'Scheda @current di @total',
-    'no_vocabulary_available':
-    'Nessun vocabolario disponibile',
+    'vocabulary_card_progress': 'Scheda @current di @total',
+    'no_vocabulary_available': 'Nessun vocabolario disponibile',
     'no_vocabulary_available_description':
-    'Non è ancora disponibile alcun vocabolario per questa lezione.',
+        'Non è ancora disponibile alcun vocabolario per questa lezione.',
     'italian_voice_unavailable_message':
-    'Installa o abilita una voce italiana sul dispositivo e riprova.',
+        'Installa o abilita una voce italiana sul dispositivo e riprova.',
     'pause': 'Pausa',
     'course_final_exam_title': 'Esame finale',
     'course_final_exam_description':
-    'Completa l’esame finale per verificare le tue conoscenze e terminare il corso.',
+        'Completa l’esame finale per verificare le tue conoscenze e terminare il corso.',
     'course_final_exam_action': 'Completa tutti i capitoli per sbloccare',
     'course_final_exam_helper':
-    'Completa ogni capitolo prima di sostenere l’esame',
+        'Completa ogni capitolo prima di sostenere l’esame',
     'current_lesson': 'Lezione attuale',
     'chapter_progress_percent': '@progress%',
     'course_tag_pro': 'PRO',
@@ -5807,263 +5543,196 @@ appTranslations = <String, Map<String, String>>{
     'claimed_xp': 'Ottenuti +@xp XP',
     'daily_challenge_xp': '@xp XP',
     'verb_learn_types_forms_examples':
-    'Impara i tipi di verbo, le forme e gli esempi reali per padroneggiare l’italiano.',
+        'Impara i tipi di verbo, le forme e gli esempi reali per padroneggiare l’italiano.',
     'pdf_page_counter': 'Pagina @current di @total',
-    'cv_preview_load_failed':
-    'Impossibile caricare l’anteprima del CV.',
-    'cv_validation_title':
-    'Completa il tuo CV',
+    'cv_preview_load_failed': 'Impossibile caricare l’anteprima del CV.',
+    'cv_validation_title': 'Completa il tuo CV',
     'cv_validation_subtitle':
-    'Risolvi gli elementi rimanenti prima di generare il CV.',
+        'Risolvi gli elementi rimanenti prima di generare il CV.',
 
-    'cv_validation_generation_requirements':
-    'Requisiti di generazione',
-    'cv_validation_required_information':
-    'Informazioni obbligatorie',
-    'cv_validation_template_sections':
-    'Sezioni del modello',
-    'cv_validation_optional_sections':
-    'Sezioni facoltative',
-    'cv_validation_suggestions':
-    'Suggerimenti',
+    'cv_validation_generation_requirements': 'Requisiti di generazione',
+    'cv_validation_required_information': 'Informazioni obbligatorie',
+    'cv_validation_template_sections': 'Sezioni del modello',
+    'cv_validation_optional_sections': 'Sezioni facoltative',
+    'cv_validation_suggestions': 'Suggerimenti',
 
     'cv_validation_one_suggestion':
-    'Un suggerimento deve essere accettato, modificato o rifiutato.',
+        'Un suggerimento deve essere accettato, modificato o rifiutato.',
     'cv_validation_multiple_suggestions':
-    '@count suggerimenti devono essere accettati, modificati o rifiutati.',
+        '@count suggerimenti devono essere accettati, modificati o rifiutati.',
 
-    'cv_validation_profile_photo':
-    'Foto del profilo',
+    'cv_validation_profile_photo': 'Foto del profilo',
     'cv_validation_photo_instruction':
-    'Scegli una foto oppure continua senza foto.',
-    'cv_validation_quality_issues':
-    'Problemi di qualità',
+        'Scegli una foto oppure continua senza foto.',
+    'cv_validation_quality_issues': 'Problemi di qualità',
 
     'cv_validation_remaining_steps':
-    'Completa i passaggi rimanenti dell’assistente prima di generare il CV.',
+        'Completa i passaggi rimanenti dell’assistente prima di generare il CV.',
     'cv_thinking_default': 'Elaborazione in corso…',
-    'cv_template_card_use_template':
-    'Usa questo modello',
-    'cv_template_card_analyzing':
-    'Analisi del modello in corso…',
-    'cv_template_card_analysis_failed':
-    'Analisi del modello non riuscita',
+    'cv_template_card_use_template': 'Usa questo modello',
+    'cv_template_card_analyzing': 'Analisi del modello in corso…',
+    'cv_template_card_analysis_failed': 'Analisi del modello non riuscita',
     'cv_template_card_analysis_default_error':
-    'Non è stato possibile analizzare il modello.',
-    'cv_template_card_retry':
-    'Riprova',
-    'cv_selected_template_label':
-    'Modello selezionato',
-    'cv_photo_decision_title':
-    'Vuoi aggiungere una foto?',
+        'Non è stato possibile analizzare il modello.',
+    'cv_template_card_retry': 'Riprova',
+    'cv_selected_template_label': 'Modello selezionato',
+    'cv_photo_decision_title': 'Vuoi aggiungere una foto?',
     'cv_photo_decision_description':
-    'Scegli una foto profilo professionale oppure continua senza foto.',
-    'cv_photo_decision_without_photo':
-    'Senza foto',
-    'cv_photo_decision_upload_photo':
-    'Carica foto',
-    'cv_edit_options_title':
-    'Modifica il tuo CV',
-    'cv_edit_options_subtitle':
-    'Scegli cosa desideri aggiornare.',
+        'Scegli una foto profilo professionale oppure continua senza foto.',
+    'cv_photo_decision_without_photo': 'Senza foto',
+    'cv_photo_decision_upload_photo': 'Carica foto',
+    'cv_edit_options_title': 'Modifica il tuo CV',
+    'cv_edit_options_subtitle': 'Scegli cosa desideri aggiornare.',
 
-    'cv_edit_options_information_title':
-    'Modifica le informazioni',
+    'cv_edit_options_information_title': 'Modifica le informazioni',
     'cv_edit_options_information_description':
-    'Aggiorna le informazioni del CV mantenendo il design esistente.',
+        'Aggiorna le informazioni del CV mantenendo il design esistente.',
 
     'cv_edit_options_information_design_title':
-    'Modifica informazioni e design',
+        'Modifica informazioni e design',
     'cv_edit_options_information_design_description':
-    'Aggiorna le informazioni del CV e poi fornisci le istruzioni per un nuovo design.',
+        'Aggiorna le informazioni del CV e poi fornisci le istruzioni per un nuovo design.',
 
-    'cv_edit_options_design_only_title':
-    'Modifica solo il design',
+    'cv_edit_options_design_only_title': 'Modifica solo il design',
     'cv_edit_options_design_only_description':
-    'Mantieni tutte le informazioni esistenti e modifica solamente il design.',
+        'Mantieni tutte le informazioni esistenti e modifica solamente il design.',
 
     'cv_edit_options_version_notice':
-    'Verrà creata una nuova versione del CV. Il CV originale rimarrà invariato.',
+        'Verrà creata una nuova versione del CV. Il CV originale rimarrà invariato.',
     'cv_design_title': 'Modifica il design del CV',
     'cv_design_description':
-    'Descrivi la modifica visiva desiderata. Le informazioni esistenti del CV verranno mantenute.',
+        'Descrivi la modifica visiva desiderata. Le informazioni esistenti del CV verranno mantenute.',
     'cv_design_hint':
-    'Esempio: usa un design pulito blu scuro con titoli più evidenti.',
+        'Esempio: usa un design pulito blu scuro con titoli più evidenti.',
     'cv_design_examples': 'Esempi',
     'cv_design_generate': 'Genera un nuovo design',
-    'cv_design_empty_error':
-    'Descrivi come desideri modificare il design.',
+    'cv_design_empty_error': 'Descrivi come desideri modificare il design.',
 
-    'cv_design_example_dark_blue':
-    'Usa un tema professionale blu scuro.',
-    'cv_design_example_minimal':
-    'Rendi il layout più minimalista.',
-    'cv_design_example_two_column':
-    'Usa un moderno design a due colonne.',
+    'cv_design_example_dark_blue': 'Usa un tema professionale blu scuro.',
+    'cv_design_example_minimal': 'Rendi il layout più minimalista.',
+    'cv_design_example_two_column': 'Usa un moderno design a due colonne.',
     'cv_chat_message_sending': 'Invio in corso',
     'cv_chat_message_failed': 'Invio non riuscito',
     'cv_chat_message_retry': 'Riprova',
-    'cv_chat_input_email_hint':
-    'Inserisci il tuo indirizzo e-mail',
-    'cv_chat_input_phone_hint':
-    'Inserisci il tuo numero di telefono',
-    'cv_chat_input_url_hint':
-    'Inserisci l’URL del sito web',
-    'cv_chat_input_list_hint':
-    'Inserisci gli elementi separati da virgole',
-    'cv_chat_input_choice_hint':
-    'Seleziona o scrivi la tua risposta',
-    'cv_chat_input_long_text_hint':
-    'Scrivi la tua risposta',
-    'cv_chat_input_default_hint':
-    'Digita la tua risposta...',
-    'cv_chat_action_generating':
-    'Generazione del CV...',
-    'cv_chat_action_generate':
-    'Genera CV',
-    'cv_attachment_title':
-    'Aggiungi un’immagine al CV',
-    'cv_attachment_profile_photo':
-    'Carica la foto del profilo',
+    'cv_chat_input_email_hint': 'Inserisci il tuo indirizzo e-mail',
+    'cv_chat_input_phone_hint': 'Inserisci il tuo numero di telefono',
+    'cv_chat_input_url_hint': 'Inserisci l’URL del sito web',
+    'cv_chat_input_list_hint': 'Inserisci gli elementi separati da virgole',
+    'cv_chat_input_choice_hint': 'Seleziona o scrivi la tua risposta',
+    'cv_chat_input_long_text_hint': 'Scrivi la tua risposta',
+    'cv_chat_input_default_hint': 'Digita la tua risposta...',
+    'cv_chat_action_generating': 'Generazione del CV...',
+    'cv_chat_action_generate': 'Genera CV',
+    'cv_attachment_title': 'Aggiungi un’immagine al CV',
+    'cv_attachment_profile_photo': 'Carica la foto del profilo',
     'cv_attachment_profile_photo_description':
-    'Aggiungi la foto del candidato da mostrare nel CV.',
-    'cv_attachment_reference':
-    'Carica un CV o un design di riferimento',
+        'Aggiungi la foto del candidato da mostrare nel CV.',
+    'cv_attachment_reference': 'Carica un CV o un design di riferimento',
     'cv_attachment_reference_description':
-    'Aggiungi un’immagine di un CV, layout, colore o design come riferimento visivo.',
+        'Aggiungi un’immagine di un CV, layout, colore o design come riferimento visivo.',
     'cv_generation_title': 'CV generato',
     'cv_generation_image_unavailable':
-    'L’immagine del CV generato non è disponibile.',
+        'L’immagine del CV generato non è disponibile.',
 
     'cv_generation_opening_information_editor':
-    'Apertura dell’editor delle informazioni',
+        'Apertura dell’editor delle informazioni',
     'cv_generation_preparing_information_editor':
-    'Preparazione dei dati esistenti del CV per la modifica. Attendi…',
-    'cv_generation_preparing_cv_editor':
-    'Preparazione dell’editor del CV',
+        'Preparazione dei dati esistenti del CV per la modifica. Attendi…',
+    'cv_generation_preparing_cv_editor': 'Preparazione dell’editor del CV',
     'cv_generation_loading_information_design':
-    'Caricamento delle informazioni e delle impostazioni di design. Attendi…',
-    'cv_generation_opening_design_editor':
-    'Apertura dell’editor del design',
+        'Caricamento delle informazioni e delle impostazioni di design. Attendi…',
+    'cv_generation_opening_design_editor': 'Apertura dell’editor del design',
     'cv_generation_preparing_design_form':
-    'Preparazione del modulo per le istruzioni di design…',
+        'Preparazione del modulo per le istruzioni di design…',
 
-    'cv_generation_creating_title':
-    'Creazione del tuo CV',
+    'cv_generation_creating_title': 'Creazione del tuo CV',
     'cv_generation_creating_description':
-    'La generazione con l’IA può richiedere alcuni minuti. Rimani su questa pagina mentre creiamo il tuo CV.',
+        'La generazione con l’IA può richiedere alcuni minuti. Rimani su questa pagina mentre creiamo il tuo CV.',
     'cv_generation_do_not_leave':
-    'Non chiudere l’app e non uscire da questa schermata.',
+        'Non chiudere l’app e non uscire da questa schermata.',
 
-    'cv_generation_open_fullscreen':
-    'Apri l’anteprima a schermo intero',
-    'cv_generation_reset_zoom':
-    'Reimposta zoom',
+    'cv_generation_open_fullscreen': 'Apri l’anteprima a schermo intero',
+    'cv_generation_reset_zoom': 'Reimposta zoom',
 
     'cv_generation_new_version_notice':
-    'Questa è una nuova versione del CV. Il CV originale rimane invariato.',
+        'Questa è una nuova versione del CV. Il CV originale rimane invariato.',
     'cv_generation_edit_version_notice':
-    'La modifica delle informazioni o del design creerà una nuova versione del CV. Il CV originale rimarrà invariato.',
+        'La modifica delle informazioni o del design creerà una nuova versione del CV. Il CV originale rimarrà invariato.',
     'cv_generation_review_notice':
-    'Controlla ortografia, date, numero di telefono, e-mail e tutti gli altri dettagli prima di utilizzare questo CV.',
+        'Controlla ortografia, date, numero di telefono, e-mail e tutti gli altri dettagli prima di utilizzare questo CV.',
 
-    'cv_generation_download_started':
-    'Download avviato',
-    'cv_generation_applying_design':
-    'Applicazione delle modifiche al design',
-    'cv_generation_opening_editor':
-    'Apertura dell’editor del CV',
+    'cv_generation_download_started': 'Download avviato',
+    'cv_generation_applying_design': 'Applicazione delle modifiche al design',
+    'cv_generation_opening_editor': 'Apertura dell’editor del CV',
 
     'cv_generation_pdf_preparing_saving':
-    'Il PDF A4 è in preparazione e verrà salvato direttamente sul telefono.',
+        'Il PDF A4 è in preparazione e verrà salvato direttamente sul telefono.',
     'cv_generation_ai_creating_version':
-    'L’IA sta creando una nuova versione del CV con le modifiche al design richieste.',
+        'L’IA sta creando una nuova versione del CV con le modifiche al design richieste.',
     'cv_generation_preparing_edit_information':
-    'Attendi mentre prepariamo le informazioni del CV per la modifica.',
+        'Attendi mentre prepariamo le informazioni del CV per la modifica.',
 
-    'cv_generation_opening_editor_button':
-    'Apertura editor...',
+    'cv_generation_opening_editor_button': 'Apertura editor...',
     'cv_generation_applying_design_button':
-    'Applicazione modifiche al design...',
-    'cv_generation_edit_design_button':
-    'Modifica o cambia design',
+        'Applicazione modifiche al design...',
+    'cv_generation_edit_design_button': 'Modifica o cambia design',
 
     'cv_generation_download_snackbar':
-    'Preparazione del PDF A4. Verrà salvato direttamente sul telefono.',
-    'cv_generation_preparing_download':
-    'Preparazione download...',
-    'cv_generation_download_pdf':
-    'Scarica PDF A4',
+        'Preparazione del PDF A4. Verrà salvato direttamente sul telefono.',
+    'cv_generation_preparing_download': 'Preparazione download...',
+    'cv_generation_download_pdf': 'Scarica PDF A4',
 
-    'cv_generation_close_preview':
-    'Chiudi anteprima',
-    'cv_generation_zoom_in':
-    'Ingrandisci',
-    'cv_generation_zoom_out':
-    'Riduci',
+    'cv_generation_close_preview': 'Chiudi anteprima',
+    'cv_generation_zoom_in': 'Ingrandisci',
+    'cv_generation_zoom_out': 'Riduci',
 
-    'cv_generation_failed':
-    'Generazione del CV non riuscita',
-    'cv_generation_try_again':
-    'Riprova',
-    'cv_generation_do_not_close_page':
-    'Non chiudere questa pagina',
+    'cv_generation_failed': 'Generazione del CV non riuscita',
+    'cv_generation_try_again': 'Riprova',
+    'cv_generation_do_not_close_page': 'Non chiudere questa pagina',
     'cv_chat_assistant_title': 'Assistente CV',
-    'cv_chat_reviewing_information':
-    'Revisione delle informazioni del tuo CV…',
+    'cv_chat_reviewing_information': 'Revisione delle informazioni del tuo CV…',
 
-    'cv_chat_edit_facts_title':
-    'Aggiorna le informazioni del CV',
-    'cv_chat_edit_design_title':
-    'Aggiorna informazioni e design',
+    'cv_chat_edit_facts_title': 'Aggiorna le informazioni del CV',
+    'cv_chat_edit_design_title': 'Aggiorna informazioni e design',
     'cv_chat_edit_facts_description':
-    'Aggiorna le tue informazioni. Il design esistente verrà mantenuto.',
+        'Aggiorna le tue informazioni. Il design esistente verrà mantenuto.',
     'cv_chat_edit_design_description':
-    'Aggiorna prima le tue informazioni, quindi fornisci le istruzioni per il nuovo design.',
+        'Aggiorna prima le tue informazioni, quindi fornisci le istruzioni per il nuovo design.',
 
     'cv_chat_mode_one_by_one': 'Una alla volta',
     'cv_chat_mode_all_at_once': 'Tutte insieme',
 
-    'cv_chat_status_collecting':
-    'Raccolta delle informazioni del CV',
-    'cv_chat_status_ready':
-    'Pronto per la generazione',
-    'cv_chat_status_generating':
-    'Generazione del CV',
+    'cv_chat_status_collecting': 'Raccolta delle informazioni del CV',
+    'cv_chat_status_ready': 'Pronto per la generazione',
+    'cv_chat_status_generating': 'Generazione del CV',
     'cv_chat_status_completed': 'Completato',
     'cv_chat_status_cancelled': 'Annullato',
 
-    'cv_chat_starting_assistant':
-    'Avvio dell’Assistente CV',
+    'cv_chat_starting_assistant': 'Avvio dell’Assistente CV',
     'cv_chat_starting_description':
-    'L’assistente ti chiederà le informazioni necessarie per creare il tuo CV.',
+        'L’assistente ti chiederà le informazioni necessarie per creare il tuo CV.',
     'cv_home_create_your_cv': 'Crea il tuo CV',
     'cv_home_description':
-    'Scegli un modello di CV oppure lascia che l’assistente CV crei un design da zero.',
+        'Scegli un modello di CV oppure lascia che l’assistente CV crei un design da zero.',
     'cv_home_choose_template': 'Scegli un modello',
     'cv_home_search_templates': 'Cerca modelli di CV...',
-    'cv_home_could_not_load_templates':
-    'Impossibile caricare i modelli',
+    'cv_home_could_not_load_templates': 'Impossibile caricare i modelli',
     'cv_home_try_again': 'Riprova',
-    'cv_home_no_templates_found':
-    'Nessun modello trovato',
+    'cv_home_no_templates_found': 'Nessun modello trovato',
     'cv_home_no_templates_available':
-    'Al momento non sono disponibili modelli di CV.',
-    'cv_home_no_search_match':
-    'Nessun modello corrisponde alla tua ricerca.',
+        'Al momento non sono disponibili modelli di CV.',
+    'cv_home_no_search_match': 'Nessun modello corrisponde alla tua ricerca.',
     'cv_home_clear_search': 'Cancella ricerca',
     'cv_home_load_more': 'Carica altro',
-    'cv_home_analyzing_template':
-    'Analisi del modello in corso',
+    'cv_home_analyzing_template': 'Analisi del modello in corso',
     'cv_home_analyzing_description':
-    'L’assistente CV sta esaminando il layout, le sezioni, i colori e il design di questo modello.',
+        'L’assistente CV sta esaminando il layout, le sezioni, i colori e il design di questo modello.',
     'cv_home_assistant_open_automatically':
-    'L’Assistente CV si aprirà automaticamente al termine dell’analisi.',
-    'cv_home_stay_on_page':
-    'Rimani su questa pagina.',
+        'L’Assistente CV si aprirà automaticamente al termine dell’analisi.',
+    'cv_home_stay_on_page': 'Rimani su questa pagina.',
     'cv_home_build_from_scratch': 'Crea da zero',
     'cv_home_build_from_scratch_description':
-    'Chatta con l’assistente CV, condividi le tue preferenze e genera un CV professionale.',
+        'Chatta con l’assistente CV, condividi le tue preferenze e genera un CV professionale.',
     'fill_form_and_submit':
         'Compila correttamente il modulo e allega i documenti richiesti.',
     'course_resources': 'Risorse del corso',

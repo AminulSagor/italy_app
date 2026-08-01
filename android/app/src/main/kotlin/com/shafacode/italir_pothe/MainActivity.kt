@@ -213,7 +213,7 @@ class MainActivity : FlutterActivity() {
         insets: WindowInsetsCompat
     ): Int {
         return insets.getInsets(
-            WindowInsetsCompat.Type.tappableElement()
+            WindowInsetsCompat.Type.navigationBars()
         ).bottom
     }
 

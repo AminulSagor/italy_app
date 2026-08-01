@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/services/api_client.dart';
+import '../../courses/sub_features/chapter_detail/models/chapter_detail_models.dart';
 import '../models/job_sentence_models.dart';
 import '../models/job_track_models.dart';
 import 'package:get/get.dart' hide Response;
@@ -93,6 +94,18 @@ class JobSentencesApiService {
     throw DioException(
       requestOptions: response.requestOptions,
       message: 'response_is_not_a_valid_json_object'.tr,
+    );
+  }
+
+  Future<ChapterVideoAccessModel> fetchCareerTrackVideoAccess({
+    required String trackId,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.get(
+      '/skill-builder/career-tracks/$trackId/video-access',
+    );
+
+    return ChapterVideoAccessModel.fromJson(
+      _responseMap(response),
     );
   }
 }

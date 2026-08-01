@@ -104,7 +104,7 @@ class QuizQuestionPanel extends StatelessWidget {
           rightKeys: matchingRightKeys,
           isLocked: hasCheckedAnswer,
           showWrongResult: showWrongResult,
-          onReorder: onMatchingRightReorder,
+          onSwap: onMatchingRightReorder,
         );
       case QuizQuestionType.writingWordTranslation:
         return _WritingWordPanel(

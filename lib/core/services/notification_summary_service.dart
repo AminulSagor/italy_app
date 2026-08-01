@@ -14,19 +14,35 @@ class NotificationSummaryService {
       '/notifications/my',
       queryParameters: <String, dynamic>{
         'page': 1,
-        'limit': 1,
+        'limit': 10,
         'unreadOnly': true,
       },
     );
+
     final Map<String, dynamic> body = _responseMap(response);
-    final dynamic rawItems = body['items'] ?? body['data'];
-    if (rawItems is List && rawItems.isNotEmpty) return true;
+
     final dynamic rawMeta = body['meta'];
+
     if (rawMeta is Map) {
-      final dynamic total = rawMeta['total'] ?? rawMeta['unreadCount'];
-      if (total is num) return total > 0;
-      return (int.tryParse(total?.toString() ?? '') ?? 0) > 0;
+      final dynamic unreadCount = rawMeta['unreadCount'];
+
+      if (unreadCount != null) {
+        return (int.tryParse(unreadCount.toString()) ?? 0) > 0;
+      }
     }
+
+    final dynamic rawItems = body['items'] ?? body['data'];
+
+    if (rawItems is List) {
+      return rawItems.whereType<Map>().any((Map item) {
+        final dynamic isRead = item['isRead'];
+
+        return isRead == false ||
+            isRead == 0 ||
+            isRead?.toString().toLowerCase() == 'false';
+      });
+    }
+
     return false;
   }
 

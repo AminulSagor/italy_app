@@ -38,7 +38,8 @@ class ChapterDetailController extends GetxController {
 
   int _lastRecordedVideoPercent = 0;
   bool _isLessonCompletionSubmitted = false;
-  Future<String?>? _videoUrlFuture;
+  Future<ChapterVideoAccessModel?>? _videoAccessFuture;
+  ChapterVideoAccessModel? _cachedVideoAccess;
   Future<String?>? _audioUrlFuture;
   Future<ChapterMediaModel?>? _pdfMediaFuture;
   Future<int>? _pdfPageCountFuture;
@@ -57,6 +58,16 @@ class ChapterDetailController extends GetxController {
   void onClose() {
     scrollController.dispose();
     super.onClose();
+  }
+
+  Future<void> refreshChapter() async {
+    _videoAccessFuture = null;
+    _cachedVideoAccess = null;
+    _audioUrlFuture = null;
+    _pdfMediaFuture = null;
+    _pdfPageCountFuture = null;
+
+    await loadDetail();
   }
 
   Future<void> loadDetail() async {
@@ -104,24 +115,66 @@ class ChapterDetailController extends GetxController {
     }
   }
 
-  Future<String?> loadVideoUrl() {
-    final Future<String?>? cachedFuture = _videoUrlFuture;
-    if (cachedFuture != null) {
-      return cachedFuture;
+  Future<ChapterVideoAccessModel?> loadVideoAccess() {
+    final ChapterVideoAccessModel? cachedAccess = _cachedVideoAccess;
+
+    if (cachedAccess != null &&
+        cachedAccess.canPlay &&
+        !cachedAccess.isExpiredOrNearExpiry) {
+      return Future<ChapterVideoAccessModel?>.value(cachedAccess);
     }
 
-    final Future<String?> future = _loadMediaUrl(
-      media: detail.value?.video,
-      type: ChapterMediaType.video,
+    final Future<ChapterVideoAccessModel?>? activeFuture =
+        _videoAccessFuture;
+
+    if (activeFuture != null) {
+      return activeFuture;
+    }
+
+    final Future<ChapterVideoAccessModel?> future =
+    _requestVideoAccess();
+
+    _videoAccessFuture = future;
+
+    return future.whenComplete(() {
+      if (identical(_videoAccessFuture, future)) {
+        _videoAccessFuture = null;
+      }
+    });
+  }
+
+  Future<ChapterVideoAccessModel?> _requestVideoAccess() async {
+    final ChapterDetailModel? current = detail.value;
+
+    if (current == null || !current.hasVideo) {
+      return null;
+    }
+
+    final ApiResult<ChapterVideoAccessModel> result =
+    await ApiErrorHandler.call<ChapterVideoAccessModel>(
+          () => _chapterDetailApiService.fetchVideoAccess(
+        lessonId: current.id,
+      ),
+      showError: false,
       errorTitle: 'video'.tr,
     );
-    _videoUrlFuture = future;
-    return future.then((String? url) {
-      if (url == null || url.isEmpty) {
-        _videoUrlFuture = null;
-      }
-      return url;
-    });
+
+    final ChapterVideoAccessModel? access = result.data;
+
+    if (!result.isSuccess || access == null) {
+      _cachedVideoAccess = null;
+      return null;
+    }
+
+    if (access.canPlay && !access.isExpiredOrNearExpiry) {
+      _cachedVideoAccess = access;
+    } else {
+      // Do not cache pending, processing, failed, or invalid access.
+      // The next retry will check the backend again.
+      _cachedVideoAccess = null;
+    }
+
+    return access;
   }
 
   Future<String?> loadAudioUrl() {
@@ -176,7 +229,7 @@ class ChapterDetailController extends GetxController {
     }
 
     if (current.hasVideo) {
-      unawaited(loadVideoUrl());
+      unawaited(loadVideoAccess());
     }
     if (current.hasAudio) {
       unawaited(loadAudioUrl());

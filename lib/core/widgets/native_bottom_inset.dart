@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +29,7 @@ class _NativeBottomInsetState extends State<NativeBottomInset>
 
   double _nativeBottomInset = 0;
   bool _requestInProgress = false;
+  bool _refreshPending = false;
 
   @override
   void initState() {
@@ -35,19 +38,30 @@ class _NativeBottomInsetState extends State<NativeBottomInset>
     WidgetsBinding.instance.addObserver(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadNativeBottomInset();
+      if (mounted) {
+        _loadNativeBottomInset();
+      }
     });
   }
 
   @override
   void didChangeMetrics() {
+    if (_requestInProgress) {
+      _refreshPending = true;
+      return;
+    }
+
     _loadNativeBottomInset();
   }
 
   Future<void> _loadNativeBottomInset() async {
     if (kIsWeb ||
-        _requestInProgress ||
         defaultTargetPlatform != TargetPlatform.android) {
+      return;
+    }
+
+    if (_requestInProgress) {
+      _refreshPending = true;
       return;
     }
 
@@ -70,11 +84,21 @@ class _NativeBottomInsetState extends State<NativeBottomInset>
         _nativeBottomInset = updatedInset;
       });
     } on MissingPluginException {
-      // Keep zero on Android when the native channel is unavailable.
+      // MediaQuery inset will be used as fallback.
     } on PlatformException {
-      // Keep zero on Android when the native channel fails.
+      // MediaQuery inset will be used as fallback.
     } finally {
       _requestInProgress = false;
+
+      if (_refreshPending && mounted) {
+        _refreshPending = false;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _loadNativeBottomInset();
+          }
+        });
+      }
     }
   }
 
@@ -97,12 +121,11 @@ class _NativeBottomInsetState extends State<NativeBottomInset>
       systemBottomInset = 0;
     } else if (!kIsWeb &&
         defaultTargetPlatform == TargetPlatform.android) {
-      // Android:
-      // 0 for gesture navigation.
-      // Positive value for three-button navigation.
-      systemBottomInset = _nativeBottomInset;
+      systemBottomInset = math.max(
+        mediaQuery.viewPadding.bottom,
+        _nativeBottomInset,
+      );
     } else {
-      // iOS and other platforms use the normal safe area.
       systemBottomInset = mediaQuery.viewPadding.bottom;
     }
 

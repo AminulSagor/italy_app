@@ -184,6 +184,38 @@ class QuizController extends GetxController {
     }
   }
 
+
+
+  void swapMatchingRight(int fromIndex, int toIndex) {
+    if (hasCheckedAnswer.value ||
+        fromIndex == toIndex ||
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= matchingRightOrder.length ||
+        toIndex >= matchingRightOrder.length) {
+      return;
+    }
+
+    final List<String> updatedTexts = matchingRightOrder.toList();
+
+    final String oldText = updatedTexts[fromIndex];
+    updatedTexts[fromIndex] = updatedTexts[toIndex];
+    updatedTexts[toIndex] = oldText;
+
+    matchingRightOrder.assignAll(updatedTexts);
+
+    if (matchingRightPairIdOrder.length == updatedTexts.length) {
+      final List<String> updatedIds =
+      matchingRightPairIdOrder.toList();
+
+      final String oldId = updatedIds[fromIndex];
+      updatedIds[fromIndex] = updatedIds[toIndex];
+      updatedIds[toIndex] = oldId;
+
+      matchingRightPairIdOrder.assignAll(updatedIds);
+    }
+  }
+
   Future<void> loadLessonComplete() async {
     if (isCompleting.value || lessonComplete.value != null) {
       return;

@@ -100,14 +100,14 @@ class PracticeHubView extends GetView<PracticeHubController> {
               ),
               SizedBox(height: 24.h),
               const PracticeHubCourseCarousel(),
-              SizedBox(height: 47.h),
+              SizedBox(height: 24.h),
 
               _HorizontalPadding(
                 child: _SectionTitleOnly(title: 'gen_skill_builders'.tr),
               ),
               SizedBox(height: 24.h),
               const _HorizontalPadding(child: PracticeHubSkillBuilderGrid()),
-              SizedBox(height: 46.h),
+              SizedBox(height: 24.h),
 
               Obx(() {
                 if (controller.isFinalExamsLoading.value &&

@@ -140,6 +140,20 @@ class ChapterDetailApiService {
     );
   }
 
+  Future<ChapterVideoAccessModel> fetchVideoAccess({
+    required String lessonId,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.get(
+      '/lessons/$lessonId/video-access',
+    );
+
+    return ChapterVideoAccessModel.fromJson(
+      _responseMap(response),
+    );
+  }
+
+
+
   Future<void> recordVideoProgress({
     required String courseId,
     required String lessonId,

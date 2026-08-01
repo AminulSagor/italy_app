@@ -35,12 +35,10 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
     }
 
     if (Get.isRegistered<NavbarAndAppbarWrapperController>()) {
-      Get.find<NavbarAndAppbarWrapperController>()
-          .onBottomNavTap(index);
+      Get.find<NavbarAndAppbarWrapperController>().onBottomNavTap(index);
 
       Get.until((Route<dynamic> route) {
-        return route.settings.name == AppRoutes.wrapper ||
-            route.isFirst;
+        return route.settings.name == AppRoutes.wrapper || route.isFirst;
       });
 
       if (Get.currentRoute != AppRoutes.wrapper) {
@@ -68,11 +66,9 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
         body: SafeArea(
           bottom: false,
           child: Obx(() {
-            final ChapterDetailModel? detail =
-                controller.detail.value;
+            final ChapterDetailModel? detail = controller.detail.value;
 
-            if (controller.isLoading.value &&
-                detail == null) {
+            if (controller.isLoading.value && detail == null) {
               return const Center(
                 child: CircularProgressIndicator(
                   color: AppColors.primaryGreen,
@@ -84,96 +80,108 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
               return const SizedBox.shrink();
             }
 
-            return SingleChildScrollView(
-              controller: controller.scrollController,
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(
-                kChapterHorizontalPadding.w,
-                20.h,
-                kChapterHorizontalPadding.w,
-                120.h,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  _Header(
-                    title: detail.title,
-                    onBackTap: () => Get.back<void>(),
-                  ),
-                  SizedBox(height: 20.h),
-
-                  if (detail.hasVideo) ...<Widget>[
-                    ChapterVideoCard(
-                      detail: detail,
-                      playbackCommand:
-                      controller.videoPlaybackCommand.value,
-                      shouldPlay:
-                      controller.shouldPlayVideo.value,
-                      loadVideoUrl: controller.loadVideoUrl,
-                      onPlaybackChanged:
-                      controller.onVideoPlaybackChanged,
-                      onProgressChanged: (
-                          Duration position,
-                          Duration duration,
-                          ) {
-                        controller.recordVideoProgress(
-                          position: position,
-                          duration: duration,
-                        );
-                      },
+            return RefreshIndicator(
+              color: AppColors.primaryGreen,
+              onRefresh: controller.refreshChapter,
+              child: SingleChildScrollView(
+                controller: controller.scrollController,
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                padding: EdgeInsets.only(bottom: 120.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        kChapterHorizontalPadding.w,
+                        6.h,
+                        kChapterHorizontalPadding.w,
+                        10.h,
+                      ),
+                      child: _Header(
+                        title: detail.title,
+                        onBackTap: () => Get.back<void>(),
+                      ),
                     ),
-                    SizedBox(height: 24.h),
-                  ],
 
-                  if (detail.hasLessonContent) ...<Widget>[
-                    LessonContentCard(
-                      lesson: detail.lessonContent!,
-                      audio: detail.audio,
-                      loadAudioUrl: controller.loadAudioUrl,
-                      onAudioCompleted:
-                      controller.recordAudioCompleted,
-                    ),
-                    SizedBox(height: 24.h),
-                  ],
-
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: ChapterResourceCard(
-                          resource: detail.theoryBook,
-                          onTap: controller.openTheoryBook,
+                    // Keep the premium video visually dominant.
+                    if (detail.hasVideo) ...<Widget>[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w),
+                        child: ChapterVideoCard(
+                          detail: detail,
+                          playbackCommand:
+                          controller.videoPlaybackCommand.value,
+                          shouldPlay: controller.shouldPlayVideo.value,
+                          loadVideoAccess: controller.loadVideoAccess,
+                          onPlaybackChanged:
+                          controller.onVideoPlaybackChanged,
+                          onProgressChanged: (
+                              Duration position,
+                              Duration duration,
+                              ) {
+                            controller.recordVideoProgress(
+                              position: position,
+                              duration: duration,
+                            );
+                          },
                         ),
                       ),
-                      SizedBox(width: 14.w),
-                      Expanded(
-                        child: ChapterResourceCard(
-                          resource: detail.vocabulary,
-                          onTap: controller.openVocabulary,
-                        ),
-                      ),
+                      SizedBox(height: 18.h),
                     ],
-                  ),
 
-                  if (detail.quiz != null) ...<Widget>[
-                    SizedBox(height: 26.h),
-                    ChapterQuizCard(
-                      quiz: detail.quiz!,
-                      onStartTap: controller.openQuiz,
-                    ),
-                    SizedBox(height: 26.h),
-                    _BottomActions(
-                      status: detail.quiz!.status,
-                      hasVideo: detail.hasVideo,
-                      isLoading:
-                      controller.isResumeSubmitting.value,
-                      isVideoPlaying:
-                      controller.isVideoPlaying.value,
-                      onResumeTap:
-                      controller.toggleVideoPlayback,
-                      onQuizTap: controller.openQuiz,
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: kChapterHorizontalPadding.w,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          if (detail.hasLessonContent) ...<Widget>[
+                            LessonContentCard(
+                              lesson: detail.lessonContent!,
+                              audio: detail.audio,
+                              loadAudioUrl: controller.loadAudioUrl,
+                              onAudioCompleted:
+                              controller.recordAudioCompleted,
+                            ),
+                            SizedBox(height: 20.h),
+                          ],
+
+                          _ResourceSection(
+                            theoryBook: detail.theoryBook,
+                            vocabulary: detail.vocabulary,
+                            onTheoryBookTap:
+                            controller.openTheoryBook,
+                            onVocabularyTap:
+                            controller.openVocabulary,
+                          ),
+
+                          if (detail.quiz != null) ...<Widget>[
+                            SizedBox(height: 22.h),
+                            ChapterQuizCard(
+                              quiz: detail.quiz!,
+                              onStartTap: controller.openQuiz,
+                            ),
+                            SizedBox(height: 20.h),
+                            _BottomActions(
+                              status: detail.quiz!.status,
+                              hasVideo: detail.hasVideo,
+                              isLoading:
+                              controller.isResumeSubmitting.value,
+                              isVideoPlaying:
+                              controller.isVideoPlaying.value,
+                              onResumeTap:
+                              controller.toggleVideoPlayback,
+                              onQuizTap: controller.openQuiz,
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ],
-                ],
+                ),
               ),
             );
           }),
@@ -196,24 +204,27 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        GestureDetector(
-          onTap: onBackTap,
-          behavior: HitTestBehavior.opaque,
-          child: SizedBox(
-            width: 40.w,
-            height: 40.w,
-            child: Icon(
-              Icons.arrow_back_rounded,
-              color: AppColors.primaryGreen,
-              size: 22.sp,
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onBackTap,
+            borderRadius: BorderRadius.circular(24.r),
+            child: SizedBox(
+              width: 44.w,
+              height: 44.w,
+              child: Icon(
+                Icons.arrow_back_rounded,
+                color: AppColors.primaryGreen,
+                size: 23.sp,
+              ),
             ),
           ),
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: 8.w),
         Expanded(
           child: Text(
             title,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: AppFont.font18.sp,
@@ -224,6 +235,65 @@ class _Header extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ResourceSection extends StatelessWidget {
+  final dynamic theoryBook;
+  final dynamic vocabulary;
+  final VoidCallback onTheoryBookTap;
+  final VoidCallback onVocabularyTap;
+
+  const _ResourceSection({
+    required this.theoryBook,
+    required this.vocabulary,
+    required this.onTheoryBookTap,
+    required this.onVocabularyTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        // Stack cards vertically on narrow screens to avoid compressed text.
+        final bool useVerticalLayout = constraints.maxWidth < 340.w;
+
+        if (useVerticalLayout) {
+          return Column(
+            children: <Widget>[
+              ChapterResourceCard(
+                resource: theoryBook,
+                onTap: onTheoryBookTap,
+              ),
+              SizedBox(height: 12.h),
+              ChapterResourceCard(
+                resource: vocabulary,
+                onTap: onVocabularyTap,
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: ChapterResourceCard(
+                resource: theoryBook,
+                onTap: onTheoryBookTap,
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: ChapterResourceCard(
+                resource: vocabulary,
+                onTap: onVocabularyTap,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -250,60 +320,78 @@ class _BottomActions extends StatelessWidget {
     if (status == ChapterQuizStatus.disabled) {
       return CustomButton.primary(
         onPressed: hasVideo ? onResumeTap : () {},
-        text: hasVideo
-            ? isVideoPlaying
-            ? 'pause'.tr
-            : 'resume_video'.tr
-            : 'video_not_given'.tr,
+        text: _videoButtonText,
         isLoading: isLoading,
-        icon: hasVideo
-            ? isVideoPlaying
-            ? Icons.pause_rounded
-            : Icons.play_arrow_rounded
-            : Icons.lock_outline_rounded,
+        icon: _videoButtonIcon,
       );
     }
 
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: CustomButton(
-            onPressed: hasVideo ? onResumeTap : () {},
-            text: hasVideo
-                ? isVideoPlaying
-                ? 'pause'.tr
-                : 'resume_video'.tr
-                : 'video_not_given'.tr,
-            icon: hasVideo
-                ? isVideoPlaying
-                ? Icons.pause_rounded
-                : Icons.play_arrow_rounded
-                : Icons.lock_outline_rounded,
-            height: kChapterBottomButtonHeight,
-            showShadow: true,
-            btnColor: AppColors.white,
-            btnShadowColor: AppColors.homeNeutralShadow,
-            borderColor: AppColors.white,
-            textColor: AppColors.homePrimaryText,
-            fontSize: AppFont.font14.sp,
-          ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: CustomButton(
-            onPressed: onQuizTap,
-            text: 'take_quiz'.tr,
-            icon: Icons.bolt_rounded,
-            height: kChapterBottomButtonHeight,
-            showShadow: true,
-            btnColor: AppColors.primaryBtnColor,
-            btnShadowColor: AppColors.primaryBtnShadow,
-            borderColor: AppColors.primaryBtnColor,
-            textColor: AppColors.limeTextColor,
-            fontSize: AppFont.font14.sp,
-          ),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool useVerticalLayout = constraints.maxWidth < 340.w;
+
+        final Widget videoButton = CustomButton(
+          onPressed: hasVideo ? onResumeTap : () {},
+          text: _videoButtonText,
+          icon: _videoButtonIcon,
+          height: kChapterBottomButtonHeight,
+          showShadow: true,
+          btnColor: AppColors.white,
+          btnShadowColor: AppColors.homeNeutralShadow,
+          borderColor: AppColors.white,
+          textColor: AppColors.homePrimaryText,
+          fontSize: AppFont.font14.sp,
+        );
+
+        final Widget quizButton = CustomButton(
+          onPressed: onQuizTap,
+          text: 'take_quiz'.tr,
+          icon: Icons.bolt_rounded,
+          height: kChapterBottomButtonHeight,
+          showShadow: true,
+          btnColor: AppColors.primaryBtnColor,
+          btnShadowColor: AppColors.primaryBtnShadow,
+          borderColor: AppColors.primaryBtnColor,
+          textColor: AppColors.limeTextColor,
+          fontSize: AppFont.font14.sp,
+        );
+
+        if (useVerticalLayout) {
+          return Column(
+            children: <Widget>[
+              quizButton,
+              SizedBox(height: 12.h),
+              videoButton,
+            ],
+          );
+        }
+
+        return Row(
+          children: <Widget>[
+            Expanded(child: videoButton),
+            SizedBox(width: 12.w),
+            Expanded(child: quizButton),
+          ],
+        );
+      },
     );
+  }
+
+  String get _videoButtonText {
+    if (!hasVideo) {
+      return 'video_not_given'.tr;
+    }
+
+    return isVideoPlaying ? 'pause'.tr : 'resume_video'.tr;
+  }
+
+  IconData get _videoButtonIcon {
+    if (!hasVideo) {
+      return Icons.lock_outline_rounded;
+    }
+
+    return isVideoPlaying
+        ? Icons.pause_rounded
+        : Icons.play_arrow_rounded;
   }
 }

@@ -86,17 +86,19 @@ class AiSpeakingLabCard extends StatelessWidget {
 
   const AiSpeakingLabCard({
     required this.onTap,
+    super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final String languageCode =
-        Get.locale?.languageCode ?? 'en';
+    final String languageCode = Get.locale?.languageCode ?? 'en';
 
     final bool isItalian = languageCode == 'it';
     final bool isBangla = languageCode == 'bn';
+
     return _GradientFeatureCard(
-      height: 252,
+      // Bangla requires more space because the text wraps more.
+      height: isBangla ? 275 : 252,
       borderRadius: 54,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
@@ -108,35 +110,42 @@ class AiSpeakingLabCard extends StatelessWidget {
         ],
         stops: <double>[0.05, 0.54, 1],
       ),
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-            top: 32.h,
-            left: 32.w,
-            child: Column(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          32.w,
+          32.h,
+          32.w,
+          24.h, // Guaranteed bottom margin
+        ),
+        child: Stack(
+          children: <Widget>[
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  'ai_speaking_lab'.tr,
-                  style: TextStyle(
-                    // Only Italian title is smaller.
-                    fontSize: isItalian ? 20.sp : 24.sp,
-                    height: isItalian ? 1.15 : 1.06,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing:
-                    isItalian ? -0.3 : -0.7,
-                    color: AppColors.white,
+                Padding(
+                  // Prevent the title from going under the microphone.
+                  padding: EdgeInsets.only(right: 85.w),
+                  child: Text(
+                    'ai_speaking_lab'.tr,
+                    style: TextStyle(
+                      fontSize: isItalian ? 20.sp : 24.sp,
+                      height: isItalian ? 1.15 : 1.06,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: isItalian ? -0.3 : -0.7,
+                      color: AppColors.white,
+                    ),
                   ),
                 ),
                 SizedBox(height: 10.h),
-                Text(
-                  'ai_speaking_lab_description'.tr,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    height: 1.55,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.white.withValues(
-                      alpha: 0.62,
+                Padding(
+                  padding: EdgeInsets.only(right: 20.w),
+                  child: Text(
+                    'ai_speaking_lab_description'.tr,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      height: 1.55,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.white.withValues(alpha: 0.62),
                     ),
                   ),
                 ),
@@ -149,42 +158,40 @@ class AiSpeakingLabCard extends StatelessWidget {
                     color: const Color(0xFF9BFF3E),
                   ),
                 ),
-                SizedBox(height: 22.h),
+
+                // Pushes the button to the bottom.
+                const Spacer(),
+
                 CustomButton(
                   text: 'enter_lab',
                   onPressed: onTap,
-               width: (isItalian || isBangla) ? 210 : 157,
+                  width: (isItalian || isBangla) ? 210 : 157,
                   height: 43,
                   btnColor: AppColors.white,
                   textColor: const Color(0xFF153D35),
-
-                  // Only Bangla button text becomes smaller.
                   fontSize: isBangla ? 12 : 14,
-
                   icon: Icons.play_arrow_rounded,
                 ),
               ],
             ),
-          ),
-          Positioned(
-            top: 32.h,
-            right: 32.w,
-            child: Container(
-              width: 64.r,
-              height: 64.r,
-              decoration: BoxDecoration(
-                color: const Color(0xFF66A61D)
-                    .withValues(alpha: 0.55),
-                borderRadius: BorderRadius.circular(24.r),
-              ),
-              child: Icon(
-                Icons.mic_none_rounded,
-                size: 35.r,
-                color: const Color(0xFF9DF02E),
+            Align(
+              alignment: Alignment.topRight,
+              child: Container(
+                width: 64.r,
+                height: 64.r,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF66A61D).withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(24.r),
+                ),
+                child: Icon(
+                  Icons.mic_none_rounded,
+                  size: 35.r,
+                  color: const Color(0xFF9DF02E),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

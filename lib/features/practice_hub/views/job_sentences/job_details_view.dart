@@ -90,9 +90,14 @@ class _CareerTrackContent extends GetView<JobSentencesController> {
           ),
           SizedBox(height: 20.h),
         ],
-        if (details.introVideo?.isAvailable ?? false) ...<Widget>[
+        if (details.introVideo != null) ...<Widget>[
           JobIntroVideoCard(
-            videoUrl: details.introVideo!.url,
+            key: ValueKey<String>(
+              '${details.id}:${details.introVideo!.id}',
+            ),
+            videoId: details.introVideo!.id,
+            loadVideoAccess:
+            controller.loadCareerTrackVideoAccess,
             initialProgressPercent: details.trackProgress.videoWatchPercent,
             onProgress: (int percent, int seconds) {
               controller.recordVideoProgress(

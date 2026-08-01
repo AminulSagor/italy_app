@@ -189,6 +189,197 @@ class ChapterMediaModel {
   }
 }
 
+enum ChapterVideoTranscodeStatus {
+  notRequired,
+  pending,
+  processing,
+  ready,
+  failed,
+  unknown,
+}
+
+class ChapterVideoAccessModel {
+  final String fileId;
+  final String mediaAssetId;
+  final ChapterVideoTranscodeStatus status;
+  final String streamUrl;
+  final int durationSeconds;
+  final int width;
+  final int height;
+  final bool retryable;
+  final bool requiresSignedCookies;
+  final Map<String, String> cookies;
+  final DateTime? expiresAt;
+
+  const ChapterVideoAccessModel({
+    required this.fileId,
+    required this.mediaAssetId,
+    required this.status,
+    required this.streamUrl,
+    required this.durationSeconds,
+    required this.width,
+    required this.height,
+    required this.retryable,
+    required this.requiresSignedCookies,
+    required this.cookies,
+    required this.expiresAt,
+  });
+
+  factory ChapterVideoAccessModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> cloudFrontAccess =
+    json['cloudFrontAccess'] is Map
+        ? Map<String, dynamic>.from(
+      json['cloudFrontAccess'] as Map,
+    )
+        : <String, dynamic>{};
+
+    return ChapterVideoAccessModel(
+      fileId: json['fileId']?.toString().trim() ?? '',
+      mediaAssetId:
+      json['mediaAssetId']?.toString().trim() ?? '',
+      status: _parseStatus(json['status']),
+      streamUrl: json['streamUrl']?.toString().trim() ?? '',
+      durationSeconds: _parseInt(json['durationSeconds']),
+      width: _parseInt(json['width']),
+      height: _parseInt(json['height']),
+      retryable: _parseBool(json['retryable']),
+      requiresSignedCookies:
+      _parseBool(json['requiresSignedCookies']),
+      cookies: _parseCookies(cloudFrontAccess['cookies']),
+      expiresAt: DateTime.tryParse(
+        cloudFrontAccess['expiresAt']?.toString() ?? '',
+      ),
+    );
+  }
+
+  bool get hasCloudFrontCookies {
+    return cookies['CloudFront-Policy']?.isNotEmpty == true &&
+        cookies['CloudFront-Signature']?.isNotEmpty == true &&
+        cookies['CloudFront-Key-Pair-Id']?.isNotEmpty == true;
+  }
+
+  bool get canPlay {
+    if (status != ChapterVideoTranscodeStatus.ready) {
+      return false;
+    }
+
+    if (streamUrl.isEmpty) {
+      return false;
+    }
+
+    if (requiresSignedCookies && !hasCloudFrontCookies) {
+      return false;
+    }
+
+    return true;
+  }
+
+  String get cookieHeader {
+    final List<String> values = <String>[];
+
+    const List<String> allowedCookieNames = <String>[
+      'CloudFront-Policy',
+      'CloudFront-Signature',
+      'CloudFront-Key-Pair-Id',
+      'CloudFront-Hash-Algorithm',
+    ];
+
+    for (final String name in allowedCookieNames) {
+      final String value = cookies[name]?.trim() ?? '';
+
+      if (value.isNotEmpty) {
+        values.add('$name=$value');
+      }
+    }
+
+    return values.join('; ');
+  }
+
+  Map<String, String> get videoHttpHeaders {
+    final String cookie = cookieHeader;
+
+    if (cookie.isEmpty) {
+      return const <String, String>{};
+    }
+
+    return <String, String>{
+      'Cookie': cookie,
+    };
+  }
+
+  bool get isExpiredOrNearExpiry {
+    if (!requiresSignedCookies) {
+      return false;
+    }
+
+    final DateTime? expiry = expiresAt;
+
+    if (expiry == null) {
+      return true;
+    }
+
+    return !DateTime.now().isBefore(
+      expiry.subtract(const Duration(minutes: 1)),
+    );
+  }
+
+  static ChapterVideoTranscodeStatus _parseStatus(dynamic value) {
+    switch (value?.toString().trim().toLowerCase()) {
+      case 'not_required':
+        return ChapterVideoTranscodeStatus.notRequired;
+      case 'pending':
+        return ChapterVideoTranscodeStatus.pending;
+      case 'processing':
+        return ChapterVideoTranscodeStatus.processing;
+      case 'ready':
+        return ChapterVideoTranscodeStatus.ready;
+      case 'failed':
+        return ChapterVideoTranscodeStatus.failed;
+      default:
+        return ChapterVideoTranscodeStatus.unknown;
+    }
+  }
+
+  static Map<String, String> _parseCookies(dynamic value) {
+    if (value is! Map) {
+      return const <String, String>{};
+    }
+
+    final Map<String, String> parsed = <String, String>{};
+
+    value.forEach((dynamic key, dynamic item) {
+      final String cookieName = key?.toString().trim() ?? '';
+      final String cookieValue = item?.toString().trim() ?? '';
+
+      if (cookieName.isNotEmpty && cookieValue.isNotEmpty) {
+        parsed[cookieName] = cookieValue;
+      }
+    });
+
+    return Map<String, String>.unmodifiable(parsed);
+  }
+
+  static int _parseInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+
+    if (value is num) {
+      return value.toInt();
+    }
+
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static bool _parseBool(dynamic value) {
+    if (value is bool) {
+      return value;
+    }
+
+    return value?.toString().trim().toLowerCase() == 'true';
+  }
+}
+
 class LessonContentModel {
   final String title;
   final String italianText;

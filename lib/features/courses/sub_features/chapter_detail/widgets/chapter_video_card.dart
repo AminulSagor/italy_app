@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../../../core/controllers/adaptive_network_video_controller.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
@@ -14,7 +15,7 @@ class ChapterVideoCard extends StatefulWidget {
   final ChapterDetailModel detail;
   final int playbackCommand;
   final bool shouldPlay;
-  final Future<String?> Function() loadVideoUrl;
+  final Future<ChapterVideoAccessModel?> Function() loadVideoAccess;
   final ValueChanged<bool> onPlaybackChanged;
   final void Function(Duration position, Duration duration) onProgressChanged;
 
@@ -23,7 +24,7 @@ class ChapterVideoCard extends StatefulWidget {
     required this.detail,
     required this.playbackCommand,
     required this.shouldPlay,
-    required this.loadVideoUrl,
+    required this.loadVideoAccess,
     required this.onPlaybackChanged,
     required this.onProgressChanged,
   });
@@ -62,7 +63,8 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
   void didUpdateWidget(covariant ChapterVideoCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.detail.video?.url != widget.detail.video?.url) {
+    if (oldWidget.detail.video?.fileId !=
+        widget.detail.video?.fileId) {
       _lastReportedPercent = widget.detail.progress.videoWatchPercent;
       _hasWatchedFullyNotifier.value =
           widget.detail.progress.videoWatchPercent >= 100;
@@ -127,17 +129,28 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       });
     }
 
+    ChapterVideoAccessModel? access;
     VideoPlayerController? controller;
+
     try {
-      String videoUrl = widget.detail.video?.url ?? '';
-      if (videoUrl.isEmpty) {
-        videoUrl = await widget.loadVideoUrl() ?? '';
-      }
-      if (videoUrl.isEmpty) {
-        throw StateError('video_url_is_not_available'.tr);
+      access = await widget.loadVideoAccess();
+
+      if (access == null || !access.canPlay) {
+        throw StateError(_videoAccessMessage(access));
       }
 
-      controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
+      final Uri streamUri = Uri.parse(access.streamUrl);
+
+      if (!streamUri.hasScheme || streamUri.host.isEmpty) {
+        throw StateError('Invalid HLS stream URL.');
+      }
+
+      controller = createAdaptiveNetworkVideoController(
+        uri: streamUri,
+        forceHls: true,
+        httpHeaders: access.videoHttpHeaders,
+      );
+
       await controller.initialize();
       await _seekToSavedProgress(controller);
 
@@ -148,15 +161,58 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
 
       _videoController = controller;
       controller.addListener(_onVideoTick);
-      setState(() => _isInitializing = false);
-    } catch (_) {
-      await controller?.dispose();
-      if (!mounted) return;
 
       setState(() {
         _isInitializing = false;
-        _errorMessage = 'video_could_not_be_loaded_tap_to_retry'.tr;
+        _errorMessage = null;
       });
+    } catch (_) {
+      await controller?.dispose();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isInitializing = false;
+        _errorMessage = _videoAccessMessage(access);
+      });
+    }
+  }
+
+  String _videoAccessMessage(
+      ChapterVideoAccessModel? access,
+      ) {
+    switch (access?.status) {
+      case ChapterVideoTranscodeStatus.pending:
+        return 'Video processing has not started yet. Tap to check again.';
+
+      case ChapterVideoTranscodeStatus.processing:
+        return 'Video is still processing. Tap to check again.';
+
+      case ChapterVideoTranscodeStatus.failed:
+        return access?.retryable == true
+            ? 'Video processing failed. Tap to retry.'
+            : 'Video processing failed.';
+
+      case ChapterVideoTranscodeStatus.notRequired:
+        return 'This video has not been converted to HLS yet.';
+
+      case ChapterVideoTranscodeStatus.ready:
+        if (access == null || access.streamUrl.isEmpty) {
+          return 'The HLS stream URL is unavailable. Tap to retry.';
+        }
+
+        if (access.requiresSignedCookies &&
+            !access.hasCloudFrontCookies) {
+          return 'CloudFront video access could not be prepared. Tap to retry.';
+        }
+
+        return 'Video could not be loaded. Tap to retry.';
+
+      case ChapterVideoTranscodeStatus.unknown:
+      case null:
+        return 'video_could_not_be_loaded_tap_to_retry'.tr;
     }
   }
 

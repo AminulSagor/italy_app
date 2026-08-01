@@ -101,7 +101,7 @@ class QuizView extends GetView<QuizController> {
                         onListeningSelectedWordTap:
                         controller.removeListeningWord,
                         onMatchingRightReorder:
-                        controller.reorderMatchingRight,
+                        controller.swapMatchingRight,
                       ),
                     ],
                   ),

@@ -164,12 +164,14 @@ Future<void> _initializeCallKitListeners() async {
       try {
         await Get.find<CallSocketService>().timeoutCall(callId: callId);
       } catch (error, stackTrace) {
-        dev.log(
-          'Unable to synchronize timed-out call',
-          name: 'CallKit',
-          error: error,
-          stackTrace: stackTrace,
-        );
+        if (kDebugMode) {
+          dev.log(
+            'Unable to synchronize timed-out call',
+            name: 'CallKit',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
       } finally {
         if (Get.isRegistered<IncomingCallCoordinator>()) {
           Get.find<IncomingCallCoordinator>().dismissIncomingCall(callId);
@@ -195,12 +197,14 @@ Future<void> _initializeCallKitListeners() async {
           await socketService.endCall(callId: callId);
         }
       } catch (error, stackTrace) {
-        dev.log(
-          'Unable to synchronize ended call',
-          name: 'CallKit',
-          error: error,
-          stackTrace: stackTrace,
-        );
+        if (kDebugMode) {
+          dev.log(
+            'Unable to synchronize ended call',
+            name: 'CallKit',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
       }
     },
   );

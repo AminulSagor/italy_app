@@ -2,27 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../../../core/controllers/adaptive_network_video_controller.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import '../../../../courses/sub_features/chapter_detail/models/chapter_detail_models.dart';
 import '../../../../courses/sub_features/chapter_detail/widgets/chapter_video_fullscreen_view.dart';
 import '../../../../courses/sub_features/chapter_detail/widgets/chapter_video_player_surface.dart';
 import 'package:get/get.dart';
 
 class JobIntroVideoCard extends StatefulWidget {
   const JobIntroVideoCard({
-    required this.videoUrl,
+    required this.videoId,
+    required this.loadVideoAccess,
     required this.initialProgressPercent,
     required this.onProgress,
     super.key,
   });
 
-  final String videoUrl;
+  final String videoId;
+  final Future<ChapterVideoAccessModel?> Function()
+  loadVideoAccess;
   final int initialProgressPercent;
-  final void Function(int watchedPercent, int timeSpentSeconds) onProgress;
+  final void Function(
+      int watchedPercent,
+      int timeSpentSeconds,
+      ) onProgress;
 
   @override
-  State<JobIntroVideoCard> createState() => _JobIntroVideoCardState();
+  State<JobIntroVideoCard> createState() =>
+      _JobIntroVideoCardState();
 }
 
 class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
@@ -53,7 +62,7 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
   @override
   void didUpdateWidget(covariant JobIntroVideoCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.videoUrl == widget.videoUrl) {
+    if (oldWidget.videoId == widget.videoId) {
       return;
     }
 
@@ -106,14 +115,36 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
       });
     }
 
+    ChapterVideoAccessModel? access;
     VideoPlayerController? controller;
+
     try {
-      final Uri? uri = Uri.tryParse(widget.videoUrl.trim());
-      if (uri == null || !uri.hasScheme) {
-        throw StateError('Video URL is not available');
+      access = await widget.loadVideoAccess();
+
+      if (access == null || !access.canPlay) {
+        throw StateError(
+          _videoAccessMessage(access),
+        );
       }
 
-      controller = VideoPlayerController.networkUrl(uri);
+      final Uri? uri = Uri.tryParse(
+        access.streamUrl.trim(),
+      );
+
+      if (uri == null ||
+          !uri.hasScheme ||
+          uri.host.isEmpty) {
+        throw StateError(
+          'Invalid HLS stream URL.',
+        );
+      }
+
+      controller = createAdaptiveNetworkVideoController(
+        uri: uri,
+        forceHls: true,
+        httpHeaders: access.videoHttpHeaders,
+      );
+
       await controller.initialize();
       await _seekToSavedProgress(controller);
 
@@ -124,16 +155,62 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
 
       _videoController = controller;
       controller.addListener(_onVideoTick);
-      setState(() => _isInitializing = false);
-    } catch (_) {
-      await controller?.dispose();
-      if (!mounted) return;
+
       setState(() {
         _isInitializing = false;
-        _errorMessage = 'Video could not be loaded. Tap to retry.';
+        _errorMessage = null;
+      });
+    } catch (_) {
+      await controller?.dispose();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isInitializing = false;
+        _errorMessage =
+            _videoAccessMessage(access);
       });
     }
   }
+  String _videoAccessMessage(
+      ChapterVideoAccessModel? access,
+      ) {
+    switch (access?.status) {
+      case ChapterVideoTranscodeStatus.pending:
+        return 'Video processing has not started yet. Tap to check again.';
+
+      case ChapterVideoTranscodeStatus.processing:
+        return 'Video is still processing. Tap to check again.';
+
+      case ChapterVideoTranscodeStatus.failed:
+        return access?.retryable == true
+            ? 'Video processing failed. Tap to retry.'
+            : 'Video processing failed.';
+
+      case ChapterVideoTranscodeStatus.notRequired:
+        return 'This video has not been converted to HLS yet.';
+
+      case ChapterVideoTranscodeStatus.ready:
+        if (access == null ||
+            access.streamUrl.isEmpty) {
+          return 'The HLS stream URL is unavailable. Tap to retry.';
+        }
+
+        if (access.requiresSignedCookies &&
+            !access.hasCloudFrontCookies) {
+          return 'CloudFront access could not be prepared. Tap to retry.';
+        }
+
+        return 'Video could not be loaded. Tap to retry.';
+
+      case ChapterVideoTranscodeStatus.unknown:
+      case null:
+        return 'Video could not be loaded. Tap to retry.';
+    }
+  }
+
 
   Future<void> _seekToSavedProgress(VideoPlayerController controller) async {
     final Duration duration = controller.value.duration;

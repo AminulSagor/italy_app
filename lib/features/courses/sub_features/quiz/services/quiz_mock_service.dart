@@ -3,7 +3,9 @@ import 'dart:math';
 import '../models/quiz_models.dart';
 
 class QuizMockService {
-  Future<List<QuizQuestionModel>> fetchQuestions({int questionCount = 15}) async {
+  Future<List<QuizQuestionModel>> fetchQuestions({
+    int questionCount = 15,
+  }) async {
     await Future<void>.delayed(const Duration(milliseconds: 350));
 
     final List<QuizQuestionModel> templates = <QuizQuestionModel>[
@@ -49,7 +51,8 @@ class QuizMockService {
         'options': <String>['True', 'False'],
         'correctOptionIndex': 1,
         'correctAnswer': 'False',
-        'correctMeaning': 'Meaning: People in Italy do not usually eat pasta for breakfast.',
+        'correctMeaning':
+            'Meaning: People in Italy do not usually eat pasta for breakfast.',
       }),
       QuizQuestionModel.fromJson(<String, dynamic>{
         'id': 'fill_blank',
@@ -61,7 +64,8 @@ class QuizMockService {
         'options': <String>['mangio', 'vorrei', 'sono', 'vado'],
         'correctOptionIndex': 2,
         'correctAnswer': 'Sono',
-        'correctMeaning': 'Meaning: Sono completes the sentence in this mock quiz.',
+        'correctMeaning':
+            'Meaning: Sono completes the sentence in this mock quiz.',
       }),
       QuizQuestionModel.fromJson(<String, dynamic>{
         'id': 'listening_assembly',
@@ -71,7 +75,16 @@ class QuizMockService {
         'selectedWords': <String>[],
         'disabledWords': <String>[],
         'answerWordCount': 4,
-        'options': <String>['Il', 'caffé', 'è', 'caldo', 'Io', 'vorrei', 'per', 'favore'],
+        'options': <String>[
+          'Il',
+          'caffé',
+          'è',
+          'caldo',
+          'Io',
+          'vorrei',
+          'per',
+          'favore',
+        ],
         'correctWords': <String>['Il', 'caffé', 'è', 'caldo'],
         'correctAnswer': 'Il caffé è caldo',
         'correctMeaning': 'Meaning: The coffee is hot.',
@@ -81,7 +94,8 @@ class QuizMockService {
         'type': 'matchingPairs',
         'eyebrow': '',
         'title': 'Match the pairs',
-        'subtitle': 'Connect the Italian words to their\nEnglish meanings.',
+        'subtitle':
+            'Drag the words on the right to match each word on the left.',
         'options': <String>[
           'Buongiorno',
           'Good\nmorning',
@@ -114,13 +128,15 @@ class QuizMockService {
         'options': <String>['Mela', 'Arancia', 'Limone', 'Fragola'],
         'correctOptionIndex': 0,
         'correctAnswer': 'Mela',
-        'correctMeaning': 'Meaning: The object is an apple, which is Mela in Italian.',
+        'correctMeaning':
+            'Meaning: The object is an apple, which is Mela in Italian.',
       }),
     ];
 
     final Random random = Random();
     return List<QuizQuestionModel>.generate(questionCount, (int index) {
-      final QuizQuestionModel base = templates[random.nextInt(templates.length)];
+      final QuizQuestionModel base =
+          templates[random.nextInt(templates.length)];
       final Map<String, dynamic> json = base.toJson();
       json['id'] = '${base.id}_$index';
       return QuizQuestionModel.fromJson(json);

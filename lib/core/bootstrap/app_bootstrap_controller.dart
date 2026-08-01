@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as dev;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 
@@ -30,21 +31,19 @@ class AppBootstrapController extends GetxController {
     try {
       await dotenv.load(fileName: '.env');
     } catch (error) {
-      dev.log(
-        'Unable to load .env file',
-        error: error,
-        name: 'AppBootstrap',
-      );
+      if (kDebugMode) {
+        dev.log('Unable to load .env file', error: error, name: 'AppBootstrap');
+      }
     }
 
     await Get.putAsync<StorageService>(
-          () => StorageService().init(),
+      () => StorageService().init(),
       permanent: true,
     );
 
     if (!Get.isRegistered<TokenService>()) {
       await Get.putAsync<TokenService>(
-            () => TokenService().init(),
+        () => TokenService().init(),
         permanent: true,
       );
     }
@@ -69,17 +68,14 @@ class AppBootstrapController extends GetxController {
      */
     if (!Get.isRegistered<DevicePushTokenService>()) {
       final DevicePushTokenService devicePushTokenService =
-      DevicePushTokenService(
-        apiClient: Get.find<ApiClient>(),
-        storageService: Get.find<StorageService>(),
-      );
+          DevicePushTokenService(
+            apiClient: Get.find<ApiClient>(),
+            storageService: Get.find<StorageService>(),
+          );
 
       devicePushTokenService.listenForTokenRefresh();
 
-      Get.put<DevicePushTokenService>(
-        devicePushTokenService,
-        permanent: true,
-      );
+      Get.put<DevicePushTokenService>(devicePushTokenService, permanent: true);
     }
 
     /*
@@ -99,9 +95,7 @@ class AppBootstrapController extends GetxController {
 
     if (!Get.isRegistered<CurrentUserSummaryService>()) {
       Get.put<CurrentUserSummaryService>(
-        CurrentUserSummaryService(
-          apiClient: Get.find<ApiClient>(),
-        ),
+        CurrentUserSummaryService(apiClient: Get.find<ApiClient>()),
         permanent: true,
       );
     }
@@ -125,9 +119,7 @@ class AppBootstrapController extends GetxController {
      */
     if (!Get.isRegistered<ProCheckoutApiService>()) {
       Get.put<ProCheckoutApiService>(
-        ProCheckoutApiService(
-          apiClient: Get.find<ApiClient>(),
-        ),
+        ProCheckoutApiService(apiClient: Get.find<ApiClient>()),
         permanent: true,
       );
     }
@@ -143,7 +135,7 @@ class AppBootstrapController extends GetxController {
 
     if (!Get.isRegistered<CoursePurchaseRecoveryService>()) {
       await Get.putAsync<CoursePurchaseRecoveryService>(
-            () => CoursePurchaseRecoveryService(
+        () => CoursePurchaseRecoveryService(
           billingService: Get.find<CourseGooglePlayBillingService>(),
           apiService: Get.find<ProCheckoutApiService>(),
         ).init(),
@@ -153,16 +145,14 @@ class AppBootstrapController extends GetxController {
 
     if (!Get.isRegistered<LearningActivityApiService>()) {
       Get.put<LearningActivityApiService>(
-        LearningActivityApiService(
-          apiClient: Get.find<ApiClient>(),
-        ),
+        LearningActivityApiService(apiClient: Get.find<ApiClient>()),
         permanent: true,
       );
     }
 
     if (!Get.isRegistered<LearningActivityTrackerService>()) {
       await Get.putAsync<LearningActivityTrackerService>(
-            () => LearningActivityTrackerService(
+        () => LearningActivityTrackerService(
           apiService: Get.find<LearningActivityApiService>(),
           storageService: Get.find<StorageService>(),
         ).init(),
@@ -172,18 +162,14 @@ class AppBootstrapController extends GetxController {
 
     if (!Get.isRegistered<NotificationSummaryService>()) {
       Get.put<NotificationSummaryService>(
-        NotificationSummaryService(
-          apiClient: Get.find<ApiClient>(),
-        ),
+        NotificationSummaryService(apiClient: Get.find<ApiClient>()),
         permanent: true,
       );
     }
 
     if (!Get.isRegistered<TranslationService>()) {
       Get.put<TranslationService>(
-        TranslationService(
-          storageService: Get.find<StorageService>(),
-        ),
+        TranslationService(storageService: Get.find<StorageService>()),
         permanent: true,
       );
     }
@@ -193,17 +179,12 @@ class AppBootstrapController extends GetxController {
      * their existing persistent-connection behavior.
      */
     if (!Get.isRegistered<PresenceService>()) {
-      Get.put<PresenceService>(
-        PresenceService(),
-        permanent: true,
-      );
+      Get.put<PresenceService>(PresenceService(), permanent: true);
     }
 
     if (!Get.isRegistered<ChatSocketService>()) {
       Get.put<ChatSocketService>(
-        ChatSocketService(
-          tokenService: Get.find<TokenService>(),
-        ),
+        ChatSocketService(tokenService: Get.find<TokenService>()),
         permanent: true,
       );
     }
@@ -216,12 +197,14 @@ class AppBootstrapController extends GetxController {
         );
       }
     } catch (error, stackTrace) {
-      dev.log(
-        'Could not attach the presence listener',
-        error: error,
-        stackTrace: stackTrace,
-        name: 'AppBootstrap',
-      );
+      if (kDebugMode) {
+        dev.log(
+          'Could not attach the presence listener',
+          error: error,
+          stackTrace: stackTrace,
+          name: 'AppBootstrap',
+        );
+      }
     }
   }
 
@@ -304,8 +287,8 @@ class AppBootstrapController extends GetxController {
     required TokenService tokenService,
   }) async {
     try {
-      final bool hasValidServerSession =
-      await Get.find<AuthService>().validateStoredSession();
+      final bool hasValidServerSession = await Get.find<AuthService>()
+          .validateStoredSession();
 
       /*
        * ApiClient performs the suspended-account navigation as soon as a
@@ -412,14 +395,12 @@ class AppBootstrapController extends GetxController {
   }
 
   Future<void> _startAuthenticatedBackgroundTasks() async {
-    await Future.wait<void>(
-      <Future<void>>[
-        _connectChatSocketSafely(),
-        _registerFcmTokenSafely(),
-        _recoverCoursePurchaseSafely(),
-        _startLearningActivitySafely(),
-      ],
-    );
+    await Future.wait<void>(<Future<void>>[
+      _connectChatSocketSafely(),
+      _registerFcmTokenSafely(),
+      _recoverCoursePurchaseSafely(),
+      _startLearningActivitySafely(),
+    ]);
   }
 
   Future<void> _connectChatSocketSafely() async {
@@ -428,31 +409,26 @@ class AppBootstrapController extends GetxController {
         return;
       }
 
-      final ChatSocketService socketService =
-      Get.find<ChatSocketService>();
+      final ChatSocketService socketService = Get.find<ChatSocketService>();
 
       String? deviceId;
 
       try {
         if (Get.isRegistered<PresenceService>()) {
-          final PresenceService presenceService =
-          Get.find<PresenceService>();
+          final PresenceService presenceService = Get.find<PresenceService>();
 
           /*
            * Preserve the existing short wait for device-ID initialization.
            */
           for (
-          int attempt = 0;
-          attempt < 10 && presenceService.deviceId.isEmpty;
-          attempt++
+            int attempt = 0;
+            attempt < 10 && presenceService.deviceId.isEmpty;
+            attempt++
           ) {
-            await Future<void>.delayed(
-              const Duration(milliseconds: 50),
-            );
+            await Future<void>.delayed(const Duration(milliseconds: 50));
           }
 
-          final String resolvedDeviceId =
-          presenceService.deviceId.trim();
+          final String resolvedDeviceId = presenceService.deviceId.trim();
 
           if (resolvedDeviceId.isNotEmpty) {
             deviceId = resolvedDeviceId;
@@ -467,9 +443,7 @@ class AppBootstrapController extends GetxController {
         );
       }
 
-      await socketService.connect(
-        deviceId: deviceId,
-      );
+      await socketService.connect(deviceId: deviceId);
     } catch (error, stackTrace) {
       dev.log(
         'Chat socket connection during bootstrap failed',
@@ -486,8 +460,7 @@ class AppBootstrapController extends GetxController {
         return;
       }
 
-      await Get.find<LearningActivityTrackerService>()
-          .startSession();
+      await Get.find<LearningActivityTrackerService>().startSession();
     } catch (error, stackTrace) {
       dev.log(
         'Learning activity startup failed',
@@ -504,8 +477,7 @@ class AppBootstrapController extends GetxController {
         return;
       }
 
-      await Get.find<CoursePurchaseRecoveryService>()
-          .recoverPendingPurchase();
+      await Get.find<CoursePurchaseRecoveryService>().recoverPendingPurchase();
     } catch (error, stackTrace) {
       /*
        * Never send the user back to login merely because Google Play or the
@@ -527,8 +499,7 @@ class AppBootstrapController extends GetxController {
         return;
       }
 
-      await Get.find<DevicePushTokenService>()
-          .registerCurrentDevice();
+      await Get.find<DevicePushTokenService>().registerCurrentDevice();
     } catch (error, stackTrace) {
       dev.log(
         'FCM token registration during bootstrap failed',

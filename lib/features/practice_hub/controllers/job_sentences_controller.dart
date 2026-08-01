@@ -6,9 +6,10 @@ import 'package:get/get.dart';
 import '../../../core/services/api_error_handler.dart';
 import '../../../core/widgets/app_pdf_viewer.dart';
 import '../../../routes/app_routes.dart';
+import '../../courses/sub_features/chapter_detail/models/chapter_detail_models.dart';
 import '../models/job_sentence_models.dart';
 import '../models/job_track_models.dart';
-import '../models/practice_hub_pdf_model.dart';
+
 import '../services/italian_tts_service.dart';
 import '../services/job_sentences_api_service.dart';
 
@@ -58,6 +59,10 @@ class JobSentencesController extends GetxController {
   final RxString currentTtsSentenceId = ''.obs;
   final RxBool isTtsSpeaking = false.obs;
 
+  Future<ChapterVideoAccessModel?>? _videoAccessFuture;
+  ChapterVideoAccessModel? _cachedVideoAccess;
+  String _videoAccessTrackId = '';
+
   Worker? _searchWorker;
 
   final Set<String> _reviewRequests = <String>{};
@@ -81,6 +86,91 @@ class JobSentencesController extends GetxController {
     unawaited(
       loadCareerTracks(showError: false),
     );
+  }
+
+  Future<ChapterVideoAccessModel?> loadCareerTrackVideoAccess() {
+    final String trackId =
+        trackDetails.value?.id ??
+            selectedTrack.value?.id ??
+            '';
+
+    if (trackId.isEmpty) {
+      return Future<ChapterVideoAccessModel?>.value(null);
+    }
+
+    if (_videoAccessTrackId != trackId) {
+      _videoAccessTrackId = trackId;
+      _cachedVideoAccess = null;
+      _videoAccessFuture = null;
+    }
+
+    final ChapterVideoAccessModel? cachedAccess =
+        _cachedVideoAccess;
+
+    if (cachedAccess != null &&
+        cachedAccess.canPlay &&
+        !cachedAccess.isExpiredOrNearExpiry) {
+      return Future<ChapterVideoAccessModel?>.value(
+        cachedAccess,
+      );
+    }
+
+    final Future<ChapterVideoAccessModel?>? activeFuture =
+        _videoAccessFuture;
+
+    if (activeFuture != null) {
+      return activeFuture;
+    }
+
+    final Future<ChapterVideoAccessModel?> future =
+    _requestCareerTrackVideoAccess(trackId);
+
+    _videoAccessFuture = future;
+
+    return future.whenComplete(() {
+      if (identical(_videoAccessFuture, future)) {
+        _videoAccessFuture = null;
+      }
+    });
+  }
+
+  Future<ChapterVideoAccessModel?>
+  _requestCareerTrackVideoAccess(
+      String trackId,
+      ) async {
+    final ApiResult<ChapterVideoAccessModel> result =
+    await ApiErrorHandler.call<ChapterVideoAccessModel>(
+          () => _apiService.fetchCareerTrackVideoAccess(
+        trackId: trackId,
+      ),
+      showError: false,
+      errorTitle: 'video'.tr,
+    );
+
+    final String currentTrackId =
+        trackDetails.value?.id ??
+            selectedTrack.value?.id ??
+            '';
+
+    if (currentTrackId != trackId) {
+      return null;
+    }
+
+    final ChapterVideoAccessModel? access = result.data;
+
+    if (!result.isSuccess || access == null) {
+      _cachedVideoAccess = null;
+      return null;
+    }
+
+    if (access.canPlay &&
+        !access.isExpiredOrNearExpiry) {
+      _cachedVideoAccess = access;
+    } else {
+      _cachedVideoAccess = null;
+    }
+
+    return access;
   }
 
   Future<void> loadCareerTracks({
