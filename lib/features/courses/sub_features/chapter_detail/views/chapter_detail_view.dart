@@ -107,26 +107,21 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
 
                     // Keep the premium video visually dominant.
                     if (detail.hasVideo) ...<Widget>[
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w),
-                        child: ChapterVideoCard(
-                          detail: detail,
-                          playbackCommand:
-                          controller.videoPlaybackCommand.value,
-                          shouldPlay: controller.shouldPlayVideo.value,
-                          loadVideoAccess: controller.loadVideoAccess,
-                          onPlaybackChanged:
-                          controller.onVideoPlaybackChanged,
-                          onProgressChanged: (
-                              Duration position,
-                              Duration duration,
-                              ) {
-                            controller.recordVideoProgress(
-                              position: position,
-                              duration: duration,
-                            );
-                          },
-                        ),
+                      ChapterVideoCard(
+                        detail: detail,
+                        playbackCommand: controller.videoPlaybackCommand.value,
+                        shouldPlay: controller.shouldPlayVideo.value,
+                        loadVideoAccess: controller.loadVideoAccess,
+                        onPlaybackChanged: controller.onVideoPlaybackChanged,
+                        onProgressChanged: (
+                            Duration position,
+                            Duration duration,
+                            ) {
+                          controller.recordVideoProgress(
+                            position: position,
+                            duration: duration,
+                          );
+                        },
                       ),
                       SizedBox(height: 18.h),
                     ],

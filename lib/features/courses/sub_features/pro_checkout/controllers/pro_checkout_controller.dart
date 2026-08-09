@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,11 +24,20 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
     required this.lessonCount,
     required this.onPurchaseCompleted,
   }) : _proCheckoutApiService = proCheckoutApiService,
-        _billingService = billingService,
-        _recoveryService = recoveryService;
+       _billingService = billingService,
+       _recoveryService = recoveryService;
 
   static const Duration _purchaseTimeout = Duration(minutes: 2);
   static const Duration _billingReturnDelay = Duration(milliseconds: 900);
+
+  static const String _purchaseLinkedToAnotherUserCode =
+      'GOOGLE_PLAY_PURCHASE_LINKED_TO_ANOTHER_USER';
+  static const String _accountIdentifierMissingCode =
+      'GOOGLE_PLAY_ACCOUNT_IDENTIFIER_MISSING';
+  static const String _purchaseLinkedToAnotherCourseCode =
+      'GOOGLE_PLAY_PURCHASE_LINKED_TO_ANOTHER_COURSE';
+  static const String _purchaseNotRestorableCode =
+      'GOOGLE_PLAY_PURCHASE_NOT_RESTORABLE';
 
   final ProCheckoutApiService _proCheckoutApiService;
   final CourseGooglePlayBillingService _billingService;
@@ -70,7 +79,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
     _purchaseSubscription = _billingService.purchaseUpdates.listen(
       (PurchaseDetails purchase) => unawaited(_handlePurchase(purchase)),
       onError: (Object error, StackTrace stackTrace) {
-        dev.log(
+        AppLogger.log(
           'Course purchase stream failed.',
           name: 'ProCheckoutController',
           error: error,
@@ -84,7 +93,12 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   @override
   void onReady() {
     super.onReady();
-    unawaited(_retryPendingPurchase());
+    unawaited(_preparePendingRecovery());
+  }
+
+  Future<void> _preparePendingRecovery() async {
+    await _recoveryService.migrateLegacyPendingPurchase();
+    await _retryPendingPurchase();
   }
 
   @override
@@ -145,8 +159,8 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
           );
         }
 
-        final String oldPrice = currentOrder.hasCoupon &&
-                _regularGooglePlayPrice.isNotEmpty
+        final String oldPrice =
+            currentOrder.hasCoupon && _regularGooglePlayPrice.isNotEmpty
             ? _regularGooglePlayPrice
             : localizedPrice;
         final String discountLabel = currentOrder.hasCoupon
@@ -200,14 +214,14 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
     try {
       final ApiResult<ProOrderModel> result =
           await ApiErrorHandler.call<ProOrderModel>(
-        () => _proCheckoutApiService.fetchOrderSummary(
-          courseId: courseId,
-          fallbackCourseName: courseName,
-          lessonCount: lessonCount,
-          couponCode: code,
-        ),
-        showError: false,
-      );
+            () => _proCheckoutApiService.fetchOrderSummary(
+              courseId: courseId,
+              fallbackCourseName: courseName,
+              lessonCount: lessonCount,
+              couponCode: code,
+            ),
+            showError: false,
+          );
 
       if (!result.isSuccess || result.data == null) {
         billingError.value = 'Coupon is not valid for this item.';
@@ -243,13 +257,13 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
     try {
       final ApiResult<ProOrderModel> result =
           await ApiErrorHandler.call<ProOrderModel>(
-        () => _proCheckoutApiService.fetchOrderSummary(
-          courseId: courseId,
-          fallbackCourseName: courseName,
-          lessonCount: lessonCount,
-        ),
-        showError: false,
-      );
+            () => _proCheckoutApiService.fetchOrderSummary(
+              courseId: courseId,
+              fallbackCourseName: courseName,
+              lessonCount: lessonCount,
+            ),
+            showError: false,
+          );
       if (result.isSuccess && result.data != null) {
         couponTextController.clear();
         couponCode.value = '';
@@ -260,7 +274,6 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       isApplyingCoupon.value = false;
     }
   }
-
 
   String _googlePlaySavingsLabel({
     required String regularPriceText,
@@ -357,6 +370,10 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
             Get.snackbar('Payment Pending', recoveredOutcome!.message);
             return;
           }
+          if (recoveredOutcome?.status == ProPurchaseOutcomeStatus.failed) {
+            Get.snackbar('Purchase Unavailable', recoveredOutcome!.message);
+            return;
+          }
         }
         if (_billingService.pendingPurchaseQueryFailed) {
           Get.snackbar(
@@ -385,20 +402,40 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       _activePurchaseCompleter = completer;
       _billingFlowActive = true;
 
-      final bool launched = await _billingService.launchPurchase(
-        product: currentOrder.storeProduct,
-        pendingPurchase: pending,
-      );
-      if (!launched) {
-        _billingFlowActive = false;
-        _activePurchaseCompleter = null;
-        Get.snackbar(
-          'Google Play',
-          _billingService.lastError.value.isEmpty
-              ? 'Google Play could not start the purchase.'
-              : _billingService.lastError.value,
+      await _billingService.savePendingPurchase(pending);
+
+      final PurchaseDetails? ownedPurchase = await _billingService
+          .queryOwnedPurchase(pending.productId);
+
+      if (ownedPurchase != null &&
+          _isRecoverablePurchaseStatus(ownedPurchase.status)) {
+        await _handlePurchase(ownedPurchase);
+      } else {
+        final bool launched = await _billingService.launchPurchase(
+          product: currentOrder.storeProduct,
+          pendingPurchase: pending,
         );
-        return;
+
+        if (!launched) {
+          final PurchaseDetails? ownedAfterLaunchFailure = await _billingService
+              .queryOwnedPurchase(pending.productId);
+
+          if (ownedAfterLaunchFailure != null &&
+              _isRecoverablePurchaseStatus(ownedAfterLaunchFailure.status)) {
+            await _billingService.savePendingPurchase(pending);
+            await _handlePurchase(ownedAfterLaunchFailure);
+          } else {
+            _billingFlowActive = false;
+            _activePurchaseCompleter = null;
+            Get.snackbar(
+              'Google Play',
+              _billingService.lastError.value.isEmpty
+                  ? 'Google Play could not start the purchase.'
+                  : _billingService.lastError.value,
+            );
+            return;
+          }
+        }
       }
 
       final ProPurchaseOutcome outcome = await completer.future.timeout(
@@ -511,9 +548,35 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         _billingFlowActive = false;
 
         /*
-   * Keep the pending order. A generic Billing error does not always prove
-   * that no charge or purchase transition occurred.
-   */
+         * Google may report ITEM_ALREADY_OWNED as a Billing error instead of
+         * emitting the owned purchase on the normal purchase stream. Query
+         * owned purchases once and let the backend resolve its app-account
+         * ownership before falling back to the generic Billing error.
+         */
+        final PurchaseDetails? ownedPurchase = await _billingService
+            .queryOwnedPurchase(pending.productId);
+
+        if (ownedPurchase != null &&
+            (ownedPurchase.status == PurchaseStatus.purchased ||
+                ownedPurchase.status == PurchaseStatus.restored)) {
+          await _verifyAndUnlock(ownedPurchase, pending);
+          return;
+        }
+
+        if (ownedPurchase?.status == PurchaseStatus.pending) {
+          _completeActive(
+            const ProPurchaseOutcome(
+              status: ProPurchaseOutcomeStatus.pending,
+              message: 'Google Play is processing your payment.',
+            ),
+          );
+          return;
+        }
+
+        /*
+         * Keep the pending order. A generic Billing error does not always
+         * prove that no charge or purchase transition occurred.
+         */
         final String message =
             purchase.error?.message ?? 'The Google Play purchase failed.';
 
@@ -552,6 +615,18 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
             ),
             showError: false,
           );
+
+      if (!verification.isSuccess) {
+        final ProPurchaseOutcome? permanentFailure =
+            _permanentVerificationFailure(verification.errorCode);
+
+        if (permanentFailure != null) {
+          await _billingService.clearPendingPurchase();
+          _completeActive(permanentFailure);
+          return;
+        }
+      }
+
       if (verification.isSuccess && verification.data != null) {
         completed = verification.data;
       } else {
@@ -586,7 +661,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         ),
       );
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Course purchase verification did not finish.',
         name: 'ProCheckoutController',
         error: error,
@@ -600,6 +675,43 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       );
     } finally {
       _processingTokens.remove(token);
+    }
+  }
+
+  bool _isRecoverablePurchaseStatus(PurchaseStatus status) {
+    return status == PurchaseStatus.purchased ||
+        status == PurchaseStatus.restored ||
+        status == PurchaseStatus.pending;
+  }
+
+  ProPurchaseOutcome? _permanentVerificationFailure(String? errorCode) {
+    switch (errorCode) {
+      case _purchaseLinkedToAnotherUserCode:
+        return const ProPurchaseOutcome(
+          status: ProPurchaseOutcomeStatus.failed,
+          message:
+              'This course is linked to another Italir Pothe account through this Google Play account. Sign in to the original Italir Pothe account, use a different Google Play account for this account, or contact support if you need help recovering access.',
+        );
+      case _accountIdentifierMissingCode:
+        return const ProPurchaseOutcome(
+          status: ProPurchaseOutcomeStatus.failed,
+          message:
+              'This older Google Play purchase cannot be securely linked to this account. Please contact support.',
+        );
+      case _purchaseLinkedToAnotherCourseCode:
+        return const ProPurchaseOutcome(
+          status: ProPurchaseOutcomeStatus.failed,
+          message:
+              'This Google Play purchase is already linked to a different course. Please contact support.',
+        );
+      case _purchaseNotRestorableCode:
+        return const ProPurchaseOutcome(
+          status: ProPurchaseOutcomeStatus.failed,
+          message:
+              'This Google Play purchase cannot be restored automatically. Please contact support.',
+        );
+      default:
+        return null;
     }
   }
 
@@ -638,9 +750,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       _recoveryService.resume();
     } else {
       unawaited(
-        subscription.cancel().whenComplete(
-              () => _recoveryService.resume(),
-        ),
+        subscription.cancel().whenComplete(() => _recoveryService.resume()),
       );
     }
 

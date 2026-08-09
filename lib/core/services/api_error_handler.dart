@@ -14,18 +14,38 @@ class ApiHandledResponse<T> {
 }
 
 class ApiResult<T> {
-  const ApiResult._({this.data, this.error, required this.isSuccess});
+  const ApiResult._({
+    this.data,
+    this.error,
+    this.errorCode,
+    this.statusCode,
+    required this.isSuccess,
+  });
 
   final T? data;
   final String? error;
+  final String? errorCode;
+  final int? statusCode;
   final bool isSuccess;
 
   factory ApiResult.success(T data) {
-    return ApiResult<T>._(data: data, isSuccess: true);
+    return ApiResult<T>._(
+      data: data,
+      isSuccess: true,
+    );
   }
 
-  factory ApiResult.failure(String error) {
-    return ApiResult<T>._(error: error, isSuccess: false);
+  factory ApiResult.failure({
+    required String error,
+    String? errorCode,
+    int? statusCode,
+  }) {
+    return ApiResult<T>._(
+      error: error,
+      errorCode: errorCode,
+      statusCode: statusCode,
+      isSuccess: false,
+    );
   }
 
   T dataOr(T fallback) {
@@ -51,7 +71,15 @@ class ApiErrorHandler {
       if (showError && !isUnauthorized) {
         _showErrorSnackbar(errorTitle, message);
       }
-      return ApiResult<T>.failure(message);
+      final DioException? dioError =
+      error is DioException ? error : null;
+
+      return ApiResult<T>.failure(
+        error: message,
+        errorCode:
+        dioError == null ? null : _parseBackendErrorCode(dioError),
+        statusCode: dioError?.response?.statusCode,
+      );
     }
   }
 
@@ -68,7 +96,11 @@ class ApiErrorHandler {
     return ApiHandledResponse<T>(
       data: result.data,
       success: result.isSuccess,
-      errorCode: result.isSuccess ? null : result.error ?? fallbackErrorCode,
+      errorCode: result.isSuccess
+          ? null
+          : result.errorCode ??
+          result.error ??
+          fallbackErrorCode,
     );
   }
 
@@ -77,6 +109,17 @@ class ApiErrorHandler {
       return _parseDioError(error);
     }
     return error.toString();
+  }
+
+  static String? _parseBackendErrorCode(DioException error) {
+    final dynamic data = error.response?.data;
+
+    if (data is Map) {
+      final String code = data['code']?.toString().trim() ?? '';
+      return code.isEmpty ? null : code;
+    }
+
+    return null;
   }
 
   static String _parseDioError(DioException error) {

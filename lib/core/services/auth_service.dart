@@ -1,4 +1,4 @@
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
@@ -16,9 +16,9 @@ class AuthService {
     required StorageService storageService,
     required DevicePushTokenService devicePushTokenService,
   }) : _apiClient = apiClient,
-        _tokenService = tokenService,
-        _storageService = storageService,
-        _devicePushTokenService = devicePushTokenService;
+       _tokenService = tokenService,
+       _storageService = storageService,
+       _devicePushTokenService = devicePushTokenService;
 
   final ApiClient _apiClient;
   final TokenService _tokenService;
@@ -32,45 +32,34 @@ class AuthService {
   static const String _logoutEndpoint = '/auth/logout';
   static const String _currentUserEndpoint = '/users/me';
 
-  Future<SignupResultModel> signup(
-      SignupPayloadModel payload,
-      ) async {
-    final Response<dynamic> response =
-    await _apiClient.dio.post(
+  Future<SignupResultModel> signup(SignupPayloadModel payload) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
       _signupEndpoint,
       data: payload.toJson(),
     );
 
-    final Map<String, dynamic> data =
-    _responseMap(response);
+    final Map<String, dynamic> data = _responseMap(response);
 
-    final SignupResultModel result =
-    SignupResultModel.fromJson(data);
+    final SignupResultModel result = SignupResultModel.fromJson(data);
 
     if (result.identifier.isEmpty) {
       throw DioException(
         requestOptions: response.requestOptions,
-        message:
-        'signup_response_missing_identifier'.tr,
+        message: 'signup_response_missing_identifier'.tr,
       );
     }
 
     return result;
   }
 
-  Future<AuthTokenResultModel> login(
-      LoginPayloadModel payload,
-      ) async {
+  Future<AuthTokenResultModel> login(LoginPayloadModel payload) async {
     /*
      * Get the permanent ID belonging to this particular
      * application installation.
      */
-    final String deviceId =
-    await _devicePushTokenService
-        .getOrCreateDeviceId();
+    final String deviceId = await _devicePushTokenService.getOrCreateDeviceId();
 
-    final Response<dynamic> response =
-    await _apiClient.dio.post(
+    final Response<dynamic> response = await _apiClient.dio.post(
       _loginEndpoint,
       data: <String, dynamic>{
         ...payload.toJson(),
@@ -80,74 +69,53 @@ class AuthService {
          * PostgreSQL authentication session.
          */
         'deviceId': deviceId,
-        'platform':
-        _devicePushTokenService.platformValue,
+        'platform': _devicePushTokenService.platformValue,
       },
     );
 
-    final AuthTokenResultModel result =
-    AuthTokenResultModel.fromJson(
+    final AuthTokenResultModel result = AuthTokenResultModel.fromJson(
       _responseMap(response),
     );
 
-    await _saveSession(
-      result,
-      response.requestOptions,
-    );
+    await _saveSession(result, response.requestOptions);
 
     return result;
   }
 
   Future<AuthTokenResultModel> verifyOtp(
-      OtpVerificationPayloadModel payload,
-      ) async {
+    OtpVerificationPayloadModel payload,
+  ) async {
     /*
      * OTP verification also creates the user's first
      * authenticated session, so it needs device details.
      */
-    final String deviceId =
-    await _devicePushTokenService
-        .getOrCreateDeviceId();
+    final String deviceId = await _devicePushTokenService.getOrCreateDeviceId();
 
-    final Response<dynamic> response =
-    await _apiClient.dio.post(
+    final Response<dynamic> response = await _apiClient.dio.post(
       _verifyOtpEndpoint,
       data: <String, dynamic>{
         ...payload.toJson(),
         'deviceId': deviceId,
-        'platform':
-        _devicePushTokenService.platformValue,
+        'platform': _devicePushTokenService.platformValue,
       },
     );
 
-    final AuthTokenResultModel result =
-    AuthTokenResultModel.fromJson(
+    final AuthTokenResultModel result = AuthTokenResultModel.fromJson(
       _responseMap(response),
     );
 
-    await _saveSession(
-      result,
-      response.requestOptions,
-    );
+    await _saveSession(result, response.requestOptions);
 
     return result;
   }
 
-  Future<OtpResponseModel> resendOtp({
-    required String identifier,
-  }) async {
-    final Response<dynamic> response =
-    await _apiClient.dio.post(
+  Future<OtpResponseModel> resendOtp({required String identifier}) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
       _resendOtpEndpoint,
-      data: <String, dynamic>{
-        'identifier':
-        _normalizeIdentifier(identifier),
-      },
+      data: <String, dynamic>{'identifier': _normalizeIdentifier(identifier)},
     );
 
-    return OtpResponseModel.fromJson(
-      _responseMap(response),
-    );
+    return OtpResponseModel.fromJson(_responseMap(response));
   }
 
   Future<bool> validateStoredSession() async {
@@ -155,8 +123,7 @@ class AuthService {
      * First confirm that the JWT exists locally and has
      * not reached its JWT expiration time.
      */
-    if (!await _tokenService
-        .hasLocallyValidAccessToken()) {
+    if (!await _tokenService.hasLocallyValidAccessToken()) {
       return false;
     }
 
@@ -171,9 +138,7 @@ class AuthService {
        * did
        * PostgreSQL authentication-session status
        */
-      await _apiClient.dio.get(
-        _currentUserEndpoint,
-      );
+      await _apiClient.dio.get(_currentUserEndpoint);
 
       await _storageService.setLoggedInData();
 
@@ -212,9 +177,7 @@ class AuthService {
        *
        * Do not send deviceId in the request body.
        */
-      await _apiClient.dio.post(
-        _logoutEndpoint,
-      );
+      await _apiClient.dio.post(_logoutEndpoint);
     } on DioException catch (error, stackTrace) {
       /*
        * Local logout must still finish when:
@@ -222,14 +185,14 @@ class AuthService {
        * - the backend is temporarily unavailable
        * - the session was already revoked
        */
-      dev.log(
+      AppLogger.log(
         'Backend logout request failed',
         error: error,
         stackTrace: stackTrace,
         name: 'AuthService',
       );
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Unexpected logout error',
         error: error,
         stackTrace: stackTrace,
@@ -239,8 +202,7 @@ class AuthService {
       /*
        * Remove this installation's local Firebase token.
        */
-      await _devicePushTokenService
-          .deleteLocalFcmToken();
+      await _devicePushTokenService.deleteLocalFcmToken();
 
       /*
        * JWT must be removed only after POST /auth/logout
@@ -249,14 +211,12 @@ class AuthService {
       try {
         await _tokenService.clearTokens();
       } finally {
-        await _storageService
-            .clearLoggedInData();
+        await _storageService.clearLoggedInData();
       }
     }
   }
 
-  Future<void>
-  clearLocalSessionAfterAccountDeletion() async {
+  Future<void> clearLocalSessionAfterAccountDeletion() async {
     /*
    * The backend account is already deleted, so do not
    * call POST /auth/logout again.
@@ -264,8 +224,7 @@ class AuthService {
     _devicePushTokenService.disableBackendSync();
 
     try {
-      await _devicePushTokenService
-          .deleteLocalFcmToken();
+      await _devicePushTokenService.deleteLocalFcmToken();
     } catch (_) {
       // Local logout must continue even if Firebase fails.
     }
@@ -284,17 +243,15 @@ class AuthService {
   }
 
   Future<void> _saveSession(
-      AuthTokenResultModel result,
-      RequestOptions requestOptions,
-      ) async {
-    final String accessToken =
-    result.accessToken.trim();
+    AuthTokenResultModel result,
+    RequestOptions requestOptions,
+  ) async {
+    final String accessToken = result.accessToken.trim();
 
     if (accessToken.isEmpty) {
       throw DioException(
         requestOptions: requestOptions,
-        message:
-        'auth_response_missing_accesstoken'.tr,
+        message: 'auth_response_missing_accesstoken'.tr,
       );
     }
 
@@ -306,9 +263,7 @@ class AuthService {
     await _storageService.setLoggedInData();
   }
 
-  Map<String, dynamic> _responseMap(
-      Response<dynamic> response,
-      ) {
+  Map<String, dynamic> _responseMap(Response<dynamic> response) {
     final dynamic data = response.data;
 
     if (data is Map<String, dynamic>) {
@@ -316,26 +271,18 @@ class AuthService {
     }
 
     if (data is Map) {
-      return Map<String, dynamic>.from(
-        data,
-      );
+      return Map<String, dynamic>.from(data);
     }
 
     throw DioException(
       requestOptions: response.requestOptions,
-      message:
-      'response_is_not_a_valid_json_object'.tr,
+      message: 'response_is_not_a_valid_json_object'.tr,
     );
   }
 
-  String _normalizeIdentifier(
-      String identifier,
-      ) {
-    final String normalized =
-    identifier.trim();
+  String _normalizeIdentifier(String identifier) {
+    final String normalized = identifier.trim();
 
-    return normalized.contains('@')
-        ? normalized.toLowerCase()
-        : normalized;
+    return normalized.contains('@') ? normalized.toLowerCase() : normalized;
   }
 }

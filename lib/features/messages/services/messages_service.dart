@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer' as dev;
+
 
 import 'package:dio/dio.dart';
 
@@ -9,6 +9,7 @@ import 'chat_socket_service.dart';
 import 'message_chat_api_service.dart';
 import 'message_report_api_service.dart';
 import '../models/message_models.dart';
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 class MessagesMockService {
   MessagesMockService({
@@ -22,9 +23,7 @@ class MessagesMockService {
          apiClient: apiClient,
          tokenService: tokenService,
        ),
-       _messageReportApiService = MessageReportApiService(
-         apiClient: apiClient,
-       );
+       _messageReportApiService = MessageReportApiService(apiClient: apiClient);
 
   final ApiClient _apiClient;
   // token service is kept for potential auth needs in requests
@@ -150,7 +149,7 @@ class MessagesMockService {
         );
       }
     } catch (err) {
-      dev.log(
+      AppLogger.log(
         'Unable to fetch message conversations',
         name: 'MessagesService',
         error: err,
@@ -176,7 +175,8 @@ class MessagesMockService {
           : 'audio';
       final String status = call['status']?.toString().toLowerCase() ?? '';
       final String callerId = call['callerId']?.toString() ?? '';
-      final bool isIncoming = currentUserId != null &&
+      final bool isIncoming =
+          currentUserId != null &&
           currentUserId.isNotEmpty &&
           callerId.isNotEmpty &&
           callerId != currentUserId;
@@ -256,7 +256,7 @@ class MessagesMockService {
       }
       return null;
     } catch (err) {
-      dev.log(
+      AppLogger.log(
         'Unable to mark conversation as read',
         name: 'MessagesService',
         error: err,
@@ -311,8 +311,7 @@ class MessagesMockService {
             map['streakValue']?.toString().trim().isNotEmpty == true
             ? map['streakValue'].toString().trim()
             : '$currentStreakDays ${currentStreakDays == 1 ? 'Day' : 'Days'}';
-        final String xp =
-            map['xpValue']?.toString().trim().isNotEmpty == true
+        final String xp = map['xpValue']?.toString().trim().isNotEmpty == true
             ? map['xpValue'].toString().trim()
             : '$totalXp XP';
 
@@ -521,7 +520,6 @@ class MessagesMockService {
       return '';
     }
   }
-
 }
 
 class _ThreadPreview {

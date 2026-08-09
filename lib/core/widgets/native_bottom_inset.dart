@@ -9,12 +9,16 @@ class NativeBottomInset extends StatefulWidget {
     required this.child,
     this.additionalBottom = 0,
     this.ignoreWhenKeyboardVisible = true,
+    this.collapseWhenKeyboardVisible = false,
     super.key,
   });
 
   final Widget child;
   final double additionalBottom;
   final bool ignoreWhenKeyboardVisible;
+
+  // When true, removes all custom bottom padding while keyboard is open.
+  final bool collapseWhenKeyboardVisible;
 
   @override
   State<NativeBottomInset> createState() =>
@@ -109,11 +113,12 @@ class _NativeBottomInsetState extends State<NativeBottomInset>
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     final bool keyboardVisible =
-        mediaQuery.viewInsets.bottom > 0;
+        View.of(context).viewInsets.bottom > 0;
 
     final double systemBottomInset;
 
@@ -129,10 +134,14 @@ class _NativeBottomInsetState extends State<NativeBottomInset>
       systemBottomInset = mediaQuery.viewPadding.bottom;
     }
 
+    final double bottomPadding =
+    widget.collapseWhenKeyboardVisible && keyboardVisible
+        ? 0
+        : systemBottomInset + widget.additionalBottom;
+
+    // Always retain Padding so the TextField does not lose focus.
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: systemBottomInset + widget.additionalBottom,
-      ),
+      padding: EdgeInsets.only(bottom: bottomPadding),
       child: widget.child,
     );
   }

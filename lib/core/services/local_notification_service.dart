@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -63,7 +63,6 @@ class LocalNotificationService {
     await _plugin.initialize(
       settings: settings,
       onDidReceiveNotificationResponse: _handleNotificationTap,
-
     );
 
     await _plugin
@@ -74,7 +73,7 @@ class LocalNotificationService {
 
     _isInitialized = true;
 
-    dev.log(
+    AppLogger.log(
       'Local notification service initialized',
       name: 'LocalNotificationService',
     );
@@ -89,7 +88,7 @@ class LocalNotificationService {
 
     FirebaseMessaging.onMessage.listen(
       (RemoteMessage message) async {
-        dev.log(
+        AppLogger.log(
           'Foreground FCM received: '
           'title=${message.notification?.title}, '
           'body=${message.notification?.body}, '
@@ -112,7 +111,7 @@ class LocalNotificationService {
             ?.toString();
         if (conversationId != null &&
             _suppressedConversationIds.contains(conversationId)) {
-          dev.log(
+          AppLogger.log(
             'Suppressing notification for active conversation: '
             '$conversationId',
             name: 'LocalNotificationService',
@@ -123,7 +122,7 @@ class LocalNotificationService {
         await showRemoteMessage(message);
       },
       onError: (Object error, StackTrace stackTrace) {
-        dev.log(
+        AppLogger.log(
           'Foreground FCM listener failed',
           error: error,
           stackTrace: stackTrace,
@@ -133,7 +132,7 @@ class LocalNotificationService {
     );
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      dev.log(
+      AppLogger.log(
         'FCM Notification tapped from background: data=${message.data}',
         name: 'LocalNotificationService',
       );
@@ -148,7 +147,7 @@ class LocalNotificationService {
       final RemoteMessage? initialMessage = await FirebaseMessaging.instance
           .getInitialMessage();
       if (initialMessage != null) {
-        dev.log(
+        AppLogger.log(
           'FCM Notification tapped from terminated state: data=${initialMessage.data}',
           name: 'LocalNotificationService',
         );
@@ -158,7 +157,7 @@ class LocalNotificationService {
         });
       }
     } catch (e) {
-      dev.log('Error checking initial message: $e');
+      AppLogger.log('Error checking initial message: $e');
     }
   }
 
@@ -197,8 +196,6 @@ class LocalNotificationService {
   }
 
   Future<void> showRemoteMessage(RemoteMessage message) async {
-
-
     final String title =
         message.notification?.title ??
         message.data['title']?.toString() ??
@@ -218,16 +215,11 @@ class LocalNotificationService {
         : await _downloadImage(imageUrl);
 
     final String conversationId =
-        message.data['conversationId']
-            ?.toString()
-            .trim() ??
-            '';
+        message.data['conversationId']?.toString().trim() ?? '';
 
-    final bool showReplyAction =
-        conversationId.isNotEmpty;
+    final bool showReplyAction = conversationId.isNotEmpty;
 
-    final AndroidNotificationDetails androidDetails =
-    _createAndroidDetails(
+    final AndroidNotificationDetails androidDetails = _createAndroidDetails(
       title: title,
       body: body,
       localImagePath: localImagePath,
@@ -284,25 +276,17 @@ class LocalNotificationService {
     required String? localImagePath,
     required bool showReplyAction,
   }) {
-    final List<AndroidNotificationAction> actions =
-    showReplyAction
+    final List<AndroidNotificationAction> actions = showReplyAction
         ? <AndroidNotificationAction>[
-      AndroidNotificationAction(
-        'REPLY_ACTION',
-        'Reply',
-        icon:
-        const DrawableResourceAndroidBitmap(
-          '@mipmap/ic_launcher',
-        ),
-        inputs:
-        <AndroidNotificationActionInput>[
-          AndroidNotificationActionInput(
-            label:
-            'gen_type_a_message'.tr,
-          ),
-        ],
-      ),
-    ]
+            AndroidNotificationAction(
+              'REPLY_ACTION',
+              'Reply',
+              icon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+              inputs: <AndroidNotificationActionInput>[
+                AndroidNotificationActionInput(label: 'gen_type_a_message'.tr),
+              ],
+            ),
+          ]
         : <AndroidNotificationAction>[];
 
     if (localImagePath == null) {
@@ -358,7 +342,7 @@ class LocalNotificationService {
     final Uri? uri = Uri.tryParse(imageUrl);
 
     if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https'))) {
-      dev.log(
+      AppLogger.log(
         'Invalid notification image URL: $imageUrl',
         name: 'LocalNotificationService',
       );
@@ -377,7 +361,7 @@ class LocalNotificationService {
       final HttpClientResponse response = await request.close();
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        dev.log(
+        AppLogger.log(
           'Notification image download failed. '
           'Status=${response.statusCode}',
           name: 'LocalNotificationService',
@@ -413,14 +397,14 @@ class LocalNotificationService {
 
       await imageFile.writeAsBytes(bytes, flush: true);
 
-      dev.log(
+      AppLogger.log(
         'Notification image downloaded: ${imageFile.path}',
         name: 'LocalNotificationService',
       );
 
       return imageFile.path;
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Failed to download notification image',
         error: error,
         stackTrace: stackTrace,
@@ -476,16 +460,13 @@ class LocalNotificationService {
     return '.jpg';
   }
 
-  void _handleNotificationTap(
-      NotificationResponse response,
-      ) {
-    dev.log(
+  void _handleNotificationTap(NotificationResponse response) {
+    AppLogger.log(
       'Notification tapped. payload=${response.payload}',
       name: 'LocalNotificationService',
     );
 
-    final String rawPayload =
-        response.payload?.trim() ?? '';
+    final String rawPayload = response.payload?.trim() ?? '';
 
     if (rawPayload.isEmpty) {
       return;
@@ -501,30 +482,18 @@ class LocalNotificationService {
           return;
         }
 
-        final Map<String, dynamic> data =
-        Map<String, dynamic>.from(decoded);
+        final Map<String, dynamic> data = Map<String, dynamic>.from(decoded);
 
         final String conversationId =
-            data['conversationId']
-                ?.toString()
-                .trim() ??
-                '';
+            data['conversationId']?.toString().trim() ?? '';
 
         if (conversationId.isNotEmpty) {
-          final String contactId =
-              data['contactId']
-                  ?.toString()
-                  .trim() ??
-                  '';
+          final String contactId = data['contactId']?.toString().trim() ?? '';
 
           final String contactName =
-              data['contactName']
-                  ?.toString()
-                  .trim() ??
-                  'User';
+              data['contactName']?.toString().trim() ?? 'User';
 
-          final MessageThreadModel thread =
-          MessageThreadModel(
+          final MessageThreadModel thread = MessageThreadModel(
             id: conversationId,
             learnerName: contactName,
             lastMessage: '',
@@ -538,13 +507,12 @@ class LocalNotificationService {
           );
 
           Get.to<void>(
-                () => const MessageChatView(),
+            () => const MessageChatView(),
             binding: BindingsBuilder(() {
               Get.put<MessageChatController>(
                 MessageChatController(
                   thread: thread,
-                  messagesMockService:
-                  Get.find<MessagesMockService>(),
+                  messagesMockService: Get.find<MessagesMockService>(),
                 ),
               );
             }),
@@ -554,11 +522,10 @@ class LocalNotificationService {
           return;
         }
 
-        deepLink =
-            data['deepLink']?.toString().trim() ?? '';
+        deepLink = data['deepLink']?.toString().trim() ?? '';
       }
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Error parsing notification payload',
         error: error,
         stackTrace: stackTrace,
@@ -572,17 +539,11 @@ class LocalNotificationService {
       return;
     }
 
-    unawaited(
-      _openNotificationDeepLink(deepLink),
-    );
+    unawaited(_openNotificationDeepLink(deepLink));
   }
-  Future<void> _openNotificationDeepLink(
-      String deepLink,
-      ) async {
-    final bool handled =
-    await NotificationDeepLinkService.open(
-      deepLink,
-    );
+
+  Future<void> _openNotificationDeepLink(String deepLink) async {
+    final bool handled = await NotificationDeepLinkService.open(deepLink);
 
     if (handled) {
       return;
@@ -604,18 +565,14 @@ class LocalNotificationService {
       routePath = uri.path;
     }
 
-    if (routePath.isEmpty ||
-        !routePath.startsWith('/')) {
+    if (routePath.isEmpty || !routePath.startsWith('/')) {
       return;
     }
 
     try {
-      await Get.toNamed<void>(
-        routePath,
-        parameters: uri.queryParameters,
-      );
+      await Get.toNamed<void>(routePath, parameters: uri.queryParameters);
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Unable to open notification deep link: $deepLink',
         error: error,
         stackTrace: stackTrace,

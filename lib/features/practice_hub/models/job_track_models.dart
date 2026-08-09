@@ -51,6 +51,7 @@ class JobMediaFileModel {
     required this.originalName,
     required this.mimeType,
     required this.sizeBytes,
+    required this.pageCount,
   });
 
   final String id;
@@ -58,6 +59,7 @@ class JobMediaFileModel {
   final String originalName;
   final String mimeType;
   final int sizeBytes;
+  final int pageCount;
 
   bool get isAvailable => url.trim().isNotEmpty;
   bool get isAudio => mimeType.toLowerCase().startsWith('audio/');
@@ -76,6 +78,7 @@ class JobMediaFileModel {
       ),
       mimeType: _stringValue(file['mimeType'] ?? json['mimeType']),
       sizeBytes: _intValue(file['sizeBytes'] ?? json['sizeBytes']),
+      pageCount: _intValue(json['pageCount'] ?? file['pageCount']),
     );
   }
 
@@ -86,6 +89,7 @@ class JobMediaFileModel {
       'originalName': originalName,
       'mimeType': mimeType,
       'sizeBytes': sizeBytes,
+      'pageCount': pageCount,
     };
   }
 
@@ -95,6 +99,7 @@ class JobMediaFileModel {
     String? originalName,
     String? mimeType,
     int? sizeBytes,
+    int? pageCount,
   }) {
     return JobMediaFileModel(
       id: id ?? this.id,
@@ -102,6 +107,7 @@ class JobMediaFileModel {
       originalName: originalName ?? this.originalName,
       mimeType: mimeType ?? this.mimeType,
       sizeBytes: sizeBytes ?? this.sizeBytes,
+      pageCount: pageCount ?? this.pageCount,
     );
   }
 }
@@ -383,7 +389,7 @@ class JobModuleModel {
       sortOrder: sortOrder ?? this.sortOrder,
       sentenceCount: sentenceCount ?? this.sentenceCount,
       learnedSentenceCount:
-          learnedSentenceCount ?? this.learnedSentenceCount,
+      learnedSentenceCount ?? this.learnedSentenceCount,
     );
   }
 }

@@ -16,7 +16,6 @@ import '../../vocabulary/services/vocabulary_api_service.dart';
 import '../models/chapter_detail_models.dart';
 import '../services/chapter_detail_api_service.dart';
 
-
 class ChapterDetailController extends GetxController {
   final CourseChapterModel chapter;
   final ChapterDetailApiService _chapterDetailApiService;
@@ -42,15 +41,10 @@ class ChapterDetailController extends GetxController {
   ChapterVideoAccessModel? _cachedVideoAccess;
   Future<String?>? _audioUrlFuture;
   Future<ChapterMediaModel?>? _pdfMediaFuture;
-  Future<int>? _pdfPageCountFuture;
 
   @override
   void onInit() {
     super.onInit();
-    if (chapter.progress >= 0.8) {
-      quizStatus.value = ChapterQuizStatus.enabled;
-      _lastRecordedVideoPercent = 80;
-    }
     loadDetail();
   }
 
@@ -65,7 +59,6 @@ class ChapterDetailController extends GetxController {
     _cachedVideoAccess = null;
     _audioUrlFuture = null;
     _pdfMediaFuture = null;
-    _pdfPageCountFuture = null;
 
     await loadDetail();
   }
@@ -124,15 +117,13 @@ class ChapterDetailController extends GetxController {
       return Future<ChapterVideoAccessModel?>.value(cachedAccess);
     }
 
-    final Future<ChapterVideoAccessModel?>? activeFuture =
-        _videoAccessFuture;
+    final Future<ChapterVideoAccessModel?>? activeFuture = _videoAccessFuture;
 
     if (activeFuture != null) {
       return activeFuture;
     }
 
-    final Future<ChapterVideoAccessModel?> future =
-    _requestVideoAccess();
+    final Future<ChapterVideoAccessModel?> future = _requestVideoAccess();
 
     _videoAccessFuture = future;
 
@@ -151,13 +142,11 @@ class ChapterDetailController extends GetxController {
     }
 
     final ApiResult<ChapterVideoAccessModel> result =
-    await ApiErrorHandler.call<ChapterVideoAccessModel>(
-          () => _chapterDetailApiService.fetchVideoAccess(
-        lessonId: current.id,
-      ),
-      showError: false,
-      errorTitle: 'video'.tr,
-    );
+        await ApiErrorHandler.call<ChapterVideoAccessModel>(
+          () => _chapterDetailApiService.fetchVideoAccess(lessonId: current.id),
+          showError: false,
+          errorTitle: 'video'.tr,
+        );
 
     final ChapterVideoAccessModel? access = result.data;
 
@@ -294,9 +283,7 @@ class ChapterDetailController extends GetxController {
       ),
     );
 
-    final Future<int> pageCountFuture = _pdfPageCountFuture ??=
-        _chapterDetailApiService.fetchPdfPageCount(pdfUrl: media.url);
-    final int pageCount = await pageCountFuture;
+    final int pageCount = media.pageCount;
 
     final ChapterDetailModel? latest = detail.value;
     if (latest == null ||
@@ -363,8 +350,17 @@ class ChapterDetailController extends GetxController {
             .clamp(0, 100)
             .toInt();
 
+    final ChapterQuizModel? quiz = current.quiz;
+
+    final bool hasUnlockThreshold =
+        quiz != null && quiz.unlockRequirementEnabled;
+
+    final int unlockThreshold = quiz?.unlockVideoWatchPercent ?? 80;
+
     final bool reachedQuizThreshold =
-        _lastRecordedVideoPercent < 80 && percent >= 80;
+        hasUnlockThreshold &&
+        _lastRecordedVideoPercent < unlockThreshold &&
+        percent >= unlockThreshold;
     if (percent < 5 ||
         percent <= _lastRecordedVideoPercent ||
         (!reachedQuizThreshold &&
@@ -471,13 +467,12 @@ class ChapterDetailController extends GetxController {
     );
 
     Get.to<void>(
-          () => AppPdfViewer(
+      () => AppPdfViewer(
         title: theoryBook.title,
         source: pdfUrl,
-        sourceType:
-        AppPdfSourceType.network,
-        sourceId:
-        'chapter_theory_pdf_viewer',
+        sourceType: AppPdfSourceType.network,
+        sourceId: 'chapter_theory_pdf_viewer',
+        initialPageCount: detail.value?.theoryBook.count ?? 0,
       ),
     );
   }
@@ -547,17 +542,11 @@ class ChapterDetailController extends GetxController {
     );
 
     if (Get.isRegistered<VocabularyController>(tag: tag)) {
-      Get.delete<VocabularyController>(
-        tag: tag,
-        force: true,
-      );
+      Get.delete<VocabularyController>(tag: tag, force: true);
     }
 
     if (Get.isRegistered<VocabularyApiService>(tag: tag)) {
-      Get.delete<VocabularyApiService>(
-        tag: tag,
-        force: true,
-      );
+      Get.delete<VocabularyApiService>(tag: tag, force: true);
     }
   }
 
@@ -611,22 +600,39 @@ class ChapterDetailController extends GetxController {
       return;
     }
 
+    final bool canStartQuiz =
+        quiz != null &&
+        (!quiz.unlockRequirementEnabled ||
+            !current.hasVideo ||
+            percent >= quiz.unlockVideoWatchPercent);
+
     final ChapterQuizModel? updatedQuiz = quiz == null
         ? null
         : quiz.copyWith(
-            status: percent >= 80 ? ChapterQuizStatus.enabled : quiz.status,
-            actionLabel: percent >= 80 ? 'start_quiz'.tr : quiz.actionLabel,
+            status: quiz.status == ChapterQuizStatus.completed
+                ? ChapterQuizStatus.completed
+                : canStartQuiz
+                ? ChapterQuizStatus.enabled
+                : ChapterQuizStatus.disabled,
+
+            actionLabel: canStartQuiz
+                ? 'start_quiz'.tr
+                : 'requires_video_percent'.trParams(<String, String>{
+                    'percent': quiz.unlockVideoWatchPercent.toString(),
+                  }),
           );
 
-    if (percent >= 80 && quizStatus.value == ChapterQuizStatus.disabled) {
-      quizStatus.value = ChapterQuizStatus.enabled;
+    if (updatedQuiz != null) {
+      quizStatus.value = updatedQuiz.status;
     }
 
     detail.value = current.copyWith(
       videoProgress: (percent / 100).clamp(0.0, 1.0).toDouble(),
-      videoProgressLabel: percent >= 80
-          ? '$percent% ${'watched'.tr} – ${'quiz_unlocked'.tr}'
-          : '$percent% ${'watched'.tr} – ${'keep_going_1'.tr}',
+      videoProgressLabel: quiz != null && canStartQuiz
+          ? '$percent% ${'watched'.tr} – '
+                '${'quiz_unlocked'.tr}'
+          : '$percent% ${'watched'.tr} – '
+                '${'keep_going_1'.tr}',
       watchedTimeLabel: _durationLabel(
         Duration(
           milliseconds: (duration.inMilliseconds * (percent / 100)).round(),

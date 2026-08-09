@@ -500,6 +500,8 @@ class JobSentencesController extends GetxController {
         AppPdfSourceType.network,
         sourceId:
         'job_sentences_theory_pdf_viewer',
+        initialPageCount:
+        resource.pageCount,
       ),
     );
   }

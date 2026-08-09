@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as dev;
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -7,7 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
+import '../../features/courses/sub_features/pro_checkout/models/pro_checkout_models.dart';
 import '../../features/courses/sub_features/pro_checkout/services/course_google_play_billing_service.dart';
 import '../../features/courses/sub_features/pro_checkout/services/pro_checkout_api_service.dart';
 
@@ -18,6 +19,13 @@ class CoursePurchaseRecoveryService extends GetxService
     required ProCheckoutApiService apiService,
   }) : _billingService = billingService,
         _apiService = apiService;
+
+  static const Set<String> _permanentFailureCodes = <String>{
+    'GOOGLE_PLAY_PURCHASE_LINKED_TO_ANOTHER_USER',
+    'GOOGLE_PLAY_ACCOUNT_IDENTIFIER_MISSING',
+    'GOOGLE_PLAY_PURCHASE_LINKED_TO_ANOTHER_COURSE',
+    'GOOGLE_PLAY_PURCHASE_NOT_RESTORABLE',
+  };
 
   final CourseGooglePlayBillingService _billingService;
   final ProCheckoutApiService _apiService;
@@ -31,6 +39,7 @@ class CoursePurchaseRecoveryService extends GetxService
     WidgetsBinding.instance.addObserver(this);
 
     await _billingService.initialize();
+    await migrateLegacyPendingPurchase();
 
     return this;
   }
@@ -66,12 +75,58 @@ class CoursePurchaseRecoveryService extends GetxService
     }
   }
 
+  Future<void> migrateLegacyPendingPurchase() async {
+    if (_billingService.loadPendingPurchase() != null) {
+      return;
+    }
+
+    final ProPendingGooglePlayPurchaseModel? legacyPending =
+    _billingService.loadLegacyPendingPurchase();
+
+    if (legacyPending == null || _billingService.currentAppUserId.isEmpty) {
+      return;
+    }
+
+    try {
+      await _apiService.canAccessPendingOrder(pending: legacyPending);
+      await _billingService.adoptLegacyPendingPurchase(legacyPending);
+    } on DioException catch (error, stackTrace) {
+      final int? statusCode = error.response?.statusCode;
+
+      /*
+       * A 403/404 means this legacy record belongs to another app user.
+       * Leave it in the legacy slot so its original owner can still recover
+       * after signing in later, but never expose it to the current user.
+       */
+      if (statusCode == 403 || statusCode == 404) {
+        return;
+      }
+
+      AppLogger.log(
+        'Legacy course purchase migration did not finish.',
+        name: 'CoursePurchaseRecoveryService',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    } catch (error, stackTrace) {
+      AppLogger.log(
+        'Legacy course purchase migration did not finish.',
+        name: 'CoursePurchaseRecoveryService',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   Future<void> recoverPendingPurchase() async {
     if (_isRecovering || isSuspended || !Platform.isAndroid) {
       return;
     }
 
-    final pending = _billingService.loadPendingPurchase();
+    await migrateLegacyPendingPurchase();
+
+    final ProPendingGooglePlayPurchaseModel? pending =
+    _billingService.loadPendingPurchase();
 
     if (pending == null) {
       return;
@@ -104,7 +159,7 @@ class CoursePurchaseRecoveryService extends GetxService
            * Do not delete the pending order for a generic Billing error.
            * The payment may still require reconciliation.
            */
-          dev.log(
+          AppLogger.log(
             purchase.error?.message ??
                 'Google Play returned an error during recovery.',
             name: 'CoursePurchaseRecoveryService',
@@ -117,7 +172,7 @@ class CoursePurchaseRecoveryService extends GetxService
           final String purchaseToken = _purchaseToken(purchase);
 
           if (purchaseToken.isEmpty) {
-            dev.log(
+            AppLogger.log(
               'Recovered Google Play purchase has no purchase token.',
               name: 'CoursePurchaseRecoveryService',
             );
@@ -140,17 +195,30 @@ class CoursePurchaseRecoveryService extends GetxService
       }
     } on DioException catch (error, stackTrace) {
       final int? statusCode = error.response?.statusCode;
+      final String errorCode = _backendErrorCode(error);
+
+      if (_permanentFailureCodes.contains(errorCode)) {
+        await _billingService.clearPendingPurchase();
+
+        AppLogger.log(
+          'Pending purchase recovery stopped because the purchase cannot be linked to this app user.',
+          name: 'CoursePurchaseRecoveryService',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        return;
+      }
 
       /*
        * A 403/404 normally means the stored order belongs to a previously
-       * logged-in user or no longer exists. Remove it so it cannot block the
-       * current account.
+       * logged-in user or no longer exists. Remove only the current user's
+       * scoped record so it cannot block this account.
        */
       if (statusCode == 403 || statusCode == 404) {
         await _billingService.clearPendingPurchase();
       }
 
-      dev.log(
+      AppLogger.log(
         'Pending course purchase recovery did not finish.',
         name: 'CoursePurchaseRecoveryService',
         error: error,
@@ -160,7 +228,7 @@ class CoursePurchaseRecoveryService extends GetxService
       /*
        * Keep the pending record for network, server and Google Play failures.
        */
-      dev.log(
+      AppLogger.log(
         'Pending course purchase recovery did not finish.',
         name: 'CoursePurchaseRecoveryService',
         error: error,
@@ -169,6 +237,26 @@ class CoursePurchaseRecoveryService extends GetxService
     } finally {
       _isRecovering = false;
     }
+  }
+
+  String _backendErrorCode(DioException error) {
+    final dynamic data = error.response?.data;
+
+    if (data is! Map) {
+      return '';
+    }
+
+    final String directCode = data['code']?.toString().trim() ?? '';
+    if (directCode.isNotEmpty) {
+      return directCode;
+    }
+
+    final dynamic nestedError = data['error'];
+    if (nestedError is Map) {
+      return nestedError['code']?.toString().trim() ?? '';
+    }
+
+    return '';
   }
 
   String _purchaseToken(PurchaseDetails purchase) {

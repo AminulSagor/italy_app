@@ -10,6 +10,12 @@ import '../services/vocabulary_api_service.dart';
 import '../widgets/vocabulary_completion_dialog.dart';
 import '../widgets/vocabulary_exit_dialog.dart';
 
+
+enum VocabularyDisplayMode {
+  list,
+  flashcard,
+}
+
 class VocabularyController extends GetxController {
   final String? lessonId;
   final VocabularyApiService _vocabularyApiService;
@@ -30,6 +36,13 @@ class VocabularyController extends GetxController {
   final RxBool isRevealed = false.obs;
   final RxBool isCompleting = false.obs;
   final RxBool isSpeaking = false.obs;
+
+  final Rx<VocabularyDisplayMode> displayMode =
+      VocabularyDisplayMode.list.obs;
+
+  final RxString searchQuery = ''.obs;
+  final RxBool showMeanings = true.obs;
+  final RxBool isPlayingAll = false.obs;
 
   final RxInt currentIndex = 0.obs;
   final RxInt rightCount = 0.obs;
@@ -58,6 +71,51 @@ class VocabularyController extends GetxController {
   }
 
   int get totalCards => session.value?.cards.length ?? 0;
+
+  List<VocabularyCardModel> get filteredCards {
+    final List<VocabularyCardModel> cards =
+        session.value?.cards ??
+            <VocabularyCardModel>[];
+
+    final String query =
+    searchQuery.value.trim().toLowerCase();
+
+    if (query.isEmpty) {
+      return cards;
+    }
+
+    return cards.where(
+          (VocabularyCardModel card) {
+        return card.word
+            .toLowerCase()
+            .contains(query) ||
+            card.meaning
+                .toLowerCase()
+                .contains(query) ||
+            card.example
+                .toLowerCase()
+                .contains(query);
+      },
+    ).toList(growable: false);
+  }
+
+  int get learnedCount {
+    return session.value?.cards
+        .where(
+          (VocabularyCardModel card) =>
+      card.isLearned,
+    )
+        .length ??
+        0;
+  }
+
+  double get learnedProgressValue {
+    if (totalCards == 0) {
+      return 0;
+    }
+
+    return learnedCount / totalCards;
+  }
 
   int get currentCardNumber {
     return totalCards == 0 ? 0 : currentIndex.value + 1;
@@ -133,9 +191,44 @@ class VocabularyController extends GetxController {
     }
   }
 
+
+  Future<void> setDisplayMode(
+      VocabularyDisplayMode mode,
+      ) async {
+    if (displayMode.value == mode) {
+      return;
+    }
+
+    await stopSpeaking();
+
+    isPlayingAll.value = false;
+    displayMode.value = mode;
+  }
+
+  void setSearchQuery(String value) {
+    searchQuery.value = value;
+  }
+
+  void setShowMeanings(bool value) {
+    showMeanings.value = value;
+  }
+
   Future<void> speakCurrentWord() async {
-    final VocabularyCardModel? card = currentCard;
-    final String text = card?.word.trim() ?? '';
+    final VocabularyCardModel? card =
+        currentCard;
+
+    if (card == null) {
+      return;
+    }
+
+    await speakCard(card);
+  }
+
+
+  Future<void> speakCard(
+      VocabularyCardModel card,
+      ) async {
+    final String text = card.word.trim();
 
     if (text.isEmpty || isSpeaking.value) {
       return;
@@ -161,7 +254,8 @@ class VocabularyController extends GetxController {
         Get.snackbar(
           'pronunciation_unavailable'.tr,
           'italian_voice_unavailable_message'.tr,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition:
+          SnackPosition.BOTTOM,
         );
       }
     } finally {
@@ -171,8 +265,45 @@ class VocabularyController extends GetxController {
     }
   }
 
+
+  Future<void> playAllVisibleWords() async {
+    if (isPlayingAll.value) {
+      isPlayingAll.value = false;
+      await stopSpeaking();
+      return;
+    }
+
+    final List<VocabularyCardModel> cards =
+    List<VocabularyCardModel>.from(
+      filteredCards,
+    );
+
+    if (cards.isEmpty) {
+      return;
+    }
+
+    isPlayingAll.value = true;
+
+    try {
+      for (final VocabularyCardModel card
+      in cards) {
+        if (!isPlayingAll.value) {
+          break;
+        }
+
+        await _ttsService.speakText(
+          card.word,
+          locale: 'it-IT',
+        );
+      }
+    } finally {
+      isPlayingAll.value = false;
+    }
+  }
+
   Future<void> stopSpeaking() async {
     _ttsRequestId++;
+    isPlayingAll.value = false;
 
     try {
       await _ttsService.stop();

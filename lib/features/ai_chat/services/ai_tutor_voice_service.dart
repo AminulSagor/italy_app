@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -130,10 +130,7 @@ class AiTutorVoiceService extends GetxService {
 
   Future<void> _connectRoom(AiTutorVoiceSessionModel session) async {
     final lk.Room room = lk.Room(
-      roomOptions: const lk.RoomOptions(
-        adaptiveStream: true,
-        dynacast: true,
-      ),
+      roomOptions: const lk.RoomOptions(adaptiveStream: true, dynacast: true),
     );
     _room = room;
     _registerRoomCallbacks(room);
@@ -198,8 +195,8 @@ class AiTutorVoiceService extends GetxService {
     status.value = assistantSpeaking.value
         ? 'ai_tutor_is_speaking'.tr
         : assistantThinking.value
-            ? 'ai_tutor_is_thinking'.tr
-            : 'gen_listening'.tr;
+        ? 'ai_tutor_is_thinking'.tr
+        : 'gen_listening'.tr;
     await _ensureMicrophonePublished();
   }
 
@@ -300,30 +297,31 @@ class AiTutorVoiceService extends GetxService {
           _markAssistantReady();
         }
       })
-      ..on<lk.ActiveSpeakersChangedEvent>(
-        (lk.ActiveSpeakersChangedEvent event) {
-          final String? localIdentity = _identity;
-          if (localIdentity == null) {
-            return;
+      ..on<lk.ActiveSpeakersChangedEvent>((
+        lk.ActiveSpeakersChangedEvent event,
+      ) {
+        final String? localIdentity = _identity;
+        if (localIdentity == null) {
+          return;
+        }
+
+        double localAudioLevel = 0;
+        double remoteAudioLevel = 0;
+
+        for (final lk.Participant participant in event.speakers) {
+          final double level = participant.audioLevel
+              .clamp(0.0, 1.0)
+              .toDouble();
+          if (participant.identity == localIdentity) {
+            localAudioLevel = math.max(localAudioLevel, level);
+          } else {
+            remoteAudioLevel = math.max(remoteAudioLevel, level);
           }
+        }
 
-          double localAudioLevel = 0;
-          double remoteAudioLevel = 0;
-
-          for (final lk.Participant participant in event.speakers) {
-            final double level =
-                participant.audioLevel.clamp(0.0, 1.0).toDouble();
-            if (participant.identity == localIdentity) {
-              localAudioLevel = math.max(localAudioLevel, level);
-            } else {
-              remoteAudioLevel = math.max(remoteAudioLevel, level);
-            }
-          }
-
-          userAudioLevel.value = localAudioLevel;
-          assistantAudioLevel.value = remoteAudioLevel;
-        },
-      )
+        userAudioLevel.value = localAudioLevel;
+        assistantAudioLevel.value = remoteAudioLevel;
+      })
       ..on<lk.DataReceivedEvent>(_handleDataReceived);
   }
 
@@ -333,7 +331,9 @@ class AiTutorVoiceService extends GetxService {
     }
 
     assistantReady.value = true;
-    status.value = isMuted.value ? 'microphone_muted'.tr : 'ai_tutor_is_preparing'.tr;
+    status.value = isMuted.value
+        ? 'microphone_muted'.tr
+        : 'ai_tutor_is_preparing'.tr;
     final Completer<void>? completer = _assistantReadyCompleter;
     if (completer != null && !completer.isCompleted) {
       completer.complete();
@@ -360,8 +360,9 @@ class AiTutorVoiceService extends GetxService {
         return;
       }
 
-      final AiTutorMessageModel message =
-          AiTutorMessageModel.fromTranscript(payload);
+      final AiTutorMessageModel message = AiTutorMessageModel.fromTranscript(
+        payload,
+      );
       if (message.primary.isEmpty) {
         return;
       }
@@ -421,7 +422,9 @@ class AiTutorVoiceService extends GetxService {
         userSpeaking.value = false;
         assistantSpeaking.value = false;
         assistantThinking.value = false;
-        status.value = isMuted.value ? 'microphone_muted'.tr : 'gen_listening'.tr;
+        status.value = isMuted.value
+            ? 'microphone_muted'.tr
+            : 'gen_listening'.tr;
         if (!isMuted.value) {
           unawaited(_ensureMicrophonePublished());
         }
@@ -484,7 +487,7 @@ class AiTutorVoiceService extends GetxService {
     if (!kDebugMode) {
       return;
     }
-    dev.log(
+    AppLogger.log(
       message,
       name: 'AiTutorVoiceService',
       error: error,

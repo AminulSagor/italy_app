@@ -1,4 +1,4 @@
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -12,7 +12,7 @@ class DevicePushTokenService {
     required ApiClient apiClient,
     required StorageService storageService,
   }) : _apiClient = apiClient,
-        _storageService = storageService;
+       _storageService = storageService;
 
   final ApiClient _apiClient;
   final StorageService _storageService;
@@ -35,10 +35,7 @@ class DevicePushTokenService {
 
     final String newDeviceId = const Uuid().v4();
 
-    await _storageService.writeString(
-      _deviceIdStorageKey,
-      newDeviceId,
-    );
+    await _storageService.writeString(_deviceIdStorageKey, newDeviceId);
 
     return newDeviceId;
   }
@@ -49,8 +46,8 @@ class DevicePushTokenService {
   /// This method never opens the notification permission popup.
   Future<void> registerCurrentDevice() async {
     try {
-      final NotificationSettings settings =
-      await FirebaseMessaging.instance.getNotificationSettings();
+      final NotificationSettings settings = await FirebaseMessaging.instance
+          .getNotificationSettings();
 
       if (!_isAuthorized(settings.authorizationStatus)) {
         _allowBackendSync = false;
@@ -61,7 +58,7 @@ class DevicePushTokenService {
 
       await _registerCurrentToken();
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Failed to register FCM token',
         error: error,
         stackTrace: stackTrace,
@@ -75,12 +72,8 @@ class DevicePushTokenService {
   Future<AuthorizationStatus>
   requestPermissionAndRegisterCurrentDevice() async {
     try {
-      final NotificationSettings settings =
-      await FirebaseMessaging.instance.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      final NotificationSettings settings = await FirebaseMessaging.instance
+          .requestPermission(alert: true, badge: true, sound: true);
 
       if (!_isAuthorized(settings.authorizationStatus)) {
         _allowBackendSync = false;
@@ -95,7 +88,7 @@ class DevicePushTokenService {
     } catch (error, stackTrace) {
       _allowBackendSync = false;
 
-      dev.log(
+      AppLogger.log(
         'Failed to request notification permission',
         error: error,
         stackTrace: stackTrace,
@@ -108,12 +101,12 @@ class DevicePushTokenService {
 
   Future<bool> hasNotificationPermission() async {
     try {
-      final NotificationSettings settings =
-      await FirebaseMessaging.instance.getNotificationSettings();
+      final NotificationSettings settings = await FirebaseMessaging.instance
+          .getNotificationSettings();
 
       return _isAuthorized(settings.authorizationStatus);
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Failed to read notification permission',
         error: error,
         stackTrace: stackTrace,
@@ -131,30 +124,28 @@ class DevicePushTokenService {
 
     _refreshListenerStarted = true;
 
-    FirebaseMessaging.instance.onTokenRefresh.listen(
-          (String newToken) async {
-        if (!_allowBackendSync || !_storageService.isLoggedIn) {
-          return;
-        }
+    FirebaseMessaging.instance.onTokenRefresh.listen((String newToken) async {
+      if (!_allowBackendSync || !_storageService.isLoggedIn) {
+        return;
+      }
 
-        final String token = newToken.trim();
+      final String token = newToken.trim();
 
-        if (token.isEmpty) {
-          return;
-        }
+      if (token.isEmpty) {
+        return;
+      }
 
-        try {
-          await _sendTokenToBackend(token);
-        } catch (error, stackTrace) {
-          dev.log(
-            'Failed to update refreshed FCM token',
-            error: error,
-            stackTrace: stackTrace,
-            name: 'DevicePushTokenService',
-          );
-        }
-      },
-    );
+      try {
+        await _sendTokenToBackend(token);
+      } catch (error, stackTrace) {
+        AppLogger.log(
+          'Failed to update refreshed FCM token',
+          error: error,
+          stackTrace: stackTrace,
+          name: 'DevicePushTokenService',
+        );
+      }
+    });
   }
 
   void disableBackendSync() {
@@ -165,7 +156,7 @@ class DevicePushTokenService {
     try {
       await FirebaseMessaging.instance.deleteToken();
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Failed to delete local FCM token',
         error: error,
         stackTrace: stackTrace,
@@ -175,8 +166,7 @@ class DevicePushTokenService {
   }
 
   Future<void> _registerCurrentToken() async {
-    final String? rawToken =
-    await FirebaseMessaging.instance.getToken();
+    final String? rawToken = await FirebaseMessaging.instance.getToken();
 
     final String token = rawToken?.trim() ?? '';
 

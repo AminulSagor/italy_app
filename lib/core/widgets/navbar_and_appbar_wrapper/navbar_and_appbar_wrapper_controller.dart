@@ -42,6 +42,8 @@ class NavbarAndAppbarWrapperController extends GetxController
   final AuthService _authService = Get.find<AuthService>();
   final RxInt currentIndex = 0.obs;
   final RxBool hasUnreadNotifications = false.obs;
+  final RxString greetingKey = 'home_good_morning'.obs;
+  Timer? _greetingTimer;
   final RxSet<int> visitedTabs = <int>{0}.obs;
   final RxBool isLoggingOut = false.obs;
   // Presence listener registration flag
@@ -249,10 +251,91 @@ class NavbarAndAppbarWrapperController extends GetxController
     return true;
   }
 
+  void _refreshGreeting() {
+    final DateTime now = DateTime.now();
+
+    greetingKey.value = _greetingKeyForHour(now.hour);
+
+    _scheduleNextGreetingRefresh(now);
+  }
+
+  String _greetingKeyForHour(int hour) {
+    // 05:00 - 11:59
+    if (hour >= 5 && hour < 12) {
+      return 'home_good_morning';
+    }
+
+    // 12:00 - 16:59
+    if (hour >= 12 && hour < 17) {
+      return 'home_good_afternoon';
+    }
+
+    // 17:00 - 21:59
+    if (hour >= 17 && hour < 22) {
+      return 'home_good_evening';
+    }
+
+    // 22:00 - 04:59
+    return 'home_good_night';
+  }
+
+  void _scheduleNextGreetingRefresh(DateTime now) {
+    _greetingTimer?.cancel();
+
+    late final DateTime nextBoundary;
+
+    if (now.hour < 5) {
+      nextBoundary = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        5,
+      );
+    } else if (now.hour < 12) {
+      nextBoundary = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        12,
+      );
+    } else if (now.hour < 17) {
+      nextBoundary = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        17,
+      );
+    } else if (now.hour < 22) {
+      nextBoundary = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        22,
+      );
+    } else {
+      nextBoundary = DateTime(
+        now.year,
+        now.month,
+        now.day + 1,
+        5,
+      );
+    }
+
+    final Duration delay =
+        nextBoundary.difference(now) +
+            const Duration(seconds: 1);
+
+    _greetingTimer = Timer(
+      delay,
+      _refreshGreeting,
+    );
+  }
+
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+    _refreshGreeting();
     _initCurrentUserId();
     _ensurePresenceListener();
     if (Get.isRegistered<UserSessionController>()) {
@@ -268,13 +351,22 @@ class NavbarAndAppbarWrapperController extends GetxController
 
   @override
   void onClose() {
+    _greetingTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.onClose();
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(
+      AppLifecycleState state,
+      ) {
     super.didChangeAppLifecycleState(state);
+
+
+    if (state == AppLifecycleState.resumed) {
+      _refreshGreeting();
+    }
+
 
     if (state != AppLifecycleState.resumed ||
         Get.currentRoute != AppRoutes.messages) {
@@ -282,7 +374,8 @@ class NavbarAndAppbarWrapperController extends GetxController
     }
 
     if (Get.isRegistered<MessagesController>()) {
-      Get.find<MessagesController>().refreshMessages();
+      Get.find<MessagesController>()
+          .refreshMessages();
     }
   }
 

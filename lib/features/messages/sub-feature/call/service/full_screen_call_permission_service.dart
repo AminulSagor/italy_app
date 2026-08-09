@@ -1,16 +1,14 @@
-import 'dart:developer' as dev;
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:get/get.dart';
-
 import '../../../../../core/services/storage_service.dart';
+import 'package:italir_pothe/core/utils/app_logger.dart';
+
 
 class FullScreenCallPermissionService {
-  FullScreenCallPermissionService({
-    StorageService? storageService,
-  }) : _storageService = storageService ?? Get.find<StorageService>();
+  FullScreenCallPermissionService({StorageService? storageService})
+    : _storageService = storageService ?? Get.find<StorageService>();
 
   static const String _permissionExplanationShownKey =
       'full_screen_call_permission_explanation_shown';
@@ -24,7 +22,7 @@ class FullScreenCallPermissionService {
 
     try {
       final bool alreadyAllowed =
-      await FlutterCallkitIncoming.canUseFullScreenIntent();
+          await FlutterCallkitIncoming.canUseFullScreenIntent();
 
       if (alreadyAllowed) {
         return;
@@ -40,12 +38,8 @@ class FullScreenCallPermissionService {
       final bool shouldOpenSettings =
           await Get.dialog<bool>(
             AlertDialog(
-              title: Text(
-                'full_screen_call_permission_title'.tr,
-              ),
-              content: Text(
-                'full_screen_call_permission_description'.tr,
-              ),
+              title: Text('full_screen_call_permission_title'.tr),
+              content: Text('full_screen_call_permission_description'.tr),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Get.back<bool>(result: false),
@@ -59,13 +53,10 @@ class FullScreenCallPermissionService {
             ),
             barrierDismissible: false,
           ) ??
-              false;
+          false;
 
       // Prevent repeatedly asking on every future call.
-      await _storageService.writeString(
-        _permissionExplanationShownKey,
-        'true',
-      );
+      await _storageService.writeString(_permissionExplanationShownKey, 'true');
 
       if (!shouldOpenSettings) {
         return;
@@ -73,7 +64,7 @@ class FullScreenCallPermissionService {
 
       await FlutterCallkitIncoming.requestFullIntentPermission();
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Unable to request full-screen call permission',
         name: 'FullScreenCallPermissionService',
         error: error,

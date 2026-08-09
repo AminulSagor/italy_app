@@ -1,4 +1,4 @@
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 import 'dart:ui';
 
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
@@ -13,7 +13,7 @@ import 'token_service.dart';
 Future<void> callkitBackgroundActionHandler(CallEvent event) async {
   DartPluginRegistrant.ensureInitialized();
 
-  dev.log('Received ${event.runtimeType}', name: 'CallKitBackground');
+  AppLogger.log('Received ${event.runtimeType}', name: 'CallKitBackground');
 
   if (event is CallEventActionCallTimeout) {
     final String callId = event.id.trim();
@@ -40,7 +40,7 @@ Future<void> callkitBackgroundActionHandler(CallEvent event) async {
       : callKitParams.id.trim();
 
   if (callId.isEmpty) {
-    dev.log(
+    AppLogger.log(
       'Action ignored because callId is missing',
       name: 'CallKitBackground',
     );
@@ -56,7 +56,7 @@ Future<void> callkitBackgroundActionHandler(CallEvent event) async {
       callData: extra,
     );
 
-    dev.log(
+    AppLogger.log(
       'Accept queued for foreground restoration',
       name: 'CallKitBackground',
     );
@@ -94,7 +94,7 @@ Future<void> _runBackgroundAction(
     );
     await action(callService);
   } catch (error, stackTrace) {
-    dev.log(
+    AppLogger.log(
       'Background action failed',
       name: 'CallKitBackground',
       error: error,

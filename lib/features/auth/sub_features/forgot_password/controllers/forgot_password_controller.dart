@@ -374,18 +374,8 @@ class ForgotPasswordController extends GetxController {
       return;
     }
 
-    if (!current.hasMinLength) {
-      Get.snackbar('snack_weak_password'.tr, 'snack_password_min_8'.tr);
-      return;
-    }
-
-    if (!current.hasUppercaseAndNumber) {
-      Get.snackbar('snack_weak_password'.tr, 'snack_need_upper_number'.tr);
-      return;
-    }
-
-    if (!current.hasSpecialCharacter) {
-      Get.snackbar('snack_weak_password'.tr, 'snack_need_special_character'.tr);
+    if (!current.hasMinimumLength) {
+      Get.snackbar('snack_weak_password'.tr, 'snack_password_6_characters'.tr);
       return;
     }
 
@@ -402,12 +392,18 @@ class ForgotPasswordController extends GetxController {
       final result = await _service.resetPassword(
         payload: ForgotPasswordResetPayloadModel(
           resetToken: verifiedSession.resetToken,
-          newPassword: current.newPassword.trim(),
+          newPassword: current.newPassword,
         ),
       );
 
       if (!result.success || result.data == null) {
-        Get.snackbar('snack_could_not_reset'.tr, 'snack_try_again'.tr);
+        final String backendMessage = result.errorCode?.trim() ?? '';
+
+        Get.snackbar(
+          'snack_could_not_reset'.tr,
+          backendMessage.isNotEmpty ? backendMessage : 'snack_try_again'.tr,
+        );
+
         return;
       }
 

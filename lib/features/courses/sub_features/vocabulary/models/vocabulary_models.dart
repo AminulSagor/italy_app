@@ -6,6 +6,11 @@ class VocabularyCardModel {
   final String example;
   final bool hasAudio;
   final String? audioFileId;
+  final String masteryStatus;
+
+  bool get isLearned =>
+      masteryStatus == 'known' ||
+          masteryStatus == 'mastered';
 
   const VocabularyCardModel({
     required this.id,
@@ -15,6 +20,7 @@ class VocabularyCardModel {
     required this.example,
     required this.hasAudio,
     this.audioFileId,
+    required this.masteryStatus,
   });
 
   factory VocabularyCardModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +32,8 @@ class VocabularyCardModel {
       example: json['example'] as String,
       hasAudio: json['hasAudio'] as bool? ?? false,
       audioFileId: json['audioFileId'] as String?,
+      masteryStatus:
+      json['masteryStatus']?.toString() ?? 'new',
     );
   }
 
@@ -38,6 +46,7 @@ class VocabularyCardModel {
       'example': example,
       'hasAudio': hasAudio,
       'audioFileId': audioFileId,
+      'masteryStatus': masteryStatus,
     };
   }
 
@@ -49,6 +58,7 @@ class VocabularyCardModel {
     String? example,
     bool? hasAudio,
     String? audioFileId,
+    String? masteryStatus,
   }) {
     return VocabularyCardModel(
       id: id ?? this.id,
@@ -58,6 +68,8 @@ class VocabularyCardModel {
       example: example ?? this.example,
       hasAudio: hasAudio ?? this.hasAudio,
       audioFileId: audioFileId ?? this.audioFileId,
+      masteryStatus:
+      masteryStatus ?? this.masteryStatus,
     );
   }
 }

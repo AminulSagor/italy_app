@@ -49,7 +49,9 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineLarge
                           ?.copyWith(
-                            fontSize: AppFont.font32.sp.clamp(AppFont.font30, AppFont.font50).toDouble(),
+                            fontSize: AppFont.font32.sp
+                                .clamp(AppFont.font30, AppFont.font50)
+                                .toDouble(),
                             height: 1.06,
                           ),
                     ),
@@ -210,12 +212,14 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
       child: TextField(
         controller: controller,
         obscureText: obscureText,
+        maxLength: 128,
         style: TextStyle(
           color: AppColors.legacyColorFF33383C,
           fontSize: AppFont.font16.sp,
           fontWeight: FontWeight.w600,
         ),
         decoration: InputDecoration(
+          counterText: '',
           hintText: hint,
           hintStyle: TextStyle(
             color: AppColors.legacyColorFF8A8E92,
@@ -258,13 +262,8 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
       child: Column(
         children: <Widget>[
           _ChecklistItem(
-            label: 'check_min_length'.tr,
-            passed: reset.hasMinLength,
-          ),
-          SizedBox(height: 10.h),
-          _ChecklistItem(
-            label: 'check_upper_number'.tr,
-            passed: reset.hasUppercaseAndNumber,
+            label: 'password_minimum_six'.tr,
+            passed: reset.hasMinimumLength,
           ),
           SizedBox(height: 10.h),
           _ChecklistItem(label: 'check_match'.tr, passed: reset.matchesConfirm),
@@ -286,7 +285,9 @@ class _ChecklistItem extends StatelessWidget {
       children: <Widget>[
         Icon(
           passed ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: passed ? AppColors.primaryGreen : AppColors.legacyColorFF8C8F93,
+          color: passed
+              ? AppColors.primaryGreen
+              : AppColors.legacyColorFF8C8F93,
           size: 17.sp,
         ),
         SizedBox(width: 10.w),
@@ -294,7 +295,9 @@ class _ChecklistItem extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: passed ? AppColors.legacyColorFF2A2F33 : AppColors.legacyColorFF7A7E82,
+              color: passed
+                  ? AppColors.legacyColorFF2A2F33
+                  : AppColors.legacyColorFF7A7E82,
               fontSize: AppFont.font15.sp,
               fontWeight: FontWeight.w500,
             ),

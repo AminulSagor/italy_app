@@ -203,17 +203,17 @@ class ProOrderModel {
           .whereType<Map>()
           .map(
             (Map<dynamic, dynamic> item) => ProFeatureModel.fromJson(
-              Map<String, dynamic>.from(item),
-            ),
-          )
+          Map<String, dynamic>.from(item),
+        ),
+      )
           .toList(growable: false),
       storeProduct: ProStoreProductModel.fromJson(
         storeProductJson.isEmpty
             ? <String, dynamic>{
-                'provider': 'google_play',
-                'productType': 'non_consumable',
-                'isActive': false,
-              }
+          'provider': 'google_play',
+          'productType': 'non_consumable',
+          'isActive': false,
+        }
             : storeProductJson,
       ),
       couponCode: _stringValue(json['couponCode']),
@@ -221,7 +221,7 @@ class ProOrderModel {
       pricingNote: _stringValue(
         json['pricingNote'],
         fallback:
-            'Google Play or App Store controls the final localized amount charged.',
+        'Google Play or App Store controls the final localized amount charged.',
       ),
     );
   }
@@ -253,6 +253,7 @@ class ProOrderModel {
 
 class ProPendingGooglePlayPurchaseModel {
   const ProPendingGooglePlayPurchaseModel({
+    required this.appUserId,
     required this.courseId,
     required this.orderId,
     required this.orderNumber,
@@ -261,6 +262,7 @@ class ProPendingGooglePlayPurchaseModel {
     required this.createdAt,
   });
 
+  final String appUserId;
   final String courseId;
   final String orderId;
   final String orderNumber;
@@ -272,22 +274,20 @@ class ProPendingGooglePlayPurchaseModel {
       Map<String, dynamic> json,
       ) {
     return ProPendingGooglePlayPurchaseModel(
+      appUserId: _stringValue(json['appUserId']),
       courseId: _stringValue(json['courseId']),
       orderId: _stringValue(json['orderId']),
       orderNumber: _stringValue(json['orderNumber']),
       productId: _stringValue(json['productId']),
-      obfuscatedAccountId: _stringValue(
-        json['obfuscatedAccountId'],
-      ),
+      obfuscatedAccountId: _stringValue(json['obfuscatedAccountId']),
       createdAt:
-      DateTime.tryParse(
-        _stringValue(json['createdAt']),
-      )?.toLocal() ??
+      DateTime.tryParse(_stringValue(json['createdAt']))?.toLocal() ??
           DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
+    'appUserId': appUserId,
     'courseId': courseId,
     'orderId': orderId,
     'orderNumber': orderNumber,
@@ -295,6 +295,26 @@ class ProPendingGooglePlayPurchaseModel {
     'obfuscatedAccountId': obfuscatedAccountId,
     'createdAt': createdAt.toUtc().toIso8601String(),
   };
+
+  ProPendingGooglePlayPurchaseModel copyWith({
+    String? appUserId,
+    String? courseId,
+    String? orderId,
+    String? orderNumber,
+    String? productId,
+    String? obfuscatedAccountId,
+    DateTime? createdAt,
+  }) {
+    return ProPendingGooglePlayPurchaseModel(
+      appUserId: appUserId ?? this.appUserId,
+      courseId: courseId ?? this.courseId,
+      orderId: orderId ?? this.orderId,
+      orderNumber: orderNumber ?? this.orderNumber,
+      productId: productId ?? this.productId,
+      obfuscatedAccountId: obfuscatedAccountId ?? this.obfuscatedAccountId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }
 
 class ProPurchaseResultModel {

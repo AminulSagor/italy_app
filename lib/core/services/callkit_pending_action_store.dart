@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,8 +20,7 @@ class PendingAcceptedCall {
 class CallkitPendingActionStore {
   CallkitPendingActionStore._();
 
-  static const String _acceptedCallKey =
-      'callkit_pending_accepted_call_v1';
+  static const String _acceptedCallKey = 'callkit_pending_accepted_call_v1';
   static const Duration _acceptedCallLifetime = Duration(minutes: 2);
 
   static Future<void> saveAcceptedCall({
@@ -34,8 +33,7 @@ class CallkitPendingActionStore {
       return;
     }
 
-    final SharedPreferences preferences =
-        await SharedPreferences.getInstance();
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
 
     await preferences.setString(
       _acceptedCallKey,
@@ -49,8 +47,7 @@ class CallkitPendingActionStore {
   }
 
   static Future<PendingAcceptedCall?> takeAcceptedCall() async {
-    final SharedPreferences preferences =
-        await SharedPreferences.getInstance();
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
 
     // The value can be written by the CallKit background isolate.
     await preferences.reload();
@@ -68,8 +65,7 @@ class CallkitPendingActionStore {
         return null;
       }
 
-      final Map<String, dynamic> payload =
-          Map<String, dynamic>.from(decoded);
+      final Map<String, dynamic> payload = Map<String, dynamic>.from(decoded);
       final String callId = payload['callId']?.toString().trim() ?? '';
       final DateTime? createdAt = DateTime.tryParse(
         payload['createdAt']?.toString() ?? '',
@@ -91,7 +87,7 @@ class CallkitPendingActionStore {
         createdAt: createdAt,
       );
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Unable to decode pending accepted call',
         name: 'CallKitPending',
         error: error,
@@ -102,8 +98,7 @@ class CallkitPendingActionStore {
   }
 
   static Future<void> clear() async {
-    final SharedPreferences preferences =
-        await SharedPreferences.getInstance();
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.remove(_acceptedCallKey);
   }
 

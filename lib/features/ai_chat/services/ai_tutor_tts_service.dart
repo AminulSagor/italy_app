@@ -1,11 +1,11 @@
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class AiTutorTtsService {
   AiTutorTtsService({FlutterTts? flutterTts})
-      : _flutterTts = flutterTts ?? FlutterTts();
+    : _flutterTts = flutterTts ?? FlutterTts();
 
   static const int _maxChunkLength = 2200;
 
@@ -65,7 +65,7 @@ class AiTutorTtsService {
       await _flutterTts.setLanguage(locale);
     } catch (error, stackTrace) {
       if (kDebugMode) {
-        dev.log(
+        AppLogger.log(
           'Unable to configure the Italian TTS voice.',
           name: 'AiTutorTtsService',
           error: error,
@@ -82,8 +82,10 @@ class AiTutorTtsService {
     }
 
     final List<String> chunks = <String>[];
-    final Iterable<RegExpMatch> matches =
-        RegExp(r'[^.!?।]+[.!?।]*', multiLine: true).allMatches(text);
+    final Iterable<RegExpMatch> matches = RegExp(
+      r'[^.!?।]+[.!?।]*',
+      multiLine: true,
+    ).allMatches(text);
     final List<String> sentences = matches
         .map((RegExpMatch match) => match.group(0)?.trim() ?? '')
         .where((String value) => value.isNotEmpty)
@@ -100,7 +102,9 @@ class AiTutorTtsService {
         continue;
       }
 
-      final String candidate = current.isEmpty ? sentence : '$current $sentence';
+      final String candidate = current.isEmpty
+          ? sentence
+          : '$current $sentence';
       if (candidate.length <= _maxChunkLength) {
         current = candidate;
       } else {

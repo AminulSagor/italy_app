@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import '../../../../core/controllers/user_session_controller.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
-import '../../../../core/widgets/widgets.dart';
 
 class AiCreditStatusRow extends GetView<UserSessionController> {
   const AiCreditStatusRow();
@@ -84,10 +83,7 @@ class _StatusChip extends StatelessWidget {
 class AiSpeakingLabCard extends StatelessWidget {
   final VoidCallback onTap;
 
-  const AiSpeakingLabCard({
-    required this.onTap,
-    super.key,
-  });
+  const AiSpeakingLabCard({required this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -96,97 +92,96 @@ class AiSpeakingLabCard extends StatelessWidget {
     final bool isItalian = languageCode == 'it';
     final bool isBangla = languageCode == 'bn';
 
+    final double cardHeight = isBangla
+        ? 270
+        : isItalian
+        ? 255
+        : 242;
+
     return _GradientFeatureCard(
-      // Bangla requires more space because the text wraps more.
-      height: isBangla ? 275 : 252,
-      borderRadius: 54,
+      onTap: onTap,
+      semanticLabel: 'enter_lab'.tr,
+      height: cardHeight,
+      borderRadius: 42,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: <Color>[
-          Color(0xFF1C5C36),
-          Color(0xFF3D8500),
-          Color(0xFF184E31),
+          Color(0xFF155B3B),
+          Color(0xFF348900),
+          Color(0xFF124D37),
         ],
-        stops: <double>[0.05, 0.54, 1],
+        stops: <double>[0, 0.55, 1],
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          32.w,
-          32.h,
-          32.w,
-          24.h, // Guaranteed bottom margin
-        ),
+        padding: EdgeInsets.fromLTRB(28.w, 28.h, 26.w, 24.h),
         child: Stack(
           children: <Widget>[
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Padding(
-                  // Prevent the title from going under the microphone.
-                  padding: EdgeInsets.only(right: 85.w),
+                  padding: EdgeInsets.only(right: 82.w),
                   child: Text(
                     'ai_speaking_lab'.tr,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: isItalian ? 20.sp : 24.sp,
-                      height: isItalian ? 1.15 : 1.06,
+                      height: 1.08,
                       fontWeight: FontWeight.w900,
                       letterSpacing: isItalian ? -0.3 : -0.7,
                       color: AppColors.white,
                     ),
                   ),
                 ),
-                SizedBox(height: 10.h),
+                SizedBox(height: 11.h),
                 Padding(
-                  padding: EdgeInsets.only(right: 20.w),
+                  padding: EdgeInsets.only(right: 24.w),
                   child: Text(
                     'ai_speaking_lab_description'.tr,
+                    maxLines: isBangla || isItalian ? 4 : 3,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 15.sp,
-                      height: 1.55,
+                      fontSize: isBangla ? 13.5.sp : 15.sp,
+                      height: isBangla ? 1.5 : 1.48,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.white.withValues(alpha: 0.62),
+                      color: AppColors.white.withValues(alpha: 0.72),
                     ),
                   ),
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  'ai_speaking_lab_badge'.tr,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF9BFF3E),
-                  ),
+                SizedBox(height: 8.h),
+                _FeatureBadge(
+                  label: 'ai_speaking_lab_badge'.tr,
+                  foregroundColor: const Color(0xFFB7FF62),
+                  backgroundColor: const Color(
+                    0xFFB7FF62,
+                  ).withValues(alpha: 0.12),
                 ),
-
-                // Pushes the button to the bottom.
                 const Spacer(),
-
-                CustomButton(
-                  text: 'enter_lab',
-                  onPressed: onTap,
-                  width: (isItalian || isBangla) ? 210 : 157,
-                  height: 43,
-                  btnColor: AppColors.white,
-                  textColor: const Color(0xFF153D35),
-                  fontSize: isBangla ? 12 : 14,
-                  icon: Icons.play_arrow_rounded,
+                _InlineCardAction(
+                  label: 'enter_lab'.tr,
+                  color: const Color(0xFFB7FF62),
+                  icon: Icons.arrow_forward_rounded,
                 ),
               ],
             ),
             Align(
               alignment: Alignment.topRight,
               child: Container(
-                width: 64.r,
-                height: 64.r,
+                width: 62.r,
+                height: 62.r,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF66A61D).withValues(alpha: 0.55),
-                  borderRadius: BorderRadius.circular(24.r),
+                  color: const Color(0xFFB7FF62).withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(21.r),
+                  border: Border.all(
+                    color: const Color(0xFFB7FF62).withValues(alpha: 0.18),
+                  ),
                 ),
                 child: Icon(
                   Icons.mic_none_rounded,
-                  size: 35.r,
-                  color: const Color(0xFF9DF02E),
+                  size: 34.r,
+                  color: const Color(0xFFB7FF62),
                 ),
               ),
             ),
@@ -200,7 +195,7 @@ class AiSpeakingLabCard extends StatelessWidget {
 class AiGuidedLearningCard extends StatelessWidget {
   final VoidCallback onTap;
 
-  const AiGuidedLearningCard({required this.onTap});
+  const AiGuidedLearningCard({required this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -209,22 +204,24 @@ class AiGuidedLearningCard extends StatelessWidget {
     final bool isItalian = languageCode == 'it';
     final bool isBangla = languageCode == 'bn';
 
-    final double buttonWidth = isItalian ? 270 : (isBangla ? 235 : 222);
-
-    final double buttonHeight = isItalian ? 48 : (isBangla ? 46 : 43);
-
-    final double buttonFontSize = isItalian ? 12 : (isBangla ? 13 : 14);
+    final double cardHeight = isBangla
+        ? 300
+        : isItalian
+        ? 292
+        : 278;
 
     return _GradientFeatureCard(
-      height: 309,
+      onTap: onTap,
+      semanticLabel: 'start_guided_learning'.tr,
+      height: cardHeight,
       borderRadius: 38,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: <Color>[Color(0xFF087062), Color(0xFF0AA574)],
+        colors: <Color>[Color(0xFF08776A), Color(0xFF0AA574)],
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(32.w, 33.h, 30.w, 20.h),
+        padding: EdgeInsets.fromLTRB(28.w, 28.h, 27.w, 24.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -235,31 +232,43 @@ class AiGuidedLearningCard extends StatelessWidget {
                   width: 56.r,
                   height: 56.r,
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(15.r),
+                    color: AppColors.white.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(17.r),
+                    border: Border.all(
+                      color: AppColors.white.withValues(alpha: 0.10),
+                    ),
                   ),
                   child: Icon(
                     Icons.menu_book_rounded,
-                    size: 32.r,
-                    color: AppColors.white.withValues(alpha: 0.9),
+                    size: 31.r,
+                    color: AppColors.white.withValues(alpha: 0.95),
                   ),
                 ),
-                SizedBox(width: 24.w),
+                SizedBox(width: 18.w),
                 Expanded(
-                  child: Text(
-                    'ai_guided_learning_title'.tr,
-                    style: TextStyle(
-                      fontSize: 29.sp,
-                      height: 1,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.9,
-                      color: AppColors.white,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 3.h),
+                    child: Text(
+                      'ai_guided_learning_title'.tr,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: isItalian
+                            ? 23.sp
+                            : isBangla
+                            ? 25.sp
+                            : 28.sp,
+                        height: 1.02,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: isItalian ? -0.4 : -0.8,
+                        color: AppColors.white,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: 16.h),
             Text(
               'ai_guided_learning_description'.tr,
               maxLines: isItalian || isBangla ? 4 : 3,
@@ -273,35 +282,106 @@ class AiGuidedLearningCard extends StatelessWidget {
                 height: isItalian
                     ? 1.45
                     : isBangla
-                    ? 1.55
-                    : 1.55,
+                    ? 1.52
+                    : 1.5,
                 fontWeight: FontWeight.w500,
-                color: AppColors.white.withValues(alpha: 0.75),
+                color: AppColors.white.withValues(alpha: 0.78),
               ),
             ),
-            SizedBox(height: 6.h),
-            Text(
-              'ai_guided_learning_badge'.tr,
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.white.withValues(alpha: 0.55),
-              ),
+            SizedBox(height: 10.h),
+            _FeatureBadge(
+              label: 'ai_guided_learning_badge'.tr,
+              foregroundColor: const Color(0xFFD7FFF1),
+              backgroundColor: AppColors.white.withValues(alpha: 0.10),
             ),
-            SizedBox(height: 6.h),
-            CustomButton(
-              // CustomButton already translates the key internally.
-              text: 'start_guided_learning',
-              onPressed: onTap,
-              width: buttonWidth,
-              height: buttonHeight,
-              btnColor: AppColors.white,
-              textColor: const Color(0xFF153D35),
-              fontSize: buttonFontSize,
+            const Spacer(),
+            _InlineCardAction(
+              label: 'start_guided_learning'.tr,
+              color: const Color(0xFFD7FFF1),
+              icon: Icons.arrow_forward_rounded,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _FeatureBadge extends StatelessWidget {
+  final String label;
+  final Color foregroundColor;
+  final Color backgroundColor;
+
+  const _FeatureBadge({
+    required this.label,
+    required this.foregroundColor,
+    required this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: 11.sp,
+          height: 1,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.2,
+          color: foregroundColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _InlineCardAction extends StatelessWidget {
+  final String label;
+  final Color color;
+  final IconData icon;
+
+  const _InlineCardAction({
+    required this.label,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 15.sp,
+              height: 1.1,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Container(
+          width: 38.r,
+          height: 38.r,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.14),
+            shape: BoxShape.circle,
+            border: Border.all(color: color.withValues(alpha: 0.24)),
+          ),
+          child: Icon(icon, size: 20.r, color: color),
+        ),
+      ],
     );
   }
 }
@@ -311,32 +391,59 @@ class _GradientFeatureCard extends StatelessWidget {
   final double borderRadius;
   final Gradient gradient;
   final Widget child;
+  final VoidCallback onTap;
+  final String semanticLabel;
 
   const _GradientFeatureCard({
     required this.height,
     required this.borderRadius,
     required this.gradient,
     required this.child,
+    required this.onTap,
+    required this.semanticLabel,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: height.h,
-      width: double.infinity,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(borderRadius.r),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 20.r,
-            offset: Offset(0, 10.h),
+    final BorderRadius resolvedBorderRadius = BorderRadius.circular(
+      borderRadius.r,
+    );
+
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: Container(
+        height: height.h,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: resolvedBorderRadius,
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 20.r,
+              offset: Offset(0, 10.h),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: resolvedBorderRadius,
+          clipBehavior: Clip.antiAlias,
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: resolvedBorderRadius,
+            ),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: resolvedBorderRadius,
+              splashColor: AppColors.white.withValues(alpha: 0.12),
+              highlightColor: AppColors.white.withValues(alpha: 0.06),
+              child: child,
+            ),
           ),
-        ],
+        ),
       ),
-      child: child,
     );
   }
 }

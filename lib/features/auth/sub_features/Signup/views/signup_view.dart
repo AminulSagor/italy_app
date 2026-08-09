@@ -211,6 +211,7 @@ class SignupView extends GetView<SignupController> {
               prefix: Icons.lock_outline_rounded,
               hint: 'hint_password_mask'.tr,
               obscureText: controller.form.value.obscurePassword,
+              maxLength: 128,
               textInputAction: TextInputAction.done,
               autofillHints: const <String>[AutofillHints.newPassword],
               onSubmitted: (_) {
@@ -601,6 +602,7 @@ class SignupView extends GetView<SignupController> {
     bool obscureText = false,
     Widget? suffix,
     ValueChanged<String>? onSubmitted,
+    int? maxLength,
   }) {
     return TextField(
       controller: controller,
@@ -612,12 +614,14 @@ class SignupView extends GetView<SignupController> {
       autocorrect: !obscureText,
       enableSuggestions: !obscureText,
       onSubmitted: onSubmitted,
+      maxLength: maxLength,
       style: TextStyle(
         fontSize: AppFont.font16.sp,
         fontWeight: FontWeight.w500,
         color: AppColors.legacyColorFF3E4042,
       ),
       decoration: InputDecoration(
+        counterText: '',
         filled: true,
         fillColor: AppColors.legacyColorFFF0F0F0,
         prefixIcon: Icon(

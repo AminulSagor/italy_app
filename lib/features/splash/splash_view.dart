@@ -546,8 +546,11 @@ class _ServiceChipPlain extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 124.h,
-      width: 79.w,
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 18.h),
+      width: 90.w,
+      padding: EdgeInsets.symmetric(
+        horizontal: 10.w,
+        vertical: 18.h,
+      ),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(kRadius36.r),
@@ -562,15 +565,31 @@ class _ServiceChipPlain extends StatelessWidget {
               color: iconBackground,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 21.r, color: iconColor),
+            child: Icon(
+              icon,
+              size: 21.r,
+              color: iconColor,
+            ),
           ),
+
           SizedBox(height: 8.h),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: AppFont.font12.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.splashTextSecondary,
+
+          Expanded(
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  softWrap: false,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFont.font12.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.splashTextSecondary,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

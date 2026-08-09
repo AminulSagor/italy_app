@@ -126,7 +126,7 @@ class SignupController extends GetxController {
       identifier: current.identifier,
       isEmailMode: current.isEmailMode,
     );
-    final String normalizedPassword = current.password.trim();
+    final String normalizedPassword = current.password;
 
     if (normalizedFullName.isEmpty ||
         normalizedIdentifier.isEmpty ||
@@ -145,8 +145,8 @@ class SignupController extends GetxController {
       return;
     }
 
-    if (!_isStrongPassword(normalizedPassword)) {
-      Get.snackbar('snack_weak_password'.tr, 'snack_need_upper_number'.tr);
+    if (!_isValidPassword(normalizedPassword)) {
+      Get.snackbar('snack_weak_password'.tr, 'snack_password_6_characters'.tr);
       return;
     }
 
@@ -459,10 +459,8 @@ class SignupController extends GetxController {
     return RegExp(r'^(?:\+8801\d{9}|\+39\d{8,11})$').hasMatch(phone);
   }
 
-  bool _isStrongPassword(String password) {
-    return RegExp(
-      r'^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$',
-    ).hasMatch(password);
+  bool _isValidPassword(String password) {
+    return password.length >= 6;
   }
 
   String _maskedIdentifier({

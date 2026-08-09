@@ -152,6 +152,7 @@ class ChapterMediaModel {
   final String title;
   final String mimeType;
   final int durationSeconds;
+  final int pageCount;
   final ChapterMediaType type;
 
   const ChapterMediaModel({
@@ -160,6 +161,7 @@ class ChapterMediaModel {
     required this.title,
     required this.mimeType,
     required this.durationSeconds,
+    required this.pageCount,
     required this.type,
   });
 
@@ -170,6 +172,7 @@ class ChapterMediaModel {
       title: _stringValue(json['title']),
       mimeType: _stringValue(json['mimeType']),
       durationSeconds: _intValue(json['durationSeconds']),
+      pageCount: _intValue(json['pageCount']),
       type: ChapterMediaType.values.firstWhere(
         (ChapterMediaType item) => item.name == _stringValue(json['type']),
         orElse: () => ChapterMediaType.video,
@@ -184,6 +187,7 @@ class ChapterMediaModel {
       'title': title,
       'mimeType': mimeType,
       'durationSeconds': durationSeconds,
+      'pageCount': pageCount,
       'type': type.name,
     };
   }
@@ -198,6 +202,27 @@ enum ChapterVideoTranscodeStatus {
   unknown,
 }
 
+class ChapterVideoQualityOption {
+  final String label;
+  final String streamUrl;
+
+  const ChapterVideoQualityOption({
+    required this.label,
+    required this.streamUrl,
+  });
+
+  factory ChapterVideoQualityOption.fromJson(Map<String, dynamic> json) {
+    return ChapterVideoQualityOption(
+      label: _stringValue(json['label']),
+      streamUrl: _stringValue(json['streamUrl']),
+    );
+  }
+
+  bool get isValid {
+    return label.isNotEmpty && streamUrl.isNotEmpty;
+  }
+}
+
 class ChapterVideoAccessModel {
   final String fileId;
   final String mediaAssetId;
@@ -210,6 +235,7 @@ class ChapterVideoAccessModel {
   final bool requiresSignedCookies;
   final Map<String, String> cookies;
   final DateTime? expiresAt;
+  final List<ChapterVideoQualityOption> qualities;
 
   const ChapterVideoAccessModel({
     required this.fileId,
@@ -223,28 +249,30 @@ class ChapterVideoAccessModel {
     required this.requiresSignedCookies,
     required this.cookies,
     required this.expiresAt,
+    required this.qualities,
   });
 
   factory ChapterVideoAccessModel.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> cloudFrontAccess =
-    json['cloudFrontAccess'] is Map
-        ? Map<String, dynamic>.from(
-      json['cloudFrontAccess'] as Map,
-    )
+        json['cloudFrontAccess'] is Map
+        ? Map<String, dynamic>.from(json['cloudFrontAccess'] as Map)
         : <String, dynamic>{};
 
     return ChapterVideoAccessModel(
       fileId: json['fileId']?.toString().trim() ?? '',
-      mediaAssetId:
-      json['mediaAssetId']?.toString().trim() ?? '',
+      mediaAssetId: json['mediaAssetId']?.toString().trim() ?? '',
       status: _parseStatus(json['status']),
       streamUrl: json['streamUrl']?.toString().trim() ?? '',
+      qualities: List<ChapterVideoQualityOption>.unmodifiable(
+        _jsonList(json['qualities'])
+            .map(ChapterVideoQualityOption.fromJson)
+            .where((ChapterVideoQualityOption quality) => quality.isValid),
+      ),
       durationSeconds: _parseInt(json['durationSeconds']),
       width: _parseInt(json['width']),
       height: _parseInt(json['height']),
       retryable: _parseBool(json['retryable']),
-      requiresSignedCookies:
-      _parseBool(json['requiresSignedCookies']),
+      requiresSignedCookies: _parseBool(json['requiresSignedCookies']),
       cookies: _parseCookies(cloudFrontAccess['cookies']),
       expiresAt: DateTime.tryParse(
         cloudFrontAccess['expiresAt']?.toString() ?? '',
@@ -302,9 +330,7 @@ class ChapterVideoAccessModel {
       return const <String, String>{};
     }
 
-    return <String, String>{
-      'Cookie': cookie,
-    };
+    return <String, String>{'Cookie': cookie};
   }
 
   bool get isExpiredOrNearExpiry {
@@ -521,6 +547,8 @@ class ChapterQuizModel {
   final String timeLabel;
   final String quizId;
   final int totalQuestions;
+  final bool unlockRequirementEnabled;
+  final int unlockVideoWatchPercent;
 
   const ChapterQuizModel({
     required this.title,
@@ -532,6 +560,8 @@ class ChapterQuizModel {
     required this.timeLabel,
     required this.quizId,
     required this.totalQuestions,
+    required this.unlockRequirementEnabled,
+    required this.unlockVideoWatchPercent,
   });
 
   factory ChapterQuizModel.fromJson(Map<String, dynamic> json) {
@@ -551,6 +581,15 @@ class ChapterQuizModel {
       timeLabel: _stringValue(json['timeLabel']),
       quizId: _stringValue(json['quizId']),
       totalQuestions: _intValue(json['totalQuestions']),
+
+      unlockRequirementEnabled: _boolValue(
+        json['unlockRequirementEnabled'],
+        fallback: false,
+      ),
+
+      unlockVideoWatchPercent: _intValue(json['unlockVideoWatchPercent']) > 0
+          ? _intValue(json['unlockVideoWatchPercent'])
+          : 80,
     );
   }
 
@@ -565,6 +604,9 @@ class ChapterQuizModel {
       'timeLabel': timeLabel,
       'quizId': quizId,
       'totalQuestions': totalQuestions,
+      'unlockRequirementEnabled': unlockRequirementEnabled,
+
+      'unlockVideoWatchPercent': unlockVideoWatchPercent,
     };
   }
 
@@ -574,6 +616,8 @@ class ChapterQuizModel {
     String? scoreLabel,
     String? xpLabel,
     String? timeLabel,
+    bool? unlockRequirementEnabled,
+    int? unlockVideoWatchPercent,
   }) {
     return ChapterQuizModel(
       title: title,
@@ -585,6 +629,11 @@ class ChapterQuizModel {
       timeLabel: timeLabel ?? this.timeLabel,
       quizId: quizId,
       totalQuestions: totalQuestions,
+      unlockRequirementEnabled:
+          unlockRequirementEnabled ?? this.unlockRequirementEnabled,
+
+      unlockVideoWatchPercent:
+          unlockVideoWatchPercent ?? this.unlockVideoWatchPercent,
     );
   }
 }

@@ -1,4 +1,4 @@
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -30,8 +30,8 @@ class SettingsController extends GetxController {
   SettingsController({
     required UserSettingsService userSettingsService,
     required AuthService authService,
-  })  : _userSettingsService = userSettingsService,
-        _authService = authService;
+  }) : _userSettingsService = userSettingsService,
+       _authService = authService;
 
   final UserSettingsService _userSettingsService;
 
@@ -40,15 +40,9 @@ class SettingsController extends GetxController {
   final AuthService _authService;
   final ImagePicker _imagePicker = ImagePicker();
 
-  static final RegExp _strongPasswordRegex = RegExp(
-    r'^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]+$',
-  );
-  static final RegExp _allowedPasswordCharacters =
-      RegExp(r'^[A-Za-z\d@$!%*?&#]+$');
   static const int _maximumAvatarBytes = 5 * 1024 * 1024;
 
-  final Rxn<UserSettingsProfileModel> profile =
-      Rxn<UserSettingsProfileModel>();
+  final Rxn<UserSettingsProfileModel> profile = Rxn<UserSettingsProfileModel>();
   final Rxn<XFile> selectedAvatar = Rxn<XFile>();
 
   final RxBool isLoading = false.obs;
@@ -130,9 +124,10 @@ class SettingsController extends GetxController {
     final String version = dotenv.env['APP_VERSION']?.trim().isNotEmpty == true
         ? dotenv.env['APP_VERSION']!.trim()
         : '1.0.0';
-    return SettingsL10n.text('version', params: <String, String>{
-      'version': version,
-    });
+    return SettingsL10n.text(
+      'version',
+      params: <String, String>{'version': version},
+    );
   }
 
   int get streakFreezeCount => profile.value?.streakFreezeCount ?? 0;
@@ -142,9 +137,7 @@ class SettingsController extends GetxController {
   bool get canChangeSelectedContact {
     final UserSettingsProfileModel? value = profile.value;
     if (value == null) return false;
-    return selectedContactIsEmail
-        ? value.canChangeEmail
-        : value.canChangePhone;
+    return selectedContactIsEmail ? value.canChangeEmail : value.canChangePhone;
   }
 
   TextEditingController get selectedContactController =>
@@ -191,25 +184,15 @@ class SettingsController extends GetxController {
     return _normalizeName(deleteConfirmText.value) == _normalizeName(name);
   }
 
-  bool get hasValidNewPassword =>
-      newPasswordDraft.value.length >= 8 &&
-      _strongPasswordRegex.hasMatch(newPasswordDraft.value);
+  bool get hasValidNewPassword => newPasswordDraft.value.length >= 6;
 
-  bool get hasPasswordMinimumLength => newPasswordDraft.value.length >= 8;
-  bool get hasPasswordNumber => RegExp(r'\d').hasMatch(newPasswordDraft.value);
-  bool get hasPasswordUppercase =>
-      RegExp(r'[A-Z]').hasMatch(newPasswordDraft.value);
-  bool get hasPasswordSpecialCharacter =>
-      RegExp(r'[@$!%*?&#]').hasMatch(newPasswordDraft.value);
-  bool get hasPasswordAllowedCharacters =>
-      newPasswordDraft.value.isNotEmpty &&
-      _allowedPasswordCharacters.hasMatch(newPasswordDraft.value);
+  bool get hasPasswordMinimumLength => hasValidNewPassword;
+
   bool get passwordsMatch =>
       newPasswordDraft.value.isNotEmpty &&
       newPasswordDraft.value == confirmPasswordDraft.value;
 
-  bool get isProfileBusy =>
-      isSavingName.value || isRequestingContactOtp.value;
+  bool get isProfileBusy => isSavingName.value || isRequestingContactOtp.value;
 
   Future<void> loadProfile({bool showError = true}) async {
     if (isLoading.value) return;
@@ -219,10 +202,10 @@ class SettingsController extends GetxController {
     try {
       final ApiResult<UserSettingsProfileModel> result =
           await ApiErrorHandler.call<UserSettingsProfileModel>(
-        _userSettingsService.getProfile,
-        showError: showError,
-        errorTitle: SettingsL10n.text('profile'),
-      );
+            _userSettingsService.getProfile,
+            showError: showError,
+            errorTitle: SettingsL10n.text('profile'),
+          );
 
       if (!result.isSuccess || result.data == null) {
         hasProfileLoadError.value = true;
@@ -232,7 +215,7 @@ class SettingsController extends GetxController {
       _applyProfile(result.data!);
     } catch (error, stackTrace) {
       hasProfileLoadError.value = true;
-      dev.log(
+      AppLogger.log(
         'Failed to load user settings',
         name: 'SettingsController',
         error: error,
@@ -258,9 +241,9 @@ class SettingsController extends GetxController {
     try {
       final ApiResult<UserSettingsProfileResponseModel> result =
           await ApiErrorHandler.call<UserSettingsProfileResponseModel>(
-        () => _userSettingsService.updateFullName(fullName),
-        errorTitle: SettingsL10n.text('update_profile'),
-      );
+            () => _userSettingsService.updateFullName(fullName),
+            errorTitle: SettingsL10n.text('update_profile'),
+          );
 
       if (!result.isSuccess || result.data == null) return false;
       _applyProfile(result.data!.profile);
@@ -309,8 +292,9 @@ class SettingsController extends GetxController {
     final UserSettingsProfileModel? current = profile.value;
     if (current == null || isRequestingContactOtp.value) return false;
 
-    final bool isAllowed =
-        isEmail ? current.canChangeEmail : current.canChangePhone;
+    final bool isAllowed = isEmail
+        ? current.canChangeEmail
+        : current.canChangePhone;
     if (!isAllowed) {
       _showMessage(
         isEmail ? 'email' : 'phone',
@@ -330,11 +314,11 @@ class SettingsController extends GetxController {
     try {
       final ApiResult<ContactOtpResponseModel> result =
           await ApiErrorHandler.call<ContactOtpResponseModel>(
-        () => isEmail
-            ? _userSettingsService.requestEmailChangeOtp(value)
-            : _userSettingsService.requestPhoneChangeOtp(value),
-        errorTitle: SettingsL10n.text('verify_contact'),
-      );
+            () => isEmail
+                ? _userSettingsService.requestEmailChangeOtp(value)
+                : _userSettingsService.requestPhoneChangeOtp(value),
+            errorTitle: SettingsL10n.text('verify_contact'),
+          );
 
       if (!result.isSuccess || result.data == null) return false;
 
@@ -377,17 +361,17 @@ class SettingsController extends GetxController {
     try {
       final ApiResult<UserSettingsProfileResponseModel> result =
           await ApiErrorHandler.call<UserSettingsProfileResponseModel>(
-        () => type == 'phone'
-            ? _userSettingsService.verifyPhoneChangeOtp(
-                phone: destination,
-                otp: otpCode,
-              )
-            : _userSettingsService.verifyEmailChangeOtp(
-                email: destination,
-                otp: otpCode,
-              ),
-        errorTitle: SettingsL10n.text('verify_contact'),
-      );
+            () => type == 'phone'
+                ? _userSettingsService.verifyPhoneChangeOtp(
+                    phone: destination,
+                    otp: otpCode,
+                  )
+                : _userSettingsService.verifyEmailChangeOtp(
+                    email: destination,
+                    otp: otpCode,
+                  ),
+            errorTitle: SettingsL10n.text('verify_contact'),
+          );
 
       if (!result.isSuccess || result.data == null) return false;
 
@@ -427,15 +411,15 @@ class SettingsController extends GetxController {
     try {
       final ApiResult<ContactOtpResponseModel> result =
           await ApiErrorHandler.call<ContactOtpResponseModel>(
-        () => type == 'phone'
-            ? _userSettingsService.requestPhoneChangeOtp(
-                pendingContactValue.value,
-              )
-            : _userSettingsService.requestEmailChangeOtp(
-                pendingContactValue.value,
-              ),
-        errorTitle: SettingsL10n.text('resend_code'),
-      );
+            () => type == 'phone'
+                ? _userSettingsService.requestPhoneChangeOtp(
+                    pendingContactValue.value,
+                  )
+                : _userSettingsService.requestEmailChangeOtp(
+                    pendingContactValue.value,
+                  ),
+            errorTitle: SettingsL10n.text('resend_code'),
+          );
 
       if (!result.isSuccess || result.data == null) return;
 
@@ -500,7 +484,7 @@ class SettingsController extends GetxController {
       selectedAvatar.value = image;
       return true;
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Could not pick a profile photo',
         name: 'SettingsController',
         error: error,
@@ -527,9 +511,9 @@ class SettingsController extends GetxController {
     try {
       final ApiResult<UserSettingsProfileResponseModel> result =
           await ApiErrorHandler.call<UserSettingsProfileResponseModel>(
-        () => _userSettingsService.uploadAvatar(image),
-        errorTitle: SettingsL10n.text('profile_photo'),
-      );
+            () => _userSettingsService.uploadAvatar(image),
+            errorTitle: SettingsL10n.text('profile_photo'),
+          );
 
       if (!result.isSuccess || result.data == null) return false;
       _applyProfile(result.data!.profile);
@@ -561,20 +545,32 @@ class SettingsController extends GetxController {
 
     final ChangeUserPasswordPayloadModel payload =
         ChangeUserPasswordPayloadModel(
-      currentPassword: currentPassword,
-      newPassword: newPassword,
-      confirmNewPassword: confirmPassword,
-    );
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+          confirmNewPassword: confirmPassword,
+        );
 
     isChangingPassword.value = true;
     try {
       final ApiResult<UserSettingsMessageModel> result =
           await ApiErrorHandler.call<UserSettingsMessageModel>(
-        () => _userSettingsService.changePassword(payload),
-        errorTitle: SettingsL10n.text('change_password'),
-      );
+            () => _userSettingsService.changePassword(payload),
+            showError: false,
+          );
 
-      if (!result.isSuccess) return false;
+      if (!result.isSuccess) {
+        final String backendMessage = result.error?.trim() ?? '';
+
+        Get.snackbar(
+          SettingsL10n.text('change_password'),
+          backendMessage.isNotEmpty
+              ? backendMessage
+              : SettingsL10n.text('request_failed'),
+          snackPosition: SnackPosition.BOTTOM,
+        );
+
+        return false;
+      }
       clearPasswordFields();
       return true;
     } finally {
@@ -599,9 +595,9 @@ class SettingsController extends GetxController {
     try {
       final ApiResult<UserSettingsMessageModel> result =
           await ApiErrorHandler.call<UserSettingsMessageModel>(
-        () => _userSettingsService.deleteAccount(accountName),
-        errorTitle: SettingsL10n.text('delete_account'),
-      );
+            () => _userSettingsService.deleteAccount(accountName),
+            errorTitle: SettingsL10n.text('delete_account'),
+          );
 
       if (!result.isSuccess) return;
 
@@ -636,8 +632,8 @@ class SettingsController extends GetxController {
 
     final String url = defaultTargetPlatform == TargetPlatform.android
         ? (configuredAndroidUrl.isNotEmpty
-            ? configuredAndroidUrl
-            : 'https://play.google.com/store/apps/details?id=com.shafacode.italir_pothe')
+              ? configuredAndroidUrl
+              : 'https://play.google.com/store/apps/details?id=com.shafacode.italir_pothe')
         : configuredIosUrl;
 
     final Uri? uri = Uri.tryParse(url);
@@ -655,7 +651,7 @@ class SettingsController extends GetxController {
         _showMessage('rate_unavailable', 'rate_unavailable_desc');
       }
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Could not open app store rating page',
         name: 'SettingsController',
         error: error,
@@ -710,7 +706,8 @@ class SettingsController extends GetxController {
   Future<bool> _validateAvatar(XFile image) async {
     final String name = image.name.toLowerCase();
     final String mime = image.mimeType?.toLowerCase() ?? '';
-    final bool supported = mime == 'image/jpeg' ||
+    final bool supported =
+        mime == 'image/jpeg' ||
         mime == 'image/png' ||
         mime == 'image/webp' ||
         name.endsWith('.jpg') ||

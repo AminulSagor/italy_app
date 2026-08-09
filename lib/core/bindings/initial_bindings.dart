@@ -10,7 +10,6 @@ import '../../features/ai_chat/services/ai_tutor_tts_service.dart';
 import '../../features/ai_chat/services/ai_tutor_voice_service.dart';
 import '../../features/courses/controllers/courses_controller.dart';
 import '../../features/courses/services/courses_api_service.dart';
-import '../../features/courses/services/courses_mock_service.dart';
 import '../../features/cv_generation/controllers/cv_home_controller.dart';
 import '../../features/cv_generation/services/cv_generation_api_service.dart';
 import '../../features/home/controllers/home_controller.dart';
@@ -156,9 +155,7 @@ class InitialBindings extends Bindings {
     );
 
 
-    if (!Get.isRegistered<CoursesMockService>()) {
-      Get.lazyPut<CoursesMockService>(CoursesMockService.new, fenix: true);
-    }
+
 
     if (!Get.isRegistered<CoursesController>()) {
       Get.lazyPut<CoursesController>(

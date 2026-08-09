@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -219,7 +219,7 @@ class LearningActivityTrackerService extends GetxService
       );
       if (!result.isSuccess) {
         remaining.add(entry);
-        dev.log(
+        AppLogger.log(
           'Unable to upload learning activity: ${result.error}',
           name: 'LearningActivityTracker',
         );
@@ -239,7 +239,7 @@ class LearningActivityTrackerService extends GetxService
       try {
         await operation();
       } catch (error, stackTrace) {
-        dev.log(
+        AppLogger.log(
           'Learning activity operation failed',
           error: error,
           stackTrace: stackTrace,

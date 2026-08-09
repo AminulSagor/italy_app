@@ -87,36 +87,38 @@ class _AiTutorDiscoveryViewState extends State<AiTutorDiscoveryView> {
                 bottom: 0,
                 child: NativeBottomInset(
                   additionalBottom: 22.h,
+                  collapseWhenKeyboardVisible: true,
                   child: Obx(() {
-                  final bool active =
-                      _controller.isTextConversationActive.value;
-                  final bool sending = _controller.isSendingMessage.value;
+                    final bool active =
+                        _controller.isTextConversationActive.value;
+                    final bool sending = _controller.isSendingMessage.value;
 
-                  return IgnorePointer(
-                    ignoring: sending,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 180),
-                      opacity: sending ? .65 : 1,
-                      child: AiTutorInputBar(
-                        controller: _controller.inputController,
-                        inputText: _controller.inputText.value,
-                        onChanged: _controller.onInputChanged,
-                        onSendTap: active
-                            ? _controller.sendTextFromChat
-                            : _controller.sendTextFromDiscovery,
-                        showVoiceAction: !active,
-                        onVoiceTap: active
-                            ? null
-                            : () => _controller.openLiveVoiceSession(),
-                        hint: active
-                            ? 'ask_your_italian_tutor'.tr
-                            : 'type_or_speak_a_phrase'.tr,
+                    return IgnorePointer(
+                      ignoring: sending,
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 180),
+                        opacity: sending ? .65 : 1,
+                        child: AiTutorInputBar(
+                          controller: _controller.inputController,
+                          inputText: _controller.inputText.value,
+                          onChanged: _controller.onInputChanged,
+                          onSendTap: active
+                              ? _controller.sendTextFromChat
+                              : _controller.sendTextFromDiscovery,
+                          showVoiceAction: !active,
+                          onVoiceTap: active
+                              ? null
+                              : () => _controller.openLiveVoiceSession(),
+                          hint: active
+                              ? 'ask_your_italian_tutor'.tr
+                              : 'type_or_speak_a_phrase'.tr,
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ),
               ),
-              )],
+            ],
           ),
         ),
       ),

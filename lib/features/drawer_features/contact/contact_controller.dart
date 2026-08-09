@@ -1,4 +1,4 @@
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -20,13 +20,12 @@ class ContactController extends GetxController {
       fallback: '+39 351 006 6920',
     );
 
-    supportPhoneInternational =
-        _normalizeInternationalPhone(
-          _readEnvironmentValue(
-            key: 'SUPPORT_PHONE_INTERNATIONAL',
-            fallback: '+393510066920',
-          ),
-        );
+    supportPhoneInternational = _normalizeInternationalPhone(
+      _readEnvironmentValue(
+        key: 'SUPPORT_PHONE_INTERNATIONAL',
+        fallback: '+393510066920',
+      ),
+    );
 
     supportEmail = _readEnvironmentValue(
       key: 'SUPPORT_EMAIL',
@@ -35,14 +34,10 @@ class ContactController extends GetxController {
 
     facebookCommunityUrl = _readEnvironmentValue(
       key: 'FACEBOOK_COMMUNITY_URL',
-      fallback:
-      'https://www.facebook.com/groups/1816913385931720',
+      fallback: 'https://www.facebook.com/groups/1816913385931720',
     );
 
-    whatsappNumber = supportPhoneInternational.replaceAll(
-      RegExp(r'\D'),
-      '',
-    );
+    whatsappNumber = supportPhoneInternational.replaceAll(RegExp(r'\D'), '');
   }
 
   void onContactTap() {
@@ -53,29 +48,23 @@ class ContactController extends GetxController {
     final Uri whatsappUri = Uri.https(
       'wa.me',
       '/$whatsappNumber',
-      <String, String>{
-        'text':
-        'Hello, I need help with Italir Pothe.',
-      },
+      <String, String>{'text': 'Hello, I need help with Italir Pothe.'},
     );
 
     await _launchExternal(
       whatsappUri,
       failureTitle: 'whatsapp_unavailable'.tr,
       failureMessage:
-      'Could not open WhatsApp. Please contact $supportPhoneDisplay.',
+          'Could not open WhatsApp. Please contact $supportPhoneDisplay.',
     );
   }
 
   Future<void> callSupport() async {
     await _launchExternal(
-      Uri(
-        scheme: 'tel',
-        path: supportPhoneInternational,
-      ),
+      Uri(scheme: 'tel', path: supportPhoneInternational),
       failureTitle: 'phone_unavailable'.tr,
       failureMessage:
-      'No phone application is available. You can call $supportPhoneDisplay manually.',
+          'No phone application is available. You can call $supportPhoneDisplay manually.',
     );
   }
 
@@ -85,23 +74,19 @@ class ContactController extends GetxController {
         scheme: 'mailto',
         path: supportEmail,
         queryParameters: <String, String>{
-          'subject':
-          'Italir Pothe Support Request',
+          'subject': 'Italir Pothe Support Request',
         },
       ),
       failureTitle: 'email_unavailable'.tr,
       failureMessage:
-      'No email application is available. You can email $supportEmail manually.',
+          'No email application is available. You can email $supportEmail manually.',
     );
   }
 
   Future<void> joinFacebookCommunity() async {
-    final Uri? communityUri = Uri.tryParse(
-      facebookCommunityUrl,
-    );
+    final Uri? communityUri = Uri.tryParse(facebookCommunityUrl);
 
-    if (communityUri == null ||
-        !communityUri.hasScheme) {
+    if (communityUri == null || !communityUri.hasScheme) {
       _showFailure(
         'facebook_unavailable'.tr,
         'The Facebook community link is invalid.',
@@ -112,17 +97,15 @@ class ContactController extends GetxController {
     await _launchExternal(
       communityUri,
       failureTitle: 'facebook_unavailable'.tr,
-      failureMessage:
-      'could_not_open_the_facebook_community_link'
-          .tr,
+      failureMessage: 'could_not_open_the_facebook_community_link'.tr,
     );
   }
 
   Future<void> _launchExternal(
-      Uri uri, {
-        required String failureTitle,
-        required String failureMessage,
-      }) async {
+    Uri uri, {
+    required String failureTitle,
+    required String failureMessage,
+  }) async {
     try {
       final bool launched = await launchUrl(
         uri,
@@ -130,23 +113,17 @@ class ContactController extends GetxController {
       );
 
       if (!launched) {
-        _showFailure(
-          failureTitle,
-          failureMessage,
-        );
+        _showFailure(failureTitle, failureMessage);
       }
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Failed to launch external support action: $uri',
         name: 'ContactController',
         error: error,
         stackTrace: stackTrace,
       );
 
-      _showFailure(
-        failureTitle,
-        failureMessage,
-      );
+      _showFailure(failureTitle, failureMessage);
     }
   }
 
@@ -154,11 +131,10 @@ class ContactController extends GetxController {
     required String key,
     required String fallback,
   }) {
-    final String? value =
-    dotenv.env[key]?.trim();
+    final String? value = dotenv.env[key]?.trim();
 
     if (value == null || value.isEmpty) {
-      dev.log(
+      AppLogger.log(
         '$key is missing from .env. Using fallback.',
         name: 'ContactController',
       );
@@ -169,13 +145,8 @@ class ContactController extends GetxController {
     return value;
   }
 
-  String _normalizeInternationalPhone(
-      String value,
-      ) {
-    final String digits = value.replaceAll(
-      RegExp(r'\D'),
-      '',
-    );
+  String _normalizeInternationalPhone(String value) {
+    final String digits = value.replaceAll(RegExp(r'\D'), '');
 
     if (digits.isEmpty) {
       return '+393510066920';
@@ -184,14 +155,7 @@ class ContactController extends GetxController {
     return '+$digits';
   }
 
-  void _showFailure(
-      String title,
-      String message,
-      ) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-    );
+  void _showFailure(String title, String message) {
+    Get.snackbar(title, message, snackPosition: SnackPosition.BOTTOM);
   }
 }

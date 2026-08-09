@@ -6,17 +6,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:italir_pothe/core/models/learning_activity_models.dart';
 import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:pdfrx/pdfrx.dart';
 
 import '../../../../../core/services/screen_protection_service.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_font.dart';
 
-
-enum AppPdfSourceType {
-  network,
-  asset,
-}
+enum AppPdfSourceType { network, asset }
 
 class AppPdfViewer extends StatefulWidget {
   const AppPdfViewer({
@@ -25,6 +21,7 @@ class AppPdfViewer extends StatefulWidget {
     required this.source,
     this.sourceType = AppPdfSourceType.network,
     this.sourceId = 'app_pdf_viewer',
+    this.initialPageCount = 0,
     this.onDocumentLoaded,
     this.onPageChanged,
   });
@@ -33,17 +30,16 @@ class AppPdfViewer extends StatefulWidget {
   final String source;
   final AppPdfSourceType sourceType;
   final String sourceId;
+  final int initialPageCount;
   final ValueChanged<int>? onDocumentLoaded;
   final ValueChanged<int>? onPageChanged;
 
   @override
-  State<AppPdfViewer> createState() =>
-      _AppPdfViewerState();
+  State<AppPdfViewer> createState() => _AppPdfViewerState();
 }
 
-class _AppPdfViewerState
-    extends State<AppPdfViewer> {
-  late final PdfViewerController _pdfController;
+class _AppPdfViewerState extends State<AppPdfViewer> {
+  PdfViewerController _pdfController = PdfViewerController();
 
   int _currentPage = 1;
   int _totalPages = 0;
@@ -51,12 +47,36 @@ class _AppPdfViewerState
 
   bool _isLoading = true;
   bool _hasError = false;
+  bool _didNotifyDocumentLoaded = false;
 
-  bool get _canGoPrevious => _currentPage > 1;
+  int get _viewerPageCount {
+    if (!_pdfController.isReady) {
+      return 0;
+    }
 
-  bool get _canGoNext =>
-      _totalPages > 0 &&
-          _currentPage < _totalPages;
+    return _pdfController.pageCount;
+  }
+
+  bool get _canGoPrevious =>
+      !_isLoading && !_hasError && _pdfController.isReady && _currentPage > 1;
+
+  bool get _canGoNext {
+    if (_isLoading ||
+        _hasError ||
+        !_pdfController.isReady ||
+        _totalPages <= 0 ||
+        _currentPage >= _totalPages) {
+      return false;
+    }
+
+    final int availablePages = _viewerPageCount;
+
+    if (availablePages <= 0) {
+      return false;
+    }
+
+    return _currentPage < availablePages;
+  }
 
   String get _pageLabel {
     if (_totalPages <= 0) {
@@ -70,24 +90,19 @@ class _AppPdfViewerState
   void initState() {
     super.initState();
 
-    _pdfController = PdfViewerController();
+    _totalPages = widget.initialPageCount > 0 ? widget.initialPageCount : 0;
 
     if (Get.isRegistered<ScreenProtectionService>()) {
-      unawaited(
-        Get.find<ScreenProtectionService>().enable(),
-      );
+      unawaited(Get.find<ScreenProtectionService>().enable());
     }
   }
 
   @override
   void dispose() {
     if (Get.isRegistered<ScreenProtectionService>()) {
-      unawaited(
-        Get.find<ScreenProtectionService>().disable(),
-      );
+      unawaited(Get.find<ScreenProtectionService>().disable());
     }
 
-    _pdfController.dispose();
     super.dispose();
   }
 
@@ -101,8 +116,16 @@ class _AppPdfViewerState
       return;
     }
 
+    final int targetPage = _currentPage - 1;
+
     HapticFeedback.selectionClick();
-    _pdfController.previousPage();
+
+    unawaited(
+      _pdfController.goToPage(
+        pageNumber: targetPage,
+        anchor: PdfPageAnchor.top,
+      ),
+    );
   }
 
   void _goToNextPage() {
@@ -110,123 +133,218 @@ class _AppPdfViewerState
       return;
     }
 
+    final int targetPage = _currentPage + 1;
+
     HapticFeedback.selectionClick();
-    _pdfController.nextPage();
+
+    unawaited(
+      _pdfController.goToPage(
+        pageNumber: targetPage,
+        anchor: PdfPageAnchor.top,
+      ),
+    );
   }
 
   void _retry() {
     HapticFeedback.selectionClick();
 
     setState(() {
+
+      _pdfController = PdfViewerController();
+
       _currentPage = 1;
-      _totalPages = 0;
+
+      _totalPages = widget.initialPageCount > 0 ? widget.initialPageCount : 0;
+
       _isLoading = true;
       _hasError = false;
+      _didNotifyDocumentLoaded = false;
+
       _reloadVersion++;
     });
   }
 
-  void _onDocumentLoaded(
-      PdfDocumentLoadedDetails details,
-      ) {
+  void _onViewerReady(PdfDocument document, PdfViewerController controller) {
     if (!mounted) {
       return;
     }
 
-    final int totalPages =
-        details.document.pages.count;
+    final int viewerPageCount = controller.pageCount;
+
+
+    final int totalPages = viewerPageCount > _totalPages
+        ? viewerPageCount
+        : _totalPages;
+
+    final int pageNumber = controller.pageNumber ?? 1;
 
     setState(() {
       _totalPages = totalPages;
-      _currentPage = 1;
+
+      _currentPage = pageNumber > 0 ? pageNumber : 1;
+
       _isLoading = false;
       _hasError = false;
     });
 
-    widget.onDocumentLoaded?.call(
-      totalPages,
-    );
+    _notifyDocumentLoaded(totalPages);
   }
 
-  void _onDocumentLoadFailed(
-      PdfDocumentLoadFailedDetails details,
-      ) {
+  void _onDocumentLoadFinished(PdfDocumentRef documentRef, bool loadSucceeded) {
     if (!mounted) {
       return;
     }
 
-    setState(() {
-      _isLoading = false;
-      _hasError = true;
-    });
-  }
+    if (!loadSucceeded) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
 
-  void _onPageChanged(
-      PdfPageChangedDetails details,
-      ) {
-    if (!mounted) {
       return;
     }
 
-    final int pageNumber =
-        details.newPageNumber;
+    if (!_pdfController.isReady) {
+      return;
+    }
 
-    setState(() {
-      _currentPage = pageNumber;
+    final int viewerPageCount = _pdfController.pageCount;
+
+    final int totalPages = viewerPageCount > _totalPages
+        ? viewerPageCount
+        : _totalPages;
+
+    if (totalPages != _totalPages) {
+      setState(() {
+        _totalPages = totalPages;
+      });
+    }
+
+    _notifyDocumentLoaded(totalPages);
+  }
+
+  void _notifyDocumentLoaded(int totalPages) {
+    if (_didNotifyDocumentLoaded || totalPages <= 0) {
+      return;
+    }
+
+    _didNotifyDocumentLoaded = true;
+
+    widget.onDocumentLoaded?.call(totalPages);
+  }
+
+  void _onPageChanged(int? pageNumber) {
+    if (!mounted || pageNumber == null || pageNumber <= 0) {
+      return;
+    }
+
+    /*
+     * Progressive loading can expose additional
+     * pages after the viewer initially becomes
+     * ready.
+     */
+    final int viewerPageCount = _viewerPageCount;
+
+    final int totalPages = viewerPageCount > _totalPages
+        ? viewerPageCount
+        : _totalPages;
+
+    if (_currentPage != pageNumber || _totalPages != totalPages) {
+      setState(() {
+        _currentPage = pageNumber;
+        _totalPages = totalPages;
+      });
+    }
+
+    widget.onPageChanged?.call(pageNumber);
+  }
+
+  void _scheduleViewerError() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _hasError) {
+        return;
+      }
+
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
     });
+  }
 
-    widget.onPageChanged?.call(
-      pageNumber,
+  PdfViewerParams _buildViewerParams() {
+    return PdfViewerParams(
+
+      margin: 0,
+      backgroundColor: AppColors.white,
+      pageDropShadow: null,
+
+
+      loadingBannerBuilder:
+          (BuildContext context, int bytesDownloaded, int? totalBytes) {
+            return const SizedBox.shrink();
+          },
+
+
+      errorBannerBuilder:
+          (
+            BuildContext context,
+            Object error,
+            StackTrace? stackTrace,
+            PdfDocumentRef documentRef,
+          ) {
+            _scheduleViewerError();
+
+            return const SizedBox.shrink();
+          },
+
+      onViewerReady: _onViewerReady,
+
+      onDocumentLoadFinished: _onDocumentLoadFinished,
+
+      onPageChanged: _onPageChanged,
+
+      pageAnchor: PdfPageAnchor.top,
     );
   }
 
   Widget _buildPdfViewer() {
-    final Key viewerKey =
-    ValueKey<String>(
+    final Key viewerKey = ValueKey<String>(
       '${widget.source}-'
-          '${widget.sourceType.name}-'
-          '$_reloadVersion',
+      '${widget.sourceType.name}-'
+      '$_reloadVersion',
     );
 
-    if (widget.sourceType ==
-        AppPdfSourceType.asset) {
-      return SfPdfViewer.asset(
+    final PdfViewerParams params = _buildViewerParams();
+
+    if (widget.sourceType == AppPdfSourceType.asset) {
+      return PdfViewer.asset(
         widget.source,
         key: viewerKey,
         controller: _pdfController,
-        pageLayoutMode:
-        PdfPageLayoutMode.single,
-        scrollDirection:
-        PdfScrollDirection.vertical,
-        canShowScrollHead: false,
-        canShowScrollStatus: false,
-        canShowPaginationDialog: false,
-        onDocumentLoaded:
-        _onDocumentLoaded,
-        onDocumentLoadFailed:
-        _onDocumentLoadFailed,
-        onPageChanged:
-        _onPageChanged,
+        useProgressiveLoading: true,
+        params: params,
       );
     }
 
-    return SfPdfViewer.network(
-      widget.source,
+    final Uri? uri = Uri.tryParse(widget.source);
+
+    if (uri == null || !uri.hasScheme) {
+      _scheduleViewerError();
+
+      return const SizedBox.shrink();
+    }
+
+    return PdfViewer.uri(
+      uri,
       key: viewerKey,
       controller: _pdfController,
-      pageLayoutMode:
-      PdfPageLayoutMode.single,
-      scrollDirection:
-      PdfScrollDirection.vertical,
-      canShowScrollHead: false,
-      canShowScrollStatus: false,
-      canShowPaginationDialog: false,
-      onDocumentLoaded:
-      _onDocumentLoaded,
-      onDocumentLoadFailed:
-      _onDocumentLoadFailed,
-      onPageChanged:
-      _onPageChanged,
+
+
+
+      preferRangeAccess: true,
+
+      params: params,
     );
   }
 
@@ -247,40 +365,17 @@ class _AppPdfViewerState
               ),
 
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    10.w,
-                    8.h,
-                    10.w,
-                    0,
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16.r),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        border: Border.all(
-                          color: const Color(0xFFDDE4E0),
-                          width: 1.w,
-                        ),
-                        borderRadius:
-                        BorderRadius.circular(16.r),
-                      ),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: <Widget>[
-                          _buildPdfViewer(),
+                child: ColoredBox(
+                  color: AppColors.white,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      _buildPdfViewer(),
 
-                          if (_isLoading)
-                            const _PdfLoadingState(),
+                      if (_isLoading) const _PdfLoadingState(),
 
-                          if (_hasError)
-                            _PdfErrorState(
-                              onRetry: _retry,
-                            ),
-                        ],
-                      ),
-                    ),
+                      if (_hasError) _PdfErrorState(onRetry: _retry),
+                    ],
                   ),
                 ),
               ),
@@ -316,16 +411,10 @@ class _PdfReaderHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 56.h,
-      padding: EdgeInsets.symmetric(
-        horizontal: 10.w,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 10.w),
       decoration: const BoxDecoration(
         color: AppColors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: Color(0xFFE3E9E6),
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFFE3E9E6))),
       ),
       child: Row(
         children: <Widget>[
@@ -355,23 +444,16 @@ class _PdfReaderHeader extends StatelessWidget {
           SizedBox(width: 10.w),
 
           AnimatedSwitcher(
-            duration: const Duration(
-              milliseconds: 180,
-            ),
+            duration: const Duration(milliseconds: 180),
             child: Container(
               key: ValueKey<String>(pageLabel),
-              constraints: BoxConstraints(
-                minWidth: 58.w,
-              ),
+              constraints: BoxConstraints(minWidth: 58.w),
               height: 34.h,
-              padding: EdgeInsets.symmetric(
-                horizontal: 10.w,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: 10.w),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: const Color(0xFFEAF4ED),
-                borderRadius:
-                BorderRadius.circular(17.r),
+                borderRadius: BorderRadius.circular(17.r),
               ),
               child: Text(
                 pageLabel,
@@ -410,26 +492,14 @@ class _PdfReaderNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double progress = totalPages > 0
-        ? (currentPage / totalPages).clamp(
-      0.0,
-      1.0,
-    )
+        ? (currentPage / totalPages).clamp(0.0, 1.0)
         : 0;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(
-        14.w,
-        9.h,
-        14.w,
-        10.h,
-      ),
+      padding: EdgeInsets.fromLTRB(14.w, 9.h, 14.w, 10.h),
       decoration: const BoxDecoration(
         color: AppColors.white,
-        border: Border(
-          top: BorderSide(
-            color: Color(0xFFE3E9E6),
-          ),
-        ),
+        border: Border(top: BorderSide(color: Color(0xFFE3E9E6))),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -439,8 +509,7 @@ class _PdfReaderNavigation extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 3.h,
-              backgroundColor:
-              const Color(0xFFE5EAE7),
+              backgroundColor: const Color(0xFFE5EAE7),
               color: AppColors.primaryGreen,
             ),
           ),
@@ -458,9 +527,7 @@ class _PdfReaderNavigation extends StatelessWidget {
 
               Expanded(
                 child: Text(
-                  totalPages > 0
-                      ? '$currentPage / $totalPages'
-                      : '—',
+                  totalPages > 0 ? '$currentPage / $totalPages' : '—',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
@@ -502,9 +569,7 @@ class _PdfRoundButton extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: isEnabled
-            ? const Color(0xFFEAF4ED)
-            : const Color(0xFFF0F2F1),
+        color: isEnabled ? const Color(0xFFEAF4ED) : const Color(0xFFF0F2F1),
         shape: const CircleBorder(),
         child: InkWell(
           onTap: isEnabled ? onTap : null,
@@ -557,9 +622,7 @@ class _PdfLoadingState extends StatelessWidget {
 }
 
 class _PdfErrorState extends StatelessWidget {
-  const _PdfErrorState({
-    required this.onRetry,
-  });
+  const _PdfErrorState({required this.onRetry});
 
   final VoidCallback onRetry;
 
@@ -604,22 +667,14 @@ class _PdfErrorState extends StatelessWidget {
 
               FilledButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(
-                  Icons.refresh_rounded,
-                ),
+                icon: const Icon(Icons.refresh_rounded),
                 label: Text('retry'.tr),
                 style: FilledButton.styleFrom(
-                  backgroundColor:
-                  AppColors.primaryGreen,
-                  foregroundColor:
-                  AppColors.white,
-                  minimumSize: Size(
-                    120.w,
-                    44.h,
-                  ),
+                  backgroundColor: AppColors.primaryGreen,
+                  foregroundColor: AppColors.white,
+                  minimumSize: Size(120.w, 44.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(22.r),
+                    borderRadius: BorderRadius.circular(22.r),
                   ),
                 ),
               ),

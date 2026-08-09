@@ -98,7 +98,7 @@ class NavbarAndAppbarWrapper
                   ),
                   child: Obx(
                         () => AppHomeTopBar(
-                      greeting: 'buongiorno'.tr,
+                          greeting: controller.greetingKey.value.tr,
                       userName: session.displayName.trim(),
                       avatarUrl: session.avatarUrl,
                       streakLabel:

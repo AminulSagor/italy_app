@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -54,7 +54,7 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
         await WakelockPlus.disable();
       }
     } catch (error) {
-      dev.log(
+      AppLogger.log(
         'Unable to update wakelock',
         error: error,
         name: 'AiTutorVoice',
@@ -75,155 +75,161 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
       activityKind: LearningActivityKind.aiTutor,
       sourceId: 'ai_tutor_live_voice_view',
       child: WillPopScope(
-      onWillPop: controller.handleLiveVoiceSystemBack,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFEFFFF0),
-        body: SafeArea(
-          bottom: false,
-          child: Stack(
-            children: <Widget>[
-              const Positioned.fill(child: _VoiceBackground()),
-              Column(
-                children: <Widget>[
-                  Obx(
-                    () => AiTutorHeader(
-                      lightBackground: true,
-                      backEnabled: !controller.isLiveVoiceConnecting,
-                      onBackTap: () =>
-                          unawaited(controller.closeLiveVoicePage()),
+        onWillPop: controller.handleLiveVoiceSystemBack,
+        child: Scaffold(
+          backgroundColor: const Color(0xFFEFFFF0),
+          body: SafeArea(
+            bottom: false,
+            child: Stack(
+              children: <Widget>[
+                const Positioned.fill(child: _VoiceBackground()),
+                Column(
+                  children: <Widget>[
+                    Obx(
+                      () => AiTutorHeader(
+                        lightBackground: true,
+                        backEnabled: !controller.isLiveVoiceConnecting,
+                        onBackTap: () =>
+                            unawaited(controller.closeLiveVoicePage()),
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Obx(() {
-                      final AiTutorVoiceService voice = controller.voiceService;
-                      final bool connecting = controller.isLiveVoiceConnecting;
-                      final bool failed = voice.connectionState.value ==
-                          AiTutorVoiceConnectionState.error;
-                      final String assistantText =
-                          voice.assistantThinking.value
-                              ? ''
-                              : voice.latestAssistantMessage?.primary ?? '';
-                      final String userText =
-                          voice.latestUserMessage?.primary ?? '';
+                    Expanded(
+                      child: Obx(() {
+                        final AiTutorVoiceService voice =
+                            controller.voiceService;
+                        final bool connecting =
+                            controller.isLiveVoiceConnecting;
+                        final bool failed =
+                            voice.connectionState.value ==
+                            AiTutorVoiceConnectionState.error;
+                        final String assistantText =
+                            voice.assistantThinking.value
+                            ? ''
+                            : voice.latestAssistantMessage?.primary ?? '';
+                        final String userText =
+                            voice.latestUserMessage?.primary ?? '';
 
-                      return SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        padding: EdgeInsets.fromLTRB(24.w, 46.h, 24.w, 175.h),
-                        child: Column(
-                          children: <Widget>[
-                            Center(
-                              child: _SessionStatusChip(
-                                label: voice.status.value,
-                                active: voice.isConnected,
-                              ),
-                            ),
-                            SizedBox(height: 46.h),
-                            if (connecting)
-                              SizedBox(
-                                width: 54.r,
-                                height: 54.r,
-                                child: const CircularProgressIndicator(
-                                  strokeWidth: 4,
-                                  color: AppColors.primaryGreen,
+                        return SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          padding: EdgeInsets.fromLTRB(24.w, 46.h, 24.w, 175.h),
+                          child: Column(
+                            children: <Widget>[
+                              Center(
+                                child: _SessionStatusChip(
+                                  label: voice.status.value,
+                                  active: voice.isConnected,
                                 ),
-                              )
-                            else
-                              AiTutorWaveform(
-                                activeColor: AppColors.primaryGreen,
-                                inactiveColor: AppColors.primaryGreen.withValues(
-                                  alpha: .14,
-                                ),
-                                width: 118,
-                                height: 126,
-                                animate: voice.isConnected &&
-                                    (voice.assistantSpeaking.value ||
-                                        voice.userSpeaking.value),
-                                thinking: voice.assistantThinking.value,
-                                audioLevel: voice.activeAudioLevel,
                               ),
-                            SizedBox(height: 42.h),
-                            if (assistantText.isNotEmpty)
-                              Column(
-                                children: <Widget>[
-                                  AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 140),
-                                    child: Text(
-                                      assistantText,
-                                      key: ValueKey<String>(assistantText),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: AppFont.font22.sp,
-                                        height: 1.22,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: -.6,
-                                        color: const Color(0xFF26312E),
+                              SizedBox(height: 46.h),
+                              if (connecting)
+                                SizedBox(
+                                  width: 54.r,
+                                  height: 54.r,
+                                  child: const CircularProgressIndicator(
+                                    strokeWidth: 4,
+                                    color: AppColors.primaryGreen,
+                                  ),
+                                )
+                              else
+                                AiTutorWaveform(
+                                  activeColor: AppColors.primaryGreen,
+                                  inactiveColor: AppColors.primaryGreen
+                                      .withValues(alpha: .14),
+                                  width: 118,
+                                  height: 126,
+                                  animate:
+                                      voice.isConnected &&
+                                      (voice.assistantSpeaking.value ||
+                                          voice.userSpeaking.value),
+                                  thinking: voice.assistantThinking.value,
+                                  audioLevel: voice.activeAudioLevel,
+                                ),
+                              SizedBox(height: 42.h),
+                              if (assistantText.isNotEmpty)
+                                Column(
+                                  children: <Widget>[
+                                    AnimatedSwitcher(
+                                      duration: const Duration(
+                                        milliseconds: 140,
+                                      ),
+                                      child: Text(
+                                        assistantText,
+                                        key: ValueKey<String>(assistantText),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: AppFont.font22.sp,
+                                          height: 1.22,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -.6,
+                                          color: const Color(0xFF26312E),
+                                        ),
                                       ),
                                     ),
+
+                                    SizedBox(height: 8.h),
+
+                                    AiReportButton(
+                                      source: AiContentReportSource(
+                                        featureType:
+                                            AiReportFeatureType.talking,
+
+                                        // Automatically attaches the visible AI transcript.
+                                        aiContentText: assistantText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              if (userText.isNotEmpty) ...<Widget>[
+                                SizedBox(height: 24.h),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 16.w,
+                                    vertical: 11.h,
                                   ),
-
-                                  SizedBox(height: 8.h),
-
-                                  AiReportButton(
-                                    source: AiContentReportSource(
-                                      featureType: AiReportFeatureType.talking,
-
-                                      // Automatically attaches the visible AI transcript.
-                                      aiContentText: assistantText,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white.withValues(
+                                      alpha: .75,
+                                    ),
+                                    borderRadius: BorderRadius.circular(18.r),
+                                  ),
+                                  child: Text(
+                                    userText,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 11.sp,
+                                      height: 1.35,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF6E7874),
                                     ),
                                   ),
-                                ],
-                              ),
-                            if (userText.isNotEmpty) ...<Widget>[
-                              SizedBox(height: 24.h),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 16.w,
-                                  vertical: 11.h,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.white.withValues(alpha: .75),
-                                  borderRadius: BorderRadius.circular(18.r),
+                              ],
+                              if (failed) ...<Widget>[
+                                SizedBox(height: 24.h),
+                                OutlinedButton.icon(
+                                  onPressed: controller.retryLiveVoice,
+                                  icon: const Icon(Icons.refresh_rounded),
+                                  label: Text('try_again'.tr),
                                 ),
-                                child: Text(
-                                  userText,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 11.sp,
-                                    height: 1.35,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF6E7874),
-                                  ),
-                                ),
-                              ),
+                              ],
                             ],
-                            if (failed) ...<Widget>[
-                              SizedBox(height: 24.h),
-                              OutlinedButton.icon(
-                                onPressed: controller.retryLiveVoice,
-                                icon: const Icon(Icons.refresh_rounded),
-                                label: Text('try_again'.tr),
-                              ),
-                            ],
-                          ],
-                        ),
-                      );
-                    }),
-                  ),
-                ],
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: NativeBottomInset(
-                  child: const _LiveVoiceControls(),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: NativeBottomInset(child: const _LiveVoiceControls()),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 }
@@ -249,7 +255,6 @@ class _VoiceBackground extends StatelessWidget {
     );
   }
 }
-
 
 class _SessionStatusChip extends StatelessWidget {
   const _SessionStatusChip({required this.label, required this.active});
@@ -279,9 +284,7 @@ class _SessionStatusChip extends StatelessWidget {
             width: 6.r,
             height: 6.r,
             decoration: BoxDecoration(
-              color: active
-                  ? AppColors.primaryGreen
-                  : const Color(0xFF9AA29F),
+              color: active ? AppColors.primaryGreen : const Color(0xFF9AA29F),
               shape: BoxShape.circle,
             ),
           ),
@@ -346,8 +349,8 @@ class _LiveVoiceControls extends GetView<AiChatController> {
               onTap: busy
                   ? null
                   : voice.isConnected
-                      ? controller.toggleLiveVoiceMute
-                      : controller.retryLiveVoice,
+                  ? controller.toggleLiveVoiceMute
+                  : controller.retryLiveVoice,
               child: Container(
                 width: 74.r,
                 height: 74.r,

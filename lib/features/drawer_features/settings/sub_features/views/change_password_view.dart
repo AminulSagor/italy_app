@@ -28,6 +28,7 @@ class ChangePasswordView extends GetView<SettingsController> {
                 hint: SettingsL10n.text('current_password_hint'),
                 icon: Icons.lock_outline_rounded,
                 controller: controller.currentPasswordController,
+                maxLength: 128,
                 obscureText: controller.obscureCurrentPassword.value,
                 suffixIcon: controller.obscureCurrentPassword.value
                     ? Icons.visibility_outlined
@@ -44,6 +45,7 @@ class ChangePasswordView extends GetView<SettingsController> {
                 hint: SettingsL10n.text('new_password_hint'),
                 icon: Icons.password_rounded,
                 controller: controller.newPasswordController,
+                maxLength: 128,
                 obscureText: controller.obscureNewPassword.value,
                 suffixIcon: controller.obscureNewPassword.value
                     ? Icons.visibility_outlined
@@ -74,11 +76,7 @@ class ChangePasswordView extends GetView<SettingsController> {
             SizedBox(height: 18.h),
             Obx(
               () => _PasswordRequirements(
-                minimum: controller.hasPasswordMinimumLength,
-                uppercase: controller.hasPasswordUppercase,
-                number: controller.hasPasswordNumber,
-                special: controller.hasPasswordSpecialCharacter,
-                allowed: controller.hasPasswordAllowedCharacters,
+                minimumLength: controller.hasPasswordMinimumLength,
                 matches: controller.passwordsMatch,
               ),
             ),
@@ -151,19 +149,11 @@ class _PasswordHeader extends StatelessWidget {
 
 class _PasswordRequirements extends StatelessWidget {
   const _PasswordRequirements({
-    required this.minimum,
-    required this.uppercase,
-    required this.number,
-    required this.special,
-    required this.allowed,
+    required this.minimumLength,
     required this.matches,
   });
 
-  final bool minimum;
-  final bool uppercase;
-  final bool number;
-  final bool special;
-  final bool allowed;
+  final bool minimumLength;
   final bool matches;
 
   @override
@@ -187,11 +177,10 @@ class _PasswordRequirements extends StatelessWidget {
             ),
           ),
           SizedBox(height: 12.h),
-          _Requirement(text: SettingsL10n.text('password_minimum'), met: minimum),
-          _Requirement(text: SettingsL10n.text('password_uppercase'), met: uppercase),
-          _Requirement(text: SettingsL10n.text('password_number'), met: number),
-          _Requirement(text: SettingsL10n.text('password_special'), met: special),
-          _Requirement(text: SettingsL10n.text('password_allowed'), met: allowed),
+          _Requirement(
+            text: SettingsL10n.text('password_minimum'),
+            met: minimumLength,
+          ),
           _Requirement(
             text: SettingsL10n.text('password_match'),
             met: matches,
@@ -221,7 +210,9 @@ class _Requirement extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Icon(
-            met ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+            met
+                ? Icons.check_circle_rounded
+                : Icons.radio_button_unchecked_rounded,
             size: 18.r,
             color: met ? SettingsUi.primary : const Color(0xFFA7B0AC),
           ),

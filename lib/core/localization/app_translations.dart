@@ -3,6 +3,31 @@
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
+    'requires_video_percent':
+    'Requires watching @percent% of the video',
+    'vocabulary_list_mode': 'List Mode',
+    'vocabulary_flashcard_mode': 'Flashcard',
+    'vocabulary_search': 'Search words',
+    'vocabulary_show_meaning': 'Show meaning',
+    'vocabulary_listen_all': 'Listen all',
+    'vocabulary_stop_audio': 'Stop',
+    'vocabulary_no_search_result':
+    'No matching words found',
+    'vocabulary_learned_progress':
+    '@learned/@total learned',
+    'vocabulary_practice_words':
+    'Practice these @count words',
+    'home_good_morning': 'Good morning',
+    'home_good_afternoon': 'Good afternoon',
+    'home_good_evening': 'Good evening',
+    'home_good_night': 'Good night',
+    'password_minimum': 'At least 6 characters',
+    'check_six_characters': 'Exactly 6 characters',
+    'snack_password_6_characters':
+    'Password must contain at least 6 characters.',
+    'password_intro': 'Use any password containing exactly 6 characters.',
+    'password_exact_length': 'Exactly 6 characters',
+    'password_invalid': 'Your new password must contain exactly 6 characters.',
     // English
     'matching_pairs_drag_instruction':
         'Move the words on the right to match them with the words on the left.',
@@ -758,7 +783,7 @@ appTranslations = <String, Map<String, String>>{
     'snack_session_expired': 'Session expired',
     'snack_verify_again': 'Please verify your code again.',
     'snack_need_upper_number':
-        'Password needs uppercase, number, and special character.',
+    'Password must contain at least 6 characters.',
     'snack_mismatch': 'Mismatch',
     'snack_passwords_match': 'Both password fields must match.',
     'snack_could_not_reset': 'Could not reset',
@@ -2020,7 +2045,7 @@ appTranslations = <String, Map<String, String>>{
     'request_to_participate': 'Request to Participate',
     'requesting': 'Requesting',
     'required': 'Required',
-    'requires_80_video': 'Requires 80 Video',
+    'requires_80_video': 'Requires watching 80% of the video',
     'resend_code_1': 'Resend Code',
     'reset_password_1': 'Reset Password',
     'resource_unavailable': 'Resource Unavailable',
@@ -2731,7 +2756,7 @@ appTranslations = <String, Map<String, String>>{
     'snack_session_expired': 'সেশন শেষ হয়েছে',
     'snack_verify_again': 'আবার কোড যাচাই করুন।',
     'snack_need_upper_number':
-        'পাসওয়ার্ডে বড় হাতের অক্ষর, সংখ্যা এবং বিশেষ চিহ্ন থাকতে হবে।',
+    'পাসওয়ার্ডে কমপক্ষে ৬টি অক্ষর থাকতে হবে।',
     'snack_mismatch': 'মেলেনি',
     'climb_the_tiers_and_become_an_italian_master':
         'ধাপগুলো পেরিয়ে হয়ে উঠুন\nএকজন ইতালিয়ান মাস্টার।',
@@ -5107,8 +5132,61 @@ appTranslations = <String, Map<String, String>>{
     // Bangla
     'matching_pairs_drag_instruction':
         'বাম পাশের শব্দগুলোর সঙ্গে মিলাতে ডান পাশের শব্দগুলো সরান।',
+    'password_intro': 'ঠিক ৬ অক্ষরের যেকোনো পাসওয়ার্ড ব্যবহার করুন।',
+    'password_exact_length': 'ঠিক ৬ অক্ষর',
+    'password_invalid': 'নতুন পাসওয়ার্ড অবশ্যই ঠিক ৬ অক্ষরের হতে হবে।',
+    'check_six_characters': 'ঠিক ৬ অক্ষর',
+    'snack_password_6_characters':
+    'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।',
+    'password_minimum': 'কমপক্ষে ৬ অক্ষর',
+    'home_good_morning': 'সুপ্রভাত',
+    'home_good_afternoon': 'শুভ অপরাহ্ন',
+    'home_good_evening': 'শুভ সন্ধ্যা',
+    'home_good_night': 'শুভ রাত্রি',
+    'vocabulary_list_mode': 'লিস্ট মোড',
+    'vocabulary_flashcard_mode': 'ফ্ল্যাশকার্ড',
+    'vocabulary_search': 'শব্দ খুঁজুন',
+    'vocabulary_show_meaning': 'অর্থ দেখান',
+    'vocabulary_listen_all': 'সবগুলো শুনুন',
+    'vocabulary_stop_audio': 'বন্ধ করুন',
+    'vocabulary_no_search_result':
+    'কোনো শব্দ পাওয়া যায়নি',
+    'vocabulary_learned_progress':
+    '@learned/@total শেখা হয়েছে',
+    'vocabulary_practice_words':
+    'এই @countটি শব্দ প্র্যাকটিস করুন',
+    'requires_video_percent':
+    'ভিডিওর @percent% দেখা প্রয়োজন',
   },
   'it_IT': <String, String>{
+    'requires_video_percent':
+    'Richiede la visione del @percent% del video',
+    'vocabulary_list_mode': 'Modalità lista',
+    'vocabulary_flashcard_mode': 'Flashcard',
+    'vocabulary_search': 'Cerca parole',
+    'vocabulary_show_meaning':
+    'Mostra significato',
+    'vocabulary_listen_all':
+    'Ascolta tutto',
+    'vocabulary_stop_audio': 'Ferma',
+    'vocabulary_no_search_result':
+    'Nessuna parola trovata',
+    'vocabulary_learned_progress':
+    '@learned/@total imparate',
+    'vocabulary_practice_words':
+    'Pratica queste @count parole',
+    'home_good_morning': 'Buongiorno',
+    'home_good_afternoon': 'Buon pomeriggio',
+    'home_good_evening': 'Buonasera',
+    'home_good_night': 'Buonanotte',
+    'password_minimum': 'Almeno 6 caratteri',
+    'check_six_characters': 'Esattamente 6 caratteri',
+    'snack_password_6_characters':
+    'La password deve contenere almeno 6 caratteri.',
+    'password_intro': 'Usa una password composta da esattamente 6 caratteri.',
+    'password_exact_length': 'Esattamente 6 caratteri',
+    'password_invalid':
+    'La nuova password deve contenere esattamente 6 caratteri.',
     // Italian
     'matching_pairs_drag_instruction':
         'Sposta le parole a destra per abbinarle alle parole a sinistra.',
@@ -5879,7 +5957,7 @@ appTranslations = <String, Map<String, String>>{
     'snack_session_expired': 'Sessione scaduta',
     'snack_verify_again': 'Verifica di nuovo il codice.',
     'snack_need_upper_number':
-        'La password deve contenere maiuscola, numero e carattere speciale.',
+    'La password deve contenere almeno 6 caratteri.',
     'snack_mismatch': 'Non corrisponde',
     'snack_passwords_match': 'Le due password devono coincidere.',
     'snack_could_not_reset': 'Impossibile reimpostare',

@@ -6,22 +6,34 @@ import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../../core/themes/app_colors.dart';
+import '../models/chapter_detail_models.dart';
 import 'chapter_video_player_surface.dart';
 
 class ChapterVideoFullscreenView extends StatefulWidget {
   final VideoPlayerController controller;
+  final ValueListenable<VideoPlayerController?>? controllerListenable;
   final ValueListenable<bool> hasWatchedFullyListenable;
   final String progressLabel;
   final String fallbackPositionLabel;
   final String fallbackDurationLabel;
+  final bool showSettings;
+  final List<ChapterVideoQualityOption> qualityOptions;
+  final ValueListenable<String>? selectedQualityListenable;
+  final Future<void> Function(ChapterVideoQualityOption? quality)?
+  onQualityChanged;
 
   const ChapterVideoFullscreenView({
     super.key,
     required this.controller,
+    this.controllerListenable,
     required this.hasWatchedFullyListenable,
     required this.progressLabel,
     required this.fallbackPositionLabel,
     required this.fallbackDurationLabel,
+    this.showSettings = false,
+    this.qualityOptions = const <ChapterVideoQualityOption>[],
+    this.selectedQualityListenable,
+    this.onQualityChanged,
   });
 
   @override
@@ -156,8 +168,40 @@ class _ChapterVideoFullscreenViewState
     super.dispose();
   }
 
+  Widget _buildPlayer(VideoPlayerController? controller) {
+    if (controller == null || !controller.value.isInitialized) {
+      return const ColoredBox(
+        color: AppColors.black,
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppColors.white,
+          ),
+        ),
+      );
+    }
+
+    return ChapterVideoPlayerSurface(
+      controller: controller,
+      hasWatchedFullyListenable: widget.hasWatchedFullyListenable,
+      progressLabel: widget.progressLabel,
+      fallbackPositionLabel: widget.fallbackPositionLabel,
+      fallbackDurationLabel: widget.fallbackDurationLabel,
+      isFullscreen: true,
+      showSettings: widget.showSettings,
+      qualityOptions: widget.qualityOptions,
+      selectedQualityListenable: widget.selectedQualityListenable,
+      onQualityChanged: widget.onQualityChanged,
+      onCloseFullscreenTap: () {
+        unawaited(_closeFullscreen());
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ValueListenable<VideoPlayerController?>? controllerListenable =
+        widget.controllerListenable;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (
@@ -170,18 +214,16 @@ class _ChapterVideoFullscreenViewState
       },
       child: Scaffold(
         backgroundColor: AppColors.black,
-        body: ChapterVideoPlayerSurface(
-          controller: widget.controller,
-          hasWatchedFullyListenable:
-          widget.hasWatchedFullyListenable,
-          progressLabel: widget.progressLabel,
-          fallbackPositionLabel:
-          widget.fallbackPositionLabel,
-          fallbackDurationLabel:
-          widget.fallbackDurationLabel,
-          isFullscreen: true,
-          onCloseFullscreenTap: () {
-            unawaited(_closeFullscreen());
+        body: controllerListenable == null
+            ? _buildPlayer(widget.controller)
+            : ValueListenableBuilder<VideoPlayerController?>(
+          valueListenable: controllerListenable,
+          builder: (
+              BuildContext context,
+              VideoPlayerController? controller,
+              Widget? child,
+              ) {
+            return _buildPlayer(controller);
           },
         ),
       ),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as dev;
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -27,7 +26,7 @@ import 'features/home/controllers/home_controller.dart';
 import 'features/messages/sub-feature/call/service/call_socket_service.dart';
 import 'features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import 'routes/routes.dart';
-
+import 'core/utils/app_logger.dart';
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   DartPluginRegistrant.ensureInitialized();
@@ -59,7 +58,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     await callService.acknowledgeIncomingCallOverHttp(callId: callId);
   } catch (error, stackTrace) {
     if (kDebugMode) {
-      dev.log(
+      AppLogger.log(
         'Background incoming-call acknowledgement failed',
         name: 'CallBackground',
         error: error,
@@ -151,7 +150,7 @@ Future<void> _initializeCallKitListeners() async {
         }
       } catch (error, stackTrace) {
         if (kDebugMode) {
-          dev.log(
+          AppLogger.log(
             'Unable to synchronize declined call',
             name: 'CallKit',
             error: error,
@@ -165,7 +164,7 @@ Future<void> _initializeCallKitListeners() async {
         await Get.find<CallSocketService>().timeoutCall(callId: callId);
       } catch (error, stackTrace) {
         if (kDebugMode) {
-          dev.log(
+          AppLogger.log(
             'Unable to synchronize timed-out call',
             name: 'CallKit',
             error: error,
@@ -198,7 +197,7 @@ Future<void> _initializeCallKitListeners() async {
         }
       } catch (error, stackTrace) {
         if (kDebugMode) {
-          dev.log(
+          AppLogger.log(
             'Unable to synchronize ended call',
             name: 'CallKit',
             error: error,

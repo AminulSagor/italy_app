@@ -69,6 +69,11 @@ class VocabularyApiService {
       'example': _stringValue(item['englishExample']),
       'hasAudio': _stringValue(item['aiPronunciationFileId']).isNotEmpty,
       'audioFileId': _stringValue(item['aiPronunciationFileId']),
+      'masteryStatus':
+      _fallbackString(
+        item['masteryStatus'],
+        'new',
+      ),
     };
   }
 

@@ -1,39 +1,26 @@
-import 'dart:developer' as dev;
 
+import 'package:italir_pothe/core/utils/app_logger.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import '../models/important_verb_models.dart';
 
+
+
 class ItalianTtsService {
-  ItalianTtsService({
-    FlutterTts? flutterTts,
-  }) : _flutterTts = flutterTts ?? FlutterTts();
+  ItalianTtsService({FlutterTts? flutterTts})
+    : _flutterTts = flutterTts ?? FlutterTts();
 
   final FlutterTts _flutterTts;
 
   bool _isInitialized = false;
 
   // Existing Important Verbs functionality.
-  Future<void> speak(
-      ImportantVerbTtsModel tts,
-      ) async {
-    await speakText(
-      tts.text,
-      locale: tts.locale,
-    );
+  Future<void> speak(ImportantVerbTtsModel tts) async {
+    await speakText(tts.text, locale: tts.locale);
   }
 
-
-  Future<void> speakText(
-      String text, {
-        String locale = 'it-IT',
-      }) async {
-    final String normalizedText = text
-        .replaceAll(
-      RegExp(r'\s+'),
-      ' ',
-    )
-        .trim();
+  Future<void> speakText(String text, {String locale = 'it-IT'}) async {
+    final String normalizedText = text.replaceAll(RegExp(r'\s+'), ' ').trim();
 
     if (normalizedText.isEmpty) {
       return;
@@ -46,15 +33,10 @@ class ItalianTtsService {
 
     await _setItalianLanguage(locale);
 
-
-    final dynamic result = await _flutterTts.speak(
-      normalizedText,
-    );
+    final dynamic result = await _flutterTts.speak(normalizedText);
 
     if (result != 1) {
-      throw StateError(
-        'Italian pronunciation could not be started.',
-      );
+      throw StateError('Italian pronunciation could not be started.');
     }
   }
 
@@ -62,9 +44,7 @@ class ItalianTtsService {
     await _flutterTts.stop();
   }
 
-  Future<void> _initialize(
-      String requestedLocale,
-      ) async {
+  Future<void> _initialize(String requestedLocale) async {
     if (_isInitialized) {
       return;
     }
@@ -78,30 +58,23 @@ class ItalianTtsService {
     _isInitialized = true;
   }
 
-  Future<void> _setItalianLanguage(
-      String requestedLocale,
-      ) async {
-    final String locale =
-    requestedLocale.trim().isEmpty
+  Future<void> _setItalianLanguage(String requestedLocale) async {
+    final String locale = requestedLocale.trim().isEmpty
         ? 'it-IT'
         : requestedLocale.trim();
 
     try {
-      final dynamic availability =
-      await _flutterTts.isLanguageAvailable(
+      final dynamic availability = await _flutterTts.isLanguageAvailable(
         locale,
       );
 
-      final bool isAvailable =
-          availability == true || availability == 1;
+      final bool isAvailable = availability == true || availability == 1;
 
-      await _flutterTts.setLanguage(
-        isAvailable ? locale : 'it-IT',
-      );
+      await _flutterTts.setLanguage(isAvailable ? locale : 'it-IT');
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Unable to verify Italian TTS locale. '
-            'Falling back to it-IT.',
+        'Falling back to it-IT.',
         name: 'ItalianTtsService',
         error: error,
         stackTrace: stackTrace,

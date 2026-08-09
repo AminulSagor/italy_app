@@ -216,6 +216,9 @@ class CoursesApiService {
       courseId: _fallbackString(sourceCourse['courseId'], sourceCourseId),
       chapterId: _stringValue(sourceCourse['chapterId']),
       title: _fallbackString(sourceCourse['title'], 'course_details'.tr),
+      description: _stringValue(
+        sourceCourse['description'] ?? course['description'],
+      ),
       progressLabel: '$percent%',
       isProEnabled: isProEnabled || courseIsFree,
       isFree: courseIsFree,

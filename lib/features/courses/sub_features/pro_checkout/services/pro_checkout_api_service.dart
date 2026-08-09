@@ -3,16 +3,21 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../../core/controllers/user_session_controller.dart';
 import '../../../../../core/services/api_client.dart';
 import '../models/pro_checkout_models.dart';
 import 'package:get/get.dart' hide Response;
 
 class ProCheckoutApiService {
-  ProCheckoutApiService({required ApiClient apiClient})
-    : _apiClient = apiClient;
+  ProCheckoutApiService({
+    required ApiClient apiClient,
+    required UserSessionController userSessionController,
+  }) : _apiClient = apiClient,
+        _userSessionController = userSessionController;
 
   static const Uuid _uuid = Uuid();
   final ApiClient _apiClient;
+  final UserSessionController _userSessionController;
 
   Future<ProOrderModel> fetchOrderSummary({
     required String courseId,
@@ -79,8 +84,8 @@ class ProCheckoutApiService {
         ),
         discountLabel: discountPercentage > 0
             ? 'discount_off'.trParams(<String, String>{
-                'discount': discountPercentage.toString(),
-              })
+          'discount': discountPercentage.toString(),
+        })
             : 'course_price'.tr,
       ),
       features: <ProFeatureModel>[
@@ -113,7 +118,7 @@ class ProCheckoutApiService {
       pricingNote: _stringValue(
         eur['pricingNote'],
         fallback:
-            'Google Play or App Store controls the final localized amount charged.',
+        'Google Play or App Store controls the final localized amount charged.',
       ),
     );
   }
@@ -158,7 +163,18 @@ class ProCheckoutApiService {
       );
     }
 
+    final String appUserId =
+        _userSessionController.user.value?.id.trim() ?? '';
+
+    if (appUserId.isEmpty) {
+      throw DioException(
+        requestOptions: response.requestOptions,
+        message: 'The current application user ID is unavailable.',
+      );
+    }
+
     return ProPendingGooglePlayPurchaseModel(
+      appUserId: appUserId,
       courseId: order.courseId,
       orderId: orderId,
       orderNumber: _stringValue(
@@ -213,6 +229,17 @@ class ProCheckoutApiService {
     );
   }
 
+
+  Future<bool> canAccessPendingOrder({
+    required ProPendingGooglePlayPurchaseModel pending,
+  }) async {
+    await _apiClient.dio.get(
+      '/course-commerce/orders/${pending.orderId}',
+    );
+
+    return true;
+  }
+
   Future<ProPurchaseResultModel?> recoverCompletedOrder({
     required ProPendingGooglePlayPurchaseModel pending,
     required String courseName,
@@ -233,10 +260,10 @@ class ProCheckoutApiService {
   }
 
   Future<Response<dynamic>> _fetchQuote(
-    String courseId,
-    String currency, {
-    String couponCode = '',
-  }) {
+      String courseId,
+      String currency, {
+        String couponCode = '',
+      }) {
     if (!Platform.isAndroid) {
       throw UnsupportedError('Google Play course purchases require Android.');
     }
@@ -266,7 +293,7 @@ class ProCheckoutApiService {
       statusLabel: 'Status: ${_titleCase(status)}',
       title: 'Course Unlocked!',
       description:
-          'You now have full access to $courseName and all $lessonCount lessons.',
+      'You now have full access to $courseName and all $lessonCount lessons.',
       buttonLabel: 'Start Learning Now',
     );
   }

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 import 'dart:io';
 
 import 'package:get/get.dart';
@@ -14,12 +14,11 @@ import '../models/shop_models.dart';
 
 class GooglePlayBillingService extends GetxService {
   GooglePlayBillingService({required StorageService storageService})
-      : _storageService = storageService;
+    : _storageService = storageService;
 
   static const String _pendingPurchaseKey =
       'package_store_pending_google_play_purchase';
-  static final RegExp _sha256Pattern =
-  RegExp(r'^[a-f0-9]{64}$');
+  static final RegExp _sha256Pattern = RegExp(r'^[a-f0-9]{64}$');
 
   final StorageService _storageService;
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
@@ -59,7 +58,7 @@ class GooglePlayBillingService extends GetxService {
       _onPurchaseUpdates,
       onError: (Object error, StackTrace stackTrace) {
         lastError.value = 'Google Play Billing purchase updates failed.';
-        dev.log(
+        AppLogger.log(
           lastError.value,
           name: 'GooglePlayBillingService',
           error: error,
@@ -76,7 +75,7 @@ class GooglePlayBillingService extends GetxService {
     } catch (error, stackTrace) {
       isAvailable.value = false;
       lastError.value = 'Could not connect to Google Play Billing.';
-      dev.log(
+      AppLogger.log(
         lastError.value,
         name: 'GooglePlayBillingService',
         error: error,
@@ -106,8 +105,8 @@ class GooglePlayBillingService extends GetxService {
       final Set<String> identifiers = activeProducts
           .map((StoreProviderProductModel item) => item.productId)
           .toSet();
-      final ProductDetailsResponse response =
-          await _inAppPurchase.queryProductDetails(identifiers);
+      final ProductDetailsResponse response = await _inAppPurchase
+          .queryProductDetails(identifiers);
 
       if (response.error != null) {
         throw StateError(response.error!.message);
@@ -137,7 +136,7 @@ class GooglePlayBillingService extends GetxService {
       }
     } catch (error, stackTrace) {
       lastError.value = 'Could not load Google Play products.';
-      dev.log(
+      AppLogger.log(
         lastError.value,
         name: 'GooglePlayBillingService',
         error: error,
@@ -187,16 +186,15 @@ class GooglePlayBillingService extends GetxService {
       return false;
     }
 
-    final String obfuscatedAccountId =
-    pendingPurchase.obfuscatedAccountId
+    final String obfuscatedAccountId = pendingPurchase.obfuscatedAccountId
         .trim()
         .toLowerCase();
 
     if (!_sha256Pattern.hasMatch(obfuscatedAccountId)) {
       lastError.value =
-      'The purchase could not be securely linked to your account.';
+          'The purchase could not be securely linked to your account.';
 
-      dev.log(
+      AppLogger.log(
         'Invalid Google Play obfuscated account ID.',
         name: 'GooglePlayBillingService',
       );
@@ -209,30 +207,27 @@ class GooglePlayBillingService extends GetxService {
       final String? offerToken = details is GooglePlayProductDetails
           ? details.offerToken
           : null;
-      final GooglePlayPurchaseParam purchaseParam =
-      GooglePlayPurchaseParam(
+      final GooglePlayPurchaseParam purchaseParam = GooglePlayPurchaseParam(
         productDetails: details,
         applicationUserName: obfuscatedAccountId,
-        offerToken: pendingPurchase.productType ==
-            StoreProviderProductType.subscription
+        offerToken:
+            pendingPurchase.productType == StoreProviderProductType.subscription
             ? offerToken
             : null,
       );
-      final bool launched = pendingPurchase.productType ==
-              StoreProviderProductType.consumable
+      final bool launched =
+          pendingPurchase.productType == StoreProviderProductType.consumable
           ? await _inAppPurchase.buyConsumable(
               purchaseParam: purchaseParam,
               autoConsume: false,
             )
-          : await _inAppPurchase.buyNonConsumable(
-              purchaseParam: purchaseParam,
-            );
+          : await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
       if (!launched) await clearPendingPurchase();
       return launched;
     } catch (error, stackTrace) {
       await clearPendingPurchase();
       lastError.value = 'Google Play could not start the purchase.';
-      dev.log(
+      AppLogger.log(
         lastError.value,
         name: 'GooglePlayBillingService',
         error: error,
@@ -252,8 +247,8 @@ class GooglePlayBillingService extends GetxService {
     try {
       final InAppPurchaseAndroidPlatformAddition addition = _inAppPurchase
           .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
-      final QueryPurchaseDetailsResponse response =
-          await addition.queryPastPurchases();
+      final QueryPurchaseDetailsResponse response = await addition
+          .queryPastPurchases();
       if (response.error != null) {
         throw StateError(response.error!.message);
       }
@@ -262,7 +257,7 @@ class GooglePlayBillingService extends GetxService {
       }
     } catch (error, stackTrace) {
       _pendingPurchaseQueryFailed = true;
-      dev.log(
+      AppLogger.log(
         'Could not recover the pending Google Play purchase.',
         name: 'GooglePlayBillingService',
         error: error,
@@ -273,9 +268,9 @@ class GooglePlayBillingService extends GetxService {
   }
 
   Future<void> finishVerifiedPurchase(
-      PurchaseDetails purchase,
-      StoreProviderProductType _,
-      ) async {
+    PurchaseDetails purchase,
+    StoreProviderProductType _,
+  ) async {
     /*
    * The secure backend already:
    *
@@ -289,9 +284,7 @@ class GooglePlayBillingService extends GetxService {
       return;
     }
 
-    await _inAppPurchase.completePurchase(
-      purchase,
-    );
+    await _inAppPurchase.completePurchase(purchase);
   }
 
   PendingGooglePlayPurchaseModel? loadPendingPurchase() {
@@ -304,7 +297,7 @@ class GooglePlayBillingService extends GetxService {
         Map<String, dynamic>.from(decoded),
       );
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Could not read the pending Google Play purchase.',
         name: 'GooglePlayBillingService',
         error: error,

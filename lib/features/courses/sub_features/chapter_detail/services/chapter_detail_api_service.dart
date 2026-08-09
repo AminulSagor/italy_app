@@ -1,8 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
-import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import '../../../../../core/services/api_client.dart';
 import '../models/chapter_detail_models.dart';
@@ -12,14 +9,6 @@ class ChapterDetailApiService {
     : _apiClient = apiClient;
 
   final ApiClient _apiClient;
-  final Dio _fileClient = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 20),
-      receiveTimeout: const Duration(seconds: 30),
-      headers: const <String, String>{'Accept': 'application/pdf'},
-    ),
-  );
-
   Future<ChapterDetailModel> fetchChapterDetail({
     required String lessonId,
     required String fallbackCourseId,
@@ -67,8 +56,29 @@ class ChapterDetailApiService {
       type: ChapterMediaType.audio,
     );
     final int vocabularyCount = _jsonList(lesson['vocabularyItems']).length;
+
     final bool hasVideo = videoFileId.isNotEmpty;
-    final bool canStartQuiz = !hasVideo || progress.videoWatchPercent >= 80;
+
+    final bool hasQuiz =
+        quiz != null && _boolValue(quiz!['hasQuiz'], fallback: false);
+
+    final bool unlockRequirementEnabled =
+        hasQuiz &&
+        _boolValue(quiz!['unlockRequirementEnabled'], fallback: false);
+
+    final int rawUnlockPercent = hasQuiz
+        ? _intValue(quiz!['unlockVideoWatchPercent'])
+        : 80;
+
+    final int unlockVideoWatchPercent = rawUnlockPercent > 0
+        ? rawUnlockPercent.clamp(1, 100).toInt()
+        : 80;
+
+    final bool canStartQuiz =
+        hasQuiz &&
+        (!unlockRequirementEnabled ||
+            !hasVideo ||
+            progress.videoWatchPercent >= unlockVideoWatchPercent);
 
     return ChapterDetailModel(
       id: _stringValue(lesson['id']),
@@ -129,12 +139,17 @@ class ChapterDetailApiService {
                   : ChapterQuizStatus.disabled,
               actionLabel: canStartQuiz
                   ? 'start_quiz'.tr
-                  : 'requires_80_video'.tr,
+                  : 'requires_video_percent'.trParams(<String, String>{
+                      'percent': unlockVideoWatchPercent.toString(),
+                    }),
               scoreLabel: '',
               xpLabel: '',
               timeLabel: '',
               quizId: _stringValue(quiz!['quizId']),
               totalQuestions: _intValue(quiz!['totalQuestions']),
+              unlockRequirementEnabled: unlockRequirementEnabled,
+
+              unlockVideoWatchPercent: unlockVideoWatchPercent,
             ),
       progress: progress,
     );
@@ -147,12 +162,8 @@ class ChapterDetailApiService {
       '/lessons/$lessonId/video-access',
     );
 
-    return ChapterVideoAccessModel.fromJson(
-      _responseMap(response),
-    );
+    return ChapterVideoAccessModel.fromJson(_responseMap(response));
   }
-
-
 
   Future<void> recordVideoProgress({
     required String courseId,
@@ -264,6 +275,7 @@ class ChapterDetailApiService {
       title: '',
       mimeType: '',
       durationSeconds: 0,
+      pageCount: 0,
       type: type,
     );
   }
@@ -293,40 +305,11 @@ class ChapterDetailApiService {
         title: _stringValue(file['originalName']),
         mimeType: _stringValue(file['mimeType']),
         durationSeconds: _intValue(data['durationSeconds']),
+        pageCount: _intValue(data['pageCount'] ?? file['pageCount']),
         type: type,
       );
     } on DioException {
       return null;
-    }
-  }
-
-  Future<int> fetchPdfPageCount({required String pdfUrl}) async {
-    if (pdfUrl.isEmpty) {
-      return 0;
-    }
-
-    try {
-      final Response<List<int>> response = await _fileClient.get<List<int>>(
-        pdfUrl,
-        options: Options(responseType: ResponseType.bytes),
-      );
-      final List<int> bytes = response.data ?? <int>[];
-      if (bytes.isEmpty) {
-        return 0;
-      }
-
-      final PdfDocument document = PdfDocument(
-        inputBytes: Uint8List.fromList(bytes),
-      );
-      try {
-        return document.pages.count;
-      } finally {
-        document.dispose();
-      }
-    } on DioException {
-      return 0;
-    } catch (_) {
-      return 0;
     }
   }
 

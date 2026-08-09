@@ -65,83 +65,159 @@ class VocabularyView extends GetView<VocabularyController> {
                   onBackTap: () => Get.back<void>(),
                 );
               }
-      
+
               return Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: 24.w,
-                  vertical: 26.h,
+                  vertical: 12.h,
                 ),
                 child: Column(
                   crossAxisAlignment:
                   CrossAxisAlignment.start,
                   children: <Widget>[
-                    SingleChildScrollView(
-                      child: Column(
-                        children: <Widget>[
-                          _VocabularyHeader(
-                            title: session.title,
-                            cardLabel:
-                            'vocabulary_card_progress'
-                                .trParams(
-                              <String, String>{
-                                'current': controller
-                                    .currentCardNumber
-                                    .toString(),
-                                'total': controller
-                                    .totalCards
-                                    .toString(),
-                              },
-                            ),
-                            onBackTap:
-                            controller
-                                .showExitConfirmation,
-                          ),
-                          SizedBox(height: 26.h),
-                          _VocabularyProgressBar(
-                            value:
-                            controller.progressValue,
-                          ),
-                          SizedBox(height: 30.h),
-                          _VocabularyFlashCard(
-                            card: card,
-                            isRevealed:
-                            controller
-                                .isRevealed
-                                .value,
-                            isSpeaking:
-                            controller
-                                .isSpeaking
-                                .value,
-                            onTap: controller.flipCard,
-                            onAudioTap:
-                            controller
-                                .speakCurrentWord,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    _VocabularyStats(
-                      streakDays:
-                      controller.currentStreakDays,
-                      level: session.level,
-                    ),
-                    SizedBox(height: 30.h),
-                    if (controller.isRevealed.value)
-                      _VocabularyRevealedActions(
-                        isKnownLoading: controller.isKnownSubmitting.value,
-                        onStudyAgainTap: controller.studyAgain,
-                        onKnownTap: controller.markKnown,
+                    _VocabularyHeader(
+                      title: session.title,
+                      cardLabel:
+                      controller.displayMode.value ==
+                          VocabularyDisplayMode.list
+                          ? 'vocabulary_learned_progress'
+                          .trParams(
+                        <String, String>{
+                          'learned': controller
+                              .learnedCount
+                              .toString(),
+                          'total': controller
+                              .totalCards
+                              .toString(),
+                        },
                       )
-                    else
-                      CustomButton.primary(
-                        onPressed:
-                        controller.revealAnswer,
-                        text: 'reveal_answer'.tr,
-                        icon:
-                        Icons.visibility_outlined,
+                          : 'vocabulary_card_progress'
+                          .trParams(
+                        <String, String>{
+                          'current': controller
+                              .currentCardNumber
+                              .toString(),
+                          'total': controller
+                              .totalCards
+                              .toString(),
+                        },
                       ),
-                    SizedBox(height: 20.h),
+                      onBackTap:
+                      controller.showExitConfirmation,
+                    ),
+
+                    SizedBox(height: 8.h),
+
+                    _VocabularyProgressBar(
+                      value:
+                      controller.displayMode.value ==
+                          VocabularyDisplayMode.list
+                          ? controller
+                          .learnedProgressValue
+                          : controller.progressValue,
+                    ),
+
+                    SizedBox(height: 8.h),
+
+                    _VocabularyModeSwitcher(
+                      selectedMode:
+                      controller.displayMode.value,
+                      onChanged:
+                      controller.setDisplayMode,
+                    ),
+
+                    SizedBox(height: 8.h),
+
+                    if (controller.displayMode.value ==
+                        VocabularyDisplayMode.list)
+                      Expanded(
+                        child: _VocabularyListMode(
+                          cards:
+                          controller.filteredCards,
+                          showMeanings:
+                          controller
+                              .showMeanings.value,
+                          isPlayingAll:
+                          controller
+                              .isPlayingAll.value,
+                          onSearchChanged:
+                          controller.setSearchQuery,
+                          onShowMeaningsChanged:
+                          controller
+                              .setShowMeanings,
+                          onAudioTap:
+                          controller.speakCard,
+                          onPlayAllTap:
+                          controller
+                              .playAllVisibleWords,
+                          onPracticeTap: () {
+                            controller.setDisplayMode(
+                              VocabularyDisplayMode
+                                  .flashcard,
+                            );
+                          },
+                        ),
+                      )
+                    else ...<Widget>[
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: <Widget>[
+                              _VocabularyFlashCard(
+                                card: card,
+                                isRevealed:
+                                controller
+                                    .isRevealed.value,
+                                isSpeaking:
+                                controller
+                                    .isSpeaking.value,
+                                onTap:
+                                controller.flipCard,
+                                onAudioTap:
+                                controller
+                                    .speakCurrentWord,
+                              ),
+
+                              SizedBox(height: 30.h),
+
+                              _VocabularyStats(
+                                streakDays:
+                                controller
+                                    .currentStreakDays,
+                                level: session.level,
+                              ),
+
+                              SizedBox(height: 30.h),
+
+                              if (controller
+                                  .isRevealed.value)
+                                _VocabularyRevealedActions(
+                                  isKnownLoading:
+                                  controller
+                                      .isKnownSubmitting
+                                      .value,
+                                  onStudyAgainTap:
+                                  controller.studyAgain,
+                                  onKnownTap:
+                                  controller.markKnown,
+                                )
+                              else
+                                CustomButton.primary(
+                                  onPressed:
+                                  controller
+                                      .revealAnswer,
+                                  text:
+                                  'reveal_answer'.tr,
+                                  icon: Icons
+                                      .visibility_outlined,
+                                ),
+
+                              SizedBox(height: 20.h),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               );
@@ -231,6 +307,433 @@ class _VocabularyProgressBar
         color: AppColors.primaryGreen,
         backgroundColor:
         AppColors.vocabularyProgressTrack,
+      ),
+    );
+  }
+}
+
+class _VocabularyModeSwitcher
+    extends StatelessWidget {
+  final VocabularyDisplayMode selectedMode;
+  final ValueChanged<VocabularyDisplayMode>
+  onChanged;
+
+  const _VocabularyModeSwitcher({
+    required this.selectedMode,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 52.h,
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius:
+        BorderRadius.circular(16.r),
+        border: Border.all(
+          color:
+          AppColors.vocabularyProgressTrack,
+        ),
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: _VocabularyModeButton(
+              label:
+              'vocabulary_list_mode'.tr,
+              icon:
+              Icons.list_alt_rounded,
+              isSelected:
+              selectedMode ==
+                  VocabularyDisplayMode
+                      .list,
+              onTap: () {
+                onChanged(
+                  VocabularyDisplayMode
+                      .list,
+                );
+              },
+            ),
+          ),
+          Expanded(
+            child: _VocabularyModeButton(
+              label:
+              'vocabulary_flashcard_mode'
+                  .tr,
+              icon: Icons.style_outlined,
+              isSelected:
+              selectedMode ==
+                  VocabularyDisplayMode
+                      .flashcard,
+              onTap: () {
+                onChanged(
+                  VocabularyDisplayMode
+                      .flashcard,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VocabularyModeButton
+    extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _VocabularyModeButton({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius:
+      BorderRadius.circular(12.r),
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryGreen
+              : Colors.transparent,
+          borderRadius:
+          BorderRadius.circular(12.r),
+        ),
+        child: Row(
+          mainAxisAlignment:
+          MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              icon,
+              size: 20.sp,
+              color: isSelected
+                  ? AppColors.white
+                  : AppColors.bodyText,
+            ),
+            SizedBox(width: 7.w),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight:
+                FontWeight.w700,
+                color: isSelected
+                    ? AppColors.white
+                    : AppColors.bodyText,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VocabularyListMode
+    extends StatelessWidget {
+  final List<VocabularyCardModel> cards;
+  final bool showMeanings;
+  final bool isPlayingAll;
+  final ValueChanged<String> onSearchChanged;
+  final ValueChanged<bool>
+  onShowMeaningsChanged;
+  final ValueChanged<VocabularyCardModel>
+  onAudioTap;
+  final VoidCallback onPlayAllTap;
+  final VoidCallback onPracticeTap;
+
+  const _VocabularyListMode({
+    required this.cards,
+    required this.showMeanings,
+    required this.isPlayingAll,
+    required this.onSearchChanged,
+    required this.onShowMeaningsChanged,
+    required this.onAudioTap,
+    required this.onPlayAllTap,
+    required this.onPracticeTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+
+        TextField(
+          onChanged: onSearchChanged,
+          decoration: InputDecoration(
+            hintText: 'vocabulary_search'.tr,
+            prefixIcon: const Icon(
+              Icons.search_rounded,
+            ),
+            filled: true,
+            fillColor: AppColors.white,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 14.w,
+              vertical: 12.h,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                14.r,
+              ),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+
+        SizedBox(height: 8.h),
+
+        Row(
+          mainAxisAlignment:
+          MainAxisAlignment.spaceBetween,
+          crossAxisAlignment:
+          CrossAxisAlignment.center,
+          children: <Widget>[
+            TextButton.icon(
+              onPressed: onPlayAllTap,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize:
+                MaterialTapTargetSize.shrinkWrap,
+              ),
+              icon: Icon(
+                isPlayingAll
+                    ? Icons.stop_circle_outlined
+                    : Icons.play_circle_outline,
+                color: AppColors.primaryGreen,
+              ),
+              label: Text(
+                isPlayingAll
+                    ? 'vocabulary_stop_audio'.tr
+                    : 'vocabulary_listen_all'.tr,
+              ),
+            ),
+
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  'vocabulary_show_meaning'.tr,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.bodyText,
+                  ),
+                ),
+
+                SizedBox(width: 2.w),
+
+                Transform.scale(
+                  scale: 0.72,
+                  child: Switch(
+                    value: showMeanings,
+                    activeThumbColor:
+                    AppColors.primaryGreen,
+                    materialTapTargetSize:
+                    MaterialTapTargetSize
+                        .shrinkWrap,
+                    onChanged:
+                    onShowMeaningsChanged,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+
+
+        SizedBox(height: 4.h),
+
+        Expanded(
+          child: cards.isEmpty
+              ? Center(
+            child: Text(
+              'vocabulary_no_search_result'
+                  .tr,
+            ),
+          )
+              : ListView.separated(
+            padding: EdgeInsets.only(
+              bottom: 12.h,
+            ),
+            itemCount: cards.length,
+            separatorBuilder:
+                (_, __) =>
+                SizedBox(
+                  height: 10.h,
+                ),
+            itemBuilder: (
+                BuildContext context,
+                int index,
+                ) {
+              final VocabularyCardModel
+              card =
+              cards[index];
+
+              return _VocabularyListCard(
+                card: card,
+                showMeaning:
+                showMeanings,
+                onAudioTap: () {
+                  onAudioTap(card);
+                },
+              );
+            },
+          ),
+        ),
+
+        SizedBox(height: 10.h),
+
+        CustomButton.primary(
+          onPressed: onPracticeTap,
+          text:
+          'vocabulary_practice_words'
+              .trParams(
+            <String, String>{
+              'count':
+              cards.length.toString(),
+            },
+          ),
+          icon: Icons.school_outlined,
+        ),
+      ],
+    );
+  }
+}
+
+class _VocabularyListCard
+    extends StatelessWidget {
+  final VocabularyCardModel card;
+  final bool showMeaning;
+  final VoidCallback onAudioTap;
+
+  const _VocabularyListCard({
+    required this.card,
+    required this.showMeaning,
+    required this.onAudioTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 16.w,
+        vertical: 14.h,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius:
+        BorderRadius.circular(16.r),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: AppColors
+                .vocabularyCardShadow,
+            blurRadius: 8.r,
+            offset: Offset(0, 3.h),
+          ),
+        ],
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  card.word,
+                  style: TextStyle(
+                    fontSize: 21.sp,
+                    fontWeight:
+                    FontWeight.w700,
+                    color: AppColors
+                        .homePrimaryText,
+                  ),
+                ),
+
+                if (showMeaning &&
+                    card.meaning
+                        .isNotEmpty) ...[
+                  SizedBox(height: 4.h),
+                  Text(
+                    card.meaning,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight:
+                      FontWeight.w600,
+                      color: AppColors
+                          .primaryGreen,
+                    ),
+                  ),
+                ],
+
+                if (card.example
+                    .isNotEmpty) ...[
+                  SizedBox(height: 5.h),
+                  Text(
+                    card.example,
+                    maxLines: 2,
+                    overflow:
+                    TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color:
+                      AppColors.bodyText,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          SizedBox(width: 8.w),
+
+          GestureDetector(
+            onTap: onAudioTap,
+            child: Container(
+              width: 46.w,
+              height: 46.w,
+              alignment:
+              Alignment.center,
+              decoration:
+              const BoxDecoration(
+                color:
+                AppColors.homePaleGreen,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.volume_up_rounded,
+                color:
+                AppColors.primaryGreen,
+                size: 24.sp,
+              ),
+            ),
+          ),
+
+          SizedBox(width: 14.w),
+
+          Icon(
+            card.isLearned
+                ? Icons.check_circle_rounded
+                : Icons
+                .radio_button_unchecked_rounded,
+            size: 28.sp,
+            color: card.isLearned
+                ? AppColors.primaryGreen
+                : AppColors.bodyText,
+          ),
+        ],
       ),
     );
   }

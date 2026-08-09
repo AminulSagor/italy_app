@@ -61,6 +61,7 @@ class _AiTutorWritingHelpViewState extends State<AiTutorWritingHelpView> {
                   bottom: 0,
                   child: NativeBottomInset(
                     additionalBottom: 22.h,
+                    collapseWhenKeyboardVisible: true,
                     child: Obx(() {
                       final bool sending = _controller.isSendingMessage.value;
                       return IgnorePointer(

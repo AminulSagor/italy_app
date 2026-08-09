@@ -65,8 +65,8 @@ class ApiClient {
     if (kDebugMode) {
       _dio.interceptors.add(
         PrettyDioLogger(
-          requestHeader: false,
-          requestBody: true,
+          requestHeader: true,
+          requestBody: false,
           responseHeader: false,
           responseBody: true,
           error: true,

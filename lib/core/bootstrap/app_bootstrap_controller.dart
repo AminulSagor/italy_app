@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -32,7 +32,11 @@ class AppBootstrapController extends GetxController {
       await dotenv.load(fileName: '.env');
     } catch (error) {
       if (kDebugMode) {
-        dev.log('Unable to load .env file', error: error, name: 'AppBootstrap');
+        AppLogger.log(
+          'Unable to load .env file',
+          error: error,
+          name: 'AppBootstrap',
+        );
       }
     }
 
@@ -119,7 +123,11 @@ class AppBootstrapController extends GetxController {
      */
     if (!Get.isRegistered<ProCheckoutApiService>()) {
       Get.put<ProCheckoutApiService>(
-        ProCheckoutApiService(apiClient: Get.find<ApiClient>()),
+        ProCheckoutApiService(
+          apiClient: Get.find<ApiClient>(),
+          userSessionController:
+          Get.find<UserSessionController>(),
+        ),
         permanent: true,
       );
     }
@@ -128,6 +136,8 @@ class AppBootstrapController extends GetxController {
       Get.put<CourseGooglePlayBillingService>(
         CourseGooglePlayBillingService(
           storageService: Get.find<StorageService>(),
+          userSessionController:
+          Get.find<UserSessionController>(),
         ),
         permanent: true,
       );
@@ -198,7 +208,7 @@ class AppBootstrapController extends GetxController {
       }
     } catch (error, stackTrace) {
       if (kDebugMode) {
-        dev.log(
+        AppLogger.log(
           'Could not attach the presence listener',
           error: error,
           stackTrace: stackTrace,
@@ -268,7 +278,7 @@ class AppBootstrapController extends GetxController {
         hadStoredToken: hasStoredToken,
       );
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Bootstrap failed',
         error: error,
         stackTrace: stackTrace,
@@ -326,7 +336,7 @@ class AppBootstrapController extends GetxController {
        * destroy a locally valid session. Protected API requests and ApiClient
        * continue to enforce 401 and account-restriction handling.
        */
-      dev.log(
+      AppLogger.log(
         'Authenticated startup validation failed',
         error: error,
         stackTrace: stackTrace,
@@ -435,7 +445,7 @@ class AppBootstrapController extends GetxController {
           }
         }
       } catch (error, stackTrace) {
-        dev.log(
+        AppLogger.log(
           'Could not resolve presence device ID',
           error: error,
           stackTrace: stackTrace,
@@ -445,7 +455,7 @@ class AppBootstrapController extends GetxController {
 
       await socketService.connect(deviceId: deviceId);
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Chat socket connection during bootstrap failed',
         error: error,
         stackTrace: stackTrace,
@@ -462,7 +472,7 @@ class AppBootstrapController extends GetxController {
 
       await Get.find<LearningActivityTrackerService>().startSession();
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Learning activity startup failed',
         error: error,
         stackTrace: stackTrace,
@@ -484,7 +494,7 @@ class AppBootstrapController extends GetxController {
        * backend is temporarily unavailable. The pending purchase remains
        * stored and can be retried on the next app resume.
        */
-      dev.log(
+      AppLogger.log(
         'Google Play course purchase recovery failed',
         error: error,
         stackTrace: stackTrace,
@@ -501,7 +511,7 @@ class AppBootstrapController extends GetxController {
 
       await Get.find<DevicePushTokenService>().registerCurrentDevice();
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'FCM token registration during bootstrap failed',
         error: error,
         stackTrace: stackTrace,

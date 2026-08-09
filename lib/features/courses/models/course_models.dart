@@ -247,6 +247,7 @@ class SpecializedLearningModel {
 class CourseDetailModel {
   final String id;
   final String title;
+  final String description;
   final String courseId;
   final String chapterId;
   final String progressLabel;
@@ -260,6 +261,7 @@ class CourseDetailModel {
   const CourseDetailModel({
     required this.id,
     required this.title,
+    required this.description,
     required this.courseId,
     required this.chapterId,
     required this.progressLabel,
@@ -277,6 +279,7 @@ class CourseDetailModel {
       courseId: json['courseId']?.toString() ?? '',
       chapterId: json['chapterId']?.toString() ?? '',
       title: json['title'] as String,
+      description: json['description']?.toString() ?? '',
       progressLabel: json['progressLabel'] as String,
       isProEnabled: json['isProEnabled'] as bool,
       isFree: json['isFree'] as bool? ?? false,
@@ -300,6 +303,7 @@ class CourseDetailModel {
       'courseId': courseId,
       'chapterId': chapterId,
       'title': title,
+      'description': description,
       'progressLabel': progressLabel,
       'isProEnabled': isProEnabled,
       'isFree': isFree,
@@ -317,6 +321,7 @@ class CourseDetailModel {
     String? courseId,
     String? chapterId,
     String? title,
+    String? description,
     String? progressLabel,
     bool? isProEnabled,
     bool? isFree,
@@ -330,6 +335,7 @@ class CourseDetailModel {
       courseId: courseId ?? this.courseId,
       chapterId: chapterId ?? this.chapterId,
       title: title ?? this.title,
+      description: description ?? this.description,
       progressLabel: progressLabel ?? this.progressLabel,
       isProEnabled: isProEnabled ?? this.isProEnabled,
       isFree: isFree ?? this.isFree,

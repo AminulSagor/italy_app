@@ -37,8 +37,15 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
   VideoPlayerController? _videoController;
   Future<void>? _initializationFuture;
   late final ValueNotifier<bool> _hasWatchedFullyNotifier;
+  final ValueNotifier<VideoPlayerController?> _controllerNotifier =
+      ValueNotifier<VideoPlayerController?>(null);
+  final ValueNotifier<String> _selectedQualityNotifier = ValueNotifier<String>(
+    'Auto',
+  );
 
+  ChapterVideoAccessModel? _videoAccess;
   bool _isInitializing = false;
+  bool _isChangingQuality = false;
   String? _errorMessage;
   int _lastPlaybackCommand = 0;
   bool _lastReportedPlaying = false;
@@ -63,14 +70,16 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
   void didUpdateWidget(covariant ChapterVideoCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.detail.video?.fileId !=
-        widget.detail.video?.fileId) {
+    if (oldWidget.detail.video?.fileId != widget.detail.video?.fileId) {
       _lastReportedPercent = widget.detail.progress.videoWatchPercent;
       _hasWatchedFullyNotifier.value =
           widget.detail.progress.videoWatchPercent >= 100;
       _disposePlayer();
+      _videoAccess = null;
+      _selectedQualityNotifier.value = 'Auto';
       _initializationFuture = null;
       _isInitializing = false;
+      _isChangingQuality = false;
       _errorMessage = null;
     }
 
@@ -95,6 +104,8 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
   @override
   void dispose() {
     _disposePlayer();
+    _controllerNotifier.dispose();
+    _selectedQualityNotifier.dispose();
     _hasWatchedFullyNotifier.dispose();
     super.dispose();
   }
@@ -139,16 +150,12 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
         throw StateError(_videoAccessMessage(access));
       }
 
-      final Uri streamUri = Uri.parse(access.streamUrl);
+      _videoAccess = access;
+      _selectedQualityNotifier.value = 'Auto';
 
-      if (!streamUri.hasScheme || streamUri.host.isEmpty) {
-        throw StateError('Invalid HLS stream URL.');
-      }
-
-      controller = createAdaptiveNetworkVideoController(
-        uri: streamUri,
-        forceHls: true,
-        httpHeaders: access.videoHttpHeaders,
+      controller = _createVideoController(
+        streamUrl: access.streamUrl,
+        access: access,
       );
 
       await controller.initialize();
@@ -160,6 +167,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       }
 
       _videoController = controller;
+      _controllerNotifier.value = controller;
       controller.addListener(_onVideoTick);
 
       setState(() {
@@ -180,9 +188,24 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     }
   }
 
-  String _videoAccessMessage(
-      ChapterVideoAccessModel? access,
-      ) {
+  VideoPlayerController _createVideoController({
+    required String streamUrl,
+    required ChapterVideoAccessModel access,
+  }) {
+    final Uri streamUri = Uri.parse(streamUrl);
+
+    if (!streamUri.hasScheme || streamUri.host.isEmpty) {
+      throw StateError('Invalid HLS stream URL.');
+    }
+
+    return createAdaptiveNetworkVideoController(
+      uri: streamUri,
+      forceHls: true,
+      httpHeaders: access.videoHttpHeaders,
+    );
+  }
+
+  String _videoAccessMessage(ChapterVideoAccessModel? access) {
     switch (access?.status) {
       case ChapterVideoTranscodeStatus.pending:
         return 'Video processing has not started yet. Tap to check again.';
@@ -203,8 +226,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
           return 'The HLS stream URL is unavailable. Tap to retry.';
         }
 
-        if (access.requiresSignedCookies &&
-            !access.hasCloudFrontCookies) {
+        if (access.requiresSignedCookies && !access.hasCloudFrontCookies) {
           return 'CloudFront video access could not be prepared. Tap to retry.';
         }
 
@@ -240,6 +262,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     final VideoPlayerController? controller = _videoController;
     if (controller == null) return;
 
+    _controllerNotifier.value = null;
     controller.removeListener(_onVideoTick);
     controller.dispose();
     _videoController = null;
@@ -320,12 +343,124 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     _reportPlaybackState(true);
   }
 
+  Future<void> _changeQuality(ChapterVideoQualityOption? quality) async {
+    if (_isChangingQuality) {
+      return;
+    }
+
+    final ChapterVideoAccessModel? access = _videoAccess;
+    final VideoPlayerController? oldController = _videoController;
+
+    if (access == null ||
+        oldController == null ||
+        !oldController.value.isInitialized) {
+      return;
+    }
+
+    final String oldLabel = _selectedQualityNotifier.value;
+    final String nextLabel = quality?.label ?? 'Auto';
+    final String nextStreamUrl = quality?.streamUrl ?? access.streamUrl;
+
+    if (nextLabel == oldLabel || nextStreamUrl.trim().isEmpty) {
+      return;
+    }
+
+    _isChangingQuality = true;
+    VideoPlayerController? pendingController;
+
+    final VideoPlayerValue oldValue = oldController.value;
+    final Duration oldPosition = oldValue.position;
+    final bool wasPlaying = oldValue.isPlaying;
+    final double playbackSpeed = oldValue.playbackSpeed;
+
+    try {
+      pendingController = _createVideoController(
+        streamUrl: nextStreamUrl,
+        access: access,
+      );
+
+      await pendingController.initialize();
+
+      final Duration newDuration = pendingController.value.duration;
+      final Duration targetPosition =
+          newDuration.inMilliseconds > 0 && oldPosition > newDuration
+          ? newDuration
+          : oldPosition;
+
+      if (targetPosition > Duration.zero) {
+        await pendingController.seekTo(targetPosition);
+      }
+
+      await pendingController.setPlaybackSpeed(playbackSpeed);
+    } catch (_) {
+      await pendingController?.dispose();
+      _showQualityChangeError();
+      _isChangingQuality = false;
+      return;
+    }
+
+    final VideoPlayerController newController = pendingController!;
+
+    if (!mounted) {
+      await newController.dispose();
+      _isChangingQuality = false;
+      return;
+    }
+
+    oldController.removeListener(_onVideoTick);
+    newController.addListener(_onVideoTick);
+
+    _videoController = newController;
+    _controllerNotifier.value = newController;
+    _selectedQualityNotifier.value = nextLabel;
+
+    try {
+      if (wasPlaying) {
+        await oldController.pause();
+        await newController.play();
+      }
+    } catch (_) {
+      newController.removeListener(_onVideoTick);
+
+      _videoController = oldController;
+      _controllerNotifier.value = oldController;
+      _selectedQualityNotifier.value = oldLabel;
+      oldController.addListener(_onVideoTick);
+
+      await newController.dispose();
+
+      if (wasPlaying) {
+        await oldController.play();
+      }
+
+      _reportPlaybackState(oldController.value.isPlaying);
+      _showQualityChangeError();
+      _isChangingQuality = false;
+      return;
+    }
+
+    try {
+      await oldController.dispose();
+      _reportPlaybackState(newController.value.isPlaying);
+    } finally {
+      _isChangingQuality = false;
+    }
+  }
+
+  void _showQualityChangeError() {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Unable to change video quality.')),
+    );
+  }
+
   Future<void> _openFullscreen() async {
     final VideoPlayerController? controller = _videoController;
 
-    if (controller == null ||
-        !controller.value.isInitialized ||
-        !mounted) {
+    if (controller == null || !controller.value.isInitialized || !mounted) {
       return;
     }
 
@@ -333,14 +468,16 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       MaterialPageRoute<void>(
         builder: (_) => ChapterVideoFullscreenView(
           controller: controller,
-          hasWatchedFullyListenable:
-          _hasWatchedFullyNotifier,
-          progressLabel:
-          widget.detail.videoProgressLabel,
-          fallbackPositionLabel:
-          widget.detail.watchedTimeLabel,
-          fallbackDurationLabel:
-          widget.detail.totalTimeLabel,
+          controllerListenable: _controllerNotifier,
+          hasWatchedFullyListenable: _hasWatchedFullyNotifier,
+          progressLabel: widget.detail.videoProgressLabel,
+          fallbackPositionLabel: widget.detail.watchedTimeLabel,
+          fallbackDurationLabel: widget.detail.totalTimeLabel,
+          showSettings: true,
+          qualityOptions:
+              _videoAccess?.qualities ?? const <ChapterVideoQualityOption>[],
+          selectedQualityListenable: _selectedQualityNotifier,
+          onQualityChanged: _changeQuality,
         ),
       ),
     );
@@ -357,37 +494,42 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
 
   @override
   Widget build(BuildContext context) {
-    final VideoPlayerController? controller = _videoController;
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: ColoredBox(
+        color: Colors.black,
+        child: ValueListenableBuilder<VideoPlayerController?>(
+          valueListenable: _controllerNotifier,
+          builder:
+              (
+                BuildContext context,
+                VideoPlayerController? controller,
+                Widget? child,
+              ) {
+                if (controller == null || !controller.value.isInitialized) {
+                  return _VideoPlaceholder(
+                    isLoading: _isInitializing,
+                    errorMessage: _errorMessage,
+                    onPlayTap: _play,
+                  );
+                }
 
-    return Container(
-      height: kChapterVideoCardHeight.h,
-      decoration: BoxDecoration(
-        color: AppColors.chapterVideoDark,
-        borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AppColors.homeNeutralShadow,
-            blurRadius: 24.r,
-            offset: Offset(0, 16.h),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
-        child: controller != null && controller.value.isInitialized
-            ? ChapterVideoPlayerSurface(
-                controller: controller,
-                hasWatchedFullyListenable: _hasWatchedFullyNotifier,
-                progressLabel: widget.detail.videoProgressLabel,
-                fallbackPositionLabel: widget.detail.watchedTimeLabel,
-                fallbackDurationLabel: widget.detail.totalTimeLabel,
-                onFullscreenTap: _openFullscreen,
-              )
-            : _VideoPlaceholder(
-                isLoading: _isInitializing,
-                errorMessage: _errorMessage,
-                onPlayTap: _play,
-              ),
+                return ChapterVideoPlayerSurface(
+                  controller: controller,
+                  hasWatchedFullyListenable: _hasWatchedFullyNotifier,
+                  progressLabel: widget.detail.videoProgressLabel,
+                  fallbackPositionLabel: widget.detail.watchedTimeLabel,
+                  fallbackDurationLabel: widget.detail.totalTimeLabel,
+                  showSettings: true,
+                  qualityOptions:
+                      _videoAccess?.qualities ??
+                      const <ChapterVideoQualityOption>[],
+                  selectedQualityListenable: _selectedQualityNotifier,
+                  onQualityChanged: _changeQuality,
+                  onFullscreenTap: _openFullscreen,
+                );
+              },
+        ),
       ),
     );
   }

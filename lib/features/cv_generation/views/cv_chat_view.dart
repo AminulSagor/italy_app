@@ -18,10 +18,7 @@ import '../widgets/cv_thinking_bubble.dart';
 import '../widgets/cv_validation_panel.dart';
 
 class CvChatView extends GetView<CvChatController> {
-  const CvChatView({
-    required this.controllerTag,
-    super.key,
-  });
+  const CvChatView({required this.controllerTag, super.key});
 
   final String controllerTag;
 
@@ -39,150 +36,119 @@ class CvChatView extends GetView<CvChatController> {
       body: SafeArea(
         top: false,
         bottom: false,
-        child: Obx(
-              () {
-                final CvAssistantSessionModel session =
-                    controller.session.value;
+        child: Obx(() {
+          final CvAssistantSessionModel session = controller.session.value;
 
-                final bool hasBottomCards =
-                    controller.hasPendingSuggestion ||
-                        controller.hasUnresolvedPhotoDecision ||
-                        controller.isValidationPanelVisible.value;
+          final bool keyboardVisible =
+              MediaQuery.viewInsetsOf(context).bottom > 0;
 
-                return Column(
-              children: <Widget>[
-                if (controller.selectedTemplate != null)
-                  CvSelectedTemplateBanner(
-                    template:
-                    controller.selectedTemplate!,
-                  ),
+          final bool hasBottomCards =
+              controller.hasPendingSuggestion ||
+                  controller.hasUnresolvedPhotoDecision ||
+                  controller.isValidationPanelVisible.value;
 
-                if (session.isEditSession)
-                  _EditModeBanner(
-                    editMode: session.editMode!,
-                  )
-                else
-                  _ConversationModeSelector(
-                    selectedMode:
-                    session.conversationMode,
-                    isLoading:
-                    controller.isSwitchingMode.value,
-                    onSelected:
-                    controller.switchConversationMode,
-                  ),
-
-                _BackendProgressIndicator(
-                  progress: session.progress,
-                  status: session.status,
+          return Column(
+            children: <Widget>[
+              if (controller.selectedTemplate != null)
+                CvSelectedTemplateBanner(
+                  template: controller.selectedTemplate!,
                 ),
 
-                Expanded(
-                  child: _buildConversation(),
+              if (session.isEditSession)
+                _EditModeBanner(editMode: session.editMode!)
+              else
+                _ConversationModeSelector(
+                  selectedMode: session.conversationMode,
+                  isLoading: controller.isSwitchingMode.value,
+                  onSelected: controller.switchConversationMode,
                 ),
 
-// Hide the large cards while the keyboard is open.
-// This prevents the main Column from overflowing.
-                if (hasBottomCards)
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight:
-                        MediaQuery.sizeOf(context).height * 0.38,
-                      ),
-                      child: SingleChildScrollView(
-                        keyboardDismissBehavior:
+              _BackendProgressIndicator(
+                progress: session.progress,
+                status: session.status,
+              ),
+
+              Expanded(child: _buildConversation()),
+
+              // Hide the large cards while the keyboard is open.
+              // This prevents the main Column from overflowing.
+              if (hasBottomCards && !keyboardVisible)
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.sizeOf(context).height * 0.38,
+                  ),
+                  child: SingleChildScrollView(
+                    keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-
-
-                            if (controller.hasUnresolvedPhotoDecision)
-                              CvPhotoDecisionCard(
-                                isBusy:
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        if (controller.hasUnresolvedPhotoDecision)
+                          CvPhotoDecisionCard(
+                            isBusy:
                                 controller.isSending.value ||
-                                    controller.isUploading.value,
-                                onUploadPhoto:
-                                controller.pickProfilePhoto,
-                                onContinueWithoutPhoto:
+                                controller.isUploading.value,
+                            onUploadPhoto: controller.pickProfilePhoto,
+                            onContinueWithoutPhoto:
                                 controller.continueWithoutPhoto,
-                              ),
+                          ),
 
-                            if (controller
-                                .isValidationPanelVisible.value)
-                              CvValidationPanel(
-                                generationBlockers:
-                                session.generationBlockers,
-                                missingRequiredFields:
+                        if (controller.isValidationPanelVisible.value)
+                          CvValidationPanel(
+                            generationBlockers: session.generationBlockers,
+                            missingRequiredFields:
                                 session.missingRequiredFields,
-                                missingTemplateSections:
+                            missingTemplateSections:
                                 session.missingTemplateSections,
-                                unresolvedOptionalSections:
+                            unresolvedOptionalSections:
                                 session.unresolvedOptionalSections,
-                                pendingSuggestionCount:
+                            pendingSuggestionCount:
                                 session.pendingSuggestions.length,
-                                photoDecision:
-                                session.photoDecision,
-                                qualityIssues:
-                                session.qualityIssues,
-                                onClose:
-                                controller.hideGenerationBlockers,
-                              ),
-
-
-                          ],
-                        ),
-                      ),
+                            photoDecision: session.photoDecision,
+                            qualityIssues: session.qualityIssues,
+                            onClose: controller.hideGenerationBlockers,
+                          ),
+                      ],
                     ),
-
-                CvChatActionBar(
-                  isGenerating:
-                  controller.isGenerating.value,
-                  isBusy:
-                  controller.isBusy,
-                  status:
-                  session.status,
-                  backendCanGenerate:
-                  session.canGenerate,
-                  validationComplete:
-                  session.validationComplete,
-                  qualityCheckPassed:
-                  session.qualityCheckPassed,
-                  hasCurrentQuestion:
-                  session.currentQuestion != null,
-                  hasGenerationBlockers:
-                  session.generationBlockers.isNotEmpty,
-                  onGenerate:
-                  controller.generateNow,
-                ),
-
-                NativeBottomInset(
-                  child: CvChatInputBar(
-                    controller: controller.messageController,
-                    currentQuestion: controller.currentQuestion,
-                    isSending: controller.isSending.value,
-                    isUploading: controller.isUploading.value,
-                    onAttach: () {
-                      _showAttachmentSheet(context);
-                    },
-                    onSend: controller.sendMessage,
                   ),
                 ),
 
+              CvChatActionBar(
+                isGenerating: controller.isGenerating.value,
+                isBusy: controller.isBusy,
+                status: session.status,
+                backendCanGenerate: session.canGenerate,
+                validationComplete: session.validationComplete,
+                qualityCheckPassed: session.qualityCheckPassed,
+                hasCurrentQuestion: session.currentQuestion != null,
+                hasGenerationBlockers: session.generationBlockers.isNotEmpty,
+                onGenerate: controller.generateNow,
+              ),
 
-              ],
-            );
-          },
-        ),
+              NativeBottomInset(
+                collapseWhenKeyboardVisible: true,
+                child: CvChatInputBar(
+                  controller: controller.messageController,
+                  currentQuestion: controller.currentQuestion,
+                  isSending: controller.isSending.value,
+                  isUploading: controller.isUploading.value,
+                  onAttach: () {
+                    _showAttachmentSheet(context);
+                  },
+                  onSend: controller.sendMessage,
+                ),
+              ),
+            ],
+          );
+        }),
       ),
     );
   }
 
   Widget _buildConversation() {
-    final List<CvAssistantMessageModel> messages =
-        controller.messages;
+    final List<CvAssistantMessageModel> messages = controller.messages;
 
-    final bool showThinking =
-        controller.isAssistantThinking.value;
+    final bool showThinking = controller.isAssistantThinking.value;
 
     if (messages.isEmpty && !showThinking) {
       return const _EmptyConversation();
@@ -190,48 +156,29 @@ class CvChatView extends GetView<CvChatController> {
 
     return ListView.builder(
       controller: controller.scrollController,
-      keyboardDismissBehavior:
-      ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: EdgeInsets.fromLTRB(
-        16.w,
-        16.h,
-        16.w,
-        14.h,
-      ),
-      itemCount:
-      messages.length + (showThinking ? 1 : 0),
-      itemBuilder: (
-          BuildContext context,
-          int index,
-          ) {
-        if (showThinking &&
-            index == messages.length) {
-          return  CvThinkingBubble(
-            message:
-            'cv_chat_reviewing_information'.tr,
-          );
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 14.h),
+      itemCount: messages.length + (showThinking ? 1 : 0),
+      itemBuilder: (BuildContext context, int index) {
+        if (showThinking && index == messages.length) {
+          return CvThinkingBubble(message: 'cv_chat_reviewing_information'.tr);
         }
 
-        final CvAssistantMessageModel message =
-        messages[index];
+        final CvAssistantMessageModel message = messages[index];
 
         return CvChatMessageBubble(
           message: message,
           onRetry: controller.isMessageFailed(message)
               ? () {
-            controller.retryFailedMessage(
-              message.id,
-            );
-          }
+                  controller.retryFailedMessage(message.id);
+                }
               : null,
         );
       },
     );
   }
 
-  void _showAttachmentSheet(
-      BuildContext context,
-      ) {
+  void _showAttachmentSheet(BuildContext context) {
     if (controller.isBusy) {
       return;
     }
@@ -241,16 +188,12 @@ class CvChatView extends GetView<CvChatController> {
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(28.r),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
       ),
       builder: (BuildContext context) {
         return CvAttachmentSheet(
-          onProfilePhoto:
-          controller.pickProfilePhoto,
-          onReferenceImages:
-          controller.pickReferenceImages,
+          onProfilePhoto: controller.pickProfilePhoto,
+          onReferenceImages: controller.pickReferenceImages,
         );
       },
     );
@@ -258,38 +201,27 @@ class CvChatView extends GetView<CvChatController> {
 }
 
 class _EditModeBanner extends StatelessWidget {
-  const _EditModeBanner({
-    required this.editMode,
-  });
+  const _EditModeBanner({required this.editMode});
 
   final CvAssistantEditMode editMode;
 
   @override
   Widget build(BuildContext context) {
-    final bool factsOnly =
-        editMode == CvAssistantEditMode.factsOnly;
+    final bool factsOnly = editMode == CvAssistantEditMode.factsOnly;
 
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.fromLTRB(
-        16.w,
-        10.h,
-        16.w,
-        4.h,
-      ),
+      margin: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 4.h),
       padding: EdgeInsets.all(13.w),
       decoration: BoxDecoration(
         color: const Color(0xFFEAF7E4),
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: AppColors.primaryGreen.withValues(
-            alpha: 0.25,
-          ),
+          color: AppColors.primaryGreen.withValues(alpha: 0.25),
         ),
       ),
       child: Row(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
             width: 36.w,
@@ -297,13 +229,10 @@ class _EditModeBanner extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius:
-              BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(
-              factsOnly
-                  ? Icons.edit_note_rounded
-                  : Icons.auto_fix_high_rounded,
+              factsOnly ? Icons.edit_note_rounded : Icons.auto_fix_high_rounded,
               size: 21.w,
               color: AppColors.primaryGreen,
             ),
@@ -311,16 +240,14 @@ class _EditModeBanner extends StatelessWidget {
           SizedBox(width: 11.w),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
                   editMode.label,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w900,
-                    color:
-                    AppColors.homePrimaryText,
+                    color: AppColors.homePrimaryText,
                   ),
                 ),
                 SizedBox(height: 3.h),
@@ -331,8 +258,7 @@ class _EditModeBanner extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11.sp,
                     height: 1.4,
-                    color:
-                    AppColors.homeSecondaryText,
+                    color: AppColors.homeSecondaryText,
                   ),
                 ),
               ],
@@ -344,8 +270,7 @@ class _EditModeBanner extends StatelessWidget {
   }
 }
 
-class _ConversationModeSelector
-    extends StatelessWidget {
+class _ConversationModeSelector extends StatelessWidget {
   const _ConversationModeSelector({
     required this.selectedMode,
     required this.isLoading,
@@ -355,18 +280,12 @@ class _ConversationModeSelector
   final CvAssistantConversationMode selectedMode;
   final bool isLoading;
 
-  final ValueChanged<CvAssistantConversationMode>
-  onSelected;
+  final ValueChanged<CvAssistantConversationMode> onSelected;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(
-        16.w,
-        10.h,
-        16.w,
-        4.h,
-      ),
+      margin: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 4.h),
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: const Color(0xFFE7EAE6),
@@ -377,23 +296,14 @@ class _ConversationModeSelector
           Expanded(
             child: _ModeButton(
               label: 'cv_chat_mode_one_by_one'.tr,
-              icon:
-              Icons.format_list_numbered_rounded,
-              selected:
-              selectedMode ==
-                  CvAssistantConversationMode
-                      .oneByOne,
+              icon: Icons.format_list_numbered_rounded,
+              selected: selectedMode == CvAssistantConversationMode.oneByOne,
               isLoading:
-              isLoading &&
-                  selectedMode ==
-                      CvAssistantConversationMode
-                          .oneByOne,
+                  isLoading &&
+                  selectedMode == CvAssistantConversationMode.oneByOne,
               isDisabled: isLoading,
               onTap: () {
-                onSelected(
-                  CvAssistantConversationMode
-                      .oneByOne,
-                );
+                onSelected(CvAssistantConversationMode.oneByOne);
               },
             ),
           ),
@@ -402,21 +312,13 @@ class _ConversationModeSelector
             child: _ModeButton(
               label: 'cv_chat_mode_all_at_once'.tr,
               icon: Icons.list_alt_rounded,
-              selected:
-              selectedMode ==
-                  CvAssistantConversationMode
-                      .allAtOnce,
+              selected: selectedMode == CvAssistantConversationMode.allAtOnce,
               isLoading:
-              isLoading &&
-                  selectedMode ==
-                      CvAssistantConversationMode
-                          .allAtOnce,
+                  isLoading &&
+                  selectedMode == CvAssistantConversationMode.allAtOnce,
               isDisabled: isLoading,
               onTap: () {
-                onSelected(
-                  CvAssistantConversationMode
-                      .allAtOnce,
-                );
+                onSelected(CvAssistantConversationMode.allAtOnce);
               },
             ),
           ),
@@ -446,87 +348,70 @@ class _ModeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected
-          ? Colors.white
-          : Colors.transparent,
+      color: selected ? Colors.white : Colors.transparent,
       borderRadius: BorderRadius.circular(13.r),
       child: InkWell(
         onTap: isDisabled ? null : onTap,
         borderRadius: BorderRadius.circular(13.r),
         child: AnimatedContainer(
-          duration:
-          const Duration(milliseconds: 180),
+          duration: const Duration(milliseconds: 180),
           height: 44.h,
           alignment: Alignment.center,
-          padding: EdgeInsets.symmetric(
-            horizontal: 8.w,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 8.w),
           decoration: BoxDecoration(
-            borderRadius:
-            BorderRadius.circular(13.r),
+            borderRadius: BorderRadius.circular(13.r),
             boxShadow: selected
                 ? <BoxShadow>[
-              BoxShadow(
-                color:
-                Colors.black.withValues(
-                  alpha: 0.05,
-                ),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ]
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
                 : null,
           ),
           child: isLoading
               ? SizedBox(
-            width: 18.w,
-            height: 18.w,
-            child:
-            const CircularProgressIndicator(
-              strokeWidth: 2,
-            ),
-          )
+                  width: 18.w,
+                  height: 18.w,
+                  child: const CircularProgressIndicator(strokeWidth: 2),
+                )
               : Row(
-            mainAxisAlignment:
-            MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                icon,
-                size: 18.w,
-                color: selected
-                    ? AppColors.primaryGreen
-                    : AppColors
-                    .homeSecondaryText,
-              ),
-              SizedBox(width: 6.w),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow:
-                  TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: selected
-                        ? FontWeight.w800
-                        : FontWeight.w600,
-                    color: selected
-                        ? AppColors.primaryGreen
-                        : AppColors
-                        .homeSecondaryText,
-                  ),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      icon,
+                      size: 18.w,
+                      color: selected
+                          ? AppColors.primaryGreen
+                          : AppColors.homeSecondaryText,
+                    ),
+                    SizedBox(width: 6.w),
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: selected
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                          color: selected
+                              ? AppColors.primaryGreen
+                              : AppColors.homeSecondaryText,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
 }
 
-class _BackendProgressIndicator
-    extends StatelessWidget {
+class _BackendProgressIndicator extends StatelessWidget {
   const _BackendProgressIndicator({
     required this.progress,
     required this.status,
@@ -537,16 +422,10 @@ class _BackendProgressIndicator
 
   @override
   Widget build(BuildContext context) {
-    final int safeProgress =
-    progress.clamp(0, 100);
+    final int safeProgress = progress.clamp(0, 100);
 
     return Container(
-      padding: EdgeInsets.fromLTRB(
-        16.w,
-        7.h,
-        16.w,
-        9.h,
-      ),
+      padding: EdgeInsets.fromLTRB(16.w, 7.h, 16.w, 9.h),
       color: AppColors.homeBackground,
       child: Column(
         children: <Widget>[
@@ -557,8 +436,7 @@ class _BackendProgressIndicator
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
-                  color:
-                  AppColors.homeSecondaryText,
+                  color: AppColors.homeSecondaryText,
                 ),
               ),
               const Spacer(),
@@ -567,8 +445,7 @@ class _BackendProgressIndicator
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w800,
-                  color:
-                  AppColors.homeSecondaryText,
+                  color: AppColors.homeSecondaryText,
                 ),
               ),
             ],
@@ -577,10 +454,8 @@ class _BackendProgressIndicator
           LinearProgressIndicator(
             value: safeProgress / 100,
             minHeight: 7.h,
-            borderRadius:
-            BorderRadius.circular(10.r),
-            backgroundColor:
-            const Color(0xFFE1E4E0),
+            borderRadius: BorderRadius.circular(10.r),
+            backgroundColor: const Color(0xFFE1E4E0),
             color: AppColors.primaryGreen,
           ),
         ],
@@ -588,9 +463,7 @@ class _BackendProgressIndicator
     );
   }
 
-  String _statusLabel(
-      CvAssistantSessionStatus status,
-      ) {
+  String _statusLabel(CvAssistantSessionStatus status) {
     switch (status) {
       case CvAssistantSessionStatus.active:
         return 'cv_chat_status_collecting'.tr;
@@ -609,9 +482,6 @@ class _BackendProgressIndicator
     }
   }
 }
-
-
-
 
 class _EmptyConversation extends StatelessWidget {
   const _EmptyConversation();
@@ -645,8 +515,7 @@ class _EmptyConversation extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w900,
-                color:
-                AppColors.homePrimaryText,
+                color: AppColors.homePrimaryText,
               ),
             ),
             SizedBox(height: 7.h),
@@ -656,8 +525,7 @@ class _EmptyConversation extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13.sp,
                 height: 1.45,
-                color:
-                AppColors.homeSecondaryText,
+                color: AppColors.homeSecondaryText,
               ),
             ),
           ],

@@ -68,7 +68,7 @@ class SurvivalSituationModel {
       iconKey: json['iconKey']?.toString() ?? 'document',
       cardColor: json['cardColor']?.toString() ?? '#E8F7EA',
       cardVariant: SurvivalCardVariant.values.firstWhere(
-        (SurvivalCardVariant value) => value.name == json['cardVariant'],
+            (SurvivalCardVariant value) => value.name == json['cardVariant'],
         orElse: () => SurvivalCardVariant.normal,
       ),
       sortOrder: _intValue(json['sortOrder']),
@@ -158,12 +158,14 @@ class SurvivalResourceModel {
     required this.originalName,
     required this.mimeType,
     required this.sizeBytes,
+    required this.pageCount,
   });
 
   final String signedReadUrl;
   final String originalName;
   final String mimeType;
   final int sizeBytes;
+  final int pageCount;
 
   factory SurvivalResourceModel.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> file = _jsonMap(json['file']);
@@ -172,6 +174,7 @@ class SurvivalResourceModel {
       originalName: file['originalName']?.toString() ?? '',
       mimeType: file['mimeType']?.toString() ?? '',
       sizeBytes: _intValue(file['sizeBytes']),
+      pageCount: _intValue(json['pageCount'] ?? file['pageCount']),
     );
   }
 
@@ -182,7 +185,9 @@ class SurvivalResourceModel {
         'originalName': originalName,
         'mimeType': mimeType,
         'sizeBytes': sizeBytes,
+        'pageCount': pageCount,
       },
+      'pageCount': pageCount,
     };
   }
 
@@ -191,12 +196,14 @@ class SurvivalResourceModel {
     String? originalName,
     String? mimeType,
     int? sizeBytes,
+    int? pageCount,
   }) {
     return SurvivalResourceModel(
       signedReadUrl: signedReadUrl ?? this.signedReadUrl,
       originalName: originalName ?? this.originalName,
       mimeType: mimeType ?? this.mimeType,
       sizeBytes: sizeBytes ?? this.sizeBytes,
+      pageCount: pageCount ?? this.pageCount,
     );
   }
 }

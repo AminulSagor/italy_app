@@ -99,6 +99,20 @@ class CourseDetailView extends GetView<CourseDetailController> {
                   ),
                 ),
               ),
+              if (detail.description.trim().isNotEmpty)
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    kCoursesHorizontalPadding.w,
+                    12.h,
+                    kCoursesHorizontalPadding.w,
+                    0,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: _ExpandableCourseDescription(
+                      description: detail.description,
+                    ),
+                  ),
+                ),
               if (!detail.isFree && !detail.isProEnabled)
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
@@ -186,6 +200,88 @@ class _EmptyLessonsCard extends StatelessWidget {
         'no_published_lessons_found_for_this_course_yet'.tr,
         textAlign: TextAlign.center,
       ),
+    );
+  }
+}
+
+class _ExpandableCourseDescription extends StatefulWidget {
+  const _ExpandableCourseDescription({
+    required this.description,
+  });
+
+  final String description;
+
+  @override
+  State<_ExpandableCourseDescription> createState() =>
+      _ExpandableCourseDescriptionState();
+}
+
+class _ExpandableCourseDescriptionState
+    extends State<_ExpandableCourseDescription> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isExpanded) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            widget.description,
+            style: const TextStyle(
+              height: 1.5,
+              color: AppColors.homePrimaryText,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isExpanded = false;
+              });
+            },
+            child: const Text(
+              'See less',
+              style: TextStyle(
+                color: AppColors.primaryGreen,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            widget.description,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              height: 1.5,
+              color: AppColors.homePrimaryText,
+            ),
+          ),
+        ),
+        SizedBox(width: 5.w),
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _isExpanded = true;
+            });
+          },
+          child: const Text(
+            'See more',
+            style: TextStyle(
+              color: AppColors.primaryGreen,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

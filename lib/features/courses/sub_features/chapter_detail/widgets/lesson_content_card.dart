@@ -536,7 +536,7 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
   }
 }
 
-class _TheoryTextPanel extends StatelessWidget {
+class _TheoryTextPanel extends StatefulWidget {
   final LessonContentModel lesson;
 
   const _TheoryTextPanel({
@@ -544,7 +544,56 @@ class _TheoryTextPanel extends StatelessWidget {
   });
 
   @override
+  State<_TheoryTextPanel> createState() => _TheoryTextPanelState();
+}
+
+class _TheoryTextPanelState extends State<_TheoryTextPanel> {
+  bool _isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
+    final LessonContentModel lesson = widget.lesson;
+
+    final String previewText = <String>[
+      lesson.italianText,
+      lesson.italianHighlightText,
+      lesson.italianMissingText,
+    ].where((String text) => text.trim().isNotEmpty).join(' ');
+
+    if (!_isExpanded) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              previewText,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: _bodyStyle(),
+            ),
+          ),
+
+          SizedBox(width: 6.w),
+
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isExpanded = true;
+              });
+            },
+            child: Text(
+              'See more',
+              style: TextStyle(
+                fontSize: AppFont.font13.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryGreen,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -576,6 +625,24 @@ class _TheoryTextPanel extends StatelessWidget {
             ),
           ),
         ],
+
+        SizedBox(height: 6.h),
+
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _isExpanded = false;
+            });
+          },
+          child: Text(
+            'See less',
+            style: TextStyle(
+              fontSize: AppFont.font13.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryGreen,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -590,7 +657,7 @@ class _TheoryTextPanel extends StatelessWidget {
   }
 }
 
-class _TranslationPanel extends StatelessWidget {
+class _TranslationPanel extends StatefulWidget {
   final LessonContentModel lesson;
 
   const _TranslationPanel({
@@ -598,11 +665,27 @@ class _TranslationPanel extends StatelessWidget {
   });
 
   @override
+  State<_TranslationPanel> createState() => _TranslationPanelState();
+}
+
+class _TranslationPanelState extends State<_TranslationPanel> {
+  bool _isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
+    final LessonContentModel lesson = widget.lesson;
+
     final String translatedText = <String>[
       lesson.banglaText,
       lesson.banglaHighlightText,
     ].where((String item) => item.trim().isNotEmpty).join('\n\n');
+
+    final TextStyle textStyle = TextStyle(
+      fontSize: AppFont.font16.sp,
+      fontWeight: FontWeight.w500,
+      color: AppColors.black,
+      height: 1.55,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -624,16 +707,61 @@ class _TranslationPanel extends StatelessWidget {
           SizedBox(height: 10.h),
         ],
 
-        Text(
-          translatedText,
-          textAlign: TextAlign.start,
-          style: TextStyle(
-            fontSize: AppFont.font16.sp,
-            fontWeight: FontWeight.w500,
-            color: AppColors.black,
-            height: 1.55,
+        if (!_isExpanded)
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  translatedText,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textStyle,
+                ),
+              ),
+
+              SizedBox(width: 6.w),
+
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isExpanded = true;
+                  });
+                },
+                child: Text(
+                  'See more',
+                  style: TextStyle(
+                    fontSize: AppFont.font13.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryGreen,
+                  ),
+                ),
+              ),
+            ],
+          )
+        else ...<Widget>[
+          Text(
+            translatedText,
+            style: textStyle,
           ),
-        ),
+
+          SizedBox(height: 6.h),
+
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isExpanded = false;
+              });
+            },
+            child: Text(
+              'See less',
+              style: TextStyle(
+                fontSize: AppFont.font13.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryGreen,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

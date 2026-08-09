@@ -1,4 +1,4 @@
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -135,10 +135,7 @@ class RewardController extends GetxController {
     await loadHistory(reset: true);
   }
 
-  Future<void> loadHistory({
-    bool reset = false,
-    bool showLoader = true,
-  }) async {
+  Future<void> loadHistory({bool reset = false, bool showLoader = true}) async {
     if (isLoadingHistory.value || isLoadingMoreHistory.value) return;
 
     final int page = reset ? 1 : historyPage.value;
@@ -218,9 +215,8 @@ class RewardController extends GetxController {
 
     selectedReward.value = detail;
     shippingRewardId.value = detail.id;
-    fullNameController.text = detail.shippingAddress?.fullName ??
-        dashboard.value?.displayName ??
-        '';
+    fullNameController.text =
+        detail.shippingAddress?.fullName ?? dashboard.value?.displayName ?? '';
     whatsappController.text = detail.shippingAddress?.whatsappNumber ?? '';
     addressController.text = detail.shippingAddress?.addressLine ?? '';
     return true;
@@ -366,7 +362,7 @@ class RewardController extends GetxController {
         _showMessage('Download unavailable', 'Could not open the reward file.');
       }
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Failed to launch reward URL.',
         name: 'RewardController',
         error: error,

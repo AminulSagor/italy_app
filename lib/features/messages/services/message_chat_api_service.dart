@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:dio/dio.dart';
 
@@ -11,8 +11,8 @@ class MessageChatApiService {
   MessageChatApiService({
     required ApiClient apiClient,
     required TokenService tokenService,
-  })  : _apiClient = apiClient,
-        _tokenService = tokenService;
+  }) : _apiClient = apiClient,
+       _tokenService = tokenService;
 
   final ApiClient _apiClient;
   final TokenService _tokenService;
@@ -46,7 +46,7 @@ class MessageChatApiService {
         );
       }
     } catch (error) {
-      dev.log(
+      AppLogger.log(
         'Unable to fetch chat timeline',
         name: 'MessageChatApiService',
         error: error,
@@ -87,7 +87,7 @@ class MessageChatApiService {
             .toList(growable: false);
       }
     } catch (error) {
-      dev.log(
+      AppLogger.log(
         'Unable to fetch older chat timeline items',
         name: 'MessageChatApiService',
         error: error,
@@ -132,7 +132,8 @@ class MessageChatApiService {
 
     if (isCall) {
       return MessageChatItemModel(
-        id: json['id']?.toString() ??
+        id:
+            json['id']?.toString() ??
             'call:${json['callId']?.toString() ?? createdAt}',
         text: '',
         timeLabel: _formatTimeLabel(createdAt),

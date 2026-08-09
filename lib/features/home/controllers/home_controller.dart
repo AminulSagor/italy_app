@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -17,20 +17,16 @@ import '../services/home_api_service.dart';
 import '../services/home_dashboard_cache_service.dart';
 import '../views/guide_video_view.dart';
 
-class HomeController extends GetxController
-    with WidgetsBindingObserver {
+class HomeController extends GetxController with WidgetsBindingObserver {
   HomeController({
     required HomeApiService homeApiService,
-    required HomeDashboardCacheService
-    homeDashboardCacheService,
+    required HomeDashboardCacheService homeDashboardCacheService,
     required UserSessionController userSessionController,
-  })  : _homeApiService = homeApiService,
-        _homeDashboardCacheService =
-            homeDashboardCacheService,
-        _userSessionController = userSessionController;
+  }) : _homeApiService = homeApiService,
+       _homeDashboardCacheService = homeDashboardCacheService,
+       _userSessionController = userSessionController;
 
-  final HomeDashboardCacheService
-  _homeDashboardCacheService;
+  final HomeDashboardCacheService _homeDashboardCacheService;
 
   final UserSessionController _userSessionController;
 
@@ -40,14 +36,12 @@ class HomeController extends GetxController
    * Prevents automatic refresh calls from repeatedly hitting
    * the backend when the user quickly changes tabs.
    */
-  static const Duration _automaticRefreshInterval =
-  Duration(seconds: 30);
+  static const Duration _automaticRefreshInterval = Duration(seconds: 30);
 
   final HomeApiService _homeApiService;
 
-  final NotificationPermissionService
-  _notificationPermissionService =
-  NotificationPermissionService();
+  final NotificationPermissionService _notificationPermissionService =
+      NotificationPermissionService();
 
   /*
    * Existing UI can continue using isLoading.
@@ -68,19 +62,16 @@ class HomeController extends GetxController
    */
   final RxString errorMessage = ''.obs;
 
-  final Rx<HomeDashboardModel> dashboard =
-      HomeDashboardModel.initial.obs;
+  final Rx<HomeDashboardModel> dashboard = HomeDashboardModel.initial.obs;
 
   bool _requestInProgress = false;
   DateTime? _lastSuccessfulLoadAt;
 
-  bool get isInitialLoading =>
-      isLoading.value && !hasLoadedOnce.value;
+  bool get isInitialLoading => isLoading.value && !hasLoadedOnce.value;
 
   bool get hasError => errorMessage.value.isNotEmpty;
 
-  bool get hasDashboard =>
-      hasLoadedOnce.value && !hasError;
+  bool get hasDashboard => hasLoadedOnce.value && !hasError;
 
   @override
   void onInit() {
@@ -97,16 +88,11 @@ class HomeController extends GetxController
   void onReady() {
     super.onReady();
 
-    unawaited(
-      _notificationPermissionService
-          .requestAfterHomeShown(),
-    );
+    unawaited(_notificationPermissionService.requestAfterHomeShown());
   }
 
   @override
-  void didChangeAppLifecycleState(
-      AppLifecycleState state,
-      ) {
+  void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) {
       return;
     }
@@ -123,14 +109,14 @@ class HomeController extends GetxController
   Future<void> _initializeDashboard() async {
     final Stopwatch stopwatch = Stopwatch()..start();
 
-    dev.log(
+    AppLogger.log(
       'Home initialization started: ${stopwatch.elapsedMilliseconds}ms',
       name: 'HomePerformance',
     );
 
     final bool restored = await _restoreCachedDashboard();
 
-    dev.log(
+    AppLogger.log(
       'Cache restore finished: ${stopwatch.elapsedMilliseconds}ms',
       name: 'HomePerformance',
     );
@@ -143,12 +129,9 @@ class HomeController extends GetxController
       isLoading.value = false;
     }
 
-    await loadDashboard(
-      force: true,
-      performanceStopwatch: stopwatch,
-    );
+    await loadDashboard(force: true, performanceStopwatch: stopwatch);
 
-    dev.log(
+    AppLogger.log(
       'Home initialization completed: ${stopwatch.elapsedMilliseconds}ms',
       name: 'HomePerformance',
     );
@@ -161,18 +144,15 @@ class HomeController extends GetxController
       return false;
     }
 
-    final HomeDashboardCacheEntry? cache =
-    await _homeDashboardCacheService.read(
-      userId: userId,
-    );
+    final HomeDashboardCacheEntry? cache = await _homeDashboardCacheService
+        .read(userId: userId);
 
     if (cache == null || isClosed) {
       return false;
     }
 
     try {
-      dashboard.value =
-          HomeDashboardModel.fromJson(cache.json);
+      dashboard.value = HomeDashboardModel.fromJson(cache.json);
 
       hasLoadedOnce.value = true;
       errorMessage.value = '';
@@ -180,27 +160,22 @@ class HomeController extends GetxController
 
       return true;
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Failed to restore cached Home dashboard',
         name: 'HomeController',
         error: error,
         stackTrace: stackTrace,
       );
 
-      await _homeDashboardCacheService.clear(
-        userId: userId,
-      );
+      await _homeDashboardCacheService.clear(userId: userId);
 
       return false;
     }
   }
 
   String get _currentUserId {
-    return _userSessionController.user.value?.id.trim() ??
-        '';
+    return _userSessionController.user.value?.id.trim() ?? '';
   }
-
-
 
   Future<void> loadDashboard({
     bool force = false,
@@ -224,25 +199,25 @@ class HomeController extends GetxController
     }
 
     try {
-      dev.log(
+      AppLogger.log(
         'Home API started: '
-            '${performanceStopwatch?.elapsedMilliseconds ?? 0}ms',
+        '${performanceStopwatch?.elapsedMilliseconds ?? 0}ms',
         name: 'HomePerformance',
       );
 
       final Stopwatch apiStopwatch = Stopwatch()..start();
 
       final ApiResult<Map<String, dynamic>> result =
-      await ApiErrorHandler.call<Map<String, dynamic>>(
-        _homeApiService.fetchDashboardJson,
-        showError: false,
-      );
+          await ApiErrorHandler.call<Map<String, dynamic>>(
+            _homeApiService.fetchDashboardJson,
+            showError: false,
+          );
 
       apiStopwatch.stop();
 
-      dev.log(
+      AppLogger.log(
         'Home API finished in ${apiStopwatch.elapsedMilliseconds}ms. '
-            'Total: ${performanceStopwatch?.elapsedMilliseconds ?? 0}ms',
+        'Total: ${performanceStopwatch?.elapsedMilliseconds ?? 0}ms',
         name: 'HomePerformance',
       );
 
@@ -259,14 +234,13 @@ class HomeController extends GetxController
 
       final Stopwatch parsingStopwatch = Stopwatch()..start();
 
-      final HomeDashboardModel data =
-      HomeDashboardModel.fromJson(responseJson);
+      final HomeDashboardModel data = HomeDashboardModel.fromJson(responseJson);
 
       parsingStopwatch.stop();
 
-      dev.log(
+      AppLogger.log(
         'Home JSON parsing finished in '
-            '${parsingStopwatch.elapsedMilliseconds}ms',
+        '${parsingStopwatch.elapsedMilliseconds}ms',
         name: 'HomePerformance',
       );
 
@@ -275,9 +249,9 @@ class HomeController extends GetxController
       errorMessage.value = '';
       _lastSuccessfulLoadAt = DateTime.now();
 
-      dev.log(
+      AppLogger.log(
         'Home data assigned to UI. Total: '
-            '${performanceStopwatch?.elapsedMilliseconds ?? 0}ms',
+        '${performanceStopwatch?.elapsedMilliseconds ?? 0}ms',
         name: 'HomePerformance',
       );
 
@@ -285,14 +259,11 @@ class HomeController extends GetxController
 
       if (userId.isNotEmpty) {
         unawaited(
-          _homeDashboardCacheService.write(
-            userId: userId,
-            json: responseJson,
-          ),
+          _homeDashboardCacheService.write(userId: userId, json: responseJson),
         );
       }
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Failed to load the Home dashboard',
         name: 'HomeController',
         error: error,
@@ -316,9 +287,7 @@ class HomeController extends GetxController
    * Use this from RefreshIndicator.
    */
   Future<void> refreshDashboard() async {
-    await loadDashboard(
-      force: true,
-    );
+    await loadDashboard(force: true);
   }
 
   /*
@@ -335,9 +304,7 @@ class HomeController extends GetxController
    * purchase, or another action that changes Home information.
    */
   Future<void> reloadAfterProgressChange() async {
-    await loadDashboard(
-      force: true,
-    );
+    await loadDashboard(force: true);
   }
 
   void clearDashboardError() {
@@ -345,8 +312,7 @@ class HomeController extends GetxController
   }
 
   void openCurrentChapter() {
-    final HomeChapterModel? chapter =
-        dashboard.value.currentChapter;
+    final HomeChapterModel? chapter = dashboard.value.currentChapter;
 
     if (chapter == null) {
       return;
@@ -355,10 +321,7 @@ class HomeController extends GetxController
     if (chapter.lessonId.isEmpty ||
         chapter.courseId.isEmpty ||
         chapter.chapterId.isEmpty) {
-      Get.snackbar(
-        'continue_learning'.tr,
-        'home_chapter_unavailable'.tr,
-      );
+      Get.snackbar('continue_learning'.tr, 'home_chapter_unavailable'.tr);
       return;
     }
 
@@ -384,8 +347,7 @@ class HomeController extends GetxController
         return;
 
       case HomeToolType.guideVideo:
-        final String videoId =
-            tool.videoId?.trim() ?? '';
+        final String videoId = tool.videoId?.trim() ?? '';
 
         if (videoId.isEmpty) {
           Get.snackbar(
@@ -397,9 +359,7 @@ class HomeController extends GetxController
         }
 
         Get.to<void>(
-              () => GuideVideoView(
-            videoId: videoId,
-          ),
+          () => GuideVideoView(videoId: videoId),
           transition: Transition.cupertino,
         );
         return;
@@ -408,31 +368,20 @@ class HomeController extends GetxController
 
   void openCvBuilder() {
     if (!Get.isRegistered<NavbarAndAppbarWrapperController>()) {
-      Get.snackbar(
-        'cv_services'.tr,
-        'home_cv_builder_unavailable'.tr,
-      );
+      Get.snackbar('cv_services'.tr, 'home_cv_builder_unavailable'.tr);
       return;
     }
 
-    Get.find<NavbarAndAppbarWrapperController>()
-        .onBottomNavTap(4);
+    Get.find<NavbarAndAppbarWrapperController>().onBottomNavTap(4);
   }
 
   void openCareerTracks() {
-    Get.toNamed<void>(
-      AppRoutes.jobSentences,
-    );
+    Get.toNamed<void>(AppRoutes.jobSentences);
   }
 
-  void openCareerTrack(
-      HomeWorkItemModel item,
-      ) {
+  void openCareerTrack(HomeWorkItemModel item) {
     if (item.id.isEmpty) {
-      Get.snackbar(
-        'learn_for_work'.tr,
-        'home_career_track_unavailable'.tr,
-      );
+      Get.snackbar('learn_for_work'.tr, 'home_career_track_unavailable'.tr);
       return;
     }
 
@@ -446,8 +395,7 @@ class HomeController extends GetxController
         cardColor: item.cardColor,
         moduleCount: item.moduleCount,
         sentenceCount: item.sentenceCount,
-        learnedSentenceCount:
-        item.learnedSentenceCount,
+        learnedSentenceCount: item.learnedSentenceCount,
       ),
     );
   }
@@ -456,8 +404,10 @@ class HomeController extends GetxController
     final String configuredNumber =
         dotenv.env['SUPPORT_PHONE_INTERNATIONAL']?.trim() ?? '';
 
-    final String phoneNumber = configuredNumber
-        .replaceAll(RegExp(r'[^0-9]'), '');
+    final String phoneNumber = configuredNumber.replaceAll(
+      RegExp(r'[^0-9]'),
+      '',
+    );
 
     final String finalPhoneNumber = phoneNumber.isEmpty
         ? _fallbackWhatsAppNumber
@@ -466,9 +416,7 @@ class HomeController extends GetxController
     final Uri whatsappUri = Uri.https(
       'wa.me',
       '/$finalPhoneNumber',
-      <String, String>{
-        'text': 'Hello, I need help with Italir Pothe.',
-      },
+      <String, String>{'text': 'Hello, I need help with Italir Pothe.'},
     );
 
     try {
@@ -481,7 +429,7 @@ class HomeController extends GetxController
         _showWhatsAppLaunchFailure();
       }
     } catch (error, stackTrace) {
-      dev.log(
+      AppLogger.log(
         'Failed to open WhatsApp support: $whatsappUri',
         name: 'HomeController',
         error: error,
@@ -493,29 +441,20 @@ class HomeController extends GetxController
   }
 
   void openWebinars() {
-    Get.toNamed<void>(
-      AppRoutes.webinar,
-    );
+    Get.toNamed<void>(AppRoutes.webinar);
   }
 
   void openAiTutor() {
-    if (!Get.isRegistered<
-        NavbarAndAppbarWrapperController>()) {
-      Get.snackbar(
-        'ai_tutor_1'.tr,
-        'home_ai_tutor_unavailable'.tr,
-      );
+    if (!Get.isRegistered<NavbarAndAppbarWrapperController>()) {
+      Get.snackbar('ai_tutor_1'.tr, 'home_ai_tutor_unavailable'.tr);
       return;
     }
 
-    Get.find<NavbarAndAppbarWrapperController>()
-        .onBottomNavTap(2);
+    Get.find<NavbarAndAppbarWrapperController>().onBottomNavTap(2);
   }
 
   void openDailyChallenges() {
-    Get.toNamed<void>(
-      AppRoutes.dailyChallenges,
-    );
+    Get.toNamed<void>(AppRoutes.dailyChallenges);
   }
 
   bool get _dashboardNeedsRefresh {
@@ -523,18 +462,14 @@ class HomeController extends GetxController
       return true;
     }
 
-    final DateTime? lastLoad =
-        _lastSuccessfulLoadAt;
+    final DateTime? lastLoad = _lastSuccessfulLoadAt;
 
     if (lastLoad == null) {
       return true;
     }
 
-    return DateTime.now().difference(lastLoad) >=
-        _automaticRefreshInterval;
+    return DateTime.now().difference(lastLoad) >= _automaticRefreshInterval;
   }
-
-
 
   void _showWhatsAppLaunchFailure() {
     Get.snackbar(

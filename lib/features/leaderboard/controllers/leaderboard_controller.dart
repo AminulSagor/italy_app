@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer' as dev;
+import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -405,7 +405,7 @@ class LeaderboardController extends GetxController {
         limit: 20,
         search: search.isNotEmpty ? search : null,
       );
-      dev.log(
+      AppLogger.log(
         'Fetching leaderboard with ${dto.toQueryParameters()}',
         name: 'LeaderboardController',
       );
@@ -415,7 +415,7 @@ class LeaderboardController extends GetxController {
       final ProfileModel? profile =
           resp.currentUser ?? await _leaderboardService.fetchMe();
 
-      dev.log(
+      AppLogger.log(
         'Fetched podium=${resp.podium.length} entries=${resp.entries.length}',
         name: 'LeaderboardController',
       );
@@ -511,22 +511,21 @@ class LeaderboardController extends GetxController {
   }
 
   Future<void> onMessageTap(Map<String, dynamic> user) async {
-    final bool isCurrentUser =
-        (user['isCurrentUser'] as bool?) ?? false;
+    final bool isCurrentUser = (user['isCurrentUser'] as bool?) ?? false;
 
     if (isCurrentUser) {
       return;
     }
 
-    final String userId =
-        user['userId']?.toString().trim() ?? '';
+    final String userId = user['userId']?.toString().trim() ?? '';
 
     if (userId.isEmpty) {
       return;
     }
 
-    final ProfileModel? preview =
-    await _leaderboardService.fetchUserPreview(userId);
+    final ProfileModel? preview = await _leaderboardService.fetchUserPreview(
+      userId,
+    );
 
     if (preview == null || preview.canChat != true) {
       Get.snackbar(
