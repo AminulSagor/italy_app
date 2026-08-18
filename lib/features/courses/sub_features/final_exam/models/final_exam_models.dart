@@ -189,7 +189,10 @@ class FinalExamResultModel {
     required this.stats,
   });
 
-  factory FinalExamResultModel.fromReview(Map<String, dynamic> review) {
+  factory FinalExamResultModel.fromReview(
+    Map<String, dynamic> review, {
+    bool writingTaskEnabled = true,
+  }) {
     final double average = _doubleValue(review['finalAverageScore']);
     final String verdict = review['verdict']?.toString() ?? '';
     final String strength = review['keyStrength']?.toString().trim() ?? '';
@@ -222,11 +225,12 @@ class FinalExamResultModel {
           value: '${_intValue(review['grammarAccuracyScore'])}',
           iconName: 'listening',
         ),
-        FinalExamResultStatModel(
-          label: 'gen_writing'.tr,
-          value: _scoreLabel(review['writingScore']),
-          iconName: 'writing',
-        ),
+        if (writingTaskEnabled)
+          FinalExamResultStatModel(
+            label: 'gen_writing'.tr,
+            value: _scoreLabel(review['writingScore']),
+            iconName: 'writing',
+          ),
         FinalExamResultStatModel(
           label: 'gen_speaking'.tr,
           value: _scoreLabel(review['speakingScore']),

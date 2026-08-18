@@ -92,6 +92,9 @@ class FinalExamSuccessView extends GetView<FinalExamController> {
                         teacherDone:
                         controller.teacherReviewComplete.value,
                         resultDone: controller.resultComplete.value,
+                        writingTaskEnabled:
+                            controller.gateway.value?.writingTaskEnabled ??
+                                true,
                         estimatedResult:
                         controller.estimatedResult.value,
                         onViewResultTap: controller.openResult,
@@ -368,12 +371,14 @@ class _ReferenceIdCard extends StatelessWidget {
 class _TimelineCard extends StatelessWidget {
   final bool teacherDone;
   final bool resultDone;
+  final bool writingTaskEnabled;
   final String estimatedResult;
   final VoidCallback onViewResultTap;
 
   const _TimelineCard({
     required this.teacherDone,
     required this.resultDone,
+    required this.writingTaskEnabled,
     required this.estimatedResult,
     required this.onViewResultTap,
   });
@@ -432,7 +437,9 @@ class _TimelineCard extends StatelessWidget {
             titleKey: 'final_exam_teacher_review',
             subtitleKey: teacherDone
                 ? 'final_exam_manual_review_completed'
-                : 'final_exam_reviewing_answers',
+                : writingTaskEnabled
+                    ? 'final_exam_reviewing_answers'
+                    : 'final_exam_reviewing_speaking_answer',
             icon: teacherDone
                 ? Icons.check_rounded
                 : Icons.circle,

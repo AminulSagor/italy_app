@@ -30,13 +30,14 @@ class FinalExamFlowMapper {
           iconName: 'headphones',
           tone: FinalExamComponentTone.blue,
         ),
-        FinalExamComponentModel(
-          id: 'writing_task',
-          title: 'gen_part_3_writing_task'.tr,
-          subtitle: 'gen_teacher_review_may_be_required'.tr,
-          iconName: 'write',
-          tone: FinalExamComponentTone.orange,
-        ),
+        if (data.writingTaskEnabled)
+          FinalExamComponentModel(
+            id: 'writing_task',
+            title: 'gen_part_3_writing_task'.tr,
+            subtitle: 'gen_teacher_review_may_be_required'.tr,
+            iconName: 'write',
+            tone: FinalExamComponentTone.orange,
+          ),
         FinalExamComponentModel(
           id: 'speaking_lab',
           title: 'gen_part_4_speaking_lab'.tr,
@@ -48,7 +49,9 @@ class FinalExamFlowMapper {
       noteBangla: data.resultNoticeBn,
       noteEnglish: data.resultNotice.isNotEmpty
           ? data.resultNotice
-          : 'writing_and_speaking_answers_may_require_teacher_r'.tr,
+          : data.writingTaskEnabled
+              ? 'writing_and_speaking_answers_may_require_teacher_r'.tr
+              : 'gen_teacher_review_may_be_required'.tr,
       canStart: data.isEligible,
       startMessage: data.message,
     );

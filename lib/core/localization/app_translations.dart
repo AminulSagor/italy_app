@@ -390,6 +390,8 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_manual_review_completed': 'Manual review completed',
     'final_exam_reviewing_answers':
         'Reviewing your speaking and writing answers',
+    'final_exam_reviewing_speaking_answer':
+        'Reviewing your speaking answer',
     'final_exam_result_certificate': 'Result and certificate',
     'final_exam_result_ready': 'Your result is ready',
     'final_exam_unlock_achievement':
@@ -4793,6 +4795,8 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_waiting_tip':
         'অপেক্ষার সময় একটি দৈনিক চ্যালেঞ্জ চেষ্টা করো অথবা অনুশীলন চালিয়ে যাও।',
     'final_exam_results_title': 'পরীক্ষার ফলাফল',
+    'final_exam_reviewing_speaking_answer':
+        'তোমার বলা উত্তর পর্যালোচনা করা হচ্ছে',
     'final_exam_mark_achieved': 'প্রাপ্ত নম্বর',
     'final_exam_xp_awarded': '@xp XP অর্জিত',
     'final_exam_teacher_comments': 'শিক্ষকের মন্তব্য',
@@ -5567,6 +5571,8 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_estimated_result': 'Risultato previsto: @value',
     'final_exam_waiting_tip':
         'Nell’attesa, prova una sfida giornaliera o continua a esercitarti.',
+    'final_exam_reviewing_speaking_answer':
+        'Stiamo esaminando la tua risposta orale',
     'common_back': 'Indietro',
     'final_exam_submit_answer': 'Invia risposta',
     'final_exam_recording': 'Registrazione…',

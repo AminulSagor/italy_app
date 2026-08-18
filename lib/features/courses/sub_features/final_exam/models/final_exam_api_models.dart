@@ -30,6 +30,7 @@ class FinalExamGatewayModel {
   final bool hasAttempted;
   final bool isEligible;
   final bool resultReady;
+  final bool writingTaskEnabled;
 
   const FinalExamGatewayModel({
     required this.courseId,
@@ -50,6 +51,7 @@ class FinalExamGatewayModel {
     required this.hasAttempted,
     required this.isEligible,
     required this.resultReady,
+    required this.writingTaskEnabled,
   });
 
   bool get canViewResult {
@@ -97,6 +99,7 @@ class FinalExamGatewayModel {
       hasAttempted: _bool(json['hasAttempted']),
       isEligible: _bool(json['isEligible']),
       resultReady: _bool(json['resultReady']),
+      writingTaskEnabled: _boolOrTrue(exam['writingTaskEnabled']),
     );
   }
 }
@@ -472,6 +475,7 @@ class FinalExamResultResponseModel {
   final bool resultReady;
   final bool canRetake;
   final bool certificateAvailable;
+  final bool writingTaskEnabled;
   final String message;
   final Map<String, dynamic> review;
 
@@ -482,6 +486,7 @@ class FinalExamResultResponseModel {
     required this.resultReady,
     required this.canRetake,
     required this.certificateAvailable,
+    required this.writingTaskEnabled,
     required this.message,
     required this.review,
   });
@@ -504,6 +509,7 @@ class FinalExamResultResponseModel {
       certificateAvailable: _bool(
         json['certificateAvailable'],
       ),
+      writingTaskEnabled: _boolOrTrue(json['writingTaskEnabled']),
       message: _string(json['message']),
       review: _map(json['review']),
     );
@@ -553,4 +559,9 @@ double _double(dynamic value) {
 bool _bool(dynamic value) {
   if (value is bool) return value;
   return _string(value).toLowerCase() == 'true';
+}
+
+bool _boolOrTrue(dynamic value) {
+  if (value == null) return true;
+  return _bool(value);
 }

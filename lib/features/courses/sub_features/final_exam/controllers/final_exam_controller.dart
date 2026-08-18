@@ -505,6 +505,7 @@ class FinalExamController extends GetxController {
 
       result.value = FinalExamResultModel.fromReview(
         data.review,
+        writingTaskEnabled: data.writingTaskEnabled,
       );
 
       _resultPollTimer?.cancel();
@@ -573,6 +574,7 @@ class FinalExamController extends GetxController {
 
       result.value = FinalExamResultModel.fromReview(
         data.review,
+        writingTaskEnabled: data.writingTaskEnabled,
       );
 
       _resultPollTimer?.cancel();
