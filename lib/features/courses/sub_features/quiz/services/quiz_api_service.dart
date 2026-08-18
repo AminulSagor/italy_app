@@ -19,8 +19,13 @@ class QuizApiCheckResult {
 class QuizApiSessionModel {
   final String sessionId;
   final List<QuizQuestionModel> questions;
+  final int answeredQuestions;
 
-  const QuizApiSessionModel({required this.sessionId, required this.questions});
+  const QuizApiSessionModel({
+    required this.sessionId,
+    required this.questions,
+    required this.answeredQuestions,
+  });
 }
 
 class QuizApiService {
@@ -46,10 +51,17 @@ class QuizApiService {
             _questionFromApi(item, mediaRequests: mediaRequests),
       ),
     );
+    questions.sort((QuizQuestionModel first, QuizQuestionModel second) {
+      final int orderComparison = first.sortOrder.compareTo(second.sortOrder);
+      return orderComparison != 0
+          ? orderComparison
+          : first.id.compareTo(second.id);
+    });
 
     return QuizApiSessionModel(
       sessionId: _stringValue(data['id']),
       questions: questions,
+      answeredQuestions: _intValue(data['answeredQuestions']),
     );
   }
 
@@ -251,6 +263,9 @@ class QuizApiService {
       'mediaUrl': media?.url ?? '',
       'mediaMimeType': media?.mimeType ?? '',
       'generatedAudioText': _stringValue(item['generatedAudioText']),
+      'sortOrder': _intValue(item['sortOrder']),
+      'answered': _boolValue(item['answered']),
+      'isCorrect': item['isCorrect'] is bool ? item['isCorrect'] : null,
     });
   }
 

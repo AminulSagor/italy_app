@@ -49,6 +49,18 @@ class QuizView extends GetView<QuizController> {
                 child: CircularProgressIndicator(color: AppColors.primaryGreen),
               );
             }
+
+            if (controller.shouldOpenCompletionAfterResume.value) {
+              if (controller.lessonComplete.value != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _openCompletionAfterResume();
+                });
+              }
+
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryGreen),
+              );
+            }
       
             if (question == null) {
               return const SizedBox.shrink();
@@ -222,6 +234,25 @@ class QuizView extends GetView<QuizController> {
     if (controller.lessonComplete.value == null) {
       return;
     }
+
+    final Object? routeResult = await Get.toNamed(
+      AppRoutes.quizCompletion,
+      arguments: ControllerTagRouteArguments(
+        controllerTag: controllerTag,
+      ),
+    );
+
+    if (routeResult == true) {
+      Get.back<bool>(result: true);
+    }
+  }
+
+  Future<void> _openCompletionAfterResume() async {
+    if (!controller.shouldOpenCompletionAfterResume.value) {
+      return;
+    }
+
+    controller.shouldOpenCompletionAfterResume.value = false;
 
     final Object? routeResult = await Get.toNamed(
       AppRoutes.quizCompletion,

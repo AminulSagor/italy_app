@@ -33,6 +33,7 @@ class QuizController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isSubmittingAnswer = false.obs;
   final RxBool isCompleting = false.obs;
+  final RxBool shouldOpenCompletionAfterResume = false.obs;
   final RxBool hasCheckedAnswer = false.obs;
   final RxBool isAnswerCorrect = false.obs;
   final RxInt currentIndex = 0.obs;
@@ -153,6 +154,7 @@ class QuizController extends GetxController {
     }
 
     isLoading.value = true;
+    shouldOpenCompletionAfterResume.value = false;
     try {
       if (initialQuestions.isNotEmpty) {
         questions.assignAll(initialQuestions);
@@ -167,8 +169,22 @@ class QuizController extends GetxController {
           return;
         }
 
-        _activeSessionId = result.data!.sessionId;
-        questions.assignAll(result.data!.questions);
+        final QuizApiSessionModel session = result.data!;
+        _activeSessionId = session.sessionId;
+        questions.assignAll(session.questions);
+
+        final int firstUnansweredIndex = questions.indexWhere(
+          (QuizQuestionModel question) => !question.answered,
+        );
+        currentIndex.value = firstUnansweredIndex >= 0
+            ? firstUnansweredIndex
+            : questions.isEmpty
+            ? 0
+            : questions.length - 1;
+
+        if (session.answeredQuestions > 0 && firstUnansweredIndex < 0) {
+          shouldOpenCompletionAfterResume.value = true;
+        }
       } else {
         questions.assignAll(
           await _quizMockService.fetchQuestions(questionCount: questionCount),
@@ -177,8 +193,14 @@ class QuizController extends GetxController {
 
       answerReviews.clear();
       lessonComplete.value = null;
-      currentIndex.value = 0;
+      if (!hasApiLessonQuiz || initialQuestions.isNotEmpty) {
+        currentIndex.value = 0;
+      }
       _resetInteractionState();
+
+      if (shouldOpenCompletionAfterResume.value) {
+        await loadLessonComplete();
+      }
     } finally {
       isLoading.value = false;
     }
@@ -435,11 +457,17 @@ class QuizController extends GetxController {
   }
 
   bool goNext() {
-    if (currentIndex.value >= questions.length - 1) {
+    int nextIndex = currentIndex.value + 1;
+
+    while (nextIndex < questions.length && questions[nextIndex].answered) {
+      nextIndex += 1;
+    }
+
+    if (nextIndex >= questions.length) {
       return true;
     }
 
-    currentIndex.value += 1;
+    currentIndex.value = nextIndex;
     _resetInteractionState();
     return false;
   }

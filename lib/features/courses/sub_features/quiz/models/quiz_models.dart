@@ -35,6 +35,9 @@ class QuizQuestionModel {
   final String mediaUrl;
   final String mediaMimeType;
   final String generatedAudioText;
+  final int sortOrder;
+  final bool answered;
+  final bool? isCorrect;
 
   const QuizQuestionModel({
     required this.id,
@@ -61,6 +64,9 @@ class QuizQuestionModel {
     this.mediaUrl = '',
     this.mediaMimeType = '',
     this.generatedAudioText = '',
+    this.sortOrder = 0,
+    this.answered = false,
+    this.isCorrect,
   });
 
   bool get hasAudioMedia {
@@ -128,6 +134,9 @@ class QuizQuestionModel {
       mediaUrl: json['mediaUrl'] as String? ?? '',
       mediaMimeType: json['mediaMimeType'] as String? ?? '',
       generatedAudioText: json['generatedAudioText'] as String? ?? '',
+      sortOrder: json['sortOrder'] as int? ?? 0,
+      answered: json['answered'] as bool? ?? false,
+      isCorrect: json['isCorrect'] as bool?,
     );
   }
 
@@ -157,6 +166,9 @@ class QuizQuestionModel {
       'mediaUrl': mediaUrl,
       'mediaMimeType': mediaMimeType,
       'generatedAudioText': generatedAudioText,
+      'sortOrder': sortOrder,
+      'answered': answered,
+      'isCorrect': isCorrect,
     };
   }
 }
