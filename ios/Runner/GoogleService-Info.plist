@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>578212275082-6891o6gsc1a7ob1deab7b54ccjqi33if.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDPDXLbZoC7txXnh5tL6m4-4H0_pAlv9R4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>578212275082</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.shafacode.italirpothe</string>
+	<key>PROJECT_ID</key>
+	<string>italir-pothe</string>
+	<key>STORAGE_BUCKET</key>
+	<string>italir-pothe.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:578212275082:ios:64ffa69e9a41a14c1f1e73</string>
+</dict>
+</plist>
