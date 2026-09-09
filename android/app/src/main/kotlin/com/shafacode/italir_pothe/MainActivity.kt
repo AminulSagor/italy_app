@@ -2,7 +2,6 @@ package com.shafacode.italir_pothe
 
 import android.content.ContentValues
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -27,6 +26,7 @@ class MainActivity : FlutterActivity() {
         "italir_pothe/system_insets"
 
     private var navigationBarBottomInsetPx: Int = 0
+    private var aiVoiceAudioEngine: AiVoiceAudioEngine? = null
 
     override fun onCreate(
         savedInstanceState: Bundle?
@@ -40,13 +40,7 @@ class MainActivity : FlutterActivity() {
          * area before Flutter lays out the page, which can create
          * unwanted bottom space.
          */
-        WindowCompat.setDecorFitsSystemWindows(
-            window,
-            false
-        )
-
-        window.statusBarColor = Color.TRANSPARENT
-        window.navigationBarColor = Color.TRANSPARENT
+        WindowCompat.enableEdgeToEdge(window)
 
         /*
          * Remove Android's automatic navigation-bar contrast
@@ -54,7 +48,6 @@ class MainActivity : FlutterActivity() {
          */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
-            window.isStatusBarContrastEnforced = false
         }
 
         /*
@@ -112,6 +105,16 @@ class MainActivity : FlutterActivity() {
 
         registerDownloadChannel(flutterEngine)
         registerSystemInsetsChannel(flutterEngine)
+        aiVoiceAudioEngine = AiVoiceAudioEngine(
+            applicationContext,
+            flutterEngine.dartExecutor.binaryMessenger
+        ).also { it.register() }
+    }
+
+    override fun onDestroy() {
+        aiVoiceAudioEngine?.dispose()
+        aiVoiceAudioEngine = null
+        super.onDestroy()
     }
 
     /*

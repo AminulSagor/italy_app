@@ -28,12 +28,12 @@ class LessonContentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool hasItalianContent =
         lesson.italianText.trim().isNotEmpty ||
-            lesson.italianHighlightText.trim().isNotEmpty ||
-            lesson.italianMissingText.trim().isNotEmpty;
+        lesson.italianHighlightText.trim().isNotEmpty ||
+        lesson.italianMissingText.trim().isNotEmpty;
 
     final bool hasBanglaContent =
         lesson.banglaText.trim().isNotEmpty ||
-            lesson.banglaHighlightText.trim().isNotEmpty;
+        lesson.banglaHighlightText.trim().isNotEmpty;
 
     final bool hasAudio = audio?.fileId.trim().isNotEmpty == true;
 
@@ -52,7 +52,7 @@ class LessonContentCard extends StatelessWidget {
           ),
 
         if (hasAudio) ...<Widget>[
-          SizedBox(height: 20.h),
+          SizedBox(height: 8.h),
           _AudioPlayerControls(
             audioUrl: audio!.url,
             loadAudioUrl: loadAudioUrl,
@@ -60,20 +60,13 @@ class LessonContentCard extends StatelessWidget {
           ),
         ],
 
-        if (hasItalianContent) ...<Widget>[
-          SizedBox(height: 24.h),
-          _TheoryTextPanel(lesson: lesson),
-        ],
-
-        if (hasBanglaContent) ...<Widget>[
-          SizedBox(height: 24.h),
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: AppColors.legacyColorFFD0D1D2,
+        if (hasItalianContent || hasBanglaContent) ...<Widget>[
+          SizedBox(height: 8.h),
+          _LessonDescriptionPanel(
+            lesson: lesson,
+            hasItalianContent: hasItalianContent,
+            hasBanglaContent: hasBanglaContent,
           ),
-          SizedBox(height: 20.h),
-          _TranslationPanel(lesson: lesson),
         ],
       ],
     );
@@ -92,8 +85,7 @@ class _AudioPlayerControls extends StatefulWidget {
   });
 
   @override
-  State<_AudioPlayerControls> createState() =>
-      _AudioPlayerControlsState();
+  State<_AudioPlayerControls> createState() => _AudioPlayerControlsState();
 }
 
 class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
@@ -171,6 +163,7 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
     }
 
     _hasReportedCompletion = true;
+    unawaited(_audioPlayer.pause());
     widget.onAudioCompleted();
   }
 
@@ -229,8 +222,7 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
       setState(() {
         _isPreparing = false;
         _isPrepared = false;
-        _errorMessage =
-            'audio_could_not_be_loaded_tap_play_to_retry'.tr;
+        _errorMessage = 'audio_could_not_be_loaded_tap_play_to_retry'.tr;
       });
 
       return false;
@@ -281,8 +273,7 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
   }
 
   Future<void> _seekTo(double milliseconds) async {
-    final Duration duration =
-        _audioPlayer.duration ?? Duration.zero;
+    final Duration duration = _audioPlayer.duration ?? Duration.zero;
 
     if (!_isPrepared || duration.inMilliseconds <= 0) {
       return;
@@ -293,9 +284,7 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
         .clamp(0, duration.inMilliseconds)
         .toInt();
 
-    await _audioPlayer.seek(
-      Duration(milliseconds: targetMilliseconds),
-    );
+    await _audioPlayer.seek(Duration(milliseconds: targetMilliseconds));
   }
 
   @override
@@ -306,89 +295,88 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
         StreamBuilder<Duration?>(
           stream: _audioPlayer.durationStream,
           initialData: _audioPlayer.duration,
-          builder: (
-              BuildContext context,
-              AsyncSnapshot<Duration?> durationSnapshot,
+          builder:
+              (
+                BuildContext context,
+                AsyncSnapshot<Duration?> durationSnapshot,
               ) {
-            final Duration duration =
-                durationSnapshot.data ?? Duration.zero;
+                final Duration duration =
+                    durationSnapshot.data ?? Duration.zero;
 
-            return StreamBuilder<Duration>(
-              stream: _audioPlayer.positionStream,
-              initialData: _audioPlayer.position,
-              builder: (
-                  BuildContext context,
-                  AsyncSnapshot<Duration> positionSnapshot,
-                  ) {
-                Duration position =
-                    positionSnapshot.data ?? Duration.zero;
+                return StreamBuilder<Duration>(
+                  stream: _audioPlayer.positionStream,
+                  initialData: _audioPlayer.position,
+                  builder:
+                      (
+                        BuildContext context,
+                        AsyncSnapshot<Duration> positionSnapshot,
+                      ) {
+                        Duration position =
+                            positionSnapshot.data ?? Duration.zero;
 
-                if (duration.inMilliseconds > 0 &&
-                    position > duration) {
-                  position = duration;
-                }
+                        if (duration.inMilliseconds > 0 &&
+                            position > duration) {
+                          position = duration;
+                        }
 
-                final double maximum =
-                duration.inMilliseconds.toDouble();
+                        final double maximum = duration.inMilliseconds
+                            .toDouble();
 
-                final double currentValue = maximum <= 0
-                    ? 0
-                    : position.inMilliseconds
-                    .clamp(0, duration.inMilliseconds)
-                    .toDouble();
+                        final double currentValue = maximum <= 0
+                            ? 0
+                            : position.inMilliseconds
+                                  .clamp(0, duration.inMilliseconds)
+                                  .toDouble();
 
-                return Column(
-                  children: <Widget>[
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 6.h,
-                        thumbShape: RoundSliderThumbShape(
-                          enabledThumbRadius: 8.r,
-                        ),
-                        overlayShape: RoundSliderOverlayShape(
-                          overlayRadius: 14.r,
-                        ),
-                        activeTrackColor: AppColors.primaryGreen,
-                        inactiveTrackColor:
-                        AppColors.legacyColorFFD0D1D2,
-                        thumbColor: AppColors.primaryGreen,
-                        overlayColor: AppColors.primaryGreen.withValues(
-                          alpha: 0.14,
-                        ),
-                        trackShape:
-                        const RoundedRectSliderTrackShape(),
-                      ),
-                      child: Slider(
-                        value: currentValue,
-                        min: 0,
-                        max: maximum <= 0 ? 1 : maximum,
-                        onChanged:
-                        !_isPrepared || maximum <= 0
-                            ? null
-                            : (double newValue) {
-                          unawaited(_seekTo(newValue));
-                        },
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(
-                          _durationLabel(position),
-                          style: _durationStyle(),
-                        ),
-                        Text(
-                          _durationLabel(duration),
-                          style: _durationStyle(),
-                        ),
-                      ],
-                    ),
-                  ],
+                        return Column(
+                          children: <Widget>[
+                            SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 6.h,
+                                thumbShape: RoundSliderThumbShape(
+                                  enabledThumbRadius: 8.r,
+                                ),
+                                overlayShape: RoundSliderOverlayShape(
+                                  overlayRadius: 14.r,
+                                ),
+                                activeTrackColor: AppColors.primaryGreen,
+                                inactiveTrackColor:
+                                    AppColors.legacyColorFFD0D1D2,
+                                thumbColor: AppColors.primaryGreen,
+                                overlayColor: AppColors.primaryGreen.withValues(
+                                  alpha: 0.14,
+                                ),
+                                trackShape: const RoundedRectSliderTrackShape(),
+                              ),
+                              child: Slider(
+                                value: currentValue,
+                                min: 0,
+                                max: maximum <= 0 ? 1 : maximum,
+                                onChanged: !_isPrepared || maximum <= 0
+                                    ? null
+                                    : (double newValue) {
+                                        unawaited(_seekTo(newValue));
+                                      },
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  _durationLabel(position),
+                                  style: _durationStyle(),
+                                ),
+                                Text(
+                                  _durationLabel(duration),
+                                  style: _durationStyle(),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
                 );
               },
-            );
-          },
         ),
 
         if (_errorMessage != null) ...<Widget>[
@@ -411,27 +399,20 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
         SizedBox(height: 18.h),
 
         LayoutBuilder(
-          builder: (
-              BuildContext context,
-              BoxConstraints constraints,
-              ) {
-            final bool useCompactLayout =
-                constraints.maxWidth < 340.w;
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final bool useCompactLayout = constraints.maxWidth < 340.w;
 
             if (useCompactLayout) {
               return Column(
                 children: <Widget>[
                   Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       _AudioIconButton(
                         icon: _isMuted
                             ? Icons.volume_off_rounded
                             : Icons.volume_up_rounded,
-                        semanticLabel: _isMuted
-                            ? 'unmute'.tr
-                            : 'mute'.tr,
+                        semanticLabel: _isMuted ? 'unmute'.tr : 'mute'.tr,
                         onTap: _toggleMute,
                       ),
                       _buildPlayPauseButton(),
@@ -455,9 +436,7 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
                   icon: _isMuted
                       ? Icons.volume_off_rounded
                       : Icons.volume_up_rounded,
-                  semanticLabel: _isMuted
-                      ? 'unmute'.tr
-                      : 'mute'.tr,
+                  semanticLabel: _isMuted ? 'unmute'.tr : 'mute'.tr,
                   onTap: _toggleMute,
                 ),
                 Expanded(
@@ -481,23 +460,20 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
     return StreamBuilder<PlayerState>(
       stream: _audioPlayer.playerStateStream,
       initialData: _audioPlayer.playerState,
-      builder: (
-          BuildContext context,
-          AsyncSnapshot<PlayerState> snapshot,
-          ) {
+      builder: (BuildContext context, AsyncSnapshot<PlayerState> snapshot) {
         final PlayerState? state = snapshot.data;
 
         final bool isBuffering =
             _isPreparing ||
-                state?.processingState == ProcessingState.loading ||
-                state?.processingState == ProcessingState.buffering;
+            state?.processingState == ProcessingState.loading ||
+            state?.processingState == ProcessingState.buffering;
 
-        final bool isPlaying = state?.playing ?? false;
+        final bool isPlaying =
+            state?.playing == true &&
+            state?.processingState != ProcessingState.completed;
 
         return _AudioIconButton(
-          icon: isPlaying
-              ? Icons.pause_rounded
-              : Icons.play_arrow_rounded,
+          icon: isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
           semanticLabel: isPlaying ? 'pause'.tr : 'play'.tr,
           isPrimary: true,
           isLoading: isBuffering,
@@ -520,13 +496,9 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
     final int minutes = duration.inMinutes.remainder(60);
     final int seconds = duration.inSeconds.remainder(60);
 
-    final String paddedMinutes = minutes
-        .toString()
-        .padLeft(2, '0');
+    final String paddedMinutes = minutes.toString().padLeft(2, '0');
 
-    final String paddedSeconds = seconds
-        .toString()
-        .padLeft(2, '0');
+    final String paddedSeconds = seconds.toString().padLeft(2, '0');
 
     if (hours > 0) {
       return '$hours:$paddedMinutes:$paddedSeconds';
@@ -536,75 +508,85 @@ class _AudioPlayerControlsState extends State<_AudioPlayerControls> {
   }
 }
 
-class _TheoryTextPanel extends StatefulWidget {
+class _LessonDescriptionPanel extends StatefulWidget {
   final LessonContentModel lesson;
+  final bool hasItalianContent;
+  final bool hasBanglaContent;
 
-  const _TheoryTextPanel({
+  const _LessonDescriptionPanel({
     required this.lesson,
+    required this.hasItalianContent,
+    required this.hasBanglaContent,
   });
 
   @override
-  State<_TheoryTextPanel> createState() => _TheoryTextPanelState();
+  State<_LessonDescriptionPanel> createState() =>
+      _LessonDescriptionPanelState();
 }
 
-class _TheoryTextPanelState extends State<_TheoryTextPanel> {
+class _LessonDescriptionPanelState extends State<_LessonDescriptionPanel> {
   bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
     final LessonContentModel lesson = widget.lesson;
 
-    final String previewText = <String>[
-      lesson.italianText,
-      lesson.italianHighlightText,
-      lesson.italianMissingText,
-    ].where((String text) => text.trim().isNotEmpty).join(' ');
+    final String previewText = widget.hasItalianContent
+        ? <String>[
+            lesson.italianText,
+            lesson.italianHighlightText,
+            lesson.italianMissingText,
+          ].where((String text) => text.trim().isNotEmpty).join(' ')
+        : <String>[
+            lesson.banglaText,
+            lesson.banglaHighlightText,
+          ].where((String text) => text.trim().isNotEmpty).join(' ');
 
     if (!_isExpanded) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Expanded(
-            child: Text(
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _isExpanded = true),
+        child: Stack(
+          children: <Widget>[
+            Text(
               previewText,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: _bodyStyle(),
             ),
-          ),
-
-          SizedBox(width: 6.w),
-
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _isExpanded = true;
-              });
-            },
-            child: Text(
-              'See more',
-              style: TextStyle(
-                fontSize: AppFont.font13.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primaryGreen,
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: ColoredBox(
+                color: AppColors.coursesDetailBg,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 4.w),
+                  child: Text(
+                    '...more',
+                    style: TextStyle(
+                      fontSize: AppFont.font13.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryGreen,
+                      height: 1.55,
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (lesson.italianText.trim().isNotEmpty)
-          Text(
-            lesson.italianText,
-            style: _bodyStyle(),
-          ),
+        if (widget.hasItalianContent && lesson.italianText.trim().isNotEmpty)
+          Text(lesson.italianText, style: _bodyStyle()),
 
-        if (lesson.italianHighlightText.trim().isNotEmpty) ...<Widget>[
-          SizedBox(height: 10.h),
+        if (widget.hasItalianContent &&
+            lesson.italianHighlightText.trim().isNotEmpty) ...<Widget>[
+          SizedBox(height: 8.h),
           Text(
             lesson.italianHighlightText,
             style: _bodyStyle().copyWith(
@@ -615,8 +597,9 @@ class _TheoryTextPanelState extends State<_TheoryTextPanel> {
           ),
         ],
 
-        if (lesson.italianMissingText.trim().isNotEmpty) ...<Widget>[
-          SizedBox(height: 12.h),
+        if (widget.hasItalianContent &&
+            lesson.italianMissingText.trim().isNotEmpty) ...<Widget>[
+          SizedBox(height: 8.h),
           Text(
             lesson.italianMissingText,
             style: _bodyStyle().copyWith(
@@ -626,20 +609,56 @@ class _TheoryTextPanelState extends State<_TheoryTextPanel> {
           ),
         ],
 
-        SizedBox(height: 6.h),
+        if (widget.hasItalianContent && widget.hasBanglaContent) ...<Widget>[
+          SizedBox(height: 12.h),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: AppColors.legacyColorFFD0D1D2,
+          ),
+          SizedBox(height: 12.h),
+        ],
 
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _isExpanded = false;
-            });
-          },
-          child: Text(
-            'See less',
+        if (widget.hasBanglaContent) ...<Widget>[
+          if (lesson.translationLabel.trim().isNotEmpty) ...<Widget>[
+            Text(
+              lesson.translationLabel,
+              style: TextStyle(
+                fontSize: AppFont.font11.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.bodyText.withValues(alpha: 0.65),
+                height: 1.35,
+              ),
+            ),
+            SizedBox(height: 6.h),
+          ],
+          Text(
+            <String>[
+              lesson.banglaText,
+              lesson.banglaHighlightText,
+            ].where((String text) => text.trim().isNotEmpty).join('\n\n'),
             style: TextStyle(
-              fontSize: AppFont.font13.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primaryGreen,
+              fontSize: AppFont.font16.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.black,
+              height: 1.55,
+            ),
+          ),
+        ],
+
+        SizedBox(height: 4.h),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => setState(() => _isExpanded = false),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 4.h),
+            child: Text(
+              'Show less',
+              style: TextStyle(
+                fontSize: AppFont.font13.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryGreen,
+              ),
             ),
           ),
         ),
@@ -653,116 +672,6 @@ class _TheoryTextPanelState extends State<_TheoryTextPanel> {
       fontWeight: FontWeight.w500,
       color: AppColors.bodyText,
       height: 1.55,
-    );
-  }
-}
-
-class _TranslationPanel extends StatefulWidget {
-  final LessonContentModel lesson;
-
-  const _TranslationPanel({
-    required this.lesson,
-  });
-
-  @override
-  State<_TranslationPanel> createState() => _TranslationPanelState();
-}
-
-class _TranslationPanelState extends State<_TranslationPanel> {
-  bool _isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final LessonContentModel lesson = widget.lesson;
-
-    final String translatedText = <String>[
-      lesson.banglaText,
-      lesson.banglaHighlightText,
-    ].where((String item) => item.trim().isNotEmpty).join('\n\n');
-
-    final TextStyle textStyle = TextStyle(
-      fontSize: AppFont.font16.sp,
-      fontWeight: FontWeight.w500,
-      color: AppColors.black,
-      height: 1.55,
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        if (lesson.translationLabel.trim().isNotEmpty) ...<Widget>[
-          SizedBox(
-            width: double.infinity,
-            child: Text(
-              lesson.translationLabel,
-              textAlign: TextAlign.start,
-              style: TextStyle(
-                fontSize: AppFont.font11.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.bodyText.withValues(alpha: 0.65),
-                height: 1.35,
-              ),
-            ),
-          ),
-          SizedBox(height: 10.h),
-        ],
-
-        if (!_isExpanded)
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  translatedText,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textStyle,
-                ),
-              ),
-
-              SizedBox(width: 6.w),
-
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isExpanded = true;
-                  });
-                },
-                child: Text(
-                  'See more',
-                  style: TextStyle(
-                    fontSize: AppFont.font13.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryGreen,
-                  ),
-                ),
-              ),
-            ],
-          )
-        else ...<Widget>[
-          Text(
-            translatedText,
-            style: textStyle,
-          ),
-
-          SizedBox(height: 6.h),
-
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _isExpanded = false;
-              });
-            },
-            child: Text(
-              'See less',
-              style: TextStyle(
-                fontSize: AppFont.font13.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primaryGreen,
-              ),
-            ),
-          ),
-        ],
-      ],
     );
   }
 }
@@ -827,9 +736,7 @@ class _SpeedPill extends StatelessWidget {
       button: true,
       selected: isSelected,
       child: Material(
-        color: isSelected
-            ? AppColors.primaryGreen
-            : Colors.transparent,
+        color: isSelected ? AppColors.primaryGreen : Colors.transparent,
         borderRadius: BorderRadius.circular(kHomePillRadius.r),
         child: InkWell(
           onTap: onTap,
@@ -843,9 +750,7 @@ class _SpeedPill extends StatelessWidget {
               style: TextStyle(
                 fontSize: AppFont.font11.sp,
                 fontWeight: FontWeight.w800,
-                color: isSelected
-                    ? AppColors.white
-                    : AppColors.homePrimaryText,
+                color: isSelected ? AppColors.white : AppColors.homePrimaryText,
               ),
             ),
           ),
@@ -896,18 +801,14 @@ class _AudioIconButton extends StatelessWidget {
             child: Center(
               child: isLoading
                   ? SizedBox(
-                width: 22.w,
-                height: 22.w,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: foregroundColor,
-                ),
-              )
-                  : Icon(
-                icon,
-                color: foregroundColor,
-                size: 25.w,
-              ),
+                      width: 22.w,
+                      height: 22.w,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: foregroundColor,
+                      ),
+                    )
+                  : Icon(icon, color: foregroundColor, size: 25.w),
             ),
           ),
         ),

@@ -16,7 +16,7 @@ class SpecializedLearningCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(minHeight: kSpecializedCardHeight.h),
-      padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 28.h),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -36,40 +36,44 @@ class SpecializedLearningCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(
-            width: 62.w,
-            height: 62.w,
+            width: 48.w,
+            height: 48.w,
             decoration: const BoxDecoration(
               color: AppColors.homeLime,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.chat_bubble_rounded, color: AppColors.primaryGreen, size: 30.w),
+            child: Icon(
+              Icons.chat_bubble_rounded,
+              color: AppColors.primaryGreen,
+              size: 24.w,
+            ),
           ),
-          SizedBox(height: 28.h),
+          SizedBox(height: 16.h),
           Text(
             item.title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: AppFont.font20.sp,
+              fontSize: AppFont.font18.sp,
               fontWeight: FontWeight.w900,
               color: AppColors.white,
               letterSpacing: -0.5,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 6.h),
           Text(
             item.subtitle,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: AppFont.font14.sp,
+              fontSize: AppFont.font13.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.homeLime,
             ),
           ),
-          SizedBox(height: 22.h),
+          SizedBox(height: 16.h),
           Wrap(
             alignment: WrapAlignment.center,
-            spacing: 16.w,
-            runSpacing: 10.h,
+            spacing: 10.w,
+            runSpacing: 8.h,
             children: <Widget>[
               _FooterPill(icon: Icons.info_outline_rounded, label: item.requirementLabel),
               _FooterPill(icon: Icons.lock_rounded, label: item.lockedLabel, isMuted: true),
@@ -91,7 +95,7 @@ class _FooterPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: isMuted ? 0.12 : 0.06),
         borderRadius: BorderRadius.circular(kHomePillRadius.r),
@@ -100,12 +104,18 @@ class _FooterPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(icon, color: isMuted ? AppColors.coursesCardDisabledText : AppColors.homeLime, size: 14.w),
-          SizedBox(width: 7.w),
+          Icon(
+            icon,
+            color: isMuted
+                ? AppColors.coursesCardDisabledText
+                : AppColors.homeLime,
+            size: 13.w,
+          ),
+          SizedBox(width: 6.w),
           Text(
             label,
             style: TextStyle(
-              fontSize: AppFont.font12.sp,
+              fontSize: AppFont.font11.sp,
               fontWeight: FontWeight.w900,
               color: isMuted ? AppColors.coursesCardDisabledText : AppColors.homeLime,
             ),

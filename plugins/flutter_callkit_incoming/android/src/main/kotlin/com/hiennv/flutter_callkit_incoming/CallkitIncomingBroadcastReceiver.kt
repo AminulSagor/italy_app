@@ -288,12 +288,6 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                 parsedCall.id
             ) != null
         ) {
-            Log.d(
-                TAG,
-                "Telecom call already registered " +
-                        "id=${parsedCall.id}; skipping"
-            )
-
             return
         }
 
@@ -350,12 +344,6 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
             telecomManager.addNewIncomingCall(
                 phoneAccountHandle,
                 telecomExtras
-            )
-
-            Log.d(
-                TAG,
-                "Telecom addNewIncomingCall " +
-                        "id=${parsedCall.id}"
             )
         } catch (error: SecurityException) {
             Log.w(
@@ -450,11 +438,6 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
 
                 return
             }
-
-        Log.d(
-            TAG,
-            "Received action=$action"
-        )
 
         when (action) {
 
@@ -762,11 +745,6 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                         ""
                     )
 
-            Log.d(
-                TAG,
-                "handleEndedCall: id=$callId"
-            )
-
             /*
              * End the Android Telecom Connection first.
              * Android's system call screen remains open until the
@@ -776,11 +754,6 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                 CallkitConnection.find(callId)
 
             if (connection != null) {
-                Log.d(
-                    TAG,
-                    "Ending Telecom connection: $callId"
-                )
-
                 connection.markEnded()
             } else {
                 Log.w(
@@ -963,11 +936,6 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
         data: Bundle
     ) {
         if (silenceEvents) {
-            Log.d(
-                TAG,
-                "Flutter event silenced: $event"
-            )
-
             return
         }
 

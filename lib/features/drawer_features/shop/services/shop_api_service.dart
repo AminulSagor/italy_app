@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -13,12 +14,12 @@ class ShopApiService {
   final ApiClient _apiClient;
 
   static const String _endpoint = '/package-store';
-  static const String _provider = 'google_play';
+  String get provider => Platform.isIOS ? 'app_store' : 'google_play';
 
   Future<StoreShopModel> getShop() async {
     final Response<dynamic> response = await _apiClient.dio.get(
       '$_endpoint/shop',
-      queryParameters: const <String, dynamic>{'provider': _provider},
+      queryParameters: <String, dynamic>{'provider': provider},
     );
     return StoreShopModel.fromJson(_responseMap(response));
   }
@@ -31,7 +32,7 @@ class ShopApiService {
     final Response<dynamic> response = await _apiClient.dio.get(
       '$_endpoint/packages',
       queryParameters: <String, dynamic>{
-        'provider': _provider,
+        'provider': provider,
         'packageType': packageType.apiValue,
         'page': page,
         'limit': limit,
@@ -45,7 +46,7 @@ class ShopApiService {
   Future<StorePackageModel> getPackage(String packageId) async {
     final Response<dynamic> response = await _apiClient.dio.get(
       '$_endpoint/packages/$packageId',
-      queryParameters: const <String, dynamic>{'provider': _provider},
+      queryParameters: <String, dynamic>{'provider': provider},
     );
     return StorePackageModel.fromJson(_responseMap(response));
   }
@@ -65,7 +66,7 @@ class ShopApiService {
     final Response<dynamic> response = await _apiClient.dio.get(
       '$_endpoint/packages/$packageId/quote',
       queryParameters: <String, dynamic>{
-        'provider': _provider,
+        'provider': provider,
         'currency': currency.apiValue,
         if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
       },
@@ -74,15 +75,12 @@ class ShopApiService {
   }
 
   Future<void> cancelOrder(
-      String orderId, {
-        String reason =
-        'Checkout setup failed before Google Play opened.',
-      }) async {
+    String orderId, {
+    String reason = 'Checkout setup failed before Google Play opened.',
+  }) async {
     await _apiClient.dio.post(
       '$_endpoint/orders/$orderId/cancel',
-      data: <String, dynamic>{
-        'reason': reason,
-      },
+      data: <String, dynamic>{'reason': reason},
     );
   }
 
@@ -109,6 +107,27 @@ class ShopApiService {
   }) async {
     final Response<dynamic> response = await _apiClient.dio.post(
       '$_endpoint/orders/$orderId/google-play/verify',
+      data: payload.toJson(),
+    );
+    return StorePurchaseCompletionModel.fromJson(_responseMap(response));
+  }
+
+  Future<StorePurchaseCompletionModel> verifyAppStorePurchase({
+    required String orderId,
+    required VerifyAppStorePurchasePayloadModel payload,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '$_endpoint/orders/$orderId/app-store/verify',
+      data: payload.toJson(),
+    );
+    return StorePurchaseCompletionModel.fromJson(_responseMap(response));
+  }
+
+  Future<StorePurchaseCompletionModel> restoreAppStoreSubscription({
+    required RestoreAppStoreSubscriptionPayloadModel payload,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '$_endpoint/app-store/restore',
       data: payload.toJson(),
     );
     return StorePurchaseCompletionModel.fromJson(_responseMap(response));

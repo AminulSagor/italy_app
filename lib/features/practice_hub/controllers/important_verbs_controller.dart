@@ -19,8 +19,7 @@ class ImportantVerbsController extends GetxController {
        _ttsService = ttsService;
 
   String get _language {
-    final String languageCode =
-        Get.locale?.languageCode.toLowerCase() ?? 'en';
+    final String languageCode = Get.locale?.languageCode.toLowerCase() ?? 'en';
 
     if (languageCode == 'bn') {
       return 'bn';
@@ -32,6 +31,7 @@ class ImportantVerbsController extends GetxController {
 
     return 'en';
   }
+
   static const int _pageSize = 10;
   static const Duration _searchDebounceDuration = Duration(milliseconds: 450);
 
@@ -118,18 +118,21 @@ class ImportantVerbsController extends GetxController {
     super.onInit();
     unawaited(loadInitialData());
   }
+
   Future<void> loadInitialData() async {
     await Future.wait<void>(<Future<void>>[
       loadVerbs(showError: false),
       loadSavedVerbs(showError: false),
     ]);
   }
+
   Future<void> refreshImportantVerbs() async {
     await Future.wait<void>(<Future<void>>[
       loadVerbs(showError: true),
       loadSavedVerbs(showError: true),
     ]);
   }
+
   Future<void> loadVerbs({bool showError = true}) async {
     final int requestId = ++_verbsRequestId;
     isVerbsLoading.value = true;
@@ -170,10 +173,9 @@ class ImportantVerbsController extends GetxController {
       }
     }
   }
+
   Future<void> loadMoreVerbs() async {
-    if (isVerbsLoading.value ||
-        isLoadingMoreVerbs.value ||
-        !hasMoreVerbs) {
+    if (isVerbsLoading.value || isLoadingMoreVerbs.value || !hasMoreVerbs) {
       return;
     }
     final int requestId = _verbsRequestId;
@@ -212,6 +214,7 @@ class ImportantVerbsController extends GetxController {
       }
     }
   }
+
   Future<void> loadSavedVerbs({bool showError = true}) async {
     final int requestId = ++_savedVerbsRequestId;
     isSavedVerbsLoading.value = true;
@@ -219,9 +222,7 @@ class ImportantVerbsController extends GetxController {
     savedVerbsError.value = '';
     _savedVerbsPage = 0;
     _savedVerbsTotalPages = 1;
-    final _VerbFilterQuery filter = _filterFor(
-      selectedSavedVerbFilter.value,
-    );
+    final _VerbFilterQuery filter = _filterFor(selectedSavedVerbFilter.value);
     final String search = savedVerbSearchQuery.value;
     try {
       final ApiResult<ImportantVerbListResponseModel> result =
@@ -238,8 +239,7 @@ class ImportantVerbsController extends GetxController {
           );
       if (requestId != _savedVerbsRequestId) return;
       if (!result.isSuccess || result.data == null) {
-        savedVerbsError.value =
-            result.error ?? 'unable_to_load_saved_verbs'.tr;
+        savedVerbsError.value = result.error ?? 'unable_to_load_saved_verbs'.tr;
         return;
       }
       final ImportantVerbListResponseModel response = result.data!;
@@ -254,6 +254,7 @@ class ImportantVerbsController extends GetxController {
       }
     }
   }
+
   Future<void> loadMoreSavedVerbs() async {
     if (isSavedVerbsLoading.value ||
         isLoadingMoreSavedVerbs.value ||
@@ -262,9 +263,7 @@ class ImportantVerbsController extends GetxController {
     }
     final int requestId = _savedVerbsRequestId;
     final int nextPage = _savedVerbsPage + 1;
-    final _VerbFilterQuery filter = _filterFor(
-      selectedSavedVerbFilter.value,
-    );
+    final _VerbFilterQuery filter = _filterFor(selectedSavedVerbFilter.value);
     final String search = savedVerbSearchQuery.value;
     isLoadingMoreSavedVerbs.value = true;
     try {
@@ -297,6 +296,7 @@ class ImportantVerbsController extends GetxController {
       }
     }
   }
+
   void onImportantVerbSearchChanged(String value) {
     importantVerbSearchQuery.value = value;
     _verbsRequestId++;
@@ -309,6 +309,7 @@ class ImportantVerbsController extends GetxController {
       unawaited(_loadSearchSuggestions(value));
     });
   }
+
   void onSavedVerbSearchChanged(String value) {
     savedVerbSearchQuery.value = value;
     _savedVerbsRequestId++;
@@ -320,6 +321,7 @@ class ImportantVerbsController extends GetxController {
       unawaited(loadSavedVerbs());
     });
   }
+
   Future<void> _loadSearchSuggestions(String value) async {
     final String query = value.trim();
     final int requestId = ++_searchRequestId;
@@ -343,9 +345,7 @@ class ImportantVerbsController extends GetxController {
           importantVerbSearchQuery.value.trim() != query) {
         return;
       }
-      searchSuggestions.assignAll(
-        result.dataOr(<ImportantVerbSummaryModel>[]),
-      );
+      searchSuggestions.assignAll(result.dataOr(<ImportantVerbSummaryModel>[]));
       _syncSavedIds(searchSuggestions);
     } finally {
       if (requestId == _searchRequestId) {
@@ -353,6 +353,7 @@ class ImportantVerbsController extends GetxController {
       }
     }
   }
+
   void clearImportantVerbSearch() {
     _importantSearchDebounce?.cancel();
     _searchRequestId++;
@@ -361,6 +362,7 @@ class ImportantVerbsController extends GetxController {
     searchSuggestions.clear();
     unawaited(loadVerbs());
   }
+
   void clearSavedVerbSearch() {
     _savedSearchDebounce?.cancel();
     savedVerbSearchController.clear();
@@ -390,7 +392,10 @@ class ImportantVerbsController extends GetxController {
 
   void onViewAllSavedVerbsTap() {
     unawaited(loadSavedVerbs(showError: false));
-    Get.to<void>(() => const SavedVerbsView(), transition: Transition.rightToLeft);
+    Get.to<void>(
+      () => const SavedVerbsView(),
+      transition: Transition.rightToLeft,
+    );
   }
 
   void onVerbSuggestionTap(ImportantVerbSummaryModel verb) {
@@ -466,9 +471,7 @@ class ImportantVerbsController extends GetxController {
 
   bool isVerbSaved(String verbId) => savedVerbIds.contains(verbId);
 
-  Future<void> toggleVerbSaved(
-      ImportantVerbSummaryModel verb,
-      ) async {
+  Future<void> toggleVerbSaved(ImportantVerbSummaryModel verb) async {
     if (isVerbSavePending(verb.id)) {
       return;
     }
@@ -479,31 +482,20 @@ class ImportantVerbsController extends GetxController {
     savingVerbIds.refresh();
 
     // Keep the optimistic UI update.
-    _setVerbSavedState(
-      verb.id,
-      !wasSaved,
-    );
+    _setVerbSavedState(verb.id, !wasSaved);
 
     bool wasSuccessful = false;
 
     try {
-      final ApiResult<void> result =
-      await ApiErrorHandler.call<void>(
-            () => wasSaved
-            ? _apiService.removeSavedVerb(
-          verbId: verb.id,
-        )
-            : _apiService.saveVerb(
-          verbId: verb.id,
-        ),
+      final ApiResult<void> result = await ApiErrorHandler.call<void>(
+        () => wasSaved
+            ? _apiService.removeSavedVerb(verbId: verb.id)
+            : _apiService.saveVerb(verbId: verb.id),
       );
 
       if (!result.isSuccess) {
         // Restore the previous state when the API fails.
-        _setVerbSavedState(
-          verb.id,
-          wasSaved,
-        );
+        _setVerbSavedState(verb.id, wasSaved);
         return;
       }
 
@@ -514,11 +506,7 @@ class ImportantVerbsController extends GetxController {
     }
 
     if (wasSuccessful) {
-      unawaited(
-        loadSavedVerbs(
-          showError: false,
-        ),
-      );
+      unawaited(loadSavedVerbs(showError: false));
     }
   }
 
@@ -528,13 +516,14 @@ class ImportantVerbsController extends GetxController {
     isSpeaking.value = true;
     speakingText.value = tts.text;
     try {
-      await _ttsService.speak(tts);
-    } catch (_) {
-      Get.snackbar(
-        'pronunciation_unavailable'.tr,
-        'Install or enable an Italian voice on this device and try again.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      final bool started = await _ttsService.speak(tts);
+      if (!started) {
+        Get.snackbar(
+          'pronunciation_unavailable'.tr,
+          'Install or enable an Italian voice on this device and try again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
     } finally {
       isSpeaking.value = false;
       speakingText.value = '';
@@ -611,9 +600,8 @@ class ImportantVerbsController extends GetxController {
               !removeUnsaved || savedVerbIds.contains(item.id),
         )
         .map(
-          (ImportantVerbSummaryModel item) => item.copyWith(
-            isSaved: savedVerbIds.contains(item.id),
-          ),
+          (ImportantVerbSummaryModel item) =>
+              item.copyWith(isSaved: savedVerbIds.contains(item.id)),
         )
         .toList(growable: false);
     target.assignAll(updated);
@@ -622,29 +610,19 @@ class ImportantVerbsController extends GetxController {
   _VerbFilterQuery _filterFor(String label) {
     switch (label.trim().toLowerCase()) {
       case 'regular':
-        return const _VerbFilterQuery(
-          regularity: 'regular',
-        );
+        return const _VerbFilterQuery(regularity: 'regular');
 
       case 'irregular':
-        return const _VerbFilterQuery(
-          regularity: 'irregular',
-        );
+        return const _VerbFilterQuery(regularity: 'irregular');
 
       case '-are':
-        return const _VerbFilterQuery(
-          endingType: '-are',
-        );
+        return const _VerbFilterQuery(endingType: '-are');
 
       case '-ere':
-        return const _VerbFilterQuery(
-          endingType: '-ere',
-        );
+        return const _VerbFilterQuery(endingType: '-ere');
 
       case '-ire':
-        return const _VerbFilterQuery(
-          endingType: '-ire',
-        );
+        return const _VerbFilterQuery(endingType: '-ire');
 
       default:
         return const _VerbFilterQuery();

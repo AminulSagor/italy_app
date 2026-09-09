@@ -185,6 +185,8 @@ class _ProfileHero extends StatelessWidget {
         Text(
           profile.name,
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: AppFont.font30.sp,
             fontWeight: FontWeight.w800,
@@ -194,7 +196,7 @@ class _ProfileHero extends StatelessWidget {
         ),
         SizedBox(height: 4.h),
         Container(
-          width: 90.w,
+          constraints: BoxConstraints(minWidth: 90.w, maxWidth: 160.w),
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
           alignment: Alignment.center,
           decoration: BoxDecoration(
@@ -205,6 +207,9 @@ class _ProfileHero extends StatelessWidget {
           ),
           child: Text(
             profile.statusLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: AppFont.font12.sp,
               fontWeight: FontWeight.w700,
@@ -227,30 +232,33 @@ class _StatsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: ProfileStatCard(
-            icon: Icons.local_fire_department_rounded,
-            value: profile.streakValue,
-            label: 'gen_current_streak'.tr,
-            backgroundColor: AppColors.profileOrangeCardBg,
-            textColor: AppColors.profileOrangeText,
-            iconColor: AppColors.notificationOrange,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(
+            child: ProfileStatCard(
+              icon: Icons.local_fire_department_rounded,
+              value: profile.streakValue,
+              label: 'gen_current_streak'.tr,
+              backgroundColor: AppColors.profileOrangeCardBg,
+              textColor: AppColors.profileOrangeText,
+              iconColor: AppColors.notificationOrange,
+            ),
           ),
-        ),
-        SizedBox(width: 22.w),
-        Expanded(
-          child: ProfileStatCard(
-            icon: Icons.flash_on_rounded,
-            value: profile.xpValue,
-            label: 'gen_total_earned'.tr,
-            backgroundColor: AppColors.profileBlueCardBg,
-            textColor: AppColors.profileBlueText,
-            iconColor: AppColors.profileBlueText,
+          SizedBox(width: 22.w),
+          Expanded(
+            child: ProfileStatCard(
+              icon: Icons.flash_on_rounded,
+              value: profile.xpValue,
+              label: 'gen_total_earned'.tr,
+              backgroundColor: AppColors.profileBlueCardBg,
+              textColor: AppColors.profileBlueText,
+              iconColor: AppColors.profileBlueText,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

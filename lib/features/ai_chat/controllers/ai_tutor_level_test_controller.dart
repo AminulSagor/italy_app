@@ -13,6 +13,7 @@ import '../services/ai_tutor_preferences_service.dart';
 import '../views/ai_tutor_discovery_view.dart';
 import '../views/ai_tutor_level_test_question_view.dart';
 import '../views/ai_tutor_level_test_result_view.dart';
+import 'ai_chat_controller.dart';
 
 class AiTutorLevelTestController extends GetxController {
   AiTutorLevelTestController({
@@ -40,13 +41,22 @@ class AiTutorLevelTestController extends GetxController {
   final RxInt recordedSeconds = 0.obs;
   final Rxn<AiTutorLearnerProfileModel> resultProfile =
       Rxn<AiTutorLearnerProfileModel>();
+  final RxInt attemptsRemaining = 0.obs;
+  final RxInt maxAttempts = 0.obs;
+  final RxBool canAttempt = true.obs;
+  final RxBool hasPaidAccess = false.obs;
 
   final Map<String, AiTutorLevelAnswerModel> _answers =
       <String, AiTutorLevelAnswerModel>{};
   Timer? _recordingTimer;
   bool _releaseRequestedWhilePreparing = false;
 
-  List<AiTutorLevelQuestionModel> get questions => aiTutorLevelTestQuestions;
+  List<AiTutorLevelQuestionModel> get questions => aiTutorLevelTestQuestions
+      .where(
+        (AiTutorLevelQuestionModel question) =>
+            question.type == AiTutorQuestionType.singleChoice,
+      )
+      .toList(growable: false);
 
   AiTutorLevelQuestionModel get currentQuestion =>
       questions[currentQuestionIndex.value];
@@ -99,6 +109,10 @@ class AiTutorLevelTestController extends GetxController {
     }
 
     final AiTutorLearnerProfileModel? profile = result.data!.profile;
+    attemptsRemaining.value = result.data!.attemptsRemaining;
+    maxAttempts.value = result.data!.maxAttempts;
+    canAttempt.value = result.data!.canAttempt;
+    hasPaidAccess.value = result.data!.hasPaidAccess;
     if (profile == null) {
       _preferencesService.clearProfile();
       return;
@@ -106,8 +120,36 @@ class AiTutorLevelTestController extends GetxController {
     _preferencesService.setProfile(profile);
   }
 
-  void startTest() {
+  Future<void> startTest() async {
+    await refreshProfile();
+    if (!canAttempt.value) {
+      Get.snackbar(
+        'gen_level_test'.tr,
+        'You have used all available free level-test attempts.',
+      );
+      return;
+    }
     _resetTest();
+    Get.find<AiChatController>().openLevelTestVoiceSession();
+  }
+
+  void completeSpeakingAssessment(String transcript) {
+    final String answer = transcript.trim();
+    if (answer.isEmpty) {
+      Get.snackbar(
+        'answer_required'.tr,
+        'Please speak during the level test before continuing.',
+      );
+      return;
+    }
+    _answers['speaking_live_assessment'] = AiTutorLevelAnswerModel(
+      questionId: 'speaking_live_assessment',
+      skill: AiTutorSkillType.speaking,
+      question: 'Adaptive live Italian speaking assessment',
+      answer: answer,
+    );
+    currentQuestionIndex.value = 0;
+    _restoreCurrentAnswer();
     Get.to<void>(
       () => const AiTutorLevelTestQuestionView(),
       transition: Transition.rightToLeft,
@@ -259,11 +301,8 @@ class AiTutorLevelTestController extends GetxController {
   }
 
   void retakeTest() {
-    _resetTest();
-    Get.off<void>(
-      () => const AiTutorLevelTestQuestionView(),
-      transition: Transition.rightToLeft,
-    );
+    Get.back<void>();
+    unawaited(startTest());
   }
 
   void continueToAiChat() {
@@ -320,14 +359,23 @@ class AiTutorLevelTestController extends GetxController {
   }
 
   Future<void> _evaluateAnswers() async {
-    final List<AiTutorLevelAnswerModel> answers = questions
+    final AiTutorLevelAnswerModel? speakingAnswer =
+        _answers['speaking_live_assessment'];
+    final List<AiTutorLevelAnswerModel> mcqAnswers = questions
         .map((AiTutorLevelQuestionModel item) => _answers[item.id])
         .whereType<AiTutorLevelAnswerModel>()
         .toList(growable: false);
-    if (answers.length != questions.length) {
-      Get.snackbar('test_incomplete'.tr, 'please_answer_all_ten_questions'.tr);
+    if (speakingAnswer == null || mcqAnswers.length != questions.length) {
+      Get.snackbar(
+        'test_incomplete'.tr,
+        'Please complete the speaking assessment and every question.',
+      );
       return;
     }
+    final List<AiTutorLevelAnswerModel> answers = <AiTutorLevelAnswerModel>[
+      speakingAnswer,
+      ...mcqAnswers,
+    ];
 
     isSubmitting.value = true;
     try {

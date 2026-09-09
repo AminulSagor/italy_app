@@ -43,9 +43,9 @@ class ShopRefillCreditCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 160.h,
+      constraints: const BoxConstraints(minHeight: 160),
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 32.w),
+      padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 20.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(44.r),
         gradient: const LinearGradient(
@@ -68,6 +68,8 @@ class ShopRefillCreditCard extends StatelessWidget {
               children: <Widget>[
                 Text(
                   title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 24.sp,
                     fontWeight: FontWeight.w900,
@@ -228,7 +230,7 @@ class ShopStreakFreezeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 216.h,
+      constraints: const BoxConstraints(minHeight: 216),
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(32.w, 34.h, 32.w, 30.h),
       decoration: BoxDecoration(
@@ -287,7 +289,7 @@ class ShopStreakFreezeCard extends StatelessWidget {
               ),
             ],
           ),
-          const Spacer(),
+          SizedBox(height: 24.h),
           _ShopBuyNowButton(
             textColor: const Color(0xFF0066A8),
             bgColor: Colors.white,
@@ -356,7 +358,7 @@ class ShopBalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 164.h,
+      constraints: const BoxConstraints(minHeight: 164),
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 18.h),
       decoration: BoxDecoration(
         color: bgColor,
@@ -370,6 +372,8 @@ class ShopBalanceCard extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 12.sp,
               height: 1.15,
@@ -378,16 +382,14 @@ class ShopBalanceCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 12.h),
-          Expanded(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                value,
-                style: TextStyle(
-                  fontSize: AppFont.font26.sp,
-                  fontWeight: FontWeight.w900,
-                  color: iconColor,
-                ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: AppFont.font26.sp,
+                fontWeight: FontWeight.w900,
+                color: iconColor,
               ),
             ),
           ),
@@ -405,8 +407,9 @@ class ShopCvBalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 144.h,
+      constraints: const BoxConstraints(minHeight: 144),
       width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 18.h),
       decoration: BoxDecoration(
         color: const Color(0xFFFFEED5),
         borderRadius: BorderRadius.circular(30.r),
@@ -423,6 +426,9 @@ class ShopCvBalanceCard extends StatelessWidget {
           SizedBox(height: 16.h),
           Text(
             'cv_credits'.tr,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w900,

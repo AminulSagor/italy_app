@@ -97,8 +97,6 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
                       child: Obx(() {
                         final AiTutorVoiceService voice =
                             controller.voiceService;
-                        final bool connecting =
-                            controller.isLiveVoiceConnecting;
                         final bool failed =
                             voice.connectionState.value ==
                             AiTutorVoiceConnectionState.error;
@@ -106,13 +104,12 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
                             voice.assistantThinking.value
                             ? ''
                             : voice.latestAssistantMessage?.primary ?? '';
-                        final String userText =
-                            voice.latestUserMessage?.primary ?? '';
 
                         return SingleChildScrollView(
                           physics: const BouncingScrollPhysics(),
-                          padding: EdgeInsets.fromLTRB(24.w, 46.h, 24.w, 175.h),
+                          padding: EdgeInsets.fromLTRB(24.w, 18.h, 24.w, 300.h),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
                               Center(
                                 child: _SessionStatusChip(
@@ -120,96 +117,44 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
                                   active: voice.isConnected,
                                 ),
                               ),
-                              SizedBox(height: 46.h),
-                              if (connecting)
-                                SizedBox(
-                                  width: 54.r,
-                                  height: 54.r,
-                                  child: const CircularProgressIndicator(
-                                    strokeWidth: 4,
-                                    color: AppColors.primaryGreen,
-                                  ),
-                                )
-                              else
-                                AiTutorWaveform(
-                                  activeColor: AppColors.primaryGreen,
-                                  inactiveColor: AppColors.primaryGreen
-                                      .withValues(alpha: .14),
-                                  width: 118,
-                                  height: 126,
-                                  animate:
-                                      voice.isConnected &&
-                                      (voice.assistantSpeaking.value ||
-                                          voice.userSpeaking.value),
-                                  thinking: voice.assistantThinking.value,
-                                  audioLevel: voice.activeAudioLevel,
-                                ),
-                              SizedBox(height: 42.h),
+                              SizedBox(height: 28.h),
                               if (assistantText.isNotEmpty)
                                 Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: <Widget>[
-                                    AnimatedSwitcher(
-                                      duration: const Duration(
-                                        milliseconds: 140,
-                                      ),
-                                      child: Text(
-                                        assistantText,
-                                        key: ValueKey<String>(assistantText),
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: AppFont.font22.sp,
-                                          height: 1.22,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: -.6,
-                                          color: const Color(0xFF26312E),
-                                        ),
+                                    Text(
+                                      assistantText,
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                        fontSize: AppFont.font22.sp,
+                                        height: 1.34,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -.35,
+                                        color: const Color(0xFF26312E),
                                       ),
                                     ),
-
-                                    SizedBox(height: 8.h),
-
-                                    AiReportButton(
-                                      source: AiContentReportSource(
-                                        featureType:
-                                            AiReportFeatureType.talking,
-
-                                        // Automatically attaches the visible AI transcript.
-                                        aiContentText: assistantText,
+                                    SizedBox(height: 12.h),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: AiReportButton(
+                                        source: AiContentReportSource(
+                                          featureType:
+                                              AiReportFeatureType.talking,
+                                          aiContentText: assistantText,
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
-                              if (userText.isNotEmpty) ...<Widget>[
-                                SizedBox(height: 24.h),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 16.w,
-                                    vertical: 11.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.white.withValues(
-                                      alpha: .75,
-                                    ),
-                                    borderRadius: BorderRadius.circular(18.r),
-                                  ),
-                                  child: Text(
-                                    userText,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 11.sp,
-                                      height: 1.35,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF6E7874),
-                                    ),
-                                  ),
-                                ),
-                              ],
                               if (failed) ...<Widget>[
                                 SizedBox(height: 24.h),
-                                OutlinedButton.icon(
-                                  onPressed: controller.retryLiveVoice,
-                                  icon: const Icon(Icons.refresh_rounded),
-                                  label: Text('try_again'.tr),
+                                Center(
+                                  child: OutlinedButton.icon(
+                                    onPressed: controller.retryLiveVoice,
+                                    icon: const Icon(Icons.refresh_rounded),
+                                    label: Text('try_again'.tr),
+                                  ),
                                 ),
                               ],
                             ],
@@ -223,7 +168,52 @@ class _AiTutorLiveVoiceViewState extends State<AiTutorLiveVoiceView>
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  child: NativeBottomInset(child: const _LiveVoiceControls()),
+                  child: NativeBottomInset(
+                    additionalBottom: 174.h,
+                    child: Obx(() {
+                      final AiTutorVoiceService voice = controller.voiceService;
+                      if (controller.isLiveVoiceConnecting) {
+                        return Center(
+                          child: SizedBox(
+                            width: 42.r,
+                            height: 42.r,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 3,
+                              color: AppColors.primaryGreen,
+                            ),
+                          ),
+                        );
+                      }
+                      return Center(
+                        child: AiTutorWaveform(
+                          activeColor: AppColors.primaryGreen,
+                          inactiveColor: AppColors.primaryGreen.withValues(
+                            alpha: .14,
+                          ),
+                          width: 104,
+                          height: 74,
+                          animate:
+                              voice.isConnected &&
+                              (voice.assistantSpeaking.value ||
+                                  voice.userSpeaking.value),
+                          thinking: voice.assistantThinking.value,
+                          audioLevel: voice.activeAudioLevel,
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: const ColoredBox(
+                    color: Color(0xFFE4F7DE),
+                    child: NativeBottomInset(
+                      additionalBottom: 8,
+                      child: _LiveVoiceControls(),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -319,10 +309,10 @@ class _LiveVoiceControls extends GetView<AiChatController> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 150.h,
+      constraints: const BoxConstraints(minHeight: 150),
       padding: EdgeInsets.fromLTRB(34.w, 24.h, 34.w, 30.h),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: .96),
+        color: const Color(0xFFE4F7DE),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         boxShadow: <BoxShadow>[
           BoxShadow(
@@ -339,12 +329,15 @@ class _LiveVoiceControls extends GetView<AiChatController> {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            _SmallControlButton(
-              icon: Icons.keyboard_alt_outlined,
-              color: const Color(0xFF77807C),
-              enabled: !busy && !controller.isGuidedVoiceSession,
-              onTap: controller.switchLiveVoiceToText,
-            ),
+            if (controller.isLevelTestVoiceSession)
+              SizedBox(width: 48.r, height: 48.r)
+            else
+              _SmallControlButton(
+                icon: Icons.keyboard_alt_outlined,
+                color: AppColors.primaryGreen,
+                enabled: !busy && !controller.isGuidedVoiceSession,
+                onTap: controller.switchLiveVoiceToText,
+              ),
             GestureDetector(
               onTap: busy
                   ? null

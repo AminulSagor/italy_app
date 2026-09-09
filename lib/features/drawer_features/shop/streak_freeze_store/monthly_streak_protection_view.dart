@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -10,10 +12,7 @@ import '../models/shop_models.dart';
 import '../shop_controller.dart';
 
 class MonthlyStreakProtectionView extends StatefulWidget {
-  const MonthlyStreakProtectionView({
-    super.key,
-    required this.package,
-  });
+  const MonthlyStreakProtectionView({super.key, required this.package});
 
   final StorePackageModel? package;
 
@@ -25,11 +24,10 @@ class MonthlyStreakProtectionView extends StatefulWidget {
 class _MonthlyStreakProtectionViewState
     extends State<MonthlyStreakProtectionView>
     with WidgetsBindingObserver {
-  static const String _androidPackageName =
-      'com.shafacode.italir_pothe';
+  static const String _androidPackageName = 'com.shafacode.italir_pothe';
 
   late final ShopController _controller;
-  bool _openingGooglePlay = false;
+  bool _openingStore = false;
 
   @override
   void initState() {
@@ -51,23 +49,31 @@ class _MonthlyStreakProtectionViewState
     }
   }
 
-  Future<void> _openGooglePlaySubscription() async {
-    if (_openingGooglePlay) return;
+  Future<void> _openStoreSubscription() async {
+    if (_openingStore) return;
 
-    setState(() => _openingGooglePlay = true);
+    setState(() => _openingStore = true);
 
     try {
-      final String activeProductId =
-      _controller.activeMonthlyProductId
-          .trim();
+      if (Platform.isIOS) {
+        final bool opened = await launchUrl(
+          Uri.parse('https://apps.apple.com/account/subscriptions'),
+          mode: LaunchMode.externalApplication,
+        );
+        if (!opened) {
+          Get.snackbar(
+            'Unable to open App Store',
+            'Open Settings > Apple Account > Subscriptions manually.',
+          );
+        }
+        return;
+      }
 
-      final String productId =
-      activeProductId.isNotEmpty
+      final String activeProductId = _controller.activeMonthlyProductId.trim();
+
+      final String productId = activeProductId.isNotEmpty
           ? activeProductId
-          : widget.package?.storeProduct
-          ?.productId
-          .trim() ??
-          '';
+          : widget.package?.storeProduct?.productId.trim() ?? '';
 
       final Map<String, String> queryParameters = <String, String>{
         'package': _androidPackageName,
@@ -87,9 +93,7 @@ class _MonthlyStreakProtectionViewState
 
       if (!opened) {
         opened = await launchUrl(
-          Uri.parse(
-            'https://play.google.com/store/account/subscriptions',
-          ),
+          Uri.parse('https://play.google.com/store/account/subscriptions'),
           mode: LaunchMode.externalApplication,
         );
       }
@@ -107,7 +111,7 @@ class _MonthlyStreakProtectionViewState
       );
     } finally {
       if (mounted) {
-        setState(() => _openingGooglePlay = false);
+        setState(() => _openingStore = false);
       }
     }
   }
@@ -126,41 +130,30 @@ class _MonthlyStreakProtectionViewState
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w900,
-          ),
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900),
         ),
       ),
       body: SafeArea(
         top: false,
         child: Obx(() {
-          final bool active =
-              _controller.hasActiveMonthlyStreakProtection;
-          final StoreActiveSubscriptionModel?
-          subscription =
-              _controller
-                  .activeMonthlyStreakSubscription;
+          final bool active = _controller.hasActiveMonthlyStreakProtection;
+          final StoreActiveSubscriptionModel? subscription =
+              _controller.activeMonthlyStreakSubscription;
 
-          final String renewalStatus =
-          !active
-              ? 'monthly_protection_inactive'
-              .tr
-              : subscription
-              ?.autoRenewEnabled ==
-              true
-              ? 'monthly_plan_auto_renews'
-              .tr
-              : 'monthly_plan_cancelled_active'
-              .tr;
+          final String renewalStatus = !active
+              ? 'monthly_protection_inactive'.tr
+              : subscription?.autoRenewEnabled == true
+              ? 'monthly_plan_auto_renews'.tr
+              : 'monthly_plan_cancelled_active'.tr;
 
           final DateTime? expiresAt =
               _controller.monthlyStreakProtectionExpiresAt;
 
           final String expiryText = expiresAt == null
               ? 'expiry_date_not_available'.tr
-              : MaterialLocalizations.of(context)
-                  .formatMediumDate(expiresAt.toLocal());
+              : MaterialLocalizations.of(
+                  context,
+                ).formatMediumDate(expiresAt.toLocal());
 
           return RefreshIndicator(
             onRefresh: _controller.refreshBalances,
@@ -243,8 +236,7 @@ class _MonthlyStreakProtectionViewState
                           style: TextStyle(
                             fontSize: AppFont.font12.sp,
 
-                            fontWeight:
-                            FontWeight.w700,
+                            fontWeight: FontWeight.w700,
 
                             height: 1.35,
 
@@ -351,19 +343,44 @@ class _MonthlyStreakProtectionViewState
                   ),
                   SizedBox(height: 24.h),
                   CustomButton.primary(
-                    text: _openingGooglePlay
-                        ? 'opening_google_play'.tr
-                        : 'manage_or_cancel_google_play'.tr,
+                    text: _openingStore
+                        ? (Platform.isIOS
+                              ? 'Opening App Store...'
+                              : 'opening_google_play'.tr)
+                        : (Platform.isIOS
+                              ? 'Manage or cancel in App Store'
+                              : 'manage_or_cancel_google_play'.tr),
                     icon: Icons.open_in_new_rounded,
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w800,
-                    onPressed: _openingGooglePlay
-                        ? () {}
-                        : _openGooglePlaySubscription,
+                    onPressed: _openingStore ? () {} : _openStoreSubscription,
                   ),
+                  if (Platform.isIOS && widget.package != null) ...<Widget>[
+                    SizedBox(height: 12.h),
+                    CustomButton(
+                      text: _controller.isRestoringSubscription.value
+                          ? 'Restoring purchases...'
+                          : 'Restore Purchases',
+                      width: double.infinity,
+                      btnColor: AppColors.white,
+                      borderColor: AppColors.primaryBtnColor,
+                      textColor: AppColors.primaryBtnColor,
+                      showShadow: false,
+                      icon: Icons.restore_rounded,
+                      fontSize: AppFont.font14.sp,
+                      fontWeight: FontWeight.w800,
+                      onPressed: _controller.isRestoringSubscription.value
+                          ? () {}
+                          : () => _controller.restoreMonthlyStreakSubscription(
+                              widget.package!,
+                            ),
+                    ),
+                  ],
                   SizedBox(height: 13.h),
                   Text(
-                    'google_play_handles_subscription_changes'.tr,
+                    Platform.isIOS
+                        ? 'Apple handles subscription changes and cancellations.'
+                        : 'google_play_handles_subscription_changes'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: AppFont.font12.sp,

@@ -240,9 +240,9 @@ class _LearningTip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 94.h,
+      constraints: const BoxConstraints(minHeight: 94),
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 26.w),
+      padding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 16.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(100.r),

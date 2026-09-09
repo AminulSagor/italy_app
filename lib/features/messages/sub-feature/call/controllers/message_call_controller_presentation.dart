@@ -4,6 +4,7 @@ extension MessageCallControllerPresentation on MessageCallController {
   Future<void> openCallScreen({bool replaceCurrent = false}) async {
     if (_routeClosed ||
         isClosed ||
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed ||
         _callCoordinator.isPresentedScreenVisibleFor(_presentationId)) {
       return;
     }
@@ -52,10 +53,7 @@ extension MessageCallControllerPresentation on MessageCallController {
     final MessageCallController completedController = this;
     Future<void>.delayed(const Duration(milliseconds: 350), () async {
       if (Get.isRegistered<MessageCallController>() &&
-          identical(
-            Get.find<MessageCallController>(),
-            completedController,
-          )) {
+          identical(Get.find<MessageCallController>(), completedController)) {
         await Get.delete<MessageCallController>(force: true);
       }
     });

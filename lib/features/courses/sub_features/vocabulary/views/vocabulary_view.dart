@@ -904,7 +904,7 @@ class _VocabularyFrontSide
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
       children: <Widget>[
         Row(
           mainAxisAlignment:
@@ -916,16 +916,11 @@ class _VocabularyFrontSide
             ),
           ],
         ),
-        SizedBox(height: 60.h),
-        Text(
-          card.word,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: AppFont.font44.sp,
-            fontWeight: FontWeight.w800,
-            color: AppColors.primaryGreen,
-            height: 1,
-          ),
+        const Spacer(),
+        _AdaptiveVocabularyWord(
+          text: card.word,
+          color: AppColors.primaryGreen,
+          fontWeight: FontWeight.w800,
         ),
         SizedBox(height: 12.h),
         Text(
@@ -938,7 +933,7 @@ class _VocabularyFrontSide
             color: AppColors.bodyText,
           ),
         ),
-        SizedBox(height: 60.h),
+        const Spacer(),
         Icon(
           Icons.pan_tool_alt_outlined,
           size: 26.sp,
@@ -976,7 +971,7 @@ class _VocabularyBackSide
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
       children: <Widget>[
         Row(
           mainAxisAlignment:
@@ -988,22 +983,18 @@ class _VocabularyBackSide
             ),
           ],
         ),
-        SizedBox(height: 60.h),
-        Text(
-          card.word,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: AppFont.font44.sp,
-            fontWeight: FontWeight.w900,
-            color:
-            AppColors.homePrimaryText,
-            height: 1,
-          ),
+        const Spacer(),
+        _AdaptiveVocabularyWord(
+          text: card.word,
+          color: AppColors.homePrimaryText,
+          fontWeight: FontWeight.w900,
         ),
-        SizedBox(height: 32.h),
+        SizedBox(height: 20.h),
         Text(
           card.meaning,
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: AppFont.font22.sp,
             fontWeight: FontWeight.w600,
@@ -1016,14 +1007,83 @@ class _VocabularyBackSide
         Text(
           card.example,
           textAlign: TextAlign.center,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: AppFont.font16.sp,
             fontWeight: FontWeight.w400,
             color: AppColors.bodyText,
           ),
         ),
-        SizedBox(height: 110.h),
+        const Spacer(),
       ],
+    );
+  }
+}
+
+class _AdaptiveVocabularyWord extends StatelessWidget {
+  final String text;
+  final Color color;
+  final FontWeight fontWeight;
+
+  const _AdaptiveVocabularyWord({
+    required this.text,
+    required this.color,
+    required this.fontWeight,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 100.h,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double minimumFontSize = AppFont.font28.sp;
+          double fittedFontSize = AppFont.font44.sp;
+
+          while (fittedFontSize > minimumFontSize) {
+            final TextPainter painter = TextPainter(
+              text: TextSpan(
+                text: text,
+                style: TextStyle(
+                  fontSize: fittedFontSize,
+                  fontWeight: fontWeight,
+                  height: 1.05,
+                ),
+              ),
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              textDirection: Directionality.of(context),
+              textScaler: MediaQuery.textScalerOf(context),
+            )..layout(maxWidth: constraints.maxWidth);
+
+            if (!painter.didExceedMaxLines &&
+                painter.height <= constraints.maxHeight) {
+              break;
+            }
+
+            fittedFontSize = (fittedFontSize - 1)
+                .clamp(minimumFontSize, AppFont.font44.sp)
+                .toDouble();
+          }
+
+          return Center(
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: fittedFontSize,
+                fontWeight: fontWeight,
+                color: color,
+                height: 1.05,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

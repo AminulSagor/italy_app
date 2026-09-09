@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter/material.dart';
@@ -49,10 +50,12 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
 
   final RxBool isLoading = false.obs;
   final RxBool isPurchasing = false.obs;
+  final RxBool isRestoringSubscription = false.obs;
   final RxBool isPreparingGooglePlay = false.obs;
   final Rx<ProCurrency> selectedCurrency = ProCurrency.eur.obs;
   final Rx<ProPaymentMethod> selectedPaymentMethod =
-      ProPaymentMethod.googlePlay.obs;
+      (Platform.isIOS ? ProPaymentMethod.appStore : ProPaymentMethod.googlePlay)
+          .obs;
   final Rxn<ProOrderModel> order = Rxn<ProOrderModel>();
   final Rxn<ProPurchaseResultModel> purchaseResult =
       Rxn<ProPurchaseResultModel>();
@@ -70,6 +73,8 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   ProPurchaseOutcome? _lastOutcome;
   final Set<String> _processingTokens = <String>{};
   final Set<String> _appliedOrderIds = <String>{};
+
+  String get _storeName => Platform.isIOS ? 'App Store' : 'Google Play';
 
   @override
   void onInit() {
@@ -119,6 +124,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
               courseId: courseId,
               fallbackCourseName: courseName,
               lessonCount: lessonCount,
+              providerProductId: order.value?.selectedProviderProductId ?? '',
             ),
             errorTitle: 'course_purchase'.tr,
           );
@@ -169,7 +175,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
                 discountedPriceText: localizedPrice,
                 fallback: currentOrder.plan.discountLabel,
               )
-            : 'GOOGLE PLAY';
+            : _storeName.toUpperCase();
 
         order.value = currentOrder.copyWith(
           plan: currentOrder.plan.copyWith(
@@ -218,6 +224,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
               courseId: courseId,
               fallbackCourseName: courseName,
               lessonCount: lessonCount,
+              providerProductId: order.value?.selectedProviderProductId ?? '',
               couponCode: code,
             ),
             showError: false,
@@ -232,7 +239,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       final bool ready = await _prepareGooglePlayProduct(result.data!);
       if (!ready) {
         Get.snackbar(
-          'Google Play',
+          _storeName,
           billingError.value.isEmpty
               ? 'The discounted store product is unavailable.'
               : billingError.value,
@@ -261,6 +268,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
               courseId: courseId,
               fallbackCourseName: courseName,
               lessonCount: lessonCount,
+              providerProductId: order.value?.selectedProviderProductId ?? '',
             ),
             showError: false,
           );
@@ -317,7 +325,165 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   }
 
   void selectPaymentMethod(ProPaymentMethod method) {
-    selectedPaymentMethod.value = ProPaymentMethod.googlePlay;
+    selectedPaymentMethod.value = Platform.isIOS
+        ? ProPaymentMethod.appStore
+        : ProPaymentMethod.googlePlay;
+  }
+
+  bool get isAppStorePurchase {
+    final String productType =
+        order.value?.storeProduct.productType.toLowerCase() ?? '';
+    return Platform.isIOS &&
+        (productType == 'subscription' || productType == 'non_consumable');
+  }
+
+  bool get isAppStoreSubscription =>
+      isAppStorePurchase &&
+      order.value?.storeProduct.productType.toLowerCase() == 'subscription';
+
+  String get appStoreSubscriptionTitle {
+    final String storeTitle = _billingService.localizedTitle;
+    return storeTitle.isNotEmpty
+        ? storeTitle
+        : order.value?.plan.title ?? courseName;
+  }
+
+  String get appStoreSubscriptionPrice {
+    // Course promotional offers do not yet carry the StoreKit signature
+    // required to purchase the offer. Never present a regular price as if it
+    // were the configured offer price.
+    if (order.value?.storeProduct.offerId.trim().isNotEmpty == true) return '';
+    return _billingService.localizedPrice.trim();
+  }
+
+  bool get hasAppStoreSubscriptionPrice =>
+      !isAppStoreSubscription || appStoreSubscriptionPrice.isNotEmpty;
+
+  String get appStoreSubscriptionBillingDuration {
+    final int count = _billingService.subscriptionPeriodCount ?? 1;
+    final String unit = _billingService.subscriptionPeriodUnit ?? 'month';
+    final String suffix = count == 1 ? 'one' : 'many';
+    return 'subscription_period_${unit}_$suffix'.trParams(<String, String>{
+      'count': '$count',
+    });
+  }
+
+  Future<void> restoreAppStorePurchase(String controllerTag) async {
+    final ProOrderModel? currentOrder = order.value;
+    if (!isAppStorePurchase ||
+        currentOrder == null ||
+        isRestoringSubscription.value) {
+      return;
+    }
+
+    isRestoringSubscription.value = true;
+    billingError.value = '';
+    try {
+      final ProPendingGooglePlayPurchaseModel? existing = _billingService
+          .loadPendingPurchase();
+      if (existing != null && existing.courseId != courseId) {
+        Get.snackbar(
+          'restore_purchases'.tr,
+          'another_purchase_recovery_pending'.tr,
+        );
+        return;
+      }
+      if (existing != null) {
+        purchaseResult.value = null;
+        final PurchaseDetails? recovered = await _billingService
+            .queryPendingPurchase();
+        if (recovered != null) {
+          await _verifyAndUnlock(recovered, existing);
+          if (purchaseResult.value != null) {
+            await Get.offNamed(
+              AppRoutes.proPurchaseSuccess,
+              arguments: ControllerTagRouteArguments(
+                controllerTag: controllerTag,
+              ),
+            );
+            return;
+          }
+        }
+        if (_billingService.pendingPurchaseQueryFailed) {
+          Get.snackbar('restore_purchases'.tr, 'restore_check_pending'.tr);
+          return;
+        }
+        await _billingService.clearPendingPurchase();
+      }
+
+      final PurchaseDetails? purchase = await _billingService
+          .queryOwnedPurchase(currentOrder.storeProduct.productId);
+
+      if (purchase == null) {
+        if (_billingService.pendingPurchaseQueryFailed) {
+          Get.snackbar('restore_purchases'.tr, 'restore_check_pending'.tr);
+        } else {
+          Get.snackbar('restore_purchases'.tr, 'no_restorable_purchase'.tr);
+        }
+        return;
+      }
+
+      final String signedTransactionInfo = purchase
+          .verificationData
+          .serverVerificationData
+          .trim();
+      final String transactionId = purchase.purchaseID?.trim() ?? '';
+      if (signedTransactionInfo.isEmpty || transactionId.isEmpty) {
+        Get.snackbar('restore_purchases'.tr, 'restore_check_pending'.tr);
+        return;
+      }
+
+      final ApiResult<ProPurchaseResultModel> result =
+          await ApiErrorHandler.call<ProPurchaseResultModel>(
+            () => _proCheckoutApiService.restoreAppStorePurchase(
+              productId: currentOrder.storeProduct.productId,
+              signedTransactionInfo: signedTransactionInfo,
+              transactionId: transactionId,
+              courseName: courseName,
+              lessonCount: lessonCount,
+            ),
+            errorTitle: 'restore_purchases'.tr,
+          );
+      if (result.isSuccess && result.data != null) {
+        purchaseResult.value = result.data;
+        await _billingService.finishVerifiedPurchase(purchase);
+        await Get.offNamed(
+          AppRoutes.proPurchaseSuccess,
+          arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
+        );
+      }
+    } finally {
+      isRestoringSubscription.value = false;
+    }
+  }
+
+  Future<void> selectPurchaseOption(ProStoreProductModel option) async {
+    if (isLoading.value ||
+        option.id == order.value?.selectedProviderProductId) {
+      return;
+    }
+    isLoading.value = true;
+    billingError.value = '';
+    try {
+      final ApiResult<ProOrderModel> result =
+          await ApiErrorHandler.call<ProOrderModel>(
+            () => _proCheckoutApiService.fetchOrderSummary(
+              courseId: courseId,
+              fallbackCourseName: courseName,
+              lessonCount: lessonCount,
+              providerProductId: option.id,
+            ),
+            errorTitle: 'course_purchase'.tr,
+          );
+      if (result.isSuccess && result.data != null) {
+        couponTextController.clear();
+        couponCode.value = '';
+        isCouponApplied.value = false;
+        await _prepareGooglePlayProduct(result.data!);
+      }
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> openCheckout(String controllerTag) async {
@@ -331,11 +497,16 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
     final ProOrderModel? currentOrder = order.value;
     if (isPurchasing.value || currentOrder == null) return;
 
+    if (!hasAppStoreSubscriptionPrice) {
+      billingError.value = 'app_store_price_unavailable'.tr;
+      return;
+    }
+
     if (!_billingService.isAvailable.value) {
       Get.snackbar(
-        'Google Play',
+        _storeName,
         _billingService.lastError.value.isEmpty
-            ? 'Google Play Billing is unavailable on this device.'
+            ? '$_storeName purchases are unavailable on this device.'
             : _billingService.lastError.value,
       );
       return;
@@ -378,7 +549,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         if (_billingService.pendingPurchaseQueryFailed) {
           Get.snackbar(
             'Payment Pending',
-            'Google Play could not confirm the previous purchase yet.',
+            '$_storeName could not confirm the previous purchase yet.',
           );
           return;
         }
@@ -387,7 +558,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
 
       final ApiResult<ProPendingGooglePlayPurchaseModel> orderResult =
           await ApiErrorHandler.call<ProPendingGooglePlayPurchaseModel>(
-            () => _proCheckoutApiService.createGooglePlayOrder(
+            () => _proCheckoutApiService.createStoreOrder(
               order: currentOrder,
               currency: selectedCurrency.value,
               couponCode: currentOrder.hasCoupon ? currentOrder.couponCode : '',
@@ -404,37 +575,29 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
 
       await _billingService.savePendingPurchase(pending);
 
-      final PurchaseDetails? ownedPurchase = await _billingService
-          .queryOwnedPurchase(pending.productId);
+      final bool launched = await _billingService.launchPurchase(
+        product: currentOrder.storeProduct,
+        pendingPurchase: pending,
+      );
 
-      if (ownedPurchase != null &&
-          _isRecoverablePurchaseStatus(ownedPurchase.status)) {
-        await _handlePurchase(ownedPurchase);
-      } else {
-        final bool launched = await _billingService.launchPurchase(
-          product: currentOrder.storeProduct,
-          pendingPurchase: pending,
-        );
+      if (!launched) {
+        final PurchaseDetails? ownedAfterLaunchFailure = await _billingService
+            .queryPendingPurchase();
 
-        if (!launched) {
-          final PurchaseDetails? ownedAfterLaunchFailure = await _billingService
-              .queryOwnedPurchase(pending.productId);
-
-          if (ownedAfterLaunchFailure != null &&
-              _isRecoverablePurchaseStatus(ownedAfterLaunchFailure.status)) {
-            await _billingService.savePendingPurchase(pending);
-            await _handlePurchase(ownedAfterLaunchFailure);
-          } else {
-            _billingFlowActive = false;
-            _activePurchaseCompleter = null;
-            Get.snackbar(
-              'Google Play',
-              _billingService.lastError.value.isEmpty
-                  ? 'Google Play could not start the purchase.'
-                  : _billingService.lastError.value,
-            );
-            return;
-          }
+        if (ownedAfterLaunchFailure != null &&
+            _isRecoverablePurchaseStatus(ownedAfterLaunchFailure.status)) {
+          await _billingService.savePendingPurchase(pending);
+          await _handlePurchase(ownedAfterLaunchFailure);
+        } else {
+          _billingFlowActive = false;
+          _activePurchaseCompleter = null;
+          Get.snackbar(
+            _storeName,
+            _billingService.lastError.value.isEmpty
+                ? '$_storeName could not start the purchase.'
+                : _billingService.lastError.value,
+          );
+          return;
         }
       }
 
@@ -509,9 +672,9 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       await _billingService.clearPendingPurchase();
       _billingFlowActive = false;
       _completeActive(
-        const ProPurchaseOutcome(
+        ProPurchaseOutcome(
           status: ProPurchaseOutcomeStatus.cancelled,
-          message: 'The Google Play purchase was cancelled.',
+          message: 'The $_storeName purchase was cancelled.',
         ),
       );
     } finally {
@@ -528,9 +691,9 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       case PurchaseStatus.pending:
         _billingFlowActive = false;
         _completeActive(
-          const ProPurchaseOutcome(
+          ProPurchaseOutcome(
             status: ProPurchaseOutcomeStatus.pending,
-            message: 'Google Play is processing your payment.',
+            message: '$_storeName is processing your payment.',
           ),
         );
         return;
@@ -538,9 +701,9 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         _billingFlowActive = false;
         await _billingService.clearPendingPurchase();
         _completeActive(
-          const ProPurchaseOutcome(
+          ProPurchaseOutcome(
             status: ProPurchaseOutcomeStatus.cancelled,
-            message: 'The Google Play purchase was cancelled.',
+            message: 'The $_storeName purchase was cancelled.',
           ),
         );
         return;
@@ -553,8 +716,9 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
          * owned purchases once and let the backend resolve its app-account
          * ownership before falling back to the generic Billing error.
          */
-        final PurchaseDetails? ownedPurchase = await _billingService
-            .queryOwnedPurchase(pending.productId);
+        final PurchaseDetails? ownedPurchase = Platform.isIOS
+            ? await _billingService.queryPendingPurchase()
+            : await _billingService.queryOwnedPurchase(pending.productId);
 
         if (ownedPurchase != null &&
             (ownedPurchase.status == PurchaseStatus.purchased ||
@@ -565,9 +729,9 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
 
         if (ownedPurchase?.status == PurchaseStatus.pending) {
           _completeActive(
-            const ProPurchaseOutcome(
+            ProPurchaseOutcome(
               status: ProPurchaseOutcomeStatus.pending,
-              message: 'Google Play is processing your payment.',
+              message: '$_storeName is processing your payment.',
             ),
           );
           return;
@@ -578,7 +742,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
          * prove that no charge or purchase transition occurred.
          */
         final String message =
-            purchase.error?.message ?? 'The Google Play purchase failed.';
+            purchase.error?.message ?? 'The $_storeName purchase failed.';
 
         _completeActive(
           ProPurchaseOutcome(
@@ -606,13 +770,21 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       ProPurchaseResultModel? completed;
       final ApiResult<ProPurchaseResultModel> verification =
           await ApiErrorHandler.call<ProPurchaseResultModel>(
-            () => _proCheckoutApiService.verifyGooglePlayPurchase(
-              pending: pending,
-              purchaseToken: token,
-              transactionId: _transactionId(purchase),
-              courseName: courseName,
-              lessonCount: lessonCount,
-            ),
+            () => Platform.isAndroid
+                ? _proCheckoutApiService.verifyGooglePlayPurchase(
+                    pending: pending,
+                    purchaseToken: token,
+                    transactionId: _transactionId(purchase),
+                    courseName: courseName,
+                    lessonCount: lessonCount,
+                  )
+                : _proCheckoutApiService.verifyAppStorePurchase(
+                    pending: pending,
+                    signedTransactionInfo: token,
+                    transactionId: _transactionId(purchase),
+                    courseName: courseName,
+                    lessonCount: lessonCount,
+                  ),
             showError: false,
           );
 
@@ -687,28 +859,28 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   ProPurchaseOutcome? _permanentVerificationFailure(String? errorCode) {
     switch (errorCode) {
       case _purchaseLinkedToAnotherUserCode:
-        return const ProPurchaseOutcome(
+        return ProPurchaseOutcome(
           status: ProPurchaseOutcomeStatus.failed,
           message:
-              'This course is linked to another Italir Pothe account through this Google Play account. Sign in to the original Italir Pothe account, use a different Google Play account for this account, or contact support if you need help recovering access.',
+              'This course is linked to another Italir Pothe account through this $_storeName account. Sign in to the original Italir Pothe account, use a different $_storeName account for this account, or contact support if you need help recovering access.',
         );
       case _accountIdentifierMissingCode:
-        return const ProPurchaseOutcome(
+        return ProPurchaseOutcome(
           status: ProPurchaseOutcomeStatus.failed,
           message:
-              'This older Google Play purchase cannot be securely linked to this account. Please contact support.',
+              'This older $_storeName purchase cannot be securely linked to this account. Please contact support.',
         );
       case _purchaseLinkedToAnotherCourseCode:
-        return const ProPurchaseOutcome(
+        return ProPurchaseOutcome(
           status: ProPurchaseOutcomeStatus.failed,
           message:
-              'This Google Play purchase is already linked to a different course. Please contact support.',
+              'This $_storeName purchase is already linked to a different course. Please contact support.',
         );
       case _purchaseNotRestorableCode:
-        return const ProPurchaseOutcome(
+        return ProPurchaseOutcome(
           status: ProPurchaseOutcomeStatus.failed,
           message:
-              'This Google Play purchase cannot be restored automatically. Please contact support.',
+              'This $_storeName purchase cannot be restored automatically. Please contact support.',
         );
       default:
         return null;

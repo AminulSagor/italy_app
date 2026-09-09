@@ -1,161 +1,138 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
+import '../helpers/cv_builder_localization.dart';
 import '../models/cv_template_model.dart';
+import 'cv_template_thumbnail.dart';
+import 'cv_template_zoom_dialog.dart';
 
 class CvTemplateCard extends StatelessWidget {
   const CvTemplateCard({
+    super.key,
     required this.template,
     required this.onTap,
-    required this.isAnalyzing,
-    required this.isDisabled,
-    required this.hasError,
-    required this.onRetry,
-    this.errorMessage,
-    super.key,
   });
 
   final CvTemplateModel template;
   final VoidCallback onTap;
-  final VoidCallback onRetry;
-
-  final bool isAnalyzing;
-  final bool isDisabled;
-  final bool hasError;
-
-  final String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
-    final bool canOpen =
-        !isDisabled &&
-            !isAnalyzing &&
-            !hasError;
+    Future<void> zoom() =>
+        CvTemplateZoomDialog.show(context, template: template);
 
-    final bool isSelected =
-        isAnalyzing || hasError;
-
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 200),
-      opacity:
-      isDisabled && !isAnalyzing ? 0.55 : 1,
-      child: Material(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-          side: BorderSide(
-            color: isSelected
-                ? AppColors.primaryGreen
-                : Colors.transparent,
-            width: isSelected ? 2 : 0,
-          ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          fit: StackFit.expand,
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20.r),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: zoom,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            InkWell(
-              onTap: canOpen ? onTap : null,
-              child: Padding(
-                padding: EdgeInsets.all(9.w),
-                child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
+            Padding(
+              padding: EdgeInsets.all(10.w),
+              child: AspectRatio(
+                // Resume previews are A4. Keeping this ratio preserves the
+                // backend image exactly while letting it occupy full width.
+                aspectRatio: 210 / 297,
+                child: Stack(
+                  fit: StackFit.expand,
                   children: <Widget>[
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius:
-                        BorderRadius.circular(
-                          14.r,
-                        ),
-                        child: Container(
-                          width: double.infinity,
-                          color:
-                          const Color(0xFFF0F1F1),
-                          child: Image.network(
-                            template.imageUrl,
-                            fit: BoxFit.contain,
-                            loadingBuilder: (
-                                BuildContext context,
-                                Widget child,
-                                ImageChunkEvent? progress,
-                                ) {
-                              if (progress == null) {
-                                return child;
-                              }
-
-                              return const Center(
-                                child:
-                                CircularProgressIndicator(),
-                              );
-                            },
-                            errorBuilder: (
-                                BuildContext context,
-                                Object error,
-                                StackTrace? stackTrace,
-                                ) {
-                              return const Center(
-                                child: Icon(
-                                  Icons
-                                      .broken_image_outlined,
-                                ),
-                              );
-                            },
-                          ),
+                    CvTemplateThumbnail(
+                      template: template,
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                    if (template.isNew)
+                      Positioned(
+                        left: 9.w,
+                        top: 9.h,
+                        child: _Badge(
+                          label: 'cvb_badge_new'.tr,
+                          icon: Icons.auto_awesome_rounded,
+                          background: Color(0xFFE4F5E8),
+                          foreground: Color(0xFF176B38),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 10.h),
-                    Text(
-                      template.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w800,
-                        color:
-                        AppColors.homePrimaryText,
+                    if (template.isPremium)
+                      Positioned(
+                        right: 9.w,
+                        top: 9.h,
+                        child: _Badge(
+                          label: 'cvb_badge_pro'.tr,
+                          icon: Icons.workspace_premium_rounded,
+                          background: Color(0xFFFFF1CF),
+                          foreground: Color(0xFF8B5A00),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 6.h),
-                    Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.auto_awesome_outlined,
-                          size: 14.w,
-                          color: AppColors.primaryGreen,
-                        ),
-                        SizedBox(width: 5.w),
-                        Text(
-                          'cv_template_card_use_template'.tr,
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            color:
-                            AppColors.primaryGreen,
-                            fontWeight:
-                            FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
             ),
-
-            if (isAnalyzing)
-              _AnalysisOverlay(
-                templateName: template.name,
+            Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 2.h, 10.w, 12.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          template.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.homePrimaryText,
+                          ),
+                        ),
+                        SizedBox(height: 3.h),
+                        Text(
+                          template.category.isEmpty
+                              ? 'cvb_tap_to_use'.tr
+                              : 'cvb_category_tap_to_use'.trParams(
+                                  <String, String>{
+                                    'category': cvCategoryLabel(
+                                      template.category,
+                                    ),
+                                  },
+                                ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: AppColors.homeSecondaryText,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'cvb_zoom_preview'.tr,
+                    child: IconButton.filledTonal(
+                      onPressed: zoom,
+                      style: IconButton.styleFrom(
+                        backgroundColor: const Color(0xFFEAF4E5),
+                        foregroundColor: AppColors.primaryGreen,
+                      ),
+                      icon: const Icon(Icons.zoom_in_rounded),
+                    ),
+                  ),
+                  SizedBox(width: 2.w),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.primaryGreen,
+                    size: 26.w,
+                  ),
+                ],
               ),
-
-            if (hasError)
-              _AnalysisFailureOverlay(
-                message: errorMessage,
-                onRetry:
-                isDisabled ? null : onRetry,
-              ),
+            ),
           ],
         ),
       ),
@@ -163,152 +140,45 @@ class CvTemplateCard extends StatelessWidget {
   }
 }
 
-class _AnalysisOverlay extends StatelessWidget {
-  const _AnalysisOverlay({
-    required this.templateName,
+class _Badge extends StatelessWidget {
+  const _Badge({
+    required this.label,
+    required this.icon,
+    required this.background,
+    required this.foreground,
   });
 
-  final String templateName;
+  final String label;
+  final IconData icon;
+  final Color background;
+  final Color foreground;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black.withValues(
-        alpha: 0.62,
-      ),
-      padding: EdgeInsets.all(16.w),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            width: 48.w,
-            height: 48.w,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius:
-              BorderRadius.circular(16.r),
-            ),
-            child: SizedBox(
-              width: 25.w,
-              height: 25.w,
-              child:
-              const CircularProgressIndicator(
-                strokeWidth: 3,
-              ),
-            ),
-          ),
-          SizedBox(height: 14.h),
-          Text(
-            'cv_template_card_analyzing'.tr,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-            ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            templateName,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 11.sp,
-              height: 1.35,
-              color: Colors.white70,
-            ),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.07),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AnalysisFailureOverlay
-    extends StatelessWidget {
-  const _AnalysisFailureOverlay({
-    required this.message,
-    required this.onRetry,
-  });
-
-  final String? message;
-  final VoidCallback? onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final String displayedMessage =
-    message?.trim().isNotEmpty == true
-        ? message!.trim()
-        : 'cv_template_card_analysis_default_error'.tr;
-
-    return Container(
-      color: Colors.black.withValues(
-        alpha: 0.72,
-      ),
-      padding: EdgeInsets.all(14.w),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Container(
-            width: 44.w,
-            height: 44.w,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius:
-              BorderRadius.circular(14.r),
-            ),
-            child: Icon(
-              Icons.error_outline_rounded,
-              color: Colors.redAccent,
-              size: 27.w,
-            ),
-          ),
-          SizedBox(height: 12.h),
+          Icon(icon, size: 12.w, color: foreground),
+          SizedBox(width: 4.w),
           Text(
-            'cv_template_card_analysis_failed'.tr,
-            textAlign: TextAlign.center,
+            label,
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 9.sp,
               fontWeight: FontWeight.w900,
-              color: Colors.white,
-            ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            displayedMessage,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 10.sp,
-              height: 1.35,
-              color: Colors.white70,
-            ),
-          ),
-          SizedBox(height: 13.h),
-          SizedBox(
-            height: 38.h,
-            child: ElevatedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(
-                Icons.refresh_rounded,
-                size: 18,
-              ),
-              label: Text(
-                'cv_template_card_retry'.tr,
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor:
-                AppColors.primaryGreen,
-                elevation: 0,
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                ),
-              ),
+              color: foreground,
             ),
           ),
         ],

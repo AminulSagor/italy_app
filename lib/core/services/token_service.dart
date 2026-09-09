@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 
+import 'secure_storage_recovery.dart';
+
 class TokenService extends GetxService {
   TokenService();
 
@@ -30,20 +32,36 @@ class TokenService extends GetxService {
   }
 
   Future<TokenService> _loadFromStorage() async {
-    final List<String?> storedValues = await Future.wait<String?>([
-      _storage.read(key: _accessTokenKey),
-      _storage.read(key: _tokenTypeKey),
-    ]);
+    String? storedToken;
+    String? storedTokenType;
 
-    final String? storedToken = storedValues[0];
-    final String? storedTokenType = storedValues[1];
+    try {
+      storedToken = await _storage.read(key: _accessTokenKey);
+      storedTokenType = await _storage.read(key: _tokenTypeKey);
+    } catch (error, stackTrace) {
+      await SecureStorageRecovery.reportHandledFailure(
+        scope: 'authentication token read',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      await SecureStorageRecovery.deleteKeys(
+        storage: _storage,
+        keys: const <String>[_accessTokenKey, _tokenTypeKey],
+        scope: 'authentication token',
+      );
+
+      _accessToken = null;
+      _tokenType = 'Bearer';
+      _isInitialized = true;
+      return this;
+    }
 
     final String normalizedToken = storedToken?.trim() ?? '';
     final String normalizedTokenType = storedTokenType?.trim() ?? '';
 
     _accessToken = normalizedToken.isEmpty ? null : normalizedToken;
     _tokenType =
-    normalizedTokenType.isEmpty ? 'Bearer' : normalizedTokenType;
+        normalizedTokenType.isEmpty ? 'Bearer' : normalizedTokenType;
 
     _isInitialized = true;
 
@@ -76,9 +94,9 @@ class TokenService extends GetxService {
   bool get isInitialized => _isInitialized;
 
   Future<void> saveAccessToken(
-      String token, {
-        String tokenType = 'Bearer',
-      }) async {
+    String token, {
+    String tokenType = 'Bearer',
+  }) async {
     final String normalizedToken = token.trim();
 
     if (normalizedToken.isEmpty) {
@@ -178,8 +196,7 @@ class TokenService extends GetxService {
         return null;
       }
 
-      final String normalizedPayload =
-      base64Url.normalize(segments[1]);
+      final String normalizedPayload = base64Url.normalize(segments[1]);
 
       final dynamic decoded = jsonDecode(
         utf8.decode(

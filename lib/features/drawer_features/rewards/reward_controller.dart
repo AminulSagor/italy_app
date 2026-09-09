@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/services/api_error_handler.dart';
 import '../../../routes/routes.dart';
+import '../shop/shop_controller.dart';
+import '../shop/models/shop_models.dart';
 import 'models/reward_models.dart';
 import 'models/reward_response_models.dart';
 import 'services/reward_api_service.dart';
@@ -119,13 +122,14 @@ class RewardController extends GetxController {
 
     if (result.isSuccess && result.data != null) {
       selectedReward.value = result.data!.reward;
+      final bool appliedBalances = _applyGrantedBalances(result.data!);
       _showMessage(
         'Reward unlocked',
         result.data!.message.isEmpty
             ? 'your_reward_has_been_added_successfully'.tr
             : result.data!.message,
       );
-      await _reloadAfterMutation();
+      await _reloadAfterMutation(refreshBalances: !appliedBalances);
     }
     isOpeningReward.value = false;
   }
@@ -326,10 +330,63 @@ class RewardController extends GetxController {
     }
   }
 
-  Future<void> _reloadAfterMutation() async {
-    await loadDashboard(refresh: true);
-    if (historyItems.isNotEmpty) {
-      await loadHistory(reset: true, showLoader: false);
+  Future<void> _reloadAfterMutation({bool refreshBalances = true}) async {
+    await Future.wait<void>(<Future<void>>[
+      loadDashboard(refresh: true),
+      if (refreshBalances) _refreshGrantedBalances(),
+      if (historyItems.isNotEmpty)
+        loadHistory(reset: true, showLoader: false),
+    ]);
+  }
+
+  bool _applyGrantedBalances(RewardOpenResponseModel response) {
+    final dynamic rawBalances = response.application?['result'];
+    if (rawBalances is! Map) return false;
+
+    final Map<String, dynamic> balanceJson = Map<String, dynamic>.from(
+      rawBalances,
+    );
+    if (!balanceJson.containsKey('ai') ||
+        !balanceJson.containsKey('cv') ||
+        !balanceJson.containsKey('streakFreeze')) {
+      return false;
+    }
+
+    try {
+      final StoreBalancesModel balances = StoreBalancesModel.fromJson(
+        balanceJson,
+      );
+
+      if (Get.isRegistered<ShopController>()) {
+        Get.find<ShopController>().applyBalances(balances);
+        return true;
+      } else if (Get.isRegistered<UserSessionController>()) {
+        Get.find<UserSessionController>().updateAiBalances(
+          voiceSeconds: balances.aiVoiceSeconds,
+          textTokens: balances.aiTextTokens,
+        );
+        return true;
+      }
+      return false;
+    } catch (error, stackTrace) {
+      AppLogger.log(
+        'Could not apply reward balances from the claim response.',
+        name: 'RewardController',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
+  Future<void> _refreshGrantedBalances() async {
+    if (Get.isRegistered<ShopController>()) {
+      await Get.find<ShopController>().refreshBalances();
+      return;
+    }
+
+    if (Get.isRegistered<UserSessionController>()) {
+      await Get.find<UserSessionController>().refreshAiBalances();
     }
   }
 

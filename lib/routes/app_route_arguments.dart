@@ -43,6 +43,7 @@ class QuizRouteArguments {
   final String? lessonId;
   final String? courseId;
   final String? chapterTitle;
+  final bool startOver;
   final List<QuizQuestionModel> initialQuestions;
   final QuizExternalAnswerHandler? externalAnswerHandler;
 
@@ -53,6 +54,7 @@ class QuizRouteArguments {
     this.lessonId,
     this.courseId,
     this.chapterTitle,
+    this.startOver = false,
     this.initialQuestions = const <QuizQuestionModel>[],
     this.externalAnswerHandler,
   });

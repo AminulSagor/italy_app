@@ -82,6 +82,41 @@ class AuthService {
     return result;
   }
 
+  Future<AuthTokenResultModel> socialLogin({
+    required String provider,
+    required String token,
+    String? tokenType,
+    String? nonce,
+    String? displayName,
+    String? authorizationCode,
+  }) async {
+    final String normalizedProvider = provider.trim().toLowerCase();
+    if (normalizedProvider != 'google' &&
+        normalizedProvider != 'facebook' &&
+        normalizedProvider != 'apple') {
+      throw ArgumentError.value(provider, 'provider', 'Unsupported provider');
+    }
+
+    final String deviceId = await _devicePushTokenService.getOrCreateDeviceId();
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '/auth/social/$normalizedProvider',
+      data: <String, dynamic>{
+        'token': token,
+        if (tokenType != null) 'tokenType': tokenType,
+        if (nonce != null) 'nonce': nonce,
+        if (displayName != null) 'displayName': displayName,
+        if (authorizationCode != null) 'authorizationCode': authorizationCode,
+        'deviceId': deviceId,
+        'platform': _devicePushTokenService.platformValue,
+      },
+    );
+    final AuthTokenResultModel result = AuthTokenResultModel.fromJson(
+      _responseMap(response),
+    );
+    await _saveSession(result, response.requestOptions);
+    return result;
+  }
+
   Future<AuthTokenResultModel> verifyOtp(
     OtpVerificationPayloadModel payload,
   ) async {

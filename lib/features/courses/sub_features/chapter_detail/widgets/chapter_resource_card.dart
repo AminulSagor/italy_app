@@ -23,7 +23,7 @@ class ChapterResourceCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: kChapterResourceCardHeight.h,
+        constraints: BoxConstraints(minHeight: kChapterResourceCardHeight.h),
         padding: EdgeInsets.all(24.w),
         decoration: BoxDecoration(
           color: AppColors.white,
@@ -50,21 +50,39 @@ class ChapterResourceCard extends StatelessWidget {
               ),
             ),
             8.h.verticalSpace,
-            Text(
-              resource.title,
-              style: TextStyle(
-                fontSize: AppFont.font18.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.homePrimaryText,
+            SizedBox(
+              width: double.infinity,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  resource.title,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(
+                    fontSize: AppFont.font18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.homePrimaryText,
+                  ),
+                ),
               ),
             ),
             4.h.verticalSpace,
-            Text(
-              resource.subtitle,
-              style: TextStyle(
-                fontSize: AppFont.font14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.bodyText,
+            SizedBox(
+              width: double.infinity,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  resource.subtitle,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(
+                    fontSize: AppFont.font14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.bodyText,
+                  ),
+                ),
               ),
             ),
           ],

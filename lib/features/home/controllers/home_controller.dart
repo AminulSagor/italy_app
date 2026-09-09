@@ -152,7 +152,14 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     }
 
     try {
-      dashboard.value = HomeDashboardModel.fromJson(cache.json);
+      // The continue card is activity-sensitive and must be confirmed by the
+      // latest backend response. Other dashboard data can still be restored
+      // immediately, but an old chapter must not briefly appear as current.
+      final Map<String, dynamic> cachedDashboard =
+          Map<String, dynamic>.from(cache.json)
+            ..['currentChapter'] = null;
+
+      dashboard.value = HomeDashboardModel.fromJson(cachedDashboard);
 
       hasLoadedOnce.value = true;
       errorMessage.value = '';

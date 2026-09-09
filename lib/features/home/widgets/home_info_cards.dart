@@ -71,8 +71,8 @@ class StreakCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kHomeStreakHeight.h,
-      padding: EdgeInsets.symmetric(horizontal: 26.w),
+      constraints: BoxConstraints(minHeight: kHomeStreakHeight.h),
+      padding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 14.h),
       decoration: BoxDecoration(
         gradient: AppColors.homeStreakGradient,
         borderRadius: BorderRadius.circular(kHomeSmallCardRadius.r),
@@ -100,12 +100,15 @@ class StreakCard extends StatelessWidget {
             ),
           ),
           SizedBox(width: 18.w),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
               Text(
                 streak.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: AppFont.font18.sp,
                   fontWeight: FontWeight.w900,
@@ -116,13 +119,16 @@ class StreakCard extends StatelessWidget {
               SizedBox(height: 4.h),
               Text(
                 streak.body,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: AppFont.font13.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.white,
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

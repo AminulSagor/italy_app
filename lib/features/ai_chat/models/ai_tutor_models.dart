@@ -153,14 +153,14 @@ class AiTutorMessageModel {
       normalizedJson['correction'],
     );
     return AiTutorMessageModel(
-      id: normalizedJson['id']?.toString() ??
+      id:
+          normalizedJson['id']?.toString() ??
           DateTime.now().microsecondsSinceEpoch.toString(),
       role: roleValue == 'user'
           ? AiTutorMessageRole.user
           : AiTutorMessageRole.assistant,
-      primary: _optionalText(
-            normalizedJson['primary'] ?? normalizedJson['text'],
-          ) ??
+      primary:
+          _optionalText(normalizedJson['primary'] ?? normalizedJson['text']) ??
           '',
       english: _optionalText(normalizedJson['english']),
       bangla: _optionalText(normalizedJson['bangla']),
@@ -171,8 +171,9 @@ class AiTutorMessageModel {
       correction: correction,
       createdAt:
           DateTime.tryParse(normalizedJson['createdAt']?.toString() ?? '') ??
-              DateTime.now(),
-      isPartial: normalizedJson['isPartial'] == true ||
+          DateTime.now(),
+      isPartial:
+          normalizedJson['isPartial'] == true ||
           normalizedJson['final'] == false,
     );
   }
@@ -205,7 +206,8 @@ class AiTutorMessageModel {
           ? AiTutorMessageRole.user
           : AiTutorMessageRole.assistant,
       primary: json['text']?.toString().trim() ?? '',
-      createdAt: DateTime.tryParse(json['timestamp']?.toString() ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['timestamp']?.toString() ?? '') ??
           DateTime.now(),
       isPartial: json['final'] == false,
     );
@@ -226,10 +228,7 @@ class AiTutorMessageModel {
   }
 
   Map<String, dynamic> toHistoryJson() {
-    return <String, dynamic>{
-      'role': role.name,
-      'content': primary,
-    };
+    return <String, dynamic>{'role': role.name, 'content': primary};
   }
 
   AiTutorMessageModel copyWith({
@@ -276,9 +275,9 @@ class AiTutorBalanceModel {
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'voiceSeconds': voiceSeconds,
-        'textTokens': textTokens,
-      };
+    'voiceSeconds': voiceSeconds,
+    'textTokens': textTokens,
+  };
 }
 
 class AiTutorTokenUsageModel {
@@ -324,10 +323,7 @@ class AiTutorChatResponseModel {
       conversationId: json['conversationId']?.toString() ?? '',
       message: AiTutorMessageModel.fromJson(messageJson),
       memoryFacts: _stringList(json['memoryFacts'], maxItems: 10),
-      recentMistakeTags: _stringList(
-        json['recentMistakeTags'],
-        maxItems: 6,
-      ),
+      recentMistakeTags: _stringList(json['recentMistakeTags'], maxItems: 6),
       balances: AiTutorBalanceModel.fromEnvelope(json),
       usage: AiTutorTokenUsageModel.fromJson(_asJsonMap(json['usage'])),
     );
@@ -344,6 +340,11 @@ class AiTutorVoiceSessionModel {
     required this.ttlSeconds,
     required this.allocatedSeconds,
     required this.balances,
+    this.model,
+    this.setup = const <String, dynamic>{},
+    this.credentialExpiresAt,
+    this.sessionPurpose = 'tutoring',
+    this.isFree = false,
   });
 
   final String sessionId;
@@ -354,6 +355,13 @@ class AiTutorVoiceSessionModel {
   final int ttlSeconds;
   final int allocatedSeconds;
   final AiTutorBalanceModel balances;
+  final String? model;
+  final Map<String, dynamic> setup;
+  final DateTime? credentialExpiresAt;
+  final String sessionPurpose;
+  final bool isFree;
+
+  bool get isLevelTest => sessionPurpose == 'level_test';
 
   factory AiTutorVoiceSessionModel.fromJson(Map<String, dynamic> json) {
     final int ttl = _intValue(json['ttlSeconds']);
@@ -368,8 +376,39 @@ class AiTutorVoiceSessionModel {
           ? _intValue(json['allocatedSeconds'])
           : (ttl > 0 ? ttl : 900),
       balances: AiTutorBalanceModel.fromEnvelope(json),
+      model: _optionalText(json['model']),
+      setup: _asJsonMap(json['setup']),
+      credentialExpiresAt: DateTime.tryParse(
+        json['credentialExpiresAt']?.toString() ?? '',
+      ),
+      sessionPurpose: json['sessionPurpose']?.toString() ?? 'tutoring',
+      isFree: json['isFree'] == true,
     );
   }
+}
+
+class AiTutorLiveEventModel {
+  const AiTutorLiveEventModel({
+    required this.eventId,
+    required this.type,
+    this.text,
+    this.handle,
+    required this.occurredAt,
+  });
+
+  final String eventId;
+  final String type;
+  final String? text;
+  final String? handle;
+  final DateTime occurredAt;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'eventId': eventId,
+    'type': type,
+    if (text?.trim().isNotEmpty == true) 'text': text!.trim(),
+    if (handle?.trim().isNotEmpty == true) 'handle': handle!.trim(),
+    'occurredAt': occurredAt.toUtc().toIso8601String(),
+  };
 }
 
 class AiTutorVoiceHeartbeatModel {
@@ -420,6 +459,7 @@ class AiTutorVoiceSessionRequestModel {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      'voiceTransport': 'gemini_live',
       if (topic?.trim().isNotEmpty == true) 'topic': topic!.trim(),
       'ttlSeconds': ttlSeconds,
       'memoryFacts': memoryFacts,

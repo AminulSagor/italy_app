@@ -5,11 +5,10 @@ import 'package:get/get.dart';
 import '../../../core/themes/app_colors.dart';
 import '../controllers/ai_tutor_level_test_controller.dart';
 import '../models/ai_tutor_level_test_models.dart';
-import 'widgets/ai_tutor_level_test_speaking_recorder.dart';
 import 'widgets/ai_tutor_level_test_widgets.dart';
 import '../../../core/widgets/native_bottom_inset.dart';
-class AiTutorLevelTestQuestionView
-    extends GetView<AiTutorLevelTestController> {
+
+class AiTutorLevelTestQuestionView extends GetView<AiTutorLevelTestController> {
   const AiTutorLevelTestQuestionView({super.key});
 
   @override
@@ -19,8 +18,7 @@ class AiTutorLevelTestQuestionView
       body: SafeArea(
         bottom: false,
         child: Obx(() {
-          final AiTutorLevelQuestionModel question =
-              controller.currentQuestion;
+          final AiTutorLevelQuestionModel question = controller.currentQuestion;
           final int number = controller.currentQuestionIndex.value + 1;
 
           return Column(
@@ -96,28 +94,11 @@ class AiTutorLevelTestQuestionView
                         ),
                       ),
                       SizedBox(height: 24.h),
-                      if (question.type == AiTutorQuestionType.singleChoice)
-                        _ChoiceAnswers(
-                          options: question.options,
-                          selectedOption: controller.selectedOption.value,
-                          onSelected: controller.selectOption,
-                        )
-                      else if (question.skill == AiTutorSkillType.speaking)
-                        AiTutorLevelTestSpeakingRecorder(
-                          recorderController: controller.recorderController,
-                          isPreparing: controller.isPreparingRecording.value,
-                          isRecording: controller.isRecording.value,
-                          isTranscribing: controller.isTranscribing.value,
-                          recordedSeconds: controller.recordedSeconds.value,
-                          transcript: controller.answerText.value,
-                          onRecordStart: controller.startSpeakingAnswer,
-                          onRecordEnd: controller.stopSpeakingAnswer,
-                        )
-                      else
-                        _OpenAnswerField(
-                          controller: controller.answerController,
-                          onChanged: controller.onAnswerChanged,
-                        ),
+                      _ChoiceAnswers(
+                        options: question.options,
+                        selectedOption: controller.selectedOption.value,
+                        onSelected: controller.selectOption,
+                      ),
                     ],
                   ),
                 ),
@@ -126,12 +107,7 @@ class AiTutorLevelTestQuestionView
                 color: AppColors.white,
                 child: NativeBottomInset(
                   child: Container(
-                    padding: EdgeInsets.fromLTRB(
-                      24.w,
-                      16.h,
-                      24.w,
-                      24.h,
-                    ),
+                    padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 24.h),
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       boxShadow: <BoxShadow>[
@@ -175,118 +151,72 @@ class _ChoiceAnswers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: options.map((String option) {
-        final bool selected = option == selectedOption;
-        return Padding(
-          padding: EdgeInsets.only(bottom: 12.h),
-          child: GestureDetector(
-            onTap: () => onSelected(option),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 170),
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
-              decoration: BoxDecoration(
-                color: selected
-                    ? const Color(0xFFE8F8DA)
-                    : AppColors.white,
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(
-                  color: selected
-                      ? AppColors.primaryGreen
-                      : const Color(0xFFE2E7E3),
-                  width: selected ? 1.6.w : 1.w,
-                ),
-              ),
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    width: 22.r,
-                    height: 22.r,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
+      children: options
+          .map((String option) {
+            final bool selected = option == selectedOption;
+            return Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: GestureDetector(
+                onTap: () => onSelected(option),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 170),
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 18.w,
+                    vertical: 16.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected ? const Color(0xFFE8F8DA) : AppColors.white,
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(
                       color: selected
                           ? AppColors.primaryGreen
-                          : Colors.transparent,
-                      border: Border.all(
-                        color: selected
-                            ? AppColors.primaryGreen
-                            : const Color(0xFFB4BDB8),
-                      ),
-                    ),
-                    child: selected
-                        ? Icon(
-                            Icons.check_rounded,
-                            size: 14.r,
-                            color: AppColors.white,
-                          )
-                        : null,
-                  ),
-                  SizedBox(width: 13.w),
-                  Expanded(
-                    child: Text(
-                      option,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF35413D),
-                      ),
+                          : const Color(0xFFE2E7E3),
+                      width: selected ? 1.6.w : 1.w,
                     ),
                   ),
-                ],
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        width: 22.r,
+                        height: 22.r,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: selected
+                              ? AppColors.primaryGreen
+                              : Colors.transparent,
+                          border: Border.all(
+                            color: selected
+                                ? AppColors.primaryGreen
+                                : const Color(0xFFB4BDB8),
+                          ),
+                        ),
+                        child: selected
+                            ? Icon(
+                                Icons.check_rounded,
+                                size: 14.r,
+                                color: AppColors.white,
+                              )
+                            : null,
+                      ),
+                      SizedBox(width: 13.w),
+                      Expanded(
+                        child: Text(
+                          option,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF35413D),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-        );
-      }).toList(growable: false),
-    );
-  }
-}
-
-class _OpenAnswerField extends StatelessWidget {
-  const _OpenAnswerField({
-    required this.controller,
-    required this.onChanged,
-  });
-
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(17.w, 10.h, 17.w, 10.h),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(color: const Color(0xFFE2E7E3)),
-      ),
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        minLines: 5,
-        maxLines: 8,
-        maxLength: 700,
-        textCapitalization: TextCapitalization.sentences,
-        style: TextStyle(
-          fontSize: 14.sp,
-          height: 1.45,
-          fontWeight: FontWeight.w600,
-          color: const Color(0xFF2D3935),
-        ),
-        decoration: InputDecoration(
-          hintText: 'gen_write_your_answer_here'.tr,
-          border: InputBorder.none,
-          counterStyle: TextStyle(
-            fontSize: 10.sp,
-            color: const Color(0xFF9CA5A1),
-          ),
-          hintStyle: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xFFA5ADA9),
-          ),
-        ),
-      ),
+            );
+          })
+          .toList(growable: false),
     );
   }
 }

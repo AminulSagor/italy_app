@@ -59,9 +59,7 @@ class CoursesApiService {
     );
   }
 
-  Future<bool> _safeFetchCourseAccess({
-    required String courseId,
-  }) async {
+  Future<bool> _safeFetchCourseAccess({required String courseId}) async {
     try {
       final Response<dynamic> response = await _apiClient.dio.get(
         '/course-enrollments/courses/$courseId/access',
@@ -69,10 +67,7 @@ class CoursesApiService {
 
       final Map<String, dynamic> body = _responseMap(response);
 
-      return _boolValue(
-        body['hasAccess'],
-        fallback: false,
-      );
+      return _boolValue(body['hasAccess'], fallback: false);
     } on DioException {
       return false;
     }
@@ -306,6 +301,9 @@ class CoursesApiService {
     required List<_CourseLessonEntry> lessonEntries,
     required Map<String, CourseLessonProgressModel> lessonProgressById,
   }) {
+    int? latestStartedLessonIndex;
+    DateTime? latestStartedUpdatedAt;
+
     for (int index = 0; index < lessonEntries.length; index++) {
       final _CourseLessonEntry entry = lessonEntries[index];
       final String lessonId = _stringValue(entry.lesson['id']);
@@ -313,11 +311,23 @@ class CoursesApiService {
           lessonProgressById[lessonId] ??
           CourseLessonProgressModel.empty(lessonId: lessonId);
 
-      if (entry.isAccessible &&
-          !progress.isCompleted &&
-          (progress.videoWatchPercent > 0 || progress.isTheoryRead)) {
-        return index;
+      // Match Home's Continue Learning behavior: opening a lesson updates its
+      // timestamp, so the last entered accessible lesson remains highlighted
+      // even at 0% progress or after it was completed.
+      if (entry.isAccessible && progress.updatedAt != null) {
+        final DateTime? updatedAt = progress.updatedAt;
+        if (latestStartedLessonIndex == null ||
+            (updatedAt != null &&
+                (latestStartedUpdatedAt == null ||
+                    updatedAt.isAfter(latestStartedUpdatedAt)))) {
+          latestStartedLessonIndex = index;
+          latestStartedUpdatedAt = updatedAt;
+        }
       }
+    }
+
+    if (latestStartedLessonIndex != null) {
+      return latestStartedLessonIndex;
     }
 
     for (int index = 0; index < lessonEntries.length; index++) {
@@ -383,23 +393,19 @@ class CoursesApiService {
   }
 
   CourseFinalExamModel _finalExamFromCourse(
-      Map<String, dynamic> course, {
-        required Map<String, dynamic>? gateway,
-        required int completionPercent,
-      }) {
+    Map<String, dynamic> course, {
+    required Map<String, dynamic>? gateway,
+    required int completionPercent,
+  }) {
     final bool hasLinkedExam = _stringValue(
       course['finalExamTemplateId'],
     ).isNotEmpty;
 
     final Map<String, dynamic> exam = gateway == null
         ? <String, dynamic>{}
-        : _jsonMapOr(
-      gateway['exam'],
-      <String, dynamic>{},
-    );
+        : _jsonMapOr(gateway['exam'], <String, dynamic>{});
 
-    final bool hasPublishedExam =
-        _stringValue(exam['id']).isNotEmpty;
+    final bool hasPublishedExam = _stringValue(exam['id']).isNotEmpty;
 
     final String attemptId = gateway == null
         ? ''
@@ -409,54 +415,41 @@ class CoursesApiService {
         ? ''
         : _stringValue(gateway['attemptStatus']);
 
-    final bool hasAttempted = gateway != null &&
-        _boolValue(
-          gateway['hasAttempted'],
-          fallback: attemptId.isNotEmpty,
-        );
+    final bool hasAttempted =
+        gateway != null &&
+        _boolValue(gateway['hasAttempted'], fallback: attemptId.isNotEmpty);
 
-    final bool resultReady = gateway != null &&
-        _boolValue(
-          gateway['resultReady'],
-          fallback: false,
-        );
+    final bool resultReady =
+        gateway != null && _boolValue(gateway['resultReady'], fallback: false);
 
-    final int unlockPercent = _intValue(
-      exam['unlockCompletionPercent'],
-    );
+    final int unlockPercent = _intValue(exam['unlockCompletionPercent']);
 
     final String backendProgressValue = gateway == null
         ? ''
         : _stringValue(gateway['courseProgressPercent']);
 
-    final int backendProgressPercent =
-    backendProgressValue.isEmpty
+    final int backendProgressPercent = backendProgressValue.isEmpty
         ? completionPercent
         : _intValue(backendProgressValue);
 
     final bool thresholdReached =
-        hasPublishedExam &&
-            backendProgressPercent >= unlockPercent;
+        hasPublishedExam && backendProgressPercent >= unlockPercent;
 
-    final bool isUnlocked = gateway != null &&
-        _boolValue(
-          gateway['isUnlocked'],
-          fallback: thresholdReached,
-        );
+    final bool isUnlocked =
+        gateway != null &&
+        _boolValue(gateway['isUnlocked'], fallback: thresholdReached);
 
-    final bool backendEligible = gateway != null &&
+    final bool backendEligible =
+        gateway != null &&
         _boolValue(
           gateway['isEligible'],
           fallback: isUnlocked && !hasAttempted,
         );
 
-    final bool canStart = hasLinkedExam &&
-        hasPublishedExam &&
-        backendEligible &&
-        !hasAttempted;
+    final bool canStart =
+        hasLinkedExam && hasPublishedExam && backendEligible && !hasAttempted;
 
-    final bool canViewResult =
-        resultReady && attemptId.isNotEmpty;
+    final bool canViewResult = resultReady && attemptId.isNotEmpty;
 
     final String gatewayMessage = gateway == null
         ? ''
@@ -491,17 +484,14 @@ class CoursesApiService {
       helperLabel = gatewayMessage.isNotEmpty
           ? gatewayMessage
           : 'Reach $unlockPercent% course completion '
-          'to unlock the final exam';
+                'to unlock the final exam';
     }
 
     return CourseFinalExamModel(
       examId: _stringValue(exam['id']),
       attemptId: attemptId,
       attemptStatus: attemptStatus,
-      title: _fallbackString(
-        exam['title'],
-        'gen_final_exam'.tr,
-      ),
+      title: _fallbackString(exam['title'], 'gen_final_exam'.tr),
       description: _fallbackString(
         exam['description'],
         'Complete the final exam to earn your course certificate.',
@@ -513,8 +503,7 @@ class CoursesApiService {
       hasAttempted: hasAttempted,
       isEligible: backendEligible,
       resultReady: resultReady,
-      courseProgressPercent:
-      backendProgressPercent.clamp(0, 100).toInt(),
+      courseProgressPercent: backendProgressPercent.clamp(0, 100).toInt(),
       unlockCompletionPercent: unlockPercent,
     );
   }
@@ -525,9 +514,9 @@ class CoursesApiService {
     required bool isCurrent,
     required CourseLessonProgressModel progress,
   }) {
-    if (progress.isCompleted) return CourseChapterState.completed;
     if (!isAccessible) return CourseChapterState.locked;
     if (isCurrent) return CourseChapterState.current;
+    if (progress.isCompleted) return CourseChapterState.completed;
     return lessonIsFree
         ? CourseChapterState.free
         : CourseChapterState.available;

@@ -19,19 +19,27 @@ class AiTutorApiService {
   }) async {
     final AiTutorVoiceSessionRequestModel request =
         AiTutorVoiceSessionRequestModel(
-      topic: topic,
-      ttlSeconds: ttlSeconds,
-      memoryFacts: memoryFacts,
-      recentMistakeTags: recentMistakeTags,
-      guidedMode: guidedMode,
-      guidedLevel: guidedLevel,
-    );
+          topic: topic,
+          ttlSeconds: ttlSeconds,
+          memoryFacts: memoryFacts,
+          recentMistakeTags: recentMistakeTags,
+          guidedMode: guidedMode,
+          guidedLevel: guidedLevel,
+        );
     final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '/ai-tutor/voice/sessions',
       options: Options(receiveTimeout: const Duration(seconds: 45)),
       data: request.toJson(),
     );
 
+    return AiTutorVoiceSessionModel.fromJson(_asMap(response.data));
+  }
+
+  Future<AiTutorVoiceSessionModel> startLevelTestVoiceSession() async {
+    final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
+      '/ai-tutor/level-test/voice/session',
+      options: Options(receiveTimeout: const Duration(seconds: 45)),
+    );
     return AiTutorVoiceSessionModel.fromJson(_asMap(response.data));
   }
 
@@ -49,6 +57,35 @@ class AiTutorApiService {
       '/ai-tutor/voice/sessions/${Uri.encodeComponent(sessionId)}/heartbeat',
     );
     return AiTutorVoiceHeartbeatModel.fromJson(_asMap(response.data));
+  }
+
+  Future<AiTutorVoiceSessionModel> reconnectVoiceSession(
+    String sessionId, {
+    String? resumptionHandle,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
+      '/ai-tutor/voice/sessions/${Uri.encodeComponent(sessionId)}/reconnect',
+      data: <String, dynamic>{
+        if (resumptionHandle?.trim().isNotEmpty == true)
+          'resumptionHandle': resumptionHandle!.trim(),
+      },
+    );
+    return AiTutorVoiceSessionModel.fromJson(_asMap(response.data));
+  }
+
+  Future<void> recordLiveEvents(
+    String sessionId,
+    List<AiTutorLiveEventModel> events,
+  ) async {
+    if (events.isEmpty) return;
+    await _apiClient.dio.post<dynamic>(
+      '/ai-tutor/voice/sessions/${Uri.encodeComponent(sessionId)}/events',
+      data: <String, dynamic>{
+        'events': events
+            .map((AiTutorLiveEventModel event) => event.toJson())
+            .toList(),
+      },
+    );
   }
 
   Future<AiTutorChatResponseModel> sendMessage({

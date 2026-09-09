@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/services/api_error_handler.dart';
+import '../../cv_generation/controllers/cv_home_controller.dart';
 import '../../../routes/routes.dart';
 import 'controllers/google_play_purchase_controller.dart';
 import 'models/google_play_billing_models.dart';
@@ -10,6 +12,7 @@ import 'models/shop_models.dart';
 import 'models/shop_order_models.dart';
 import 'services/google_play_billing_service.dart';
 import 'services/shop_api_service.dart';
+
 class OrderHistoryFilterTitles {
   static String get allOrders => 'all_orders'.tr;
   static String get courses => 'courses'.tr;
@@ -17,16 +20,16 @@ class OrderHistoryFilterTitles {
   static String get streakFreezes => 'streak_freezes'.tr;
   static String get cvCredits => 'cv_credits'.tr;
 }
+
 class ShopController extends GetxController {
   ShopController({
     required ShopApiService apiService,
     GooglePlayBillingService? billingService,
     GooglePlayPurchaseController? purchaseController,
-  })  : _apiService = apiService,
-        _billingService =
-            billingService ?? Get.find<GooglePlayBillingService>(),
-        _purchaseController =
-            purchaseController ?? Get.find<GooglePlayPurchaseController>();
+  }) : _apiService = apiService,
+       _billingService = billingService ?? Get.find<GooglePlayBillingService>(),
+       _purchaseController =
+           purchaseController ?? Get.find<GooglePlayPurchaseController>();
   final ShopApiService _apiService;
   final GooglePlayBillingService _billingService;
   final GooglePlayPurchaseController _purchaseController;
@@ -35,6 +38,7 @@ class ShopController extends GetxController {
   final RxBool isLoadingShop = false.obs;
   final RxBool isLoadingQuote = false.obs;
   final RxBool isCheckoutLoading = false.obs;
+  final RxBool isRestoringSubscription = false.obs;
   final RxString shopError = ''.obs;
   final RxString checkoutError = ''.obs;
   final Rxn<StoreShopModel> shop = Rxn<StoreShopModel>();
@@ -53,8 +57,14 @@ class ShopController extends GetxController {
   final Rxn<StoreQuoteResponseModel> quote = Rxn<StoreQuoteResponseModel>();
   String _regularStorePriceText = '';
   String _regularStoreProductId = '';
+  CheckoutPaymentMethod get _platformPaymentMethod => Platform.isIOS
+      ? CheckoutPaymentMethod.appStore
+      : CheckoutPaymentMethod.googlePlay;
   final Rx<CheckoutPaymentMethod> selectedPaymentMethod =
-      CheckoutPaymentMethod.googlePlay.obs;
+      (Platform.isIOS
+              ? CheckoutPaymentMethod.appStore
+              : CheckoutPaymentMethod.googlePlay)
+          .obs;
   final Rxn<StorePurchaseCompletionModel> completedPurchase =
       Rxn<StorePurchaseCompletionModel>();
   @override
@@ -66,56 +76,45 @@ class ShopController extends GetxController {
     );
     unawaited(_initializeShop());
   }
+
   Future<void> _initializeShop() async {
     await loadShop();
 
-    final StorePurchaseCompletionModel? recovered =
-    _purchaseController.takeLastCompletion();
+    final StorePurchaseCompletionModel? recovered = _purchaseController
+        .takeLastCompletion();
 
     if (recovered != null) {
       await _applyPurchaseCompletion(recovered);
     }
-  }  StorePackageModel? get selectedAiPackage =>
+  }
+
+  StorePackageModel? get selectedAiPackage =>
       _findPackage(aiPackages, selectedAiPackageId.value);
   StorePackageModel? get selectedStreakPackage =>
       _findPackage(streakPackages, selectedStreakPackageId.value);
   StorePackageModel? get selectedCvPackage =>
       _findPackage(cvPackages, selectedCvPackageId.value);
 
-  int get aiVoiceMinutes =>
-      balances.value?.aiVoiceMinutes ?? 0;
+  int get aiVoiceMinutes => balances.value?.aiVoiceMinutes ?? 0;
 
-  int get aiTextTokens =>
-      balances.value?.aiTextTokens ?? 0;
+  int get aiTextTokens => balances.value?.aiTextTokens ?? 0;
 
-  int get streakFreezeBalance =>
-      balances.value?.streakFreezeCount ?? 0;
+  int get streakFreezeBalance => balances.value?.streakFreezeCount ?? 0;
 
   bool get hasActiveMonthlyStreakProtection =>
-      balances.value
-          ?.unlimitedProtectionActive ??
-          false;
+      balances.value?.unlimitedProtectionActive ?? false;
 
-  DateTime?
-  get monthlyStreakProtectionExpiresAt =>
-      balances.value
-          ?.unlimitedProtectionExpiresAt;
+  DateTime? get monthlyStreakProtectionExpiresAt =>
+      balances.value?.unlimitedProtectionExpiresAt;
 
-  StoreActiveSubscriptionModel?
-  get activeMonthlyStreakSubscription =>
-      balances.value
-          ?.activeStreakSubscription;
+  StoreActiveSubscriptionModel? get activeMonthlyStreakSubscription =>
+      balances.value?.activeStreakSubscription;
 
   String get activeMonthlyProductId =>
-      activeMonthlyStreakSubscription
-          ?.productId ??
-          '';
+      activeMonthlyStreakSubscription?.productId ?? '';
 
-  bool isActiveMonthlyStreakPackage(
-      StorePackageModel package,
-      ) {
-    final StoreActiveSubscriptionModel?
-    subscription =
+  bool isActiveMonthlyStreakPackage(StorePackageModel package) {
+    final StoreActiveSubscriptionModel? subscription =
         activeMonthlyStreakSubscription;
 
     return package.isUnlimitedStreak &&
@@ -123,67 +122,41 @@ class ShopController extends GetxController {
         subscription.packageId == package.id;
   }
 
-  bool isMonthlyPurchaseBlocked(
-      StorePackageModel package,
-      ) {
+  bool isMonthlyPurchaseBlocked(StorePackageModel package) {
     return package.isUnlimitedStreak &&
         hasActiveMonthlyStreakProtection &&
-        !isActiveMonthlyStreakPackage(
-          package,
-        );
+        !isActiveMonthlyStreakPackage(package);
   }
 
-  int get cvCreditBalance =>
-      balances.value?.cvCredits ?? 0;
+  int get cvCreditBalance => balances.value?.cvCredits ?? 0;
 
   /// Total free CV creations configured by admin.
-  int get freeCvGenerationsLimit =>
-      balances.value
-          ?.freeCvGenerationsLimit ??
-          3;
+  int get freeCvGenerationsLimit => balances.value?.freeCvGenerationsLimit ?? 3;
 
   /// Free CV creations the user still has.
   int get freeCvGenerationsRemaining =>
-      balances.value
-          ?.freeCvGenerationsRemaining ??
-          0;
+      balances.value?.freeCvGenerationsRemaining ?? 0;
 
   /// Whether at least one free CV creation remains.
-  bool get hasCvFreeAllowance =>
-      freeCvGenerationsRemaining > 0;
+  bool get hasCvFreeAllowance => freeCvGenerationsRemaining > 0;
 
   /// Whether all free CV creations have been used.
-  bool get cvFreeLimitEnded =>
-      balances.value
-          ?.freeCvLimitExhausted ??
-          true;
+  bool get cvFreeLimitEnded => balances.value?.freeCvLimitExhausted ?? true;
 
   /// Free CV creations plus purchased credits.
   int get totalCvGenerationsAvailable =>
-      balances.value
-          ?.totalCvGenerationsAvailable ??
-          0;
+      balances.value?.totalCvGenerationsAvailable ?? 0;
 
   /// Whether the user can create another new CV.
-  bool get canCreateCv =>
-      balances.value
-          ?.canCreateCv ??
-          false;
+  bool get canCreateCv => balances.value?.canCreateCv ?? false;
 
   /// Possible values: free, credit, none.
   String get nextCvGenerationUses =>
-      balances.value
-          ?.nextCvGenerationUses ??
-          'none';
+      balances.value?.nextCvGenerationUses ?? 'none';
 
   /// Whether CV editing and regeneration are free.
   bool get allowCvEditingWithoutCredit =>
-      balances.value
-          ?.allowCvEditingWithoutCredit ??
-          false;
-
-
-
+      balances.value?.allowCvEditingWithoutCredit ?? false;
 
   StoreShopSectionModel? sectionFor(StorePackageType type) {
     for (final StoreShopSectionModel item in shop.value?.sections ?? const []) {
@@ -191,6 +164,7 @@ class ShopController extends GetxController {
     }
     return null;
   }
+
   Future<void> loadShop() async {
     if (isLoadingShop.value) return;
     isLoadingShop.value = true;
@@ -198,18 +172,17 @@ class ShopController extends GetxController {
     try {
       final ApiResult<List<Object>> result =
           await ApiErrorHandler.call<List<Object>>(() async {
-        return Future.wait<Object>(<Future<Object>>[
-          _apiService.getShop(),
-          _apiService.getPackages(packageType: StorePackageType.aiBundle),
-          _apiService.getPackages(packageType: StorePackageType.streakFreeze),
-          _apiService.getPackages(packageType: StorePackageType.cvCredit),
-        ]);
-      }, showError: false);
-      if (!result.isSuccess ||
-          result.data == null) {
-        shopError.value =
-            result.error ??
-                'could_not_load_the_shop'.tr;
+            return Future.wait<Object>(<Future<Object>>[
+              _apiService.getShop(),
+              _apiService.getPackages(packageType: StorePackageType.aiBundle),
+              _apiService.getPackages(
+                packageType: StorePackageType.streakFreeze,
+              ),
+              _apiService.getPackages(packageType: StorePackageType.cvCredit),
+            ]);
+          }, showError: false);
+      if (!result.isSuccess || result.data == null) {
+        shopError.value = result.error ?? 'could_not_load_the_shop'.tr;
 
         return;
       }
@@ -233,83 +206,105 @@ class ShopController extends GetxController {
       isLoadingShop.value = false;
     }
   }
+
   Future<void> refreshBalances() async {
     final ApiResult<StoreBalancesModel> result =
         await ApiErrorHandler.call<StoreBalancesModel>(
-      _apiService.getBalances,
-      showError: false,
-    );
+          _apiService.getBalances,
+          showError: false,
+        );
     if (result.isSuccess && result.data != null) {
-      balances.value = result.data;
+      applyBalances(result.data!);
 
-      _syncUserSessionBalances(
-        result.data!,
-      );
+      final StorePackageModel? selected = selectedStreakPackage;
 
-      final StorePackageModel? selected =
-          selectedStreakPackage;
-
-      if (
-      selected != null &&
+      if (selected != null &&
           selected.isUnlimitedStreak &&
-          hasActiveMonthlyStreakProtection
-      ) {
+          hasActiveMonthlyStreakProtection) {
         _selectDefaultStreakPackage();
       }
     }
   }
+
+  Future<void> restoreAppStoreSubscription(StorePackageModel package) async {
+    if (!Platform.isIOS || isRestoringSubscription.value) return;
+    isRestoringSubscription.value = true;
+    try {
+      final GooglePlayPurchaseOutcome outcome = await _purchaseController
+          .restoreAppStoreSubscription(package);
+      if (outcome.status == GooglePlayPurchaseOutcomeStatus.completed) {
+        if (outcome.completion != null) {
+          await _applyPurchaseCompletion(outcome.completion!);
+        }
+        await refreshBalances();
+      }
+      Get.snackbar(
+        outcome.status == GooglePlayPurchaseOutcomeStatus.completed
+            ? 'Restored'
+            : 'Restore Purchases',
+        outcome.message,
+      );
+    } finally {
+      isRestoringSubscription.value = false;
+    }
+  }
+
+  Future<void> restoreMonthlyStreakSubscription(StorePackageModel package) =>
+      restoreAppStoreSubscription(package);
+
+  void applyBalances(StoreBalancesModel value) {
+    balances.value = value;
+    _syncUserSessionBalances(value);
+  }
+
   void selectAiPackage(String packageId) {
     selectedAiPackageId.value = packageId;
     _resetQuote();
   }
+
   void selectStreakPackage(String packageId) {
     selectedStreakPackageId.value = packageId;
     _resetQuote();
   }
+
   void selectCvPackage(String packageId) {
     selectedCvPackageId.value = packageId;
     _resetQuote();
   }
+
   bool isAiPackageSelected(String id) => selectedAiPackageId.value == id;
   bool isStreakPackageSelected(String id) =>
       selectedStreakPackageId.value == id;
   bool isCvPackageSelected(String id) => selectedCvPackageId.value == id;
-  String packagePriceText(
-      StorePackageModel package,
-      ) {
+  String packagePriceText(StorePackageModel package) {
     final String price =
-        _billingService.localizedPrice(
-          package.storeProduct,
-        ) ??
-            '€${package.priceEur.toStringAsFixed(2)}';
+        _billingService.localizedPrice(package.storeProduct) ??
+        '€${package.priceEur.toStringAsFixed(2)}';
 
     if (!package.isMonthly) {
       return price;
     }
 
-    return 'price_per_month'.trParams(
-      <String, String>{
-        'price': price,
-      },
-    );
+    return 'price_per_month'.trParams(<String, String>{'price': price});
   }
-  bool get isGooglePlaySelected =>
-      selectedPaymentMethod.value == CheckoutPaymentMethod.googlePlay;
-  bool get canChangeCurrency => !isGooglePlaySelected;
-  bool get canUseCoupon =>
-      activePackage.value?.couponEnabled ??
-          false;
+
+  bool get isStorePaymentSelected =>
+      selectedPaymentMethod.value == _platformPaymentMethod;
+  bool get canChangeCurrency => !isStorePaymentSelected;
+  bool get canUseCoupon => activePackage.value?.couponEnabled ?? false;
   bool get hasDiscount => isCouponApplied.value && discountAmount > 0;
   Future<void> selectCurrency(RefillCurrency currency) async {
     if (!canChangeCurrency || selectedCurrency.value == currency) return;
     selectedCurrency.value = currency;
     await _loadQuote(coupon: isCouponApplied.value ? couponCode.value : '');
   }
+
   void onCouponChanged(String value) {
     couponCode.value = value.trim();
     checkoutError.value = '';
     if (isCouponApplied.value) isCouponApplied.value = false;
   }
+
   Future<void> applyCoupon() async {
     if (!canUseCoupon) {
       Get.snackbar(
@@ -323,17 +318,12 @@ class ShopController extends GetxController {
     final String code = couponTextController.text.trim();
 
     if (code.isEmpty) {
-      Get.snackbar(
-        'coupon_required'.tr,
-        'please_enter_a_coupon_code'.tr,
-      );
+      Get.snackbar('coupon_required'.tr, 'please_enter_a_coupon_code'.tr);
 
       return;
     }
 
-    final bool loaded = await _loadQuote(
-      coupon: code,
-    );
+    final bool loaded = await _loadQuote(coupon: code);
 
     if (loaded) {
       checkoutError.value = '';
@@ -354,6 +344,7 @@ class ShopController extends GetxController {
       );
     }
   }
+
   Future<void> clearCoupon() async {
     couponTextController.clear();
     couponCode.value = '';
@@ -361,24 +352,29 @@ class ShopController extends GetxController {
     checkoutError.value = '';
     if (activePackage.value != null) await _loadQuote();
   }
+
   String formatPrice(double value) {
     final bool eur = selectedCurrency.value == RefillCurrency.eur;
-    return eur ? '€${value.toStringAsFixed(2)}' : '৳${value.toStringAsFixed(0)}';
+    return eur
+        ? '€${value.toStringAsFixed(2)}'
+        : '৳${value.toStringAsFixed(0)}';
   }
+
   StoreQuotePricingModel? get pricing => quote.value?.pricing;
   double get currentBasePrice =>
       pricing?.originalAmount ?? activePackage.value?.priceEur ?? 0;
   double get discountAmount => pricing?.discountAmount ?? 0;
   double get payableAmount => pricing?.payableAmount ?? currentBasePrice;
   String get originalPriceText => formatPrice(currentBasePrice);
-  String get payablePriceText => _checkoutStorePrice ?? formatPrice(payableAmount);
+  String get payablePriceText =>
+      _checkoutStorePrice ?? formatPrice(payableAmount);
   String get savedAmountText =>
       'YOU SAVED ${_storeSavedAmountText ?? formatPrice(discountAmount)}';
   String get orderSummaryPrice => payablePriceText;
   String get checkoutOriginalPriceText =>
       hasDiscount && _regularStorePriceText.isNotEmpty
-          ? _regularStorePriceText
-          : originalPriceText;
+      ? _regularStorePriceText
+      : originalPriceText;
   String get checkoutPayablePriceText => payablePriceText;
   String get checkoutSavedAmountText => savedAmountText;
   String get streakFreezeOriginalPriceText => checkoutOriginalPriceText;
@@ -388,7 +384,7 @@ class ShopController extends GetxController {
   String get cvCreditPayablePriceText => payablePriceText;
   String get cvCreditSavedAmountText => savedAmountText;
   String? get _checkoutStorePrice =>
-      _billingService.localizedPrice(quote.value?.storeProduct);
+      _billingService.localizedPurchasePrice(quote.value?.storeProduct);
   String? get _storeSavedAmountText {
     if (!hasDiscount || _regularStorePriceText.isEmpty) return null;
     final String? discounted = _checkoutStorePrice;
@@ -398,12 +394,43 @@ class ShopController extends GetxController {
       discountedPriceText: discounted,
     );
   }
+
   StorePackageModel? get checkoutPackage =>
       activePackage.value ?? selectedAiPackage;
   String get selectedPlanTitle => checkoutPackage?.name ?? 'package'.tr;
   String get selectedPlanSubtitle => checkoutPackage?.entitlementSummary ?? '';
   String get checkoutBillingLabel =>
       checkoutPackage?.isMonthly == true ? '/ month' : '/ one-time';
+  bool get isAppStoreSubscriptionCheckout =>
+      Platform.isIOS &&
+      checkoutPackage?.isMonthly == true &&
+      quote.value?.storeProduct.isSubscription == true;
+  String get appStoreSubscriptionTitle =>
+      _billingService.localizedTitle(quote.value?.storeProduct) ??
+      selectedPlanTitle;
+  String get appStoreSubscriptionPrice => _checkoutStorePrice?.trim() ?? '';
+  bool get hasAppStoreSubscriptionPrice =>
+      !isAppStoreSubscriptionCheckout || appStoreSubscriptionPrice.isNotEmpty;
+  bool get canConfirmCheckout =>
+      !isCheckoutLoading.value && hasAppStoreSubscriptionPrice;
+  String get appStoreSubscriptionBillingDuration {
+    final StoreBillingPeriod? period = _billingService.subscriptionPeriod(
+      quote.value?.storeProduct,
+    );
+    final int count = period?.count ?? 1;
+    final String unit = period?.unit ?? 'month';
+    final String suffix = count == 1 ? 'one' : 'many';
+    return 'subscription_period_${unit}_$suffix'.trParams(<String, String>{
+      'count': '$count',
+    });
+  }
+
+  Future<void> restoreCurrentAppStoreSubscription() async {
+    final StorePackageModel? package = checkoutPackage;
+    if (package == null || !package.isMonthly) return;
+    await restoreAppStoreSubscription(package);
+  }
+
   String get selectedStreakFreezePackTitle =>
       selectedStreakPackage?.name ?? 'Streak Freeze';
   int get selectedStreakFreezeCount =>
@@ -415,72 +442,69 @@ class ShopController extends GetxController {
   Future<void> onRefillCreditTap() async {
     await _openPackageList(StorePackageType.aiBundle, AppRoutes.aiRefillCenter);
   }
+
   Future<void> onStreakFreezeTap() async {
-    await _openPackageList(StorePackageType.streakFreeze, AppRoutes.streakFreeze);
+    await _openPackageList(
+      StorePackageType.streakFreeze,
+      AppRoutes.streakFreeze,
+    );
   }
+
   Future<void> onCvCreditTap() async {
     await _openPackageList(StorePackageType.cvCredit, AppRoutes.cvCreditStore);
   }
+
   Future<void> confirmPurchase() async {
     await _openSummary(selectedAiPackage, AppRoutes.orderSummary);
   }
-  Future<void>
-  goToStreakFreezeOrderSummary() async {
-    final StorePackageModel? package =
-        selectedStreakPackage;
+
+  Future<void> goToStreakFreezeOrderSummary() async {
+    final StorePackageModel? package = selectedStreakPackage;
 
     if (package == null) {
-      Get.snackbar(
-        'select_a_package'.tr,
-        'please_select_a_package_first'.tr,
-      );
+      Get.snackbar('select_a_package'.tr, 'please_select_a_package_first'.tr);
 
       return;
     }
 
-    if (
-    package.isUnlimitedStreak &&
-        hasActiveMonthlyStreakProtection
-    ) {
+    if (package.isUnlimitedStreak && hasActiveMonthlyStreakProtection) {
       Get.snackbar(
         'monthly_protection_active'.tr,
-        'active_monthly_plan_already_exists'
-            .tr,
+        'active_monthly_plan_already_exists'.tr,
       );
 
       return;
     }
 
-    await _openSummary(
-      package,
-      AppRoutes.streakFreezeOrderSummary,
-    );
+    await _openSummary(package, AppRoutes.streakFreezeOrderSummary);
   }
 
   void showMonthlyPlanAlreadyActive() {
     Get.snackbar(
       'monthly_protection_active'.tr,
-      'active_monthly_plan_already_exists'
-          .tr,
+      'active_monthly_plan_already_exists'.tr,
     );
   }
 
   Future<void> goToCvCreditOrderSummary() async {
     await _openSummary(selectedCvPackage, AppRoutes.cvCreditOrderSummary);
   }
+
   Future<void> buySelectedPlan() async {
     if (quote.value == null && !await _loadQuote()) return;
-    selectedPaymentMethod.value = CheckoutPaymentMethod.googlePlay;
+    selectedPaymentMethod.value = _platformPaymentMethod;
     Get.toNamed(AppRoutes.checkout);
   }
+
   List<CheckoutPaymentMethod> get availablePaymentMethods =>
-      const <CheckoutPaymentMethod>[CheckoutPaymentMethod.googlePlay];
+      <CheckoutPaymentMethod>[_platformPaymentMethod];
   StoreProviderOptionModel? paymentOption(CheckoutPaymentMethod method) {
     for (final StoreProviderOptionModel option
         in quote.value?.supportedProviders ?? const []) {
       if (option.method != method) continue;
       final StoreProviderProductModel product = quote.value!.storeProduct;
-      final bool storeReady = _billingService.isAvailable.value &&
+      final bool storeReady =
+          _billingService.isAvailable.value &&
           _billingService.hasProduct(product);
       return StoreProviderOptionModel(
         provider: option.provider,
@@ -489,17 +513,20 @@ class ShopController extends GetxController {
         productType: option.productType,
         basePlanId: option.basePlanId,
         offerId: option.offerId,
+        offerType: option.offerType,
         developmentVerification: option.developmentVerification,
+        promotionalOffer: option.promotionalOffer,
         label: option.label,
         unavailableReason: storeReady
             ? option.unavailableReason
             : _billingService.lastError.value.isNotEmpty
-                ? _billingService.lastError.value
-                : 'this_payment_method_is_unavailable'.tr,
+            ? _billingService.lastError.value
+            : 'this_payment_method_is_unavailable'.tr,
       );
     }
     return null;
   }
+
   bool isPaymentMethodSelected(CheckoutPaymentMethod method) =>
       selectedPaymentMethod.value == method;
   void selectPaymentMethod(CheckoutPaymentMethod method) {
@@ -516,18 +543,27 @@ class ShopController extends GetxController {
     selectedPaymentMethod.value = method;
     checkoutError.value = '';
   }
-  String paymentMethodTitle(CheckoutPaymentMethod _) => 'google_play'.tr;
+
+  String paymentMethodTitle(CheckoutPaymentMethod method) =>
+      method == CheckoutPaymentMethod.appStore ? 'App Store' : 'google_play'.tr;
   Future<void> confirmCheckout() async {
+    if (!hasAppStoreSubscriptionPrice) {
+      checkoutError.value = 'app_store_price_unavailable'.tr;
+      return;
+    }
     await _completeSelectedPurchase();
   }
+
   Future<void> confirmStreakFreezePurchase() async {
     activePackage.value = selectedStreakPackage;
     await buySelectedPlan();
   }
+
   Future<void> confirmCvCreditPurchase() async {
     activePackage.value = selectedCvPackage;
     await buySelectedPlan();
   }
+
   String get completedMessage {
     final StorePurchaseCompletionModel? value = completedPurchase.value;
     if (value == null) return 'your_purchase_is_now_active'.tr;
@@ -540,6 +576,7 @@ class ShopController extends GetxController {
         return "Your '${value.packageName}' credits are active and ready for CV generation.";
     }
   }
+
   String get completedOrderId => completedPurchase.value?.orderNumber ?? '';
   String get completionFirstValue {
     final StorePurchaseCompletionModel? value = completedPurchase.value;
@@ -555,6 +592,7 @@ class ShopController extends GetxController {
         return '${value.creditedCvCredits}×';
     }
   }
+
   String get completionFirstLabel {
     switch (completedPurchase.value?.packageType) {
       case StorePackageType.aiBundle:
@@ -567,6 +605,7 @@ class ShopController extends GetxController {
         return 'credits_added'.tr;
     }
   }
+
   String get completionSecondValue {
     final StorePurchaseCompletionModel? value = completedPurchase.value;
     if (value == null) return '0';
@@ -579,23 +618,28 @@ class ShopController extends GetxController {
         return '${value.balances.cvCredits}×';
     }
   }
+
   String get completionSecondLabel {
     return completedPurchase.value?.packageType == StorePackageType.aiBundle
         ? 'gen_ai_smart_tokens'.tr
         : 'current_balance'.tr;
   }
+
   void closePurchaseCompleted() {
     _resetCompletedPurchase();
     Get.back();
   }
+
   void startLearningNow() {
     _resetCompletedPurchase();
     Get.offAllNamed(AppRoutes.wrapper);
   }
+
   void prepareForShopExit() {
     _resetCompletedPurchase();
     _purchaseController.resetTransientState(cancelActivePurchase: true);
   }
+
   void onOrderHistoryTap() => Get.toNamed(AppRoutes.orderHistory);
   Future<void> _openPackageList(StorePackageType type, String route) async {
     if (_packagesFor(type).isEmpty) await loadShop();
@@ -606,10 +650,8 @@ class ShopController extends GetxController {
     _resetQuote();
     Get.toNamed(route);
   }
-  Future<void> _openSummary(
-    StorePackageModel? package,
-    String route,
-  ) async {
+
+  Future<void> _openSummary(StorePackageModel? package, String route) async {
     if (package == null) {
       Get.snackbar('select_a_package'.tr, 'please_select_a_package_first'.tr);
       return;
@@ -618,6 +660,7 @@ class ShopController extends GetxController {
     _resetQuote(keepActivePackage: true);
     if (await _loadQuote()) Get.toNamed(route);
   }
+
   Future<bool> _loadQuote({String coupon = ''}) async {
     final StorePackageModel? package = activePackage.value;
     if (package == null || isLoadingQuote.value) return false;
@@ -625,15 +668,14 @@ class ShopController extends GetxController {
     try {
       final ApiResult<StoreQuoteResponseModel> result =
           await ApiErrorHandler.call<StoreQuoteResponseModel>(
-        () => _apiService.getQuote(
-          packageId: package.id,
-          currency: selectedCurrency.value,
-          couponCode: coupon,
-        ),
-        showError: coupon.trim().isEmpty,
-      );
-      if (!result.isSuccess ||
-          result.data == null) {
+            () => _apiService.getQuote(
+              packageId: package.id,
+              currency: selectedCurrency.value,
+              couponCode: coupon,
+            ),
+            showError: coupon.trim().isEmpty,
+          );
+      if (!result.isSuccess || result.data == null) {
         if (coupon.trim().isNotEmpty) {
           checkoutError.value = '';
         }
@@ -644,21 +686,22 @@ class ShopController extends GetxController {
       final StoreQuoteResponseModel loadedQuote = result.data!;
       final List<StoreProviderProductModel> productsToPrepare =
           <StoreProviderProductModel>[
-        if (package.storeProduct != null) package.storeProduct!,
-        loadedQuote.storeProduct,
-      ];
+            if (package.storeProduct != null) package.storeProduct!,
+            loadedQuote.storeProduct,
+          ];
       await _billingService.prepareProducts(productsToPrepare);
       _syncRegularStorePrice(package, coupon: coupon);
       quote.value = loadedQuote;
       balances.value = loadedQuote.balances;
       _syncUserSessionBalances(loadedQuote.balances);
-      selectedPaymentMethod.value = CheckoutPaymentMethod.googlePlay;
+      selectedPaymentMethod.value = _platformPaymentMethod;
       _syncCurrencyFromGooglePlay(loadedQuote.storeProduct);
       return true;
     } finally {
       isLoadingQuote.value = false;
     }
   }
+
   Future<void> _completeSelectedPurchase() async {
     if (isCheckoutLoading.value) return;
     final StorePackageModel? package = activePackage.value;
@@ -670,13 +713,13 @@ class ShopController extends GetxController {
     isCheckoutLoading.value = true;
     checkoutError.value = '';
     try {
-      final GooglePlayPurchaseOutcome outcome =
-          await _purchaseController.startPurchase(
-        package: package,
-        storeProduct: currentQuote.storeProduct,
-        currency: selectedCurrency.value,
-        couponCode: isCouponApplied.value ? couponCode.value : '',
-      );
+      final GooglePlayPurchaseOutcome outcome = await _purchaseController
+          .startPurchase(
+            package: package,
+            storeProduct: currentQuote.storeProduct,
+            currency: selectedCurrency.value,
+            couponCode: isCouponApplied.value ? couponCode.value : '',
+          );
       switch (outcome.status) {
         case GooglePlayPurchaseOutcomeStatus.completed:
           if (outcome.completion != null) {
@@ -697,6 +740,7 @@ class ShopController extends GetxController {
       isCheckoutLoading.value = false;
     }
   }
+
   Future<void> _applyPurchaseCompletion(
     StorePurchaseCompletionModel completion,
   ) async {
@@ -709,10 +753,18 @@ class ShopController extends GetxController {
     if (Get.isRegistered<UserSessionController>()) {
       await Get.find<UserSessionController>().refreshAiBalances();
     }
+    if (completion.packageType == StorePackageType.cvCredit &&
+        Get.isRegistered<CvHomeController>() &&
+        !Get.isPrepared<CvHomeController>()) {
+      await Get.find<CvHomeController>().loadHomeBootstrap(
+        showBlockingLoading: false,
+      );
+    }
     if (Get.currentRoute != AppRoutes.purchaseCompleted) {
       Get.offNamed(AppRoutes.purchaseCompleted);
     }
   }
+
   void _syncUserSessionBalances(StoreBalancesModel value) {
     if (!Get.isRegistered<UserSessionController>()) return;
     Get.find<UserSessionController>().updateAiBalances(
@@ -720,35 +772,26 @@ class ShopController extends GetxController {
       textTokens: value.aiTextTokens,
     );
   }
+
   void _selectDefaults() {
-    selectedAiPackageId.value =
-        _preferred(aiPackages)?.id ?? '';
+    selectedAiPackageId.value = _preferred(aiPackages)?.id ?? '';
 
     _selectDefaultStreakPackage();
 
-    selectedCvPackageId.value =
-        _preferred(cvPackages)?.id ?? '';
+    selectedCvPackageId.value = _preferred(cvPackages)?.id ?? '';
   }
 
   void _selectDefaultStreakPackage() {
-    final List<StorePackageModel>
-    purchasablePackages =
-    streakPackages
+    final List<StorePackageModel> purchasablePackages = streakPackages
         .where(
           (StorePackageModel package) =>
-      !(
-          package.isUnlimitedStreak &&
-              hasActiveMonthlyStreakProtection
-      ),
-    )
+              !(package.isUnlimitedStreak && hasActiveMonthlyStreakProtection),
+        )
         .toList(growable: false);
 
-    selectedStreakPackageId.value =
-        _preferred(
-          purchasablePackages,
-        )?.id ??
-            '';
+    selectedStreakPackageId.value = _preferred(purchasablePackages)?.id ?? '';
   }
+
   StorePackageModel? _preferred(List<StorePackageModel> packages) {
     if (packages.isEmpty) return null;
     for (final StorePackageModel item in packages) {
@@ -759,12 +802,14 @@ class ShopController extends GetxController {
     }
     return packages.first;
   }
+
   void _resetQuote({bool keepActivePackage = false}) {
     quote.value = null;
     _resetCouponState();
     checkoutError.value = '';
     if (!keepActivePackage) activePackage.value = null;
   }
+
   void _resetCouponState() {
     couponTextController.clear();
     couponCode.value = '';
@@ -841,11 +886,13 @@ class ShopController extends GetxController {
       selectedCurrency.value = RefillCurrency.eur;
     }
   }
+
   void _resetCompletedPurchase() {
     completedPurchase.value = null;
     _lastHandledOrderId = '';
     _purchaseController.resetTransientState();
   }
+
   List<StorePackageModel> _packagesFor(StorePackageType type) {
     switch (type) {
       case StorePackageType.aiBundle:
@@ -856,18 +903,13 @@ class ShopController extends GetxController {
         return cvPackages;
     }
   }
-  StorePackageModel? _findPackage(
-      List<StorePackageModel> packages,
-      String id,
-      ) {
+
+  StorePackageModel? _findPackage(List<StorePackageModel> packages, String id) {
     if (id.isEmpty) {
       return null;
     }
 
-    for (
-    final StorePackageModel item
-    in packages
-    ) {
+    for (final StorePackageModel item in packages) {
       if (item.id == id) {
         return item;
       }
@@ -875,29 +917,31 @@ class ShopController extends GetxController {
 
     return null;
   }
+
   StorePackageModel _emptyPackage(StorePackageType type) => StorePackageModel(
-        id: '',
-        type: type,
-        name: 'Package',
-        description: '',
-        priceEur: 0,
-        billingModel: 'one_time',
-        marketingBadge: 'none',
-        aiVoiceMinutes: 0,
-        aiVoiceSeconds: 0,
-        aiTextTokens: 0,
-        cvCredits: 0,
-        streakFreezeCount: 0,
-        streakProtectionMode: '',
-        protectionDurationDays: null,
-        couponEnabled: false,
-        sortOrder: 0,
-      );
+    id: '',
+    type: type,
+    name: 'Package',
+    description: '',
+    priceEur: 0,
+    billingModel: 'one_time',
+    marketingBadge: 'none',
+    aiVoiceMinutes: 0,
+    aiVoiceSeconds: 0,
+    aiTextTokens: 0,
+    cvCredits: 0,
+    streakFreezeCount: 0,
+    streakProtectionMode: '',
+    protectionDurationDays: null,
+    couponEnabled: false,
+    sortOrder: 0,
+  );
   String _compact(int value) {
     if (value < 1000) return value.toString();
     if (value % 1000 == 0) return '${value ~/ 1000}k';
     return '${(value / 1000).toStringAsFixed(1)}k';
   }
+
   @override
   void onClose() {
     prepareForShopExit();

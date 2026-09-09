@@ -1,6 +1,6 @@
 enum ProCurrency { eur, bdt }
 
-enum ProPaymentMethod { card, googlePlay }
+enum ProPaymentMethod { card, googlePlay, appStore }
 
 enum ProPurchaseOutcomeStatus { completed, pending, cancelled, failed }
 
@@ -10,6 +10,8 @@ class ProStoreProductModel {
     required this.provider,
     required this.productId,
     required this.productType,
+    required this.accessType,
+    required this.durationDays,
     required this.basePlanId,
     required this.offerId,
     required this.isActive,
@@ -19,6 +21,8 @@ class ProStoreProductModel {
   final String provider;
   final String productId;
   final String productType;
+  final String accessType;
+  final int? durationDays;
   final String basePlanId;
   final String offerId;
   final bool isActive;
@@ -32,6 +36,10 @@ class ProStoreProductModel {
         json['productType'],
         fallback: 'non_consumable',
       ),
+      accessType: _stringValue(json['accessType'], fallback: 'lifetime'),
+      durationDays: json['durationDays'] == null
+          ? null
+          : _intValue(json['durationDays']),
       basePlanId: _stringValue(json['basePlanId']),
       offerId: _stringValue(json['offerId']),
       isActive: _boolValue(json['isActive'], fallback: true),
@@ -43,6 +51,8 @@ class ProStoreProductModel {
     'provider': provider,
     'productId': productId,
     'productType': productType,
+    'accessType': accessType,
+    'durationDays': durationDays,
     'basePlanId': basePlanId,
     'offerId': offerId,
     'isActive': isActive,
@@ -159,6 +169,8 @@ class ProOrderModel {
     required this.plan,
     required this.features,
     required this.storeProduct,
+    required this.selectedProviderProductId,
+    required this.purchaseOptions,
     required this.couponCode,
     required this.discountPercentage,
     required this.pricingNote,
@@ -174,6 +186,8 @@ class ProOrderModel {
   final ProPlanModel plan;
   final List<ProFeatureModel> features;
   final ProStoreProductModel storeProduct;
+  final String selectedProviderProductId;
+  final List<ProStoreProductModel> purchaseOptions;
   final String couponCode;
   final int discountPercentage;
   final String pricingNote;
@@ -187,6 +201,9 @@ class ProOrderModel {
     final Map<String, dynamic> storeProductJson = proJsonMap(
       json['storeProduct'],
     );
+    final List<dynamic> rawPurchaseOptions = json['purchaseOptions'] is List
+        ? json['purchaseOptions'] as List<dynamic>
+        : const <dynamic>[];
     return ProOrderModel(
       courseId: _stringValue(json['courseId']),
       courseName: _stringValue(
@@ -202,26 +219,37 @@ class ProOrderModel {
       features: rawFeatures
           .whereType<Map>()
           .map(
-            (Map<dynamic, dynamic> item) => ProFeatureModel.fromJson(
-          Map<String, dynamic>.from(item),
-        ),
-      )
+            (Map<dynamic, dynamic> item) =>
+                ProFeatureModel.fromJson(Map<String, dynamic>.from(item)),
+          )
           .toList(growable: false),
       storeProduct: ProStoreProductModel.fromJson(
         storeProductJson.isEmpty
             ? <String, dynamic>{
-          'provider': 'google_play',
-          'productType': 'non_consumable',
-          'isActive': false,
-        }
+                'provider': 'google_play',
+                'productType': 'non_consumable',
+                'accessType': 'lifetime',
+                'isActive': false,
+              }
             : storeProductJson,
       ),
+      selectedProviderProductId: _stringValue(
+        json['selectedProviderProductId'],
+        fallback: _stringValue(storeProductJson['id']),
+      ),
+      purchaseOptions: rawPurchaseOptions
+          .whereType<Map>()
+          .map(
+            (Map<dynamic, dynamic> item) =>
+                ProStoreProductModel.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList(growable: false),
       couponCode: _stringValue(json['couponCode']),
       discountPercentage: _intValue(json['discountPercentage']),
       pricingNote: _stringValue(
         json['pricingNote'],
         fallback:
-        'Google Play or App Store controls the final localized amount charged.',
+            'Google Play or App Store controls the final localized amount charged.',
       ),
     );
   }
@@ -229,6 +257,8 @@ class ProOrderModel {
   ProOrderModel copyWith({
     ProPlanModel? plan,
     ProStoreProductModel? storeProduct,
+    String? selectedProviderProductId,
+    List<ProStoreProductModel>? purchaseOptions,
     String? couponCode,
     int? discountPercentage,
     String? pricingNote,
@@ -244,6 +274,9 @@ class ProOrderModel {
       plan: plan ?? this.plan,
       features: features,
       storeProduct: storeProduct ?? this.storeProduct,
+      selectedProviderProductId:
+          selectedProviderProductId ?? this.selectedProviderProductId,
+      purchaseOptions: purchaseOptions ?? this.purchaseOptions,
       couponCode: couponCode ?? this.couponCode,
       discountPercentage: discountPercentage ?? this.discountPercentage,
       pricingNote: pricingNote ?? this.pricingNote,
@@ -258,6 +291,8 @@ class ProPendingGooglePlayPurchaseModel {
     required this.orderId,
     required this.orderNumber,
     required this.productId,
+    required this.provider,
+    required this.providerProductId,
     required this.obfuscatedAccountId,
     required this.createdAt,
   });
@@ -267,21 +302,25 @@ class ProPendingGooglePlayPurchaseModel {
   final String orderId;
   final String orderNumber;
   final String productId;
+  final String provider;
+  final String providerProductId;
   final String obfuscatedAccountId;
   final DateTime createdAt;
 
   factory ProPendingGooglePlayPurchaseModel.fromJson(
-      Map<String, dynamic> json,
-      ) {
+    Map<String, dynamic> json,
+  ) {
     return ProPendingGooglePlayPurchaseModel(
       appUserId: _stringValue(json['appUserId']),
       courseId: _stringValue(json['courseId']),
       orderId: _stringValue(json['orderId']),
       orderNumber: _stringValue(json['orderNumber']),
       productId: _stringValue(json['productId']),
+      provider: _stringValue(json['provider'], fallback: 'google_play'),
+      providerProductId: _stringValue(json['providerProductId']),
       obfuscatedAccountId: _stringValue(json['obfuscatedAccountId']),
       createdAt:
-      DateTime.tryParse(_stringValue(json['createdAt']))?.toLocal() ??
+          DateTime.tryParse(_stringValue(json['createdAt']))?.toLocal() ??
           DateTime.now(),
     );
   }
@@ -292,6 +331,8 @@ class ProPendingGooglePlayPurchaseModel {
     'orderId': orderId,
     'orderNumber': orderNumber,
     'productId': productId,
+    'provider': provider,
+    'providerProductId': providerProductId,
     'obfuscatedAccountId': obfuscatedAccountId,
     'createdAt': createdAt.toUtc().toIso8601String(),
   };
@@ -302,6 +343,8 @@ class ProPendingGooglePlayPurchaseModel {
     String? orderId,
     String? orderNumber,
     String? productId,
+    String? provider,
+    String? providerProductId,
     String? obfuscatedAccountId,
     DateTime? createdAt,
   }) {
@@ -311,6 +354,8 @@ class ProPendingGooglePlayPurchaseModel {
       orderId: orderId ?? this.orderId,
       orderNumber: orderNumber ?? this.orderNumber,
       productId: productId ?? this.productId,
+      provider: provider ?? this.provider,
+      providerProductId: providerProductId ?? this.providerProductId,
       obfuscatedAccountId: obfuscatedAccountId ?? this.obfuscatedAccountId,
       createdAt: createdAt ?? this.createdAt,
     );

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../models/practice_hub_models.dart';
-import 'package:get/get.dart';
 
 class PracticeHubFinalExamCard extends StatelessWidget {
   const PracticeHubFinalExamCard({
@@ -24,20 +24,20 @@ class PracticeHubFinalExamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 260),
+      duration: const Duration(milliseconds: 240),
       child: exam.isUnlocked
           ? _ReadyFinalExamCard(
-              key: ValueKey<String>('ready-${exam.courseId}'),
-              exam: exam,
-              onTap: onTap,
-              onStartTap: onStartTap,
-            )
+        key: ValueKey<String>('ready-${exam.courseId}'),
+        exam: exam,
+        onTap: onTap,
+        onStartTap: onStartTap,
+      )
           : _LockedFinalExamCard(
-              key: ValueKey<String>('locked-${exam.courseId}'),
-              exam: exam,
-              onTap: onTap,
-              onLockedButtonTap: onWatchMoreLessonsTap,
-            ),
+        key: ValueKey<String>('locked-${exam.courseId}'),
+        exam: exam,
+        onTap: onTap,
+        onLockedButtonTap: onWatchMoreLessonsTap,
+      ),
     );
   }
 }
@@ -58,12 +58,15 @@ class _LockedFinalExamCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        constraints: BoxConstraints(minHeight: 236.h),
         width: double.infinity,
-        padding: EdgeInsets.fromLTRB(28.w, 24.h, 28.w, 26.h),
+        padding: EdgeInsets.symmetric(
+          horizontal: 20.w,
+          vertical: 18.h,
+        ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(45.r),
+          borderRadius: BorderRadius.circular(24.r),
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -75,75 +78,94 @@ class _LockedFinalExamCard extends StatelessWidget {
           ),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.18),
-              blurRadius: 24.r,
-              offset: Offset(0, 14.h),
+              color: Colors.black.withValues(alpha: 0.14),
+              blurRadius: 16.r,
+              offset: Offset(0, 7.h),
             ),
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Container(
-              width: 55.r,
-              height: 55.r,
+              width: 44.r,
+              height: 44.r,
               decoration: const BoxDecoration(
                 color: Color(0xFF78FF3E),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.desktop_windows_rounded,
-                size: 28.r,
+                size: 22.r,
                 color: const Color(0xFF102D16),
               ),
             ),
+
             SizedBox(height: 8.h),
+
             Text(
               exam.courseName,
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: AppFont.font14.sp,
-                fontWeight: FontWeight.w800,
+                fontSize: AppFont.font13.sp,
+                height: 1.2,
+                fontWeight: FontWeight.w700,
                 color: const Color(0xFF85FF43),
               ),
             ),
-            SizedBox(height: 18.h),
+
+            SizedBox(height: 12.h),
+
             Text(
               exam.examTitle,
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: AppFont.font20.sp,
-                height: 1.1,
-                fontWeight: FontWeight.w900,
+                fontSize: AppFont.font18.sp,
+                height: 1.15,
+                fontWeight: FontWeight.w800,
                 color: AppColors.white,
               ),
             ),
-            SizedBox(height: 10.h),
+
+            SizedBox(height: 8.h),
+
             Text(
-              'exam_progress_requirement'.trParams(<String, String>{
-                'progress': exam.courseProgressPercent.toString(),
-                'required': exam.unlockCompletionPercent.toString(),
-              }),
+              'exam_progress_requirement'.trParams(
+                <String, String>{
+                  'progress': exam.courseProgressPercent.toString(),
+                  'required': exam.unlockCompletionPercent.toString(),
+                },
+              ),
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: AppFont.font13.sp,
+                fontSize: AppFont.font12.sp,
+                height: 1.3,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF85FF43),
               ),
             ),
-            SizedBox(height: 20.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+
+            SizedBox(height: 16.h),
+
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8.w,
+              runSpacing: 8.h,
               children: <Widget>[
                 _ExamMiniPill(
-                  text: 'percent_required'.trParams(<String, String>{
-                    'percent': exam.unlockCompletionPercent.toString(),
-                  }),
+                  text: 'percent_required'.trParams(
+                    <String, String>{
+                      'percent': exam.unlockCompletionPercent.toString(),
+                    },
+                  ),
                   icon: Icons.info_outline_rounded,
                   active: true,
                 ),
-                SizedBox(width: 12.w),
                 _ExamMiniPill(
                   text: 'locked'.tr,
                   icon: Icons.lock_rounded,
@@ -175,12 +197,17 @@ class _ReadyFinalExamCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        constraints: BoxConstraints(minHeight: 300.h),
         width: double.infinity,
-        padding: EdgeInsets.fromLTRB(32.w, 30.h, 32.w, 30.h),
+        padding: EdgeInsets.fromLTRB(
+          20.w,
+          20.h,
+          20.w,
+          18.h,
+        ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(45.r),
+          borderRadius: BorderRadius.circular(24.r),
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -193,88 +220,100 @@ class _ReadyFinalExamCard extends StatelessWidget {
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.12),
-              blurRadius: 22.r,
-              offset: Offset(0, 12.h),
+              blurRadius: 16.r,
+              offset: Offset(0, 7.h),
             ),
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  width: 76.r,
-                  height: 76.r,
+                  width: 54.r,
+                  height: 54.r,
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.14),
+                    color: AppColors.white.withValues(alpha: 0.13),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: Container(
-                      width: 42.r,
-                      height: 42.r,
+                      width: 32.r,
+                      height: 32.r,
                       decoration: const BoxDecoration(
                         color: Color(0xFF81FF42),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.workspace_premium_rounded,
-                        size: 28.r,
+                        size: 20.r,
                         color: const Color(0xFF187000),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 16.w),
+
+                SizedBox(width: 12.w),
+
                 Expanded(
                   child: Text(
                     exam.courseName,
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: AppFont.font20.sp,
-                      height: 1.15,
-                      fontWeight: FontWeight.w900,
+                      fontSize: AppFont.font16.sp,
+                      height: 1.2,
+                      fontWeight: FontWeight.w800,
                       color: AppColors.white,
                     ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 24.h),
+
+            SizedBox(height: 18.h),
+
             Text(
               exam.examTitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: AppFont.font30.sp,
-                height: 1,
+                fontSize: AppFont.font22.sp,
+                height: 1.1,
                 fontWeight: FontWeight.w900,
                 color: AppColors.white,
               ),
             ),
-            SizedBox(height: 12.h),
+
+            SizedBox(height: 8.h),
+
             Text(
               exam.statusLabelKey.tr,
               style: TextStyle(
-                fontSize: AppFont.font18.sp,
-                fontWeight: FontWeight.w900,
+                fontSize: AppFont.font14.sp,
+                height: 1.2,
+                fontWeight: FontWeight.w800,
                 color: const Color(0xFF86FF45),
               ),
             ),
-            SizedBox(height: 28.h),
+
+            SizedBox(height: 18.h),
+
             CustomButton(
               onPressed: onStartTap,
               text: exam.actionLabelKey.tr,
-              height: 60,
+              height: 48,
               width: double.infinity,
               showShadow: true,
               btnColor: AppColors.white,
               btnShadowColor: AppColors.black,
               borderColor: AppColors.black,
               textColor: AppColors.black,
-              fontSize: AppFont.font16,
-              fontWeight: FontWeight.w900,
+              fontSize: AppFont.font14,
+              fontWeight: FontWeight.w800,
             ),
           ],
         ),
@@ -299,14 +338,20 @@ class _ExamMiniPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget pill = Container(
-      height: 28.h,
-      padding: EdgeInsets.symmetric(horizontal: 11.w),
+      constraints: BoxConstraints(
+        minHeight: 28.h,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: 10.w,
+        vertical: 6.h,
+      ),
       decoration: BoxDecoration(
         color: active
             ? const Color(0xFF153B0A)
-            : AppColors.white.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(20.r),
+            : AppColors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
+          width: 1,
           color: active
               ? const Color(0xFF2F7C16)
               : AppColors.white.withValues(alpha: 0.12),
@@ -318,29 +363,38 @@ class _ExamMiniPill extends StatelessWidget {
           Icon(
             icon,
             size: 13.r,
-            color: active ? const Color(0xFF83FF45) : const Color(0xFFA3A9A0),
+            color: active
+                ? const Color(0xFF83FF45)
+                : const Color(0xFFA3A9A0),
           ),
           SizedBox(width: 5.w),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: AppFont.font11.sp,
-              fontWeight: FontWeight.w900,
-              color: active
-                  ? const Color(0xFF83FF45)
-                  : const Color(0xFFA3A9A0),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: AppFont.font11.sp,
+                height: 1.1,
+                fontWeight: FontWeight.w700,
+                color: active
+                    ? const Color(0xFF83FF45)
+                    : const Color(0xFFA3A9A0),
+              ),
             ),
           ),
         ],
       ),
     );
 
-    return onTap == null
-        ? pill
-        : GestureDetector(
-            onTap: onTap,
-            behavior: HitTestBehavior.opaque,
-            child: pill,
-          );
+    if (onTap == null) {
+      return pill;
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: pill,
+    );
   }
 }

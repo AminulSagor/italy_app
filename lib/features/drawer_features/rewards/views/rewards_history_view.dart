@@ -131,7 +131,7 @@ class _HistoryTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 120.h,
+        constraints: const BoxConstraints(minHeight: 120),
         width: double.infinity,
         padding: EdgeInsets.fromLTRB(20.w, 16.h, 18.w, 16.h),
         decoration: BoxDecoration(

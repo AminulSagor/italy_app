@@ -26,7 +26,7 @@ class ProfileStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kProfileInfoCardHeight.h,
+      constraints: BoxConstraints(minHeight: kProfileInfoCardHeight.h),
       padding: EdgeInsets.fromLTRB(18.w, 28.h, 18.w, 22.h),
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -67,6 +67,8 @@ class ProfileStatCard extends StatelessWidget {
               Text(
                 label,
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: AppFont.font10.sp,
                   fontWeight: FontWeight.w700,

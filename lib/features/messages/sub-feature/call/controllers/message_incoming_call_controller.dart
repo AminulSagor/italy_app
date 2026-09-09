@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:get/get.dart';
 
@@ -103,7 +104,12 @@ class MessageIncomingCallController extends GetxController {
       }
 
       _stopTimeout();
-      await CallkitIncomingService.endNativeSubsystemOnly(callId);
+      // On iOS this incoming CallKit transaction owns the audio session. It
+      // must remain alive through Agora's join; reporting it remotely ended
+      // here deactivates the session and drops lock-screen answers.
+      if (!Platform.isIOS) {
+        await CallkitIncomingService.endNativeSubsystemOnly(callId);
+      }
       _routeClosed = true;
       isProcessing.value = false;
       await _onAccepted(response);
@@ -115,6 +121,11 @@ class MessageIncomingCallController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } on CallSocketException catch (error) {
+      if (error.code == 'CALL_NOT_FOUND') {
+        await CallkitIncomingService.endNativeSubsystemOnly(callId);
+        await _finishCall();
+        return;
+      }
       _resetIncomingStatus();
       Get.snackbar(
         'unable_to_answer'.tr,
@@ -144,6 +155,11 @@ class MessageIncomingCallController extends GetxController {
       await CallkitIncomingService.endNativeSubsystemOnly(callId);
       await _finishCall();
     } on CallSocketException catch (error) {
+      if (error.code == 'CALL_NOT_FOUND') {
+        await CallkitIncomingService.endNativeSubsystemOnly(callId);
+        await _finishCall();
+        return;
+      }
       Get.snackbar(
         'unable_to_decline'.tr,
         error.message,

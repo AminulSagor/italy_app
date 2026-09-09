@@ -97,7 +97,7 @@ class VocabularyExitDialog extends StatelessWidget {
             ),
             SizedBox(height: 10.h),
             Text(
-              'if_you_quit_now_you_ll_lose_your_progress'.tr,
+              'exit_vocabulary_confirmation'.tr,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -111,14 +111,14 @@ class VocabularyExitDialog extends StatelessWidget {
             SizedBox(height: 28.h),
             CustomButton.primary(
               onPressed: onKeepGoingTap,
-              text: 'keep_going_1'.tr,
+              text: 'keep_learning'.tr,
               icon: Icons.play_arrow_rounded,
               fontSize: AppFont.font14.sp,
             ),
             SizedBox(height: 12.h),
             CustomButton(
               onPressed: onQuitTap,
-              text: 'quit_vocabulary'.tr,
+              text: 'exit_vocabulary'.tr,
               height: 48.h,
               fontSize: AppFont.font14.sp,
               textColor: AppColors.blockDangerRed,

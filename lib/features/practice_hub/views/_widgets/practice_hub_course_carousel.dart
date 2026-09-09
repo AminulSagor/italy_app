@@ -15,7 +15,7 @@ class PracticeHubCourseCarousel extends GetView<PracticeHubController> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 252.h,
+      height: 252,
       child: Obx(() {
         if (controller.isCoursesLoading.value && controller.courses.isEmpty) {
           return const Center(
@@ -61,7 +61,7 @@ class _EmptyCoursesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 238.h,
+      height: 238,
       alignment: Alignment.center,
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       decoration: BoxDecoration(

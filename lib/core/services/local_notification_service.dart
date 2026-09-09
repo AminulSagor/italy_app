@@ -105,6 +105,21 @@ class LocalNotificationService {
           return;
         }
 
+        // Reward notifications are sent only after the backend has granted
+        // the reward, so use the push as an immediate cache-refresh signal.
+        unawaited(
+          NotificationDeepLinkService.refreshRewardDataIfNeeded(
+            moderationDeepLink,
+          ).catchError((Object error, StackTrace stackTrace) {
+            AppLogger.log(
+              'Reward push refresh failed',
+              error: error,
+              stackTrace: stackTrace,
+              name: 'LocalNotificationService',
+            );
+          }),
+        );
+
         // Skip displaying the notification if the user is currently viewing
         // the conversation that this message belongs to.
         final String? conversationId = message.data['conversationId']

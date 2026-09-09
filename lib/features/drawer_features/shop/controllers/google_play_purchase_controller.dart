@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:italir_pothe/core/utils/app_logger.dart';
 
 import 'package:flutter/widgets.dart';
@@ -11,6 +12,7 @@ import '../../../../core/services/api_error_handler.dart';
 import '../models/google_play_billing_models.dart';
 import '../models/shop_models.dart';
 import '../models/shop_order_models.dart';
+import '../services/app_store_purchase_recovery.dart';
 import '../services/google_play_billing_service.dart';
 import '../services/shop_api_service.dart';
 
@@ -48,6 +50,9 @@ class GooglePlayPurchaseController extends GetxController
 
   final Rxn<StorePurchaseCompletionModel> lastCompletion =
       Rxn<StorePurchaseCompletionModel>();
+
+  String get _provider => Platform.isIOS ? 'app_store' : 'google_play';
+  String get _storeName => Platform.isIOS ? 'App Store' : 'Google Play';
 
   Stream<StorePurchaseCompletionModel> get completionStream =>
       _completionController.stream;
@@ -96,7 +101,14 @@ class GooglePlayPurchaseController extends GetxController
     if (isProcessing.value) {
       return const GooglePlayPurchaseOutcome(
         status: GooglePlayPurchaseOutcomeStatus.pending,
-        message: 'A Google Play purchase is already being processed.',
+        message: 'A store purchase is already being processed.',
+      );
+    }
+
+    if (_billingService.currentAppUserId.isEmpty) {
+      return const GooglePlayPurchaseOutcome(
+        status: GooglePlayPurchaseOutcomeStatus.failed,
+        message: 'Your account is still loading. Please try again shortly.',
       );
     }
 
@@ -107,14 +119,16 @@ class GooglePlayPurchaseController extends GetxController
     final String requestedOfferId = storeProduct.offerId.trim();
 
     if (requestedProductId.isEmpty) {
-      return const GooglePlayPurchaseOutcome(
+      return GooglePlayPurchaseOutcome(
         status: GooglePlayPurchaseOutcomeStatus.failed,
-        message: 'This package has no Google Play product ID.',
+        message: 'This package has no $_storeName product ID.',
       );
     }
 
-    if (storeProduct.isSubscription && requestedBasePlanId.isEmpty) {
-      return const GooglePlayPurchaseOutcome(
+    if (Platform.isAndroid &&
+        storeProduct.isSubscription &&
+        requestedBasePlanId.isEmpty) {
+      return GooglePlayPurchaseOutcome(
         status: GooglePlayPurchaseOutcomeStatus.failed,
         message: 'This subscription has no Google Play base plan ID.',
       );
@@ -143,14 +157,14 @@ class GooglePlayPurchaseController extends GetxController
       if (purchaseFound && _billingService.loadPendingPurchase() != null) {
         return const GooglePlayPurchaseOutcome(
           status: GooglePlayPurchaseOutcomeStatus.pending,
-          message: 'Your previous Google Play purchase is still pending.',
+          message: 'Your previous store purchase is still pending.',
         );
       }
 
       if (!purchaseFound && _billingService.pendingPurchaseQueryFailed) {
         return const GooglePlayPurchaseOutcome(
           status: GooglePlayPurchaseOutcomeStatus.pending,
-          message: 'Google Play could not confirm the previous purchase yet.',
+          message: 'The store could not confirm the previous purchase yet.',
         );
       }
 
@@ -161,10 +175,19 @@ class GooglePlayPurchaseController extends GetxController
        */
       await _cancelUnfinishedOrder(
         existing.orderId,
-        reason: 'Previous Google Play checkout did not create a purchase.',
+        reason: 'Previous store checkout did not create a purchase.',
       );
 
       await _billingService.clearPendingPurchase();
+    }
+
+    if (Platform.isIOS) {
+      final GooglePlayPurchaseOutcome? recovered =
+          await _recoverUnfinishedAppStorePurchase(
+            package: package,
+            storeProduct: storeProduct,
+          );
+      if (recovered != null) return recovered;
     }
 
     isProcessing.value = true;
@@ -179,7 +202,7 @@ class GooglePlayPurchaseController extends GetxController
               CreateStoreOrderPayloadModel(
                 packageId: package.id,
                 currency: currency,
-                paymentProvider: 'google_play',
+                paymentProvider: _provider,
                 productId: requestedProductId,
                 idempotencyKey: _uuid.v4(),
                 couponCode: couponCode,
@@ -198,7 +221,7 @@ class GooglePlayPurchaseController extends GetxController
                 .trim()
                 .toLowerCase();
 
-            if (obfuscatedAccountId.isEmpty) {
+            if (Platform.isAndroid && obfuscatedAccountId.isEmpty) {
               throw StateError(
                 'Google Play account binding information is missing.',
               );
@@ -230,6 +253,7 @@ class GooglePlayPurchaseController extends GetxController
                 paymentMethod.offerId.trim().isNotEmpty
                 ? paymentMethod.offerId.trim()
                 : requestedOfferId;
+            final String resolvedOfferType = paymentMethod.offerType.trim();
 
             if (resolvedProductId.isEmpty) {
               throw StateError(
@@ -237,7 +261,8 @@ class GooglePlayPurchaseController extends GetxController
               );
             }
 
-            if (resolvedProductType == StoreProviderProductType.subscription &&
+            if (Platform.isAndroid &&
+                resolvedProductType == StoreProviderProductType.subscription &&
                 resolvedBasePlanId.isEmpty) {
               throw StateError(
                 'Google Play base plan ID is missing from checkout.',
@@ -245,14 +270,18 @@ class GooglePlayPurchaseController extends GetxController
             }
 
             return PendingGooglePlayPurchaseModel(
+              appUserId: _billingService.currentAppUserId,
               orderId: order.id,
               packageId: package.id,
+              provider: _provider,
               productId: resolvedProductId,
               productType: resolvedProductType,
               basePlanId: resolvedBasePlanId,
               offerId: resolvedOfferId,
+              offerType: resolvedOfferType,
               obfuscatedAccountId: obfuscatedAccountId,
               createdAt: DateTime.now(),
+              appStorePromotionalOffer: paymentMethod.promotionalOffer,
             );
           }, showError: false);
 
@@ -260,12 +289,12 @@ class GooglePlayPurchaseController extends GetxController
         if (createdOrderId.isNotEmpty) {
           await _cancelUnfinishedOrder(
             createdOrderId,
-            reason: 'Checkout preparation failed before Google Play opened.',
+            reason: 'Checkout preparation failed before the store opened.',
           );
         }
 
         final String message =
-            orderResult.error ?? 'Could not prepare the Google Play purchase.';
+            orderResult.error ?? 'Could not prepare the store purchase.';
 
         errorMessage.value = message;
 
@@ -288,9 +317,26 @@ class GooglePlayPurchaseController extends GetxController
       if (!launched) {
         _billingFlowActive = false;
 
+        if (_billingService.lastLaunchWasDuplicateAppStoreTransaction) {
+          await _cancelUnfinishedOrder(
+            pending.orderId,
+            reason:
+                'A different unfinished StoreKit transaction already exists for this product.',
+          );
+          await _billingService.clearPendingPurchase();
+          _clearActivePurchase();
+
+          final GooglePlayPurchaseOutcome? recovered =
+              await _recoverUnfinishedAppStorePurchase(
+                package: package,
+                storeProduct: storeProduct,
+              );
+          if (recovered != null) return recovered;
+        }
+
         await _cancelUnfinishedOrder(
           pending.orderId,
-          reason: 'Google Play billing flow could not be opened.',
+          reason: 'The store billing flow could not be opened.',
         );
 
         await _billingService.clearPendingPurchase();
@@ -299,7 +345,7 @@ class GooglePlayPurchaseController extends GetxController
 
         final String message = _billingService.lastError.value.isNotEmpty
             ? _billingService.lastError.value
-            : 'Google Play could not start the purchase.';
+            : 'The store could not start the purchase.';
 
         errorMessage.value = message;
 
@@ -333,8 +379,17 @@ class GooglePlayPurchaseController extends GetxController
   }
 
   Future<bool> retryPendingPurchase() async {
-    final PendingGooglePlayPurchaseModel? pending = _billingService
+    PendingGooglePlayPurchaseModel? pending = _billingService
         .loadPendingPurchase();
+
+    if (pending == null) {
+      final PendingGooglePlayPurchaseModel? legacy = _billingService
+          .loadLegacyPendingPurchase();
+      if (legacy != null) {
+        await _billingService.adoptLegacyPendingPurchase(legacy);
+        pending = _billingService.loadPendingPurchase();
+      }
+    }
 
     if (pending == null) {
       return false;
@@ -375,6 +430,161 @@ class GooglePlayPurchaseController extends GetxController
     }
 
     return true;
+  }
+
+  Future<GooglePlayPurchaseOutcome?> _recoverUnfinishedAppStorePurchase({
+    required StorePackageModel package,
+    required StoreProviderProductModel storeProduct,
+  }) async {
+    final PurchaseDetails? purchase = await _billingService
+        .queryUnfinishedAppStorePurchase(storeProduct.productId);
+
+    if (purchase == null) {
+      if (_billingService.pendingPurchaseQueryFailed) {
+        return const GooglePlayPurchaseOutcome(
+          status: GooglePlayPurchaseOutcomeStatus.pending,
+          message:
+              'The App Store could not check a previous purchase yet. Please try again.',
+        );
+      }
+      return null;
+    }
+
+    final String originalOrderId = appStoreOrderIdFromPurchase(purchase);
+    if (originalOrderId.isEmpty) {
+      return const GooglePlayPurchaseOutcome(
+        status: GooglePlayPurchaseOutcomeStatus.failed,
+        message:
+            'A previous App Store transaction cannot be linked to its order. Please contact support.',
+      );
+    }
+
+    final PendingGooglePlayPurchaseModel recoveredPending =
+        PendingGooglePlayPurchaseModel(
+          appUserId: _billingService.currentAppUserId,
+          orderId: originalOrderId,
+          packageId: package.id,
+          provider: 'app_store',
+          productId: storeProduct.productId,
+          productType: storeProduct.productType,
+          basePlanId: storeProduct.basePlanId,
+          offerId: storeProduct.offerId,
+          offerType: '',
+          obfuscatedAccountId: '',
+          createdAt: DateTime.now(),
+        );
+
+    await _billingService.savePendingPurchase(recoveredPending);
+    lastCompletion.value = null;
+    await _handlePurchase(purchase);
+
+    final StorePurchaseCompletionModel? completion = lastCompletion.value;
+    if (completion != null && completion.orderId == originalOrderId) {
+      return GooglePlayPurchaseOutcome(
+        status: GooglePlayPurchaseOutcomeStatus.completed,
+        message: completion.message,
+        completion: completion,
+      );
+    }
+
+    return const GooglePlayPurchaseOutcome(
+      status: GooglePlayPurchaseOutcomeStatus.pending,
+      message:
+          'Your previous App Store purchase was found and will be verified automatically.',
+    );
+  }
+
+  Future<GooglePlayPurchaseOutcome> restoreAppStoreSubscription(
+    StorePackageModel package,
+  ) async {
+    if (!Platform.isIOS) {
+      return const GooglePlayPurchaseOutcome(
+        status: GooglePlayPurchaseOutcomeStatus.failed,
+        message: 'Restore Purchases is available on iOS only.',
+      );
+    }
+    if (isProcessing.value) {
+      return const GooglePlayPurchaseOutcome(
+        status: GooglePlayPurchaseOutcomeStatus.pending,
+        message: 'A store operation is already in progress.',
+      );
+    }
+
+    final String productId = package.storeProduct?.productId.trim() ?? '';
+    if (productId.isEmpty) {
+      return const GooglePlayPurchaseOutcome(
+        status: GooglePlayPurchaseOutcomeStatus.failed,
+        message: 'This subscription has no App Store product ID.',
+      );
+    }
+
+    isProcessing.value = true;
+    errorMessage.value = '';
+    try {
+      final PurchaseDetails? purchase = await _billingService
+          .restoreAppStoreSubscription(productId);
+      if (purchase == null) {
+        return const GooglePlayPurchaseOutcome(
+          status: GooglePlayPurchaseOutcomeStatus.failed,
+          message: 'No restorable App Store subscription was found.',
+        );
+      }
+
+      final String signedTransactionInfo = _purchaseToken(purchase);
+      final String transactionId = _transactionId(purchase);
+      if (signedTransactionInfo.isEmpty || transactionId.isEmpty) {
+        return const GooglePlayPurchaseOutcome(
+          status: GooglePlayPurchaseOutcomeStatus.failed,
+          message: 'The App Store restore data was incomplete.',
+        );
+      }
+
+      final ApiResult<StorePurchaseCompletionModel> result =
+          await ApiErrorHandler.call<StorePurchaseCompletionModel>(
+            () => _apiService.restoreAppStoreSubscription(
+              payload: RestoreAppStoreSubscriptionPayloadModel(
+                productId: productId,
+                transactionId: transactionId,
+                signedTransactionInfo: signedTransactionInfo,
+              ),
+            ),
+            showError: false,
+          );
+      if (!result.isSuccess || result.data == null) {
+        return GooglePlayPurchaseOutcome(
+          status: GooglePlayPurchaseOutcomeStatus.failed,
+          message: result.error ?? 'The subscription could not be restored.',
+        );
+      }
+
+      await _billingService.finishVerifiedPurchase(
+        purchase,
+        StoreProviderProductType.subscription,
+      );
+      final StorePurchaseCompletionModel completion = result.data!;
+      lastCompletion.value = completion;
+      if (!_completionController.isClosed) {
+        _completionController.add(completion);
+      }
+      return GooglePlayPurchaseOutcome(
+        status: GooglePlayPurchaseOutcomeStatus.completed,
+        message: 'Your App Store subscription was restored.',
+        completion: completion,
+      );
+    } catch (error, stackTrace) {
+      AppLogger.log(
+        'App Store subscription restore failed.',
+        name: 'GooglePlayPurchaseController',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return const GooglePlayPurchaseOutcome(
+        status: GooglePlayPurchaseOutcomeStatus.failed,
+        message: 'The App Store subscription could not be restored.',
+      );
+    } finally {
+      isProcessing.value = false;
+    }
   }
 
   StorePurchaseCompletionModel? takeLastCompletion() {
@@ -451,8 +661,7 @@ class GooglePlayPurchaseController extends GetxController
       if (pending != null) {
         await _cancelUnfinishedOrder(
           pending.orderId,
-          reason:
-              'The user returned without completing the Google Play purchase.',
+          reason: 'The user returned without completing the store purchase.',
         );
       }
 
@@ -463,7 +672,7 @@ class GooglePlayPurchaseController extends GetxController
       _completeActive(
         const GooglePlayPurchaseOutcome(
           status: GooglePlayPurchaseOutcomeStatus.cancelled,
-          message: 'The Google Play purchase was cancelled.',
+          message: 'The store purchase was cancelled.',
         ),
       );
     } finally {
@@ -486,7 +695,7 @@ class GooglePlayPurchaseController extends GetxController
         _completeActive(
           const GooglePlayPurchaseOutcome(
             status: GooglePlayPurchaseOutcomeStatus.pending,
-            message: 'Google Play is processing your payment.',
+            message: 'The store is processing your payment.',
           ),
         );
 
@@ -497,7 +706,7 @@ class GooglePlayPurchaseController extends GetxController
 
         await _cancelUnfinishedOrder(
           pending.orderId,
-          reason: 'The Google Play purchase was cancelled by the user.',
+          reason: 'The store purchase was cancelled by the user.',
         );
 
         await _billingService.clearPendingPurchase();
@@ -505,7 +714,7 @@ class GooglePlayPurchaseController extends GetxController
         _completeActive(
           const GooglePlayPurchaseOutcome(
             status: GooglePlayPurchaseOutcomeStatus.cancelled,
-            message: 'The Google Play purchase was cancelled.',
+            message: 'The store purchase was cancelled.',
           ),
         );
 
@@ -516,13 +725,13 @@ class GooglePlayPurchaseController extends GetxController
 
         await _cancelUnfinishedOrder(
           pending.orderId,
-          reason: 'Google Play returned a purchase error.',
+          reason: 'The store returned a purchase error.',
         );
 
         await _billingService.clearPendingPurchase();
 
         final String message =
-            purchase.error?.message ?? 'The Google Play purchase failed.';
+            purchase.error?.message ?? 'The store purchase failed.';
 
         errorMessage.value = message;
 
@@ -570,8 +779,8 @@ class GooglePlayPurchaseController extends GetxController
               _billingService.loadPendingPurchase() == null;
 
           final String message = stalePurchaseWasCleared
-              ? 'The previous Google Play purchase was no longer valid and has been cleared. Please try again.'
-              : 'Google Play payment succeeded, but verification is pending.';
+              ? 'The previous store purchase was no longer valid and has been cleared. Please try again.'
+              : 'Store payment succeeded, but verification is pending.';
 
           errorMessage.value = message;
 
@@ -658,16 +867,35 @@ class GooglePlayPurchaseController extends GetxController
     required PendingGooglePlayPurchaseModel pending,
     required String purchaseToken,
   }) async {
+    final String transactionId = _transactionId(purchase);
     final ApiResult<StorePurchaseCompletionModel> verification =
         await ApiErrorHandler.call<StorePurchaseCompletionModel>(
-          () => _apiService.verifyGooglePlayPurchase(
-            orderId: pending.orderId,
-            payload: VerifyGooglePlayPurchasePayloadModel(
-              productId: pending.productId,
-              purchaseToken: purchaseToken,
-              transactionId: _transactionId(purchase),
-            ),
-          ),
+          () => Platform.isAndroid
+              ? _apiService.verifyGooglePlayPurchase(
+                  orderId: pending.orderId,
+                  payload: VerifyGooglePlayPurchasePayloadModel(
+                    productId: pending.productId,
+                    purchaseToken: purchaseToken,
+                    transactionId: transactionId,
+                  ),
+                )
+              : pending.offerType == 'offer_code'
+              ? _apiService.restoreAppStoreSubscription(
+                  payload: RestoreAppStoreSubscriptionPayloadModel(
+                    productId: pending.productId,
+                    transactionId: transactionId,
+                    signedTransactionInfo: purchaseToken,
+                    pendingOrderId: pending.orderId,
+                  ),
+                )
+              : _apiService.verifyAppStorePurchase(
+                  orderId: pending.orderId,
+                  payload: VerifyAppStorePurchasePayloadModel(
+                    productId: pending.productId,
+                    transactionId: transactionId,
+                    signedTransactionInfo: purchaseToken,
+                  ),
+                ),
           showError: false,
         );
 
@@ -715,8 +943,9 @@ class GooglePlayPurchaseController extends GetxController
    * completed the order moments earlier.
    */
     final bool isNotOwned =
-        verificationError.contains('not owned by the user') ||
-        verificationError.contains('product purchase is not owned');
+        Platform.isAndroid &&
+        (verificationError.contains('not owned by the user') ||
+            verificationError.contains('product purchase is not owned'));
 
     if (isNotOwned) {
       await Future<void>.delayed(const Duration(milliseconds: 800));

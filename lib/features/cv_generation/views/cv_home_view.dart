@@ -3,516 +3,536 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
-import '../../../core/widgets/custom_button.dart';
 import '../controllers/cv_home_controller.dart';
+import '../helpers/cv_builder_localization.dart';
 import '../models/cv_template_model.dart';
 import '../widgets/cv_template_card.dart';
+import '../widgets/cv_template_list_skeleton.dart';
 
 class CvHomeView extends GetView<CvHomeController> {
   const CvHomeView({super.key});
 
   @override
-  @override
   Widget build(BuildContext context) {
-    return Obx(
-          () => Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          Material(
-            color: AppColors.homeBackground,
-            child: SafeArea(
-              top: false,
-              bottom: false,
-              child: RefreshIndicator(
-                onRefresh:
-                controller.refreshTemplates,
-                child: ListView(
-                  padding: EdgeInsets.fromLTRB(
-                    16.w,
-                    20.h,
-                    16.w,
-                    130.h,
-                  ),
-                  children: <Widget>[
-                    Text(
-                      'cv_home_create_your_cv'.tr,
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight:
-                        FontWeight.w900,
-                        color:
-                        AppColors.primaryGreen,
-                      ),
-                    ),
-                    SizedBox(height: 22.h),
-
-                    const _CvAccessCard(),
-
-                    SizedBox(height: 20.h),
-
-                    Obx(
-                          () => _ScratchCard(
-                        isLoading: controller
-                            .isStartingScratch.value,
-                        isDisabled: controller
-                            .isStartingAnySession &&
-                            !controller
-                                .isStartingScratch.value,
-                        onTap: controller
-                            .startScratchChat,
-                      ),
-                    ),
-
-                    SizedBox(height: 28.h),
-
-                    Text(
-                      'cv_home_choose_template'.tr,
-                      style: TextStyle(
-                        fontSize: 21.sp,
-                        fontWeight:
-                        FontWeight.w900,
-                        color: AppColors
-                            .homePrimaryText,
-                      ),
-                    ),
-
-                    SizedBox(height: 13.h),
-
-                    Obx(
-                          () => TextField(
-                        controller: controller
-                            .searchController,
-                        onChanged: controller
-                            .onSearchChanged,
-                        decoration: InputDecoration(
-                          hintText: 'cv_home_search_templates'.tr,
-                          prefixIcon: const Icon(
-                            Icons.search_rounded,
+    return Material(
+      color: AppColors.homeBackground,
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: RefreshIndicator(
+          color: AppColors.primaryGreen,
+          onRefresh: controller.refreshTemplates,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 130.h),
+            children: <Widget>[
+              const _Header(),
+              SizedBox(height: 8.h),
+              const _QuickActionsRow(),
+              SizedBox(height: 8.h),
+              _SearchField(controller: controller),
+              SizedBox(height: 6.h),
+              _CategoryChips(controller: controller),
+              Obx(
+                () => AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  child: controller.isFiltering.value
+                      ? Padding(
+                          key: const ValueKey<String>('filter-loading'),
+                          padding: EdgeInsets.only(top: 12.h),
+                          child: const LinearProgressIndicator(
+                            minHeight: 2,
+                            color: AppColors.primaryGreen,
                           ),
-                          suffixIcon: controller
-                              .searchQuery
-                              .value
-                              .isEmpty
-                              ? null
-                              : IconButton(
-                            onPressed:
-                            controller
-                                .clearSearch,
-                            icon: const Icon(
-                              Icons
-                                  .close_rounded,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border:
-                          OutlineInputBorder(
-                            borderRadius:
-                            BorderRadius.circular(
-                              28.r,
-                            ),
-                            borderSide:
-                            BorderSide.none,
-                          ),
+                        )
+                      : const SizedBox(
+                          key: ValueKey<String>('filter-idle'),
+                          height: 8,
                         ),
-                      ),
-                    ),
-
-                    SizedBox(height: 20.h),
-
-                    Obx(
-                          () => _buildTemplateArea(),
-                    ),
-                  ],
                 ),
               ),
-            ),
+              _TemplateArea(controller: controller),
+            ],
           ),
-
-          if (controller
-              .isTemplateOverlayVisible.value)
-            const Positioned.fill(
-              child:
-              _TemplateAnalyzingOverlay(),
-            ),
-        ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildTemplateArea() {
-    if (controller.isLoading.value) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: 50,
-        ),
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+class _Header extends StatelessWidget {
+  const _Header();
 
-    if (controller.errorMessage.value.isNotEmpty &&
-        controller.templates.isEmpty) {
-      return _EmptyState(
-        icon: Icons.error_outline_rounded,
-        title: 'cv_home_could_not_load_templates'.tr,
-        message: controller.errorMessage.value,
-        actionLabel: 'cv_home_try_again'.tr,
-        onAction: () {
-          controller.loadTemplates(
-            reset: true,
-          );
-        },
-      );
-    }
-
-    if (controller.templates.isEmpty) {
-      return _EmptyState(
-        icon: Icons.description_outlined,
-        title: 'cv_home_no_templates_found'.tr,
-        message:
-        controller.searchQuery.value.isEmpty
-            ? 'cv_home_no_templates_available'.tr
-            : 'cv_home_no_search_match'.tr,
-        actionLabel:
-        controller.searchQuery.value.isEmpty
-            ? null
-            : 'cv_home_clear_search'.tr,
-        onAction:
-        controller.searchQuery.value.isEmpty
-            ? null
-            : controller.clearSearch,
-      );
-    }
-
+  @override
+  Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        GridView.builder(
-          shrinkWrap: true,
-          physics:
-          const NeverScrollableScrollPhysics(),
-          itemCount: controller.templates.length,
-          gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12.w,
-            mainAxisSpacing: 14.h,
-            childAspectRatio: 0.61,
+        Text(
+          'cvb_home_title'.tr,
+          style: TextStyle(
+            fontSize: 27.sp,
+            fontWeight: FontWeight.w900,
+            color: AppColors.primaryGreen,
           ),
-          itemBuilder: (
-              BuildContext context,
-              int index,
-              ) {
-            final CvTemplateModel template =
-            controller.templates[index];
-
-            final bool isAnalyzing =
-            controller.isTemplateAnalyzing(
-              template.id,
-            );
-
-            final bool isDisabled =
-            controller
-                .isTemplateInteractionDisabled(
-              template.id,
-            );
-
-            final bool hasError =
-            controller
-                .hasTemplateAnalysisFailed(
-              template.id,
-            );
-
-            return CvTemplateCard(
-              template: template,
-
-              isAnalyzing: isAnalyzing,
-
-              isDisabled: isDisabled,
-
-              hasError: hasError,
-
-              errorMessage: hasError
-                  ? controller
-                  .analysisErrorMessage.value
-                  : null,
-
-              onTap: () {
-                controller.startTemplateChat(
-                  template,
-                );
-              },
-
-              onRetry: () {
-                controller.retryTemplateAnalysis(
-                  template,
-                );
-              },
-            );
-          },
         ),
-
-        if (controller.canLoadMore) ...<Widget>[
-          SizedBox(height: 22.h),
-          CustomButton(
-            width: double.infinity,
-            text: 'cv_home_load_more'.tr,
-            isLoading:
-            controller.isLoadingMore.value,
-            onPressed: () {
-              controller.loadTemplates(
-                reset: false,
-              );
-            },
-          ),
-        ],
       ],
     );
   }
-
 }
 
-class _TemplateAnalyzingOverlay
-    extends StatelessWidget {
-  const _TemplateAnalyzingOverlay();
+class _QuickActionsRow extends GetView<CvHomeController> {
+  const _QuickActionsRow();
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black.withValues(
-        alpha: 0.48,
-      ),
-      child: AbsorbPointer(
-        absorbing: true,
-        child: SafeArea(
-          child: Center(
-            child: Container(
-              width: 310.w,
-              margin: EdgeInsets.symmetric(
-                horizontal: 26.w,
-              ),
-              padding: EdgeInsets.all(24.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius:
-                BorderRadius.circular(24.r),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: Colors.black.withValues(
-                      alpha: 0.2,
-                    ),
-                    blurRadius: 28,
-                    offset: const Offset(0, 12),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Container(
-                    width: 66.w,
-                    height: 66.w,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFEAF7E4),
-                      shape: BoxShape.circle,
-                    ),
-                    child: SizedBox(
-                      width: 32.w,
-                      height: 32.w,
-                      child:
-                      const CircularProgressIndicator(
-                        strokeWidth: 3.2,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 20.h),
-
-                  Text(
-                    'cv_home_analyzing_template'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 19.sp,
-                      fontWeight: FontWeight.w900,
-                      color:
-                      AppColors.homePrimaryText,
-                    ),
-                  ),
-
-                  SizedBox(height: 8.h),
-
-                  Text(
-                    'cv_home_analyzing_description'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12.5.sp,
-                      height: 1.5,
-                      color: AppColors
-                          .homeSecondaryText,
-                    ),
-                  ),
-
-                  SizedBox(height: 17.h),
-
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 13.w,
-                      vertical: 11.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEAF7E4),
-                      borderRadius:
-                      BorderRadius.circular(13.r),
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.auto_awesome_rounded,
-                          size: 18.w,
-                          color:
-                          AppColors.primaryGreen,
-                        ),
-                        SizedBox(width: 8.w),
-                        Expanded(
-                          child: Text(
-                            'cv_home_assistant_open_automatically'.tr,
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              height: 1.4,
-                              fontWeight:
-                              FontWeight.w700,
-                              color: AppColors
-                                  .primaryGreen,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 13.h),
-
-                  Text(
-                    'cv_home_stay_on_page'.tr,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors
-                          .homeSecondaryText,
-                    ),
-                  ),
-                ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 64),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Expanded(
+              child: Obx(() {
+                final CvAccessModel? access = controller.cvAccess.value;
+                if (access == null) return const _CompactCardSkeleton();
+                return _CreditsCard(access: access);
+              }),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Obx(
+                () => _MyCvsCard(
+                  loading: controller.isOpeningLibrary.value,
+                  onTap: controller.openMyCvs,
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _ScratchCard extends StatelessWidget {
-  const _ScratchCard({
-    required this.isLoading,
-    required this.isDisabled,
-    required this.onTap,
-  });
+class _CreditsCard extends StatelessWidget {
+  const _CreditsCard({required this.access});
 
-  final bool isLoading;
-
-  final bool isDisabled;
-
-  final VoidCallback onTap;
+  final CvAccessModel access;
 
   @override
   Widget build(BuildContext context) {
-    final bool cannotTap =
-        isLoading || isDisabled;
+    final bool freeNext = access.nextIsFree;
+    final bool paidNext = access.nextUsesPaidCredit;
+    final Color background = freeNext
+        ? const Color(0xFFEAF6EC)
+        : paidNext
+        ? const Color(0xFFFFF3DE)
+        : const Color(0xFFF0F2F1);
+    final Color accent = freeNext
+        ? const Color(0xFF176B38)
+        : paidNext
+        ? const Color(0xFF8A5A00)
+        : const Color(0xFF606965);
 
-    return Opacity(
-      opacity: isDisabled ? 0.55 : 1,
-      child: Material(
-        color: AppColors.primaryGreen,
-        borderRadius:
-        BorderRadius.circular(24.r),
-        child: InkWell(
-          onTap: cannotTap ? null : onTap,
-          borderRadius:
-          BorderRadius.circular(24.r),
-          child: Padding(
-            padding: EdgeInsets.all(20.w),
-            child: Row(
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 34.r,
+            height: 34.r,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.82),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(
+              freeNext ? Icons.card_giftcard_rounded : Icons.toll_rounded,
+              size: 19.r,
+              color: accent,
+            ),
+          ),
+          SizedBox(width: 9.w),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Container(
-                  width: 54.w,
-                  height: 54.w,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color:
-                    Colors.white.withValues(
-                      alpha: 0.15,
-                    ),
-                    borderRadius:
-                    BorderRadius.circular(
-                      18.r,
-                    ),
-                  ),
-                  child: isLoading
-                      ? const CircularProgressIndicator(
-                    color: Colors.white,
-                  )
-                      : const Icon(
-                    Icons
-                        .auto_awesome_rounded,
-                    color: Colors.white,
+                Text(
+                  'cvb_credits'.tr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.homePrimaryText,
                   ),
                 ),
-                SizedBox(width: 15.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        'cv_home_build_from_scratch'.tr,
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight:
-                          FontWeight.w900,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: 5.h),
-                      Text(
-                        'cv_home_build_from_scratch_description'.tr,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          height: 1.4,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
+                SizedBox(height: 2.h),
+                Text(
+                  'cvb_credit_summary'.trParams(<String, String>{
+                    'free': '${access.freeCreationsRemaining}',
+                    'paid': '${access.paidCredits}',
+                  }),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w700,
+                    color: accent,
                   ),
-                ),
-                const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: Colors.white,
-                  size: 18,
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MyCvsCard extends StatelessWidget {
+  const _MyCvsCard({required this.loading, required this.onTap});
+
+  final bool loading;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16.r),
+      child: InkWell(
+        onTap: loading ? null : onTap,
+        borderRadius: BorderRadius.circular(16.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(color: const Color(0xFFD8E7DF)),
+          ),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 34.r,
+                height: 34.r,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEAF6F1),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: loading
+                    ? Padding(
+                        padding: EdgeInsets.all(9.r),
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primaryGreen,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.folder_open_rounded,
+                        color: AppColors.primaryGreen,
+                      ),
+              ),
+              SizedBox(width: 9.w),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'cvb_my_cvs'.tr,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.homePrimaryText,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'cvb_drafts_pdfs'.tr,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryGreen,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.primaryGreen,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({
+class _CompactCardSkeleton extends StatelessWidget {
+  const _CompactCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFE5E9E7),
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({required this.controller});
+
+  final CvHomeController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => TextField(
+        controller: controller.searchController,
+        onChanged: controller.onSearchChanged,
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          hintText: 'cvb_search_designs'.tr,
+          prefixIcon: const Icon(Icons.search_rounded),
+          suffixIcon: controller.searchQuery.value.isEmpty
+              ? null
+              : IconButton(
+                  onPressed: controller.clearSearch,
+                  icon: const Icon(Icons.close_rounded),
+                ),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: EdgeInsets.symmetric(vertical: 13.h),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24.r),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryChips extends StatelessWidget {
+  const _CategoryChips({required this.controller});
+
+  final CvHomeController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      // Read it HERE so Obx reacts when selection changes.
+      final String selectedCategory = controller.selectedCategory.value
+          .trim()
+          .toLowerCase();
+
+      if (controller.categories.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return SizedBox(
+        height: 38.h,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: controller.categories.length + 1,
+          separatorBuilder: (_, __) => SizedBox(width: 8.w),
+          itemBuilder: (BuildContext context, int index) {
+            final String rawCategory = index == 0
+                ? ''
+                : controller.categories[index - 1].category;
+
+            final String category = rawCategory.trim().toLowerCase();
+
+            final String label = category.isEmpty
+                ? 'cvb_all'.tr
+                : cvCategoryLabel(rawCategory);
+
+            final bool selected = selectedCategory == category;
+
+            return ChoiceChip(
+              label: Text(label),
+              selected: selected,
+              onSelected: (_) => controller.selectCategory(category),
+
+              // Clear selected state.
+              selectedColor: AppColors.primaryGreen,
+              backgroundColor: Colors.white,
+              checkmarkColor: Colors.white,
+
+              labelStyle: TextStyle(
+                fontSize: 11.5.sp,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                color: selected ? Colors.white : AppColors.homeSecondaryText,
+              ),
+
+              side: BorderSide(
+                color: selected
+                    ? AppColors.primaryGreen
+                    : const Color(0xFFE1E7E3),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+}
+
+class _CategorySkeleton extends StatelessWidget {
+  const _CategorySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 38.h,
+      child: Row(
+        children: <Widget>[
+          for (final double width in <double>[54, 94, 78, 88]) ...<Widget>[
+            Container(
+              width: width.w,
+              height: 34.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE4E8E6),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+            ),
+            SizedBox(width: 8.w),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TemplateArea extends StatelessWidget {
+  const _TemplateArea({required this.controller});
+
+  final CvHomeController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isInitialLoading.value && controller.templates.isEmpty) {
+        return const CvTemplateListSkeleton();
+      }
+
+      if (controller.errorMessage.value.isNotEmpty &&
+          controller.templates.isEmpty) {
+        return _StateCard(
+          icon: Icons.cloud_off_outlined,
+          title: 'cvb_load_templates_failed'.tr,
+          message: controller.errorMessage.value,
+          actionLabel: 'cvb_try_again'.tr,
+          onAction: () =>
+              controller.loadHomeBootstrap(showBlockingLoading: true),
+        );
+      }
+
+      if (controller.templates.isEmpty) {
+        return _StateCard(
+          icon: Icons.search_off_rounded,
+          title: 'cvb_no_templates'.tr,
+          message:
+              controller.searchQuery.value.isNotEmpty ||
+                  controller.selectedCategory.value.isNotEmpty
+              ? 'cvb_try_search_category'.tr
+              : 'cvb_no_published_templates'.tr,
+          actionLabel: controller.searchQuery.value.isNotEmpty
+              ? 'cvb_clear_search'.tr
+              : null,
+          onAction: controller.searchQuery.value.isNotEmpty
+              ? controller.clearSearch
+              : null,
+        );
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  'cvb_designs'.tr,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.homePrimaryText,
+                  ),
+                ),
+              ),
+              Text(
+                '${controller.totalItems.value}',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.homeSecondaryText,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 5.h),
+          Text(
+            'cvb_inspect_design'.tr,
+            style: TextStyle(
+              fontSize: 10.5.sp,
+              color: AppColors.homeSecondaryText,
+            ),
+          ),
+          SizedBox(height: 11.h),
+          ...controller.templates.map(
+            (CvTemplateModel template) => Padding(
+              padding: EdgeInsets.only(bottom: 16.h),
+              child: CvTemplateCard(
+                key: ValueKey<String>('template-${template.id}'),
+                template: template,
+                onTap: () => controller.openTemplate(template),
+              ),
+            ),
+          ),
+          if (controller.canLoadMore) ...<Widget>[
+            SizedBox(height: 2.h),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: controller.isLoadingMore.value
+                    ? null
+                    : () => controller.loadTemplates(reset: false),
+                child: controller.isLoadingMore.value
+                    ? SizedBox(
+                        width: 19.w,
+                        height: 19.w,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primaryGreen,
+                        ),
+                      )
+                    : Text('cvb_load_more_designs'.tr),
+              ),
+            ),
+          ],
+        ],
+      );
+    });
+  }
+}
+
+class _StateCard extends StatelessWidget {
+  const _StateCard({
     required this.icon,
     required this.title,
     required this.message,
@@ -521,200 +541,45 @@ class _EmptyState extends StatelessWidget {
   });
 
   final IconData icon;
-
   final String title;
-
   final String message;
-
   final String? actionLabel;
-
   final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(28.w),
+      width: double.infinity,
+      padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-        BorderRadius.circular(24.r),
+        borderRadius: BorderRadius.circular(20.r),
       ),
       child: Column(
         children: <Widget>[
-          Icon(
-            icon,
-            size: 48.w,
-            color: AppColors.primaryGreen,
-          ),
-          SizedBox(height: 14.h),
+          Icon(icon, size: 42.w, color: AppColors.homeSecondaryText),
+          SizedBox(height: 10.h),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 17.sp,
-              fontWeight: FontWeight.w900,
-            ),
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900),
           ),
-          SizedBox(height: 7.h),
+          SizedBox(height: 6.h),
           Text(
             message,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 13.sp,
+              fontSize: 12.sp,
               height: 1.4,
-              color:
-              AppColors.homeSecondaryText,
+              color: AppColors.homeSecondaryText,
             ),
           ),
-          if (actionLabel != null &&
-              onAction != null) ...<Widget>[
-            SizedBox(height: 18.h),
-            TextButton(
-              onPressed: onAction,
-              child: Text(actionLabel!),
-            ),
+          if (actionLabel != null && onAction != null) ...<Widget>[
+            SizedBox(height: 12.h),
+            TextButton(onPressed: onAction, child: Text(actionLabel!)),
           ],
         ],
       ),
     );
-  }
-}
-
-
-class _CvAccessCard
-    extends GetView<CvHomeController> {
-  const _CvAccessCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final int freeRemaining =
-          controller.freeCvGenerationsRemaining;
-
-      final int paidCredits =
-          controller.paidCvCredits;
-
-      final bool freeEnded =
-          controller.freeCvLimitEnded;
-
-      return Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(
-          horizontal: 12.w,
-          vertical: 10.h,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(
-            16.r,
-          ),
-          border: Border.all(
-            color: freeEnded
-                ? const Color(0xFFFFD7C2)
-                : const Color(0xFFDCEEDB),
-          ),
-        ),
-        child: Row(
-          children: <Widget>[
-            Container(
-              width: 34.r,
-              height: 34.r,
-              decoration: BoxDecoration(
-                color: freeEnded
-                    ? const Color(0xFFFFEEE5)
-                    : const Color(0xFFEAF8E8),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                freeEnded
-                    ? Icons.hourglass_bottom_rounded
-                    : Icons.auto_awesome_rounded,
-                size: 18.r,
-                color: freeEnded
-                    ? const Color(0xFFB35320)
-                    : AppColors.primaryGreen,
-              ),
-            ),
-
-            SizedBox(width: 9.w),
-
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    freeEnded
-                        ? 'cv_free_limit_ended'.tr
-                        : 'cv_free_creations_remaining'
-                        .trParams(
-                      <String, String>{
-                        'count':
-                        freeRemaining.toString(),
-                      },
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13.5.sp,
-                      fontWeight: FontWeight.w700,
-                      color:
-                      AppColors.homePrimaryText,
-                    ),
-                  ),
-
-                  SizedBox(height: 2.h),
-
-                  Text(
-                    'cv_paid_credit_balance'.trParams(
-                      <String, String>{
-                        'count': paidCredits.toString(),
-                      },
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11.5.sp,
-                      color:
-                      AppColors.homeSecondaryText,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            if (freeEnded) ...<Widget>[
-              SizedBox(width: 6.w),
-
-              Tooltip(
-                message: 'buy_cv_credits'.tr,
-                child: IconButton(
-                  onPressed:
-                  controller.openCvCreditStore,
-                  padding: EdgeInsets.zero,
-                  visualDensity:
-                  VisualDensity.compact,
-                  constraints: BoxConstraints.tightFor(
-                    width: 36.r,
-                    height: 36.r,
-                  ),
-                  style: IconButton.styleFrom(
-                    backgroundColor:
-                    const Color(0xFFFFEEE5),
-                    foregroundColor:
-                    const Color(0xFFB35320),
-                  ),
-                  icon: Icon(
-                    Icons.add_card_rounded,
-                    size: 18.r,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      );
-    });
   }
 }

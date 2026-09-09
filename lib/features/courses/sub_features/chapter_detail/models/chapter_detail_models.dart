@@ -549,6 +549,8 @@ class ChapterQuizModel {
   final int totalQuestions;
   final bool unlockRequirementEnabled;
   final int unlockVideoWatchPercent;
+  final bool hasInProgressSession;
+  final int answeredQuestions;
 
   const ChapterQuizModel({
     required this.title,
@@ -562,6 +564,8 @@ class ChapterQuizModel {
     required this.totalQuestions,
     required this.unlockRequirementEnabled,
     required this.unlockVideoWatchPercent,
+    this.hasInProgressSession = false,
+    this.answeredQuestions = 0,
   });
 
   factory ChapterQuizModel.fromJson(Map<String, dynamic> json) {
@@ -590,6 +594,11 @@ class ChapterQuizModel {
       unlockVideoWatchPercent: _intValue(json['unlockVideoWatchPercent']) > 0
           ? _intValue(json['unlockVideoWatchPercent'])
           : 80,
+      hasInProgressSession: _boolValue(
+        json['hasInProgressSession'],
+        fallback: false,
+      ),
+      answeredQuestions: _intValue(json['answeredQuestions']),
     );
   }
 
@@ -607,6 +616,8 @@ class ChapterQuizModel {
       'unlockRequirementEnabled': unlockRequirementEnabled,
 
       'unlockVideoWatchPercent': unlockVideoWatchPercent,
+      'hasInProgressSession': hasInProgressSession,
+      'answeredQuestions': answeredQuestions,
     };
   }
 
@@ -618,6 +629,8 @@ class ChapterQuizModel {
     String? timeLabel,
     bool? unlockRequirementEnabled,
     int? unlockVideoWatchPercent,
+    bool? hasInProgressSession,
+    int? answeredQuestions,
   }) {
     return ChapterQuizModel(
       title: title,
@@ -634,6 +647,9 @@ class ChapterQuizModel {
 
       unlockVideoWatchPercent:
           unlockVideoWatchPercent ?? this.unlockVideoWatchPercent,
+      hasInProgressSession:
+          hasInProgressSession ?? this.hasInProgressSession,
+      answeredQuestions: answeredQuestions ?? this.answeredQuestions,
     );
   }
 }

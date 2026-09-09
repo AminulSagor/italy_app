@@ -88,6 +88,16 @@ class ChapterDetailController extends GetxController {
       detail.value = result.data;
       quizStatus.value =
           result.data!.quiz?.status ?? ChapterQuizStatus.disabled;
+      await ApiErrorHandler.call<Object?>(
+        () async {
+          await _chapterDetailApiService.recordLessonOpened(
+            courseId: result.data!.courseId,
+            lessonId: result.data!.id,
+          );
+          return null;
+        },
+        showError: false,
+      );
       _preloadChapterResources();
       _lastRecordedVideoPercent = result.data!.progress.videoWatchPercent;
       _isLessonCompletionSubmitted = result.data!.progress.isCompleted;
@@ -488,6 +498,35 @@ class ChapterDetailController extends GetxController {
       return;
     }
 
+    bool startOver = false;
+    if (quiz.hasInProgressSession && quiz.answeredQuestions > 0) {
+      final bool? selection = await Get.dialog<bool>(
+        AlertDialog(
+          title: Text('saved_quiz_progress'.tr),
+          content: Text(
+            'saved_quiz_progress_message'.trParams(<String, String>{
+              'count': quiz.answeredQuestions.toString(),
+            }),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Get.back<bool>(result: true),
+              child: Text('start_over'.tr),
+            ),
+            FilledButton(
+              onPressed: () => Get.back<bool>(result: false),
+              child: Text('resume_quiz'.tr),
+            ),
+          ],
+        ),
+        barrierDismissible: true,
+      );
+      if (selection == null) {
+        return;
+      }
+      startOver = selection;
+    }
+
     final String tag =
         'quiz_${chapter.id}_${DateTime.now().millisecondsSinceEpoch}';
 
@@ -498,6 +537,7 @@ class ChapterDetailController extends GetxController {
         lessonId: current.id,
         courseId: current.courseId,
         chapterTitle: current.title,
+        startOver: startOver,
         questionCount: quiz.totalQuestions > 0 ? quiz.totalQuestions : 15,
       ),
     );
@@ -505,8 +545,9 @@ class ChapterDetailController extends GetxController {
     if (routeResult == true) {
       quizStatus.value = ChapterQuizStatus.completed;
       await _markLessonCompletedIfNeeded();
-      await loadDetail();
     }
+
+    await loadDetail();
 
     if (Get.isRegistered<QuizController>(tag: tag)) {
       Get.delete<QuizController>(tag: tag, force: true);
@@ -628,7 +669,9 @@ class ChapterDetailController extends GetxController {
 
     detail.value = current.copyWith(
       videoProgress: (percent / 100).clamp(0.0, 1.0).toDouble(),
-      videoProgressLabel: quiz != null && canStartQuiz
+      videoProgressLabel: quiz?.unlockRequirementEnabled != true
+          ? '$percent% ${'watched'.tr}'
+          : canStartQuiz
           ? '$percent% ${'watched'.tr} – '
                 '${'quiz_unlocked'.tr}'
           : '$percent% ${'watched'.tr} – '

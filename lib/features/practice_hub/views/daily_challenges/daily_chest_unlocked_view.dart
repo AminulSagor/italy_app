@@ -65,12 +65,15 @@ class DailyChestUnlockedView extends GetView<PracticeHubController> {
               //   ),
               // ),
               SizedBox(height: 34.h),
-              const Row(
-                children: <Widget>[
-                  Expanded(child: _XpRewardCard()),
-                  SizedBox(width: 16),
-                  Expanded(child: _FreezeRewardCard()),
-                ],
+              const IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Expanded(child: _XpRewardCard()),
+                    SizedBox(width: 16),
+                    Expanded(child: _FreezeRewardCard()),
+                  ],
+                ),
               ),
               SizedBox(height: 22.h),
               const _StreakIncreasePill(),
@@ -145,7 +148,7 @@ class XpBoostButton extends GetView<PracticeHubController> {
       final String remaining = _formatDuration(seconds);
 
       return Container(
-        height: 64.h,
+        constraints: const BoxConstraints(minHeight: 64),
         width: double.infinity,
         padding: EdgeInsets.fromLTRB(17.w, 8.h, 24.w, 8.h),
         decoration: BoxDecoration(
@@ -181,6 +184,8 @@ class XpBoostButton extends GetView<PracticeHubController> {
                 children: <Widget>[
                   Text(
                     boost?.isActive == true ? 'boost_active'.tr : 'xp_boost'.tr,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13.sp,
                       height: 1,
@@ -193,6 +198,8 @@ class XpBoostButton extends GetView<PracticeHubController> {
                     boost?.isActive == true
                         ? '$remaining remaining'
                         : 'no_active_boost'.tr,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13.sp,
                       height: 1,
@@ -238,7 +245,8 @@ class _XpRewardCard extends GetView<PracticeHubController> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 185.h,
+      constraints: const BoxConstraints(minHeight: 185),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 18.h),
       decoration: BoxDecoration(
         color: const Color(0xFFF9EAD1),
         borderRadius: BorderRadius.circular(42.r),
@@ -262,6 +270,9 @@ class _XpRewardCard extends GetView<PracticeHubController> {
           SizedBox(height: 22.h),
           Text(
             'xp_earned'.tr,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: AppFont.font11.sp,
               height: 1,
@@ -298,7 +309,8 @@ class _FreezeRewardCard extends GetView<PracticeHubController> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 185.h,
+      constraints: const BoxConstraints(minHeight: 185),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 18.h),
       decoration: BoxDecoration(
         color: const Color(0xFFEAF2FB),
         borderRadius: BorderRadius.circular(42.r),
@@ -322,6 +334,9 @@ class _FreezeRewardCard extends GetView<PracticeHubController> {
           SizedBox(height: 20.h),
           Text(
             'streak_freeze'.tr,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: AppFont.font11.sp,
               height: 1,

@@ -20,14 +20,16 @@ class SettingsL10n {
     return value;
   }
 
-  static const Map<String, Map<String, String>> _values =
-      <String, Map<String, String>>{
+  static const Map<String, Map<String, String>>
+  _values = <String, Map<String, String>>{
     'en': <String, String>{
       'settings': 'Settings',
       'profile_and_security': 'Profile & security',
       'privacy_and_legal': 'Privacy & legal',
       'edit_profile': 'Edit profile',
       'change_password': 'Change password',
+      'set_password': 'Set password',
+      'add_contact_to_set_password': 'Add email or phone to set password',
       'privacy_policy': 'Privacy policy',
       'terms_of_service': 'Terms of service',
       'delete_account': 'Delete account',
@@ -140,6 +142,8 @@ class SettingsL10n {
       'privacy_and_legal': 'গোপনীয়তা ও আইনগত তথ্য',
       'edit_profile': 'প্রোফাইল সম্পাদনা',
       'change_password': 'পাসওয়ার্ড পরিবর্তন',
+      'set_password': 'পাসওয়ার্ড সেট করুন',
+      'add_contact_to_set_password': 'পাসওয়ার্ডের জন্য ইমেইল বা ফোন যোগ করুন',
       'privacy_policy': 'গোপনীয়তা নীতি',
       'terms_of_service': 'সেবার শর্তাবলি',
       'delete_account': 'অ্যাকাউন্ট মুছুন',
@@ -193,7 +197,8 @@ class SettingsL10n {
       'new_password_hint': 'নতুন পাসওয়ার্ড তৈরি করুন',
       'confirm_password': 'নতুন পাসওয়ার্ড নিশ্চিত করুন',
       'confirm_password_hint': 'নতুন পাসওয়ার্ডটি আবার লিখুন',
-      'password_intro': 'অন্য কোথাও ব্যবহার করেন না এমন শক্তিশালী পাসওয়ার্ড ব্যবহার করুন।',
+      'password_intro':
+          'অন্য কোথাও ব্যবহার করেন না এমন শক্তিশালী পাসওয়ার্ড ব্যবহার করুন।',
       'password_requirements': 'পাসওয়ার্ডের শর্ত',
       'password_minimum': 'কমপক্ষে ৮ অক্ষর',
       'password_uppercase': 'একটি বড় হাতের অক্ষর (A–Z)',
@@ -252,6 +257,9 @@ class SettingsL10n {
       'privacy_and_legal': 'Privacy e informazioni legali',
       'edit_profile': 'Modifica profilo',
       'change_password': 'Cambia password',
+      'set_password': 'Imposta password',
+      'add_contact_to_set_password':
+          'Aggiungi email o telefono per la password',
       'privacy_policy': 'Informativa sulla privacy',
       'terms_of_service': 'Termini di servizio',
       'delete_account': 'Elimina account',
@@ -275,7 +283,8 @@ class SettingsL10n {
       'phone_hint': '+8801XXXXXXXXX oppure +39XXXXXXXXXX',
       'verified': 'Verificato',
       'not_verified': 'Non verificato',
-      'change_unavailable': 'Questo contatto non può essere modificato al momento.',
+      'change_unavailable':
+          'Questo contatto non può essere modificato al momento.',
       'otp_required_notice':
           'Per cambiare email o telefono è necessaria la verifica con un codice di 4 cifre.',
       'save_changes': 'Salva modifiche',
@@ -344,14 +353,16 @@ class SettingsL10n {
       'email_updated': 'Email aggiornata',
       'email_updated_desc': 'Il nuovo indirizzo email è verificato e attivo.',
       'phone_updated': 'Telefono aggiornato',
-      'phone_updated_desc': 'Il nuovo numero di telefono è verificato e attivo.',
+      'phone_updated_desc':
+          'Il nuovo numero di telefono è verificato e attivo.',
       'back_to_profile': 'Torna a modifica profilo',
       'back_to_login': 'Torna al login',
       'done': 'Fine',
       'legal_contact': 'Per domande scrivi a hello@italirpothe.com.',
       'effective_date': 'In vigore dal 21 luglio 2026',
       'rate_unavailable': 'Pagina dello store non disponibile',
-      'rate_unavailable_desc': 'Non è stato possibile aprire la pagina dello store.',
+      'rate_unavailable_desc':
+          'Non è stato possibile aprire la pagina dello store.',
       'request_failed': 'Richiesta non riuscita',
       'profile': 'Profilo',
       'update_profile': 'Aggiorna profilo',

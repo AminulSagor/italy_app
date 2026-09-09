@@ -1,6 +1,8 @@
-import 'package:italir_pothe/core/utils/app_logger.dart';
+import 'dart:io';
+import 'dart:developer' as developer;
 import 'dart:ui';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -12,8 +14,6 @@ import 'token_service.dart';
 @pragma('vm:entry-point')
 Future<void> callkitBackgroundActionHandler(CallEvent event) async {
   DartPluginRegistrant.ensureInitialized();
-
-  AppLogger.log('Received ${event.runtimeType}', name: 'CallKitBackground');
 
   if (event is CallEventActionCallTimeout) {
     final String callId = event.id.trim();
@@ -40,70 +40,119 @@ Future<void> callkitBackgroundActionHandler(CallEvent event) async {
       : callKitParams.id.trim();
 
   if (callId.isEmpty) {
-    AppLogger.log(
-      'Action ignored because callId is missing',
-      name: 'CallKitBackground',
-    );
     return;
   }
 
   if (event is CallEventActionCallAccept) {
-    // Do not initialize API clients or request media permissions from the
-    // background isolate. Persist the native action and finish the answer
-    // flow only after Flutter has a resumed Activity.
+    // Persist first so the main isolate can restore the media session even if
+    // iOS launches this callback while the app is terminated.
     await CallkitPendingActionStore.saveAcceptedCall(
       callId: callId,
       callData: extra,
     );
 
-    AppLogger.log(
-      'Accept queued for foreground restoration',
-      name: 'CallKitBackground',
-    );
+    await _runBackgroundAction((CallSocketService callService) async {
+      final Map<String, dynamic> answerResponse = await callService
+          .answerCallOverHttp(callId: callId);
+      await CallkitPendingActionStore.saveAcceptedCall(
+        callId: callId,
+        callData: extra,
+        answerResponse: answerResponse,
+      );
+    });
     return;
+  }
+
+  if (event is CallEventActionCallIncoming && Platform.isIOS) {
+    // PushKit, unlike the FCM background handler, reaches this callback when
+    // iOS wakes a terminated app. ACK as soon as CallKit is visible so the
+    // caller transitions from "calling" to "ringing".
+    await _runBackgroundAction((CallSocketService callService) async {
+      await callService.acknowledgeIncomingCallOverHttp(callId: callId);
+    });
+    return;
+  }
+
+  if (event is CallEventActionCallDecline) {
+    // Keep a durable retry before starting network I/O. iOS may suspend a
+    // terminated/background process before the request reaches the server.
+    await CallkitPendingActionStore.saveDeclinedCall(
+      callId: callId,
+      callData: extra,
+    );
+  }
+
+  if (event is CallEventActionCallEnded) {
+    // The local CallKit end has won over any in-flight accepted restoration.
+    // Clear it before network reconciliation so a later app resume cannot
+    // join Agora for a call that the user already hung up.
+    await CallkitPendingActionStore.clearAcceptedCall();
+    await CallkitPendingActionStore.saveEndedCall(
+      callId: callId,
+      callData: extra,
+    );
   }
 
   await _runBackgroundAction((CallSocketService callService) async {
     if (event is CallEventActionCallDecline) {
-      await callService.rejectCallOverHttp(callId: callId);
-      await CallkitPendingActionStore.clear();
+      try {
+        await callService.rejectCallOverHttp(callId: callId);
+      } on CallSocketException catch (error) {
+        if (error.code != 'CALL_NOT_FOUND') {
+          rethrow;
+        }
+        // The server has already removed this stale call. Treat that as a
+        // completed decline and clear the persisted retry action.
+      }
+      await CallkitPendingActionStore.clearDeclinedCall();
       return;
     }
 
-    final Map<String, dynamic> current = await callService.fetchCall(
-      callId: callId,
-    );
-    final Map<String, dynamic> call = _extractExtra(current['call']);
-    final String status = call['status']?.toString() ?? '';
-
-    // Remote termination also closes native CallKit. Only send a local end
-    // request when the authoritative server state is still active.
-    if (status == 'active') {
-      await callService.endCallOverHttp(callId: callId);
+    if (event is CallEventActionCallEnded) {
+      // The endpoint is idempotent. Avoid a preliminary GET: iOS may suspend
+      // the lock-screen execution window between the GET and the actual end.
+      try {
+        await callService.endCallOverHttp(callId: callId);
+      } on CallSocketException catch (error) {
+        if (error.code != 'CALL_NOT_FOUND' &&
+            error.code != 'CALL_CANNOT_BE_ENDED') {
+          rethrow;
+        }
+      }
+      await CallkitPendingActionStore.clearEndedCall();
     }
   });
 }
 
-Future<void> _runBackgroundAction(
+Future<bool> _runBackgroundAction(
   Future<void> Function(CallSocketService callService) action,
 ) async {
   try {
+    developer.log('background action begin', name: 'CallLifecycle.CallKit');
+    await Firebase.initializeApp();
     await dotenv.load(fileName: '.env');
     final CallSocketService callService = CallSocketService(
       tokenService: TokenService(),
     );
     await action(callService);
+    developer.log('background action complete', name: 'CallLifecycle.CallKit');
+    return true;
   } catch (error, stackTrace) {
-    AppLogger.log(
-      'Background action failed',
-      name: 'CallKitBackground',
+    developer.log(
+      'background action failed',
+      name: 'CallLifecycle.CallKit',
       error: error,
       stackTrace: stackTrace,
     );
+    return false;
   }
 }
 
 CallKitParams? _callKitParamsFromEvent(CallEvent event) {
+  if (event is CallEventActionCallIncoming) {
+    return event.callKitParams;
+  }
+
   if (event is CallEventActionCallAccept) {
     return event.callKitParams;
   }

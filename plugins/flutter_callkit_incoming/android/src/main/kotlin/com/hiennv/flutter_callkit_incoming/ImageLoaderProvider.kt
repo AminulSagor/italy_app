@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.widget.ImageView
 import coil.ImageLoader
 import coil.request.ImageRequest
@@ -84,7 +83,6 @@ open class SafeTarget(
 
     override fun onSuccess(result: Drawable) {
         super.onSuccess(result)
-        Log.d("onSuccess", "-")
         if (!isCancelled) {
             onLoaded((result as BitmapDrawable).bitmap)
         }
@@ -92,12 +90,10 @@ open class SafeTarget(
 
     override fun onStart(placeholder: Drawable?) {
         super.onStart(placeholder)
-        Log.d("onStart", "-")
     }
 
     override fun onError(error: Drawable?) {
         super.onError(error)
-        Log.d("onError", "-")
     }
 
 

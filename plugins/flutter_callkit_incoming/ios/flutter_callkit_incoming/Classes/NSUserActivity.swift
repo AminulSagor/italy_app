@@ -18,7 +18,6 @@ extension NSUserActivity: StartCallConvertible {
         else {
             return nil
         }
-        print(interaction.intent)
         return contact.personHandle?.value
     }
 

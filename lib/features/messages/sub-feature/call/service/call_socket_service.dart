@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -53,8 +52,7 @@ class CallSocketService extends GetxService {
 
   final List<CallSocketListener> _incomingCallListeners =
       <CallSocketListener>[];
-  final List<CallSocketListener> _ringingCallListeners =
-  <CallSocketListener>[];
+  final List<CallSocketListener> _ringingCallListeners = <CallSocketListener>[];
 
   final List<CallSocketListener> _answeredCallListeners =
       <CallSocketListener>[];
@@ -110,20 +108,12 @@ class CallSocketService extends GetxService {
     _socket = socket;
 
     socket.onConnect((dynamic _) {
-      debugPrint('[CallSocket] Connected: ${socket.id}');
-
       if (!completer.isCompleted) {
         completer.complete();
       }
     });
 
-    socket.onDisconnect((dynamic reason) {
-      debugPrint('[CallSocket] Disconnected: $reason');
-    });
-
     socket.onConnectError((dynamic error) {
-      debugPrint('[CallSocket] Connection error: $error');
-
       if (!completer.isCompleted) {
         completer.completeError(
           CallSocketException(
@@ -135,71 +125,32 @@ class CallSocketService extends GetxService {
       }
     });
 
-    socket.onError((dynamic error) {
-      debugPrint('[CallSocket] Socket error: $error');
-    });
-
     socket.on('call:connected', (dynamic data) {
-      _handleSocketEvent(
-        event: 'call:connected',
-        data: data,
-        listeners: _connectedListeners,
-        listenerName: 'Connected',
-      );
+      _handleSocketEvent(data: data, listeners: _connectedListeners);
     });
 
     socket.on('call:incoming', (dynamic data) {
-      _handleSocketEvent(
-        event: 'call:incoming',
-        data: data,
-        listeners: _incomingCallListeners,
-        listenerName: 'Incoming call',
-      );
+      _handleSocketEvent(data: data, listeners: _incomingCallListeners);
     });
 
     socket.on('call:ringing', (dynamic data) {
-      _handleSocketEvent(
-        event: 'call:ringing',
-        data: data,
-        listeners: _ringingCallListeners,
-        listenerName: 'Ringing call',
-      );
+      _handleSocketEvent(data: data, listeners: _ringingCallListeners);
     });
 
     socket.on('call:answered', (dynamic data) {
-      _handleSocketEvent(
-        event: 'call:answered',
-        data: data,
-        listeners: _answeredCallListeners,
-        listenerName: 'Answered call',
-      );
+      _handleSocketEvent(data: data, listeners: _answeredCallListeners);
     });
 
     socket.on('call:rejected', (dynamic data) {
-      _handleSocketEvent(
-        event: 'call:rejected',
-        data: data,
-        listeners: _rejectedCallListeners,
-        listenerName: 'Rejected call',
-      );
+      _handleSocketEvent(data: data, listeners: _rejectedCallListeners);
     });
 
     socket.on('call:cancelled', (dynamic data) {
-      _handleSocketEvent(
-        event: 'call:cancelled',
-        data: data,
-        listeners: _cancelledCallListeners,
-        listenerName: 'Cancelled call',
-      );
+      _handleSocketEvent(data: data, listeners: _cancelledCallListeners);
     });
 
     socket.on('call:ended', (dynamic data) {
-      _handleSocketEvent(
-        event: 'call:ended',
-        data: data,
-        listeners: _endedCallListeners,
-        listenerName: 'Ended call',
-      );
+      _handleSocketEvent(data: data, listeners: _endedCallListeners);
     });
 
     socket.connect();
@@ -299,6 +250,18 @@ class CallSocketService extends GetxService {
     );
   }
 
+  Future<Map<String, dynamic>> heartbeatCall({required String callId}) {
+    return _runSocketActionWithHttpFallback(
+      socketAction: () => _emitCallAction(
+        event: 'call:heartbeat',
+        payload: <String, dynamic>{'callId': callId},
+        timeoutCode: 'CALL_HEARTBEAT_TIMEOUT',
+        timeoutMessage: 'The server did not acknowledge the active call.',
+      ),
+      httpAction: () => heartbeatCallOverHttp(callId: callId),
+    );
+  }
+
   Future<Map<String, dynamic>> answerCallOverHttp({required String callId}) {
     return _sendHttpCallAction(
       method: 'POST',
@@ -334,6 +297,20 @@ class CallSocketService extends GetxService {
     );
   }
 
+  Future<Map<String, dynamic>> heartbeatCallOverHttp({required String callId}) {
+    return _sendHttpCallAction(
+      method: 'POST',
+      path: '/calls/${callId.trim()}/heartbeat',
+    );
+  }
+
+  Future<Map<String, dynamic>> renewMediaToken({required String callId}) {
+    return _sendHttpCallAction(
+      method: 'POST',
+      path: '/calls/${callId.trim()}/media-token',
+    );
+  }
+
   Future<Map<String, dynamic>> acknowledgeIncomingCallOverHttp({
     required String callId,
   }) {
@@ -342,7 +319,6 @@ class CallSocketService extends GetxService {
       path: '/calls/${callId.trim()}/incoming-ack',
     );
   }
-
 
   Future<Map<String, dynamic>> fetchCall({required String callId}) {
     return _sendHttpCallAction(method: 'GET', path: '/calls/${callId.trim()}');
@@ -359,10 +335,6 @@ class CallSocketService extends GetxService {
         rethrow;
       }
 
-      debugPrint(
-        '[CallSocket] ${error.code}; retrying the call action over HTTP',
-      );
-
       return httpAction();
     }
   }
@@ -375,7 +347,8 @@ class CallSocketService extends GetxService {
         error.code == 'CALL_REJECT_TIMEOUT' ||
         error.code == 'CALL_CANCEL_TIMEOUT' ||
         error.code == 'CALL_END_TIMEOUT' ||
-        error.code == 'CALL_TIMEOUT_TIMEOUT';
+        error.code == 'CALL_TIMEOUT_TIMEOUT' ||
+        error.code == 'CALL_HEARTBEAT_TIMEOUT';
   }
 
   Future<Map<String, dynamic>> _sendHttpCallAction({
@@ -465,9 +438,7 @@ class CallSocketService extends GetxService {
     );
   }
 
-  Future<void> acknowledgeIncomingCall({
-    required String callId,
-  }) async {
+  Future<void> acknowledgeIncomingCall({required String callId}) async {
     final String normalizedCallId = callId.trim();
 
     if (normalizedCallId.isEmpty) {
@@ -481,47 +452,30 @@ class CallSocketService extends GetxService {
 
     // Background/resuming app may not have a connected socket yet.
     if (socket == null || !socket.connected) {
-      await acknowledgeIncomingCallOverHttp(
-        callId: normalizedCallId,
-      );
+      await acknowledgeIncomingCallOverHttp(callId: normalizedCallId);
       return;
     }
 
     final Completer<Map<String, dynamic>> completer =
-    Completer<Map<String, dynamic>>();
-
-    debugPrint(
-      '[CallSocket] Sending call:incoming:ack $normalizedCallId',
-    );
+        Completer<Map<String, dynamic>>();
 
     socket.emitWithAck(
       'call:incoming:ack',
-      <String, dynamic>{
-        'callId': normalizedCallId,
-      },
+      <String, dynamic>{'callId': normalizedCallId},
       ack: (dynamic rawResponse) {
         if (completer.isCompleted) return;
 
-        final Map<String, dynamic> response =
-        _toMap(rawResponse);
-
-        debugPrint(
-          '[CallSocket] call:incoming:ack response $response',
-        );
-
-        completer.complete(response);
+        completer.complete(_toMap(rawResponse));
       },
     );
 
     try {
-      final Map<String, dynamic> response =
-      await completer.future.timeout(
+      final Map<String, dynamic> response = await completer.future.timeout(
         const Duration(seconds: 3),
         onTimeout: () {
           throw const CallSocketException(
             code: 'CALL_INCOMING_ACK_TIMEOUT',
-            message:
-            'The incoming call acknowledgement timed out.',
+            message: 'The incoming call acknowledgement timed out.',
           );
         },
       );
@@ -534,13 +488,7 @@ class CallSocketService extends GetxService {
         rethrow;
       }
 
-      debugPrint(
-        '[CallSocket] Socket ACK timed out; retrying over HTTP',
-      );
-
-      await acknowledgeIncomingCallOverHttp(
-        callId: normalizedCallId,
-      );
+      await acknowledgeIncomingCallOverHttp(callId: normalizedCallId);
     }
   }
 
@@ -573,8 +521,6 @@ class CallSocketService extends GetxService {
         }
 
         final Map<String, dynamic> response = _toMap(rawResponse);
-
-        debugPrint('[CallSocket] $event response $response');
 
         completer.complete(response);
       },
@@ -669,20 +615,12 @@ class CallSocketService extends GetxService {
   }
 
   void _handleSocketEvent({
-    required String event,
     required dynamic data,
     required List<CallSocketListener> listeners,
-    required String listenerName,
   }) {
     final Map<String, dynamic> payload = _toMap(data);
 
-    debugPrint('[CallSocket] $event $payload');
-
-    _notifyListeners(
-      listeners: listeners,
-      payload: payload,
-      listenerName: listenerName,
-    );
+    _notifyListeners(listeners: listeners, payload: payload);
   }
 
   void _addListener(
@@ -697,7 +635,6 @@ class CallSocketService extends GetxService {
   void _notifyListeners({
     required List<CallSocketListener> listeners,
     required Map<String, dynamic> payload,
-    required String listenerName,
   }) {
     final List<CallSocketListener> copiedListeners =
         List<CallSocketListener>.from(listeners);
@@ -705,11 +642,7 @@ class CallSocketService extends GetxService {
     for (final CallSocketListener listener in copiedListeners) {
       try {
         listener(payload);
-      } catch (error, stackTrace) {
-        debugPrint('[CallSocket] $listenerName listener error: $error');
-
-        debugPrintStack(stackTrace: stackTrace);
-      }
+      } catch (_) {}
     }
   }
 
@@ -727,9 +660,7 @@ class CallSocketService extends GetxService {
       socket.clearListeners();
       socket.disconnect();
       socket.dispose();
-    } catch (error) {
-      debugPrint('[CallSocket] Dispose error: $error');
-    }
+    } catch (_) {}
   }
 
   Map<String, dynamic> _toMap(dynamic data) {

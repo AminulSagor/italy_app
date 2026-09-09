@@ -18,27 +18,39 @@ class ChangePasswordView extends GetView<SettingsController> {
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 28.h),
           children: <Widget>[
-            SettingsTopBar(title: SettingsL10n.text('change_password')),
+            Obx(
+              () => SettingsTopBar(
+                title: controller.hasPassword
+                    ? SettingsL10n.text('change_password')
+                    : SettingsL10n.text('set_password'),
+              ),
+            ),
             SizedBox(height: 20.h),
             _PasswordHeader(),
             SizedBox(height: 20.h),
             Obx(
-              () => SettingsPillField(
-                label: SettingsL10n.text('current_password'),
-                hint: SettingsL10n.text('current_password_hint'),
-                icon: Icons.lock_outline_rounded,
-                controller: controller.currentPasswordController,
-                maxLength: 128,
-                obscureText: controller.obscureCurrentPassword.value,
-                suffixIcon: controller.obscureCurrentPassword.value
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-                onSuffixTap: controller.toggleCurrentPasswordVisibility,
-                textInputAction: TextInputAction.next,
-                autofillHints: const <String>[AutofillHints.password],
-              ),
+              () => controller.hasPassword
+                  ? SettingsPillField(
+                      label: SettingsL10n.text('current_password'),
+                      hint: SettingsL10n.text('current_password_hint'),
+                      icon: Icons.lock_outline_rounded,
+                      controller: controller.currentPasswordController,
+                      maxLength: 128,
+                      obscureText: controller.obscureCurrentPassword.value,
+                      suffixIcon: controller.obscureCurrentPassword.value
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      onSuffixTap: controller.toggleCurrentPasswordVisibility,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const <String>[AutofillHints.password],
+                    )
+                  : const SizedBox.shrink(),
             ),
-            SizedBox(height: 16.h),
+            Obx(
+              () => controller.hasPassword
+                  ? SizedBox(height: 16.h)
+                  : const SizedBox.shrink(),
+            ),
             Obx(
               () => SettingsPillField(
                 label: SettingsL10n.text('new_password'),
@@ -83,7 +95,9 @@ class ChangePasswordView extends GetView<SettingsController> {
             SizedBox(height: 22.h),
             Obx(
               () => SettingsPrimaryButton(
-                text: SettingsL10n.text('update_password'),
+                text: controller.hasPassword
+                    ? SettingsL10n.text('update_password')
+                    : SettingsL10n.text('set_password'),
                 icon: Icons.lock_reset_rounded,
                 enabled: !controller.isChangingPassword.value,
                 isLoading: controller.isChangingPassword.value,

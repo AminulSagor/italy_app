@@ -21,7 +21,7 @@ class CourseLevelCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: kCourseCardWidth.w,
-        height: kCourseCardHeight.h,
+        height: kCourseCardHeight,
         padding: EdgeInsets.all(24.w),
         decoration: BoxDecoration(
           color: _isActive ? AppColors.primaryGreen : AppColors.coursesCardInactiveBg,
@@ -70,6 +70,8 @@ class CourseLevelCard extends StatelessWidget {
                       ),
                       child: Text(
                         course.statusLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: AppFont.font12.sp,
                           fontWeight: FontWeight.w900,
@@ -83,6 +85,8 @@ class CourseLevelCard extends StatelessWidget {
               const Spacer(),
               Text(
                 course.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: AppFont.font26.sp,
                   fontWeight: FontWeight.w900,

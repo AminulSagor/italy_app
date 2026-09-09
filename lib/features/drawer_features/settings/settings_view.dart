@@ -35,7 +35,9 @@ class SettingsView extends GetView<SettingsController> {
                   SizedBox(height: 14.h),
                   _StreakFreezeCard(count: controller.streakFreezeCount),
                   SizedBox(height: 24.h),
-                  _SectionTitle(title: SettingsL10n.text('profile_and_security')),
+                  _SectionTitle(
+                    title: SettingsL10n.text('profile_and_security'),
+                  ),
                   SizedBox(height: 10.h),
                   _SettingsActionTile(
                     icon: Icons.manage_accounts_outlined,
@@ -48,7 +50,7 @@ class SettingsView extends GetView<SettingsController> {
                   SizedBox(height: 10.h),
                   _SettingsActionTile(
                     icon: Icons.lock_outline_rounded,
-                    title: SettingsL10n.text('change_password'),
+                    title: controller.passwordActionLabel,
                     onTap: controller.changePassword,
                   ),
                   SizedBox(height: 24.h),

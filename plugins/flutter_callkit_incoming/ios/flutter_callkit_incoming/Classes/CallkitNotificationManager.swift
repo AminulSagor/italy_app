@@ -59,13 +59,9 @@ public class CallkitNotificationManager: NSObject {
                                                   preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
                     alert.addAction(UIAlertAction(title: "Ok", style: .default) { _ in
-                        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-                            if let error = error {
-                                print("Notification permission error: \(error)")
-                            } else {
-                                print("Permission granted: \(granted)")
-                            }
-                        }
+                        center.requestAuthorization(
+                            options: [.alert, .sound, .badge]
+                        ) { _, _ in }
                     })
                     UIApplication.shared.keyWindow?.rootViewController?.present(alert, animated: true)
                 }
@@ -86,9 +82,9 @@ public class CallkitNotificationManager: NSObject {
                 }
                 
             case .authorized, .provisional, .ephemeral:
-                print("Notification permission is already granted.")
+                break
             @unknown default:
-                print("Unknown notification permission state.")
+                break
             }
         }
     }

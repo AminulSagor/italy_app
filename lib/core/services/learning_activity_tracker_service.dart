@@ -20,7 +20,7 @@ class LearningActivityTrackerService extends GetxService
        _storageService = storageService;
 
   static const String _pendingStorageKey = 'pendingLearningActivityTime';
-  static const Duration _heartbeatDuration = Duration(seconds: 10);
+  static const Duration _heartbeatDuration = Duration(minutes: 5);
   static const int _minimumRecordSeconds = 1;
 
   final LearningActivityApiService _apiService;
@@ -39,11 +39,21 @@ class LearningActivityTrackerService extends GetxService
 
   Future<LearningActivityTrackerService> init() async {
     WidgetsBinding.instance.addObserver(this);
+    return this;
+  }
+
+  void _startHeartbeat() {
+    if (_heartbeat?.isActive == true) return;
+
     _heartbeat = Timer.periodic(
       _heartbeatDuration,
-      (_) => unawaited(flushAndSync()),
+          (_) => unawaited(flushAndSync()),
     );
-    return this;
+  }
+
+  void _stopHeartbeat() {
+    _heartbeat?.cancel();
+    _heartbeat = null;
   }
 
   Future<void> startSession() {
@@ -54,22 +64,34 @@ class LearningActivityTrackerService extends GetxService
   }
 
   Future<void> endSession() {
+    _stopHeartbeat();
+
     return _enqueue(() async {
       await _flushCurrentInternal(clearActivity: true);
       await _syncPendingInternal();
+
       _visibleScopes.clear();
-      await _writePending(<LearningActivityTimeEntryModel>[]);
+
+      await _writePending(
+        <LearningActivityTimeEntryModel>[],
+      );
     });
   }
 
   Future<void> discardSession() {
+    _stopHeartbeat();
+
     return _enqueue(() async {
       _currentKind = null;
       _currentSourceId = null;
       _currentScopeToken = null;
       _startedAt = null;
+
       _visibleScopes.clear();
-      await _writePending(<LearningActivityTimeEntryModel>[]);
+
+      await _writePending(
+        <LearningActivityTimeEntryModel>[],
+      );
     });
   }
 
@@ -126,47 +148,91 @@ class LearningActivityTrackerService extends GetxService
   void handleRoute(String? _) {}
 
   Future<void> _activateVisibleScopeInternal() async {
-    final _LearningPageScope? scope = _isForeground && _visibleScopes.isNotEmpty
+    final _LearningPageScope? scope =
+    _isForeground && _visibleScopes.isNotEmpty
         ? _visibleScopes.last
         : null;
 
-    if (scope?.token == _currentScopeToken &&
-        scope?.activityKind == _currentKind &&
-        scope?.sourceId == _currentSourceId) {
+    final bool isSameScope =
+        scope?.token == _currentScopeToken &&
+            scope?.activityKind == _currentKind &&
+            scope?.sourceId == _currentSourceId;
+
+    // Same learning screen.
+    if (isSameScope) {
       if (scope != null && _startedAt == null) {
         _startedAt = DateTime.now();
+        _startHeartbeat();
       }
+
+      if (scope == null) {
+        _stopHeartbeat();
+      }
+
       return;
     }
 
+    // We are leaving/changing the previous learning screen.
+    final bool hadActiveActivity =
+        _currentKind != null && _startedAt != null;
+
     await _flushCurrentInternal(clearActivity: true);
+
+    // Immediately send previous screen time.
+    if (hadActiveActivity) {
+      await _syncPendingInternal();
+    }
+
+    // Activate new learning screen.
     _currentScopeToken = scope?.token;
     _currentKind = scope?.activityKind;
     _currentSourceId = scope?.sourceId;
-    _startedAt = scope == null ? null : DateTime.now();
+
+    if (scope == null) {
+      _startedAt = null;
+      _stopHeartbeat();
+      return;
+    }
+
+    // Start counting from now.
+    _startedAt = DateTime.now();
+    _startHeartbeat();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached ||
-        state == AppLifecycleState.inactive) {
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
       _isForeground = false;
+
+      // Don't keep heartbeat running in background.
+      _stopHeartbeat();
+
       unawaited(
         _enqueue(() async {
+          // Save time from last checkpoint until now.
           await _flushCurrentInternal(clearActivity: true);
+
+          // Try sending immediately.
           await _syncPendingInternal();
         }),
       );
+
       return;
     }
 
     if (state == AppLifecycleState.resumed) {
       _isForeground = true;
+
       unawaited(
         _enqueue(() async {
-          await _activateVisibleScopeInternal();
+          // Upload anything that previously failed.
           await _syncPendingInternal();
+
+          // If learning screen is still visible,
+          // start counting again from now.
+          await _activateVisibleScopeInternal();
         }),
       );
     }

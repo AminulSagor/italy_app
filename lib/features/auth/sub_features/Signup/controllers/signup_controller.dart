@@ -7,6 +7,7 @@ import '../../../../../core/services/api_error_handler.dart';
 import '../../../../../core/controllers/user_session_controller.dart';
 import '../../../../../core/services/course_purchase_recovery_service.dart';
 import '../../../../../core/services/learning_activity_tracker_service.dart';
+import '../../../../../core/services/otp_session_service.dart';
 import '../../../../../core/utils/otp_resend_cooldown.dart';
 import '../../../../../core/services/auth_service.dart';
 import '../../../../../features/messages/services/chat_socket_service.dart';
@@ -18,6 +19,7 @@ import '../models/signup_models.dart';
 class SignupController extends GetxController {
   final TranslationService _translationService = Get.find<TranslationService>();
   final AuthService _authService = Get.find<AuthService>();
+  final OtpSessionService _otpSessionService = Get.find<OtpSessionService>();
 
   final Rx<SignupFormModel> form = SignupFormModel.initial().obs;
   final Rx<SignupOtpUiModel> otpUi = SignupOtpUiModel.initial().obs;
@@ -61,6 +63,8 @@ class SignupController extends GetxController {
     fullNameController.addListener(_onFormInputChanged);
     identifierController.addListener(_onFormInputChanged);
     passwordController.addListener(_onFormInputChanged);
+
+    _restorePendingOtpSession();
   }
 
   Future<void> setLanguage(String value) async {
@@ -204,7 +208,13 @@ class SignupController extends GetxController {
         ),
       );
 
-      resendCooldown.start();
+      final PendingOtpSession session = await _otpSessionService.save(
+        flow: OtpSessionFlow.accountVerification,
+        identifier: signupResult.identifier,
+        maskedIdentifier: otpUi.value.maskedIdentifier,
+        isEmail: current.isEmailMode,
+      );
+      resendCooldown.restore(session.resendAvailableAt);
       Get.toNamed(AppRoutes.signupOtp);
     } finally {
       form.value = form.value.copyWith(isLoading: false);
@@ -254,7 +264,13 @@ class SignupController extends GetxController {
       }
 
       _clearOtpInputs();
-      resendCooldown.start();
+      final PendingOtpSession session = await _otpSessionService.save(
+        flow: OtpSessionFlow.accountVerification,
+        identifier: identifier,
+        maskedIdentifier: otpUi.value.maskedIdentifier,
+        isEmail: identifier.contains('@'),
+      );
+      resendCooldown.restore(session.resendAvailableAt);
       Get.snackbar('snack_code_resent'.tr, 'snack_fresh_code_sent'.tr);
     } finally {
       otpUi.value = otpUi.value.copyWith(isResending: false);
@@ -299,6 +315,7 @@ class SignupController extends GetxController {
         return;
       }
 
+      await _otpSessionService.clear();
       _applyVerifiedAccountInfo(result.data!.user);
 
       // Refresh socket connection with the new token after successful verification
@@ -357,15 +374,16 @@ class SignupController extends GetxController {
     Get.offNamed(AppRoutes.login);
   }
 
-  void onBackFromOtp() {
+  Future<void> onBackFromOtp() async {
+    await _otpSessionService.clear();
     Get.back();
   }
 
-  void prepareExistingAccountOtp({
+  Future<void> prepareExistingAccountOtp({
     required String identifier,
     required bool isEmailMode,
     String? devOtp,
-  }) {
+  }) async {
     final String normalizedIdentifier = _normalizeIdentifier(
       identifier: identifier,
       isEmailMode: isEmailMode,
@@ -392,7 +410,40 @@ class SignupController extends GetxController {
       isVerifying: false,
     );
     _clearOtpInputs();
-    resendCooldown.start();
+    final PendingOtpSession session = await _otpSessionService.save(
+      flow: OtpSessionFlow.accountVerification,
+      identifier: normalizedIdentifier,
+      maskedIdentifier: otpUi.value.maskedIdentifier,
+      isEmail: isEmailMode,
+    );
+    resendCooldown.restore(session.resendAvailableAt);
+  }
+
+  void _restorePendingOtpSession() {
+    final PendingOtpSession? session = _otpSessionService.currentSession;
+    if (session == null || session.flow != OtpSessionFlow.accountVerification) {
+      return;
+    }
+
+    pendingPayload.value = SignupPayloadModel(
+      fullName: '',
+      password: '',
+      email: session.isEmail ? session.identifier : null,
+      phone: session.isEmail ? null : session.identifier,
+    );
+    accountCreatedUi.value = accountCreatedUi.value.copyWith(
+      fullName: '',
+      identifier: session.identifier,
+    );
+    otpUi.value = otpUi.value.copyWith(
+      maskedIdentifier: session.maskedIdentifier.isNotEmpty
+          ? session.maskedIdentifier
+          : session.identifier,
+      codeDigits: <String>['', '', '', ''],
+      isResending: false,
+      isVerifying: false,
+    );
+    resendCooldown.restore(session.resendAvailableAt);
   }
 
   void _applyVerifiedAccountInfo(AuthUserModel user) {

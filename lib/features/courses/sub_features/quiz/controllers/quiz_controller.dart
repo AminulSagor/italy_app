@@ -12,6 +12,7 @@ class QuizController extends GetxController {
   final String? lessonId;
   final String? courseId;
   final String? chapterTitle;
+  final bool startOver;
   final bool isExamMode;
   final int questionCount;
   final List<QuizQuestionModel> initialQuestions;
@@ -23,6 +24,7 @@ class QuizController extends GetxController {
     this.lessonId,
     this.courseId,
     this.chapterTitle,
+    this.startOver = false,
     this.isExamMode = false,
     this.questionCount = 15,
     this.initialQuestions = const <QuizQuestionModel>[],
@@ -161,7 +163,10 @@ class QuizController extends GetxController {
       } else if (hasApiLessonQuiz) {
         final ApiResult<QuizApiSessionModel> result =
             await ApiErrorHandler.call<QuizApiSessionModel>(
-          () => _quizApiService.startLessonQuiz(lessonId: lessonId!.trim()),
+          () => _quizApiService.startLessonQuiz(
+            lessonId: lessonId!.trim(),
+            startOver: startOver,
+          ),
           errorTitle: 'quiz'.tr,
         );
 

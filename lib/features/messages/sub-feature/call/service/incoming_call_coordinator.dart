@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:developer' as developer;
+import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
@@ -12,11 +14,12 @@ import '../views/message_incoming_call_view.dart';
 import 'call_agora_service.dart';
 import 'call_socket_service.dart';
 
-typedef AcceptedCallHandler = Future<void> Function({
-  required String callId,
-  required Map<String, dynamic> callData,
-  required Map<String, dynamic> answerResponse,
-});
+typedef AcceptedCallHandler =
+    Future<void> Function({
+      required String callId,
+      required Map<String, dynamic> callData,
+      required Map<String, dynamic> answerResponse,
+    });
 
 class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
   IncomingCallCoordinator({
@@ -42,8 +45,16 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
   bool _incomingRouteVisible = false;
   bool _isOpeningAcceptedCall = false;
   bool _restoreInProgress = false;
+  final Map<String, Future<void>> _incomingAcknowledgements =
+      <String, Future<void>>{};
+  final Set<String> _acceptedIncomingCallIds = <String>{};
+  final Set<String> _remotelyTerminatedIncomingCallIds = <String>{};
+  Future<void>? _nativeAcceptFuture;
+  String? _nativeAcceptCallId;
 
   late final void Function(Map<String, dynamic>) _incomingCallListener;
+  late final void Function(Map<String, dynamic>) _cancelledCallListener;
+  late final void Function(Map<String, dynamic>) _endedCallListener;
 
   @override
   void onInit() {
@@ -51,7 +62,11 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     _incomingCallListener = _handleIncomingCall;
+    _cancelledCallListener = _handleRemoteIncomingCallClosed;
+    _endedCallListener = _handleRemoteIncomingCallClosed;
     _callSocketService.addIncomingCallListener(_incomingCallListener);
+    _callSocketService.addCancelledCallListener(_cancelledCallListener);
+    _callSocketService.addEndedCallListener(_endedCallListener);
   }
 
   @override
@@ -62,8 +77,6 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
       unawaited(_restoreNativeIncomingCallAfterDelay());
     });
   }
-
-
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -152,6 +165,11 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     _incomingRouteVisible = false;
     _isOpeningAcceptedCall = false;
     _restoreInProgress = false;
+    _incomingAcknowledgements.clear();
+    _acceptedIncomingCallIds.clear();
+    _remotelyTerminatedIncomingCallIds.clear();
+    _nativeAcceptFuture = null;
+    _nativeAcceptCallId = null;
 
     isCallTransitioning.value = false;
     hasPresentedCall.value = false;
@@ -167,9 +185,7 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     } catch (_) {}
 
     if (Get.isRegistered<MessageIncomingCallController>()) {
-      await Get.delete<MessageIncomingCallController>(
-        force: true,
-      );
+      await Get.delete<MessageIncomingCallController>(force: true);
     }
   }
 
@@ -182,17 +198,69 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     }
   }
 
+  /// Acknowledge a CallKit/PushKit call as soon as CallKit has displayed it.
+  /// This deliberately does not wait for the Flutter incoming route, which is
+  /// unavailable while iOS keeps the app locked in the background.
+  Future<void> acknowledgeNativeIncomingCall(String callId) {
+    final String normalizedCallId = callId.trim();
+    if (normalizedCallId.isEmpty) {
+      return Future<void>.value();
+    }
+
+    final Future<void>? existing = _incomingAcknowledgements[normalizedCallId];
+    if (existing != null) {
+      return existing;
+    }
+
+    final Future<void> acknowledgement = _callSocketService
+        .acknowledgeIncomingCall(callId: normalizedCallId);
+    _incomingAcknowledgements[normalizedCallId] = acknowledgement;
+
+    return acknowledgement.whenComplete(() {
+      if (identical(
+        _incomingAcknowledgements[normalizedCallId],
+        acknowledgement,
+      )) {
+        _incomingAcknowledgements.remove(normalizedCallId);
+      }
+    });
+  }
+
   Future<void> _restoreNativeIncomingCallAfterDelay() async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
     await restoreNativeIncomingCall();
   }
 
   void _handleIncomingCall(Map<String, dynamic> payload) {
-    if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+    final String callId = _eventCallId(payload);
+    if (callId.isEmpty || _remotelyTerminatedIncomingCallIds.contains(callId)) {
+      return;
+    }
+
+    final AppLifecycleState? lifecycleState =
+        WidgetsBinding.instance.lifecycleState;
+    if (lifecycleState != AppLifecycleState.resumed) {
       return;
     }
 
     unawaited(_openIncomingCall(payload, showNativeRingtone: true));
+  }
+
+  void _handleRemoteIncomingCallClosed(Map<String, dynamic> payload) {
+    final String callId = _eventCallId(payload);
+    if (callId.isEmpty) {
+      return;
+    }
+
+    _remotelyTerminatedIncomingCallIds.add(callId);
+    unawaited(_closeRemotelyTerminatedIncomingCall(callId));
+  }
+
+  Future<void> _closeRemotelyTerminatedIncomingCall(String callId) async {
+    dismissIncomingCall(callId);
+    try {
+      await CallkitIncomingService.endNativeSubsystemOnly(callId);
+    } catch (_) {}
   }
 
   Future<void> openNativeIncomingCall({
@@ -230,12 +298,44 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
         return;
       }
 
+      final String callId = incomingCall.id.trim();
+      if (callId.isEmpty ||
+          _remotelyTerminatedIncomingCallIds.contains(callId) ||
+          !await _isIncomingCallStillRinging(callId)) {
+        return;
+      }
+
       await openNativeIncomingCall(
-        callId: incomingCall.id,
+        callId: callId,
         callData: _toMap(incomingCall.extra),
       );
-    } catch (_) {
-      // The native call may disappear while Android is resuming the activity.
+    } catch (_) {}
+  }
+
+  Future<bool> _isIncomingCallStillRinging(String callId) async {
+    try {
+      final Map<String, dynamic> response = await _callSocketService.fetchCall(
+        callId: callId,
+      );
+      final Map<String, dynamic> call = _toMap(response['call']);
+      final String status =
+          call['status']?.toString().trim().toLowerCase() ?? '';
+
+      if (status == 'ringing') {
+        return true;
+      }
+
+      _remotelyTerminatedIncomingCallIds.add(callId);
+      await CallkitIncomingService.endNativeSubsystemOnly(callId);
+      return false;
+    } on CallSocketException catch (error) {
+      if (error.code == 'CALL_NOT_FOUND') {
+        _remotelyTerminatedIncomingCallIds.add(callId);
+        await CallkitIncomingService.endNativeSubsystemOnly(callId);
+        return false;
+      }
+
+      return true;
     }
   }
 
@@ -277,9 +377,7 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
 
       // Now tell the backend that the receiver device is actually ringing.
       try {
-        await _callSocketService.acknowledgeIncomingCall(
-          callId: callId,
-        );
+        await acknowledgeNativeIncomingCall(callId);
       } catch (_) {}
 
       if (Get.isRegistered<MessageIncomingCallController>()) {
@@ -292,6 +390,7 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
             callSocketService: _callSocketService,
             callAgoraService: Get.find<CallAgoraService>(),
             onAccepted: (Map<String, dynamic> answerResponse) async {
+              _acceptedIncomingCallIds.add(callId);
               final Map<String, dynamic> callData = <String, dynamic>{
                 ..._flattenCallPayload(payload),
                 '_replaceCurrentCallRoute': true,
@@ -362,7 +461,8 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     }
 
     final String ownerId = _incomingOwnerId(callId);
-    final bool shouldCloseRoute = _incomingRouteVisible &&
+    final bool shouldCloseRoute =
+        _incomingRouteVisible &&
         isPresentedScreenVisibleFor(ownerId) &&
         Get.key.currentState?.canPop() == true;
 
@@ -427,53 +527,154 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     Map<String, dynamic> answerResponse = const <String, dynamic>{},
   }) async {
     final String normalizedCallId = callId.trim();
-    if (normalizedCallId.isEmpty || _isOpeningAcceptedCall) {
+    if (normalizedCallId.isEmpty) {
       return;
     }
 
+    if (_acceptedIncomingCallIds.contains(normalizedCallId)) {
+      // This is the native confirmation generated by setCallConnected after
+      // the Flutter incoming screen has already answered the same call.
+      await CallkitIncomingService.completeNativeAnswer(normalizedCallId);
+      await CallkitPendingActionStore.clearAcceptedCall();
+      return;
+    }
+
+    final Future<void>? existing = _nativeAcceptFuture;
+    if (existing != null) {
+      // Native events may be duplicated when CallKit, app resume, and the
+      // pending-action store race. Coalesce the same answer instead of
+      // issuing a second backend answer or replacing an Agora controller.
+      if (_nativeAcceptCallId == normalizedCallId) {
+        await existing;
+      }
+      return;
+    }
+
+    _acceptedIncomingCallIds.add(normalizedCallId);
+    _nativeAcceptCallId = normalizedCallId;
+    final Future<void> acceptFuture = _performNativeAccept(
+      callId: normalizedCallId,
+      callData: callData,
+      answerResponse: answerResponse,
+    );
+    _nativeAcceptFuture = acceptFuture;
+
+    try {
+      await acceptFuture;
+    } finally {
+      if (identical(_nativeAcceptFuture, acceptFuture)) {
+        _nativeAcceptFuture = null;
+        _nativeAcceptCallId = null;
+      }
+    }
+  }
+
+  Future<void> _performNativeAccept({
+    required String callId,
+    required Map<String, dynamic> callData,
+    required Map<String, dynamic> answerResponse,
+  }) async {
     _isOpeningAcceptedCall = true;
     isCallTransitioning.value = true;
     bool wasAnswered = answerResponse.isNotEmpty;
 
     try {
+      developer.log(
+        'accept begin callId=$callId hasAnswer=${answerResponse.isNotEmpty}',
+        name: 'CallLifecycle.Accept',
+      );
       await _waitForForeground();
 
       final MessageCallType callType = MessageCallType.fromValue(
         callData['callType']?.toString(),
       );
+
+      // A CallKit answer is already final from the user's point of view.
+      // Acknowledge it to the backend before local media setup so a locked
+      // device cannot accidentally turn Answer into Decline while waiting on
+      // Flutter UI, permissions, or Agora initialization.
+      final Map<String, dynamic> resolvedAnswer = answerResponse.isNotEmpty
+          ? answerResponse
+          : await _callSocketService.answerCallOverHttp(callId: callId);
+      wasAnswered = true;
+      developer.log(
+        'backend answer complete callId=$callId',
+        name: 'CallLifecycle.Accept',
+      );
+
       await Get.find<CallAgoraService>().ensurePermissionsForCall(
         isVideoCall: callType.isVideo,
       );
+      developer.log(
+        'permissions ready callId=$callId video=${callType.isVideo}',
+        name: 'CallLifecycle.Accept',
+      );
 
-      final Map<String, dynamic> resolvedAnswer = answerResponse.isNotEmpty
-          ? answerResponse
-          : await _callSocketService.answerCallOverHttp(
-              callId: normalizedCallId,
-            );
-      wasAnswered = true;
+      final MessageCallMediaModel media = MessageCallMediaModel.fromJson(
+        _toMap(resolvedAnswer['media']),
+      );
+      await Get.find<CallAgoraService>().prepareCallKitEngine(
+        appId: media.appId,
+        isVideoCall: callType.isVideo,
+      );
 
-      await CallkitPendingActionStore.clear();
-      await CallkitIncomingService.markCallConnected(normalizedCallId);
+      // Native CallKit has already fulfilled the answer action promptly, as
+      // required by iOS. Agora was prepared before this point when the main
+      // engine handled the event; cold starts replay activation after attach.
+      final bool audioSessionActivated =
+          await CallkitIncomingService.waitForIosAudioSessionActivation();
+      if (!audioSessionActivated) {
+        // Do not terminate an answered call merely because Dart missed or
+        // received CallKit's activation event late. Agora can join now and
+        // the native activation callback is replayed once media is attached.
+        developer.log(
+          'audio activation not observed before timeout; continuing callId=$callId',
+          name: 'CallLifecycle.Accept',
+        );
+      } else {
+        developer.log(
+          'audio session active callId=$callId',
+          name: 'CallLifecycle.Accept',
+        );
+      }
+
       final bool replaceCurrentRoute = _incomingRouteVisible;
-      await _detachIncomingForAccepted(normalizedCallId);
-      await CallkitIncomingService.endNativeSubsystemOnly(normalizedCallId);
+      await _detachIncomingForAccepted(callId);
+
+      // CallKit owns the iOS audio session for the lifetime of an answered
+      // call. Ending it here deactivates audio before Agora can connect.
+      if (!Platform.isIOS) {
+        await CallkitIncomingService.endNativeSubsystemOnly(callId);
+      }
 
       await _acceptedCallHandler(
-        callId: normalizedCallId,
+        callId: callId,
         callData: <String, dynamic>{
           ...callData,
           '_replaceCurrentCallRoute': replaceCurrentRoute,
         },
         answerResponse: resolvedAnswer,
       );
-    } catch (error) {
+      developer.log(
+        'accepted controller started callId=$callId',
+        name: 'CallLifecycle.Accept',
+      );
+      await CallkitPendingActionStore.clearAcceptedCall();
+    } on CallSocketException catch (error) {
       await _handleNativeAcceptFailure(
-        callId: normalizedCallId,
+        callId: callId,
         wasAnswered: wasAnswered,
         message: error.toString(),
       );
+      await CallkitPendingActionStore.clearAcceptedCall();
+    } catch (error) {
+      await _handleNativeAcceptFailure(
+        callId: callId,
+        wasAnswered: wasAnswered,
+        message: error.toString(),
+      );
+      await CallkitPendingActionStore.clearAcceptedCall();
     } finally {
-      await CallkitPendingActionStore.clear();
       _isOpeningAcceptedCall = false;
       isCallTransitioning.value = false;
     }
@@ -484,6 +685,14 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     required bool wasAnswered,
     required String message,
   }) async {
+    developer.log(
+      'accept failed callId=$callId wasAnswered=$wasAnswered message=$message',
+      name: 'CallLifecycle.Accept',
+      level: 1000,
+    );
+    _acceptedIncomingCallIds.remove(callId);
+    await CallkitIncomingService.failNativeAnswer(callId);
+
     try {
       if (wasAnswered) {
         await _callSocketService.endCallOverHttp(callId: callId);
@@ -516,16 +725,30 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
 
     try {
       do {
+        final bool waitingForBackgroundAnswer =
+            Platform.isIOS && DateTime.now().isBefore(deadline);
         final PendingAcceptedCall? pending =
-            await CallkitPendingActionStore.takeAcceptedCall();
+            await CallkitPendingActionStore.takeAcceptedCall(
+              requireAnswerResponse: waitingForBackgroundAnswer,
+            );
 
         if (pending != null) {
+          if (!await _canRestoreAcceptedCall(pending.callId)) {
+            await CallkitIncomingService.endNativeSubsystemOnly(pending.callId);
+            return false;
+          }
           await acceptNativeCall(
             callId: pending.callId,
             callData: pending.callData,
             answerResponse: pending.answerResponse,
           );
           return true;
+        }
+
+        if (waitingForBackgroundAnswer &&
+            await CallkitPendingActionStore.hasAcceptedCall()) {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          continue;
         }
 
         List<CallKitParams> acceptedNativeCalls = <CallKitParams>[];
@@ -539,6 +762,10 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
           final String nativeCallId = nativeCall.id.trim();
 
           if (nativeCallId.isNotEmpty) {
+            if (!await _canRestoreAcceptedCall(nativeCallId)) {
+              await CallkitIncomingService.endNativeSubsystemOnly(nativeCallId);
+              return false;
+            }
             await acceptNativeCall(
               callId: nativeCallId,
               callData: _toMap(nativeCall.extra),
@@ -559,10 +786,37 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     }
   }
 
+  Future<bool> _canRestoreAcceptedCall(String callId) async {
+    try {
+      final Map<String, dynamic> response = await _callSocketService.fetchCall(
+        callId: callId,
+      );
+      final String status =
+          _toMap(response['call'])['status']?.toString().toLowerCase() ?? '';
+      return status == 'ringing' || status == 'active';
+    } on CallSocketException catch (error) {
+      return error.code != 'CALL_NOT_FOUND';
+    } catch (_) {
+      // A temporary network failure must not discard a legitimate lock-screen
+      // answer; normal status polling will reconcile it once connected.
+      return true;
+    }
+  }
+
   Future<void> _waitForForeground() async {
+    if (Platform.isIOS) {
+      // CallKit intentionally supports answering while the device remains
+      // locked and no UIWindow/Navigator is attached. Media setup must be
+      // headless; openCallScreen() will present later when iOS resumes.
+      return;
+    }
+
     for (int attempt = 0; attempt < 300; attempt++) {
-      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
-          Get.key.currentState != null) {
+      final bool navigatorReady = Get.key.currentState != null;
+      final bool lifecycleReady =
+          WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+
+      if (navigatorReady && lifecycleReady) {
         // Give Android enough time to attach the resumed Activity before
         // permission_handler opens a runtime permission dialog.
         await Future<void>.delayed(const Duration(milliseconds: 300));
@@ -582,6 +836,12 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
   }
 
   static String _incomingOwnerId(String callId) => 'incoming:$callId';
+
+  static String _eventCallId(Map<String, dynamic> payload) {
+    final Map<String, dynamic> call = _toMap(payload['call']);
+    return (call['id']?.toString() ?? payload['callId']?.toString() ?? '')
+        .trim();
+  }
 
   static Map<String, dynamic> _payloadFromNativeData(
     String callId,
@@ -612,7 +872,8 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
       'callId': call['id']?.toString() ?? '',
       'conversationId': call['directConversationId']?.toString() ?? '',
       'callType': call['callType']?.toString() ?? 'audio',
-      'callerId': caller['id']?.toString() ?? call['callerId']?.toString() ?? '',
+      'callerId':
+          caller['id']?.toString() ?? call['callerId']?.toString() ?? '',
       'callerName': caller['fullName']?.toString() ?? 'Caller',
       'callerAvatarUrl': caller['avatarUrl']?.toString() ?? '',
     };
@@ -632,6 +893,8 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _callSocketService.removeIncomingCallListener(_incomingCallListener);
+    _callSocketService.removeCancelledCallListener(_cancelledCallListener);
+    _callSocketService.removeEndedCallListener(_endedCallListener);
     super.onClose();
   }
 }

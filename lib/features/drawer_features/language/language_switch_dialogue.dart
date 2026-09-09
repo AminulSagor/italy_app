@@ -29,16 +29,21 @@ class LanguageSwitchDialogue extends StatelessWidget {
     return Dialog(
       insetPadding: EdgeInsets.symmetric(horizontal: 30.w),
       backgroundColor: AppColors.transparent,
-      child: GetX<LanguageDialogController>(
-        init: LanguageDialogController(initialLanguage: initialLanguage),
-        builder: (LanguageDialogController controller) {
-          return Container(
-            padding: EdgeInsets.fromLTRB(30.w, 34.h, 30.w, 26.h),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(kLargeBorderRadius.r),
-            ),
-            child: Column(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.88,
+        ),
+        child: GetX<LanguageDialogController>(
+          init: LanguageDialogController(initialLanguage: initialLanguage),
+          builder: (LanguageDialogController controller) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(30.w, 34.h, 30.w, 26.h),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(kLargeBorderRadius.r),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
@@ -92,9 +97,11 @@ class LanguageSwitchDialogue extends StatelessWidget {
                   onPressed: controller.confirmLanguage,
                 ),
               ],
-            ),
-          );
-        },
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -120,8 +127,8 @@ class _LanguageOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 96.h,
-        padding: EdgeInsets.symmetric(horizontal: 18.w),
+        constraints: const BoxConstraints(minHeight: 96),
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.messageTileActiveBg
@@ -152,17 +159,21 @@ class _LanguageOption extends StatelessWidget {
               child: Text(flag, style: TextStyle(fontSize: AppFont.font32.sp)),
             ),
             SizedBox(width: 18.w),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: AppFont.font20.sp,
-                fontWeight: FontWeight.w800,
-                color: isSelected
-                    ? AppColors.primaryGreen
-                    : AppColors.homePrimaryText,
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: AppFont.font20.sp,
+                  fontWeight: FontWeight.w800,
+                  color: isSelected
+                      ? AppColors.primaryGreen
+                      : AppColors.homePrimaryText,
+                ),
               ),
             ),
-            const Spacer(),
+            SizedBox(width: 10.w),
             isSelected
                 ? Container(
                     width: 34.r,

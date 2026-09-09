@@ -75,7 +75,9 @@ class ProfileSafetyActionCard extends StatelessWidget {
       child: CustomPaint(
         painter: isDashed ? _DashedBorderPainter() : null,
         child: Container(
-          height: (cardHeight ?? kProfileSafetyCardHeight).h,
+          constraints: BoxConstraints(
+            minHeight: (cardHeight ?? kProfileSafetyCardHeight).h,
+          ),
           padding: EdgeInsets.fromLTRB(28.w, 32.h, 18.w, 24.h),
           decoration: BoxDecoration(
             color: _backgroundColor,
@@ -86,7 +88,6 @@ class ProfileSafetyActionCard extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Container(
                 width: kProfileActionIconSize.w,
@@ -97,6 +98,7 @@ class ProfileSafetyActionCard extends StatelessWidget {
                 ),
                 child: Icon(icon, size: 22.w, color: _iconColor),
               ),
+              SizedBox(height: 18.h),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[

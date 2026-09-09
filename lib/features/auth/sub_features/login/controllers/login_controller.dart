@@ -10,6 +10,7 @@ import '../../../../../core/services/auth_service.dart';
 import '../../../../../core/services/course_purchase_recovery_service.dart';
 import '../../../../../core/services/device_push_token_service.dart';
 import '../../../../../core/services/learning_activity_tracker_service.dart';
+import '../../../../../core/services/social_sign_in_service.dart';
 import '../../../../../features/messages/services/chat_socket_service.dart';
 import '../../../../../features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import '../../../../../routes/routes.dart';
@@ -20,9 +21,11 @@ import '../models/login_models.dart';
 class LoginController extends GetxController {
   final TranslationService _translationService = Get.find<TranslationService>();
   final AuthService _authService = Get.find<AuthService>();
+  final SocialSignInService _socialSignInService = SocialSignInService();
 
   final Rx<LoginFormModel> form = LoginFormModel.initial().obs;
   final Rxn<LoginPayloadModel> pendingPayload = Rxn<LoginPayloadModel>();
+  final RxnString socialLoadingProvider = RxnString();
 
   late final TextEditingController identifierController;
   late final TextEditingController passwordController;
@@ -127,48 +130,110 @@ class LoginController extends GetxController {
         return;
       }
 
-      // Refresh socket connection with the new token after successful login
-      try {
-        if (Get.isRegistered<ChatSocketService>()) {
-          final ChatSocketService socketService = Get.find<ChatSocketService>();
-          await socketService.refreshConnectionAfterLogin();
-        }
-      } catch (_) {
-        // Socket refresh failure should not prevent navigation
-      }
-
-      await Get.find<DevicePushTokenService>().registerCurrentDevice();
-      if (Get.isRegistered<UserSessionController>()) {
-        await Get.find<UserSessionController>().loadUser(forceRefresh: true);
-      }
-      if (Get.isRegistered<CoursePurchaseRecoveryService>()) {
-        await Get.find<CoursePurchaseRecoveryService>()
-            .recoverPendingPurchase();
-      }
-      if (Get.isRegistered<LearningActivityTrackerService>()) {
-        await Get.find<LearningActivityTrackerService>().startSession();
-      }
-      if (Get.isRegistered<IncomingCallCoordinator>()) {
-        try {
-          await Get.find<IncomingCallCoordinator>().reconnectAfterLogin();
-        } catch (_) {
-          // The REST fallback still allows background call actions.
-        }
-      }
-
-      Get.offAllNamed(AppRoutes.wrapper);
-
-      if (Get.isRegistered<IncomingCallCoordinator>()) {
-        unawaited(
-          Future<void>(() async {
-            await Future<void>.delayed(const Duration(milliseconds: 300));
-            await Get.find<IncomingCallCoordinator>()
-                .restorePendingAcceptedCall();
-          }),
-        );
-      }
+      await _completeSuccessfulLogin();
     } finally {
       form.value = form.value.copyWith(isLoading: false);
+    }
+  }
+
+  Future<void> onGoogleLogin() async {
+    await _socialLogin(
+      provider: 'google',
+      tokenLoader: _socialSignInService.getGoogleCredential,
+    );
+  }
+
+  Future<void> onFacebookLogin() async {
+    await _socialLogin(
+      provider: 'facebook',
+      tokenLoader: _socialSignInService.getFacebookCredential,
+    );
+  }
+
+  Future<void> onAppleLogin() async {
+    await _socialLogin(
+      provider: 'apple',
+      tokenLoader: _socialSignInService.getAppleCredential,
+    );
+  }
+
+  Future<void> _socialLogin({
+    required String provider,
+    required Future<SocialProviderCredential?> Function() tokenLoader,
+  }) async {
+    if (form.value.isLoading || socialLoadingProvider.value != null) return;
+    socialLoadingProvider.value = provider;
+
+    try {
+      final SocialProviderCredential? credential = await tokenLoader();
+      if (credential == null) return;
+
+      final ApiResult<AuthTokenResultModel> result = await ApiErrorHandler.call(
+        () => _authService.socialLogin(
+          provider: provider,
+          token: credential.token,
+          tokenType: credential.tokenType,
+          nonce: credential.nonce,
+          displayName: credential.displayName,
+          authorizationCode: credential.authorizationCode,
+        ),
+        showError: false,
+      );
+      if (!result.isSuccess) {
+        if (Get.currentRoute != AppRoutes.accountSuspended) {
+          Get.snackbar(
+            'Login failed',
+            result.error ?? 'Unable to log in. Please try again.',
+          );
+        }
+        return;
+      }
+      await _completeSuccessfulLogin();
+    } on SocialSignInException catch (error) {
+      Get.snackbar('Login failed', error.message);
+    } catch (_) {
+      Get.snackbar('Login failed', 'Unable to log in. Please try again.');
+    } finally {
+      socialLoadingProvider.value = null;
+    }
+  }
+
+  Future<void> _completeSuccessfulLogin() async {
+    try {
+      if (Get.isRegistered<ChatSocketService>()) {
+        await Get.find<ChatSocketService>().refreshConnectionAfterLogin();
+      }
+    } catch (_) {
+      // Socket refresh failure should not prevent navigation.
+    }
+
+    await Get.find<DevicePushTokenService>().registerCurrentDevice();
+    if (Get.isRegistered<UserSessionController>()) {
+      await Get.find<UserSessionController>().loadUser(forceRefresh: true);
+    }
+    if (Get.isRegistered<CoursePurchaseRecoveryService>()) {
+      await Get.find<CoursePurchaseRecoveryService>().recoverPendingPurchase();
+    }
+    if (Get.isRegistered<LearningActivityTrackerService>()) {
+      await Get.find<LearningActivityTrackerService>().startSession();
+    }
+    if (Get.isRegistered<IncomingCallCoordinator>()) {
+      try {
+        await Get.find<IncomingCallCoordinator>().reconnectAfterLogin();
+      } catch (_) {
+        // The REST fallback still allows background call actions.
+      }
+    }
+
+    Get.offAllNamed(AppRoutes.wrapper);
+    if (Get.isRegistered<IncomingCallCoordinator>()) {
+      unawaited(
+        Future<void>(() async {
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+          await Get.find<IncomingCallCoordinator>()
+              .restorePendingAcceptedCall();
+        }),
+      );
     }
   }
 
@@ -200,7 +265,7 @@ class LoginController extends GetxController {
         ? Get.find<SignupController>()
         : Get.put<SignupController>(SignupController());
 
-    signupController.prepareExistingAccountOtp(
+    await signupController.prepareExistingAccountOtp(
       identifier: identifier,
       isEmailMode: isEmailMode,
       devOtp: resendResult.data?.devOtp,

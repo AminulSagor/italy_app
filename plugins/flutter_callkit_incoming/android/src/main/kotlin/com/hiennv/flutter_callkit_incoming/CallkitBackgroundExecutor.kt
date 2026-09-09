@@ -23,7 +23,6 @@ object CallkitBackgroundExecutor {
 
     fun start(context: Context, pluginCallbackHandle: Long) {
         if (backgroundFlutterEngine != null) {
-            Log.d(TAG, "Background engine already running")
             return
         }
 
@@ -50,7 +49,6 @@ object CallkitBackgroundExecutor {
             CHANNEL
         )
 
-        Log.d(TAG, "Background engine started")
     }
 
     fun send(event: String, body: Map<String, Any?>) {

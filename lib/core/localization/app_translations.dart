@@ -1,22 +1,27 @@
 // Cleaned and synchronized application translations.
 // All locale maps contain the same keys; placeholders are preserved.
+import 'cv_builder_translations.dart';
+
 const Map<String, Map<String, String>>
 appTranslations = <String, Map<String, String>>{
   'en_US': <String, String>{
-    'requires_video_percent':
-    'Requires watching @percent% of the video',
+    'ai_level_test_live_description':
+        'Complete a live speaking assessment and 5 multiple-choice questions.',
+    'start_free_level_test': 'Start Free Level Test',
+    'level_test_attempts_remaining':
+        '@remaining of @max free attempts remaining',
+    'level_test_paid_access': 'Paid AI credit: level test available',
+    ...cvBuilderEnTranslations,
+    'requires_video_percent': 'Requires watching @percent% of the video',
     'vocabulary_list_mode': 'List Mode',
     'vocabulary_flashcard_mode': 'Flashcard',
     'vocabulary_search': 'Search words',
     'vocabulary_show_meaning': 'Show meaning',
     'vocabulary_listen_all': 'Listen all',
     'vocabulary_stop_audio': 'Stop',
-    'vocabulary_no_search_result':
-    'No matching words found',
-    'vocabulary_learned_progress':
-    '@learned/@total learned',
-    'vocabulary_practice_words':
-    'Practice these @count words',
+    'vocabulary_no_search_result': 'No matching words found',
+    'vocabulary_learned_progress': '@learned/@total learned',
+    'vocabulary_practice_words': 'Practice these @count words',
     'home_good_morning': 'Good morning',
     'home_good_afternoon': 'Good afternoon',
     'home_good_evening': 'Good evening',
@@ -24,7 +29,7 @@ appTranslations = <String, Map<String, String>>{
     'password_minimum': 'At least 6 characters',
     'check_six_characters': 'Exactly 6 characters',
     'snack_password_6_characters':
-    'Password must contain at least 6 characters.',
+        'Password must contain at least 6 characters.',
     'password_intro': 'Use any password containing exactly 6 characters.',
     'password_exact_length': 'Exactly 6 characters',
     'password_invalid': 'Your new password must contain exactly 6 characters.',
@@ -99,7 +104,7 @@ appTranslations = <String, Map<String, String>>{
         'Accents change the meaning and pronunciation of words.',
 
     'ai_level_test_description':
-        'Find your current level through only 10 questions.',
+        'Complete a live speaking assessment and 5 multiple-choice questions.',
     'ai_tutor_intro': 'I am your AI Tutor. Let’s practice Italian together.',
     'ai_scenario_tip':
         'The AI will play the role in that scenario, such as a cashier, waiter, or driver.',
@@ -107,6 +112,9 @@ appTranslations = <String, Map<String, String>>{
     'level_mastered': 'Level @level\nMastered',
     'certificate_milestone_message': 'You’ve reached a new milestone',
     'course_information_unavailable': 'Unable to load course information.',
+    'course_access_option': 'Access option',
+    'lifetime_course_access': 'Lifetime access',
+    'time_limited_course_access': '@days days access',
     'purchase_success_description':
         'You now have full lifetime access to all Italir Pothe features. Your journey to fluency starts today.',
 
@@ -276,14 +284,49 @@ appTranslations = <String, Map<String, String>>{
         'This subscription renews automatically until cancelled.',
     'secure_payment': 'Secure payment',
     'payment_processed_securely':
-        'Your payment is securely processed through Google Play.',
+        "Your payment is securely processed by your device's app store.",
     'recurring_purchase': 'Recurring subscription',
     'one_time_purchase': 'One-time purchase',
     'cancel_subscription_anytime':
-        'You can manage or cancel it from Google Play.',
+        "You can manage or cancel it from your device's subscription settings.",
     'you_will_only_be_charged_once':
         'You will only be charged once for this purchase.',
     'price_per_month': '@price / month',
+    'subscription_details': 'Subscription details',
+    'course_access_details': 'Course access details',
+    'subscription_title': 'Subscription',
+    'course_access_title': 'Course access',
+    'subscription_price': 'Price',
+    'billing_duration': 'Billing duration',
+    'loading_app_store_price': 'Loading App Store price…',
+    'app_store_price_unavailable':
+        'The localized App Store price is unavailable. Please try again.',
+    'apple_subscription_renewal_disclosure':
+        '@price per @duration. Payment will be charged to your Apple Account at confirmation. The subscription automatically renews for the same duration unless cancelled at least 24 hours before the current period ends. Your account will be charged for renewal within 24 hours before the current period ends.',
+    'apple_non_renewing_subscription_disclosure':
+        '@price for @duration of course access. Payment will be charged to your Apple Account at confirmation. This is a non-renewing purchase and ends after the stated access period.',
+    'apple_subscription_cancellation':
+        'Manage or cancel in Settings > Apple Account > Subscriptions.',
+    'subscription_agreement_prefix': 'By subscribing, you agree to the',
+    'purchase_agreement_prefix': 'By purchasing, you agree to the',
+    'restore_purchases': 'Restore Purchases',
+    'restoring_purchases': 'Restoring purchases…',
+    'restore_check_pending':
+        'The App Store is still checking your purchases. Please try Restore Purchases again shortly.',
+    'no_restorable_purchase':
+        'No restorable App Store purchase was found for this product.',
+    'another_purchase_recovery_pending':
+        'Another course purchase is still being recovered. Please try again shortly.',
+    'unable_to_open_link': 'Unable to open link',
+    'try_again_later': 'Please try again later.',
+    'subscription_period_day_one': '@count day',
+    'subscription_period_day_many': '@count days',
+    'subscription_period_week_one': '@count week',
+    'subscription_period_week_many': '@count weeks',
+    'subscription_period_month_one': '@count month',
+    'subscription_period_month_many': '@count months',
+    'subscription_period_year_one': '@count year',
+    'subscription_period_year_many': '@count years',
 
     'monthly_plan_auto_renews': 'Renews automatically each month',
 
@@ -390,8 +433,7 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_manual_review_completed': 'Manual review completed',
     'final_exam_reviewing_answers':
         'Reviewing your speaking and writing answers',
-    'final_exam_reviewing_speaking_answer':
-        'Reviewing your speaking answer',
+    'final_exam_reviewing_speaking_answer': 'Reviewing your speaking answer',
     'final_exam_result_certificate': 'Result and certificate',
     'final_exam_result_ready': 'Your result is ready',
     'final_exam_unlock_achievement':
@@ -420,8 +462,6 @@ appTranslations = <String, Map<String, String>>{
     'that_s_not_quite_right': 'That’s not quite right.',
     'current_total': '@current / @total',
     'audio_speed_multiplier': '@speed×',
-    'if_you_quit_now_you_ll_lose_your_progress':
-        'If you quit now, you’ll lose your progress.',
     'community_link_error': 'Unable to open community',
     'community_link_not_available': 'The community link is not configured.',
     'community_link_could_not_open':
@@ -637,7 +677,7 @@ appTranslations = <String, Map<String, String>>{
     'cv_home_build_from_scratch': 'Build From Scratch',
     'cv_home_build_from_scratch_description':
         'Chat with the CV assistant, share your preferences, and generate a professional CV.',
-    'discover_your_exact_level': 'Discover your exact\nlevel.',
+    'discover_your_exact_level': 'Discover your exact level.',
     'climb_the_tiers_and_become_an_italian_master':
         'Climb the tiers and become\nan Italian Master.',
 
@@ -784,8 +824,7 @@ appTranslations = <String, Map<String, String>>{
     'snack_check_code_retry': 'Please check the code and retry.',
     'snack_session_expired': 'Session expired',
     'snack_verify_again': 'Please verify your code again.',
-    'snack_need_upper_number':
-    'Password must contain at least 6 characters.',
+    'snack_need_upper_number': 'Password must contain at least 6 characters.',
     'snack_mismatch': 'Mismatch',
     'snack_passwords_match': 'Both password fields must match.',
     'snack_could_not_reset': 'Could not reset',
@@ -1366,6 +1405,10 @@ appTranslations = <String, Map<String, String>>{
     'call_ended': 'Call Ended',
     'call_error': 'Call Error',
     'call_failed': 'Call Failed',
+    'call_video_connecting': 'Connecting video…',
+    'call_video_reconnecting': 'Poor connection — restoring video…',
+    'call_video_remote_paused': "Participant's camera is paused",
+    'call_video_unavailable': 'Video is temporarily unavailable',
     'call_id_missing': 'Call ID Missing',
     'call_incoming_ack_timeout': 'Call Incoming Ack Timeout',
     'call_initiate_timeout': 'Call Initiate Timeout',
@@ -1732,6 +1775,7 @@ appTranslations = <String, Map<String, String>>{
     'join_the_italian_journey': 'Join the Italian Journey',
     'keep_going': 'Keep Going',
     'keep_going_1': 'Keep Going',
+    'keep_learning': 'Keep Learning',
     'keep_going_to_reach_diamond_league': 'Keep Going to Reach Diamond League',
     'keep_holding_the_microphone': 'Keep Holding the Microphone',
     'keep_learning_and_climbing_the_leaderboard_to_unlo':
@@ -2007,7 +2051,9 @@ appTranslations = <String, Map<String, String>>{
     'quick_correction': 'Quick Correction',
     'quick_tools': 'Quick Tools',
     'quit_quiz': 'Quit Quiz',
+    'exit_quiz': 'Exit Quiz',
     'quit_vocabulary': 'Quit Vocabulary',
+    'exit_vocabulary': 'Exit Vocabulary',
     'quiz': 'Quiz',
     'quiz_complete': 'Quiz Complete',
     'quiz_unlocked': 'Quiz Unlocked',
@@ -2081,7 +2127,7 @@ appTranslations = <String, Map<String, String>>{
     'reward_unavailable': 'Reward Unavailable',
     'rewards_unavailable': 'Rewards Unavailable',
     'rewards_you_unlock_or_claim_will_be_saved_here':
-        'Rewards You Unlock or Claim Will be Saved Here',
+        'Rewards Sent to You Will be Saved Here',
     'safe_learning_environment_maintained':
         'Safe Learning Environment Maintained',
     'safe_learning_environment_restored': 'Safe Learning Environment Restored',
@@ -2152,7 +2198,7 @@ appTranslations = <String, Map<String, String>>{
     'speaker_error': 'Speaker Error',
     'speaking_audio': 'Speaking Audio',
     'speaking_task': 'Speaking Task',
-    'start_10_question_test': 'Start 10 Question Test',
+    'start_10_question_test': 'Start Free Level Test',
     'start_a_text_conversation_enter_live_voice_select':
         'Start a Text Conversation Enter Live Voice Select',
     'start_chatting': 'Start Chatting',
@@ -2440,7 +2486,7 @@ appTranslations = <String, Map<String, String>>{
     'you_will_no_longer_be_able_to_message_or_see_each':
         'You will no longer be able to message or see each other’s profiles.',
     'your_claimed_and_unlocked_rewards_will_appear_here':
-        'Your Claimed and Unlocked Rewards Will Appear Here',
+        'Rewards Sent to You Will Appear Here',
     'your_cv_is_ready': 'Your CV is Ready',
     'your_data_progress_and_certificates_nhave_been_per':
         'Your data, progress, and certificates have been permanently deleted.',
@@ -2528,6 +2574,15 @@ appTranslations = <String, Map<String, String>>{
     'boost_active_remaining': 'Boost Active:\n@remaining',
     'quit_quiz_progress_warning':
         'If you quit now, you\'ll lose your\nprogress and current score for\nthis chapter.',
+    'exit_vocabulary_confirmation':
+        'You can return to vocabulary practice anytime.',
+    'exit_resumable_quiz_warning':
+        'Your checked answers are saved. You can resume this quiz later. Any unchecked answer won\'t be saved.',
+    'saved_quiz_progress': 'Saved quiz progress',
+    'saved_quiz_progress_message':
+        'You have @count saved answers. Resume them, or start over and reset this attempt.',
+    'resume_quiz': 'Resume quiz',
+    'start_over': 'Start over',
     'call_back': 'Call back',
     'select_learning_level_conversation_practice':
         'Select a learning level to start your\nconversation practice.',
@@ -2574,6 +2629,13 @@ appTranslations = <String, Map<String, String>>{
     'score_xp_delta': '+@xp XP',
   },
   'bn_BD': <String, String>{
+    'ai_level_test_live_description':
+        'লাইভ স্পিকিং মূল্যায়ন ও ৫টি বহুনির্বাচনী প্রশ্নের মাধ্যমে আপনার লেভেল জানুন।',
+    'start_free_level_test': 'ফ্রি লেভেল টেস্ট শুরু করুন',
+    'level_test_attempts_remaining':
+        '@maxটির মধ্যে @remainingটি ফ্রি চেষ্টা বাকি',
+    'level_test_paid_access': 'পেইড AI ক্রেডিট: লেভেল টেস্ট চালু আছে',
+    ...cvBuilderBnTranslations,
     'cv_chat_assistant_title': 'সিভি অ্যাসিস্ট্যান্ট',
     'cv_chat_reviewing_information': 'আপনার সিভির তথ্য পর্যালোচনা করা হচ্ছে…',
 
@@ -2757,8 +2819,7 @@ appTranslations = <String, Map<String, String>>{
     'snack_check_code_retry': 'কোড যাচাই করে আবার চেষ্টা করুন।',
     'snack_session_expired': 'সেশন শেষ হয়েছে',
     'snack_verify_again': 'আবার কোড যাচাই করুন।',
-    'snack_need_upper_number':
-    'পাসওয়ার্ডে কমপক্ষে ৬টি অক্ষর থাকতে হবে।',
+    'snack_need_upper_number': 'পাসওয়ার্ডে কমপক্ষে ৬টি অক্ষর থাকতে হবে।',
     'snack_mismatch': 'মেলেনি',
     'climb_the_tiers_and_become_an_italian_master':
         'ধাপগুলো পেরিয়ে হয়ে উঠুন\nএকজন ইতালিয়ান মাস্টার।',
@@ -3487,6 +3548,10 @@ appTranslations = <String, Map<String, String>>{
     'call_ended': 'কল শেষ হয়েছে',
     'call_error': 'কল ত্রুটি',
     'call_failed': 'কল ব্যর্থ হয়েছে',
+    'call_video_connecting': 'ভিডিও সংযুক্ত হচ্ছে…',
+    'call_video_reconnecting': 'দুর্বল সংযোগ — ভিডিও পুনরুদ্ধার করা হচ্ছে…',
+    'call_video_remote_paused': 'অংশগ্রহণকারীর ক্যামেরা বন্ধ আছে',
+    'call_video_unavailable': 'ভিডিও সাময়িকভাবে অনুপলব্ধ',
     'call_id_missing': 'কল আইডি অনুপস্থিত',
     'call_incoming_ack_timeout': 'ইনকামিং কল স্বীকৃতির সময়সীমা শেষ',
     'call_initiate_timeout': 'কল শুরু করার সময়সীমা শেষ',
@@ -3859,6 +3924,7 @@ appTranslations = <String, Map<String, String>>{
     'join_the_italian_journey': 'ইতালিয়ান শেখার যাত্রায় যোগ দিন',
     'keep_going': 'চালিয়ে যান',
     'keep_going_1': 'চালিয়ে যান',
+    'keep_learning': 'শেখা চালিয়ে যান',
     'keep_going_to_reach_diamond_league': 'ডায়মন্ড লিগে পৌঁছাতে চালিয়ে যান',
     'keep_holding_the_microphone': 'মাইক্রোফোন চেপে ধরে রাখুন',
     'keep_learning_and_climbing_the_leaderboard_to_unlo':
@@ -4140,7 +4206,9 @@ appTranslations = <String, Map<String, String>>{
     'quick_correction': 'দ্রুত সংশোধন',
     'quick_tools': 'দ্রুত টুলস',
     'quit_quiz': 'কুইজ ছেড়ে দিন',
+    'exit_quiz': 'কুইজ থেকে বের হন',
     'quit_vocabulary': 'ভোকাবুলারি ছেড়ে দিন',
+    'exit_vocabulary': 'ভোকাবুলারি থেকে বের হন',
     'quiz': 'কুইজ',
     'quiz_complete': 'কুইজ সম্পন্ন',
     'quiz_unlocked': 'কুইজ আনলক হয়েছে',
@@ -4216,7 +4284,7 @@ appTranslations = <String, Map<String, String>>{
     'reward_unavailable': 'পুরস্কার উপলভ্য নয়',
     'rewards_unavailable': 'পুরস্কারসমূহ উপলভ্য নয়',
     'rewards_you_unlock_or_claim_will_be_saved_here':
-        'আপনি যে পুরস্কার আনলক বা সংগ্রহ করবেন তা এখানে সংরক্ষিত হবে',
+        'আপনাকে পাঠানো পুরস্কারগুলো এখানে সংরক্ষিত হবে',
     'safe_learning_environment_maintained':
         'নিরাপদ শেখার পরিবেশ বজায় রাখা হয়েছে',
     'safe_learning_environment_restored':
@@ -4367,7 +4435,7 @@ appTranslations = <String, Map<String, String>>{
         'সার্ভার কলের অনুরোধে সাড়া দেয়নি',
     'the_server_did_not_respond_to_the_cancellation_req':
         'সার্ভার বাতিলের অনুরোধে সাড়া দেয়নি',
-    'discover_your_exact_level': 'আপনার সঠিক\nলেভেল জেনে নিন।',
+    'discover_your_exact_level': 'আপনার সঠিক লেভেল জেনে নিন।',
     'the_server_did_not_respond_to_the_end_call_request':
         'সার্ভার কল শেষ করার অনুরোধে সাড়া দেয়নি',
     'the_server_did_not_respond_to_the_rejection_reques':
@@ -4584,7 +4652,7 @@ appTranslations = <String, Map<String, String>>{
     'you_will_no_longer_be_able_to_message_or_see_each':
         'আপনারা আর একে অপরকে বার্তা পাঠাতে বা প্রোফাইল দেখতে পারবেন না',
     'your_claimed_and_unlocked_rewards_will_appear_here':
-        'আপনার সংগ্রহ করা ও আনলক হওয়া পুরস্কার এখানে দেখা যাবে',
+        'অ্যাডমিনের পাঠানো পুরস্কারগুলো এখানে দেখা যাবে',
     'your_cv_is_ready': 'আপনার সিভি প্রস্তুত',
     'your_data_progress_and_certificates_nhave_been_per':
         'আপনার তথ্য, অগ্রগতি ও সার্টিফিকেট স্থায়ীভাবে মুছে ফেলা হয়েছে',
@@ -4672,6 +4740,15 @@ appTranslations = <String, Map<String, String>>{
     'boost_active_remaining': 'বুস্ট সক্রিয়:\n@remaining',
     'quit_quiz_progress_warning':
         'এখন কুইজ ছাড়লে এই অধ্যায়ের\nঅগ্রগতি ও বর্তমান স্কোর হারাবেন।',
+    'exit_vocabulary_confirmation':
+        'আপনি যেকোনো সময় ভোকাবুলারি অনুশীলনে ফিরে আসতে পারবেন।',
+    'exit_resumable_quiz_warning':
+        'যাচাই করা উত্তরগুলো সংরক্ষিত আছে। পরে কুইজটি আবার শুরু করতে পারবেন। যাচাই না করা বর্তমান উত্তরটি সংরক্ষিত হবে না।',
+    'saved_quiz_progress': 'সংরক্ষিত কুইজ অগ্রগতি',
+    'saved_quiz_progress_message':
+        'আপনার @countটি উত্তর সংরক্ষিত আছে। আগের জায়গা থেকে শুরু করুন, অথবা এই চেষ্টাটি রিসেট করে নতুন করে শুরু করুন।',
+    'resume_quiz': 'আগের জায়গা থেকে শুরু করুন',
+    'start_over': 'নতুন করে শুরু করুন',
     'call_back': 'আবার কল করুন',
     'select_learning_level_conversation_practice':
         'কথোপকথন অনুশীলন শুরু করতে একটি\nশেখার লেভেল নির্বাচন করুন।',
@@ -4750,8 +4827,6 @@ appTranslations = <String, Map<String, String>>{
     'community_link_error': 'কমিউনিটি খোলা যায়নি',
     'community_link_not_available': 'কমিউনিটি লিংকটি কনফিগার করা হয়নি।',
     'community_link_could_not_open': 'ফেসবুক কমিউনিটিটি খোলা যায়নি।',
-    'if_you_quit_now_you_ll_lose_your_progress':
-        'এখন বের হলে আপনার অগ্রগতি হারিয়ে যাবে।',
     'current_total': '@current / @total',
     'audio_speed_multiplier': '@speed×',
     'that_s_not_quite_right': 'উত্তরটি সঠিক হয়নি।',
@@ -4785,6 +4860,8 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_manual_review_completed': 'ম্যানুয়াল পর্যালোচনা সম্পন্ন',
     'final_exam_reviewing_answers':
         'তোমার বলা ও লেখা উত্তর পর্যালোচনা করা হচ্ছে',
+    'final_exam_reviewing_speaking_answer':
+        'তোমার বলা উত্তর পর্যালোচনা করা হচ্ছে',
     'final_exam_result_certificate': 'ফলাফল ও সার্টিফিকেট',
     'final_exam_result_ready': 'তোমার ফলাফল প্রস্তুত',
     'final_exam_unlock_achievement': 'পর্যালোচনা শেষ হলে তোমার অর্জন আনলক হবে',
@@ -4795,8 +4872,6 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_waiting_tip':
         'অপেক্ষার সময় একটি দৈনিক চ্যালেঞ্জ চেষ্টা করো অথবা অনুশীলন চালিয়ে যাও।',
     'final_exam_results_title': 'পরীক্ষার ফলাফল',
-    'final_exam_reviewing_speaking_answer':
-        'তোমার বলা উত্তর পর্যালোচনা করা হচ্ছে',
     'final_exam_mark_achieved': 'প্রাপ্ত নম্বর',
     'final_exam_xp_awarded': '@xp XP অর্জিত',
     'final_exam_teacher_comments': 'শিক্ষকের মন্তব্য',
@@ -4860,6 +4935,41 @@ appTranslations = <String, Map<String, String>>{
     'google_play_handles_subscription_changes':
         'বাতিল, নবায়ন, পেমেন্ট পদ্ধতি পরিবর্তন ও পুনরায় সাবস্ক্রাইব Google Play পরিচালনা করে।',
     'price_per_month': '@price / মাস',
+    'subscription_details': 'সাবস্ক্রিপশনের বিস্তারিত',
+    'course_access_details': 'কোর্স অ্যাক্সেসের বিস্তারিত',
+    'subscription_title': 'সাবস্ক্রিপশন',
+    'course_access_title': 'কোর্স অ্যাক্সেস',
+    'subscription_price': 'মূল্য',
+    'billing_duration': 'বিলিংয়ের মেয়াদ',
+    'loading_app_store_price': 'App Store-এর মূল্য লোড হচ্ছে…',
+    'app_store_price_unavailable':
+        'স্থানীয় App Store মূল্য পাওয়া যাচ্ছে না। আবার চেষ্টা করুন।',
+    'apple_subscription_renewal_disclosure':
+        'প্রতি @duration-এ @price। নিশ্চিত করার সময় আপনার Apple Account-এ মূল্য চার্জ হবে। বর্তমান মেয়াদ শেষ হওয়ার অন্তত ২৪ ঘণ্টা আগে বাতিল না করলে একই মেয়াদের জন্য সাবস্ক্রিপশন স্বয়ংক্রিয়ভাবে নবায়ন হবে। বর্তমান মেয়াদ শেষ হওয়ার আগের ২৪ ঘণ্টার মধ্যে নবায়নের মূল্য চার্জ করা হবে।',
+    'apple_non_renewing_subscription_disclosure':
+        '@duration কোর্স অ্যাক্সেসের জন্য @price। নিশ্চিত করার সময় আপনার Apple Account-এ মূল্য চার্জ হবে। এটি স্বয়ংক্রিয়ভাবে নবায়ন হয় না এবং নির্ধারিত অ্যাক্সেস সময় শেষে শেষ হবে।',
+    'apple_subscription_cancellation':
+        'Settings > Apple Account > Subscriptions থেকে পরিচালনা বা বাতিল করুন।',
+    'subscription_agreement_prefix': 'সাবস্ক্রাইব করে আপনি সম্মত হচ্ছেন',
+    'purchase_agreement_prefix': 'ক্রয় করে আপনি সম্মত হচ্ছেন',
+    'restore_purchases': 'ক্রয় পুনরুদ্ধার করুন',
+    'restoring_purchases': 'ক্রয় পুনরুদ্ধার হচ্ছে…',
+    'restore_check_pending':
+        'App Store এখনও আপনার ক্রয় যাচাই করছে। কিছুক্ষণ পর আবার ক্রয় পুনরুদ্ধার চেষ্টা করুন।',
+    'no_restorable_purchase':
+        'এই পণ্যের জন্য পুনরুদ্ধারযোগ্য App Store ক্রয় পাওয়া যায়নি।',
+    'another_purchase_recovery_pending':
+        'অন্য একটি কোর্স ক্রয় এখনও পুনরুদ্ধার হচ্ছে। কিছুক্ষণ পর আবার চেষ্টা করুন।',
+    'unable_to_open_link': 'লিংক খোলা যায়নি',
+    'try_again_later': 'পরে আবার চেষ্টা করুন।',
+    'subscription_period_day_one': '@count দিন',
+    'subscription_period_day_many': '@count দিন',
+    'subscription_period_week_one': '@count সপ্তাহ',
+    'subscription_period_week_many': '@count সপ্তাহ',
+    'subscription_period_month_one': '@count মাস',
+    'subscription_period_month_many': '@count মাস',
+    'subscription_period_year_one': '@count বছর',
+    'subscription_period_year_many': '@count বছর',
 
     'monthly_plan_auto_renews': 'প্রতি মাসে স্বয়ংক্রিয়ভাবে নবায়ন হবে',
 
@@ -4887,11 +4997,11 @@ appTranslations = <String, Map<String, String>>{
         'বাতিল না করা পর্যন্ত সাবস্ক্রিপশনটি স্বয়ংক্রিয়ভাবে নবায়ন হবে।',
     'secure_payment': 'নিরাপদ পেমেন্ট',
     'payment_processed_securely':
-        'আপনার পেমেন্ট Google Play-এর মাধ্যমে নিরাপদে প্রক্রিয়া করা হবে।',
+        'আপনার ডিভাইসের অ্যাপ স্টোরের মাধ্যমে পেমেন্ট নিরাপদে প্রক্রিয়া করা হবে।',
     'recurring_purchase': 'নিয়মিত সাবস্ক্রিপশন',
     'one_time_purchase': 'এককালীন ক্রয়',
     'cancel_subscription_anytime':
-        'Google Play থেকে এটি পরিচালনা বা বাতিল করতে পারবেন।',
+        'ডিভাইসের সাবস্ক্রিপশন সেটিংস থেকে এটি পরিচালনা বা বাতিল করতে পারবেন।',
     'you_will_only_be_charged_once':
         'এই ক্রয়ের জন্য আপনাকে শুধু একবার চার্জ করা হবে।',
     'your_cv_allowance': 'আপনার সিভি সুবিধা',
@@ -5036,6 +5146,9 @@ appTranslations = <String, Map<String, String>>{
     'level_mastered': 'লেভেল @level\nসম্পন্ন',
     'certificate_milestone_message': 'আপনি একটি নতুন মাইলফলক অর্জন করেছেন',
     'course_information_unavailable': 'কোর্সের তথ্য লোড করা যায়নি।',
+    'course_access_option': 'অ্যাক্সেসের বিকল্প',
+    'lifetime_course_access': 'আজীবন অ্যাক্সেস',
+    'time_limited_course_access': '@days দিনের অ্যাক্সেস',
     'purchase_success_description':
         'আপনি এখন Italir Pothe-এর সব ফিচারে আজীবন পূর্ণ প্রবেশাধিকার পেয়েছেন। আজ থেকেই আপনার সাবলীলতার যাত্রা শুরু।',
 
@@ -5140,8 +5253,7 @@ appTranslations = <String, Map<String, String>>{
     'password_exact_length': 'ঠিক ৬ অক্ষর',
     'password_invalid': 'নতুন পাসওয়ার্ড অবশ্যই ঠিক ৬ অক্ষরের হতে হবে।',
     'check_six_characters': 'ঠিক ৬ অক্ষর',
-    'snack_password_6_characters':
-    'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।',
+    'snack_password_6_characters': 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।',
     'password_minimum': 'কমপক্ষে ৬ অক্ষর',
     'home_good_morning': 'সুপ্রভাত',
     'home_good_afternoon': 'শুভ অপরাহ্ন',
@@ -5153,32 +5265,29 @@ appTranslations = <String, Map<String, String>>{
     'vocabulary_show_meaning': 'অর্থ দেখান',
     'vocabulary_listen_all': 'সবগুলো শুনুন',
     'vocabulary_stop_audio': 'বন্ধ করুন',
-    'vocabulary_no_search_result':
-    'কোনো শব্দ পাওয়া যায়নি',
-    'vocabulary_learned_progress':
-    '@learned/@total শেখা হয়েছে',
-    'vocabulary_practice_words':
-    'এই @countটি শব্দ প্র্যাকটিস করুন',
-    'requires_video_percent':
-    'ভিডিওর @percent% দেখা প্রয়োজন',
+    'vocabulary_no_search_result': 'কোনো শব্দ পাওয়া যায়নি',
+    'vocabulary_learned_progress': '@learned/@total শেখা হয়েছে',
+    'vocabulary_practice_words': 'এই @countটি শব্দ প্র্যাকটিস করুন',
+    'requires_video_percent': 'ভিডিওর @percent% দেখা প্রয়োজন',
   },
   'it_IT': <String, String>{
-    'requires_video_percent':
-    'Richiede la visione del @percent% del video',
+    'ai_level_test_live_description':
+        'Completa una prova orale dal vivo e 5 domande a scelta multipla.',
+    'start_free_level_test': 'Inizia il test di livello gratuito',
+    'level_test_attempts_remaining':
+        '@remaining tentativi gratuiti su @max rimasti',
+    'level_test_paid_access': 'Credito AI a pagamento: test disponibile',
+    ...cvBuilderItTranslations,
+    'requires_video_percent': 'Richiede la visione del @percent% del video',
     'vocabulary_list_mode': 'Modalità lista',
     'vocabulary_flashcard_mode': 'Flashcard',
     'vocabulary_search': 'Cerca parole',
-    'vocabulary_show_meaning':
-    'Mostra significato',
-    'vocabulary_listen_all':
-    'Ascolta tutto',
+    'vocabulary_show_meaning': 'Mostra significato',
+    'vocabulary_listen_all': 'Ascolta tutto',
     'vocabulary_stop_audio': 'Ferma',
-    'vocabulary_no_search_result':
-    'Nessuna parola trovata',
-    'vocabulary_learned_progress':
-    '@learned/@total imparate',
-    'vocabulary_practice_words':
-    'Pratica queste @count parole',
+    'vocabulary_no_search_result': 'Nessuna parola trovata',
+    'vocabulary_learned_progress': '@learned/@total imparate',
+    'vocabulary_practice_words': 'Pratica queste @count parole',
     'home_good_morning': 'Buongiorno',
     'home_good_afternoon': 'Buon pomeriggio',
     'home_good_evening': 'Buonasera',
@@ -5186,11 +5295,11 @@ appTranslations = <String, Map<String, String>>{
     'password_minimum': 'Almeno 6 caratteri',
     'check_six_characters': 'Esattamente 6 caratteri',
     'snack_password_6_characters':
-    'La password deve contenere almeno 6 caratteri.',
+        'La password deve contenere almeno 6 caratteri.',
     'password_intro': 'Usa una password composta da esattamente 6 caratteri.',
     'password_exact_length': 'Esattamente 6 caratteri',
     'password_invalid':
-    'La nuova password deve contenere esattamente 6 caratteri.',
+        'La nuova password deve contenere esattamente 6 caratteri.',
     // Italian
     'matching_pairs_drag_instruction':
         'Sposta le parole a destra per abbinarle alle parole a sinistra.',
@@ -5266,7 +5375,7 @@ appTranslations = <String, Map<String, String>>{
         'Gli accenti cambiano il significato e la pronuncia delle parole.',
 
     'ai_level_test_description':
-        'Scopri il tuo livello attuale con soltanto 10 domande.',
+        'Completa una prova orale dal vivo e 5 domande a scelta multipla.',
     'ai_tutor_intro':
         'Sono il tuo tutor AI. Esercitiamoci insieme in italiano.',
     'ai_scenario_tip':
@@ -5276,6 +5385,9 @@ appTranslations = <String, Map<String, String>>{
     'certificate_milestone_message': 'Hai raggiunto un nuovo traguardo',
     'course_information_unavailable':
         'Impossibile caricare le informazioni del corso.',
+    'course_access_option': 'Opzione di accesso',
+    'lifetime_course_access': 'Accesso a vita',
+    'time_limited_course_access': 'Accesso per @days giorni',
     'purchase_success_description':
         'Ora hai accesso completo a vita a tutte le funzionalità di Italir Pothe. Il tuo percorso verso la padronanza inizia oggi.',
 
@@ -5447,14 +5559,49 @@ appTranslations = <String, Map<String, String>>{
         'L’abbonamento si rinnova automaticamente finché non viene annullato.',
     'secure_payment': 'Pagamento sicuro',
     'payment_processed_securely':
-        'Il pagamento viene elaborato in modo sicuro tramite Google Play.',
+        "Il pagamento viene elaborato in modo sicuro dall'app store del dispositivo.",
     'recurring_purchase': 'Abbonamento ricorrente',
     'one_time_purchase': 'Acquisto singolo',
     'cancel_subscription_anytime':
-        'Puoi gestirlo o annullarlo tramite Google Play.',
+        'Puoi gestirlo o annullarlo nelle impostazioni degli abbonamenti del dispositivo.',
     'you_will_only_be_charged_once':
         'Ti verrà addebitato l’importo una sola volta.',
     'price_per_month': '@price / mese',
+    'subscription_details': 'Dettagli dell’abbonamento',
+    'course_access_details': 'Dettagli di accesso al corso',
+    'subscription_title': 'Abbonamento',
+    'course_access_title': 'Accesso al corso',
+    'subscription_price': 'Prezzo',
+    'billing_duration': 'Periodo di fatturazione',
+    'loading_app_store_price': 'Caricamento del prezzo App Store…',
+    'app_store_price_unavailable':
+        'Il prezzo localizzato dell’App Store non è disponibile. Riprova.',
+    'apple_subscription_renewal_disclosure':
+        '@price per @duration. Il pagamento verrà addebitato sul tuo Apple Account alla conferma. L’abbonamento si rinnova automaticamente per la stessa durata, salvo annullamento almeno 24 ore prima della fine del periodo corrente. Il rinnovo verrà addebitato nelle 24 ore precedenti la fine del periodo corrente.',
+    'apple_non_renewing_subscription_disclosure':
+        '@price per @duration di accesso al corso. Il pagamento verrà addebitato sul tuo Apple Account alla conferma. Questo acquisto non si rinnova automaticamente e termina alla fine del periodo di accesso indicato.',
+    'apple_subscription_cancellation':
+        'Gestisci o annulla in Impostazioni > Apple Account > Abbonamenti.',
+    'subscription_agreement_prefix': 'Abbonandoti accetti',
+    'purchase_agreement_prefix': 'Acquistando accetti',
+    'restore_purchases': 'Ripristina acquisti',
+    'restoring_purchases': 'Ripristino acquisti…',
+    'restore_check_pending':
+        'App Store sta ancora verificando i tuoi acquisti. Riprova a ripristinarli tra poco.',
+    'no_restorable_purchase':
+        'Non è stato trovato un acquisto App Store ripristinabile per questo prodotto.',
+    'another_purchase_recovery_pending':
+        'È ancora in corso il recupero di un altro acquisto di un corso. Riprova tra poco.',
+    'unable_to_open_link': 'Impossibile aprire il link',
+    'try_again_later': 'Riprova più tardi.',
+    'subscription_period_day_one': '@count giorno',
+    'subscription_period_day_many': '@count giorni',
+    'subscription_period_week_one': '@count settimana',
+    'subscription_period_week_many': '@count settimane',
+    'subscription_period_month_one': '@count mese',
+    'subscription_period_month_many': '@count mesi',
+    'subscription_period_year_one': '@count anno',
+    'subscription_period_year_many': '@count anni',
 
     'monthly_plan_auto_renews': 'Si rinnova automaticamente ogni mese',
 
@@ -5561,6 +5708,8 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_manual_review_completed': 'Revisione manuale completata',
     'final_exam_reviewing_answers':
         'Stiamo esaminando le tue risposte orali e scritte',
+    'final_exam_reviewing_speaking_answer':
+        'Stiamo esaminando la tua risposta orale',
     'final_exam_result_certificate': 'Risultato e certificato',
     'final_exam_result_ready': 'Il tuo risultato è pronto',
     'final_exam_unlock_achievement':
@@ -5571,8 +5720,6 @@ appTranslations = <String, Map<String, String>>{
     'final_exam_estimated_result': 'Risultato previsto: @value',
     'final_exam_waiting_tip':
         'Nell’attesa, prova una sfida giornaliera o continua a esercitarti.',
-    'final_exam_reviewing_speaking_answer':
-        'Stiamo esaminando la tua risposta orale',
     'common_back': 'Indietro',
     'final_exam_submit_answer': 'Invia risposta',
     'final_exam_recording': 'Registrazione…',
@@ -5592,8 +5739,6 @@ appTranslations = <String, Map<String, String>>{
     'that_s_not_quite_right': 'La risposta non è corretta.',
     'current_total': '@current / @total',
     'audio_speed_multiplier': '@speed×',
-    'if_you_quit_now_you_ll_lose_your_progress':
-        'Se esci ora, perderai i tuoi progressi.',
     'community_link_error': 'Impossibile aprire la community',
     'community_link_not_available':
         'Il link della community non è configurato.',
@@ -5962,8 +6107,7 @@ appTranslations = <String, Map<String, String>>{
     'snack_check_code_retry': 'Controlla il codice e riprova.',
     'snack_session_expired': 'Sessione scaduta',
     'snack_verify_again': 'Verifica di nuovo il codice.',
-    'snack_need_upper_number':
-    'La password deve contenere almeno 6 caratteri.',
+    'snack_need_upper_number': 'La password deve contenere almeno 6 caratteri.',
     'snack_mismatch': 'Non corrisponde',
     'snack_passwords_match': 'Le due password devono coincidere.',
     'snack_could_not_reset': 'Impossibile reimpostare',
@@ -6559,6 +6703,10 @@ appTranslations = <String, Map<String, String>>{
     'call_ended': 'Chiamata terminata',
     'call_error': 'Errore di chiamata',
     'call_failed': 'Chiamata non riuscita',
+    'call_video_connecting': 'Connessione video…',
+    'call_video_reconnecting': 'Connessione debole — ripristino del video…',
+    'call_video_remote_paused': 'La videocamera del partecipante è in pausa',
+    'call_video_unavailable': 'Il video è temporaneamente non disponibile',
     'call_id_missing': 'ID chiamata mancante',
     'call_incoming_ack_timeout':
         'Tempo scaduto per la conferma della chiamata in arrivo',
@@ -6933,6 +7081,7 @@ appTranslations = <String, Map<String, String>>{
     'join_the_italian_journey': 'Inizia il tuo viaggio nell’italiano',
     'keep_going': 'Continua così',
     'keep_going_1': 'Continua così',
+    'keep_learning': 'Continua a imparare',
     'keep_going_to_reach_diamond_league':
         'Continua per raggiungere la Lega Diamante',
     'keep_holding_the_microphone': 'Continua a tenere premuto il microfono',
@@ -7217,7 +7366,9 @@ appTranslations = <String, Map<String, String>>{
     'quick_correction': 'Correzione rapida',
     'quick_tools': 'Strumenti rapidi',
     'quit_quiz': 'Abbandona quiz',
+    'exit_quiz': 'Esci dal quiz',
     'quit_vocabulary': 'Abbandona vocabolario',
+    'exit_vocabulary': 'Esci dal vocabolario',
     'quiz': 'Quiz',
     'quiz_complete': 'Quiz completato',
     'quiz_unlocked': 'Quiz sbloccato',
@@ -7293,7 +7444,7 @@ appTranslations = <String, Map<String, String>>{
     'reward_unavailable': 'Ricompensa non disponibile',
     'rewards_unavailable': 'Ricompense non disponibili',
     'rewards_you_unlock_or_claim_will_be_saved_here':
-        'Le ricompense sbloccate o riscattate verranno salvate qui',
+        'Le ricompense che ricevi verranno salvate qui',
     'safe_learning_environment_maintained':
         'Ambiente di apprendimento sicuro mantenuto',
     'safe_learning_environment_restored':
@@ -7366,7 +7517,7 @@ appTranslations = <String, Map<String, String>>{
     'speaker_error': 'Errore dell’altoparlante',
     'speaking_audio': 'Audio della prova orale',
     'speaking_task': 'Attività orale',
-    'start_10_question_test': 'Inizia il test di 10 domande',
+    'start_10_question_test': 'Inizia il test di livello gratuito',
     'start_a_text_conversation_enter_live_voice_select':
         'Inizia una conversazione testuale, passa alla voce dal vivo o scegli un’opzione',
     'start_chatting': 'Inizia a chattare',
@@ -7664,7 +7815,7 @@ appTranslations = <String, Map<String, String>>{
     'you_will_no_longer_be_able_to_message_or_see_each':
         'Non potrete più inviarvi messaggi o vedere i rispettivi profili',
     'your_claimed_and_unlocked_rewards_will_appear_here':
-        'Le ricompense riscattate e sbloccate appariranno qui',
+        'Le ricompense inviate dall’amministratore appariranno qui',
     'your_cv_is_ready': 'Il tuo CV è pronto',
     'your_data_progress_and_certificates_nhave_been_per':
         'I tuoi dati, progressi e certificati sono stati eliminati definitivamente',
@@ -7755,6 +7906,15 @@ appTranslations = <String, Map<String, String>>{
     'boost_active_remaining': 'Potenziamento attivo:\n@remaining',
     'quit_quiz_progress_warning':
         'Se esci ora, perderai i tuoi\nprogressi e il punteggio attuale di\nquesto capitolo.',
+    'exit_vocabulary_confirmation':
+        'Puoi tornare alla pratica del vocabolario in qualsiasi momento.',
+    'exit_resumable_quiz_warning':
+        'Le risposte già verificate sono salvate. Potrai riprendere il quiz più tardi. La risposta non ancora verificata non verrà salvata.',
+    'saved_quiz_progress': 'Progressi del quiz salvati',
+    'saved_quiz_progress_message':
+        'Hai @count risposte salvate. Riprendi oppure ricomincia azzerando questo tentativo.',
+    'resume_quiz': 'Riprendi il quiz',
+    'start_over': 'Ricomincia',
     'call_back': 'Richiama',
     'select_learning_level_conversation_practice':
         'Seleziona un livello di apprendimento per iniziare\nla pratica di conversazione.',
@@ -7801,7 +7961,7 @@ appTranslations = <String, Map<String, String>>{
         ' prestando attenzione,\nmentre l’utente A ha ottenuto solo 85 XP\nandando di fretta!',
     'score_xp_value': '@xp XP',
     'score_xp_delta': '+@xp XP',
-    'discover_your_exact_level': 'Scopri il tuo\nlivello esatto.',
+    'discover_your_exact_level': 'Scopri il tuo livello esatto.',
     'the_league_system': 'Il sistema\ndelle leghe',
     'climb_the_tiers_and_become_an_italian_master':
         'Sali di livello e diventa\nun maestro d’italiano.',

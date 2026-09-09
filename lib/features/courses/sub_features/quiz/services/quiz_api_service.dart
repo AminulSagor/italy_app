@@ -35,11 +35,13 @@ class QuizApiService {
 
   Future<QuizApiSessionModel> startLessonQuiz({
     required String lessonId,
+    bool startOver = false,
   }) async {
     final Response<dynamic> response = await _apiClient.dio.post(
       '/quiz-sessions/lessons/$lessonId/start',
       data: <String, dynamic>{
         'clientActivityDate': DateTime.now().toUtc().toIso8601String(),
+        if (startOver) 'mode': 'start_over',
       },
     );
     final Map<String, dynamic> data = _responseMap(response);

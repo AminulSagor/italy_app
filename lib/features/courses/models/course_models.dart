@@ -577,18 +577,21 @@ class CourseLessonProgressModel {
   final int videoWatchPercent;
   final bool isTheoryRead;
   final bool isCompleted;
+  final DateTime? updatedAt;
 
   const CourseLessonProgressModel({
     required this.lessonId,
     required this.videoWatchPercent,
     required this.isTheoryRead,
     required this.isCompleted,
+    this.updatedAt,
   });
 
   const CourseLessonProgressModel.empty({required this.lessonId})
       : videoWatchPercent = 0,
         isTheoryRead = false,
-        isCompleted = false;
+        isCompleted = false,
+        updatedAt = null;
 
   factory CourseLessonProgressModel.fromJson(Map<String, dynamic> json) {
     return CourseLessonProgressModel(
@@ -598,6 +601,9 @@ class CourseLessonProgressModel {
           .toInt(),
       isTheoryRead: _boolValue(json['isTheoryRead']),
       isCompleted: _boolValue(json['isCompleted']),
+      updatedAt: DateTime.tryParse(
+        json['updatedAt']?.toString() ?? '',
+      ),
     );
   }
 
@@ -612,6 +618,7 @@ class CourseLessonProgressModel {
       'videoWatchPercent': videoWatchPercent,
       'isTheoryRead': isTheoryRead,
       'isCompleted': isCompleted,
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
@@ -620,12 +627,14 @@ class CourseLessonProgressModel {
     int? videoWatchPercent,
     bool? isTheoryRead,
     bool? isCompleted,
+    DateTime? updatedAt,
   }) {
     return CourseLessonProgressModel(
       lessonId: lessonId ?? this.lessonId,
       videoWatchPercent: videoWatchPercent ?? this.videoWatchPercent,
       isTheoryRead: isTheoryRead ?? this.isTheoryRead,
       isCompleted: isCompleted ?? this.isCompleted,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

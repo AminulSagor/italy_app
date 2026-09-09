@@ -31,9 +31,17 @@ void _flutterCallkitIncomingCallbackDispatcher() {
     final int rawHandle =
         await channel.invokeMethod<int>('getBackgroundHandler') ?? 0;
 
-    final callback = PluginUtilities.getCallbackFromHandle(
+    if (rawHandle == 0) {
+      return;
+    }
+
+    final Function? callback = PluginUtilities.getCallbackFromHandle(
       CallbackHandle.fromRawHandle(rawHandle),
-    ) as Future<void> Function(CallEvent callEvent);
+    );
+
+    if (callback is! BackgroundMessageHandler) {
+      return;
+    }
 
     final event = FlutterCallkitIncoming._receiveCallEvent({
       'event': call.method,
@@ -43,6 +51,25 @@ void _flutterCallkitIncomingCallbackDispatcher() {
       await callback(event);
     }
   });
+
+  // Native iOS queues CallKit actions until this isolate has installed its
+  // method handler. Without this handshake, a fast lock-screen decline can
+  // arrive while the headless Flutter engine is still starting and be lost.
+  unawaited(_signalCallkitBackgroundInitialized(channel));
+}
+
+Future<void> _signalCallkitBackgroundInitialized(MethodChannel channel) async {
+  // The Dart entrypoint can run a few milliseconds before iOS finishes
+  // registering this plugin on the new engine. Retry the handshake so queued
+  // CallKit actions are still released once the native channel is available.
+  for (int attempt = 0; attempt < 20; attempt++) {
+    try {
+      await channel.invokeMethod<void>('backgroundInitialized');
+      return;
+    } on MissingPluginException {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+  }
 }
 
 class FlutterCallkitIncoming {
@@ -50,6 +77,10 @@ class FlutterCallkitIncoming {
       MethodChannel('flutter_callkit_incoming');
   static const EventChannel _eventChannel =
       EventChannel('flutter_callkit_incoming_events');
+  static final Stream<CallEvent?> _events = _eventChannel
+      .receiveBroadcastStream()
+      .map(_receiveCallEvent)
+      .asBroadcastStream();
 
   /// Set a message handler function which is called when the app is in the
   /// background or terminated.
@@ -83,8 +114,7 @@ class FlutterCallkitIncoming {
   /// Event.ACTION_CALL_TOGGLE_AUDIO_SESSION - only iOS
   /// Event.DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP - only iOS
   /// }
-  static Stream<CallEvent?> get onEvent =>
-      _eventChannel.receiveBroadcastStream().map(_receiveCallEvent);
+  static Stream<CallEvent?> get onEvent => _events;
 
   /// Handle accept call from background when the app was killed.
   static void acceptCallHandle(ActionEvent handler) {
@@ -174,6 +204,31 @@ class FlutterCallkitIncoming {
   /// accept, decline, or ended event back to Flutter.
   static Future<void> endNativeSubsystemOnly(String id) async {
     await _channel.invokeMethod("endNativeSubsystemOnly", {'id': id});
+  }
+
+  /// Completes the pending iOS CallKit answer transaction after the app has
+  /// established signaling with its call server. No-op on Android.
+  static Future<bool> completeAnswer(String id) async {
+    return await _channel.invokeMethod<bool>("completeAnswer", {'id': id}) ??
+        false;
+  }
+
+  /// Fails the pending iOS CallKit answer transaction when signaling or local
+  /// media prerequisites cannot be established. No-op on Android.
+  static Future<void> failAnswer(String id) async {
+    await _channel.invokeMethod("failAnswer", {'id': id});
+  }
+
+  /// Whether CallKit currently owns an active iOS audio session.
+  static Future<bool> isAudioSessionActive() async {
+    return await _channel.invokeMethod<bool>("isAudioSessionActive") ?? false;
+  }
+
+  /// Replays CallKit's active audio-session notification after an RTC engine
+  /// has attached. A cold-started engine can otherwise miss the original
+  /// activation callback and join with a silent microphone.
+  static Future<bool> resumeCallAudio() async {
+    return await _channel.invokeMethod<bool>("resumeCallAudio") ?? false;
   }
 
   /// Set call has been connected successfully.
@@ -348,10 +403,10 @@ class FlutterCallkitIncoming {
         return CallEventActionCallToggleGroup(id, callUUIDToGroupWith);
       case CallEventConstants.actionCallToggleAudioSession:
         final body = data['body'] as Map<Object?, Object?>?;
-        final isActive = body?['isActive'] as bool?;
+        final isActive = (body?['isActive'] ?? body?['isActivate']) as bool?;
         if (isActive == null) {
           throw const FormatException(
-              '[ACTION_CALL_TOGGLE_AUDIO_SESSION] id is null.');
+              '[ACTION_CALL_TOGGLE_AUDIO_SESSION] isActive is null.');
         }
         return CallEventActionCallToggleAudioSession(isActive);
       case CallEventConstants.actionCallCustom:

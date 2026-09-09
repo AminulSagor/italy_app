@@ -194,7 +194,7 @@ class _TopicCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 108.h,
+        constraints: const BoxConstraints(minHeight: 108),
         padding: EdgeInsets.fromLTRB(25.w, 18.h, 25.w, 17.h),
         decoration: BoxDecoration(
           color: AppColors.white,
@@ -226,6 +226,8 @@ class _TopicCard extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 20.sp,
                       height: 1.18,
@@ -237,6 +239,8 @@ class _TopicCard extends StatelessWidget {
                   SizedBox(height: 5.h),
                   Text(
                     subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 10.sp,
                       height: 1.2,

@@ -223,11 +223,15 @@ class QuizWrongAnswerFeedback extends StatelessWidget {
 class QuizExitConfirmationDialog extends StatelessWidget {
   final VoidCallback onKeepGoingTap;
   final VoidCallback onQuitTap;
+  final String warningText;
+  final String quitLabel;
 
   const QuizExitConfirmationDialog({
     super.key,
     required this.onKeepGoingTap,
     required this.onQuitTap,
+    required this.warningText,
+    required this.quitLabel,
   });
 
   @override
@@ -315,8 +319,8 @@ class QuizExitConfirmationDialog extends StatelessWidget {
               ),
               SizedBox(height: 10.h),
               Text(
-                'quit_quiz_progress_warning'.tr,
-                maxLines: 4,
+                warningText,
+                maxLines: 6,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -336,7 +340,7 @@ class QuizExitConfirmationDialog extends StatelessWidget {
               SizedBox(height: 12.h),
               CustomButton(
                 onPressed: onQuitTap,
-                text: 'quit_quiz'.tr,
+                text: quitLabel,
                 textColor: AppColors.blockDangerRed,
                 btnColor: AppColors.white,
                 borderColor: AppColors.blockDangerRed,

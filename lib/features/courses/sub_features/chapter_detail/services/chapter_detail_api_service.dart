@@ -66,6 +66,9 @@ class ChapterDetailApiService {
         hasQuiz &&
         _boolValue(quiz!['unlockRequirementEnabled'], fallback: false);
 
+    final bool quizCompleted =
+        hasQuiz && _boolValue(quiz!['quizCompleted'], fallback: false);
+
     final int rawUnlockPercent = hasQuiz
         ? _intValue(quiz!['unlockVideoWatchPercent'])
         : 80;
@@ -85,7 +88,11 @@ class ChapterDetailApiService {
       courseId: courseId,
       title: _fallbackString(lesson['title'], fallbackTitle),
       videoProgressLabel: hasVideo
-          ? _videoProgressLabel(progress.videoWatchPercent)
+          ? _videoProgressLabel(
+              percent: progress.videoWatchPercent,
+              unlockRequirementEnabled: unlockRequirementEnabled,
+              unlockVideoWatchPercent: unlockVideoWatchPercent,
+            )
           : 'video_not_given'.tr,
       watchedTimeLabel: _durationLabelFromPercent(
         percent: progress.videoWatchPercent,
@@ -132,7 +139,7 @@ class ChapterDetailApiService {
                 quiz!['description'],
                 'chapter_quiz_description'.tr,
               ),
-              status: progress.isCompleted
+              status: quizCompleted
                   ? ChapterQuizStatus.completed
                   : canStartQuiz
                   ? ChapterQuizStatus.enabled
@@ -150,6 +157,11 @@ class ChapterDetailApiService {
               unlockRequirementEnabled: unlockRequirementEnabled,
 
               unlockVideoWatchPercent: unlockVideoWatchPercent,
+              hasInProgressSession: _boolValue(
+                quiz!['hasInProgressSession'],
+                fallback: false,
+              ),
+              answeredQuestions: _intValue(quiz!['answeredQuestions']),
             ),
       progress: progress,
     );
@@ -163,6 +175,19 @@ class ChapterDetailApiService {
     );
 
     return ChapterVideoAccessModel.fromJson(_responseMap(response));
+  }
+
+  Future<void> recordLessonOpened({
+    required String courseId,
+    required String lessonId,
+  }) async {
+    await _apiClient.dio.post(
+      '/learning-progress/lessons/opened',
+      data: <String, dynamic>{
+        'courseId': courseId,
+        'lessonId': lessonId,
+      },
+    );
   }
 
   Future<void> recordVideoProgress({
@@ -335,8 +360,16 @@ class ChapterDetailApiService {
     );
   }
 
-  String _videoProgressLabel(int percent) {
-    if (percent >= 80) {
+  String _videoProgressLabel({
+    required int percent,
+    required bool unlockRequirementEnabled,
+    required int unlockVideoWatchPercent,
+  }) {
+    final String watchedLabel = '$percent% ${'watched'.tr}';
+    if (!unlockRequirementEnabled) {
+      return watchedLabel;
+    }
+    if (percent >= unlockVideoWatchPercent) {
       return '$percent% ${'watched'.tr} – ${'quiz_unlocked'.tr}';
     }
     return '$percent% ${'watched'.tr} – ${'keep_going_1'.tr}';

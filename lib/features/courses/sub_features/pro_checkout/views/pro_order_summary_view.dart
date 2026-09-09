@@ -98,6 +98,45 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
                           currency: controller.selectedCurrency.value,
                           isCouponApplied: order.hasCoupon,
                         ),
+                        if (order.purchaseOptions.length > 1) ...<Widget>[
+                          SizedBox(height: 18.h),
+                          _SectionTitle(title: 'course_access_option'.tr),
+                          SizedBox(height: 10.h),
+                          Wrap(
+                            spacing: 10.w,
+                            runSpacing: 10.h,
+                            children: order.purchaseOptions
+                                .map((ProStoreProductModel option) {
+                                  final bool selected =
+                                      option.id ==
+                                      order.selectedProviderProductId;
+                                  return ChoiceChip(
+                                    selected: selected,
+                                    onSelected: controller.isLoading.value
+                                        ? null
+                                        : (_) => controller
+                                              .selectPurchaseOption(option),
+                                    label: Text(
+                                      option.accessType == 'time_limited'
+                                          ? 'time_limited_course_access'
+                                                .trParams(<String, String>{
+                                                  'days': option.durationDays
+                                                      .toString(),
+                                                })
+                                          : 'lifetime_course_access'.tr,
+                                    ),
+                                    selectedColor: AppColors.primaryGreen,
+                                    labelStyle: TextStyle(
+                                      color: selected
+                                          ? AppColors.white
+                                          : AppColors.homePrimaryText,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  );
+                                })
+                                .toList(growable: false),
+                          ),
+                        ],
                         SizedBox(height: 22.h),
 
                         _SectionTitle(title: 'course_features'.tr),
@@ -105,19 +144,21 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
                         ProFeatureGrid(features: order.features),
                         SizedBox(height: 24.h),
 
-                        _SectionTitle(title: 'coupon_code'.tr),
-                        SizedBox(height: 12.h),
-                        ProCouponInput(
-                          controller: controller.couponTextController,
-                          isCouponApplied: order.hasCoupon,
-                          isLoading: controller.isApplyingCoupon.value,
-                          appliedCode: order.couponCode,
-                          discountPercentage: order.discountPercentage,
-                          pricingNote: order.pricingNote,
-                          onChanged: controller.onCouponChanged,
-                          onApplyTap: controller.applyCoupon,
-                          onRemoveTap: controller.clearCoupon,
-                        ),
+                        ...<Widget>[
+                          _SectionTitle(title: 'coupon_code'.tr),
+                          SizedBox(height: 12.h),
+                          ProCouponInput(
+                            controller: controller.couponTextController,
+                            isCouponApplied: order.hasCoupon,
+                            isLoading: controller.isApplyingCoupon.value,
+                            appliedCode: order.couponCode,
+                            discountPercentage: order.discountPercentage,
+                            pricingNote: order.pricingNote,
+                            onChanged: controller.onCouponChanged,
+                            onApplyTap: controller.applyCoupon,
+                            onRemoveTap: controller.clearCoupon,
+                          ),
+                        ],
 
                         if (controller
                             .billingError

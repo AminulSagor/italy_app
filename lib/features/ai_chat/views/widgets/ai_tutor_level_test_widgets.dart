@@ -75,6 +75,8 @@ class AiTutorLevelMeasureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compactTextHeight = Get.locale?.languageCode == 'bn' ? 1.25 : 1.0;
+
     return Container(
       height: 87.h,
       width: double.infinity,
@@ -111,7 +113,7 @@ class AiTutorLevelMeasureCard extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
-                    height: 1,
+                    height: compactTextHeight,
                     fontWeight: FontWeight.w900,
                     color: const Color(0xFF303635),
                   ),
@@ -121,7 +123,7 @@ class AiTutorLevelMeasureCard extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     fontSize: 14.sp,
-                    height: 1,
+                    height: compactTextHeight,
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF636A67),
                   ),

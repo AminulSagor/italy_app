@@ -45,7 +45,6 @@ class SplashView extends GetView<SplashController> {
                     titleSuffix: 'splash_slide_2_suffix'.tr,
                     description: 'splash_slide_2_desc'.tr,
                   ),
-
                 ],
               ),
 
@@ -121,185 +120,205 @@ class SplashView extends GetView<SplashController> {
   // =========================================================
 
   Widget _buildWelcomePage(BuildContext context, SplashController controller) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.splashWelcomeGradient,
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 18.h),
-      child: Column(
-        children: <Widget>[
-          SizedBox(height: 56.h),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: AppColors.splashWelcomeGradient,
+          ),
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 18.h,
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 56.h),
 
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                top: -30.h,
-                left: 120.w,
-                right: 0,
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    width: 100.w,
-                    height: 100.w,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: Color.fromARGB(255, 73, 227, 26),
-                          blurRadius: 150,
-                          spreadRadius: 12,
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Positioned(
+                            top: -30.h,
+                            left: 120.w,
+                            right: 0,
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: Container(
+                                width: 100.w,
+                                height: 100.w,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  boxShadow: <BoxShadow>[
+                                    BoxShadow(
+                                      color: Color.fromARGB(255, 73, 227, 26),
+                                      blurRadius: 150,
+                                      spreadRadius: 12,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              CircleAvatar(
+                                radius: 13.r,
+                                backgroundColor: AppColors.primaryGreen,
+                                child: Icon(
+                                  Icons.language,
+                                  color: AppColors.white,
+                                  size: 14.r,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                'app_name'.tr,
+                                style:
+                                    TextStyle(
+                                      fontSize: AppFont.font36.sp,
+                                      fontWeight: FontWeight.w800,
+                                      height: 40 / 36,
+                                      letterSpacing: -0.9,
+                                      color: AppColors.headerText,
+                                    ).copyWith(
+                                      fontSize: AppFont.font22.sp,
+                                      height: 1,
+                                      letterSpacing: 0,
+                                      color: AppColors.splashBrandText,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                      const Spacer(),
+
+                      Text(
+                        'splash_title_line1'.tr,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineLarge
+                            ?.copyWith(
+                              height: 1.12,
+                              color: AppColors.splashTextPrimary,
+                            ),
+                      ),
+
+                      Text(
+                        'splash_title_line2'.tr,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineLarge
+                            ?.copyWith(
+                              fontStyle: FontStyle.italic,
+                              color: AppColors.primaryGreen,
+                            ),
+                      ),
+
+                      SizedBox(height: 26.h),
+
+                      Align(
+                        child: Container(
+                          padding: EdgeInsets.all(8.r),
+                          decoration: BoxDecoration(
+                            color: AppColors.splashChipContainer,
+                            borderRadius: BorderRadius.circular(kRadius42.r),
+                            border: Border.all(
+                              color: AppColors.splashChipBorder,
+                            ),
+                            boxShadow: const <BoxShadow>[
+                              BoxShadow(
+                                color: AppColors.legacyColor10000000,
+                                offset: Offset(0, 3),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              // Legacy implementation kept for quick revert.
+                              // _ServiceChip(
+                              //   icon: Icons.menu_book,
+                              //   label: 'splash_service_italian'.tr,
+                              //   active: true,
+                              // ),
+                              // _ServiceChip(
+                              //   icon: Icons.gavel,
+                              //   label: 'splash_service_caf'.tr,
+                              //   iconColor: AppColors.splashChipCafIcon,
+                              // ),
+                              // _ServiceChip(
+                              //   icon: Icons.work,
+                              //   label: 'splash_service_cv'.tr,
+                              //   iconColor: AppColors.splashChipCvIcon,
+                              // ),
+                              _ServiceChipHighlighted(
+                                icon: Icons.menu_book,
+                                label: 'splash_service_italian'.tr,
+                                iconColor: AppColors.splashChipActiveIcon,
+                                iconBackground: AppColors.splashChipActiveBg,
+                              ),
+                              SizedBox(width: 10.w),
+                              _ServiceChipPlain(
+                                icon: Icons.work,
+                                label: 'splash_service_cv'.tr,
+                                iconColor: AppColors.splashChipCvIcon,
+                                iconBackground: AppColors.splashChipInactiveBg,
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+
+                      SizedBox(height: 28.h),
+
+                      CustomButton(
+                        onPressed: controller.onPrimaryButtonTap,
+                        text: 'splash_get_started'.tr,
+                        height: 60,
+                        width: 270,
+                        isElevated: true,
+                        //showShadow: false,
+                      ),
+
+                      SizedBox(height: 16.h),
+
+                      // Container(
+                      //   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      //   decoration: BoxDecoration(
+                      //     color: AppColors.splashTrustedBadgeBg,
+                      //     borderRadius: BorderRadius.circular(kRadius20.r),
+                      //   ),
+                      //   child: Text(
+                      //     'splash_trusted'.tr,
+                      //     style: TextStyle(
+                      //       fontSize: AppFont.font11.sp,
+                      //       fontWeight: FontWeight.w700,
+                      //       letterSpacing: 1.1,
+                      //       color: AppColors.splashTrustedBadgeText,
+                      //     ),
+                      //   ),
+                      // ),
+                      SizedBox(height: 20.h),
+
+                      _buildLanguageSwitcher(controller),
+
+                      const Spacer(flex: 2),
+                    ],
                   ),
                 ),
               ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  CircleAvatar(
-                    radius: 13.r,
-                    backgroundColor: AppColors.primaryGreen,
-                    child: Icon(
-                      Icons.language,
-                      color: AppColors.white,
-                      size: 14.r,
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'app_name'.tr,
-                    style:
-                        TextStyle(
-                          fontSize: AppFont.font36.sp,
-                          fontWeight: FontWeight.w800,
-                          height: 40 / 36,
-                          letterSpacing: -0.9,
-                          color: AppColors.headerText,
-                        ).copyWith(
-                          fontSize: AppFont.font22.sp,
-                          height: 1,
-                          letterSpacing: 0,
-                          color: AppColors.splashBrandText,
-                        ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          const Spacer(),
-
-          Text(
-            'splash_title_line1'.tr,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              height: 1.12,
-              color: AppColors.splashTextPrimary,
             ),
           ),
-
-          Text(
-            'splash_title_line2'.tr,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              fontStyle: FontStyle.italic,
-              color: AppColors.primaryGreen,
-            ),
-          ),
-
-          SizedBox(height: 26.h),
-
-          Align(
-            child: Container(
-              padding: EdgeInsets.all(8.r),
-              decoration: BoxDecoration(
-                color: AppColors.splashChipContainer,
-                borderRadius: BorderRadius.circular(kRadius42.r),
-                border: Border.all(color: AppColors.splashChipBorder),
-                boxShadow: const <BoxShadow>[
-                  BoxShadow(
-                    color: AppColors.legacyColor10000000,
-                    offset: Offset(0, 3),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  // Legacy implementation kept for quick revert.
-                  // _ServiceChip(
-                  //   icon: Icons.menu_book,
-                  //   label: 'splash_service_italian'.tr,
-                  //   active: true,
-                  // ),
-                  // _ServiceChip(
-                  //   icon: Icons.gavel,
-                  //   label: 'splash_service_caf'.tr,
-                  //   iconColor: AppColors.splashChipCafIcon,
-                  // ),
-                  // _ServiceChip(
-                  //   icon: Icons.work,
-                  //   label: 'splash_service_cv'.tr,
-                  //   iconColor: AppColors.splashChipCvIcon,
-                  // ),
-                  _ServiceChipHighlighted(
-                    icon: Icons.menu_book,
-                    label: 'splash_service_italian'.tr,
-                    iconColor: AppColors.splashChipActiveIcon,
-                    iconBackground: AppColors.splashChipActiveBg,
-                  ),
-                  SizedBox(width: 10.w),
-                  _ServiceChipPlain(
-                    icon: Icons.work,
-                    label: 'splash_service_cv'.tr,
-                    iconColor: AppColors.splashChipCvIcon,
-                    iconBackground: AppColors.splashChipInactiveBg,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          SizedBox(height: 28.h),
-
-          CustomButton(
-            onPressed: controller.onPrimaryButtonTap,
-            text: 'splash_get_started'.tr,
-            height: 60,
-            width: 270,
-            isElevated: true,
-            //showShadow: false,
-          ),
-
-          SizedBox(height: 16.h),
-
-          // Container(
-          //   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-          //   decoration: BoxDecoration(
-          //     color: AppColors.splashTrustedBadgeBg,
-          //     borderRadius: BorderRadius.circular(kRadius20.r),
-          //   ),
-          //   child: Text(
-          //     'splash_trusted'.tr,
-          //     style: TextStyle(
-          //       fontSize: AppFont.font11.sp,
-          //       fontWeight: FontWeight.w700,
-          //       letterSpacing: 1.1,
-          //       color: AppColors.splashTrustedBadgeText,
-          //     ),
-          //   ),
-          // ),
-          SizedBox(height: 20.h),
-
-          _buildLanguageSwitcher(controller),
-
-          const Spacer(flex: 2),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -379,95 +398,106 @@ class SplashView extends GetView<SplashController> {
           color: AppColors.splashTextPrimary,
         );
 
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.splashOnboardingGradient,
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 18.h),
-      child: Column(
-        children: <Widget>[
-          SizedBox(height: 42.h),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: AppColors.splashOnboardingGradient,
+          ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 18.h),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - 36.h,
+              ),
+              child: Column(
+                children: <Widget>[
+                  SizedBox(height: 42.h),
 
-          SizedBox(
-            height: 210.h,
-            width: double.infinity,
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: <Widget>[
-                if (index == 1)
-                  Transform.translate(
-                    offset: Offset(-15.w, 40.h),
-                    child: Transform.scale(
-                      scale: 2.5,
-                      child: Image.asset(
-                        _splashHeaderImages[imageIndex],
-                        fit: BoxFit.contain,
-                      ),
+                  SizedBox(
+                    height: 210.h,
+                    width: double.infinity,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.center,
+                      children: <Widget>[
+                        if (index == 1)
+                          Transform.translate(
+                            offset: Offset(-15.w, 40.h),
+                            child: Transform.scale(
+                              scale: 2.5,
+                              child: Image.asset(
+                                _splashHeaderImages[imageIndex],
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        if (index == 2)
+                          Transform.translate(
+                            offset: Offset(30.w, 65.h),
+                            child: Transform.scale(
+                              scale: 2.25,
+                              child: Image.asset(
+                                _splashHeaderImages[imageIndex],
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        if (index == 3)
+                          Transform.translate(
+                            offset: Offset(55.w, 50.h),
+                            child: Transform.scale(
+                              scale: 2,
+                              child: Image.asset(
+                                _splashHeaderImages[imageIndex],
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                if (index == 2)
-                  Transform.translate(
-                    offset: Offset(30.w, 65.h),
-                    child: Transform.scale(
-                      scale: 2.25,
-                      child: Image.asset(
-                        _splashHeaderImages[imageIndex],
-                        fit: BoxFit.contain,
-                      ),
+
+                  SizedBox(height: 80.h),
+
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: title, style: headlineLargeStyle),
+                        TextSpan(
+                          text: highlight,
+                          style: headlineLargeStyle.copyWith(
+                            color: AppColors.splashHighlight,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        TextSpan(text: titleSuffix, style: headlineLargeStyle),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                    style: headlineLargeStyle,
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  Text(
+                    description,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: AppFont.font15.sp,
+                      fontWeight: FontWeight.w500,
+                      height: 1.45,
+                      color: AppColors.splashBodyText,
                     ),
                   ),
-                if (index == 3)
-                  Transform.translate(
-                    offset: Offset(55.w, 50.h),
-                    child: Transform.scale(
-                      scale: 2,
-                      child: Image.asset(
-                        _splashHeaderImages[imageIndex],
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-              ],
+
+                  SizedBox(height: 170.h),
+                ],
+              ),
             ),
           ),
-
-          SizedBox(height: 80.h),
-
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: title, style: headlineLargeStyle),
-                TextSpan(
-                  text: highlight,
-                  style: headlineLargeStyle.copyWith(
-                    color: AppColors.splashHighlight,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                TextSpan(text: titleSuffix, style: headlineLargeStyle),
-              ],
-            ),
-            textAlign: TextAlign.center,
-            style: headlineLargeStyle,
-          ),
-
-          SizedBox(height: 16.h),
-
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: AppFont.font15.sp,
-              fontWeight: FontWeight.w500,
-              height: 1.45,
-              color: AppColors.splashBodyText,
-            ),
-          ),
-
-          SizedBox(height: 170.h),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -545,12 +575,9 @@ class _ServiceChipPlain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 124.h,
       width: 90.w,
-      padding: EdgeInsets.symmetric(
-        horizontal: 10.w,
-        vertical: 18.h,
-      ),
+      constraints: const BoxConstraints(minHeight: 124),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 18.h),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(kRadius36.r),
@@ -565,29 +592,23 @@ class _ServiceChipPlain extends StatelessWidget {
               color: iconBackground,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              size: 21.r,
-              color: iconColor,
-            ),
+            child: Icon(icon, size: 21.r, color: iconColor),
           ),
 
           SizedBox(height: 8.h),
 
-          Expanded(
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  softWrap: false,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: AppFont.font12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.splashTextSecondary,
-                  ),
+          Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                softWrap: false,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: AppFont.font12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.splashTextSecondary,
                 ),
               ),
             ),

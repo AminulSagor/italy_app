@@ -10,8 +10,16 @@ class ScreenProtectionService extends GetxService {
     // Keep the current protection state for unnamed nested routes.
     if (route.isEmpty) return;
 
-    final bool shouldProtect =
+    const Set<String> screenshotAllowedCourseRoutes = <String>{
+      '/courses/pro/order-summary',
+      '/courses/pro/checkout',
+      '/courses/pro/purchase-success',
+    };
+
+    final bool isCourseRoute =
         route == '/courses' || route.startsWith('/courses/');
+    final bool shouldProtect =
+        isCourseRoute && !screenshotAllowedCourseRoutes.contains(route);
 
 
     if (_isProtected == shouldProtect) return;

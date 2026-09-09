@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../../core/controllers/adaptive_network_video_controller.dart';
+import '../../../../../core/controllers/video_playback_wakelock.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
@@ -35,6 +36,7 @@ class ChapterVideoCard extends StatefulWidget {
 
 class _ChapterVideoCardState extends State<ChapterVideoCard> {
   VideoPlayerController? _videoController;
+  final VideoPlaybackWakelock _playbackWakelock = VideoPlaybackWakelock();
   Future<void>? _initializationFuture;
   late final ValueNotifier<bool> _hasWatchedFullyNotifier;
   final ValueNotifier<VideoPlayerController?> _controllerNotifier =
@@ -103,6 +105,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
 
   @override
   void dispose() {
+    _playbackWakelock.dispose();
     _disposePlayer();
     _controllerNotifier.dispose();
     _selectedQualityNotifier.dispose();
@@ -169,6 +172,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       _videoController = controller;
       _controllerNotifier.value = controller;
       controller.addListener(_onVideoTick);
+      _playbackWakelock.attach(controller);
 
       setState(() {
         _isInitializing = false;
@@ -262,6 +266,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     final VideoPlayerController? controller = _videoController;
     if (controller == null) return;
 
+    _playbackWakelock.detach();
     _controllerNotifier.value = null;
     controller.removeListener(_onVideoTick);
     controller.dispose();
@@ -413,6 +418,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     _videoController = newController;
     _controllerNotifier.value = newController;
     _selectedQualityNotifier.value = nextLabel;
+    _playbackWakelock.attach(newController);
 
     try {
       if (wasPlaying) {
@@ -426,6 +432,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       _controllerNotifier.value = oldController;
       _selectedQualityNotifier.value = oldLabel;
       oldController.addListener(_onVideoTick);
+      _playbackWakelock.attach(oldController);
 
       await newController.dispose();
 

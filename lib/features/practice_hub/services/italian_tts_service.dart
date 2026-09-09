@@ -1,10 +1,17 @@
-
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:italir_pothe/core/utils/app_logger.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import '../models/important_verb_models.dart';
 
+class ItalianTtsUnavailableException implements Exception {
+  const ItalianTtsUnavailableException(this.message);
 
+  final String message;
+
+  @override
+  String toString() => message;
+}
 
 class ItalianTtsService {
   ItalianTtsService({FlutterTts? flutterTts})
@@ -15,33 +22,44 @@ class ItalianTtsService {
   bool _isInitialized = false;
 
   // Existing Important Verbs functionality.
-  Future<void> speak(ImportantVerbTtsModel tts) async {
-    await speakText(tts.text, locale: tts.locale);
+  Future<bool> speak(ImportantVerbTtsModel tts) async {
+    return speakText(tts.text, locale: tts.locale);
   }
 
-  Future<void> speakText(String text, {String locale = 'it-IT'}) async {
+  Future<bool> speakText(String text, {String locale = 'it-IT'}) async {
     final String normalizedText = text.replaceAll(RegExp(r'\s+'), ' ').trim();
 
     if (normalizedText.isEmpty) {
-      return;
+      return false;
     }
 
-    await _initialize(locale);
+    try {
+      await _initialize(locale);
+      await _flutterTts.stop();
+      await _setItalianLanguage(locale);
+      final dynamic result = await _flutterTts.speak(normalizedText);
+      if (result == 1) return true;
 
-    // Stop any previous pronunciation first.
-    await _flutterTts.stop();
-
-    await _setItalianLanguage(locale);
-
-    final dynamic result = await _flutterTts.speak(normalizedText);
-
-    if (result != 1) {
-      throw StateError('Italian pronunciation could not be started.');
+      await _reportHandledFailure(
+        const ItalianTtsUnavailableException(
+          'The Android TTS engine refused to start speech.',
+        ),
+        StackTrace.current,
+      );
+      return false;
+    } catch (error, stackTrace) {
+      _isInitialized = false;
+      await _reportHandledFailure(error, stackTrace);
+      return false;
     }
   }
 
   Future<void> stop() async {
-    await _flutterTts.stop();
+    try {
+      await _flutterTts.stop();
+    } catch (error, stackTrace) {
+      await _reportHandledFailure(error, stackTrace);
+    }
   }
 
   Future<void> _initialize(String requestedLocale) async {
@@ -85,6 +103,28 @@ class ItalianTtsService {
   }
 
   Future<void> dispose() async {
-    await _flutterTts.stop();
+    await stop();
+  }
+
+  Future<void> _reportHandledFailure(
+    Object error,
+    StackTrace stackTrace,
+  ) async {
+    AppLogger.log(
+      'Italian pronunciation was unavailable.',
+      name: 'ItalianTtsService',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    try {
+      await FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: 'Handled Italian TTS failure',
+        fatal: false,
+      );
+    } catch (_) {
+      // Diagnostics must never make TTS failure fatal.
+    }
   }
 }

@@ -154,6 +154,24 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
     _showControlsTemporarily();
   }
 
+  Future<void> _seekBy(Duration offset) async {
+    final VideoPlayerValue value = widget.controller.value;
+    if (!value.isInitialized || value.duration.inMilliseconds <= 0) {
+      return;
+    }
+
+    final int targetMilliseconds =
+        (value.position + offset).inMilliseconds.clamp(
+              0,
+              value.duration.inMilliseconds,
+            );
+
+    await widget.controller.seekTo(
+      Duration(milliseconds: targetMilliseconds),
+    );
+    _showControlsTemporarily();
+  }
+
   Future<void> _showSettingsSheet() async {
     _showControlsPersistently();
 
@@ -382,6 +400,8 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
                     showSettings: widget.showSettings,
                     onSettingsTap: _showSettingsSheet,
                     onPlayPauseTap: _togglePlayback,
+                    onRewindTap: () => _seekBy(const Duration(seconds: -10)),
+                    onForwardTap: () => _seekBy(const Duration(seconds: 10)),
                     onSeek: _seekTo,
                     onFullscreenTap: widget.onFullscreenTap,
                     onCloseFullscreenTap: widget.onCloseFullscreenTap,
@@ -426,6 +446,8 @@ class _VideoControlsOverlay extends StatelessWidget {
   final bool showSettings;
   final VoidCallback onSettingsTap;
   final VoidCallback onPlayPauseTap;
+  final VoidCallback onRewindTap;
+  final VoidCallback onForwardTap;
   final ValueChanged<double> onSeek;
   final VoidCallback? onFullscreenTap;
   final VoidCallback? onCloseFullscreenTap;
@@ -440,6 +462,8 @@ class _VideoControlsOverlay extends StatelessWidget {
     required this.showSettings,
     required this.onSettingsTap,
     required this.onPlayPauseTap,
+    required this.onRewindTap,
+    required this.onForwardTap,
     required this.onSeek,
     this.onFullscreenTap,
     this.onCloseFullscreenTap,
@@ -483,37 +507,56 @@ class _VideoControlsOverlay extends StatelessWidget {
             ),
 
           Center(
-            child: GestureDetector(
-              onTap: value.isBuffering ? null : onPlayPauseTap,
-              child: Container(
-                width: playButtonSize,
-                height: playButtonSize,
-                decoration: BoxDecoration(
-                  color: AppColors.black.withValues(alpha: 0.42),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.white.withValues(alpha: 0.5),
-                  ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                _VideoActionButton(
+                  tooltip: 'Back 10 seconds',
+                  icon: Icons.replay_10_rounded,
+                  isFullscreen: isFullscreen,
+                  onTap: value.isBuffering ? null : onRewindTap,
                 ),
-                child: Center(
-                  child: value.isBuffering
-                      ? SizedBox(
-                    width: playIconSize * 0.7,
-                    height: playIconSize * 0.7,
-                    child: const CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: AppColors.white,
+                SizedBox(width: isFullscreen ? 14 : 14.w),
+                GestureDetector(
+                  onTap: value.isBuffering ? null : onPlayPauseTap,
+                  child: Container(
+                    width: playButtonSize,
+                    height: playButtonSize,
+                    decoration: BoxDecoration(
+                      color: AppColors.black.withValues(alpha: 0.42),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.white.withValues(alpha: 0.5),
+                      ),
                     ),
-                  )
-                      : Icon(
-                    value.isPlaying
-                        ? Icons.pause
-                        : Icons.play_arrow,
-                    color: AppColors.white,
-                    size: playIconSize,
+                    child: Center(
+                      child: value.isBuffering
+                          ? SizedBox(
+                              width: playIconSize * 0.7,
+                              height: playIconSize * 0.7,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: AppColors.white,
+                              ),
+                            )
+                          : Icon(
+                              value.isPlaying
+                                  ? Icons.pause
+                                  : Icons.play_arrow,
+                              color: AppColors.white,
+                              size: playIconSize,
+                            ),
+                    ),
                   ),
                 ),
-              ),
+                SizedBox(width: isFullscreen ? 14 : 14.w),
+                _VideoActionButton(
+                  tooltip: 'Forward 10 seconds',
+                  icon: Icons.forward_10_rounded,
+                  isFullscreen: isFullscreen,
+                  onTap: value.isBuffering ? null : onForwardTap,
+                ),
+              ],
             ),
           ),
 

@@ -267,8 +267,15 @@ class QuizView extends GetView<QuizController> {
   }
 
   Future<void> _showQuitDialog() async {
+    final bool isResumableLessonQuiz =
+        controller.hasApiLessonQuiz && !controller.isExamMode;
+
     await Get.dialog<void>(
       QuizExitConfirmationDialog(
+        warningText: isResumableLessonQuiz
+            ? 'exit_resumable_quiz_warning'.tr
+            : 'quit_quiz_progress_warning'.tr,
+        quitLabel: isResumableLessonQuiz ? 'exit_quiz'.tr : 'quit_quiz'.tr,
         onKeepGoingTap: () => Get.back<void>(),
         onQuitTap: () {
           Get.back<void>();

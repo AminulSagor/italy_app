@@ -16,80 +16,99 @@ class MessageIncomingCallView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
-        child: Obx(
-          () => Padding(
-            padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 30.h),
-            child: Column(
-              children: <Widget>[
-                SizedBox(height: 40.h),
-                Icon(
-                  controller.callType.isVideo
-                      ? Icons.videocam_rounded
-                      : Icons.call_rounded,
-                  size: 34.w,
-                  color: AppColors.primaryGreen,
-                ),
-                SizedBox(height: 14.h),
-                Text(
-                  controller.statusLabel.value,
-                  style: TextStyle(
-                    fontSize: AppFont.font18.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.homePrimaryText,
-                  ),
-                ),
-                const Spacer(),
-                _CallerAvatar(
-                  avatarUrl: controller.caller.avatarUrl,
-                  name: controller.caller.name,
-                ),
-                SizedBox(height: 22.h),
-                Text(
-                  controller.caller.name,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28.sp,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.homePrimaryText,
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                Text(
-                  controller.callType.isVideo
-                      ? 'incoming_video_call'.tr
-                      : 'incoming_voice_call'.tr,
-                  style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.homePrimaryText.withValues(alpha: 0.65),
-                  ),
-                ),
-                const Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    _IncomingCallButton(
-                      icon: Icons.call_end_rounded,
-                      label: 'gen_decline'.tr,
-                      backgroundColor: Colors.red,
-                      isLoading: controller.isProcessing.value,
-                      onPressed: controller.rejectCall,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return Obx(
+              () => SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 28.w,
+                        vertical: 30.h,
+                      ),
+                      child: Column(
+                        children: <Widget>[
+                          SizedBox(height: 40.h),
+                          Icon(
+                            controller.callType.isVideo
+                                ? Icons.videocam_rounded
+                                : Icons.call_rounded,
+                            size: 34.w,
+                            color: AppColors.primaryGreen,
+                          ),
+                          SizedBox(height: 14.h),
+                          Text(
+                            controller.statusLabel.value,
+                            style: TextStyle(
+                              fontSize: AppFont.font18.sp,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.homePrimaryText,
+                            ),
+                          ),
+                          const Spacer(),
+                          _CallerAvatar(
+                            avatarUrl: controller.caller.avatarUrl,
+                            name: controller.caller.name,
+                          ),
+                          SizedBox(height: 22.h),
+                          Text(
+                            controller.caller.name,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 28.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.homePrimaryText,
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+                          Text(
+                            controller.callType.isVideo
+                                ? 'incoming_video_call'.tr
+                                : 'incoming_voice_call'.tr,
+                            style: TextStyle(
+                              fontSize: AppFont.font16.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.homePrimaryText.withValues(
+                                alpha: 0.65,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              _IncomingCallButton(
+                                icon: Icons.call_end_rounded,
+                                label: 'gen_decline'.tr,
+                                backgroundColor: Colors.red,
+                                isLoading: controller.isProcessing.value,
+                                onPressed: controller.rejectCall,
+                              ),
+                              _IncomingCallButton(
+                                icon: controller.callType.isVideo
+                                    ? Icons.videocam_rounded
+                                    : Icons.call_rounded,
+                                label: 'gen_answer'.tr,
+                                backgroundColor: AppColors.primaryGreen,
+                                isLoading: controller.isProcessing.value,
+                                onPressed: controller.answerCall,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 42.h),
+                        ],
+                      ),
                     ),
-                    _IncomingCallButton(
-                      icon: controller.callType.isVideo
-                          ? Icons.videocam_rounded
-                          : Icons.call_rounded,
-                      label: 'gen_answer'.tr,
-                      backgroundColor: AppColors.primaryGreen,
-                      isLoading: controller.isProcessing.value,
-                      onPressed: controller.answerCall,
-                    ),
-                  ],
+                  ),
                 ),
-                SizedBox(height: 42.h),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

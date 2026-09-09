@@ -14,6 +14,7 @@ import '../../routes/routes.dart';
 import '../controllers/user_session_controller.dart';
 import '../localization/translation_service.dart';
 import '../services/api_client.dart';
+import '../services/app_update_service.dart';
 import '../services/auth_service.dart';
 import '../services/course_purchase_recovery_service.dart';
 import '../services/current_user_summary_service.dart';
@@ -21,6 +22,7 @@ import '../services/device_push_token_service.dart';
 import '../services/learning_activity_api_service.dart';
 import '../services/learning_activity_tracker_service.dart';
 import '../services/notification_summary_service.dart';
+import '../services/otp_session_service.dart';
 import '../services/storage_service.dart';
 import '../services/token_service.dart';
 
@@ -45,6 +47,11 @@ class AppBootstrapController extends GetxController {
       permanent: true,
     );
 
+    await Get.putAsync<OtpSessionService>(
+      () => OtpSessionService(Get.find<StorageService>()).init(),
+      permanent: true,
+    );
+
     if (!Get.isRegistered<TokenService>()) {
       await Get.putAsync<TokenService>(
         () => TokenService().init(),
@@ -58,6 +65,13 @@ class AppBootstrapController extends GetxController {
           tokenService: Get.find<TokenService>(),
           storageService: Get.find<StorageService>(),
         ),
+        permanent: true,
+      );
+    }
+
+    if (!Get.isRegistered<AppUpdateService>()) {
+      Get.put<AppUpdateService>(
+        AppUpdateService(apiClient: Get.find<ApiClient>()),
         permanent: true,
       );
     }
@@ -125,8 +139,7 @@ class AppBootstrapController extends GetxController {
       Get.put<ProCheckoutApiService>(
         ProCheckoutApiService(
           apiClient: Get.find<ApiClient>(),
-          userSessionController:
-          Get.find<UserSessionController>(),
+          userSessionController: Get.find<UserSessionController>(),
         ),
         permanent: true,
       );
@@ -136,8 +149,7 @@ class AppBootstrapController extends GetxController {
       Get.put<CourseGooglePlayBillingService>(
         CourseGooglePlayBillingService(
           storageService: Get.find<StorageService>(),
-          userSessionController:
-          Get.find<UserSessionController>(),
+          userSessionController: Get.find<UserSessionController>(),
         ),
         permanent: true,
       );
@@ -226,6 +238,8 @@ class AppBootstrapController extends GetxController {
 
   Future<void> _bootstrap() async {
     try {
+      await Get.find<AppUpdateService>().handleStartupUpdate();
+
       final StorageService storageService = Get.find<StorageService>();
       final TokenService tokenService = Get.find<TokenService>();
 
@@ -239,6 +253,7 @@ class AppBootstrapController extends GetxController {
           storageService.isLoggedIn && hasStoredToken;
 
       if (hasValidLocalSession) {
+        await Get.find<OtpSessionService>().clear();
         /*
          * Preserve the existing terminated-app accepted-call behavior.
          *
@@ -272,6 +287,32 @@ class AppBootstrapController extends GetxController {
         return;
       }
 
+      final OtpSessionService otpSessionService = Get.find<OtpSessionService>();
+      final PendingOtpSession? pendingOtpSession = await otpSessionService
+          .getValidSession();
+      if (pendingOtpSession != null) {
+        await _clearLocalStateBeforeOtpRestore(
+          storageService: storageService,
+          tokenService: tokenService,
+          hadStoredToken: hasStoredToken,
+        );
+        Get.offAllNamed(
+          pendingOtpSession.flow == OtpSessionFlow.passwordReset
+              ? AppRoutes.forgotPasswordOtp
+              : AppRoutes.signupOtp,
+        );
+        return;
+      }
+      if (otpSessionService.discardedExpiredSession) {
+        await _clearLocalStateBeforeOtpRestore(
+          storageService: storageService,
+          tokenService: tokenService,
+          hadStoredToken: hasStoredToken,
+        );
+        Get.offAllNamed(AppRoutes.login);
+        return;
+      }
+
       await _clearLocalUnauthenticatedState(
         storageService: storageService,
         tokenService: tokenService,
@@ -289,6 +330,24 @@ class AppBootstrapController extends GetxController {
           Get.currentRoute != AppRoutes.login) {
         Get.offAllNamed(AppRoutes.login);
       }
+    }
+  }
+
+  Future<void> _clearLocalStateBeforeOtpRestore({
+    required StorageService storageService,
+    required TokenService tokenService,
+    required bool hadStoredToken,
+  }) async {
+    await Get.find<LearningActivityTrackerService>().discardSession();
+
+    if (storageService.isLoggedIn) {
+      await storageService.clearLoggedInData();
+    }
+    if (hadStoredToken) {
+      await tokenService.clearTokens();
+    }
+    if (Get.isRegistered<UserSessionController>()) {
+      Get.find<UserSessionController>().clear();
     }
   }
 

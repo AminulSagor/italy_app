@@ -16,8 +16,9 @@ class UserSettingsService {
   static const int _fallbackMaximumAvatarBytes = 5 * 1024 * 1024;
 
   Future<UserSettingsProfileModel> getProfile() async {
-    final Response<dynamic> response =
-        await _apiClient.dio.get<dynamic>(_settingsEndpoint);
+    final Response<dynamic> response = await _apiClient.dio.get<dynamic>(
+      _settingsEndpoint,
+    );
     return UserSettingsProfileResponseModel.fromJson(
       _responseMap(response),
     ).profile;
@@ -126,11 +127,11 @@ class UserSettingsService {
 
     final ConfirmAvatarUploadPayloadModel payload =
         ConfirmAvatarUploadPayloadModel(
-      storageKey: prepared.storageKey,
-      originalName: originalName,
-      mimeType: mimeType,
-      sizeBytes: sizeBytes,
-    );
+          storageKey: prepared.storageKey,
+          originalName: originalName,
+          mimeType: mimeType,
+          sizeBytes: sizeBytes,
+        );
 
     final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '$_settingsEndpoint/avatar/confirm',
@@ -145,6 +146,16 @@ class UserSettingsService {
   ) async {
     final Response<dynamic> response = await _apiClient.dio.patch<dynamic>(
       '$_settingsEndpoint/password',
+      data: payload.toJson(),
+    );
+    return UserSettingsMessageModel.fromJson(_responseMap(response));
+  }
+
+  Future<UserSettingsMessageModel> setPassword(
+    SetUserPasswordPayloadModel payload,
+  ) async {
+    final Response<dynamic> response = await _apiClient.dio.patch<dynamic>(
+      '$_settingsEndpoint/password/set',
       data: payload.toJson(),
     );
     return UserSettingsMessageModel.fromJson(_responseMap(response));

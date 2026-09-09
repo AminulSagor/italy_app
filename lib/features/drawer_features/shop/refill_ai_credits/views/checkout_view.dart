@@ -4,6 +4,7 @@ import 'package:italir_pothe/core/themes/app_colors.dart';
 import 'package:italir_pothe/core/widgets/widgets.dart';
 import '../../models/shop_models.dart';
 import '../../shop_controller.dart';
+import '../../widgets/app_store_subscription_disclosure.dart';
 
 class CheckoutPage extends StatelessWidget {
   const CheckoutPage({super.key});
@@ -35,7 +36,6 @@ class CheckoutPage extends StatelessWidget {
             // const SizedBox(height: 44),
             // _CheckoutHeader(onBackTap: () => Navigator.maybePop(context)),
             const SizedBox(height: 28),
-
 
             Obx(
               () => _OrderSummaryCard(
@@ -72,7 +72,8 @@ class CheckoutPage extends StatelessWidget {
                             method,
                           ),
                           isEnabled:
-                              controller.paymentOption(method)?.enabled ?? false,
+                              controller.paymentOption(method)?.enabled ??
+                              false,
                           onTap: () => controller.selectPaymentMethod(method),
                         ),
                       ),
@@ -82,17 +83,37 @@ class CheckoutPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Obx(
+              () => controller.isAppStoreSubscriptionCheckout
+                  ? Column(
+                      children: <Widget>[
+                        AppStoreSubscriptionDisclosure(
+                          title: controller.appStoreSubscriptionTitle,
+                          price: controller.appStoreSubscriptionPrice,
+                          billingDuration:
+                              controller.appStoreSubscriptionBillingDuration,
+                          isRestoring: controller.isRestoringSubscription.value,
+                          onRestore:
+                              controller.restoreCurrentAppStoreSubscription,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            Obx(
               () => CustomButton.primary(
                 text: controller.isCheckoutLoading.value
                     ? 'processing'.tr
+                    : !controller.hasAppStoreSubscriptionPrice
+                    ? 'loading_app_store_price'.tr
                     : 'complete_purchase'.tr,
-                onPressed: controller.isCheckoutLoading.value
+                onPressed: !controller.canConfirmCheckout
                     ? () {}
                     : controller.confirmCheckout,
-                btnColor: controller.isCheckoutLoading.value
+                btnColor: !controller.canConfirmCheckout
                     ? AppColors.bodyText
                     : _green,
-                btnShadowColor: controller.isCheckoutLoading.value
+                btnShadowColor: !controller.canConfirmCheckout
                     ? AppColors.bodyText
                     : _darkGreen,
                 borderRadius: 32,
@@ -449,6 +470,12 @@ class _PaymentMethodPill extends StatelessWidget {
   }
 
   _PaymentMethodUi _paymentMethodUi(CheckoutPaymentMethod method) {
+    if (method == CheckoutPaymentMethod.appStore) {
+      return const _PaymentMethodUi(
+        title: 'App Store',
+        icon: Icon(Icons.apple_rounded, color: CheckoutPage._green, size: 34),
+      );
+    }
     return _PaymentMethodUi(
       title: 'google_play'.tr,
       icon: const Icon(

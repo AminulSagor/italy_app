@@ -78,8 +78,10 @@ class PurchaseCompletedPage extends StatelessWidget {
                     Obx(() {
                       final StorePackageType? packageType =
                           controller.completedPurchase.value?.packageType;
-                      return Row(
-                        children: [
+                      return IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
                           Expanded(
                             child: _creditCard(
                               bgColor: blueCard,
@@ -101,7 +103,8 @@ class PurchaseCompletedPage extends StatelessWidget {
                               textColor: const Color(0xFF3A3434),
                             ),
                           ),
-                        ],
+                          ],
+                        ),
                       );
                     }),
 
@@ -205,7 +208,7 @@ class PurchaseCompletedPage extends StatelessWidget {
     required Color textColor,
   }) {
     return Container(
-      height: 151.h,
+      constraints: const BoxConstraints(minHeight: 151),
       padding: EdgeInsets.fromLTRB(22.w, 22.h, 16.w, 20.h),
       decoration: BoxDecoration(
         color: bgColor,
@@ -223,7 +226,7 @@ class PurchaseCompletedPage extends StatelessWidget {
             ),
             child: Icon(icon, color: iconColor, size: 22.r),
           ),
-          const Spacer(),
+          SizedBox(height: 18.h),
           Text(
             value,
             style: TextStyle(
@@ -252,7 +255,7 @@ class PurchaseCompletedPage extends StatelessWidget {
 
   Widget _orderStatusBox({required String orderId}) {
     return Container(
-      height: 84.h,
+      constraints: const BoxConstraints(minHeight: 84),
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
       decoration: BoxDecoration(

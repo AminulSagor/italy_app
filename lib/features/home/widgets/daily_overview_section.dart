@@ -37,6 +37,7 @@ class DailyOverviewSection extends StatelessWidget {
                       color: AppColors.homePrimaryText,
                     ),
                   ),
+
                   SizedBox(height: 4.h),
                   Text(
                     'gen_your_learning_activity_this_we'.tr,

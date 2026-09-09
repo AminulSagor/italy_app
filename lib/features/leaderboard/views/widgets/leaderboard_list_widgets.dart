@@ -356,7 +356,7 @@ class _LeaderboardUserTile extends StatelessWidget {
               child: Text(
                 '#$rank',
                 style: TextStyle(
-                  fontSize: AppFont.font17.sp,
+                  fontSize: AppFont.font14.sp,
                   fontWeight: FontWeight.w900,
                   color: isCurrentUser
                       ? AppColors.primaryGreen
@@ -364,13 +364,13 @@ class _LeaderboardUserTile extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: 4.w),
+
             _SmallAvatar(
               isCurrentUser: isCurrentUser,
               rank: rank,
               avatarUrl: avatarUrl,
             ),
-            SizedBox(width: 12.w),
+            SizedBox(width: 8.w),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -425,14 +425,18 @@ class _LeaderboardUserTile extends StatelessWidget {
                             : AppColors.homeSecondaryText,
                       ),
                       SizedBox(width: 2.w),
-                      Text(
-                        league,
-                        style: TextStyle(
-                          fontSize: AppFont.font10.sp,
-                          fontWeight: FontWeight.w900,
-                          color: isCurrentUser
-                              ? AppColors.primaryGreen
-                              : AppColors.homeSecondaryText,
+                      Flexible(
+                        child: Text(
+                          league,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: AppFont.font10.sp,
+                            fontWeight: FontWeight.w900,
+                            color: isCurrentUser
+                                ? AppColors.primaryGreen
+                                : AppColors.homeSecondaryText,
+                          ),
                         ),
                       ),
                     ],
@@ -440,26 +444,42 @@ class _LeaderboardUserTile extends StatelessWidget {
                 ],
               ),
             ),
-            Row(
-              children: <Widget>[
-                Text(
-                  xp,
-                  style: TextStyle(
-                    fontSize: AppFont.font16.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.primaryGreen,
-                  ),
+            Flexible(
+              flex: 0,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 72.w,
                 ),
-                SizedBox(width: 3.w),
-                Icon(
-                  Icons.bolt_rounded,
-                  size: 18.r,
-                  color: AppColors.primaryGreen,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          xp,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: AppFont.font16.sp,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primaryGreen,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 3.w),
+                    Icon(
+                      Icons.bolt_rounded,
+                      size: 18.r,
+                      color: AppColors.primaryGreen,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
             if (!isCurrentUser) ...<Widget>[
-              SizedBox(width: 12.w),
+              SizedBox(width: 2.w),
               _MessageActionButton(onTap: onMessageTap),
             ],
           ],

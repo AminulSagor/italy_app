@@ -10,17 +10,19 @@ import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:get/get.dart';
 
+import 'callkit_pending_action_store.dart';
 
-typedef CallkitActionCallback = Future<void> Function(
-  String callId,
-  Map<String, dynamic> data,
-);
+typedef CallkitActionCallback =
+    Future<void> Function(String callId, Map<String, dynamic> data);
 
 class CallkitIncomingService {
   static StreamSubscription<RemoteMessage>? _foregroundSubscription;
   static StreamSubscription<dynamic>? _callkitSubscription;
   static final Set<String> _remoteTerminationCallIds = <String>{};
   static final Set<String> _shownCallIds = <String>{};
+  static final Set<String> _processedDeclineCallIds = <String>{};
+  static bool _iosAudioSessionActive = false;
+  static Completer<void>? _iosAudioSessionActivation;
 
   static Future<void> initialize({
     required CallkitActionCallback onIncoming,
@@ -36,90 +38,107 @@ class CallkitIncomingService {
       showIncomingCallFromForegroundMessage,
     );
 
-    _callkitSubscription = FlutterCallkitIncoming.onEvent.listen(
-      (CallEvent? event) async {
-        if (event == null) {
-          return;
-        }
+    _callkitSubscription = FlutterCallkitIncoming.onEvent.listen((
+      CallEvent? event,
+    ) async {
+      if (event == null) {
+        return;
+      }
 
-        if (event is CallEventActionCallIncoming) {
-          final Map<String, dynamic> extra = _extractExtra(
-            event.callKitParams.extra,
-          );
-          final String callId = _eventCallId(
-            extra: extra,
-            fallbackId: event.callKitParams.id,
-          );
-
-          if (callId.isNotEmpty) {
-            await onIncoming(callId, extra);
-          }
-          return;
-        }
-
-        if (event is CallEventActionCallAccept) {
-          final Map<String, dynamic> extra = _extractExtra(
-            event.callKitParams.extra,
-          );
-          final String callId = _eventCallId(
-            extra: extra,
-            fallbackId: event.callKitParams.id,
-          );
-
-          if (callId.isNotEmpty) {
-            _shownCallIds.remove(callId);
-            await onAccept(callId, extra);
-          }
-          return;
-        }
-
-        if (event is CallEventActionCallDecline) {
-          final Map<String, dynamic> extra = _extractExtra(
-            event.callKitParams.extra,
-          );
-          final String callId = _eventCallId(
-            extra: extra,
-            fallbackId: event.callKitParams.id,
-          );
-
-          if (callId.isNotEmpty) {
-            _shownCallIds.remove(callId);
-            await onDecline(callId, extra);
-          }
-          return;
-        }
-
-        if (event is CallEventActionCallEnded) {
-          final Map<String, dynamic> extra = _extractExtra(
-            event.callKitParams.extra,
-          );
-          final String callId = _eventCallId(
-            extra: extra,
-            fallbackId: event.callKitParams.id,
-          );
-
-          if (callId.isNotEmpty) {
-            _shownCallIds.remove(callId);
-            await onEnded(callId, extra);
-          }
-          return;
-        }
-
-        if (event is CallEventActionCallTimeout) {
-          final String callId = event.id.trim();
-          if (callId.isNotEmpty) {
-            _shownCallIds.remove(callId);
-            await onTimeout(
-              callId,
-              <String, dynamic>{
-                'callId': callId,
-                'reason': 'timeout',
-              },
-            );
+      if (event is CallEventActionCallToggleAudioSession) {
+        _iosAudioSessionActive = event.isActive;
+        if (event.isActive) {
+          final Completer<void>? activation = _iosAudioSessionActivation;
+          if (activation != null && !activation.isCompleted) {
+            activation.complete();
           }
         }
-      },
-    );
+        return;
+      }
+
+      if (event is CallEventActionCallIncoming) {
+        final Map<String, dynamic> extra = _extractExtra(
+          event.callKitParams.extra,
+        );
+        final String callId = _eventCallId(
+          extra: extra,
+          fallbackId: event.callKitParams.id,
+        );
+
+        if (callId.isNotEmpty) {
+          _processedDeclineCallIds.remove(callId);
+          await onIncoming(callId, extra);
+        }
+        return;
+      }
+
+      if (event is CallEventActionCallAccept) {
+        _iosAudioSessionActive = false;
+        final Map<String, dynamic> extra = _extractExtra(
+          event.callKitParams.extra,
+        );
+        final String callId = _eventCallId(
+          extra: extra,
+          fallbackId: event.callKitParams.id,
+        );
+
+        if (callId.isNotEmpty) {
+          _shownCallIds.remove(callId);
+          await onAccept(callId, extra);
+        }
+        return;
+      }
+
+      if (event is CallEventActionCallDecline) {
+        final Map<String, dynamic> extra = _extractExtra(
+          event.callKitParams.extra,
+        );
+        final String callId = _eventCallId(
+          extra: extra,
+          fallbackId: event.callKitParams.id,
+        );
+
+        if (callId.isNotEmpty) {
+          _shownCallIds.remove(callId);
+          if (!_processedDeclineCallIds.add(callId)) {
+            return;
+          }
+          Timer(
+            const Duration(minutes: 2),
+            () => _processedDeclineCallIds.remove(callId),
+          );
+          await onDecline(callId, extra);
+        }
+        return;
+      }
+
+      if (event is CallEventActionCallEnded) {
+        final Map<String, dynamic> extra = _extractExtra(
+          event.callKitParams.extra,
+        );
+        final String callId = _eventCallId(
+          extra: extra,
+          fallbackId: event.callKitParams.id,
+        );
+
+        if (callId.isNotEmpty) {
+          _shownCallIds.remove(callId);
+          await onEnded(callId, extra);
+        }
+        return;
+      }
+
+      if (event is CallEventActionCallTimeout) {
+        final String callId = event.id.trim();
+        if (callId.isNotEmpty) {
+          _shownCallIds.remove(callId);
+          await onTimeout(callId, <String, dynamic>{
+            'callId': callId,
+            'reason': 'timeout',
+          });
+        }
+      }
+    });
   }
 
   static Future<void> showIncomingCallFromForegroundMessage(
@@ -152,7 +171,8 @@ class CallkitIncomingService {
       'callId': call['id']?.toString() ?? '',
       'conversationId': call['directConversationId']?.toString() ?? '',
       'callType': call['callType']?.toString() ?? 'audio',
-      'callerId': caller['id']?.toString() ?? call['callerId']?.toString() ?? '',
+      'callerId':
+          caller['id']?.toString() ?? call['callerId']?.toString() ?? '',
       'callerName': caller['fullName']?.toString() ?? 'incoming_call'.tr,
       'callerAvatarUrl': caller['avatarUrl']?.toString() ?? '',
     };
@@ -177,6 +197,9 @@ class CallkitIncomingService {
         type == 'call_rejected' ||
         type == 'call_ended') {
       _shownCallIds.remove(callId);
+      // A cancellation can race a lock-screen answer. Never restore an old
+      // accepted/declined action after CallKit has been told the call ended.
+      await CallkitPendingActionStore.clear();
       _remoteTerminationCallIds.add(callId);
       Timer(
         const Duration(seconds: 30),
@@ -214,9 +237,7 @@ class CallkitIncomingService {
         callbackText: 'Call back',
       ),
 
-      callingNotification: const NotificationParams(
-        showNotification: false,
-      ),
+      callingNotification: const NotificationParams(showNotification: false),
 
       android: AndroidParams(
         isCustomNotification: true,
@@ -241,7 +262,7 @@ class CallkitIncomingService {
         supportsVideo: callType == 'video',
         maximumCallGroups: 1,
         maximumCallsPerCallGroup: 1,
-        audioSessionMode: 'default',
+        audioSessionMode: callType == 'video' ? 'videoChat' : 'voiceChat',
         audioSessionActive: true,
         ringtonePath: 'system_ringtone_default',
       ),
@@ -263,7 +284,8 @@ class CallkitIncomingService {
   }
 
   static Future<List<CallKitParams>> acceptedNativeCalls() async {
-    final List<CallKitParams> calls = await FlutterCallkitIncoming.activeCalls();
+    final List<CallKitParams> calls =
+        await FlutterCallkitIncoming.activeCalls();
     return calls
         .where((CallKitParams call) => call.isAccepted)
         .toList(growable: false);
@@ -280,11 +302,75 @@ class CallkitIncomingService {
     }
 
     _shownCallIds.remove(normalizedCallId);
-    if (Platform.isAndroid) {
-      await FlutterCallkitIncoming.endNativeSubsystemOnly(normalizedCallId);
-    } else {
-      await FlutterCallkitIncoming.endCall(normalizedCallId);
+    await FlutterCallkitIncoming.endNativeSubsystemOnly(normalizedCallId);
+  }
+
+  static Future<bool> completeNativeAnswer(String callId) async {
+    final String normalizedCallId = callId.trim();
+    if (!Platform.isIOS || normalizedCallId.isEmpty) {
+      return false;
     }
+
+    return FlutterCallkitIncoming.completeAnswer(normalizedCallId);
+  }
+
+  static Future<bool> resumeIosCallAudio() async {
+    if (!Platform.isIOS) {
+      return true;
+    }
+
+    if (!await FlutterCallkitIncoming.isAudioSessionActive()) {
+      return false;
+    }
+
+    _iosAudioSessionActive = true;
+    return FlutterCallkitIncoming.resumeCallAudio();
+  }
+
+  /// Waits for CallKit's provider to activate AVAudioSession before the RTC
+  /// engine starts capture. The timeout keeps foreground and restoration paths
+  /// usable if iOS has already activated the session before Dart attached.
+  static Future<bool> waitForIosAudioSessionActivation({
+    Duration timeout = const Duration(seconds: 4),
+  }) async {
+    if (!Platform.isIOS) {
+      return true;
+    }
+
+    if (_iosAudioSessionActive ||
+        await FlutterCallkitIncoming.isAudioSessionActive()) {
+      _iosAudioSessionActive = true;
+      return true;
+    }
+
+    final Completer<void> activation = Completer<void>();
+    _iosAudioSessionActivation = activation;
+
+    // Close the small race between the native query and installing the waiter.
+    if (await FlutterCallkitIncoming.isAudioSessionActive()) {
+      _iosAudioSessionActive = true;
+      activation.complete();
+    }
+
+    try {
+      await activation.future.timeout(timeout);
+      return true;
+    } on TimeoutException {
+      return false;
+    } finally {
+      if (identical(_iosAudioSessionActivation, activation)) {
+        _iosAudioSessionActivation = null;
+      }
+    }
+  }
+
+  static Future<void> failNativeAnswer(String callId) async {
+    final String normalizedCallId = callId.trim();
+    if (!Platform.isIOS || normalizedCallId.isEmpty) {
+      return;
+    }
+
+    await FlutterCallkitIncoming.failAnswer(normalizedCallId);
   }
 
   static Future<void> endCall(String callId) async {

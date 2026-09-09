@@ -13,7 +13,7 @@ class ProCheckoutApiService {
     required ApiClient apiClient,
     required UserSessionController userSessionController,
   }) : _apiClient = apiClient,
-        _userSessionController = userSessionController;
+       _userSessionController = userSessionController;
 
   static const Uuid _uuid = Uuid();
   final ApiClient _apiClient;
@@ -24,18 +24,38 @@ class ProCheckoutApiService {
     required String fallbackCourseName,
     required int lessonCount,
     String couponCode = '',
+    String providerProductId = '',
   }) async {
-    final List<Response<dynamic>> responses = await Future.wait(
-      <Future<Response<dynamic>>>[
-        _fetchQuote(courseId, 'EUR', couponCode: couponCode),
-        _fetchQuote(courseId, 'BDT', couponCode: couponCode),
-      ],
-    );
+    final List<Response<dynamic>> responses =
+        await Future.wait(<Future<Response<dynamic>>>[
+          _fetchQuote(
+            courseId,
+            'EUR',
+            couponCode: couponCode,
+            providerProductId: providerProductId,
+          ),
+          _fetchQuote(
+            courseId,
+            'BDT',
+            couponCode: couponCode,
+            providerProductId: providerProductId,
+          ),
+        ]);
 
     final Map<String, dynamic> eur = _responseMap(responses[0]);
     final Map<String, dynamic> bdt = _responseMap(responses[1]);
     final Map<String, dynamic> course = proJsonMap(eur['course']);
     final Map<String, dynamic> product = proJsonMap(eur['storeProduct']);
+    final List<dynamic> rawOptions = eur['purchaseOptions'] is List
+        ? eur['purchaseOptions'] as List<dynamic>
+        : const <dynamic>[];
+    final List<ProStoreProductModel> purchaseOptions = rawOptions
+        .whereType<Map>()
+        .map(
+          (Map<dynamic, dynamic> item) =>
+              ProStoreProductModel.fromJson(Map<String, dynamic>.from(item)),
+        )
+        .toList(growable: false);
     final String courseName = _stringValue(course['title']).isEmpty
         ? fallbackCourseName
         : _stringValue(course['title']);
@@ -44,7 +64,7 @@ class ProCheckoutApiService {
     if (product.isEmpty || _stringValue(product['productId']).isEmpty) {
       throw DioException(
         requestOptions: responses[0].requestOptions,
-        message: 'Google Play product mapping is missing for this course.',
+        message: 'No purchase option is configured for this platform.',
       );
     }
 
@@ -84,8 +104,8 @@ class ProCheckoutApiService {
         ),
         discountLabel: discountPercentage > 0
             ? 'discount_off'.trParams(<String, String>{
-          'discount': discountPercentage.toString(),
-        })
+                'discount': discountPercentage.toString(),
+              })
             : 'course_price'.tr,
       ),
       features: <ProFeatureModel>[
@@ -113,17 +133,24 @@ class ProCheckoutApiService {
         ),
       ],
       storeProduct: ProStoreProductModel.fromJson(product),
+      selectedProviderProductId: _stringValue(
+        eur['selectedProviderProductId'],
+        fallback: _stringValue(product['id']),
+      ),
+      purchaseOptions: purchaseOptions.isEmpty
+          ? <ProStoreProductModel>[ProStoreProductModel.fromJson(product)]
+          : purchaseOptions,
       couponCode: _stringValue(eur['couponCode']),
       discountPercentage: discountPercentage,
       pricingNote: _stringValue(
         eur['pricingNote'],
         fallback:
-        'Google Play or App Store controls the final localized amount charged.',
+            'Google Play or App Store controls the final localized amount charged.',
       ),
     );
   }
 
-  Future<ProPendingGooglePlayPurchaseModel> createGooglePlayOrder({
+  Future<ProPendingGooglePlayPurchaseModel> createStoreOrder({
     required ProOrderModel order,
     required ProCurrency currency,
     required String couponCode,
@@ -132,14 +159,14 @@ class ProCheckoutApiService {
       '/course-commerce/orders',
       data: <String, dynamic>{
         'courseId': order.courseId,
-        'paymentProvider': 'google_play',
+        'paymentProvider': order.storeProduct.provider,
         'productId': order.storeProduct.productId,
+        'providerProductId': order.selectedProviderProductId,
         'currency': currency == ProCurrency.bdt ? 'BDT' : 'EUR',
         'idempotencyKey': _uuid.v4(),
         if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
       },
     );
-
 
     final Map<String, dynamic> body = _responseMap(response);
 
@@ -156,15 +183,14 @@ class ProCheckoutApiService {
       body['googlePlayObfuscatedAccountId'],
     ).toLowerCase();
 
-    if (obfuscatedAccountId.isEmpty) {
+    if (Platform.isAndroid && obfuscatedAccountId.isEmpty) {
       throw DioException(
         requestOptions: response.requestOptions,
         message: 'Google Play account binding information is missing.',
       );
     }
 
-    final String appUserId =
-        _userSessionController.user.value?.id.trim() ?? '';
+    final String appUserId = _userSessionController.user.value?.id.trim() ?? '';
 
     if (appUserId.isEmpty) {
       throw DioException(
@@ -177,11 +203,10 @@ class ProCheckoutApiService {
       appUserId: appUserId,
       courseId: order.courseId,
       orderId: orderId,
-      orderNumber: _stringValue(
-        body['orderNumber'],
-        fallback: orderId,
-      ),
+      orderNumber: _stringValue(body['orderNumber'], fallback: orderId),
       productId: order.storeProduct.productId,
+      provider: order.storeProduct.provider,
+      providerProductId: order.selectedProviderProductId,
       obfuscatedAccountId: obfuscatedAccountId,
       createdAt: DateTime.now(),
     );
@@ -212,6 +237,57 @@ class ProCheckoutApiService {
     );
   }
 
+  Future<ProPurchaseResultModel> verifyAppStorePurchase({
+    required ProPendingGooglePlayPurchaseModel pending,
+    required String signedTransactionInfo,
+    required String transactionId,
+    required String courseName,
+    required int lessonCount,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '/course-commerce/orders/${pending.orderId}/app-store/verify',
+      data: <String, dynamic>{
+        'productId': pending.productId,
+        'transactionId': transactionId,
+        'signedTransactionInfo': signedTransactionInfo,
+      },
+    );
+    final Map<String, dynamic> body = _responseMap(response);
+    return _purchaseResult(
+      order: proJsonMap(body['order']),
+      fallbackOrderNumber: pending.orderNumber,
+      courseName: courseName,
+      lessonCount: lessonCount,
+    );
+  }
+
+  Future<ProPurchaseResultModel> restoreAppStorePurchase({
+    required String productId,
+    required String signedTransactionInfo,
+    required String transactionId,
+    required String courseName,
+    required int lessonCount,
+  }) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '/course-commerce/app-store/restore',
+      data: <String, dynamic>{
+        'productId': productId,
+        'transactionId': transactionId,
+        'signedTransactionInfo': signedTransactionInfo,
+      },
+    );
+    final Map<String, dynamic> body = _responseMap(response);
+    final Map<String, dynamic> restoredOrder = proJsonMap(body['order']);
+    return _purchaseResult(
+      order: restoredOrder,
+      fallbackOrderNumber: _stringValue(
+        restoredOrder['orderNumber'],
+        fallback: _stringValue(restoredOrder['id']),
+      ),
+      courseName: courseName,
+      lessonCount: lessonCount,
+    );
+  }
 
   Future<void> verifyGooglePlayPurchaseForRecovery({
     required ProPendingGooglePlayPurchaseModel pending,
@@ -229,13 +305,25 @@ class ProCheckoutApiService {
     );
   }
 
+  Future<void> verifyAppStorePurchaseForRecovery({
+    required ProPendingGooglePlayPurchaseModel pending,
+    required String signedTransactionInfo,
+    required String transactionId,
+  }) async {
+    await _apiClient.dio.post(
+      '/course-commerce/orders/${pending.orderId}/app-store/verify',
+      data: <String, dynamic>{
+        'productId': pending.productId,
+        'transactionId': transactionId,
+        'signedTransactionInfo': signedTransactionInfo,
+      },
+    );
+  }
 
   Future<bool> canAccessPendingOrder({
     required ProPendingGooglePlayPurchaseModel pending,
   }) async {
-    await _apiClient.dio.get(
-      '/course-commerce/orders/${pending.orderId}',
-    );
+    await _apiClient.dio.get('/course-commerce/orders/${pending.orderId}');
 
     return true;
   }
@@ -260,18 +348,21 @@ class ProCheckoutApiService {
   }
 
   Future<Response<dynamic>> _fetchQuote(
-      String courseId,
-      String currency, {
-        String couponCode = '',
-      }) {
-    if (!Platform.isAndroid) {
-      throw UnsupportedError('Google Play course purchases require Android.');
+    String courseId,
+    String currency, {
+    String couponCode = '',
+    String providerProductId = '',
+  }) {
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      throw UnsupportedError('Store course purchases require Android or iOS.');
     }
     return _apiClient.dio.get(
       '/course-purchases/courses/$courseId/quote',
       queryParameters: <String, dynamic>{
         'currency': currency,
-        'provider': 'google_play',
+        'provider': Platform.isAndroid ? 'google_play' : 'app_store',
+        if (providerProductId.trim().isNotEmpty)
+          'providerProductId': providerProductId.trim(),
         if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
       },
     );
@@ -293,7 +384,7 @@ class ProCheckoutApiService {
       statusLabel: 'Status: ${_titleCase(status)}',
       title: 'Course Unlocked!',
       description:
-      'You now have full access to $courseName and all $lessonCount lessons.',
+          'You now have full access to $courseName and all $lessonCount lessons.',
       buttonLabel: 'Start Learning Now',
     );
   }

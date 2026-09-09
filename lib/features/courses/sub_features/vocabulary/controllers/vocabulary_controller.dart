@@ -10,11 +10,7 @@ import '../services/vocabulary_api_service.dart';
 import '../widgets/vocabulary_completion_dialog.dart';
 import '../widgets/vocabulary_exit_dialog.dart';
 
-
-enum VocabularyDisplayMode {
-  list,
-  flashcard,
-}
+enum VocabularyDisplayMode { list, flashcard }
 
 class VocabularyController extends GetxController {
   final String? lessonId;
@@ -28,17 +24,16 @@ class VocabularyController extends GetxController {
     required UserSessionController userSessionController,
     required ItalianTtsService ttsService,
     this.lessonId,
-  })  : _vocabularyApiService = vocabularyApiService,
-        _userSessionController = userSessionController,
-        _ttsService = ttsService;
+  }) : _vocabularyApiService = vocabularyApiService,
+       _userSessionController = userSessionController,
+       _ttsService = ttsService;
 
   final RxBool isLoading = false.obs;
   final RxBool isRevealed = false.obs;
   final RxBool isCompleting = false.obs;
   final RxBool isSpeaking = false.obs;
 
-  final Rx<VocabularyDisplayMode> displayMode =
-      VocabularyDisplayMode.list.obs;
+  final Rx<VocabularyDisplayMode> displayMode = VocabularyDisplayMode.list.obs;
 
   final RxString searchQuery = ''.obs;
   final RxBool showMeanings = true.obs;
@@ -48,8 +43,7 @@ class VocabularyController extends GetxController {
   final RxInt rightCount = 0.obs;
   final RxInt wrongCount = 0.obs;
 
-  final Rxn<VocabularySessionModel> session =
-  Rxn<VocabularySessionModel>();
+  final Rxn<VocabularySessionModel> session = Rxn<VocabularySessionModel>();
 
   final RxList<String> knownVocabularyIds = <String>[].obs;
   final RxList<String> weakVocabularyIds = <String>[].obs;
@@ -74,38 +68,27 @@ class VocabularyController extends GetxController {
 
   List<VocabularyCardModel> get filteredCards {
     final List<VocabularyCardModel> cards =
-        session.value?.cards ??
-            <VocabularyCardModel>[];
+        session.value?.cards ?? <VocabularyCardModel>[];
 
-    final String query =
-    searchQuery.value.trim().toLowerCase();
+    final String query = searchQuery.value.trim().toLowerCase();
 
     if (query.isEmpty) {
       return cards;
     }
 
-    return cards.where(
-          (VocabularyCardModel card) {
-        return card.word
-            .toLowerCase()
-            .contains(query) ||
-            card.meaning
-                .toLowerCase()
-                .contains(query) ||
-            card.example
-                .toLowerCase()
-                .contains(query);
-      },
-    ).toList(growable: false);
+    return cards
+        .where((VocabularyCardModel card) {
+          return card.word.toLowerCase().contains(query) ||
+              card.meaning.toLowerCase().contains(query) ||
+              card.example.toLowerCase().contains(query);
+        })
+        .toList(growable: false);
   }
 
   int get learnedCount {
     return session.value?.cards
-        .where(
-          (VocabularyCardModel card) =>
-      card.isLearned,
-    )
-        .length ??
+            .where((VocabularyCardModel card) => card.isLearned)
+            .length ??
         0;
   }
 
@@ -142,10 +125,7 @@ class VocabularyController extends GetxController {
     super.onInit();
 
     unawaited(
-      _userSessionController.loadUser(
-        forceRefresh: true,
-        showError: false,
-      ),
+      _userSessionController.loadUser(forceRefresh: true, showError: false),
     );
 
     unawaited(loadVocabulary());
@@ -167,8 +147,7 @@ class VocabularyController extends GetxController {
     try {
       await stopSpeaking();
 
-      final VocabularySessionModel response =
-      await _loadSession();
+      final VocabularySessionModel response = await _loadSession();
 
       session.value = response;
 
@@ -191,10 +170,7 @@ class VocabularyController extends GetxController {
     }
   }
 
-
-  Future<void> setDisplayMode(
-      VocabularyDisplayMode mode,
-      ) async {
+  Future<void> setDisplayMode(VocabularyDisplayMode mode) async {
     if (displayMode.value == mode) {
       return;
     }
@@ -214,8 +190,7 @@ class VocabularyController extends GetxController {
   }
 
   Future<void> speakCurrentWord() async {
-    final VocabularyCardModel? card =
-        currentCard;
+    final VocabularyCardModel? card = currentCard;
 
     if (card == null) {
       return;
@@ -224,10 +199,7 @@ class VocabularyController extends GetxController {
     await speakCard(card);
   }
 
-
-  Future<void> speakCard(
-      VocabularyCardModel card,
-      ) async {
+  Future<void> speakCard(VocabularyCardModel card) async {
     final String text = card.word.trim();
 
     if (text.isEmpty || isSpeaking.value) {
@@ -245,17 +217,12 @@ class VocabularyController extends GetxController {
         return;
       }
 
-      await _ttsService.speakText(
-        text,
-        locale: 'it-IT',
-      );
-    } catch (_) {
-      if (requestId == _ttsRequestId) {
+      final bool started = await _ttsService.speakText(text, locale: 'it-IT');
+      if (!started && requestId == _ttsRequestId) {
         Get.snackbar(
           'pronunciation_unavailable'.tr,
           'italian_voice_unavailable_message'.tr,
-          snackPosition:
-          SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.BOTTOM,
         );
       }
     } finally {
@@ -265,7 +232,6 @@ class VocabularyController extends GetxController {
     }
   }
 
-
   Future<void> playAllVisibleWords() async {
     if (isPlayingAll.value) {
       isPlayingAll.value = false;
@@ -273,8 +239,7 @@ class VocabularyController extends GetxController {
       return;
     }
 
-    final List<VocabularyCardModel> cards =
-    List<VocabularyCardModel>.from(
+    final List<VocabularyCardModel> cards = List<VocabularyCardModel>.from(
       filteredCards,
     );
 
@@ -285,16 +250,23 @@ class VocabularyController extends GetxController {
     isPlayingAll.value = true;
 
     try {
-      for (final VocabularyCardModel card
-      in cards) {
+      for (final VocabularyCardModel card in cards) {
         if (!isPlayingAll.value) {
           break;
         }
 
-        await _ttsService.speakText(
+        final bool started = await _ttsService.speakText(
           card.word,
           locale: 'it-IT',
         );
+        if (!started) {
+          Get.snackbar(
+            'pronunciation_unavailable'.tr,
+            'italian_voice_unavailable_message'.tr,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          break;
+        }
       }
     } finally {
       isPlayingAll.value = false;
@@ -350,14 +322,11 @@ class VocabularyController extends GetxController {
   Future<void> markKnown() async {
     final VocabularyCardModel? card = currentCard;
 
-    if (card == null ||
-        isCompleting.value ||
-        isKnownSubmitting.value) {
+    if (card == null || isCompleting.value || isKnownSubmitting.value) {
       return;
     }
 
-    final bool isLastCard =
-        currentIndex.value >= totalCards - 1;
+    final bool isLastCard = currentIndex.value >= totalCards - 1;
 
     if (isLastCard) {
       isKnownSubmitting.value = true;
@@ -402,8 +371,7 @@ class VocabularyController extends GetxController {
     isCompleting.value = true;
 
     try {
-      final VocabularyCompletionModel complete =
-      await _completeSession();
+      final VocabularyCompletionModel complete = await _completeSession();
 
       await Get.dialog<void>(
         VocabularyCompletionDialog(
@@ -423,6 +391,11 @@ class VocabularyController extends GetxController {
     }
 
     await stopSpeaking();
+
+    if (displayMode.value == VocabularyDisplayMode.list) {
+      Get.back<void>();
+      return;
+    }
 
     await Get.dialog<void>(
       VocabularyExitDialog(
@@ -450,42 +423,37 @@ class VocabularyController extends GetxController {
   Future<VocabularySessionModel> _loadSession() async {
     final String? currentLessonId = lessonId?.trim();
 
-    if (currentLessonId == null ||
-        currentLessonId.isEmpty) {
+    if (currentLessonId == null || currentLessonId.isEmpty) {
       return _emptySession();
     }
 
     final ApiResult<VocabularySessionModel> result =
-    await ApiErrorHandler.call<VocabularySessionModel>(
+        await ApiErrorHandler.call<VocabularySessionModel>(
           () => _vocabularyApiService.fetchVocabularySession(
-        lessonId: currentLessonId,
-      ),
-      errorTitle: 'gen_vocabulary'.tr,
-    );
+            lessonId: currentLessonId,
+          ),
+          errorTitle: 'gen_vocabulary'.tr,
+        );
 
     return result.dataOr(_emptySession());
   }
 
-  Future<VocabularyCompletionModel>
-  _completeSession() async {
-    final String? sessionId =
-    session.value?.sessionId?.trim();
+  Future<VocabularyCompletionModel> _completeSession() async {
+    final String? sessionId = session.value?.sessionId?.trim();
 
     if (sessionId == null || sessionId.isEmpty) {
       return _localCompletion();
     }
 
     final ApiResult<VocabularyCompletionModel> result =
-    await ApiErrorHandler.call<VocabularyCompletionModel>(
+        await ApiErrorHandler.call<VocabularyCompletionModel>(
           () => _vocabularyApiService.completeSession(
-        sessionId: sessionId,
-        knownVocabularyIds:
-        knownVocabularyIds.toList(),
-        weakVocabularyIds:
-        weakVocabularyIds.toList(),
-      ),
-      errorTitle: 'gen_vocabulary'.tr,
-    );
+            sessionId: sessionId,
+            knownVocabularyIds: knownVocabularyIds.toList(),
+            weakVocabularyIds: weakVocabularyIds.toList(),
+          ),
+          errorTitle: 'gen_vocabulary'.tr,
+        );
 
     return result.dataOr(_localCompletion());
   }

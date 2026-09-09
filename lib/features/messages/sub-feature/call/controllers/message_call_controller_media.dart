@@ -1,28 +1,19 @@
 part of 'message_call_controller.dart';
 
 extension MessageCallControllerMedia on MessageCallController {
-
-
   Future<void> _prepareOutgoingVideoPreview(
-      MessageCallSessionModel session,
-      ) async {
-    if (!callType.isVideo ||
-        _routeClosed ||
-        _remoteTerminal ||
-        _endRequested) {
+    MessageCallSessionModel session,
+  ) async {
+    if (!callType.isVideo || _routeClosed || _remoteTerminal || _endRequested) {
       return;
     }
 
     try {
-      final bool enabled =
-      await _callAgoraService
-          .prepareLocalVideoPreview(
+      final bool enabled = await _callAgoraService.prepareLocalVideoPreview(
         appId: session.media.appId,
       );
 
-      if (_routeClosed ||
-          _remoteTerminal ||
-          _endRequested) {
+      if (_routeClosed || _remoteTerminal || _endRequested) {
         return;
       }
 
@@ -33,12 +24,11 @@ extension MessageCallControllerMedia on MessageCallController {
       isCameraOff.value = true;
     }
   }
+
   Future<void> _activateVideoIfNeeded() async {
     if (!callType.isVideo || isEnding.value) {
       return;
     }
-
-
 
     try {
       final bool enabled = await _callAgoraService.activateVideo();
@@ -76,17 +66,16 @@ extension MessageCallControllerMedia on MessageCallController {
   Future<void> _syncProximityLock() async {
     final bool shouldEnable =
         !callType.isVideo &&
-            isActive.value &&
-            !isSpeakerOn.value &&
-            !isEnding.value;
+        isActive.value &&
+        !isSpeakerOn.value &&
+        !isEnding.value;
 
     await _proximityService.setEnabled(shouldEnable);
   }
 
   Future<void> toggleSpeaker() async {
     try {
-      isSpeakerOn.value =
-      await _callAgoraService.toggleSpeaker();
+      isSpeakerOn.value = await _callAgoraService.toggleSpeaker();
 
       await _syncProximityLock();
     } catch (error) {

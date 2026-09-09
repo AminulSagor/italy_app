@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../../core/localization/translation_service.dart';
 import '../../../../../core/services/api_client.dart';
+import '../../../../../core/services/otp_session_service.dart';
 import '../../../../../core/utils/otp_resend_cooldown.dart';
 import '../../../../../routes/routes.dart';
 import '../models/forgot_password_models.dart';
@@ -14,6 +15,7 @@ class ForgotPasswordController extends GetxController {
           service ?? ForgotPasswordService(apiClient: Get.find<ApiClient>());
 
   final ForgotPasswordService _service;
+  final OtpSessionService _otpSessionService = Get.find<OtpSessionService>();
 
   final TranslationService _translationService = Get.find<TranslationService>();
 
@@ -82,6 +84,8 @@ class ForgotPasswordController extends GetxController {
     newPasswordController.addListener(_onResetInputChanged);
 
     confirmPasswordController.addListener(_onResetInputChanged);
+
+    _restorePendingOtpSession();
   }
 
   Future<void> setLanguage(String value) async {
@@ -172,7 +176,13 @@ class ForgotPasswordController extends GetxController {
       _clearOtpInputs();
       _clearResetInputs();
 
-      resendCooldown.start();
+      final PendingOtpSession session = await _otpSessionService.save(
+        flow: OtpSessionFlow.passwordReset,
+        identifier: data.identifier,
+        maskedIdentifier: data.maskedIdentifier,
+        isEmail: payload.channel == 'email',
+      );
+      resendCooldown.restore(session.resendAvailableAt);
 
       final String? devOtp = data.devOtp;
 
@@ -260,7 +270,13 @@ class ForgotPasswordController extends GetxController {
       _clearOtpInputs();
       _clearResetInputs();
 
-      resendCooldown.start();
+      final PendingOtpSession session = await _otpSessionService.save(
+        flow: OtpSessionFlow.passwordReset,
+        identifier: data.identifier,
+        maskedIdentifier: data.maskedIdentifier,
+        isEmail: payload.channel == 'email',
+      );
+      resendCooldown.restore(session.resendAvailableAt);
 
       final String? devOtp = data.devOtp;
 
@@ -328,6 +344,7 @@ class ForgotPasswordController extends GetxController {
         return;
       }
 
+      await _otpSessionService.clear();
       /*
        * Store only the reset token, not the OTP.
        */
@@ -432,8 +449,37 @@ class ForgotPasswordController extends GetxController {
     }
   }
 
-  void onBackTap() {
+  Future<void> onBackTap() async {
+    await _otpSessionService.clear();
     Get.back();
+  }
+
+  void _restorePendingOtpSession() {
+    final PendingOtpSession? session = _otpSessionService.currentSession;
+    if (session == null || session.flow != OtpSessionFlow.passwordReset) {
+      return;
+    }
+
+    form.value = form.value.copyWith(
+      selectedResetMode: session.isEmail ? 'email' : 'phone',
+      identifier: session.identifier,
+    );
+    identifierController.text = session.identifier;
+    pendingRequestPayload.value = ForgotPasswordRequestPayloadModel(
+      identifier: session.identifier,
+      channel: session.isEmail ? 'email' : 'phone',
+    );
+    pendingVerifiedOtp.value = null;
+    otpUi.value = otpUi.value.copyWith(
+      maskedIdentifier: session.maskedIdentifier.isNotEmpty
+          ? session.maskedIdentifier
+          : session.identifier,
+      identifier: session.identifier,
+      codeDigits: <String>['', '', '', ''],
+      isResending: false,
+      isVerifying: false,
+    );
+    resendCooldown.restore(session.resendAvailableAt);
   }
 
   void onBackToLoginTap() {

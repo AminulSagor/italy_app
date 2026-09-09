@@ -22,9 +22,7 @@ class RewardsView extends GetView<RewardController> {
         child: Obx(() {
           if (controller.isLoadingDashboard.value &&
               controller.dashboard.value == null) {
-            return const Center(
-              child: CircularProgressIndicator(color: green),
-            );
+            return const Center(child: CircularProgressIndicator(color: green));
           }
 
           final RewardDashboardModel? dashboard = controller.dashboard.value;
@@ -50,19 +48,15 @@ class RewardsView extends GetView<RewardController> {
                     onTap: controller.loadDashboard,
                   )
                 else ...<Widget>[
-                  if (dashboard.pendingChest != null)
+                  if (dashboard.pendingChest != null) ...<Widget>[
+                    // Kept only for rewards created before automatic grants
+                    // were introduced. New rewards appear directly below.
                     _WinnerCard(
                       chest: dashboard.pendingChest!,
                       onOpenChest: controller.openChest,
-                    )
-                  else
-                    RewardStateMessage(
-                      icon: Icons.inventory_2_outlined,
-                      title: 'no_unopened_chest'.tr,
-                      message:
-                          'keep_learning_and_climbing_the_leaderboard_to_unlo'.tr,
                     ),
-                  SizedBox(height: 34.h),
+                    SizedBox(height: 34.h),
+                  ],
                   _HistoryHeader(onSeeAll: controller.openRewardsHistory),
                   SizedBox(height: 20.h),
                   if (dashboard.recentRewards.isEmpty)
@@ -70,7 +64,8 @@ class RewardsView extends GetView<RewardController> {
                       icon: Icons.emoji_events_outlined,
                       title: 'no_rewards_yet'.tr,
                       message:
-                          'your_claimed_and_unlocked_rewards_will_appear_here'.tr,
+                          'your_claimed_and_unlocked_rewards_will_appear_here'
+                              .tr,
                     )
                   else
                     GridView.builder(
@@ -84,8 +79,7 @@ class RewardsView extends GetView<RewardController> {
                         mainAxisSpacing: 18.h,
                       ),
                       itemBuilder: (BuildContext context, int index) {
-                        final RewardModel item =
-                            dashboard.recentRewards[index];
+                        final RewardModel item = dashboard.recentRewards[index];
                         return _RewardCard(
                           item: item,
                           onDetailsTap: () =>

@@ -507,8 +507,8 @@ class AppPages {
           tag: args.controllerTag,
         );
 
-        Get.lazyPut<VocabularyController>(
-              () => VocabularyController(
+        Get.put<VocabularyController>(
+          VocabularyController(
             lessonId: args.lessonId,
             vocabularyApiService: Get.find<VocabularyApiService>(
               tag: args.controllerTag,
@@ -548,13 +548,14 @@ class AppPages {
           () => QuizApiService(apiClient: Get.find<ApiClient>()),
           tag: args.controllerTag,
         );
-        Get.lazyPut<QuizController>(
-          () => QuizController(
+        Get.put<QuizController>(
+          QuizController(
             quizMockService: Get.find<QuizMockService>(tag: args.controllerTag),
             quizApiService: Get.find<QuizApiService>(tag: args.controllerTag),
             lessonId: args.lessonId,
             courseId: args.courseId,
             chapterTitle: args.chapterTitle,
+            startOver: args.startOver,
             isExamMode: args.isExamMode,
             questionCount: args.questionCount,
             initialQuestions: args.initialQuestions,

@@ -133,7 +133,8 @@ class AiTutorLearnerProfileModel {
           : 'Your AI tutor will adapt lessons to this result.',
       strengths: _stringList(json['strengths']),
       focusAreas: _stringList(json['focusAreas']),
-      completedAt: DateTime.tryParse(json['completedAt']?.toString() ?? '') ??
+      completedAt:
+          DateTime.tryParse(json['completedAt']?.toString() ?? '') ??
           DateTime.now(),
     );
   }
@@ -218,8 +219,8 @@ class AiTutorLevelTestResponseModel {
     final Map<String, dynamic> profileJson = rawProfile is Map<String, dynamic>
         ? rawProfile
         : rawProfile is Map
-            ? Map<String, dynamic>.from(rawProfile)
-            : <String, dynamic>{};
+        ? Map<String, dynamic>.from(rawProfile)
+        : <String, dynamic>{};
     return AiTutorLevelTestResponseModel(
       profile: AiTutorLearnerProfileModel.fromJson(profileJson),
     );
@@ -230,19 +231,33 @@ class AiTutorLevelTestResponseModel {
   }
 }
 
-
 class AiTutorLevelProfileResponseModel {
-  const AiTutorLevelProfileResponseModel({required this.profile});
+  const AiTutorLevelProfileResponseModel({
+    required this.profile,
+    required this.attemptsUsed,
+    required this.maxAttempts,
+    required this.attemptsRemaining,
+    required this.canAttempt,
+    required this.hasPaidAccess,
+  });
 
   final AiTutorLearnerProfileModel? profile;
+  final int attemptsUsed;
+  final int maxAttempts;
+  final int attemptsRemaining;
+  final bool canAttempt;
+  final bool hasPaidAccess;
 
-  factory AiTutorLevelProfileResponseModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory AiTutorLevelProfileResponseModel.fromJson(Map<String, dynamic> json) {
     final dynamic rawProfile = json['profile'];
     if (rawProfile is Map<String, dynamic>) {
       return AiTutorLevelProfileResponseModel(
         profile: AiTutorLearnerProfileModel.fromJson(rawProfile),
+        attemptsUsed: _intValue(json['attemptsUsed']),
+        maxAttempts: _intValue(json['maxAttempts']),
+        attemptsRemaining: _intValue(json['attemptsRemaining']),
+        canAttempt: json['canAttempt'] != false,
+        hasPaidAccess: json['hasPaidAccess'] == true,
       );
     }
     if (rawProfile is Map) {
@@ -250,9 +265,21 @@ class AiTutorLevelProfileResponseModel {
         profile: AiTutorLearnerProfileModel.fromJson(
           Map<String, dynamic>.from(rawProfile),
         ),
+        attemptsUsed: _intValue(json['attemptsUsed']),
+        maxAttempts: _intValue(json['maxAttempts']),
+        attemptsRemaining: _intValue(json['attemptsRemaining']),
+        canAttempt: json['canAttempt'] != false,
+        hasPaidAccess: json['hasPaidAccess'] == true,
       );
     }
-    return const AiTutorLevelProfileResponseModel(profile: null);
+    return AiTutorLevelProfileResponseModel(
+      profile: null,
+      attemptsUsed: _intValue(json['attemptsUsed']),
+      maxAttempts: _intValue(json['maxAttempts']),
+      attemptsRemaining: _intValue(json['attemptsRemaining']),
+      canAttempt: json['canAttempt'] != false,
+      hasPaidAccess: json['hasPaidAccess'] == true,
+    );
   }
 }
 
@@ -282,4 +309,10 @@ class AiTutorLevelTestRequestModel {
           .toList(growable: false),
     };
   }
+}
+
+int _intValue(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }

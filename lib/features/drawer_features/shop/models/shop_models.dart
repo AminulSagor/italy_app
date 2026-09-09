@@ -2,6 +2,7 @@ enum StorePackageType {
   aiBundle('ai_bundle'),
   streakFreeze('streak_freeze'),
   cvCredit('cv_credit');
+
   const StorePackageType(this.apiValue);
   final String apiValue;
   static StorePackageType fromApi(String? value) {
@@ -15,17 +16,23 @@ enum StorePackageType {
 enum RefillCurrency {
   eur('EUR', '€'),
   bdt('BDT', '৳');
+
   const RefillCurrency(this.apiValue, this.symbol);
   final String apiValue;
   final String symbol;
 }
 
 enum CheckoutPaymentMethod {
-  googlePlay('google_play');
+  googlePlay('google_play'),
+  appStore('app_store');
+
   const CheckoutPaymentMethod(this.providerValue);
   final String providerValue;
-  static CheckoutPaymentMethod fromProvider(String? _) {
-    return CheckoutPaymentMethod.googlePlay;
+  static CheckoutPaymentMethod fromProvider(String? value) {
+    return CheckoutPaymentMethod.values.firstWhere(
+      (CheckoutPaymentMethod method) => method.providerValue == value,
+      orElse: () => CheckoutPaymentMethod.googlePlay,
+    );
   }
 }
 
@@ -33,6 +40,7 @@ enum StoreProviderProductType {
   consumable('consumable'),
   nonConsumable('non_consumable'),
   subscription('subscription');
+
   const StoreProviderProductType(this.apiValue);
   final String apiValue;
   static StoreProviderProductType fromApi(String? value) {
@@ -116,83 +124,56 @@ class StoreActiveSubscriptionModel {
   final DateTime? expiresAt;
   final DateTime? canceledAt;
 
-  factory StoreActiveSubscriptionModel.fromJson(
-      Map<String, dynamic> json,
-      ) {
+  factory StoreActiveSubscriptionModel.fromJson(Map<String, dynamic> json) {
     return StoreActiveSubscriptionModel(
       id: _string(json['id']),
 
-      provider: _string(
-        json['provider'],
-        fallback: 'google_play',
-      ),
+      provider: _string(json['provider'], fallback: 'google_play'),
 
-      packageId:
-      _string(json['packageId']),
+      packageId: _string(json['packageId']),
 
-      productId:
-      _string(json['productId']),
+      productId: _string(json['productId']),
 
-      basePlanId:
-      _string(json['basePlanId']),
+      basePlanId: _string(json['basePlanId']),
 
-      offerId:
-      _string(json['offerId']),
+      offerId: _string(json['offerId']),
 
-      status:
-      _string(json['status']),
+      status: _string(json['status']),
 
-      entitlementStatus:
-      _string(json['entitlementStatus']),
+      entitlementStatus: _string(json['entitlementStatus']),
 
-      autoRenewEnabled:
-      _bool(json['autoRenewEnabled']),
+      autoRenewEnabled: _bool(json['autoRenewEnabled']),
 
-      startedAt:
-      _date(json['startedAt']),
+      startedAt: _date(json['startedAt']),
 
-      expiresAt:
-      _date(json['expiresAt']),
+      expiresAt: _date(json['expiresAt']),
 
-      canceledAt:
-      _date(json['canceledAt']),
+      canceledAt: _date(json['canceledAt']),
     );
   }
 
-  Map<String, dynamic> toJson() =>
-      <String, dynamic>{
-        'id': id,
-        'provider': provider,
-        'packageId': packageId,
-        'productId': productId,
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'provider': provider,
+    'packageId': packageId,
+    'productId': productId,
 
-        'basePlanId':
-        basePlanId.isEmpty
-            ? null
-            : basePlanId,
+    'basePlanId': basePlanId.isEmpty ? null : basePlanId,
 
-        'offerId':
-        offerId.isEmpty
-            ? null
-            : offerId,
+    'offerId': offerId.isEmpty ? null : offerId,
 
-        'status': status,
+    'status': status,
 
-        'entitlementStatus':
-        entitlementStatus,
+    'entitlementStatus': entitlementStatus,
 
-        'autoRenewEnabled':
-        autoRenewEnabled,
+    'autoRenewEnabled': autoRenewEnabled,
 
-        'startedAt':
-        startedAt?.toIso8601String(),
+    'startedAt': startedAt?.toIso8601String(),
 
-        'expiresAt':
-        expiresAt?.toIso8601String(),
+    'expiresAt': expiresAt?.toIso8601String(),
 
-        'canceledAt':
-        canceledAt?.toIso8601String(),
-      };
+    'canceledAt': canceledAt?.toIso8601String(),
+  };
 }
 
 class StoreBalancesModel {
@@ -227,8 +208,7 @@ class StoreBalancesModel {
 
   final DateTime? unlimitedProtectionExpiresAt;
 
-  final StoreActiveSubscriptionModel?
-  activeStreakSubscription;
+  final StoreActiveSubscriptionModel? activeStreakSubscription;
 
   /// Purchased CV credits only.
   final int cvCredits;
@@ -261,51 +241,32 @@ class StoreBalancesModel {
   /// Whether edits and regenerations are free.
   final bool allowCvEditingWithoutCredit;
 
-  bool get hasFreeCvGeneration =>
-      freeCvGenerationsRemaining > 0;
+  bool get hasFreeCvGeneration => freeCvGenerationsRemaining > 0;
 
-  bool get hasPurchasedCvCredit =>
-      cvCredits > 0;
+  bool get hasPurchasedCvCredit => cvCredits > 0;
 
-  bool get nextCvUsesFreeAllowance =>
-      nextCvGenerationUses == 'free';
+  bool get nextCvUsesFreeAllowance => nextCvGenerationUses == 'free';
 
-  bool get nextCvUsesPurchasedCredit =>
-      nextCvGenerationUses == 'credit';
+  bool get nextCvUsesPurchasedCredit => nextCvGenerationUses == 'credit';
 
-  factory StoreBalancesModel.fromJson(
-      Map<String, dynamic> json,
-      ) {
-    final Map<String, dynamic> ai =
-    _map(json['ai']);
+  factory StoreBalancesModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> ai = _map(json['ai']);
 
-    final Map<String, dynamic> streak =
-    _map(json['streakFreeze']);
+    final Map<String, dynamic> streak = _map(json['streakFreeze']);
 
-    final Map<String, dynamic> unlimited =
-    _map(
-      streak['unlimitedProtection'],
-    );
+    final Map<String, dynamic> unlimited = _map(streak['unlimitedProtection']);
 
-    final Map<String, dynamic> subscription =
-    _map(
-      unlimited['subscription'],
-    );
+    final Map<String, dynamic> subscription = _map(unlimited['subscription']);
 
-    final Map<String, dynamic> cv =
-    _map(json['cv']);
+    final Map<String, dynamic> cv = _map(json['cv']);
 
-    final int voiceSeconds =
-    ai.containsKey('voiceSeconds')
+    final int voiceSeconds = ai.containsKey('voiceSeconds')
         ? _int(ai['voiceSeconds'])
-        : (_double(ai['voiceMinutes']) * 60)
-        .round();
+        : (_double(ai['voiceMinutes']) * 60).round();
 
-    final int cvCredits =
-    _int(cv['credits']);
+    final int cvCredits = _int(cv['credits']);
 
-    final int freeCreditsPerSignup =
-    _int(
+    final int freeCreditsPerSignup = _int(
       cv['freeCreditsPerSignup'],
       fallback: 3,
     );
@@ -317,15 +278,8 @@ class StoreBalancesModel {
      * Old backend fallback:
      * freeCreditsPerSignup
      */
-    final int freeGenerationsLimit =
-    cv.containsKey(
-      'freeGenerationsLimit',
-    )
-        ? _int(
-      cv['freeGenerationsLimit'],
-      fallback:
-      freeCreditsPerSignup,
-    )
+    final int freeGenerationsLimit = cv.containsKey('freeGenerationsLimit')
+        ? _int(cv['freeGenerationsLimit'], fallback: freeCreditsPerSignup)
         : freeCreditsPerSignup;
 
     /*
@@ -337,45 +291,26 @@ class StoreBalancesModel {
      * free-credit configuration.
      */
     final int freeGenerationsRemaining =
-    cv.containsKey(
-      'freeGenerationsRemaining',
-    )
-        ? _int(
-      cv[
-      'freeGenerationsRemaining'],
-    )
+        cv.containsKey('freeGenerationsRemaining')
+        ? _int(cv['freeGenerationsRemaining'])
         : freeCreditsPerSignup;
 
-    final bool freeLimitExhausted =
-    cv.containsKey(
-      'freeLimitExhausted',
-    )
-        ? _bool(
-      cv['freeLimitExhausted'],
-    )
+    final bool freeLimitExhausted = cv.containsKey('freeLimitExhausted')
+        ? _bool(cv['freeLimitExhausted'])
         : freeGenerationsRemaining <= 0;
 
     final int totalGenerationsAvailable =
-    cv.containsKey(
-      'totalGenerationsAvailable',
-    )
-        ? _int(
-      cv[
-      'totalGenerationsAvailable'],
-    )
-        : freeGenerationsRemaining +
-        cvCredits;
+        cv.containsKey('totalGenerationsAvailable')
+        ? _int(cv['totalGenerationsAvailable'])
+        : freeGenerationsRemaining + cvCredits;
 
-    final bool canCreate =
-    cv.containsKey('canCreate')
+    final bool canCreate = cv.containsKey('canCreate')
         ? _bool(cv['canCreate'])
         : totalGenerationsAvailable > 0;
 
-    final String nextGenerationUses =
-    _string(
+    final String nextGenerationUses = _string(
       cv['nextGenerationUses'],
-      fallback:
-      freeGenerationsRemaining > 0
+      fallback: freeGenerationsRemaining > 0
           ? 'free'
           : cvCredits > 0
           ? 'credit'
@@ -383,136 +318,92 @@ class StoreBalancesModel {
     );
 
     return StoreBalancesModel(
-      aiVoiceMinutes:
-      voiceSeconds <= 0
-          ? 0
-          : (voiceSeconds / 60).ceil(),
+      aiVoiceMinutes: voiceSeconds <= 0 ? 0 : (voiceSeconds / 60).ceil(),
 
-      aiVoiceSeconds:
-      voiceSeconds,
+      aiVoiceSeconds: voiceSeconds,
 
-      aiTextTokens:
-      _int(ai['textTokens']),
+      aiTextTokens: _int(ai['textTokens']),
 
-      streakFreezeCount:
-      _int(streak['count']),
+      streakFreezeCount: _int(streak['count']),
 
-      unlimitedProtectionActive:
-      _bool(unlimited['active']),
+      unlimitedProtectionActive: _bool(unlimited['active']),
 
-      unlimitedProtectionExpiresAt:
-      _date(unlimited['expiresAt']),
+      unlimitedProtectionExpiresAt: _date(unlimited['expiresAt']),
 
-      activeStreakSubscription:
-      subscription.isEmpty
+      activeStreakSubscription: subscription.isEmpty
           ? null
-          : StoreActiveSubscriptionModel
-          .fromJson(
-        subscription,
-      ),
+          : StoreActiveSubscriptionModel.fromJson(subscription),
 
-      cvCredits:
-      cvCredits,
+      cvCredits: cvCredits,
 
-      freeCvCreditsPerSignup:
-      freeCreditsPerSignup,
+      freeCvCreditsPerSignup: freeCreditsPerSignup,
 
-      freeCvGenerationsLimit:
-      freeGenerationsLimit,
+      freeCvGenerationsLimit: freeGenerationsLimit,
 
-      freeCvGenerationsRemaining:
-      freeGenerationsRemaining,
+      freeCvGenerationsRemaining: freeGenerationsRemaining,
 
-      freeCvLimitExhausted:
-      freeLimitExhausted,
+      freeCvLimitExhausted: freeLimitExhausted,
 
-      totalCvGenerationsAvailable:
-      totalGenerationsAvailable,
+      totalCvGenerationsAvailable: totalGenerationsAvailable,
 
-      canCreateCv:
-      canCreate,
+      canCreateCv: canCreate,
 
-      nextCvGenerationUses:
-      nextGenerationUses,
+      nextCvGenerationUses: nextGenerationUses,
 
-      allowCvEditingWithoutCredit:
-      _bool(
-        cv['allowEditingWithoutCredit'],
-      ),
+      allowCvEditingWithoutCredit: _bool(cv['allowEditingWithoutCredit']),
     );
   }
 
-  Map<String, dynamic> toJson() =>
-      <String, dynamic>{
-        'ai': <String, dynamic>{
-          'voiceMinutes':
-          aiVoiceMinutes,
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'ai': <String, dynamic>{
+      'voiceMinutes': aiVoiceMinutes,
 
-          'voiceSeconds':
-          aiVoiceSeconds,
+      'voiceSeconds': aiVoiceSeconds,
 
-          'textTokens':
-          aiTextTokens,
-        },
+      'textTokens': aiTextTokens,
+    },
 
-        'streakFreeze':
-        <String, dynamic>{
-          'count':
-          streakFreezeCount,
+    'streakFreeze': <String, dynamic>{
+      'count': streakFreezeCount,
 
-          'unlimitedProtection':
-          <String, dynamic>{
-            'active':
-            unlimitedProtectionActive,
+      'unlimitedProtection': <String, dynamic>{
+        'active': unlimitedProtectionActive,
 
-            'expiresAt':
-            unlimitedProtectionExpiresAt
-                ?.toIso8601String(),
+        'expiresAt': unlimitedProtectionExpiresAt?.toIso8601String(),
 
-            'subscription':
-            activeStreakSubscription
-                ?.toJson(),
-          },
-        },
+        'subscription': activeStreakSubscription?.toJson(),
+      },
+    },
 
-        'cv': <String, dynamic>{
-          /*
+    'cv': <String, dynamic>{
+      /*
            * Purchased CV credits.
            */
-          'credits':
-          cvCredits,
+      'credits': cvCredits,
 
-          /*
+      /*
            * Existing field preserved.
            */
-          'freeCreditsPerSignup':
-          freeCvCreditsPerSignup,
+      'freeCreditsPerSignup': freeCvCreditsPerSignup,
 
-          /*
+      /*
            * New free-generation fields.
            */
-          'freeGenerationsLimit':
-          freeCvGenerationsLimit,
+      'freeGenerationsLimit': freeCvGenerationsLimit,
 
-          'freeGenerationsRemaining':
-          freeCvGenerationsRemaining,
+      'freeGenerationsRemaining': freeCvGenerationsRemaining,
 
-          'freeLimitExhausted':
-          freeCvLimitExhausted,
+      'freeLimitExhausted': freeCvLimitExhausted,
 
-          'totalGenerationsAvailable':
-          totalCvGenerationsAvailable,
+      'totalGenerationsAvailable': totalCvGenerationsAvailable,
 
-          'canCreate':
-          canCreateCv,
+      'canCreate': canCreateCv,
 
-          'nextGenerationUses':
-          nextCvGenerationUses,
+      'nextGenerationUses': nextCvGenerationUses,
 
-          'allowEditingWithoutCredit':
-          allowCvEditingWithoutCredit,
-        },
-      };
+      'allowEditingWithoutCredit': allowCvEditingWithoutCredit,
+    },
+  };
 }
 
 class StorePackageModel {
@@ -556,10 +447,7 @@ class StorePackageModel {
   bool get isMonthly => billingModel == 'monthly';
   bool get isUnlimitedStreak => streakProtectionMode == 'monthly_unlimited';
 
-  String get badgeLabel =>
-      marketingBadge == 'none'
-          ? ''
-          : marketingBadge;
+  String get badgeLabel => marketingBadge == 'none' ? '' : marketingBadge;
 
   String get entitlementSummary {
     switch (type) {
@@ -669,11 +557,44 @@ class StoreShopModel {
     final Map<String, dynamic> history = _map(json['orderHistory']);
     return StoreShopModel(
       balances: StoreBalancesModel.fromJson(_map(json['balances'])),
-      sections: _list(json['sections'])
-          .map(StoreShopSectionModel.fromJson)
-          .toList(growable: false),
+      sections: _list(
+        json['sections'],
+      ).map(StoreShopSectionModel.fromJson).toList(growable: false),
       hasOrders: _bool(history['hasOrders']),
       latestOrderNumber: _string(history['latestOrderNumber']),
+    );
+  }
+}
+
+class AppStorePromotionalOfferModel {
+  const AppStorePromotionalOfferModel({
+    required this.offerId,
+    required this.keyId,
+    required this.nonce,
+    required this.timestamp,
+    required this.signature,
+  });
+
+  final String offerId;
+  final String keyId;
+  final String nonce;
+  final int timestamp;
+  final String signature;
+
+  bool get isComplete =>
+      offerId.isNotEmpty &&
+      keyId.isNotEmpty &&
+      nonce.isNotEmpty &&
+      timestamp > 0 &&
+      signature.isNotEmpty;
+
+  factory AppStorePromotionalOfferModel.fromJson(Map<String, dynamic> json) {
+    return AppStorePromotionalOfferModel(
+      offerId: _string(json['offerId']),
+      keyId: _string(json['keyId']),
+      nonce: _string(json['nonce']),
+      timestamp: _int(json['timestamp']),
+      signature: _string(json['signature']),
     );
   }
 }
@@ -686,7 +607,9 @@ class StoreProviderOptionModel {
     required this.productType,
     required this.basePlanId,
     required this.offerId,
+    this.offerType = '',
     required this.developmentVerification,
+    this.promotionalOffer,
     this.label = 'Google Play',
     this.unavailableReason = '',
   });
@@ -697,11 +620,14 @@ class StoreProviderOptionModel {
   final StoreProviderProductType productType;
   final String basePlanId;
   final String offerId;
+  final String offerType;
   final bool developmentVerification;
+  final AppStorePromotionalOfferModel? promotionalOffer;
   final String label;
   final String unavailableReason;
 
-  CheckoutPaymentMethod get method => CheckoutPaymentMethod.googlePlay;
+  CheckoutPaymentMethod get method =>
+      CheckoutPaymentMethod.fromProvider(provider);
 
   factory StoreProviderOptionModel.fromJson(Map<String, dynamic> json) {
     return StoreProviderOptionModel(
@@ -713,8 +639,19 @@ class StoreProviderOptionModel {
       ),
       basePlanId: _string(json['basePlanId']),
       offerId: _string(json['offerId']),
+      offerType: _string(json['offerType']),
       developmentVerification: _bool(json['developmentVerification']),
-      label: _string(json['label'], fallback: 'Google Play'),
+      promotionalOffer: _map(json['promotionalOffer']).isEmpty
+          ? null
+          : AppStorePromotionalOfferModel.fromJson(
+              _map(json['promotionalOffer']),
+            ),
+      label: _string(
+        json['label'],
+        fallback: _string(json['provider']) == 'app_store'
+            ? 'App Store'
+            : 'Google Play',
+      ),
       unavailableReason: _string(json['unavailableReason']),
     );
   }
@@ -793,9 +730,10 @@ class StoreQuoteResponseModel {
           basePlanId: product.basePlanId,
           offerId: product.offerId,
           developmentVerification: _bool(payment['developmentVerification']),
+          label: provider == 'app_store' ? 'App Store' : 'Google Play',
           unavailableReason: enabled
               ? ''
-              : 'This package is not configured in Google Play.',
+              : 'This package is not configured for this platform.',
         ),
       ],
     );
@@ -819,9 +757,9 @@ class StorePackageListResponseModel {
     final Map<String, dynamic> meta = _map(json['meta']);
     return StorePackageListResponseModel(
       balances: StoreBalancesModel.fromJson(_map(json['balances'])),
-      items: _list(json['items'])
-          .map(StorePackageModel.fromJson)
-          .toList(growable: false),
+      items: _list(
+        json['items'],
+      ).map(StorePackageModel.fromJson).toList(growable: false),
       page: _int(meta['page'], fallback: 1),
       totalPages: _int(meta['totalPages'], fallback: 1),
     );
@@ -870,6 +808,42 @@ class VerifyGooglePlayPurchasePayloadModel {
     'productId': productId,
     'purchaseToken': purchaseToken,
     if (transactionId.isNotEmpty) 'transactionId': transactionId,
+  };
+}
+
+class VerifyAppStorePurchasePayloadModel {
+  const VerifyAppStorePurchasePayloadModel({
+    required this.productId,
+    required this.transactionId,
+    required this.signedTransactionInfo,
+  });
+
+  final String productId;
+  final String transactionId;
+  final String signedTransactionInfo;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'productId': productId,
+    'transactionId': transactionId,
+    'signedTransactionInfo': signedTransactionInfo,
+  };
+}
+
+class RestoreAppStoreSubscriptionPayloadModel
+    extends VerifyAppStorePurchasePayloadModel {
+  const RestoreAppStoreSubscriptionPayloadModel({
+    required super.productId,
+    required super.transactionId,
+    required super.signedTransactionInfo,
+    this.pendingOrderId = '',
+  });
+
+  final String pendingOrderId;
+
+  @override
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    ...super.toJson(),
+    if (pendingOrderId.isNotEmpty) 'pendingOrderId': pendingOrderId,
   };
 }
 

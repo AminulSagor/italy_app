@@ -29,7 +29,6 @@ class CallManager: NSObject {
         // safe: no CallKit call gets registered, and the caller can detect the no-op via
         // its own state machine.
         guard let uuid = UUID(uuidString: data.uuid) else {
-            NSLog("[CallkitIncoming] startCall: invalid UUID '\(data.uuid)' — ignored")
             return
         }
         let startCallAction = CXStartCallAction(call: uuid, handle: handle)
@@ -75,17 +74,18 @@ class CallManager: NSObject {
     func connectedCall(call: Call) {
         let callItem = self.callWithUUID(uuid: call.uuid)
         callItem?.connectedCall(completion: nil)
+
+        // Incoming calls have already executed CXAnswerCallAction through the
+        // provider delegate. Requesting a second answer action here can emit a
+        // duplicate accept event and tear down the first media connection.
+        if callItem?.data.isAccepted == true {
+            return
+        }
         
         let answerAction = CXAnswerCallAction(call: call.uuid)        
         let transaction = CXTransaction(action: answerAction)
 
-        callController.request(transaction) { error in
-            if let error = error {
-                print("Error answering call: \(error.localizedDescription)")
-            } else {
-                // Call successfully answered
-            }
-        }
+        callController.request(transaction) { _ in }
     }
     
     func endCallAlls() {
@@ -124,20 +124,9 @@ class CallManager: NSObject {
     }
     
     
-    private func requestCall(_ transaction: CXTransaction, action: String, completion: ((Bool) -> Void)? = nil) {
+    private func requestCall(_ transaction: CXTransaction, action _: String, completion: ((Bool) -> Void)? = nil) {
         callController.request(transaction){ error in
-            if let error = error {
-                //fail
-                print("Error requesting transaction: \(error)")
-            }else {
-                if(action == "startCall"){
-                    //TODO: push notification for Start Call
-                }else if(action == "endCall" || action == "endCallAlls"){
-                    //TODO: push notification for End Call
-                }
-                completion?(error == nil)
-                print("Requested transaction successfully: \(action)")
-            }
+            completion?(error == nil)
         }
     }
     

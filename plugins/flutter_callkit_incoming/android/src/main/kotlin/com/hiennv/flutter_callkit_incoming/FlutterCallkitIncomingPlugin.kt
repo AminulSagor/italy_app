@@ -135,23 +135,12 @@ class FlutterCallkitIncomingPlugin :
                 }
 
             if (uiHandlers.isNotEmpty()) {
-                Log.d(
-                    TAG,
-                    "Sending UI event: $event"
-                )
-
                 uiHandlers.forEach {
                     it.send(event, body)
                 }
             } else if (
                 CallkitBackgroundExecutor.registered
             ) {
-                Log.d(
-                    TAG,
-                    "Sending background event: $event " +
-                            "(no UI handlers)"
-                )
-
                 CallkitBackgroundExecutor.send(
                     event,
                     body
@@ -374,21 +363,11 @@ class FlutterCallkitIncomingPlugin :
     fun endCall(data: Data) {
         val appContext = context ?: return
 
-        Log.d(
-            TAG,
-            "Native endCall: id=${data.id}"
-        )
-
         callkitSoundPlayerManager?.stop()
         CallkitIncomingActivity.finishCurrent(false)
 
         // Critical for Android Telecom fullscreen UI.
         CallkitConnection.find(data.id)?.let { connection ->
-            Log.d(
-                TAG,
-                "Native endCall ending Telecom connection: ${data.id}"
-            )
-
             connection.markEnded()
         }
 
@@ -488,13 +467,6 @@ class FlutterCallkitIncomingPlugin :
         val callToCleanup =
             currentCall ?: requestedCall
 
-        Log.d(
-            TAG,
-            "cleanupIncomingCall: " +
-                    "requestedId=${requestedCall.id}, " +
-                    "activeCallFound=${currentCall != null}"
-        )
-
         stopIncomingCallUi()
 
         try {
@@ -579,6 +551,13 @@ class FlutterCallkitIncomingPlugin :
                         getUserCallback(context)
 
                     result.success(handle)
+                }
+
+                // The readiness handshake is required by iOS. Acknowledge it
+                // on Android as well because the Dart background dispatcher is
+                // shared by both platforms.
+                "backgroundInitialized" -> {
+                    result.success(null)
                 }
 
                 "setAcceptCallHandle" -> {
@@ -749,12 +728,6 @@ class FlutterCallkitIncomingPlugin :
 
                     val callToEnd = activeCall ?: requestedCall
 
-                    Log.d(
-                        TAG,
-                        "endCall requested: id=${callToEnd.id}, " +
-                                "activeCallFound=${activeCall != null}"
-                    )
-
                     // Immediately stop the plugin ringtone.
                     callkitSoundPlayerManager?.stop()
 
@@ -770,11 +743,6 @@ class FlutterCallkitIncomingPlugin :
                         CallkitConnection.find(callToEnd.id)
 
                     if (telecomConnection != null) {
-                        Log.d(
-                            TAG,
-                            "Ending Telecom connection: ${callToEnd.id}"
-                        )
-
                         telecomConnection.markEnded()
                     } else {
                         Log.w(
@@ -1066,8 +1034,6 @@ class FlutterCallkitIncomingPlugin :
             callkitSoundPlayerManager = null
             callkitNotificationManager = null
         }
-
-        Log.d(TAG, "onDetachedFromEngine")
     }
 
     override fun onAttachedToActivity(

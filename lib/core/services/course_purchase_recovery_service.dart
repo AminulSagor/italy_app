@@ -18,7 +18,7 @@ class CoursePurchaseRecoveryService extends GetxService
     required CourseGooglePlayBillingService billingService,
     required ProCheckoutApiService apiService,
   }) : _billingService = billingService,
-        _apiService = apiService;
+       _apiService = apiService;
 
   static const Set<String> _permanentFailureCodes = <String>{
     'GOOGLE_PLAY_PURCHASE_LINKED_TO_ANOTHER_USER',
@@ -80,8 +80,8 @@ class CoursePurchaseRecoveryService extends GetxService
       return;
     }
 
-    final ProPendingGooglePlayPurchaseModel? legacyPending =
-    _billingService.loadLegacyPendingPurchase();
+    final ProPendingGooglePlayPurchaseModel? legacyPending = _billingService
+        .loadLegacyPendingPurchase();
 
     if (legacyPending == null || _billingService.currentAppUserId.isEmpty) {
       return;
@@ -119,14 +119,16 @@ class CoursePurchaseRecoveryService extends GetxService
   }
 
   Future<void> recoverPendingPurchase() async {
-    if (_isRecovering || isSuspended || !Platform.isAndroid) {
+    if (_isRecovering ||
+        isSuspended ||
+        (!Platform.isAndroid && !Platform.isIOS)) {
       return;
     }
 
     await migrateLegacyPendingPurchase();
 
-    final ProPendingGooglePlayPurchaseModel? pending =
-    _billingService.loadPendingPurchase();
+    final ProPendingGooglePlayPurchaseModel? pending = _billingService
+        .loadPendingPurchase();
 
     if (pending == null) {
       return;
@@ -135,8 +137,8 @@ class CoursePurchaseRecoveryService extends GetxService
     _isRecovering = true;
 
     try {
-      final PurchaseDetails? purchase =
-      await _billingService.queryPendingPurchase();
+      final PurchaseDetails? purchase = await _billingService
+          .queryPendingPurchase();
 
       /*
        * Keep the local record when Google Play temporarily returns no result.
@@ -155,7 +157,7 @@ class CoursePurchaseRecoveryService extends GetxService
           return;
 
         case PurchaseStatus.error:
-        /*
+          /*
            * Do not delete the pending order for a generic Billing error.
            * The payment may still require reconciliation.
            */
@@ -179,11 +181,19 @@ class CoursePurchaseRecoveryService extends GetxService
             return;
           }
 
-          await _apiService.verifyGooglePlayPurchaseForRecovery(
-            pending: pending,
-            purchaseToken: purchaseToken,
-            transactionId: _transactionId(purchase),
-          );
+          if (Platform.isAndroid) {
+            await _apiService.verifyGooglePlayPurchaseForRecovery(
+              pending: pending,
+              purchaseToken: purchaseToken,
+              transactionId: _transactionId(purchase),
+            );
+          } else {
+            await _apiService.verifyAppStorePurchaseForRecovery(
+              pending: pending,
+              signedTransactionInfo: purchaseToken,
+              transactionId: _transactionId(purchase),
+            );
+          }
 
           /*
            * Complete the client purchase only after the backend has confirmed

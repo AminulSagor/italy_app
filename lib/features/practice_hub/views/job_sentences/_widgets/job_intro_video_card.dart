@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../../core/controllers/adaptive_network_video_controller.dart';
+import '../../../../../core/controllers/video_playback_wakelock.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
@@ -21,21 +22,17 @@ class JobIntroVideoCard extends StatefulWidget {
   });
 
   final String videoId;
-  final Future<ChapterVideoAccessModel?> Function()
-  loadVideoAccess;
+  final Future<ChapterVideoAccessModel?> Function() loadVideoAccess;
   final int initialProgressPercent;
-  final void Function(
-      int watchedPercent,
-      int timeSpentSeconds,
-      ) onProgress;
+  final void Function(int watchedPercent, int timeSpentSeconds) onProgress;
 
   @override
-  State<JobIntroVideoCard> createState() =>
-      _JobIntroVideoCardState();
+  State<JobIntroVideoCard> createState() => _JobIntroVideoCardState();
 }
 
 class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
   VideoPlayerController? _videoController;
+  final VideoPlaybackWakelock _playbackWakelock = VideoPlaybackWakelock();
   Future<void>? _initializationFuture;
   late final ValueNotifier<bool> _hasWatchedFullyNotifier;
 
@@ -49,9 +46,7 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
   void initState() {
     super.initState();
     _lastReportedPercent = widget.initialProgressPercent.clamp(0, 100).toInt();
-    _hasWatchedFullyNotifier = ValueNotifier<bool>(
-      _lastReportedPercent >= 100,
-    );
+    _hasWatchedFullyNotifier = ValueNotifier<bool>(_lastReportedPercent >= 100);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _ensurePlayerInitialized();
@@ -82,6 +77,7 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
   @override
   void dispose() {
     _flushProgress(force: true);
+    _playbackWakelock.dispose();
     _disposePlayer();
     _hasWatchedFullyNotifier.dispose();
     super.dispose();
@@ -122,21 +118,13 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
       access = await widget.loadVideoAccess();
 
       if (access == null || !access.canPlay) {
-        throw StateError(
-          _videoAccessMessage(access),
-        );
+        throw StateError(_videoAccessMessage(access));
       }
 
-      final Uri? uri = Uri.tryParse(
-        access.streamUrl.trim(),
-      );
+      final Uri? uri = Uri.tryParse(access.streamUrl.trim());
 
-      if (uri == null ||
-          !uri.hasScheme ||
-          uri.host.isEmpty) {
-        throw StateError(
-          'Invalid HLS stream URL.',
-        );
+      if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
+        throw StateError('Invalid HLS stream URL.');
       }
 
       controller = createAdaptiveNetworkVideoController(
@@ -155,6 +143,7 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
 
       _videoController = controller;
       controller.addListener(_onVideoTick);
+      _playbackWakelock.attach(controller);
 
       setState(() {
         _isInitializing = false;
@@ -169,14 +158,12 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
 
       setState(() {
         _isInitializing = false;
-        _errorMessage =
-            _videoAccessMessage(access);
+        _errorMessage = _videoAccessMessage(access);
       });
     }
   }
-  String _videoAccessMessage(
-      ChapterVideoAccessModel? access,
-      ) {
+
+  String _videoAccessMessage(ChapterVideoAccessModel? access) {
     switch (access?.status) {
       case ChapterVideoTranscodeStatus.pending:
         return 'Video processing has not started yet. Tap to check again.';
@@ -193,13 +180,11 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
         return 'This video has not been converted to HLS yet.';
 
       case ChapterVideoTranscodeStatus.ready:
-        if (access == null ||
-            access.streamUrl.isEmpty) {
+        if (access == null || access.streamUrl.isEmpty) {
           return 'The HLS stream URL is unavailable. Tap to retry.';
         }
 
-        if (access.requiresSignedCookies &&
-            !access.hasCloudFrontCookies) {
+        if (access.requiresSignedCookies && !access.hasCloudFrontCookies) {
           return 'CloudFront access could not be prepared. Tap to retry.';
         }
 
@@ -211,11 +196,11 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
     }
   }
 
-
   Future<void> _seekToSavedProgress(VideoPlayerController controller) async {
     final Duration duration = controller.value.duration;
-    final double savedProgress =
-        (widget.initialProgressPercent / 100).clamp(0.0, 1.0).toDouble();
+    final double savedProgress = (widget.initialProgressPercent / 100)
+        .clamp(0.0, 1.0)
+        .toDouble();
     if (duration.inMilliseconds <= 0 || savedProgress <= 0) {
       return;
     }
@@ -234,6 +219,7 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
     final VideoPlayerController? controller = _videoController;
     if (controller == null) return;
 
+    _playbackWakelock.detach();
     controller.removeListener(_onVideoTick);
     controller.dispose();
     _videoController = null;
@@ -268,15 +254,16 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
     }
 
     final Duration remaining = duration - position;
-    final bool isComplete = position > Duration.zero &&
+    final bool isComplete =
+        position > Duration.zero &&
         (position >= duration ||
             remaining <= const Duration(milliseconds: 150));
     final int percent = isComplete
         ? 100
         : ((position.inMilliseconds / duration.inMilliseconds) * 100)
-            .floor()
-            .clamp(0, 99)
-            .toInt();
+              .floor()
+              .clamp(0, 99)
+              .toInt();
 
     if (isComplete && !_hasWatchedFullyNotifier.value) {
       _hasWatchedFullyNotifier.value = true;
@@ -307,12 +294,12 @@ class _JobIntroVideoCardState extends State<JobIntroVideoCard> {
 
     final Duration duration = controller.value.duration;
     if (duration.inMilliseconds <= 0) return;
-    final int percent = ((controller.value.position.inMilliseconds /
-                duration.inMilliseconds) *
-            100)
-        .floor()
-        .clamp(0, 100)
-        .toInt();
+    final int percent =
+        ((controller.value.position.inMilliseconds / duration.inMilliseconds) *
+                100)
+            .floor()
+            .clamp(0, 100)
+            .toInt();
     if (force && _unreportedWatchMilliseconds >= 1000) {
       _reportProgress(percent);
     }

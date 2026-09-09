@@ -70,8 +70,10 @@ class AiTutorLevelTestResultView
                 ),
               ),
               SizedBox(height: 18.h),
-              Row(
-                children: <Widget>[
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
                   Expanded(
                     child: _SkillResultCard(
                       color: const Color(0xFFDDF1FF),
@@ -91,7 +93,8 @@ class AiTutorLevelTestResultView
                       level: profile.vocabularyLevel,
                     ),
                   ),
-                ],
+                  ],
+                ),
               ),
               SizedBox(height: 14.h),
               _GrammarResultCard(level: profile.grammarLevel),
@@ -220,8 +223,8 @@ class _SkillResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 123.h,
-      padding: EdgeInsets.symmetric(horizontal: 14.w),
+      constraints: const BoxConstraints(minHeight: 123),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(30.r),
@@ -233,6 +236,9 @@ class _SkillResultCard extends StatelessWidget {
           SizedBox(height: 10.h),
           Text(
             label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,

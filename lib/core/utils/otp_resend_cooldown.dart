@@ -24,9 +24,16 @@ class OtpResendCooldown {
   }
 
   void start() {
-    _availableAt = DateTime.now().add(Duration(seconds: cooldownSeconds));
+    restore(DateTime.now().add(Duration(seconds: cooldownSeconds)));
+  }
+
+  void restore(DateTime availableAt) {
+    _availableAt = availableAt;
     _syncRemaining();
     _timer?.cancel();
+    if (_availableAt == null) {
+      return;
+    }
     _timer = Timer.periodic(
       const Duration(seconds: 1),
       (_) => _syncRemaining(),

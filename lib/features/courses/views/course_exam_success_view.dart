@@ -17,10 +17,17 @@ class CourseExamSuccessView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.homeBackground,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(26.w, 70.h, 26.w, 38.h),
-          child: Column(
-            children: <Widget>[
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(26.w, 70.h, 26.w, 38.h),
+                    child: Column(
+                      children: <Widget>[
               Container(
                 width: kCourseSuccessHeroSize.w,
                 height: kCourseSuccessHeroSize.w,
@@ -77,8 +84,13 @@ class CourseExamSuccessView extends StatelessWidget {
               SizedBox(height: 52.h),
               Container(
                 width: double.infinity,
-                height: kCourseSuccessInfoHeight.h,
-                padding: EdgeInsets.symmetric(horizontal: 30.w),
+                constraints: BoxConstraints(
+                  minHeight: kCourseSuccessInfoHeight.h,
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 30.w,
+                  vertical: 20.h,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.coursesSuccessInfoBg,
                   borderRadius: BorderRadius.circular(
@@ -137,8 +149,13 @@ class CourseExamSuccessView extends StatelessWidget {
                     Get.until((Route<dynamic> route) => route.isFirst),
                 text: 'back_to_courses'.tr,
               ),
-            ],
-          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

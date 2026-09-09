@@ -20,10 +20,17 @@ class SettingsSuccessView extends StatelessWidget {
     return Scaffold(
       backgroundColor: SettingsUi.background,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 28.h),
-          child: Column(
-            children: <Widget>[
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 28.h),
+                    child: Column(
+                      children: <Widget>[
               Align(
                 alignment: Alignment.centerLeft,
                 child: Material(
@@ -84,8 +91,13 @@ class SettingsSuccessView extends StatelessWidget {
                 icon: content.buttonIcon,
                 onTap: () => _navigate(type),
               ),
-            ],
-          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

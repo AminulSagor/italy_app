@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../core/services/secure_storage_recovery.dart';
 import '../../../core/services/token_service.dart';
 import '../models/presence_model.dart';
 import 'chat_socket_service.dart';
@@ -116,11 +117,34 @@ class PresenceService extends GetxService with WidgetsBindingObserver {
 
   Future<void> _initDeviceId() async {
     const String key = 'presence_device_id';
-    String? id = await _storage.read(key: key);
+    String? id;
+    try {
+      id = await _storage.read(key: key);
+    } catch (error, stackTrace) {
+      await SecureStorageRecovery.reportHandledFailure(
+        scope: 'presence device ID read',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      await SecureStorageRecovery.deleteKeys(
+        storage: _storage,
+        keys: const <String>[key],
+        scope: 'presence device ID',
+      );
+    }
+
     if (id == null || id.isEmpty) {
       id =
           'dev_${DateTime.now().millisecondsSinceEpoch}_${(1000 + DateTime.now().microsecond)}';
-      await _storage.write(key: key, value: id);
+      try {
+        await _storage.write(key: key, value: id);
+      } catch (error, stackTrace) {
+        await SecureStorageRecovery.reportHandledFailure(
+          scope: 'presence device ID write',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
     }
     _deviceId = id;
   }

@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:get/get.dart';
 import '../../../../../core/services/storage_service.dart';
-import 'package:italir_pothe/core/utils/app_logger.dart';
-
 
 class FullScreenCallPermissionService {
   FullScreenCallPermissionService({StorageService? storageService})
@@ -63,13 +61,6 @@ class FullScreenCallPermissionService {
       }
 
       await FlutterCallkitIncoming.requestFullIntentPermission();
-    } catch (error, stackTrace) {
-      AppLogger.log(
-        'Unable to request full-screen call permission',
-        name: 'FullScreenCallPermissionService',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
+    } catch (_) {}
   }
 }

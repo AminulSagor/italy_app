@@ -52,7 +52,7 @@ class PracticeHubCourseCard extends StatelessWidget {
       value: course.progressLabel,
       child: SizedBox(
         width: fullWidth ? double.infinity : 264.w,
-        height: 240.h,
+        height: 240,
         child: Material(
           color: cardColor,
           borderRadius: BorderRadius.circular(28.r),

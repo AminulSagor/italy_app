@@ -141,7 +141,7 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                               onAudioCompleted:
                               controller.recordAudioCompleted,
                             ),
-                            SizedBox(height: 20.h),
+                            SizedBox(height: 8.h),
                           ],
 
                           _ResourceSection(
@@ -154,12 +154,12 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                           ),
 
                           if (detail.quiz != null) ...<Widget>[
-                            SizedBox(height: 22.h),
+                            SizedBox(height: 12.h),
                             ChapterQuizCard(
                               quiz: detail.quiz!,
                               onStartTap: controller.openQuiz,
                             ),
-                            SizedBox(height: 20.h),
+                            SizedBox(height: 10.h),
                             _BottomActions(
                               status: detail.quiz!.status,
                               hasVideo: detail.hasVideo,

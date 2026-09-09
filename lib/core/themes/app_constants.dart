@@ -100,7 +100,7 @@ const double kCourseCardHeight = 254;
 const double kCourseCardRadius = 42;
 const double kSkillCardHeight = 108;
 const double kSkillCardRadius = 42;
-const double kSpecializedCardHeight = 210;
+const double kSpecializedCardHeight = 184;
 const double kCourseDetailHeaderHeight = 64;
 const double kCourseDetailCardRadius = 48;
 const double kCourseDetailChapterHeight = 112;
@@ -113,7 +113,7 @@ const double kCourseProgressBadgeHeight = 52;
 const double kCourseSuccessHeroSize = 190;
 const double kCourseSuccessInfoHeight = 152;
 
-const double kChapterHorizontalPadding = 24;
+const double kChapterHorizontalPadding = 20;
 const double kChapterVideoCardHeight = 195;
 const double kChapterContentCardRadius = 38;
 const double kChapterLessonCardMinHeight = 446;

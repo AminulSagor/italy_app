@@ -106,7 +106,7 @@ class _BasePointsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200.h,
+      constraints: const BoxConstraints(minHeight: 200),
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(32.w, 31.h, 32.w, 28.h),
       decoration: BoxDecoration(
@@ -121,7 +121,7 @@ class _BasePointsCard extends StatelessWidget {
             bgColor: Color(0xFF13A844),
             iconColor: AppColors.white,
           ),
-          const Spacer(),
+          SizedBox(height: 20.h),
           Text(
             'score_base_points_title'.tr,
             style: TextStyle(
@@ -168,7 +168,7 @@ class _StreakBonusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 235.h,
+      constraints: const BoxConstraints(minHeight: 235),
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(32.w, 32.h, 32.w, 32.h),
       decoration: BoxDecoration(
@@ -183,7 +183,7 @@ class _StreakBonusCard extends StatelessWidget {
             size: 30.r,
             color: const Color(0xFF834900),
           ),
-          const Spacer(),
+          SizedBox(height: 20.h),
           Text(
             'score_streak_bonus_title'.tr,
             style: TextStyle(
@@ -217,23 +217,27 @@ class _ScoreStreakRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 37.h,
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      constraints: const BoxConstraints(minHeight: 37),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.78),
         borderRadius: BorderRadius.circular(999.r),
       ),
       child: Row(
         children: <Widget>[
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: AppFont.font11.sp,
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFFA23A18),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: AppFont.font11.sp,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFFA23A18),
+              ),
             ),
           ),
-          const Spacer(),
+          SizedBox(width: 8.w),
           Text(
             value,
             style: TextStyle(
@@ -304,7 +308,7 @@ class _BonusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200.h,
+      constraints: const BoxConstraints(minHeight: 200),
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(32.w, 31.h, 32.w, 30.h),
       decoration: BoxDecoration(
@@ -315,7 +319,7 @@ class _BonusCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Icon(icon, size: 31.r, color: iconColor),
-          const Spacer(),
+          SizedBox(height: 20.h),
           Text(
             title,
             style: TextStyle(
@@ -362,7 +366,7 @@ class _ProTipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 256.h,
+      constraints: const BoxConstraints(minHeight: 256),
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(32.w, 31.h, 32.w, 28.h),
       decoration: BoxDecoration(
@@ -412,7 +416,7 @@ class _ProTipCard extends StatelessWidget {
               ],
             ),
           ),
-          const Spacer(),
+          SizedBox(height: 22.h),
           Row(
             children: <Widget>[
               Expanded(

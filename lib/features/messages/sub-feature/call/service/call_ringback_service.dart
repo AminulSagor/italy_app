@@ -1,13 +1,8 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 
-enum _OutgoingCallTone {
-  none,
-  calling,
-  ringing,
-}
+enum _OutgoingCallTone { none, calling, ringing }
 
 class CallRingbackService {
   static final AudioContext _toneAudioContext = AudioContext(
@@ -37,9 +32,7 @@ class CallRingbackService {
   bool _isDisposed = false;
   int _requestVersion = 0;
 
-  Future<void> startCalling({
-    bool forceRestart = false,
-  }) {
+  Future<void> startCalling({bool forceRestart = false}) {
     return _requestTone(
       tone: _OutgoingCallTone.calling,
       assetPath: 'audio/caller_calling.mp3',
@@ -48,9 +41,7 @@ class CallRingbackService {
     );
   }
 
-  Future<void> startRinging({
-    bool forceRestart = false,
-  }) {
+  Future<void> startRinging({bool forceRestart = false}) {
     return _requestTone(
       tone: _OutgoingCallTone.ringing,
       assetPath: 'audio/caller_ringback.mp3',
@@ -77,9 +68,7 @@ class CallRingbackService {
         return;
       }
 
-      if (!forceRestart &&
-          _currentTone == tone &&
-          _player != null) {
+      if (!forceRestart && _currentTone == tone && _player != null) {
         return;
       }
 
@@ -109,22 +98,16 @@ class CallRingbackService {
           return;
         }
 
-        await AudioPlayer.global.setAudioContext(
-          _toneAudioContext,
-        );
+        await AudioPlayer.global.setAudioContext(_toneAudioContext);
 
         if (!_isRequestValid(requestVersion, tone)) {
           await _disposePlayer(newPlayer);
           return;
         }
 
-        await newPlayer.setAudioContext(
-          _toneAudioContext,
-        );
+        await newPlayer.setAudioContext(_toneAudioContext);
 
-        await newPlayer.setReleaseMode(
-          ReleaseMode.loop,
-        );
+        await newPlayer.setReleaseMode(ReleaseMode.loop);
 
         await newPlayer.setVolume(volume);
 
@@ -137,9 +120,7 @@ class CallRingbackService {
          * Prepare the asset separately instead of using play() directly.
          * This reduces overlapping Android MediaPlayer state changes.
          */
-        await newPlayer.setSource(
-          AssetSource(assetPath),
-        );
+        await newPlayer.setSource(AssetSource(assetPath));
 
         if (!_isRequestValid(requestVersion, tone)) {
           await _disposePlayer(newPlayer);
@@ -161,20 +142,7 @@ class CallRingbackService {
         }
 
         _currentTone = tone;
-
-        debugPrint(
-          '[CallRingbackService] Playing $assetPath '
-              'with player ${newPlayer.playerId}',
-        );
-      } catch (error, stackTrace) {
-        debugPrint(
-          '[CallRingbackService] Failed to play $assetPath: $error',
-        );
-
-        debugPrintStack(
-          stackTrace: stackTrace,
-        );
-
+      } catch (_) {
         if (identical(_player, newPlayer)) {
           _player = null;
         }
@@ -189,10 +157,7 @@ class CallRingbackService {
     });
   }
 
-  bool _isRequestValid(
-      int requestVersion,
-      _OutgoingCallTone tone,
-      ) {
+  bool _isRequestValid(int requestVersion, _OutgoingCallTone tone) {
     return !_isDisposed &&
         requestVersion == _requestVersion &&
         _requestedTone == tone;
@@ -213,8 +178,7 @@ class CallRingbackService {
        * A newer playback request may have been queued after this stop.
        * In that case, the newer request owns the player lifecycle.
        */
-      if (_isDisposed ||
-          requestVersion != _requestVersion) {
+      if (_isDisposed || requestVersion != _requestVersion) {
         return;
       }
 
@@ -222,35 +186,21 @@ class CallRingbackService {
       _player = null;
 
       await _disposePlayer(currentPlayer);
-
-      debugPrint(
-        '[CallRingbackService] Playback stopped and player released',
-      );
     });
   }
 
-  Future<void> _enqueue(
-      Future<void> Function() operation,
-      ) {
+  Future<void> _enqueue(Future<void> Function() operation) {
     final Future<void> result = _operationTail.then(
-          (_) => operation(),
-      onError: (_, __) => operation(),
+      (_) => operation(),
+      onError: (_, _) => operation(),
     );
 
-    _operationTail = result.catchError(
-          (Object error, StackTrace stackTrace) {
-        debugPrint(
-          '[CallRingbackService] Queued operation failed: $error',
-        );
-      },
-    );
+    _operationTail = result.catchError((Object _, StackTrace _) {});
 
     return result;
   }
 
-  Future<void> _disposePlayer(
-      AudioPlayer? player,
-      ) async {
+  Future<void> _disposePlayer(AudioPlayer? player) async {
     if (player == null) {
       return;
     }
@@ -261,11 +211,7 @@ class CallRingbackService {
      */
     try {
       await player.dispose();
-    } catch (error) {
-      debugPrint(
-        '[CallRingbackService] Player disposal failed: $error',
-      );
-    }
+    } catch (_) {}
   }
 
   Future<void> dispose() {

@@ -9,6 +9,7 @@ import '../../../core/services/api_error_handler.dart';
 import '../models/ai_tutor_guided_learning_models.dart';
 import '../models/ai_tutor_level_test_models.dart';
 import '../models/ai_tutor_models.dart';
+import 'ai_tutor_level_test_controller.dart';
 import '../services/ai_tutor_api_service.dart';
 import '../services/ai_tutor_preferences_service.dart';
 import '../services/ai_tutor_tts_service.dart';
@@ -30,10 +31,10 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   }) : _apiService = apiService ?? Get.find<AiTutorApiService>(),
        voiceService = voiceService ?? Get.find<AiTutorVoiceService>(),
        _ttsService = ttsService ?? Get.find<AiTutorTtsService>(),
-       _preferencesService = preferencesService ??
-           Get.find<AiTutorPreferencesService>(),
-       _userSessionController = userSessionController ??
-           Get.find<UserSessionController>();
+       _preferencesService =
+           preferencesService ?? Get.find<AiTutorPreferencesService>(),
+       _userSessionController =
+           userSessionController ?? Get.find<UserSessionController>();
 
   final AiTutorApiService _apiService;
   final AiTutorTtsService _ttsService;
@@ -50,8 +51,7 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   final RxList<String> expandedTranslationIds = <String>[].obs;
   final RxList<AiTutorStarterModel> visibleStarters =
       <AiTutorStarterModel>[].obs;
-  final RxList<AiTutorMessageModel> textMessages =
-      <AiTutorMessageModel>[].obs;
+  final RxList<AiTutorMessageModel> textMessages = <AiTutorMessageModel>[].obs;
   final RxnString conversationId = RxnString();
   final RxList<String> conversationMemoryFacts = <String>[].obs;
   final RxList<String> recentMistakeTags = <String>[].obs;
@@ -98,52 +98,54 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   AiTutorVoiceSessionModel? _activeVoiceSession;
   String? _activeVoiceTopic;
   AiTutorGuidedSessionContext? _activeGuidedSession;
+  bool _isLevelTestVoiceSession = false;
   int _textSessionVersion = 0;
   Timer? _voiceCountdownTimer;
   Timer? _voiceHeartbeatTimer;
   bool _isEndingVoiceSession = false;
   bool _isSendingVoiceHeartbeat = false;
 
-  final List<AiTutorStarterModel> _allStarters =
-      <AiTutorStarterModel>[
-        AiTutorStarterModel(
-          title: 'gen_practice_ordering_food'.tr,
-          subtitle: 'gen_al_ristorante'.tr,
-          prompt: 'practice_ordering_food_at_an_italian_restaurant'.tr,
-          isVoice: true,
-          icon: Icons.restaurant_rounded,
-        ),
-        AiTutorStarterModel(
-          title: 'gen_talk_about_my_day'.tr,
-          subtitle: 'gen_la_mia_giornata'.tr,
-          prompt: 'help_me_talk_about_my_day_in_italian'.tr,
-          isVoice: false,
-          icon: Icons.wb_sunny_rounded,
-        ),
-        AiTutorStarterModel(
-          title: 'gen_review_basic_greetings'.tr,
-          subtitle: 'gen_i_saluti_base'.tr,
-          prompt: 'teach_me_basic_italian_greetings'.tr,
-          isVoice: false,
-          icon: Icons.school_rounded,
-        ),
-        AiTutorStarterModel(
-          title: 'gen_ask_for_directions'.tr,
-          subtitle: 'gen_chiedere_indicazioni'.tr,
-          prompt: 'practice_asking_for_directions_in_italian'.tr,
-          isVoice: false,
-          icon: Icons.near_me_rounded,
-        ),
-        AiTutorStarterModel(
-          title: 'gen_coffee_shop_phrases'.tr,
-          subtitle: 'gen_al_bar'.tr,
-          prompt: 'practice_italian_coffee_shop_phrases_with_me'.tr,
-          isVoice: true,
-          icon: Icons.local_cafe_rounded,
-        ),
-      ];
+  final List<AiTutorStarterModel> _allStarters = <AiTutorStarterModel>[
+    AiTutorStarterModel(
+      title: 'gen_practice_ordering_food'.tr,
+      subtitle: 'gen_al_ristorante'.tr,
+      prompt: 'practice_ordering_food_at_an_italian_restaurant'.tr,
+      isVoice: true,
+      icon: Icons.restaurant_rounded,
+    ),
+    AiTutorStarterModel(
+      title: 'gen_talk_about_my_day'.tr,
+      subtitle: 'gen_la_mia_giornata'.tr,
+      prompt: 'help_me_talk_about_my_day_in_italian'.tr,
+      isVoice: false,
+      icon: Icons.wb_sunny_rounded,
+    ),
+    AiTutorStarterModel(
+      title: 'gen_review_basic_greetings'.tr,
+      subtitle: 'gen_i_saluti_base'.tr,
+      prompt: 'teach_me_basic_italian_greetings'.tr,
+      isVoice: false,
+      icon: Icons.school_rounded,
+    ),
+    AiTutorStarterModel(
+      title: 'gen_ask_for_directions'.tr,
+      subtitle: 'gen_chiedere_indicazioni'.tr,
+      prompt: 'practice_asking_for_directions_in_italian'.tr,
+      isVoice: false,
+      icon: Icons.near_me_rounded,
+    ),
+    AiTutorStarterModel(
+      title: 'gen_coffee_shop_phrases'.tr,
+      subtitle: 'gen_al_bar'.tr,
+      prompt: 'practice_italian_coffee_shop_phrases_with_me'.tr,
+      isVoice: true,
+      icon: Icons.local_cafe_rounded,
+    ),
+  ];
 
   bool get isGuidedVoiceSession => _activeGuidedSession != null;
+
+  bool get isLevelTestVoiceSession => _isLevelTestVoiceSession;
 
   bool get isLiveVoiceConnecting =>
       isStartingVoiceSession.value ||
@@ -171,9 +173,9 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   Future<void> refreshLearnerProfile() async {
     final ApiResult<AiTutorLevelProfileResponseModel> result =
         await ApiErrorHandler.call<AiTutorLevelProfileResponseModel>(
-      _apiService.getLevelTestProfile,
-      showError: false,
-    );
+          _apiService.getLevelTestProfile,
+          showError: false,
+        );
     if (!result.isSuccess || result.data == null) {
       return;
     }
@@ -201,8 +203,9 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   }
 
   void refreshStarters() {
-    final List<AiTutorStarterModel> shuffled =
-        List<AiTutorStarterModel>.from(_allStarters)..shuffle(Random());
+    final List<AiTutorStarterModel> shuffled = List<AiTutorStarterModel>.from(
+      _allStarters,
+    )..shuffle(Random());
     visibleStarters.assignAll(shuffled.take(3));
   }
 
@@ -265,8 +268,9 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     }
 
     final int sessionVersion = _textSessionVersion;
-    final List<AiTutorMessageModel> history =
-        List<AiTutorMessageModel>.from(textMessages);
+    final List<AiTutorMessageModel> history = List<AiTutorMessageModel>.from(
+      textMessages,
+    );
     textMessages.add(AiTutorMessageModel.user(text));
     isSendingMessage.value = true;
 
@@ -398,8 +402,19 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     String? topic,
     AiTutorGuidedSessionContext? guidedSession,
   }) {
+    _isLevelTestVoiceSession = false;
     _activeVoiceTopic = topic?.trim();
     _activeGuidedSession = guidedSession;
+    Get.to<void>(
+      () => const AiTutorLiveVoiceView(),
+      transition: Transition.rightToLeft,
+    );
+  }
+
+  void openLevelTestVoiceSession() {
+    _activeVoiceTopic = null;
+    _activeGuidedSession = null;
+    _isLevelTestVoiceSession = true;
     Get.to<void>(
       () => const AiTutorLiveVoiceView(),
       transition: Transition.rightToLeft,
@@ -411,8 +426,11 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
       return;
     }
 
-    await _userSessionController.refreshAiBalances();
-    if (_userSessionController.aiVoiceSeconds <= 0) {
+    if (!_isLevelTestVoiceSession) {
+      await _userSessionController.refreshAiBalances();
+    }
+    if (!_isLevelTestVoiceSession &&
+        _userSessionController.aiVoiceSeconds <= 0) {
       isVoiceBalanceExhausted.value = true;
       voiceService.connectionState.value = AiTutorVoiceConnectionState.error;
       voiceService.status.value = 'No AI voice time remaining';
@@ -429,8 +447,8 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     try {
       final ApiResult<AiTutorVoiceSessionModel> result =
           await ApiErrorHandler.call<AiTutorVoiceSessionModel>(
-        _requestVoiceSessionWithRetry,
-      );
+            _requestVoiceSessionWithRetry,
+          );
       if (!result.isSuccess || result.data == null) {
         voiceService.connectionState.value = AiTutorVoiceConnectionState.error;
         voiceService.status.value = 'Unable to start voice session';
@@ -440,26 +458,45 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
       createdSession = result.data!;
       _activeVoiceSession = createdSession;
       remainingVoiceSeconds.value = createdSession.allocatedSeconds;
-      _applyAiBalances(createdSession.balances);
-      await voiceService.connect(createdSession);
+      if (!_isLevelTestVoiceSession) {
+        _applyAiBalances(createdSession.balances);
+      }
+      await voiceService.connect(
+        createdSession,
+        refreshCredential: _isLevelTestVoiceSession
+            ? null
+            : (String? resumptionHandle) => _apiService.reconnectVoiceSession(
+                createdSession!.sessionId,
+                resumptionHandle: resumptionHandle,
+              ),
+        reportEvents: _isLevelTestVoiceSession
+            ? null
+            : (List<AiTutorLiveEventModel> events) => _apiService
+                  .recordLiveEvents(createdSession!.sessionId, events),
+        onLevelTestComplete: _isLevelTestVoiceSession
+            ? _completeLevelTestFromGemini
+            : null,
+      );
       final bool assistantReady = await voiceService.waitForAssistantReady(
         timeout: const Duration(seconds: 30),
       );
       if (!assistantReady) {
         throw TimeoutException('The AI tutor did not join the voice room');
       }
-      await _sendVoiceHeartbeat();
-      _startVoiceUsageTimers();
+      if (!_isLevelTestVoiceSession) {
+        await _sendVoiceHeartbeat();
+        _startVoiceUsageTimers();
+      }
     } catch (_) {
       await voiceService.disconnect(preserveErrorState: true);
       voiceService.connectionState.value = AiTutorVoiceConnectionState.error;
       voiceService.status.value = 'Unable to connect to AI tutor';
-      if (createdSession != null) {
+      if (createdSession != null && !_isLevelTestVoiceSession) {
         final ApiResult<AiTutorBalanceModel> endResult =
             await ApiErrorHandler.call<AiTutorBalanceModel>(
-          () => _apiService.endVoiceSession(createdSession!.sessionId),
-          showError: false,
-        );
+              () => _apiService.endVoiceSession(createdSession!.sessionId),
+              showError: false,
+            );
         if (endResult.data != null) {
           _applyAiBalances(endResult.data!);
         }
@@ -477,6 +514,9 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
 
     for (int attempt = 1; attempt <= 2; attempt++) {
       try {
+        if (_isLevelTestVoiceSession) {
+          return await _apiService.startLevelTestVoiceSession();
+        }
         return await _apiService.startVoiceSession(
           topic: _activeVoiceTopic,
           ttlSeconds: min(_userSessionController.aiVoiceSeconds, 3600),
@@ -533,9 +573,9 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     try {
       final ApiResult<AiTutorVoiceHeartbeatModel> result =
           await ApiErrorHandler.call<AiTutorVoiceHeartbeatModel>(
-        () => _apiService.heartbeatVoiceSession(session.sessionId),
-        showError: false,
-      );
+            () => _apiService.heartbeatVoiceSession(session.sessionId),
+            showError: false,
+          );
       if (!result.isSuccess || result.data == null) return;
 
       final AiTutorVoiceHeartbeatModel heartbeat = result.data!;
@@ -573,12 +613,12 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     _stopVoiceUsageTimers();
     try {
       await voiceService.disconnect();
-      if (session != null) {
+      if (session != null && !_isLevelTestVoiceSession) {
         final ApiResult<AiTutorBalanceModel> result =
             await ApiErrorHandler.call<AiTutorBalanceModel>(
-          () => _apiService.endVoiceSession(session.sessionId),
-          showError: false,
-        );
+              () => _apiService.endVoiceSession(session.sessionId),
+              showError: false,
+            );
         if (result.data != null) {
           _applyAiBalances(result.data!);
         } else {
@@ -604,6 +644,7 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     await endLiveVoiceSession();
     _activeGuidedSession = null;
     _activeVoiceTopic = null;
+    _isLevelTestVoiceSession = false;
     return true;
   }
 
@@ -611,16 +652,44 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     if (isLiveVoiceConnecting) {
       return;
     }
+    final bool completingLevelTest = _isLevelTestVoiceSession;
     await endLiveVoiceSession();
+    final String speakingTranscript = completingLevelTest
+        ? _levelTestSpeakingTranscript()
+        : '';
     _activeGuidedSession = null;
     _activeVoiceTopic = null;
+    _isLevelTestVoiceSession = false;
     if (Get.key.currentState?.canPop() ?? false) {
       Get.back<void>();
     }
+    if (completingLevelTest) {
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      if (Get.isRegistered<AiTutorLevelTestController>()) {
+        Get.find<AiTutorLevelTestController>().completeSpeakingAssessment(
+          speakingTranscript,
+        );
+      }
+    }
+  }
+
+  Future<void> _completeLevelTestFromGemini() async {
+    if (!_isLevelTestVoiceSession || _isEndingVoiceSession) return;
+    await closeLiveVoicePage();
+  }
+
+  String _levelTestSpeakingTranscript() {
+    return voiceService.messages
+        .where((AiTutorMessageModel message) => message.isUser)
+        .map((AiTutorMessageModel message) => message.primary.trim())
+        .where((String text) => text.isNotEmpty)
+        .join('\n');
   }
 
   Future<void> switchLiveVoiceToText() async {
-    if (isLiveVoiceConnecting || isGuidedVoiceSession) {
+    if (isLiveVoiceConnecting ||
+        isGuidedVoiceSession ||
+        isLevelTestVoiceSession) {
       return;
     }
 
@@ -661,10 +730,10 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   }) {
     final AiTutorGuidedSessionContext guidedSession =
         AiTutorGuidedSessionContext(
-      level: level.trim().toUpperCase(),
-      mode: mode,
-      topic: topicTitle.trim(),
-    );
+          level: level.trim().toUpperCase(),
+          mode: mode,
+          topic: topicTitle.trim(),
+        );
     openLiveVoiceSession(
       topic: guidedSession.topic,
       guidedSession: guidedSession,

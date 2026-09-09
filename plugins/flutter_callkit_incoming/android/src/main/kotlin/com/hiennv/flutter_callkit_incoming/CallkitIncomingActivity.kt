@@ -42,6 +42,9 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.hiennv.flutter_callkit_incoming.widgets.RippleRelativeLayout
 import de.hdodenhof.circleimageview.CircleImageView
 import java.lang.ref.WeakReference
@@ -162,7 +165,6 @@ class CallkitIncomingActivity : Activity() {
     private lateinit var ivDeclineCall: ImageView
     private lateinit var tvDecline: TextView
 
-    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -204,7 +206,7 @@ class CallkitIncomingActivity : Activity() {
 
         configureLockScreenWindow()
 
-        transparentStatusAndNavigation()
+        configureEdgeToEdge()
 
         setContentView(
             R.layout.activity_callkit_incoming
@@ -285,64 +287,20 @@ class CallkitIncomingActivity : Activity() {
         wakeLock.acquire(duration)
     }
 
-    @Suppress("DEPRECATION")
-    private fun transparentStatusAndNavigation() {
-        if (
-            Build.VERSION.SDK_INT >=
-            Build.VERSION_CODES.KITKAT &&
-            Build.VERSION.SDK_INT <
-            Build.VERSION_CODES.LOLLIPOP
-        ) {
-            setWindowFlag(
-                WindowManager.LayoutParams
-                    .FLAG_TRANSLUCENT_STATUS or
-                        WindowManager.LayoutParams
-                            .FLAG_TRANSLUCENT_NAVIGATION,
-                true
-            )
+    private fun configureEdgeToEdge() {
+        WindowCompat.enableEdgeToEdge(window)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
         }
 
-        if (
-            Build.VERSION.SDK_INT >=
-            Build.VERSION_CODES.KITKAT
-        ) {
-            window.decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        WindowCompat.getInsetsController(
+            window,
+            window.decorView
+        ).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
         }
-
-        if (
-            Build.VERSION.SDK_INT >=
-            Build.VERSION_CODES.LOLLIPOP
-        ) {
-            setWindowFlag(
-                WindowManager.LayoutParams
-                    .FLAG_TRANSLUCENT_STATUS or
-                        WindowManager.LayoutParams
-                            .FLAG_TRANSLUCENT_NAVIGATION,
-                false
-            )
-
-            window.statusBarColor = Color.TRANSPARENT
-            window.navigationBarColor = Color.TRANSPARENT
-        }
-    }
-
-    private fun setWindowFlag(
-        bits: Int,
-        enabled: Boolean
-    ) {
-        val windowParameters = window.attributes
-
-        windowParameters.flags =
-            if (enabled) {
-                windowParameters.flags or bits
-            } else {
-                windowParameters.flags and bits.inv()
-            }
-
-        window.attributes = windowParameters
     }
 
     private fun incomingData(sourceIntent: Intent) {
@@ -765,17 +723,7 @@ class CallkitIncomingActivity : Activity() {
         llAction =
             findViewById(R.id.llAction)
 
-        val parameters =
-            llAction.layoutParams as MarginLayoutParams
-
-        parameters.setMargins(
-            0,
-            0,
-            0,
-            Utils.getNavigationBarHeight(this)
-        )
-
-        llAction.layoutParams = parameters
+        applyActionSystemBarInsets()
 
         ivAcceptCall =
             findViewById(R.id.ivAcceptCall)
@@ -797,6 +745,32 @@ class CallkitIncomingActivity : Activity() {
 
         ivDeclineCall.setOnClickListener {
             onDeclineClick()
+        }
+    }
+
+    private fun applyActionSystemBarInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(
+            llAction
+        ) { view, windowInsets ->
+            val safeInsets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or
+                        WindowInsetsCompat.Type.displayCutout()
+            )
+            val parameters =
+                view.layoutParams as MarginLayoutParams
+
+            parameters.setMargins(
+                safeInsets.left,
+                parameters.topMargin,
+                safeInsets.right,
+                safeInsets.bottom
+            )
+            view.layoutParams = parameters
+            windowInsets
+        }
+
+        llAction.post {
+            ViewCompat.requestApplyInsets(llAction)
         }
     }
 

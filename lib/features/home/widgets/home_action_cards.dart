@@ -20,8 +20,8 @@ class SupportCommunityCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(kHomeCardRadius.r),
       onTap: onTap,
       child: Container(
-        height: kHomeSupportCardHeight.h,
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        constraints: BoxConstraints(minHeight: kHomeSupportCardHeight.h),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: AppColors.homePaleGreen,
           borderRadius: BorderRadius.circular(kHomeCardRadius.r),
@@ -49,6 +49,8 @@ class SupportCommunityCard extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     support.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: AppFont.font17.sp,
                       fontWeight: FontWeight.w900,
@@ -59,6 +61,8 @@ class SupportCommunityCard extends StatelessWidget {
                   SizedBox(height: 3.h),
                   Text(
                     support.subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: AppFont.font13.sp,
                       fontWeight: FontWeight.w600,

@@ -84,7 +84,7 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
           ),
           SizedBox(height: 26.h),
           SizedBox(
-            height: kCourseCardHeight.h,
+            height: kCourseCardHeight,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -125,8 +125,11 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
             ),
           ),
           SizedBox(height: 54.h),
-          _SectionTitle(title: 'gen_specialized_learning'.tr),
-          SizedBox(height: 28.h),
+          _SectionTitle(
+            title: 'gen_specialized_learning'.tr,
+            fontSize: AppFont.font20,
+          ),
+          SizedBox(height: 20.h),
           Padding(
             padding: EdgeInsets.symmetric(
               horizontal: kCoursesHorizontalPadding.w,
@@ -152,8 +155,9 @@ class _CoursesLoadedBody extends GetView<CoursesController> {
 
 class _SectionTitle extends StatelessWidget {
   final String title;
+  final double fontSize;
 
-  const _SectionTitle({required this.title});
+  const _SectionTitle({required this.title, this.fontSize = AppFont.font24});
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +166,7 @@ class _SectionTitle extends StatelessWidget {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: AppFont.font24.sp,
+          fontSize: fontSize.sp,
           fontWeight: FontWeight.w900,
           color: AppColors.homePrimaryText,
           letterSpacing: -0.8,

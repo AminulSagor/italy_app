@@ -529,7 +529,7 @@ class SettingsController extends GetxController {
     final String newPassword = newPasswordController.text;
     final String confirmPassword = confirmPasswordController.text;
 
-    if (currentPassword.isEmpty) {
+    if (hasPassword && currentPassword.isEmpty) {
       _showMessage('change_password', 'current_password_required');
       return false;
     }
@@ -543,18 +543,24 @@ class SettingsController extends GetxController {
     }
     if (isChangingPassword.value) return false;
 
-    final ChangeUserPasswordPayloadModel payload =
-        ChangeUserPasswordPayloadModel(
-          currentPassword: currentPassword,
-          newPassword: newPassword,
-          confirmNewPassword: confirmPassword,
-        );
-
     isChangingPassword.value = true;
     try {
       final ApiResult<UserSettingsMessageModel> result =
           await ApiErrorHandler.call<UserSettingsMessageModel>(
-            () => _userSettingsService.changePassword(payload),
+            () => hasPassword
+                ? _userSettingsService.changePassword(
+                    ChangeUserPasswordPayloadModel(
+                      currentPassword: currentPassword,
+                      newPassword: newPassword,
+                      confirmNewPassword: confirmPassword,
+                    ),
+                  )
+                : _userSettingsService.setPassword(
+                    SetUserPasswordPayloadModel(
+                      newPassword: newPassword,
+                      confirmNewPassword: confirmPassword,
+                    ),
+                  ),
             showError: false,
           );
 
@@ -570,6 +576,9 @@ class SettingsController extends GetxController {
         );
 
         return false;
+      }
+      if (!hasPassword && profile.value != null) {
+        profile.value = profile.value!.copyWith(hasPassword: true);
       }
       clearPasswordFields();
       return true;
@@ -692,7 +701,29 @@ class SettingsController extends GetxController {
     if (profile.value != null) Get.toNamed(AppRoutes.profileSecurity);
   }
 
-  void changePassword() => Get.toNamed(AppRoutes.changePassword);
+  bool get hasPassword => profile.value?.hasPassword ?? true;
+
+  bool get hasVerifiedContact {
+    final UserSettingsProfileModel? value = profile.value;
+    return value?.isEmailVerified == true || value?.isPhoneVerified == true;
+  }
+
+  String get passwordActionLabel {
+    if (hasPassword) return SettingsL10n.text('change_password');
+    return hasVerifiedContact
+        ? SettingsL10n.text('set_password')
+        : SettingsL10n.text('add_contact_to_set_password');
+  }
+
+  void changePassword() {
+    if (!hasPassword && !hasVerifiedContact) {
+      final UserSettingsProfileModel? value = profile.value;
+      setEditProfileTab(value?.email == null ? 'email' : 'phone');
+      openProfileSecurity();
+      return;
+    }
+    Get.toNamed(AppRoutes.changePassword);
+  }
 
   void deleteAccount() {
     if (profile.value == null) return;

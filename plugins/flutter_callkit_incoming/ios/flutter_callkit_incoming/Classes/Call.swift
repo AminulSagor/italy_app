@@ -357,14 +357,11 @@ public class Call: NSObject {
             map["nameCaller"] = nameCaller
             map["handle"] = handle
             
-            var mapExtras = extra as? [String: Any]
-            
-            if (mapExtras == nil) {
-                print("error casting dictionary to [String: Any]")
+            guard let mapExtras = extra as? [String: Any] else {
                 return String(format: "{\"nameCaller\":\"%@\", \"handle\":\"%@\"}", nameCaller, handle).encryptHandle()
             }
             
-            for (key, value) in mapExtras! {
+            for (key, value) in mapExtras {
                 map[key] = value
             }
             
@@ -374,7 +371,6 @@ public class Call: NSObject {
 
             return mapString.encryptHandle()
         } catch {
-            print("error encrypting call data")
             return String(format: "{\"nameCaller\":\"%@\", \"handle\":\"%@\"}", nameCaller, handle).encryptHandle()
         }
        

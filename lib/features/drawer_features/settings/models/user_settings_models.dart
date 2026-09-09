@@ -6,6 +6,7 @@ class UserSettingsProfileModel {
     required this.phone,
     required this.isEmailVerified,
     required this.isPhoneVerified,
+    required this.hasPassword,
     required this.profilePhotoFileId,
     required this.avatarUrl,
     required this.canChangeEmail,
@@ -21,6 +22,7 @@ class UserSettingsProfileModel {
   final String? phone;
   final bool isEmailVerified;
   final bool isPhoneVerified;
+  final bool hasPassword;
   final String? profilePhotoFileId;
   final String? avatarUrl;
   final bool canChangeEmail;
@@ -37,6 +39,9 @@ class UserSettingsProfileModel {
       phone: _nullableString(json['phone']),
       isEmailVerified: json['isEmailVerified'] == true,
       isPhoneVerified: json['isPhoneVerified'] == true,
+      hasPassword: json['hasPassword'] == null
+          ? true
+          : json['hasPassword'] == true,
       profilePhotoFileId: _nullableString(json['profilePhotoFileId']),
       avatarUrl: _nullableString(json['avatarUrl']),
       canChangeEmail: json['canChangeEmail'] != false,
@@ -50,20 +55,21 @@ class UserSettingsProfileModel {
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'fullName': fullName,
-        'email': email,
-        'phone': phone,
-        'isEmailVerified': isEmailVerified,
-        'isPhoneVerified': isPhoneVerified,
-        'profilePhotoFileId': profilePhotoFileId,
-        'avatarUrl': avatarUrl,
-        'canChangeEmail': canChangeEmail,
-        'canChangePhone': canChangePhone,
-        'streakFreezeCount': streakFreezeCount,
-        'currentStreakDays': currentStreakDays,
-        'learnerLevel': learnerLevel,
-      };
+    'id': id,
+    'fullName': fullName,
+    'email': email,
+    'phone': phone,
+    'isEmailVerified': isEmailVerified,
+    'isPhoneVerified': isPhoneVerified,
+    'hasPassword': hasPassword,
+    'profilePhotoFileId': profilePhotoFileId,
+    'avatarUrl': avatarUrl,
+    'canChangeEmail': canChangeEmail,
+    'canChangePhone': canChangePhone,
+    'streakFreezeCount': streakFreezeCount,
+    'currentStreakDays': currentStreakDays,
+    'learnerLevel': learnerLevel,
+  };
 
   UserSettingsProfileModel copyWith({
     String? id,
@@ -72,6 +78,7 @@ class UserSettingsProfileModel {
     String? phone,
     bool? isEmailVerified,
     bool? isPhoneVerified,
+    bool? hasPassword,
     String? profilePhotoFileId,
     String? avatarUrl,
     bool? canChangeEmail,
@@ -87,6 +94,7 @@ class UserSettingsProfileModel {
       phone: phone ?? this.phone,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       isPhoneVerified: isPhoneVerified ?? this.isPhoneVerified,
+      hasPassword: hasPassword ?? this.hasPassword,
       profilePhotoFileId: profilePhotoFileId ?? this.profilePhotoFileId,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       canChangeEmail: canChangeEmail ?? this.canChangeEmail,
@@ -99,17 +107,12 @@ class UserSettingsProfileModel {
 }
 
 class UserSettingsProfileResponseModel {
-  const UserSettingsProfileResponseModel({
-    required this.profile,
-    this.message,
-  });
+  const UserSettingsProfileResponseModel({required this.profile, this.message});
 
   final UserSettingsProfileModel profile;
   final String? message;
 
-  factory UserSettingsProfileResponseModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory UserSettingsProfileResponseModel.fromJson(Map<String, dynamic> json) {
     final dynamic rawProfile = json['profile'] ?? json['user'] ?? json['data'];
     if (rawProfile is! Map) {
       throw const FormatException('Profile response is missing profile data.');
@@ -124,9 +127,9 @@ class UserSettingsProfileResponseModel {
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        if (message != null) 'message': message,
-        'profile': profile.toJson(),
-      };
+    if (message != null) 'message': message,
+    'profile': profile.toJson(),
+  };
 }
 
 class ContactOtpResponseModel {
@@ -149,13 +152,13 @@ class ContactOtpResponseModel {
     final String type = explicitType == 'phone' || explicitType == 'email'
         ? explicitType
         : phone.isNotEmpty
-            ? 'phone'
-            : 'email';
+        ? 'phone'
+        : 'email';
     final String destination = _string(json['destination']).isNotEmpty
         ? _string(json['destination'])
         : type == 'phone'
-            ? phone
-            : email;
+        ? phone
+        : email;
 
     if (destination.isEmpty) {
       throw const FormatException('OTP response is missing its destination.');
@@ -226,11 +229,11 @@ class ConfirmAvatarUploadPayloadModel {
   final int sizeBytes;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'storageKey': storageKey,
-        'originalName': originalName,
-        'mimeType': mimeType,
-        'sizeBytes': sizeBytes,
-      };
+    'storageKey': storageKey,
+    'originalName': originalName,
+    'mimeType': mimeType,
+    'sizeBytes': sizeBytes,
+  };
 }
 
 class ChangeUserPasswordPayloadModel {
@@ -245,10 +248,25 @@ class ChangeUserPasswordPayloadModel {
   final String confirmNewPassword;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'currentPassword': currentPassword,
-        'newPassword': newPassword,
-        'confirmNewPassword': confirmNewPassword,
-      };
+    'currentPassword': currentPassword,
+    'newPassword': newPassword,
+    'confirmNewPassword': confirmNewPassword,
+  };
+}
+
+class SetUserPasswordPayloadModel {
+  const SetUserPasswordPayloadModel({
+    required this.newPassword,
+    required this.confirmNewPassword,
+  });
+
+  final String newPassword;
+  final String confirmNewPassword;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'newPassword': newPassword,
+    'confirmNewPassword': confirmNewPassword,
+  };
 }
 
 class UserSettingsMessageModel {

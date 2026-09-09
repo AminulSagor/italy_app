@@ -324,12 +324,19 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
               return;
             }
 
+            final bool isCompleted =
+                state.processingState == ProcessingState.completed;
+
             setState(() {
-              _isPlaying = state.playing;
+              _isPlaying = state.playing && !isCompleted;
               _isLoading =
                   state.processingState == ProcessingState.loading ||
                       state.processingState == ProcessingState.buffering;
             });
+
+            if (isCompleted && state.playing) {
+              unawaited(_player.pause());
+            }
           },
         );
 
@@ -397,7 +404,10 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
     }
 
     if (_player.processingState == ProcessingState.completed) {
+      await _player.pause();
       await _player.seek(Duration.zero);
+      await _player.play();
+      return;
     }
 
     if (_player.playing) {

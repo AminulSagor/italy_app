@@ -528,15 +528,24 @@ class LeaderboardController extends GetxController {
     );
 
     if (preview == null || preview.canChat != true) {
-      Get.snackbar(
-        'cannot_chat'.tr,
-        'this_user_cannot_be_messaged_right_now'.tr,
-      );
+      final BuildContext? snackbarContext = Get.overlayContext;
+      if (snackbarContext != null && snackbarContext.mounted) {
+        ScaffoldMessenger.maybeOf(snackbarContext)?.showSnackBar(
+          SnackBar(content: Text('this_user_cannot_be_messaged_right_now'.tr)),
+        );
+      }
       return;
     }
 
-    await Get.dialog<void>(
-      LeaderboardChatDialog(
+    final BuildContext? dialogContext = Get.overlayContext;
+    if (isClosed || dialogContext == null || !dialogContext.mounted) {
+      return;
+    }
+
+    await showDialog<void>(
+      context: dialogContext,
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      builder: (BuildContext context) => LeaderboardChatDialog(
         user: <String, dynamic>{
           ...user,
           'chatTargetUserId': preview.chatTargetUserId,
@@ -545,7 +554,6 @@ class LeaderboardController extends GetxController {
           'avatarUrl': preview.avatarUrl,
         },
       ),
-      barrierColor: Colors.black.withValues(alpha: 0.45),
     );
   }
 

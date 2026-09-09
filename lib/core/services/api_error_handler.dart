@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 
+import 'connectivity_service.dart';
+
 class ApiHandledResponse<T> {
   const ApiHandledResponse({
     required this.data,
@@ -29,10 +31,7 @@ class ApiResult<T> {
   final bool isSuccess;
 
   factory ApiResult.success(T data) {
-    return ApiResult<T>._(
-      data: data,
-      isSuccess: true,
-    );
+    return ApiResult<T>._(data: data, isSuccess: true);
   }
 
   factory ApiResult.failure({
@@ -71,13 +70,11 @@ class ApiErrorHandler {
       if (showError && !isUnauthorized) {
         _showErrorSnackbar(errorTitle, message);
       }
-      final DioException? dioError =
-      error is DioException ? error : null;
+      final DioException? dioError = error is DioException ? error : null;
 
       return ApiResult<T>.failure(
         error: message,
-        errorCode:
-        dioError == null ? null : _parseBackendErrorCode(dioError),
+        errorCode: dioError == null ? null : _parseBackendErrorCode(dioError),
         statusCode: dioError?.response?.statusCode,
       );
     }
@@ -98,9 +95,7 @@ class ApiErrorHandler {
       success: result.isSuccess,
       errorCode: result.isSuccess
           ? null
-          : result.errorCode ??
-          result.error ??
-          fallbackErrorCode,
+          : result.errorCode ?? result.error ?? fallbackErrorCode,
     );
   }
 
@@ -184,9 +179,16 @@ class ApiErrorHandler {
   }
 
   static void _showErrorSnackbar(String title, String message) {
-    if (Get.isSnackbarOpen) {
-      Get.closeCurrentSnackbar();
+    if (Get.isRegistered<ConnectivityService>() &&
+        Get.find<ConnectivityService>().isOffline) {
+      return;
     }
+
+    final context = Get.overlayContext;
+    if (context == null || !context.mounted || Get.isSnackbarOpen) {
+      return;
+    }
+
     Get.snackbar(title.tr, message);
   }
 }

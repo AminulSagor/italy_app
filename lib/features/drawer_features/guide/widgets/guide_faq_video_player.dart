@@ -5,13 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/controllers/video_playback_wakelock.dart';
+
 class GuideFaqVideoPlayer extends StatefulWidget {
   final String assetPath;
 
-  const GuideFaqVideoPlayer({
-    super.key,
-    required this.assetPath,
-  });
+  const GuideFaqVideoPlayer({super.key, required this.assetPath});
 
   @override
   State<GuideFaqVideoPlayer> createState() => _GuideFaqVideoPlayerState();
@@ -19,6 +18,7 @@ class GuideFaqVideoPlayer extends StatefulWidget {
 
 class _GuideFaqVideoPlayerState extends State<GuideFaqVideoPlayer> {
   VideoPlayerController? _videoController;
+  final VideoPlaybackWakelock _playbackWakelock = VideoPlaybackWakelock();
   String? _errorMessage;
 
   @override
@@ -41,11 +41,13 @@ class _GuideFaqVideoPlayerState extends State<GuideFaqVideoPlayer> {
     _errorMessage = null;
 
     if (previousController != null) {
+      _playbackWakelock.detach();
       await previousController.dispose();
     }
 
-    final VideoPlayerController controller =
-        VideoPlayerController.asset(widget.assetPath);
+    final VideoPlayerController controller = VideoPlayerController.asset(
+      widget.assetPath,
+    );
 
     try {
       await controller.initialize();
@@ -59,6 +61,7 @@ class _GuideFaqVideoPlayerState extends State<GuideFaqVideoPlayer> {
       setState(() {
         _videoController = controller;
       });
+      _playbackWakelock.attach(controller);
     } catch (_) {
       await controller.dispose();
 
@@ -86,6 +89,7 @@ class _GuideFaqVideoPlayerState extends State<GuideFaqVideoPlayer> {
 
   @override
   void dispose() {
+    _playbackWakelock.dispose();
     _videoController?.dispose();
     super.dispose();
   }
@@ -129,11 +133,7 @@ class _GuideFaqVideoPlayerState extends State<GuideFaqVideoPlayer> {
 
     return ValueListenableBuilder<VideoPlayerValue>(
       valueListenable: controller,
-      builder: (
-        BuildContext context,
-        VideoPlayerValue value,
-        Widget? child,
-      ) {
+      builder: (BuildContext context, VideoPlayerValue value, Widget? child) {
         final double aspectRatio = value.aspectRatio > 0
             ? value.aspectRatio
             : 16 / 9;
@@ -149,9 +149,7 @@ class _GuideFaqVideoPlayerState extends State<GuideFaqVideoPlayer> {
                 child: VideoPlayer(controller),
               ),
               if (!value.isPlaying)
-                ColoredBox(
-                  color: Colors.black.withValues(alpha: 0.22),
-                ),
+                ColoredBox(color: Colors.black.withValues(alpha: 0.22)),
               Center(
                 child: Semantics(
                   button: true,
@@ -218,9 +216,7 @@ class _VideoLoadingView extends StatelessWidget {
     return SizedBox(
       height: 188.h,
       child: const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF79F535),
-        ),
+        child: CircularProgressIndicator(color: Color(0xFF79F535)),
       ),
     );
   }
@@ -230,10 +226,7 @@ class _VideoStatusView extends StatelessWidget {
   final IconData icon;
   final String message;
 
-  const _VideoStatusView({
-    required this.icon,
-    required this.message,
-  });
+  const _VideoStatusView({required this.icon, required this.message});
 
   @override
   Widget build(BuildContext context) {

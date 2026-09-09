@@ -1,7 +1,8 @@
-import 'package:italir_pothe/core/utils/app_logger.dart';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_callkit_incoming/entities/call_event.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:uuid/uuid.dart';
 
 import 'api_client.dart';
@@ -22,6 +23,7 @@ class DevicePushTokenService {
 
   bool _allowBackendSync = false;
   bool _refreshListenerStarted = false;
+  bool _voipTokenListenerStarted = false;
 
   String get platformValue => Platform.isIOS ? 'ios' : 'android';
 
@@ -40,12 +42,23 @@ class DevicePushTokenService {
     return newDeviceId;
   }
 
-  /// Silently registers the device only when notification permission
-  /// has already been granted.
+  /// Silently registers Android after notification permission is granted.
+  /// iOS always registers its PushKit token because CallKit is independent of
+  /// alert-notification permission.
   ///
   /// This method never opens the notification permission popup.
   Future<void> registerCurrentDevice() async {
     try {
+      if (Platform.isIOS) {
+        // PushKit/CallKit does not depend on alert-notification permission.
+        // Also register the FCM token when APNs has made it available so
+        // silent call-cancellation updates can reconcile an existing CallKit
+        // screen without displaying a notification.
+        _allowBackendSync = true;
+        await _registerCurrentTokens();
+        return;
+      }
+
       final NotificationSettings settings = await FirebaseMessaging.instance
           .getNotificationSettings();
 
@@ -56,15 +69,8 @@ class DevicePushTokenService {
 
       _allowBackendSync = true;
 
-      await _registerCurrentToken();
-    } catch (error, stackTrace) {
-      AppLogger.log(
-        'Failed to register FCM token',
-        error: error,
-        stackTrace: stackTrace,
-        name: 'DevicePushTokenService',
-      );
-    }
+      await _registerCurrentTokens();
+    } catch (_) {}
   }
 
   /// Call this only after showing your own explanation and after
@@ -76,25 +82,17 @@ class DevicePushTokenService {
           .requestPermission(alert: true, badge: true, sound: true);
 
       if (!_isAuthorized(settings.authorizationStatus)) {
-        _allowBackendSync = false;
+        _allowBackendSync = Platform.isIOS;
         return settings.authorizationStatus;
       }
 
       _allowBackendSync = true;
 
-      await _registerCurrentToken();
+      await _registerCurrentTokens();
 
       return settings.authorizationStatus;
-    } catch (error, stackTrace) {
-      _allowBackendSync = false;
-
-      AppLogger.log(
-        'Failed to request notification permission',
-        error: error,
-        stackTrace: stackTrace,
-        name: 'DevicePushTokenService',
-      );
-
+    } catch (_) {
+      _allowBackendSync = Platform.isIOS;
       return AuthorizationStatus.denied;
     }
   }
@@ -105,14 +103,7 @@ class DevicePushTokenService {
           .getNotificationSettings();
 
       return _isAuthorized(settings.authorizationStatus);
-    } catch (error, stackTrace) {
-      AppLogger.log(
-        'Failed to read notification permission',
-        error: error,
-        stackTrace: stackTrace,
-        name: 'DevicePushTokenService',
-      );
-
+    } catch (_) {
       return false;
     }
   }
@@ -123,6 +114,8 @@ class DevicePushTokenService {
     }
 
     _refreshListenerStarted = true;
+
+    _listenForVoipTokenRefresh();
 
     FirebaseMessaging.instance.onTokenRefresh.listen((String newToken) async {
       if (!_allowBackendSync || !_storageService.isLoggedIn) {
@@ -136,15 +129,36 @@ class DevicePushTokenService {
       }
 
       try {
-        await _sendTokenToBackend(token);
-      } catch (error, stackTrace) {
-        AppLogger.log(
-          'Failed to update refreshed FCM token',
-          error: error,
-          stackTrace: stackTrace,
-          name: 'DevicePushTokenService',
-        );
+        await _sendTokensToBackend(fcmToken: token);
+      } catch (_) {}
+    });
+  }
+
+  void _listenForVoipTokenRefresh() {
+    if (!Platform.isIOS || _voipTokenListenerStarted) {
+      return;
+    }
+
+    _voipTokenListenerStarted = true;
+
+    FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
+      if (event is! CallEventActionDidUpdateDevicePushTokenVoip ||
+          !_storageService.isLoggedIn) {
+        return;
       }
+
+      try {
+        final String voipToken =
+            (await FlutterCallkitIncoming.getDevicePushTokenVoIP())?.trim() ??
+            '';
+
+        if (voipToken.isEmpty) {
+          return;
+        }
+
+        _allowBackendSync = true;
+        await _sendTokensToBackend(voipToken: voipToken);
+      } catch (_) {}
     });
   }
 
@@ -155,26 +169,49 @@ class DevicePushTokenService {
   Future<void> deleteLocalFcmToken() async {
     try {
       await FirebaseMessaging.instance.deleteToken();
-    } catch (error, stackTrace) {
-      AppLogger.log(
-        'Failed to delete local FCM token',
-        error: error,
-        stackTrace: stackTrace,
-        name: 'DevicePushTokenService',
-      );
-    }
+    } catch (_) {}
   }
 
-  Future<void> _registerCurrentToken() async {
-    final String? rawToken = await FirebaseMessaging.instance.getToken();
+  Future<void> _registerCurrentTokens({bool includeFcmToken = true}) async {
+    final String fcmToken = includeFcmToken
+        ? await _getFcmTokenWhenReady()
+        : '';
+    final String voipToken = Platform.isIOS
+        ? (await FlutterCallkitIncoming.getDevicePushTokenVoIP())?.trim() ?? ''
+        : '';
 
-    final String token = rawToken?.trim() ?? '';
-
-    if (token.isEmpty) {
+    if (fcmToken.isEmpty && voipToken.isEmpty) {
       return;
     }
 
-    await _sendTokenToBackend(token);
+    await _sendTokensToBackend(
+      fcmToken: fcmToken.isEmpty ? null : fcmToken,
+      voipToken: voipToken.isEmpty ? null : voipToken,
+    );
+  }
+
+  Future<String> _getFcmTokenWhenReady() async {
+    if (Platform.isIOS) {
+      // Firebase requires an APNs token before its iOS FCM token APIs are
+      // called. APNs registration can complete shortly after app startup, so
+      // wait for that native token instead of racing getToken().
+      for (int attempt = 0; attempt < 20; attempt++) {
+        final String apnsToken =
+            (await FirebaseMessaging.instance.getAPNSToken())?.trim() ?? '';
+        if (apnsToken.isNotEmpty) {
+          break;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+      }
+
+      final String apnsToken =
+          (await FirebaseMessaging.instance.getAPNSToken())?.trim() ?? '';
+      if (apnsToken.isEmpty) {
+        return '';
+      }
+    }
+
+    return (await FirebaseMessaging.instance.getToken())?.trim() ?? '';
   }
 
   bool _isAuthorized(AuthorizationStatus status) {
@@ -182,20 +219,27 @@ class DevicePushTokenService {
         status == AuthorizationStatus.provisional;
   }
 
-  Future<void> _sendTokenToBackend(String fcmToken) async {
-    if (fcmToken.isEmpty) {
+  Future<void> _sendTokensToBackend({
+    String? fcmToken,
+    String? voipToken,
+  }) async {
+    final String normalizedFcmToken = fcmToken?.trim() ?? '';
+    final String normalizedVoipToken = voipToken?.trim() ?? '';
+
+    if (normalizedFcmToken.isEmpty && normalizedVoipToken.isEmpty) {
       return;
     }
 
     final String deviceId = await getOrCreateDeviceId();
 
-    await _apiClient.dio.post(
+    await _apiClient.dio.post<dynamic>(
       _registerEndpoint,
       data: <String, dynamic>{
         'deviceId': deviceId,
         'platform': platformValue,
         'appState': 'foreground',
-        'fcmToken': fcmToken,
+        if (normalizedFcmToken.isNotEmpty) 'fcmToken': normalizedFcmToken,
+        if (normalizedVoipToken.isNotEmpty) 'voipToken': normalizedVoipToken,
       },
     );
   }

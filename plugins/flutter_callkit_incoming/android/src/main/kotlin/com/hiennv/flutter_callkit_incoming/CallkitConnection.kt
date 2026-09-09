@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.telecom.Connection
 import android.telecom.DisconnectCause
 import android.util.Log
@@ -70,7 +68,6 @@ class CallkitConnection(
         audioModeIsVoip = true
         connectionCapabilities = CAPABILITY_MUTE or CAPABILITY_SUPPORT_HOLD
         register(callId, this)
-        Log.d(TAG, "Connection created id=$callId active=${activeCount()}")
     }
 
     // -------------------------------------------------------------------------
@@ -84,25 +81,21 @@ class CallkitConnection(
 
     override fun onAnswer() {
         super.onAnswer()
-        Log.d(TAG, "onAnswer id=$callId")
         setActive()
     }
 
     override fun onReject() {
         super.onReject()
-        Log.d(TAG, "onReject id=$callId")
         finishWithCause(DisconnectCause.REJECTED)
     }
 
     override fun onDisconnect() {
         super.onDisconnect()
-        Log.d(TAG, "onDisconnect id=$callId")
         finishWithCause(DisconnectCause.LOCAL)
     }
 
     override fun onAbort() {
         super.onAbort()
-        Log.d(TAG, "onAbort id=$callId")
         finishWithCause(DisconnectCause.UNKNOWN)
     }
 
@@ -122,7 +115,6 @@ class CallkitConnection(
 
     /** Mark the call as answered — user accepted via app notification. */
     fun markAccepted() {
-        Log.d(TAG, "markAccepted id=$callId")
         setActive()
     }
 
@@ -143,7 +135,6 @@ class CallkitConnection(
      * FGS for the lifetime of the connection.
      */
     fun markDeclined(context: Context) {
-        Log.d(TAG, "markDeclined id=$callId")
         // Do not launch the app on decline. End the self-managed Telecom call
         // immediately so declining from the notification/lock screen leaves a
         // backgrounded or terminated app closed (3.0.0 behavior).
@@ -165,7 +156,6 @@ class CallkitConnection(
                 .putString("pending_nonce", callId)
                 .putLong("pending_at", System.currentTimeMillis())
                 .apply()
-            Log.d(TAG, "[DIAG-DECLINE-CS] prefs written nonce=$callId")
             val launchIntent = AppUtils.getAppIntent(context, null, null)
             launchIntent?.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -174,24 +164,17 @@ class CallkitConnection(
             )
             if (launchIntent != null) {
                 context.startActivity(launchIntent)
-                Log.d(TAG, "[DIAG-DECLINE-CS] startActivity dispatched (CS ctx, RINGING)")
-            } else {
-                Log.w(TAG, "[DIAG-DECLINE-CS] launchIntent null — recovery skipped")
             }
-        } catch (e: Exception) {
-            Log.w(TAG, "[DIAG-DECLINE-CS] recovery failed: ${e.message}")
-        }
+        } catch (_: Exception) {}
     }
 
     /** Mark the call as terminated — call ended (either side hung up). */
     fun markEnded() {
-        Log.d(TAG, "markEnded id=$callId")
         finishWithCause(DisconnectCause.LOCAL)
     }
 
     /** Mark the call as missed — timeout without answer. */
     fun markMissed() {
-        Log.d(TAG, "markMissed id=$callId")
         finishWithCause(DisconnectCause.MISSED)
     }
 

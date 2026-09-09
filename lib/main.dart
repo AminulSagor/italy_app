@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +15,9 @@ import 'core/bootstrap/app_bootstrap_controller.dart';
 import 'core/localization/translation_service.dart';
 import 'core/services/callkit_background_action_handler.dart';
 import 'core/services/callkit_incoming_service.dart';
+import 'core/services/callkit_pending_action_store.dart';
 import 'core/services/connectivity_service.dart';
+import 'core/services/crash_error_policy.dart';
 import 'core/services/local_notification_service.dart';
 import 'core/services/learning_activity_tracker_service.dart';
 import 'core/services/screen_protection_service.dart';
@@ -23,10 +27,11 @@ import 'core/widgets/connectivity_offline_view.dart';
 import 'features/messages/sub-feature/call/widgets/global_call_status_card.dart';
 import 'core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import 'features/home/controllers/home_controller.dart';
+import 'features/messages/sub-feature/call/controllers/message_call_controller.dart';
 import 'features/messages/sub-feature/call/service/call_socket_service.dart';
 import 'features/messages/sub-feature/call/service/incoming_call_coordinator.dart';
 import 'routes/routes.dart';
-import 'core/utils/app_logger.dart';
+
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   DartPluginRegistrant.ensureInitialized();
@@ -56,22 +61,14 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
     // Background isolates should use HTTP, not the foreground socket.
     await callService.acknowledgeIncomingCallOverHttp(callId: callId);
-  } catch (error, stackTrace) {
-    if (kDebugMode) {
-      AppLogger.log(
-        'Background incoming-call acknowledgement failed',
-        name: 'CallBackground',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-  }
+  } catch (_) {}
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
+  await _configureCrashlytics();
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FlutterCallkitIncoming.onBackgroundMessage(
@@ -114,6 +111,54 @@ Future<void> main() async {
   });
 }
 
+Future<void> _configureCrashlytics() async {
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+    kReleaseMode,
+  );
+
+  final FlutterExceptionHandler? previousFlutterErrorHandler =
+      FlutterError.onError;
+  FlutterError.onError = (FlutterErrorDetails details) {
+    if (kReleaseMode) {
+      final bool isRecoverable = CrashErrorPolicy.isRecoverable(
+        details.exception,
+        details.stack ?? StackTrace.empty,
+      );
+
+      unawaited(
+        isRecoverable
+            ? FirebaseCrashlytics.instance.recordFlutterError(details)
+            : FirebaseCrashlytics.instance.recordFlutterFatalError(details),
+      );
+      return;
+    }
+
+    previousFlutterErrorHandler?.call(details);
+  };
+
+  final ErrorCallback? previousPlatformErrorHandler =
+      PlatformDispatcher.instance.onError;
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stackTrace) {
+    if (kReleaseMode) {
+      final bool isRecoverable = CrashErrorPolicy.isRecoverable(
+        error,
+        stackTrace,
+      );
+
+      unawaited(
+        FirebaseCrashlytics.instance.recordError(
+          error,
+          stackTrace,
+          fatal: !isRecoverable,
+        ),
+      );
+      return true;
+    }
+
+    return previousPlatformErrorHandler?.call(error, stackTrace) ?? false;
+  };
+}
+
 Future<void> _initializeCallKitListeners() async {
   await CallkitIncomingService.initialize(
     onIncoming: (String callId, Map<String, dynamic> data) async {
@@ -121,11 +166,18 @@ Future<void> _initializeCallKitListeners() async {
         return;
       }
 
+      final IncomingCallCoordinator coordinator =
+          Get.find<IncomingCallCoordinator>();
+
+      // PushKit has already shown CallKit at this point. On iOS the Flutter
+      // route stays unavailable while locked, so acknowledge independently of
+      // route restoration and let the caller advance to ringing immediately.
+      if (Platform.isIOS) {
+        unawaited(_acknowledgeIosCallKitIncoming(coordinator, callId));
+      }
+
       unawaited(
-        Get.find<IncomingCallCoordinator>().openNativeIncomingCall(
-          callId: callId,
-          callData: data,
-        ),
+        coordinator.openNativeIncomingCall(callId: callId, callData: data),
       );
     },
     onAccept: (String callId, Map<String, dynamic> data) async {
@@ -144,33 +196,21 @@ Future<void> _initializeCallKitListeners() async {
     onDecline: (String callId, Map<String, dynamic> data) async {
       try {
         await Get.find<CallSocketService>().rejectCall(callId: callId);
-
+      } catch (_) {
+      } finally {
+        // A missing call is already terminal on the server. Always remove the
+        // corresponding native/Flutter incoming UI so another decline action
+        // cannot be emitted for the same stale call.
         if (Get.isRegistered<IncomingCallCoordinator>()) {
           Get.find<IncomingCallCoordinator>().dismissIncomingCall(callId);
         }
-      } catch (error, stackTrace) {
-        if (kDebugMode) {
-          AppLogger.log(
-            'Unable to synchronize declined call',
-            name: 'CallKit',
-            error: error,
-            stackTrace: stackTrace,
-          );
-        }
+        await CallkitPendingActionStore.clearDeclinedCall();
       }
     },
     onTimeout: (String callId, Map<String, dynamic> data) async {
       try {
         await Get.find<CallSocketService>().timeoutCall(callId: callId);
-      } catch (error, stackTrace) {
-        if (kDebugMode) {
-          AppLogger.log(
-            'Unable to synchronize timed-out call',
-            name: 'CallKit',
-            error: error,
-            stackTrace: stackTrace,
-          );
-        }
+      } catch (_) {
       } finally {
         if (Get.isRegistered<IncomingCallCoordinator>()) {
           Get.find<IncomingCallCoordinator>().dismissIncomingCall(callId);
@@ -183,40 +223,116 @@ Future<void> _initializeCallKitListeners() async {
         return;
       }
 
+      if (Get.isRegistered<MessageCallController>()) {
+        Get.find<MessageCallController>().closeFromNativeEnd(callId);
+      }
+
+      await CallkitPendingActionStore.saveEndedCall(
+        callId: callId,
+        callData: data,
+      );
       try {
         final CallSocketService socketService = Get.find<CallSocketService>();
-        final Map<String, dynamic> statusResponse = await socketService
-            .fetchCall(callId: callId);
-        final dynamic rawCall = statusResponse['call'];
-        final Map<String, dynamic> call = rawCall is Map
-            ? Map<String, dynamic>.from(rawCall)
-            : <String, dynamic>{};
-
-        if (call['status']?.toString() == 'active') {
-          await socketService.endCall(callId: callId);
+        await socketService.endCallOverHttp(callId: callId);
+        await CallkitPendingActionStore.clearEndedCall();
+      } on CallSocketException catch (error) {
+        if (error.code == 'CALL_NOT_FOUND' ||
+            error.code == 'CALL_CANNOT_BE_ENDED') {
+          await CallkitPendingActionStore.clearEndedCall();
         }
-      } catch (error, stackTrace) {
-        if (kDebugMode) {
-          AppLogger.log(
-            'Unable to synchronize ended call',
-            name: 'CallKit',
-            error: error,
-            stackTrace: stackTrace,
-          );
-        }
+      } catch (_) {
+      } finally {
+        await CallkitPendingActionStore.clearAcceptedCall();
       }
     },
   );
 }
 
+Future<void> _acknowledgeIosCallKitIncoming(
+  IncomingCallCoordinator coordinator,
+  String callId,
+) async {
+  try {
+    await coordinator.acknowledgeNativeIncomingCall(callId);
+  } catch (_) {}
+}
+
 Future<void> _completeCallKitStartup() async {
+  final PendingEndedCall? pendingEnd =
+      await CallkitPendingActionStore.takeEndedCall();
+  if (pendingEnd != null) {
+    if (!Get.isRegistered<CallSocketService>()) {
+      await CallkitPendingActionStore.saveEndedCall(
+        callId: pendingEnd.callId,
+        callData: pendingEnd.callData,
+      );
+    } else {
+      try {
+        await Get.find<CallSocketService>().endCallOverHttp(
+          callId: pendingEnd.callId,
+        );
+      } on CallSocketException catch (error) {
+        if (error.code != 'CALL_NOT_FOUND' &&
+            error.code != 'CALL_CANNOT_BE_ENDED') {
+          await CallkitPendingActionStore.saveEndedCall(
+            callId: pendingEnd.callId,
+            callData: pendingEnd.callData,
+          );
+        }
+      } catch (_) {
+        await CallkitPendingActionStore.saveEndedCall(
+          callId: pendingEnd.callId,
+          callData: pendingEnd.callData,
+        );
+      }
+    }
+  }
+
+  final PendingDeclinedCall? pendingDecline =
+      await CallkitPendingActionStore.takeDeclinedCall();
+  if (pendingDecline != null) {
+    if (!Get.isRegistered<CallSocketService>()) {
+      await CallkitPendingActionStore.saveDeclinedCall(
+        callId: pendingDecline.callId,
+        callData: pendingDecline.callData,
+      );
+    } else {
+      try {
+        await Get.find<CallSocketService>().rejectCallOverHttp(
+          callId: pendingDecline.callId,
+        );
+        await CallkitIncomingService.endNativeSubsystemOnly(
+          pendingDecline.callId,
+        );
+      } on CallSocketException catch (error) {
+        if (error.code == 'CALL_NOT_FOUND') {
+          await CallkitIncomingService.endNativeSubsystemOnly(
+            pendingDecline.callId,
+          );
+        } else {
+          await CallkitPendingActionStore.saveDeclinedCall(
+            callId: pendingDecline.callId,
+            callData: pendingDecline.callData,
+          );
+        }
+      } catch (_) {
+        await CallkitPendingActionStore.saveDeclinedCall(
+          callId: pendingDecline.callId,
+          callData: pendingDecline.callData,
+        );
+      }
+    }
+  }
+
   if (Get.isRegistered<IncomingCallCoordinator>()) {
     final IncomingCallCoordinator coordinator =
         Get.find<IncomingCallCoordinator>();
 
     unawaited(
       coordinator.restorePendingAcceptedCall(
-        waitForBackgroundHandler: const Duration(milliseconds: 800),
+        waitForBackgroundHandler: Platform.isIOS
+            ? const Duration(seconds: 15)
+            : const Duration(milliseconds: 800),
       ),
     );
 
@@ -273,47 +389,17 @@ class ItalyApp extends StatelessWidget {
                   callCoordinator.hasPresentedCall.value &&
                   !callCoordinator.isPresentedCallScreenVisible.value;
 
-              /*
-     * Completely hide the current application page while offline.
-     * The navigator remains mounted internally, so the user returns
-     * to the same page when connectivity is restored.
-     */
-              if (isOffline) {
-                return Column(
-                  children: <Widget>[
-                    /*
-           * Preserve the existing active-call functionality without
-           * exposing the application page underneath.
-           */
-                    if (showCallCard) const GlobalCallStatusCard(),
-
-                    const Expanded(child: ConnectivityOfflineView()),
-                  ],
-                );
-              }
-
-              /*
-     * Normal online state without an active call.
-     */
-              if (!showCallCard) {
-                return navigatorChild;
-              }
-
-              /*
-     * Preserve the existing global call-status-card behavior.
-     */
-              return Column(
-                children: <Widget>[
-                  const GlobalCallStatusCard(),
-                  Expanded(
-                    child: MediaQuery(
-                      data: MediaQuery.of(
-                        context,
-                      ).removePadding(removeTop: true),
-                      child: navigatorChild,
-                    ),
-                  ),
-                ],
+              return ConnectivityOfflineGate(
+                isOffline: isOffline,
+                header: showCallCard ? const GlobalCallStatusCard() : null,
+                child: showCallCard
+                    ? MediaQuery(
+                        data: MediaQuery.of(
+                          context,
+                        ).removePadding(removeTop: true),
+                        child: navigatorChild,
+                      )
+                    : navigatorChild,
               );
             });
           },

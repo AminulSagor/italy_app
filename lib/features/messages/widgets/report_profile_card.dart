@@ -17,8 +17,8 @@ class ReportProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: kReportProfileCardHeight.h,
-      padding: EdgeInsets.symmetric(horizontal: 38.w),
+      constraints: BoxConstraints(minHeight: kReportProfileCardHeight.h),
+      padding: EdgeInsets.symmetric(horizontal: 38.w, vertical: 18.h),
       decoration: BoxDecoration(
         color: AppColors.messageTileInactiveBg,
         borderRadius: BorderRadius.circular(kRadius42.r),
@@ -34,6 +34,8 @@ class ReportProfileCard extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'reporting_profile'.tr,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: AppFont.font16.sp,
                     fontWeight: FontWeight.w900,

@@ -1,0 +1,7 @@
+// Public Google OAuth identifiers for the iOS app and NestJS backend.
+GOOGLE_IOS_CLIENT_ID=1038113720231-8oue6gp1htrh2628u9mts71hur8o9m6u.apps.googleusercontent.com
+GOOGLE_REVERSED_CLIENT_ID=com.googleusercontent.apps.1038113720231-8oue6gp1htrh2628u9mts71hur8o9m6u
+GOOGLE_SERVER_CLIENT_ID=1038113720231-i3kkje03jaap1fbi09m1jsl2j9mqdal2.apps.googleusercontent.com
+FACEBOOK_APP_ID=2229699511091261
+FACEBOOK_CLIENT_TOKEN=dd0f6cfd72a61b59ddc47c2423fc4013
+FACEBOOK_DISPLAY_NAME=Italir Pothe
