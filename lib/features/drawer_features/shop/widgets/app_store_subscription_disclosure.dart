@@ -1,8 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/themes/app_colors.dart';
+
+const String appPrivacyPolicyUrl = 'https://www.italirpothe.com/privacy-policy';
+const String appleStandardEulaUrl =
+    'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+const String platformTermsAndConditionsUrl =
+    'https://www.italirpothe.com/terms-and-conditions';
+
+Uri subscriptionTermsOfUseUri(TargetPlatform platform) => Uri.parse(
+  platform == TargetPlatform.iOS
+      ? appleStandardEulaUrl
+      : platformTermsAndConditionsUrl,
+);
 
 class AppStoreSubscriptionDisclosure extends StatelessWidget {
   const AppStoreSubscriptionDisclosure({
@@ -15,12 +28,7 @@ class AppStoreSubscriptionDisclosure extends StatelessWidget {
     this.isAutoRenewing = true,
   });
 
-  static final Uri _privacyPolicy = Uri.parse(
-    'https://www.italirpothe.com/privacy-policy',
-  );
-  static final Uri _termsOfUse = Uri.parse(
-    'https://www.italirpothe.com/terms-and-conditions',
-  );
+  static final Uri _privacyPolicy = Uri.parse(appPrivacyPolicyUrl);
   static final Uri _manageSubscriptions = Uri.parse(
     'https://apps.apple.com/account/subscriptions',
   );
@@ -143,8 +151,13 @@ class AppStoreSubscriptionDisclosure extends StatelessWidget {
                 style: const TextStyle(color: muted, fontSize: 12),
               ),
               _LegalLink(
-                label: 'terms_and_conditions'.tr,
-                onTap: () => _open(_termsOfUse),
+                label:
+                    (defaultTargetPlatform == TargetPlatform.iOS
+                            ? 'Terms of Use (EULA)'
+                            : 'terms_and_conditions')
+                        .tr,
+                onTap: () =>
+                    _open(subscriptionTermsOfUseUri(defaultTargetPlatform)),
               ),
             ],
           ),
