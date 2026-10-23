@@ -32,6 +32,7 @@ class ChapterDetailController extends GetxController {
   final RxBool isVideoPlaying = false.obs;
   final RxBool shouldPlayVideo = false.obs;
   final RxInt videoPlaybackCommand = 0.obs;
+  bool _theoryReadRecorded = false;
   final Rx<ChapterQuizStatus> quizStatus = ChapterQuizStatus.disabled.obs;
   final Rxn<ChapterDetailModel> detail = Rxn<ChapterDetailModel>();
 
@@ -88,16 +89,13 @@ class ChapterDetailController extends GetxController {
       detail.value = result.data;
       quizStatus.value =
           result.data!.quiz?.status ?? ChapterQuizStatus.disabled;
-      await ApiErrorHandler.call<Object?>(
-        () async {
-          await _chapterDetailApiService.recordLessonOpened(
-            courseId: result.data!.courseId,
-            lessonId: result.data!.id,
-          );
-          return null;
-        },
-        showError: false,
-      );
+      await ApiErrorHandler.call<Object?>(() async {
+        await _chapterDetailApiService.recordLessonOpened(
+          courseId: result.data!.courseId,
+          lessonId: result.data!.id,
+        );
+        return null;
+      }, showError: false);
       _preloadChapterResources();
       _lastRecordedVideoPercent = result.data!.progress.videoWatchPercent;
       _isLessonCompletionSubmitted = result.data!.progress.isCompleted;
@@ -118,7 +116,13 @@ class ChapterDetailController extends GetxController {
     }
   }
 
-  Future<ChapterVideoAccessModel?> loadVideoAccess() {
+  Future<ChapterVideoAccessModel?> loadVideoAccess({
+    bool forceRefresh = false,
+  }) {
+    if (forceRefresh) {
+      _cachedVideoAccess = null;
+    }
+
     final ChapterVideoAccessModel? cachedAccess = _cachedVideoAccess;
 
     if (cachedAccess != null &&
@@ -464,18 +468,7 @@ class ChapterDetailController extends GetxController {
       return;
     }
 
-    await ApiErrorHandler.call<Object?>(
-      () async {
-        await _chapterDetailApiService.markTheoryRead(
-          courseId: current.courseId,
-          lessonId: current.id,
-        );
-        return null;
-      },
-      showError: false,
-      errorTitle: 'gen_theory_book'.tr,
-    );
-
+    _theoryReadRecorded = false;
     Get.to<void>(
       () => AppPdfViewer(
         title: theoryBook.title,
@@ -483,8 +476,37 @@ class ChapterDetailController extends GetxController {
         sourceType: AppPdfSourceType.network,
         sourceId: 'chapter_theory_pdf_viewer',
         initialPageCount: detail.value?.theoryBook.count ?? 0,
+        onDocumentLoaded: (_) => unawaited(
+          _recordTheoryReadAfterLoad(
+            courseId: current.courseId,
+            lessonId: current.id,
+          ),
+        ),
       ),
     );
+  }
+
+  Future<void> _recordTheoryReadAfterLoad({
+    required String courseId,
+    required String lessonId,
+  }) async {
+    if (_theoryReadRecorded) return;
+    _theoryReadRecorded = true;
+
+    final ApiResult<Object?> result = await ApiErrorHandler.call<Object?>(
+      () async {
+        await _chapterDetailApiService.markTheoryRead(
+          courseId: courseId,
+          lessonId: lessonId,
+        );
+        return null;
+      },
+      showError: false,
+      errorTitle: 'gen_theory_book'.tr,
+    );
+    if (!result.isSuccess) {
+      _theoryReadRecorded = false;
+    }
   }
 
   Future<void> openQuiz() async {

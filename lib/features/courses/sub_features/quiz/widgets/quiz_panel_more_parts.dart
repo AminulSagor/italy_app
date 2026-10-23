@@ -7,6 +7,7 @@ class _ListeningAssemblyPanel extends StatelessWidget {
     required this.showWrongResult,
     required this.onWordTap,
     required this.onSelectedWordTap,
+    required this.onAudioCompleted,
   });
 
   final QuizQuestionModel question;
@@ -14,16 +15,14 @@ class _ListeningAssemblyPanel extends StatelessWidget {
   final bool showWrongResult;
   final ValueChanged<String> onWordTap;
   final ValueChanged<String> onSelectedWordTap;
+  final VoidCallback onAudioCompleted;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        _TitleBlock(
-          title: question.title,
-          subtitle: question.subtitle,
-        ),
+        _TitleBlock(title: question.title, subtitle: question.subtitle),
 
         SizedBox(height: 24.h),
 
@@ -31,6 +30,7 @@ class _ListeningAssemblyPanel extends StatelessWidget {
         AudioPromptCard(
           audioUrl: question.mediaUrl,
           compact: true,
+          onCompleted: onAudioCompleted,
         ),
 
         SizedBox(height: 28.h),
@@ -73,29 +73,19 @@ class _MatchingPairsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> leftOptions =
-    question.matchingLeftTexts.isNotEmpty
+    final List<String> leftOptions = question.matchingLeftTexts.isNotEmpty
         ? question.matchingLeftTexts
         : <String>[
-      for (
-      int index = 0;
-      index < question.options.length;
-      index++
-      )
-        if (index.isEven) question.options[index],
-    ];
+            for (int index = 0; index < question.options.length; index++)
+              if (index.isEven) question.options[index],
+          ];
 
-    final List<String> resolvedRightOptions =
-    rightOptions.isNotEmpty
+    final List<String> resolvedRightOptions = rightOptions.isNotEmpty
         ? rightOptions
         : <String>[
-      for (
-      int index = 0;
-      index < question.options.length;
-      index++
-      )
-        if (index.isOdd) question.options[index],
-    ];
+            for (int index = 0; index < question.options.length; index++)
+              if (index.isOdd) question.options[index],
+          ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -108,10 +98,7 @@ class _MatchingPairsPanel extends StatelessWidget {
 
         if ((question.prompt ?? '').trim().isNotEmpty) ...<Widget>[
           SizedBox(height: 16.h),
-          _PromptText(
-            text: question.prompt!,
-            center: true,
-          ),
+          _PromptText(text: question.prompt!, center: true),
         ],
 
         SizedBox(height: 18.h),
@@ -132,6 +119,7 @@ class _MatchingPairsPanel extends StatelessWidget {
     );
   }
 }
+
 class _MatchingInstructionCard extends StatelessWidget {
   const _MatchingInstructionCard();
 
@@ -142,10 +130,7 @@ class _MatchingInstructionCard extends StatelessWidget {
       label: 'matching_pairs_drag_instruction'.tr,
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.symmetric(
-          horizontal: 14.w,
-          vertical: 12.h,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: AppColors.primaryGreen.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14.r),
@@ -211,8 +196,7 @@ class _MatchingPairBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int itemCount =
-    leftOptions.length < rightOptions.length
+    final int itemCount = leftOptions.length < rightOptions.length
         ? leftOptions.length
         : rightOptions.length;
 
@@ -221,42 +205,34 @@ class _MatchingPairBoard extends StatelessWidget {
     }
 
     return LayoutBuilder(
-      builder: (
-          BuildContext context,
-          BoxConstraints constraints,
-          ) {
+      builder: (BuildContext context, BoxConstraints constraints) {
         final double gap = 12.w;
-        final double tileWidth =
-            (constraints.maxWidth - gap) / 2;
+        final double tileWidth = (constraints.maxWidth - gap) / 2;
 
         return Column(
-          children: List<Widget>.generate(
-            itemCount,
-                (int index) {
-              final String itemKey =
-              index < rightKeys.length &&
-                  rightKeys[index].trim().isNotEmpty
-                  ? rightKeys[index]
-                  : '${rightOptions[index]}-$index';
+          children: List<Widget>.generate(itemCount, (int index) {
+            final String itemKey =
+                index < rightKeys.length && rightKeys[index].trim().isNotEmpty
+                ? rightKeys[index]
+                : '${rightOptions[index]}-$index';
 
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: index == itemCount - 1 ? 0 : 14.h,
-                ),
-                child: _MatchingPairRow(
-                  leftText: leftOptions[index],
-                  rightText: rightOptions[index],
-                  rightKey: itemKey,
-                  index: index,
-                  tileWidth: tileWidth,
-                  gap: gap,
-                  isLocked: isLocked,
-                  showWrongResult: showWrongResult,
-                  onSwap: onSwap,
-                ),
-              );
-            },
-          ),
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: index == itemCount - 1 ? 0 : 14.h,
+              ),
+              child: _MatchingPairRow(
+                leftText: leftOptions[index],
+                rightText: rightOptions[index],
+                rightKey: itemKey,
+                index: index,
+                tileWidth: tileWidth,
+                gap: gap,
+                isLocked: isLocked,
+                showWrongResult: showWrongResult,
+                onSwap: onSwap,
+              ),
+            );
+          }),
         );
       },
     );
@@ -295,27 +271,24 @@ class _MatchingPairRow extends StatelessWidget {
         SizedBox(
           width: tileWidth,
           child: DragTarget<int>(
-            onWillAcceptWithDetails: (
-                DragTargetDetails<int> details,
-                ) {
+            onWillAcceptWithDetails: (DragTargetDetails<int> details) {
               return !isLocked && details.data != index;
             },
-            onAcceptWithDetails: (
-                DragTargetDetails<int> details,
-                ) {
+            onAcceptWithDetails: (DragTargetDetails<int> details) {
               onSwap(details.data, index);
             },
-            builder: (
-                BuildContext context,
-                List<int?> candidateData,
-                List<dynamic> rejectedData,
+            builder:
+                (
+                  BuildContext context,
+                  List<int?> candidateData,
+                  List<dynamic> rejectedData,
                 ) {
-              return _MatchingPairTile(
-                label: leftText,
-                isDraggable: false,
-                isDropTarget: candidateData.isNotEmpty,
-              );
-            },
+                  return _MatchingPairTile(
+                    label: leftText,
+                    isDraggable: false,
+                    isDropTarget: candidateData.isNotEmpty,
+                  );
+                },
           ),
         ),
 
@@ -325,66 +298,60 @@ class _MatchingPairRow extends StatelessWidget {
         SizedBox(
           width: tileWidth,
           child: DragTarget<int>(
-            onWillAcceptWithDetails: (
-                DragTargetDetails<int> details,
-                ) {
+            onWillAcceptWithDetails: (DragTargetDetails<int> details) {
               return !isLocked && details.data != index;
             },
-            onAcceptWithDetails: (
-                DragTargetDetails<int> details,
-                ) {
+            onAcceptWithDetails: (DragTargetDetails<int> details) {
               onSwap(details.data, index);
             },
-            builder: (
-                BuildContext context,
-                List<int?> candidateData,
-                List<dynamic> rejectedData,
+            builder:
+                (
+                  BuildContext context,
+                  List<int?> candidateData,
+                  List<dynamic> rejectedData,
                 ) {
-              final bool isReceiving = candidateData.isNotEmpty;
+                  final bool isReceiving = candidateData.isNotEmpty;
 
-              final Widget tile = _MatchingPairTile(
-                label: rightText,
-                isDraggable: !isLocked,
-                isDropTarget: isReceiving,
-                isWrong: showWrongResult,
-              );
+                  final Widget tile = _MatchingPairTile(
+                    label: rightText,
+                    isDraggable: !isLocked,
+                    isDropTarget: isReceiving,
+                    isWrong: showWrongResult,
+                  );
 
-              if (isLocked) {
-                return tile;
-              }
+                  if (isLocked) {
+                    return tile;
+                  }
 
-              return Draggable<int>(
-                key: ValueKey<String>(rightKey),
-                data: index,
+                  return Draggable<int>(
+                    key: ValueKey<String>(rightKey),
+                    data: index,
 
-                // No axis means movement in every direction.
-                dragAnchorStrategy: pointerDragAnchorStrategy,
-                rootOverlay: true,
-                maxSimultaneousDrags: 1,
-                hitTestBehavior: HitTestBehavior.opaque,
+                    // No axis means movement in every direction.
+                    dragAnchorStrategy: pointerDragAnchorStrategy,
+                    rootOverlay: true,
+                    maxSimultaneousDrags: 1,
+                    hitTestBehavior: HitTestBehavior.opaque,
 
-                feedback: Material(
-                  color: Colors.transparent,
-                  elevation: 10,
-                  borderRadius: BorderRadius.circular(kRadius30.r),
-                  child: SizedBox(
-                    width: tileWidth,
-                    child: _MatchingPairTile(
-                      label: rightText,
-                      isDraggable: true,
-                      isDragging: true,
+                    feedback: Material(
+                      color: Colors.transparent,
+                      elevation: 10,
+                      borderRadius: BorderRadius.circular(kRadius30.r),
+                      child: SizedBox(
+                        width: tileWidth,
+                        child: _MatchingPairTile(
+                          label: rightText,
+                          isDraggable: true,
+                          isDragging: true,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
 
-                childWhenDragging: Opacity(
-                  opacity: 0.25,
-                  child: tile,
-                ),
+                    childWhenDragging: Opacity(opacity: 0.25, child: tile),
 
-                child: tile,
-              );
-            },
+                    child: tile,
+                  );
+                },
           ),
         ),
       ],
@@ -414,8 +381,7 @@ class _MatchingPairTile extends StatelessWidget {
     if (isWrong) {
       backgroundColor = AppColors.quizWrongLightBg;
     } else if (isDropTarget) {
-      backgroundColor =
-          AppColors.primaryGreen.withValues(alpha: 0.12);
+      backgroundColor = AppColors.primaryGreen.withValues(alpha: 0.12);
     } else {
       backgroundColor = AppColors.white;
     }
@@ -448,12 +414,12 @@ class _MatchingPairTile extends StatelessWidget {
           ),
           boxShadow: isDragging
               ? <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
-              blurRadius: 12.r,
-              offset: Offset(0, 5.h),
-            ),
-          ]
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 12.r,
+                    offset: Offset(0, 5.h),
+                  ),
+                ]
               : null,
         ),
         child: Row(
@@ -480,9 +446,7 @@ class _MatchingPairTile extends StatelessWidget {
               Icon(
                 Icons.drag_indicator_rounded,
                 size: 20.w,
-                color: isWrong
-                    ? AppColors.quizWrongBorder
-                    : AppColors.bodyText,
+                color: isWrong ? AppColors.quizWrongBorder : AppColors.bodyText,
               ),
             ],
           ],

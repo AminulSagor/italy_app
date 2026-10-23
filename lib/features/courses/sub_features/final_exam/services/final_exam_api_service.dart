@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import '../../../../../core/utils/local_date.dart';
 
 import '../../../../../core/services/api_client.dart';
 import '../models/final_exam_api_models.dart';
@@ -19,9 +20,7 @@ class FinalExamApiService {
     return FinalExamGatewayModel.fromJson(_responseMap(response));
   }
 
-  Future<FinalExamAttemptModel> startAttempt({
-    required String courseId,
-  }) async {
+  Future<FinalExamAttemptModel> startAttempt({required String courseId}) async {
     final Response<dynamic> response = await _apiClient.dio.post(
       '/final-exams/start',
       data: <String, dynamic>{'courseId': courseId},
@@ -63,7 +62,7 @@ class FinalExamApiService {
       '/final-exams/attempts/$attemptId/submit',
       data: <String, dynamic>{
         'totalDurationSeconds': totalDurationSeconds.clamp(0, 86400).toInt(),
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
     return FinalExamSubmissionModel.fromJson(_responseMap(response));
@@ -198,10 +197,7 @@ class FinalExamApiService {
         data['publicUrl'],
       );
       if (url.isEmpty) return null;
-      return _FileMediaInfo(
-        url: url,
-        mimeType: _string(file['mimeType']),
-      );
+      return _FileMediaInfo(url: url, mimeType: _string(file['mimeType']));
     } on DioException {
       return null;
     }

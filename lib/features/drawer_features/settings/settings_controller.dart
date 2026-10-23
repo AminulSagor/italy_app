@@ -10,10 +10,9 @@ import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/models/current_user_summary.dart';
 import '../../../core/services/api_error_handler.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/services/device_push_token_service.dart';
-import '../../../core/services/storage_service.dart';
-import '../../../core/services/token_service.dart';
 import '../../../core/services/learning_activity_tracker_service.dart';
+import '../../../core/services/ai_data_consent_service.dart';
+import '../../../core/services/social_sign_in_service.dart';
 import '../../../core/utils/otp_resend_cooldown.dart';
 import '../../../core/widgets/app_drawer_controller.dart';
 import '../../../routes/routes.dart';
@@ -35,10 +34,9 @@ class SettingsController extends GetxController {
 
   final UserSettingsService _userSettingsService;
 
-  // Kept for constructor compatibility with the existing route binding.
-  // ignore: unused_field
   final AuthService _authService;
   final ImagePicker _imagePicker = ImagePicker();
+  final SocialSignInService _socialSignInService = SocialSignInService();
 
   static const int _maximumAvatarBytes = 5 * 1024 * 1024;
 
@@ -54,6 +52,7 @@ class SettingsController extends GetxController {
   final RxBool isVerifyingContactOtp = false.obs;
   final RxBool isResendingContactOtp = false.obs;
   final RxBool isDeletingAccount = false.obs;
+  final RxBool isDisconnectingSocialAccount = false.obs;
 
   final RxBool obscureCurrentPassword = true.obs;
   final RxBool obscureNewPassword = true.obs;
@@ -179,9 +178,13 @@ class SettingsController extends GetxController {
   bool get isOtpComplete => RegExp(r'^\d{4}$').hasMatch(otpDraft.value);
 
   bool get canDeleteAccount {
+    return _normalizeName(deleteConfirmText.value) ==
+        _normalizeName(deleteAccountConfirmationTarget);
+  }
+
+  String get deleteAccountConfirmationTarget {
     final String name = profile.value?.fullName.trim() ?? '';
-    if (name.isEmpty) return false;
-    return _normalizeName(deleteConfirmText.value) == _normalizeName(name);
+    return name.isEmpty ? 'DELETE' : name;
   }
 
   bool get hasValidNewPassword => newPasswordDraft.value.length >= 6;
@@ -590,13 +593,13 @@ class SettingsController extends GetxController {
   Future<void> deleteAccountPermanently() async {
     if (!canDeleteAccount || isDeletingAccount.value) {
       if (!canDeleteAccount) {
-        _showMessage('delete_account', 'name_does_not_match');
+        _showMessage('delete_account', 'deletion_confirmation_does_not_match');
       }
       return;
     }
 
     final String accountName = profile.value?.fullName.trim() ?? '';
-    if (accountName.isEmpty) return;
+    final String? confirmation = accountName.isEmpty ? 'DELETE' : null;
 
     isDeletingAccount.value = true;
     bool navigationCompleted = false;
@@ -604,7 +607,10 @@ class SettingsController extends GetxController {
     try {
       final ApiResult<UserSettingsMessageModel> result =
           await ApiErrorHandler.call<UserSettingsMessageModel>(
-            () => _userSettingsService.deleteAccount(accountName),
+            () => _userSettingsService.deleteAccount(
+              fullName: accountName.isEmpty ? null : accountName,
+              confirmation: confirmation,
+            ),
             errorTitle: SettingsL10n.text('delete_account'),
           );
 
@@ -669,6 +675,147 @@ class SettingsController extends GetxController {
       _showMessage('rate_unavailable', 'rate_unavailable_desc');
     }
   }
+
+  Future<void> openAiDataSharingSettings() async {
+    await Get.find<AiDataConsentService>().openConsentSettings();
+  }
+
+  Future<void> openConnectedAccounts() async {
+    final ApiResult<Map<String, dynamic>> result =
+        await ApiErrorHandler.call<Map<String, dynamic>>(
+          _userSettingsService.getConnectedAccounts,
+          errorTitle: SettingsL10n.text('connected_accounts'),
+        );
+    if (!result.isSuccess || result.data == null) return;
+
+    final Map<String, dynamic> data = result.data!;
+    final bool hasPassword = data['hasPassword'] == true;
+    final List<Map<String, dynamic>> accounts = data['accounts'] is List
+        ? (data['accounts'] as List<dynamic>)
+              .whereType<Map>()
+              .map((Map item) => Map<String, dynamic>.from(item))
+              .toList(growable: false)
+        : <Map<String, dynamic>>[];
+
+    await Get.dialog<void>(
+      AlertDialog(
+        title: Text(SettingsL10n.text('connected_accounts')),
+        content: SizedBox(
+          width: 420,
+          child: accounts.isEmpty
+              ? Text(SettingsL10n.text('no_connected_accounts'))
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: accounts
+                      .map((Map<String, dynamic> account) {
+                        final String provider =
+                            account['provider']?.toString().toLowerCase() ?? '';
+                        final bool canDisconnect =
+                            hasPassword || accounts.length > 1;
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(_socialProviderIcon(provider)),
+                          title: Text(_socialProviderName(provider)),
+                          subtitle: Text(
+                            account['email']?.toString().trim().isNotEmpty ==
+                                    true
+                                ? account['email'].toString()
+                                : SettingsL10n.text('connected'),
+                          ),
+                          trailing: TextButton(
+                            onPressed:
+                                canDisconnect &&
+                                    !isDisconnectingSocialAccount.value
+                                ? () =>
+                                      _confirmDisconnectSocialAccount(provider)
+                                : null,
+                            child: Text(SettingsL10n.text('disconnect')),
+                          ),
+                        );
+                      })
+                      .toList(growable: false),
+                ),
+        ),
+        actions: <Widget>[
+          if (!hasPassword && accounts.length == 1)
+            TextButton(
+              onPressed: () {
+                Get.back<void>();
+                changePassword();
+              },
+              child: Text(SettingsL10n.text('set_password_first')),
+            ),
+          TextButton(
+            onPressed: Get.back<void>,
+            child: Text(SettingsL10n.text('close')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmDisconnectSocialAccount(String provider) async {
+    final bool? confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text(SettingsL10n.text('disconnect_account')),
+        content: Text(
+          SettingsL10n.text(
+            'disconnect_account_warning',
+          ).replaceAll('@provider', _socialProviderName(provider)),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Get.back<bool>(result: false),
+            child: Text(SettingsL10n.text('cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Get.back<bool>(result: true),
+            child: Text(SettingsL10n.text('disconnect')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || isDisconnectingSocialAccount.value) return;
+
+    isDisconnectingSocialAccount.value = true;
+    try {
+      final ApiResult<void> result = await ApiErrorHandler.call<void>(
+        () => _userSettingsService.disconnectSocialAccount(provider),
+        errorTitle: SettingsL10n.text('connected_accounts'),
+      );
+      if (!result.isSuccess) return;
+      try {
+        await _socialSignInService.disconnectProvider(provider);
+      } catch (error, stackTrace) {
+        AppLogger.log(
+          'Provider session cleanup failed after account disconnect',
+          name: 'SettingsController',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+      Get.back<void>();
+      Get.snackbar(
+        SettingsL10n.text('connected_accounts'),
+        SettingsL10n.text('account_disconnected'),
+      );
+    } finally {
+      isDisconnectingSocialAccount.value = false;
+    }
+  }
+
+  String _socialProviderName(String provider) => switch (provider) {
+    'google' => 'Google',
+    'facebook' => 'Facebook',
+    'apple' => 'Apple',
+    _ => provider,
+  };
+
+  IconData _socialProviderIcon(String provider) => switch (provider) {
+    'apple' => Icons.apple,
+    'facebook' => Icons.facebook,
+    _ => Icons.account_circle_outlined,
+  };
 
   void clearPasswordFields() {
     currentPasswordController.clear();
@@ -776,26 +923,7 @@ class SettingsController extends GetxController {
   }
 
   Future<void> _clearLocalSessionAfterDeletion() async {
-    try {
-      if (Get.isRegistered<DevicePushTokenService>()) {
-        final DevicePushTokenService pushService =
-            Get.find<DevicePushTokenService>();
-        pushService.disableBackendSync();
-        await pushService.deleteLocalFcmToken();
-      }
-    } catch (_) {}
-
-    try {
-      if (Get.isRegistered<TokenService>()) {
-        await Get.find<TokenService>().clearTokens();
-      }
-    } catch (_) {}
-
-    try {
-      if (Get.isRegistered<StorageService>()) {
-        await Get.find<StorageService>().clearLoggedInData();
-      }
-    } catch (_) {}
+    await _authService.clearLocalSessionAfterAccountDeletion();
   }
 
   Future<void> _stopAuthenticatedServices() async {

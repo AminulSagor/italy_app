@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../../../../core/utils/local_date.dart';
 import 'package:get/get.dart' hide Response;
 
 import '../../../../../core/services/api_client.dart';
@@ -183,10 +184,7 @@ class ChapterDetailApiService {
   }) async {
     await _apiClient.dio.post(
       '/learning-progress/lessons/opened',
-      data: <String, dynamic>{
-        'courseId': courseId,
-        'lessonId': lessonId,
-      },
+      data: <String, dynamic>{'courseId': courseId, 'lessonId': lessonId},
     );
   }
 
@@ -203,7 +201,7 @@ class ChapterDetailApiService {
         'lessonId': lessonId,
         'watchedPercent': watchedPercent.clamp(0, 100).toInt(),
         'timeSpentSeconds': timeSpentSeconds,
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
   }
@@ -217,7 +215,7 @@ class ChapterDetailApiService {
       data: <String, dynamic>{
         'courseId': courseId,
         'lessonId': lessonId,
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
   }
@@ -233,7 +231,7 @@ class ChapterDetailApiService {
         'courseId': courseId,
         'lessonId': lessonId,
         if (audioFileId.isNotEmpty) 'audioFileId': audioFileId,
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
   }
@@ -247,7 +245,7 @@ class ChapterDetailApiService {
       data: <String, dynamic>{
         'courseId': courseId,
         'lessonId': lessonId,
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
   }

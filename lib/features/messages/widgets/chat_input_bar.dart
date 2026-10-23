@@ -26,6 +26,28 @@ class ChatInputBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Obx(() {
+          if (controller.isUnavailable) {
+            return Container(
+              height: kChatInputHeight.h,
+              width: double.infinity,
+              alignment: Alignment.center,
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              decoration: BoxDecoration(
+                color: AppColors.chatInputBg,
+                borderRadius: BorderRadius.circular(kRadius34.r),
+              ),
+              child: Text(
+                'account_no_longer_available'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: AppFont.font15.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.bodyText,
+                ),
+              ),
+            );
+          }
+
           if (controller.blockStatus.value != 'none') {
             if (controller.blockStatus.value == 'blocked_by_me') {
               return Container(

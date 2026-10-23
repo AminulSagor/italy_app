@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../../core/utils/local_date.dart';
 
 import '../../../core/services/api_client.dart';
 import '../../courses/sub_features/chapter_detail/models/chapter_detail_models.dart';
@@ -58,7 +59,7 @@ class JobSentencesApiService {
     await _apiClient.dio.post(
       '/skill-builder/sentences/$sentenceId/reviewed',
       data: <String, dynamic>{
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
   }
@@ -73,7 +74,7 @@ class JobSentencesApiService {
       data: <String, dynamic>{
         'watchedPercent': watchedPercent.clamp(0, 100),
         if (timeSpentSeconds != null) 'timeSpentSeconds': timeSpentSeconds,
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
   }
@@ -82,7 +83,7 @@ class JobSentencesApiService {
     await _apiClient.dio.post(
       '/skill-builder/career-tracks/$trackId/theory-opened',
       data: <String, dynamic>{
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
   }
@@ -104,8 +105,6 @@ class JobSentencesApiService {
       '/skill-builder/career-tracks/$trackId/video-access',
     );
 
-    return ChapterVideoAccessModel.fromJson(
-      _responseMap(response),
-    );
+    return ChapterVideoAccessModel.fromJson(_responseMap(response));
   }
 }

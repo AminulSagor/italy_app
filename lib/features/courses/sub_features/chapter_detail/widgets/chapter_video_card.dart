@@ -1,12 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../../core/controllers/adaptive_network_video_controller.dart';
+import '../../../../../core/controllers/hls_playback_recovery_coordinator.dart';
 import '../../../../../core/controllers/video_playback_wakelock.dart';
 import '../../../../../core/themes/app_colors.dart';
-import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
 import '../models/chapter_detail_models.dart';
 import 'chapter_video_fullscreen_view.dart';
@@ -16,7 +18,8 @@ class ChapterVideoCard extends StatefulWidget {
   final ChapterDetailModel detail;
   final int playbackCommand;
   final bool shouldPlay;
-  final Future<ChapterVideoAccessModel?> Function() loadVideoAccess;
+  final Future<ChapterVideoAccessModel?> Function({bool forceRefresh})
+  loadVideoAccess;
   final ValueChanged<bool> onPlaybackChanged;
   final void Function(Duration position, Duration duration) onProgressChanged;
 
@@ -34,7 +37,8 @@ class ChapterVideoCard extends StatefulWidget {
   State<ChapterVideoCard> createState() => _ChapterVideoCardState();
 }
 
-class _ChapterVideoCardState extends State<ChapterVideoCard> {
+class _ChapterVideoCardState extends State<ChapterVideoCard>
+    with WidgetsBindingObserver {
   VideoPlayerController? _videoController;
   final VideoPlaybackWakelock _playbackWakelock = VideoPlaybackWakelock();
   Future<void>? _initializationFuture;
@@ -44,6 +48,9 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
   final ValueNotifier<String> _selectedQualityNotifier = ValueNotifier<String>(
     'Auto',
   );
+  final ValueNotifier<String?> _recoveryMessageNotifier =
+      ValueNotifier<String?>(null);
+  late final HlsPlaybackRecoveryCoordinator _recoveryCoordinator;
 
   ChapterVideoAccessModel? _videoAccess;
   bool _isInitializing = false;
@@ -51,11 +58,17 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
   String? _errorMessage;
   int _lastPlaybackCommand = 0;
   bool _lastReportedPlaying = false;
+  bool _playbackIntent = false;
   int _lastReportedPercent = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _recoveryCoordinator = HlsPlaybackRecoveryCoordinator(
+      onRecover: _recoverPlayback,
+      onRecoveryExhausted: _handleRecoveryExhausted,
+    );
     _lastPlaybackCommand = widget.playbackCommand;
     _lastReportedPercent = widget.detail.progress.videoWatchPercent;
     _hasWatchedFullyNotifier = ValueNotifier<bool>(
@@ -82,7 +95,10 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       _initializationFuture = null;
       _isInitializing = false;
       _isChangingQuality = false;
+      _playbackIntent = false;
       _errorMessage = null;
+      _recoveryMessageNotifier.value = null;
+      _recoveryCoordinator.reset();
     }
 
     final int savedPercent = widget.detail.progress.videoWatchPercent;
@@ -105,12 +121,22 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _recoveryCoordinator.dispose();
     _playbackWakelock.dispose();
     _disposePlayer();
     _controllerNotifier.dispose();
     _selectedQualityNotifier.dispose();
+    _recoveryMessageNotifier.dispose();
     _hasWatchedFullyNotifier.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _recoveryCoordinator.handleAppResumed();
+    }
   }
 
   Future<void> _ensurePlayerInitialized() async {
@@ -147,7 +173,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     VideoPlayerController? controller;
 
     try {
-      access = await widget.loadVideoAccess();
+      access = await widget.loadVideoAccess(forceRefresh: false);
 
       if (access == null || !access.canPlay) {
         throw StateError(_videoAccessMessage(access));
@@ -173,10 +199,15 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       _controllerNotifier.value = controller;
       controller.addListener(_onVideoTick);
       _playbackWakelock.attach(controller);
+      _recoveryCoordinator.updateAccess(
+        expiresAt: access.expiresAt,
+        requiresSignedAccess: access.requiresSignedCookies,
+      );
 
       setState(() {
         _isInitializing = false;
         _errorMessage = null;
+        _recoveryMessageNotifier.value = null;
       });
     } catch (_) {
       await controller?.dispose();
@@ -275,7 +306,13 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
 
   void _onVideoTick() {
     final VideoPlayerController? controller = _videoController;
-    if (controller == null || !controller.value.isInitialized) {
+    if (controller == null) {
+      return;
+    }
+
+    _recoveryCoordinator.updatePlaybackValue(controller.value);
+
+    if (!controller.value.isInitialized || controller.value.hasError) {
       return;
     }
 
@@ -302,6 +339,9 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     if (isComplete && !_hasWatchedFullyNotifier.value) {
       _hasWatchedFullyNotifier.value = true;
     }
+    if (isComplete) {
+      _playbackIntent = false;
+    }
 
     if (percent == 100 && _lastReportedPercent < 100) {
       _lastReportedPercent = 100;
@@ -327,11 +367,22 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     final VideoPlayerController? controller = _videoController;
     if (controller == null || !controller.value.isInitialized) return;
     await controller.pause();
+    _playbackIntent = false;
     _reportPlaybackState(false);
   }
 
   Future<void> _play() async {
-    await _ensurePlayerInitialized();
+    if (_videoController != null &&
+        _videoController?.value.isInitialized != true &&
+        _videoAccess != null) {
+      await _retryPlayback();
+    } else {
+      await _ensurePlayerInitialized();
+    }
+
+    if (_videoAccess?.isExpiredOrNearExpiry == true) {
+      await _recoveryCoordinator.recoverNow(refreshAccess: true);
+    }
 
     final VideoPlayerController? controller = _videoController;
     if (controller == null || !controller.value.isInitialized) {
@@ -345,6 +396,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
     }
 
     await controller.play();
+    _playbackIntent = true;
     _reportPlaybackState(true);
   }
 
@@ -353,37 +405,91 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
       return;
     }
 
-    final ChapterVideoAccessModel? access = _videoAccess;
-    final VideoPlayerController? oldController = _videoController;
-
-    if (access == null ||
-        oldController == null ||
-        !oldController.value.isInitialized) {
+    if (_videoAccess == null || _videoController?.value.isInitialized != true) {
       return;
     }
 
     final String oldLabel = _selectedQualityNotifier.value;
     final String nextLabel = quality?.label ?? 'Auto';
-    final String nextStreamUrl = quality?.streamUrl ?? access.streamUrl;
-
-    if (nextLabel == oldLabel || nextStreamUrl.trim().isEmpty) {
+    if (nextLabel == oldLabel) {
       return;
     }
 
     _isChangingQuality = true;
-    VideoPlayerController? pendingController;
+    try {
+      final bool changed = await _recoveryCoordinator.runExclusive(() async {
+        ChapterVideoAccessModel? access = _videoAccess;
+        if (access?.isExpiredOrNearExpiry == true) {
+          access = await widget.loadVideoAccess(forceRefresh: true);
+        }
+        if (access == null || !access.canPlay) {
+          return false;
+        }
+        return _replaceController(access: access, qualityLabel: nextLabel);
+      });
+      if (!changed) {
+        _showQualityChangeError();
+      }
+    } finally {
+      _isChangingQuality = false;
+    }
+  }
+
+  Future<bool> _recoverPlayback({
+    required HlsPlaybackRecoveryReason reason,
+    required bool refreshAccess,
+  }) async {
+    final ChapterVideoAccessModel? currentAccess = _videoAccess;
+    if (!mounted || currentAccess == null) {
+      return false;
+    }
+
+    ChapterVideoAccessModel? access = currentAccess;
+    if (refreshAccess) {
+      access = await widget.loadVideoAccess(forceRefresh: true);
+    }
+    if (!mounted || access == null || !access.canPlay) {
+      return false;
+    }
+
+    return _replaceController(
+      access: access,
+      qualityLabel: _selectedQualityNotifier.value,
+    );
+  }
+
+  Future<bool> _replaceController({
+    required ChapterVideoAccessModel access,
+    required String qualityLabel,
+  }) async {
+    final VideoPlayerController? oldController = _videoController;
+    if (oldController == null) {
+      return false;
+    }
+    final ChapterVideoAccessModel? oldAccess = _videoAccess;
+    final String oldSelectedLabel = _selectedQualityNotifier.value;
+
+    final ChapterVideoQualityOption? selectedQuality = _qualityForLabel(
+      access,
+      qualityLabel,
+    );
+    final String resolvedLabel = selectedQuality?.label ?? 'Auto';
+    final String streamUrl = selectedQuality?.streamUrl ?? access.streamUrl;
+    if (streamUrl.trim().isEmpty) {
+      return false;
+    }
 
     final VideoPlayerValue oldValue = oldController.value;
     final Duration oldPosition = oldValue.position;
-    final bool wasPlaying = oldValue.isPlaying;
+    final bool shouldResume = _playbackIntent;
     final double playbackSpeed = oldValue.playbackSpeed;
+    VideoPlayerController? pendingController;
 
     try {
       pendingController = _createVideoController(
-        streamUrl: nextStreamUrl,
+        streamUrl: streamUrl,
         access: access,
       );
-
       await pendingController.initialize();
 
       final Duration newDuration = pendingController.value.duration;
@@ -391,67 +497,133 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
           newDuration.inMilliseconds > 0 && oldPosition > newDuration
           ? newDuration
           : oldPosition;
-
       if (targetPosition > Duration.zero) {
         await pendingController.seekTo(targetPosition);
       }
-
       await pendingController.setPlaybackSpeed(playbackSpeed);
     } catch (_) {
       await pendingController?.dispose();
-      _showQualityChangeError();
-      _isChangingQuality = false;
-      return;
+      return false;
     }
 
-    final VideoPlayerController newController = pendingController!;
-
-    if (!mounted) {
+    final VideoPlayerController newController = pendingController;
+    if (!mounted || !identical(_videoController, oldController)) {
       await newController.dispose();
-      _isChangingQuality = false;
-      return;
+      return false;
     }
 
-    oldController.removeListener(_onVideoTick);
-    newController.addListener(_onVideoTick);
+    if (oldController.value.isPlaying) {
+      try {
+        await oldController.pause();
+      } catch (_) {
+        // The replacement is already ready, so a stale-player pause failure
+        // does not prevent the swap.
+      }
+    }
 
-    _videoController = newController;
-    _controllerNotifier.value = newController;
-    _selectedQualityNotifier.value = nextLabel;
-    _playbackWakelock.attach(newController);
+    if (!mounted || !identical(_videoController, oldController)) {
+      await newController.dispose();
+      return false;
+    }
 
     try {
-      if (wasPlaying) {
-        await oldController.pause();
+      oldController.removeListener(_onVideoTick);
+      newController.addListener(_onVideoTick);
+      _videoController = newController;
+      _controllerNotifier.value = newController;
+      _videoAccess = access;
+      _selectedQualityNotifier.value = resolvedLabel;
+      _playbackWakelock.attach(newController);
+      _recoveryCoordinator.updateAccess(
+        expiresAt: access.expiresAt,
+        requiresSignedAccess: access.requiresSignedCookies,
+      );
+
+      if (shouldResume) {
         await newController.play();
       }
     } catch (_) {
+      if (!mounted) {
+        await newController.dispose();
+        await oldController.dispose();
+        return false;
+      }
       newController.removeListener(_onVideoTick);
-
       _videoController = oldController;
       _controllerNotifier.value = oldController;
-      _selectedQualityNotifier.value = oldLabel;
+      _videoAccess = oldAccess;
+      _selectedQualityNotifier.value = oldSelectedLabel;
       oldController.addListener(_onVideoTick);
       _playbackWakelock.attach(oldController);
-
+      _recoveryCoordinator.updateAccess(
+        expiresAt: oldAccess?.expiresAt,
+        requiresSignedAccess: oldAccess?.requiresSignedCookies ?? false,
+      );
       await newController.dispose();
-
-      if (wasPlaying) {
-        await oldController.play();
+      if (shouldResume) {
+        try {
+          await oldController.play();
+        } catch (_) {
+          // The old access may already be expired.
+        }
       }
-
-      _reportPlaybackState(oldController.value.isPlaying);
-      _showQualityChangeError();
-      _isChangingQuality = false;
-      return;
+      return false;
     }
 
     try {
       await oldController.dispose();
-      _reportPlaybackState(newController.value.isPlaying);
-    } finally {
-      _isChangingQuality = false;
+    } catch (_) {
+      // The replacement is already active; disposal failure is non-fatal.
     }
+    _reportPlaybackState(newController.value.isPlaying);
+    if (mounted) {
+      setState(() {
+        _errorMessage = null;
+        _recoveryMessageNotifier.value = null;
+      });
+    }
+    return true;
+  }
+
+  ChapterVideoQualityOption? _qualityForLabel(
+    ChapterVideoAccessModel access,
+    String label,
+  ) {
+    if (label == 'Auto') {
+      return null;
+    }
+    for (final ChapterVideoQualityOption quality in access.qualities) {
+      if (quality.label == label) {
+        return quality;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _retryPlayback() async {
+    final bool recovered = await _recoveryCoordinator.recoverNow(
+      refreshAccess: true,
+    );
+    if (!recovered && mounted) {
+      setState(() {
+        _recoveryMessageNotifier.value =
+            'Unable to resume video. Check your connection and tap Retry.';
+      });
+    }
+  }
+
+  void _handleRecoveryExhausted(HlsPlaybackRecoveryReason reason) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _recoveryMessageNotifier.value =
+          'Video playback was interrupted. Tap Retry to continue.';
+    });
+  }
+
+  void _handlePlaybackIntentChanged(bool shouldPlay) {
+    _playbackIntent = shouldPlay;
   }
 
   void _showQualityChangeError() {
@@ -485,6 +657,9 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
               _videoAccess?.qualities ?? const <ChapterVideoQualityOption>[],
           selectedQualityListenable: _selectedQualityNotifier,
           onQualityChanged: _changeQuality,
+          recoveryMessageListenable: _recoveryMessageNotifier,
+          onRetry: _retryPlayback,
+          onPlaybackIntentChanged: _handlePlaybackIntentChanged,
         ),
       ),
     );
@@ -533,6 +708,9 @@ class _ChapterVideoCardState extends State<ChapterVideoCard> {
                       const <ChapterVideoQualityOption>[],
                   selectedQualityListenable: _selectedQualityNotifier,
                   onQualityChanged: _changeQuality,
+                  recoveryMessageListenable: _recoveryMessageNotifier,
+                  onRetry: _retryPlayback,
+                  onPlaybackIntentChanged: _handlePlaybackIntentChanged,
                   onFullscreenTap: _openFullscreen,
                 );
               },

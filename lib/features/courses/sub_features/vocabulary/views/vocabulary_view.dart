@@ -16,10 +16,7 @@ import '../models/vocabulary_models.dart';
 class VocabularyView extends GetView<VocabularyController> {
   final String controllerTag;
 
-  const VocabularyView({
-    super.key,
-    required this.controllerTag,
-  });
+  const VocabularyView({super.key, required this.controllerTag});
 
   @override
   String? get tag => controllerTag;
@@ -28,10 +25,7 @@ class VocabularyView extends GetView<VocabularyController> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (
-          bool didPop,
-          Object? result,
-          ) {
+      onPopInvokedWithResult: (bool didPop, Object? result) {
         if (didPop) {
           return;
         }
@@ -45,117 +39,86 @@ class VocabularyView extends GetView<VocabularyController> {
           color: AppColors.coursesDetailBg,
           child: SafeArea(
             child: Obx(() {
-              final VocabularySessionModel? session =
-                  controller.session.value;
-      
-              final VocabularyCardModel? card =
-                  controller.currentCard;
-      
-              if (controller.isLoading.value &&
-                  session == null) {
+              final VocabularySessionModel? session = controller.session.value;
+
+              final VocabularyCardModel? card = controller.currentCard;
+
+              if (controller.isLoading.value && session == null) {
                 return const Center(
                   child: CircularProgressIndicator(
                     color: AppColors.primaryGreen,
                   ),
                 );
               }
-      
+
               if (session == null || card == null) {
-                return _EmptyVocabularyState(
-                  onBackTap: () => Get.back<void>(),
-                );
+                return _EmptyVocabularyState(onBackTap: () => Get.back<void>());
               }
 
               return Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 24.w,
-                  vertical: 12.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     _VocabularyHeader(
                       title: session.title,
                       cardLabel:
-                      controller.displayMode.value ==
-                          VocabularyDisplayMode.list
+                          controller.displayMode.value ==
+                              VocabularyDisplayMode.list
                           ? 'vocabulary_learned_progress'
-                          .trParams(
-                        <String, String>{
-                          'learned': controller
-                              .learnedCount
-                              .toString(),
-                          'total': controller
-                              .totalCards
-                              .toString(),
-                        },
-                      )
+                                .trParams(<String, String>{
+                                  'learned': controller.learnedCount.toString(),
+                                  'total': controller.totalCards.toString(),
+                                })
                           : 'vocabulary_card_progress'
-                          .trParams(
-                        <String, String>{
-                          'current': controller
-                              .currentCardNumber
-                              .toString(),
-                          'total': controller
-                              .totalCards
-                              .toString(),
-                        },
-                      ),
-                      onBackTap:
-                      controller.showExitConfirmation,
+                                .trParams(<String, String>{
+                                  'current': controller.currentCardNumber
+                                      .toString(),
+                                  'total': controller.totalCards.toString(),
+                                }),
+                      onBackTap: controller.showExitConfirmation,
                     ),
 
                     SizedBox(height: 8.h),
 
                     _VocabularyProgressBar(
                       value:
-                      controller.displayMode.value ==
-                          VocabularyDisplayMode.list
-                          ? controller
-                          .learnedProgressValue
+                          controller.displayMode.value ==
+                              VocabularyDisplayMode.list
+                          ? controller.learnedProgressValue
                           : controller.progressValue,
                     ),
 
                     SizedBox(height: 8.h),
 
-                    _VocabularyModeSwitcher(
-                      selectedMode:
-                      controller.displayMode.value,
-                      onChanged:
-                      controller.setDisplayMode,
-                    ),
-
-                    SizedBox(height: 8.h),
+                    if (!controller.isWeakReviewMode.value) ...<Widget>[
+                      _VocabularyModeSwitcher(
+                        selectedMode: controller.displayMode.value,
+                        onChanged: controller.setDisplayMode,
+                      ),
+                      SizedBox(height: 8.h),
+                    ],
 
                     if (controller.displayMode.value ==
                         VocabularyDisplayMode.list)
                       Expanded(
                         child: _VocabularyListMode(
-                          cards:
-                          controller.filteredCards,
-                          showMeanings:
-                          controller
-                              .showMeanings.value,
-                          isPlayingAll:
-                          controller
-                              .isPlayingAll.value,
-                          onSearchChanged:
-                          controller.setSearchQuery,
-                          onShowMeaningsChanged:
-                          controller
-                              .setShowMeanings,
-                          onAudioTap:
-                          controller.speakCard,
-                          onPlayAllTap:
-                          controller
-                              .playAllVisibleWords,
+                          cards: controller.filteredCards,
+                          weakWordCount: controller.weakWordCount,
+                          isStartingWeakReview:
+                              controller.isStartingWeakReview.value,
+                          showMeanings: controller.showMeanings.value,
+                          isPlayingAll: controller.isPlayingAll.value,
+                          onSearchChanged: controller.setSearchQuery,
+                          onShowMeaningsChanged: controller.setShowMeanings,
+                          onAudioTap: controller.speakCard,
+                          onPlayAllTap: controller.playAllVisibleWords,
                           onPracticeTap: () {
                             controller.setDisplayMode(
-                              VocabularyDisplayMode
-                                  .flashcard,
+                              VocabularyDisplayMode.flashcard,
                             );
                           },
+                          onWeakReviewTap: controller.startWeakReview,
                         ),
                       )
                     else ...<Widget>[
@@ -165,51 +128,36 @@ class VocabularyView extends GetView<VocabularyController> {
                             children: <Widget>[
                               _VocabularyFlashCard(
                                 card: card,
-                                isRevealed:
-                                controller
-                                    .isRevealed.value,
-                                isSpeaking:
-                                controller
-                                    .isSpeaking.value,
-                                onTap:
-                                controller.flipCard,
-                                onAudioTap:
-                                controller
-                                    .speakCurrentWord,
+                                isRevealed: controller.isRevealed.value,
+                                isSpeaking: controller.isSpeaking.value,
+                                onTap: controller.flipCard,
+                                onAudioTap: controller.speakCurrentWord,
                               ),
 
                               SizedBox(height: 30.h),
 
                               _VocabularyStats(
-                                streakDays:
-                                controller
-                                    .currentStreakDays,
+                                streakDays: controller.currentStreakDays,
                                 level: session.level,
                               ),
 
                               SizedBox(height: 30.h),
 
-                              if (controller
-                                  .isRevealed.value)
+                              if (controller.isRevealed.value ||
+                                  controller.isCurrentCardMarkedWeak)
                                 _VocabularyRevealedActions(
-                                  isKnownLoading:
-                                  controller
-                                      .isKnownSubmitting
-                                      .value,
-                                  onStudyAgainTap:
-                                  controller.studyAgain,
-                                  onKnownTap:
-                                  controller.markKnown,
+                                  isSubmitting:
+                                      controller.isCardChoiceSubmitting.value,
+                                  isNextAction:
+                                      controller.isCurrentCardMarkedWeak,
+                                  onStudyAgainTap: controller.studyAgain,
+                                  onKnownTap: controller.markKnown,
                                 )
                               else
                                 CustomButton.primary(
-                                  onPressed:
-                                  controller
-                                      .revealAnswer,
-                                  text:
-                                  'reveal_answer'.tr,
-                                  icon: Icons
-                                      .visibility_outlined,
+                                  onPressed: controller.revealAnswer,
+                                  text: 'reveal_answer'.tr,
+                                  icon: Icons.visibility_outlined,
                                 ),
 
                               SizedBox(height: 20.h),
@@ -285,38 +233,29 @@ class _VocabularyHeader extends StatelessWidget {
   }
 }
 
-class _VocabularyProgressBar
-    extends StatelessWidget {
+class _VocabularyProgressBar extends StatelessWidget {
   final double value;
 
-  const _VocabularyProgressBar({
-    required this.value,
-  });
+  const _VocabularyProgressBar({required this.value});
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius:
-      BorderRadius.circular(999.r),
+      borderRadius: BorderRadius.circular(999.r),
       child: LinearProgressIndicator(
         value: value.clamp(0.0, 1.0),
-        minHeight:
-        kVocabularyProgressHeight.h,
-        borderRadius:
-        BorderRadius.circular(999.r),
+        minHeight: kVocabularyProgressHeight.h,
+        borderRadius: BorderRadius.circular(999.r),
         color: AppColors.primaryGreen,
-        backgroundColor:
-        AppColors.vocabularyProgressTrack,
+        backgroundColor: AppColors.vocabularyProgressTrack,
       ),
     );
   }
 }
 
-class _VocabularyModeSwitcher
-    extends StatelessWidget {
+class _VocabularyModeSwitcher extends StatelessWidget {
   final VocabularyDisplayMode selectedMode;
-  final ValueChanged<VocabularyDisplayMode>
-  onChanged;
+  final ValueChanged<VocabularyDisplayMode> onChanged;
 
   const _VocabularyModeSwitcher({
     required this.selectedMode,
@@ -330,48 +269,28 @@ class _VocabularyModeSwitcher
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius:
-        BorderRadius.circular(16.r),
-        border: Border.all(
-          color:
-          AppColors.vocabularyProgressTrack,
-        ),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.vocabularyProgressTrack),
       ),
       child: Row(
         children: <Widget>[
           Expanded(
             child: _VocabularyModeButton(
-              label:
-              'vocabulary_list_mode'.tr,
-              icon:
-              Icons.list_alt_rounded,
-              isSelected:
-              selectedMode ==
-                  VocabularyDisplayMode
-                      .list,
+              label: 'vocabulary_list_mode'.tr,
+              icon: Icons.list_alt_rounded,
+              isSelected: selectedMode == VocabularyDisplayMode.list,
               onTap: () {
-                onChanged(
-                  VocabularyDisplayMode
-                      .list,
-                );
+                onChanged(VocabularyDisplayMode.list);
               },
             ),
           ),
           Expanded(
             child: _VocabularyModeButton(
-              label:
-              'vocabulary_flashcard_mode'
-                  .tr,
+              label: 'vocabulary_flashcard_mode'.tr,
               icon: Icons.style_outlined,
-              isSelected:
-              selectedMode ==
-                  VocabularyDisplayMode
-                      .flashcard,
+              isSelected: selectedMode == VocabularyDisplayMode.flashcard,
               onTap: () {
-                onChanged(
-                  VocabularyDisplayMode
-                      .flashcard,
-                );
+                onChanged(VocabularyDisplayMode.flashcard);
               },
             ),
           ),
@@ -381,8 +300,7 @@ class _VocabularyModeSwitcher
   }
 }
 
-class _VocabularyModeButton
-    extends StatelessWidget {
+class _VocabularyModeButton extends StatelessWidget {
   final String label;
   final IconData icon;
   final bool isSelected;
@@ -399,38 +317,28 @@ class _VocabularyModeButton
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius:
-      BorderRadius.circular(12.r),
+      borderRadius: BorderRadius.circular(12.r),
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryGreen
-              : Colors.transparent,
-          borderRadius:
-          BorderRadius.circular(12.r),
+          color: isSelected ? AppColors.primaryGreen : Colors.transparent,
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
-          mainAxisAlignment:
-          MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Icon(
               icon,
               size: 20.sp,
-              color: isSelected
-                  ? AppColors.white
-                  : AppColors.bodyText,
+              color: isSelected ? AppColors.white : AppColors.bodyText,
             ),
             SizedBox(width: 7.w),
             Text(
               label,
               style: TextStyle(
                 fontSize: 14.sp,
-                fontWeight:
-                FontWeight.w700,
-                color: isSelected
-                    ? AppColors.white
-                    : AppColors.bodyText,
+                fontWeight: FontWeight.w700,
+                color: isSelected ? AppColors.white : AppColors.bodyText,
               ),
             ),
           ],
@@ -440,21 +348,23 @@ class _VocabularyModeButton
   }
 }
 
-class _VocabularyListMode
-    extends StatelessWidget {
+class _VocabularyListMode extends StatelessWidget {
   final List<VocabularyCardModel> cards;
+  final int weakWordCount;
+  final bool isStartingWeakReview;
   final bool showMeanings;
   final bool isPlayingAll;
   final ValueChanged<String> onSearchChanged;
-  final ValueChanged<bool>
-  onShowMeaningsChanged;
-  final ValueChanged<VocabularyCardModel>
-  onAudioTap;
+  final ValueChanged<bool> onShowMeaningsChanged;
+  final ValueChanged<VocabularyCardModel> onAudioTap;
   final VoidCallback onPlayAllTap;
   final VoidCallback onPracticeTap;
+  final VoidCallback onWeakReviewTap;
 
   const _VocabularyListMode({
     required this.cards,
+    required this.weakWordCount,
+    required this.isStartingWeakReview,
     required this.showMeanings,
     required this.isPlayingAll,
     required this.onSearchChanged,
@@ -462,20 +372,27 @@ class _VocabularyListMode
     required this.onAudioTap,
     required this.onPlayAllTap,
     required this.onPracticeTap,
+    required this.onWeakReviewTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
+        if (weakWordCount > 0) ...<Widget>[
+          _NeedsAttentionBanner(
+            weakWordCount: weakWordCount,
+            isLoading: isStartingWeakReview,
+            onTap: onWeakReviewTap,
+          ),
+          SizedBox(height: 10.h),
+        ],
 
         TextField(
           onChanged: onSearchChanged,
           decoration: InputDecoration(
             hintText: 'vocabulary_search'.tr,
-            prefixIcon: const Icon(
-              Icons.search_rounded,
-            ),
+            prefixIcon: const Icon(Icons.search_rounded),
             filled: true,
             fillColor: AppColors.white,
             contentPadding: EdgeInsets.symmetric(
@@ -483,9 +400,7 @@ class _VocabularyListMode
               vertical: 12.h,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                14.r,
-              ),
+              borderRadius: BorderRadius.circular(14.r),
               borderSide: BorderSide.none,
             ),
           ),
@@ -494,18 +409,15 @@ class _VocabularyListMode
         SizedBox(height: 8.h),
 
         Row(
-          mainAxisAlignment:
-          MainAxisAlignment.spaceBetween,
-          crossAxisAlignment:
-          CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             TextButton.icon(
               onPressed: onPlayAllTap,
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
                 minimumSize: Size.zero,
-                tapTargetSize:
-                MaterialTapTargetSize.shrinkWrap,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               icon: Icon(
                 isPlayingAll
@@ -538,13 +450,9 @@ class _VocabularyListMode
                   scale: 0.72,
                   child: Switch(
                     value: showMeanings,
-                    activeThumbColor:
-                    AppColors.primaryGreen,
-                    materialTapTargetSize:
-                    MaterialTapTargetSize
-                        .shrinkWrap,
-                    onChanged:
-                    onShowMeaningsChanged,
+                    activeThumbColor: AppColors.primaryGreen,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    onChanged: onShowMeaningsChanged,
                   ),
                 ),
               ],
@@ -552,59 +460,36 @@ class _VocabularyListMode
           ],
         ),
 
-
         SizedBox(height: 4.h),
 
         Expanded(
           child: cards.isEmpty
-              ? Center(
-            child: Text(
-              'vocabulary_no_search_result'
-                  .tr,
-            ),
-          )
+              ? Center(child: Text('vocabulary_no_search_result'.tr))
               : ListView.separated(
-            padding: EdgeInsets.only(
-              bottom: 12.h,
-            ),
-            itemCount: cards.length,
-            separatorBuilder:
-                (_, __) =>
-                SizedBox(
-                  height: 10.h,
-                ),
-            itemBuilder: (
-                BuildContext context,
-                int index,
-                ) {
-              final VocabularyCardModel
-              card =
-              cards[index];
+                  padding: EdgeInsets.only(bottom: 12.h),
+                  itemCount: cards.length,
+                  separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                  itemBuilder: (BuildContext context, int index) {
+                    final VocabularyCardModel card = cards[index];
 
-              return _VocabularyListCard(
-                card: card,
-                showMeaning:
-                showMeanings,
-                onAudioTap: () {
-                  onAudioTap(card);
-                },
-              );
-            },
-          ),
+                    return _VocabularyListCard(
+                      card: card,
+                      showMeaning: showMeanings,
+                      onAudioTap: () {
+                        onAudioTap(card);
+                      },
+                    );
+                  },
+                ),
         ),
 
         SizedBox(height: 10.h),
 
         CustomButton.primary(
           onPressed: onPracticeTap,
-          text:
-          'vocabulary_practice_words'
-              .trParams(
-            <String, String>{
-              'count':
-              cards.length.toString(),
-            },
-          ),
+          text: 'vocabulary_practice_words'.trParams(<String, String>{
+            'count': cards.length.toString(),
+          }),
           icon: Icons.school_outlined,
         ),
       ],
@@ -612,8 +497,95 @@ class _VocabularyListMode
   }
 }
 
-class _VocabularyListCard
-    extends StatelessWidget {
+class _NeedsAttentionBanner extends StatelessWidget {
+  final int weakWordCount;
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  const _NeedsAttentionBanner({
+    required this.weakWordCount,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.coursesDetailBannerBg,
+      borderRadius: BorderRadius.circular(16.r),
+      child: InkWell(
+        onTap: isLoading ? null : onTap,
+        borderRadius: BorderRadius.circular(16.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 38.w,
+                height: 38.w,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: AppColors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.replay_rounded,
+                  color: AppColors.coursesCreamText,
+                  size: 22.sp,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'vocabulary_needs_attention'.tr,
+                      style: TextStyle(
+                        fontSize: AppFont.font14.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.homePrimaryText,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'vocabulary_weak_words_to_review'.trParams(
+                        <String, String>{'count': weakWordCount.toString()},
+                      ),
+                      style: TextStyle(
+                        fontSize: AppFont.font12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.bodyText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8.w),
+              if (isLoading)
+                SizedBox(
+                  width: 20.w,
+                  height: 20.w,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primaryGreen,
+                  ),
+                )
+              else
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.primaryGreen,
+                  size: 26.sp,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VocabularyListCard extends StatelessWidget {
   final VocabularyCardModel card;
   final bool showMeaning;
   final VoidCallback onAudioTap;
@@ -627,18 +599,13 @@ class _VocabularyListCard
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 16.w,
-        vertical: 14.h,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius:
-        BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: AppColors
-                .vocabularyCardShadow,
+            color: AppColors.vocabularyCardShadow,
             blurRadius: 8.r,
             offset: Offset(0, 3.h),
           ),
@@ -648,48 +615,38 @@ class _VocabularyListCard
         children: <Widget>[
           Expanded(
             child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
                   card.word,
                   style: TextStyle(
                     fontSize: 21.sp,
-                    fontWeight:
-                    FontWeight.w700,
-                    color: AppColors
-                        .homePrimaryText,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.homePrimaryText,
                   ),
                 ),
 
-                if (showMeaning &&
-                    card.meaning
-                        .isNotEmpty) ...[
+                if (showMeaning && card.meaning.isNotEmpty) ...[
                   SizedBox(height: 4.h),
                   Text(
                     card.meaning,
                     style: TextStyle(
                       fontSize: 14.sp,
-                      fontWeight:
-                      FontWeight.w600,
-                      color: AppColors
-                          .primaryGreen,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryGreen,
                     ),
                   ),
                 ],
 
-                if (card.example
-                    .isNotEmpty) ...[
+                if (card.example.isNotEmpty) ...[
                   SizedBox(height: 5.h),
                   Text(
                     card.example,
                     maxLines: 2,
-                    overflow:
-                    TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13.sp,
-                      color:
-                      AppColors.bodyText,
+                      color: AppColors.bodyText,
                     ),
                   ),
                 ],
@@ -704,18 +661,14 @@ class _VocabularyListCard
             child: Container(
               width: 46.w,
               height: 46.w,
-              alignment:
-              Alignment.center,
-              decoration:
-              const BoxDecoration(
-                color:
-                AppColors.homePaleGreen,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                color: AppColors.homePaleGreen,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.volume_up_rounded,
-                color:
-                AppColors.primaryGreen,
+                color: AppColors.primaryGreen,
                 size: 24.sp,
               ),
             ),
@@ -726,12 +679,9 @@ class _VocabularyListCard
           Icon(
             card.isLearned
                 ? Icons.check_circle_rounded
-                : Icons
-                .radio_button_unchecked_rounded,
+                : Icons.radio_button_unchecked_rounded,
             size: 28.sp,
-            color: card.isLearned
-                ? AppColors.primaryGreen
-                : AppColors.bodyText,
+            color: card.isLearned ? AppColors.primaryGreen : AppColors.bodyText,
           ),
         ],
       ),
@@ -739,8 +689,7 @@ class _VocabularyListCard
   }
 }
 
-class _VocabularyFlashCard
-    extends StatelessWidget {
+class _VocabularyFlashCard extends StatelessWidget {
   final VocabularyCardModel card;
   final bool isRevealed;
   final bool isSpeaking;
@@ -760,19 +709,11 @@ class _VocabularyFlashCard
     return GestureDetector(
       onTap: onTap,
       child: TweenAnimationBuilder<double>(
-        tween: Tween<double>(
-          end: isRevealed ? math.pi : 0,
-        ),
-        duration:
-        const Duration(milliseconds: 520),
+        tween: Tween<double>(end: isRevealed ? math.pi : 0),
+        duration: const Duration(milliseconds: 520),
         curve: Curves.easeInOutCubic,
-        builder: (
-            BuildContext context,
-            double angle,
-            Widget? child,
-            ) {
-          final bool showBack =
-              angle > math.pi / 2;
+        builder: (BuildContext context, double angle, Widget? child) {
+          final bool showBack = angle > math.pi / 2;
 
           return Transform(
             alignment: Alignment.center,
@@ -781,24 +722,17 @@ class _VocabularyFlashCard
               ..rotateY(angle),
             child: Transform(
               alignment: Alignment.center,
-              transform: Matrix4.identity()
-                ..rotateY(
-                  showBack ? math.pi : 0,
-                ),
+              transform: Matrix4.identity()..rotateY(showBack ? math.pi : 0),
               child: Container(
                 width: double.infinity,
                 height: 440.h,
                 padding: EdgeInsets.all(30.w),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius:
-                  BorderRadius.circular(
-                    kRadius48.r,
-                  ),
+                  borderRadius: BorderRadius.circular(kRadius48.r),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: AppColors
-                          .vocabularyCardShadow,
+                      color: AppColors.vocabularyCardShadow,
                       blurRadius: 42.r,
                       offset: Offset(0, 22.h),
                     ),
@@ -806,34 +740,20 @@ class _VocabularyFlashCard
                 ),
                 child: Center(
                   child: AnimatedSwitcher(
-                    duration: const Duration(
-                      milliseconds: 140,
-                    ),
+                    duration: const Duration(milliseconds: 140),
                     child: showBack
                         ? _VocabularyBackSide(
-                      key:
-                      const ValueKey<
-                          String>(
-                        'back',
-                      ),
-                      card: card,
-                      isSpeaking:
-                      isSpeaking,
-                      onAudioTap:
-                      onAudioTap,
-                    )
+                            key: const ValueKey<String>('back'),
+                            card: card,
+                            isSpeaking: isSpeaking,
+                            onAudioTap: onAudioTap,
+                          )
                         : _VocabularyFrontSide(
-                      key:
-                      const ValueKey<
-                          String>(
-                        'front',
-                      ),
-                      card: card,
-                      isSpeaking:
-                      isSpeaking,
-                      onAudioTap:
-                      onAudioTap,
-                    ),
+                            key: const ValueKey<String>('front'),
+                            card: card,
+                            isSpeaking: isSpeaking,
+                            onAudioTap: onAudioTap,
+                          ),
                   ),
                 ),
               ),
@@ -845,15 +765,11 @@ class _VocabularyFlashCard
   }
 }
 
-class _VocabularyAudioButton
-    extends StatelessWidget {
+class _VocabularyAudioButton extends StatelessWidget {
   final bool isSpeaking;
   final VoidCallback onTap;
 
-  const _VocabularyAudioButton({
-    required this.isSpeaking,
-    required this.onTap,
-  });
+  const _VocabularyAudioButton({required this.isSpeaking, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -870,26 +786,24 @@ class _VocabularyAudioButton
         ),
         child: isSpeaking
             ? SizedBox(
-          width: 20.w,
-          height: 20.w,
-          child:
-          const CircularProgressIndicator(
-            strokeWidth: 2,
-            color: AppColors.primaryGreen,
-          ),
-        )
+                width: 20.w,
+                height: 20.w,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primaryGreen,
+                ),
+              )
             : Icon(
-          Icons.volume_up_rounded,
-          size: 28.sp,
-          color: AppColors.primaryGreen,
-        ),
+                Icons.volume_up_rounded,
+                size: 28.sp,
+                color: AppColors.primaryGreen,
+              ),
       ),
     );
   }
 }
 
-class _VocabularyFrontSide
-    extends StatelessWidget {
+class _VocabularyFrontSide extends StatelessWidget {
   final VocabularyCardModel card;
   final bool isSpeaking;
   final VoidCallback onAudioTap;
@@ -907,13 +821,9 @@ class _VocabularyFrontSide
       mainAxisSize: MainAxisSize.max,
       children: <Widget>[
         Row(
-          mainAxisAlignment:
-          MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            _VocabularyAudioButton(
-              isSpeaking: isSpeaking,
-              onTap: onAudioTap,
-            ),
+            _VocabularyAudioButton(isSpeaking: isSpeaking, onTap: onAudioTap),
           ],
         ),
         const Spacer(),
@@ -955,8 +865,7 @@ class _VocabularyFrontSide
   }
 }
 
-class _VocabularyBackSide
-    extends StatelessWidget {
+class _VocabularyBackSide extends StatelessWidget {
   final VocabularyCardModel card;
   final bool isSpeaking;
   final VoidCallback onAudioTap;
@@ -974,13 +883,9 @@ class _VocabularyBackSide
       mainAxisSize: MainAxisSize.max,
       children: <Widget>[
         Row(
-          mainAxisAlignment:
-          MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            _VocabularyAudioButton(
-              isSpeaking: isSpeaking,
-              onTap: onAudioTap,
-            ),
+            _VocabularyAudioButton(isSpeaking: isSpeaking, onTap: onAudioTap),
           ],
         ),
         const Spacer(),
@@ -998,8 +903,7 @@ class _VocabularyBackSide
           style: TextStyle(
             fontSize: AppFont.font22.sp,
             fontWeight: FontWeight.w600,
-            color:
-            AppColors.vocabularyBlueText,
+            color: AppColors.vocabularyBlueText,
             height: 1.15,
           ),
         ),
@@ -1092,10 +996,7 @@ class _VocabularyStats extends StatelessWidget {
   final int streakDays;
   final int level;
 
-  const _VocabularyStats({
-    required this.streakDays,
-    required this.level,
-  });
+  const _VocabularyStats({required this.streakDays, required this.level});
 
   @override
   Widget build(BuildContext context) {
@@ -1103,31 +1004,20 @@ class _VocabularyStats extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: _VocabularyStatText(
-            icon: Icons
-                .local_fire_department_rounded,
-            label:
-            'gen_streakdays_day_streak'
-                .trParams(
-              <String, String>{
-                'streakDays':
-                streakDays.toString(),
-              },
-            ),
-            color:
-            AppColors.vocabularyStreakText,
+            icon: Icons.local_fire_department_rounded,
+            label: 'gen_streakdays_day_streak'.trParams(<String, String>{
+              'streakDays': streakDays.toString(),
+            }),
+            color: AppColors.vocabularyStreakText,
           ),
         ),
         Expanded(
           child: _VocabularyStatText(
-            icon:
-            Icons.emoji_events_outlined,
-            label: 'gen_level_level'.trParams(
-              <String, String>{
-                'level': level.toString(),
-              },
-            ),
-            color:
-            AppColors.vocabularyBlueText,
+            icon: Icons.emoji_events_outlined,
+            label: 'gen_level_level'.trParams(<String, String>{
+              'level': level.toString(),
+            }),
+            color: AppColors.vocabularyBlueText,
             alignEnd: true,
           ),
         ),
@@ -1136,8 +1026,7 @@ class _VocabularyStats extends StatelessWidget {
   }
 }
 
-class _VocabularyStatText
-    extends StatelessWidget {
+class _VocabularyStatText extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
@@ -1157,11 +1046,7 @@ class _VocabularyStatText
           ? MainAxisAlignment.end
           : MainAxisAlignment.start,
       children: <Widget>[
-        Icon(
-          icon,
-          color: color,
-          size: 22.sp,
-        ),
+        Icon(icon, color: color, size: 22.sp),
         SizedBox(width: 8.w),
         Flexible(
           child: Text(
@@ -1180,14 +1065,15 @@ class _VocabularyStatText
   }
 }
 
-class _VocabularyRevealedActions
-    extends StatelessWidget {
-  final bool isKnownLoading;
+class _VocabularyRevealedActions extends StatelessWidget {
+  final bool isSubmitting;
+  final bool isNextAction;
   final VoidCallback onStudyAgainTap;
   final VoidCallback onKnownTap;
 
   const _VocabularyRevealedActions({
-    required this.isKnownLoading,
+    required this.isSubmitting,
+    required this.isNextAction,
     required this.onStudyAgainTap,
     required this.onKnownTap,
   });
@@ -1202,16 +1088,13 @@ class _VocabularyRevealedActions
             text: 'study_again'.tr,
             icon: Icons.refresh_rounded,
             showShadow: true,
-            btnColor:
-            AppColors.vocabularyOrange,
-            btnShadowColor:
-            AppColors
-                .vocabularyOrangeShadow,
-            borderColor:
-            AppColors.vocabularyOrange,
+            btnColor: AppColors.vocabularyOrange,
+            btnShadowColor: AppColors.vocabularyOrangeShadow,
+            borderColor: AppColors.vocabularyOrange,
             textColor: AppColors.white,
             fontSize: 14.sp,
             borderRadius: kRadius42,
+            isLoading: isSubmitting,
           ),
         ),
         SizedBox(width: 16.w),
@@ -1219,10 +1102,12 @@ class _VocabularyRevealedActions
           child: CustomButton.primary(
             fontSize: 14.sp,
             onPressed: onKnownTap,
-            text: 'i_know_nthis'.tr,
-            icon: Icons.check_circle_rounded,
+            text: isNextAction ? 'next'.tr : 'i_know_nthis'.tr,
+            icon: isNextAction
+                ? Icons.arrow_forward_rounded
+                : Icons.check_circle_rounded,
             borderRadius: kRadius42,
-            isLoading: isKnownLoading,
+            isLoading: isSubmitting,
           ),
         ),
       ],
@@ -1230,36 +1115,28 @@ class _VocabularyRevealedActions
   }
 }
 
-class _EmptyVocabularyState
-    extends StatelessWidget {
+class _EmptyVocabularyState extends StatelessWidget {
   final VoidCallback onBackTap;
 
-  const _EmptyVocabularyState({
-    required this.onBackTap,
-  });
+  const _EmptyVocabularyState({required this.onBackTap});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 24.w,
-        vertical: 20.h,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
       child: Column(
         children: <Widget>[
           Row(
             children: <Widget>[
               GestureDetector(
                 onTap: onBackTap,
-                behavior:
-                HitTestBehavior.opaque,
+                behavior: HitTestBehavior.opaque,
                 child: SizedBox(
                   width: 44.w,
                   height: 44.w,
                   child: Icon(
                     Icons.arrow_back_rounded,
-                    color:
-                    AppColors.primaryGreen,
+                    color: AppColors.primaryGreen,
                     size: 22.sp,
                   ),
                 ),
@@ -1269,12 +1146,9 @@ class _EmptyVocabularyState
                 child: Text(
                   'gen_vocabulary'.tr,
                   style: TextStyle(
-                    fontSize:
-                    AppFont.font18.sp,
-                    fontWeight:
-                    FontWeight.w700,
-                    color: AppColors
-                        .homePrimaryText,
+                    fontSize: AppFont.font18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.homePrimaryText,
                   ),
                 ),
               ),
@@ -1284,64 +1158,44 @@ class _EmptyVocabularyState
             child: Center(
               child: Container(
                 width: double.infinity,
-                padding:
-                EdgeInsets.symmetric(
-                  horizontal: 24.w,
-                  vertical: 32.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius:
-                  BorderRadius.circular(
-                    20.r,
-                  ),
+                  borderRadius: BorderRadius.circular(20.r),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: AppColors
-                          .homeNeutralShadow,
+                      color: AppColors.homeNeutralShadow,
                       blurRadius: 10.r,
                       offset: Offset(0, 4.h),
                     ),
                   ],
                 ),
                 child: Column(
-                  mainAxisSize:
-                  MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Icon(
                       Icons.menu_book_outlined,
-                      color: AppColors
-                          .primaryGreen,
+                      color: AppColors.primaryGreen,
                       size: 42.sp,
                     ),
                     SizedBox(height: 18.h),
                     Text(
-                      'no_vocabulary_available'
-                          .tr,
-                      textAlign:
-                      TextAlign.center,
+                      'no_vocabulary_available'.tr,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize:
-                        AppFont.font18.sp,
-                        fontWeight:
-                        FontWeight.w700,
-                        color: AppColors
-                            .homePrimaryText,
+                        fontSize: AppFont.font18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.homePrimaryText,
                       ),
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'no_vocabulary_available_description'
-                          .tr,
-                      textAlign:
-                      TextAlign.center,
+                      'no_vocabulary_available_description'.tr,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize:
-                        AppFont.font14.sp,
-                        fontWeight:
-                        FontWeight.w400,
-                        color:
-                        AppColors.bodyText,
+                        fontSize: AppFont.font14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.bodyText,
                         height: 1.4,
                       ),
                     ),

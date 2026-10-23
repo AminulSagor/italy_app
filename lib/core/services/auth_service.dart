@@ -234,6 +234,8 @@ class AuthService {
         name: 'AuthService',
       );
     } finally {
+      _apiClient.clearCourseDeviceProof();
+
       /*
        * Remove this installation's local Firebase token.
        */
@@ -257,6 +259,7 @@ class AuthService {
    * call POST /auth/logout again.
    */
     _devicePushTokenService.disableBackendSync();
+    _apiClient.clearCourseDeviceProof();
 
     try {
       await _devicePushTokenService.deleteLocalFcmToken();

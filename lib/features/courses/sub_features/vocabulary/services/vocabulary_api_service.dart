@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../../../../core/utils/local_date.dart';
 
 import '../../../../../core/services/api_client.dart';
 import '../models/vocabulary_models.dart';
@@ -37,6 +38,20 @@ class VocabularyApiService {
     });
   }
 
+  Future<String> startWeakReviewSession({required String lessonId}) async {
+    final Response<dynamic> response = await _apiClient.dio.post(
+      '/lessons/$lessonId/vocabulary/review-sessions',
+      data: const <String, dynamic>{'mode': 'weak_review'},
+    );
+    final String sessionId = _stringValue(_responseMap(response)['id']);
+
+    if (sessionId.isEmpty) {
+      throw StateError('Weak vocabulary review session has no id');
+    }
+
+    return sessionId;
+  }
+
   Future<VocabularyCompletionModel> completeSession({
     required String sessionId,
     required List<String> knownVocabularyIds,
@@ -47,7 +62,7 @@ class VocabularyApiService {
       data: <String, dynamic>{
         'knownVocabularyIds': knownVocabularyIds,
         'weakVocabularyIds': weakVocabularyIds,
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
     final Map<String, dynamic> data = _responseMap(response);
@@ -60,6 +75,21 @@ class VocabularyApiService {
     });
   }
 
+  Future<bool> recordCardReview({
+    required String sessionId,
+    required String vocabularyId,
+    required bool isKnown,
+  }) async {
+    await _apiClient.dio.post(
+      '/vocabulary-review-sessions/$sessionId/cards/$vocabularyId/review',
+      data: <String, dynamic>{
+        'choice': isKnown ? 'known' : 'study_again',
+        'clientActivityDate': formatLocalDate(DateTime.now()),
+      },
+    );
+    return true;
+  }
+
   Map<String, dynamic> _cardFromApi(Map<String, dynamic> item) {
     return <String, dynamic>{
       'id': _stringValue(item['id']),
@@ -69,11 +99,7 @@ class VocabularyApiService {
       'example': _stringValue(item['englishExample']),
       'hasAudio': _stringValue(item['aiPronunciationFileId']).isNotEmpty,
       'audioFileId': _stringValue(item['aiPronunciationFileId']),
-      'masteryStatus':
-      _fallbackString(
-        item['masteryStatus'],
-        'new',
-      ),
+      'masteryStatus': _fallbackString(item['masteryStatus'], 'new'),
     };
   }
 

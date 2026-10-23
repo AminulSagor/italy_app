@@ -20,6 +20,7 @@ class ApiResult<T> {
     this.data,
     this.error,
     this.errorCode,
+    this.errorDetails,
     this.statusCode,
     required this.isSuccess,
   });
@@ -27,6 +28,7 @@ class ApiResult<T> {
   final T? data;
   final String? error;
   final String? errorCode;
+  final Map<String, dynamic>? errorDetails;
   final int? statusCode;
   final bool isSuccess;
 
@@ -37,11 +39,13 @@ class ApiResult<T> {
   factory ApiResult.failure({
     required String error,
     String? errorCode,
+    Map<String, dynamic>? errorDetails,
     int? statusCode,
   }) {
     return ApiResult<T>._(
       error: error,
       errorCode: errorCode,
+      errorDetails: errorDetails,
       statusCode: statusCode,
       isSuccess: false,
     );
@@ -59,6 +63,7 @@ class ApiErrorHandler {
     Future<T> Function() apiCall, {
     bool showError = true,
     String errorTitle = 'Error',
+    Set<String> suppressedErrorCodes = const <String>{},
   }) async {
     try {
       final T data = await apiCall();
@@ -67,14 +72,22 @@ class ApiErrorHandler {
       final String message = getErrorMessage(error);
       final bool isUnauthorized =
           error is DioException && error.response?.statusCode == 401;
-      if (showError && !isUnauthorized) {
+      final DioException? dioError = error is DioException ? error : null;
+      final String? errorCode = dioError == null
+          ? null
+          : _parseBackendErrorCode(dioError);
+      if (showError &&
+          !isUnauthorized &&
+          !suppressedErrorCodes.contains(errorCode)) {
         _showErrorSnackbar(errorTitle, message);
       }
-      final DioException? dioError = error is DioException ? error : null;
 
       return ApiResult<T>.failure(
         error: message,
-        errorCode: dioError == null ? null : _parseBackendErrorCode(dioError),
+        errorCode: errorCode,
+        errorDetails: dioError == null
+            ? null
+            : _parseBackendErrorDetails(dioError),
         statusCode: dioError?.response?.statusCode,
       );
     }
@@ -115,6 +128,16 @@ class ApiErrorHandler {
     }
 
     return null;
+  }
+
+  static Map<String, dynamic>? _parseBackendErrorDetails(DioException error) {
+    final dynamic data = error.response?.data;
+    if (data is! Map) return null;
+
+    return data.map<String, dynamic>(
+      (dynamic key, dynamic value) =>
+          MapEntry<String, dynamic>(key.toString(), value),
+    );
   }
 
   static String _parseDioError(DioException error) {

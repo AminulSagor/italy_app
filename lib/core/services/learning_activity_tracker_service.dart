@@ -10,6 +10,7 @@ import '../models/learning_activity_models.dart';
 import 'api_error_handler.dart';
 import 'learning_activity_api_service.dart';
 import 'storage_service.dart';
+import '../utils/local_date.dart';
 
 class LearningActivityTrackerService extends GetxService
     with WidgetsBindingObserver {
@@ -47,7 +48,7 @@ class LearningActivityTrackerService extends GetxService
 
     _heartbeat = Timer.periodic(
       _heartbeatDuration,
-          (_) => unawaited(flushAndSync()),
+      (_) => unawaited(flushAndSync()),
     );
   }
 
@@ -72,9 +73,7 @@ class LearningActivityTrackerService extends GetxService
 
       _visibleScopes.clear();
 
-      await _writePending(
-        <LearningActivityTimeEntryModel>[],
-      );
+      await _writePending(<LearningActivityTimeEntryModel>[]);
     });
   }
 
@@ -89,9 +88,7 @@ class LearningActivityTrackerService extends GetxService
 
       _visibleScopes.clear();
 
-      await _writePending(
-        <LearningActivityTimeEntryModel>[],
-      );
+      await _writePending(<LearningActivityTimeEntryModel>[]);
     });
   }
 
@@ -148,15 +145,14 @@ class LearningActivityTrackerService extends GetxService
   void handleRoute(String? _) {}
 
   Future<void> _activateVisibleScopeInternal() async {
-    final _LearningPageScope? scope =
-    _isForeground && _visibleScopes.isNotEmpty
+    final _LearningPageScope? scope = _isForeground && _visibleScopes.isNotEmpty
         ? _visibleScopes.last
         : null;
 
     final bool isSameScope =
         scope?.token == _currentScopeToken &&
-            scope?.activityKind == _currentKind &&
-            scope?.sourceId == _currentSourceId;
+        scope?.activityKind == _currentKind &&
+        scope?.sourceId == _currentSourceId;
 
     // Same learning screen.
     if (isSameScope) {
@@ -173,8 +169,7 @@ class LearningActivityTrackerService extends GetxService
     }
 
     // We are leaving/changing the previous learning screen.
-    final bool hadActiveActivity =
-        _currentKind != null && _startedAt != null;
+    final bool hadActiveActivity = _currentKind != null && _startedAt != null;
 
     await _flushCurrentInternal(clearActivity: true);
 
@@ -266,7 +261,7 @@ class LearningActivityTrackerService extends GetxService
         durationSeconds: durationSeconds.clamp(1, 3600).toInt(),
         startedAt: startedAt,
         endedAt: endedAt,
-        clientActivityDate: _dateOnly(startedAt.toLocal()),
+        clientActivityDate: formatLocalDate(startedAt),
       ),
     );
   }
@@ -357,12 +352,6 @@ class LearningActivityTrackerService extends GetxService
             .toList(growable: false),
       ),
     );
-  }
-
-  String _dateOnly(DateTime date) {
-    final String month = date.month.toString().padLeft(2, '0');
-    final String day = date.day.toString().padLeft(2, '0');
-    return '${date.year}-$month-$day';
   }
 
   @override

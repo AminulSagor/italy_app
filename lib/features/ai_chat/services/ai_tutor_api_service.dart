@@ -1,13 +1,25 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/services/api_client.dart';
+import '../../../core/services/ai_data_consent_service.dart';
 import '../models/ai_tutor_level_test_models.dart';
 import '../models/ai_tutor_models.dart';
 
 class AiTutorApiService {
-  AiTutorApiService({required ApiClient apiClient}) : _apiClient = apiClient;
+  AiTutorApiService({
+    required ApiClient apiClient,
+    required AiDataConsentService aiDataConsentService,
+  }) : _apiClient = apiClient,
+       _aiDataConsentService = aiDataConsentService;
 
   final ApiClient _apiClient;
+  final AiDataConsentService _aiDataConsentService;
+
+  Future<void> _requireConsent() async {
+    if (!await _aiDataConsentService.requireConsent()) {
+      throw StateError('AI data-sharing permission was not granted.');
+    }
+  }
 
   Future<AiTutorVoiceSessionModel> startVoiceSession({
     String? topic,
@@ -17,6 +29,7 @@ class AiTutorApiService {
     String? guidedMode,
     String? guidedLevel,
   }) async {
+    await _requireConsent();
     final AiTutorVoiceSessionRequestModel request =
         AiTutorVoiceSessionRequestModel(
           topic: topic,
@@ -36,6 +49,7 @@ class AiTutorApiService {
   }
 
   Future<AiTutorVoiceSessionModel> startLevelTestVoiceSession() async {
+    await _requireConsent();
     final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '/ai-tutor/level-test/voice/session',
       options: Options(receiveTimeout: const Duration(seconds: 45)),
@@ -63,6 +77,7 @@ class AiTutorApiService {
     String sessionId, {
     String? resumptionHandle,
   }) async {
+    await _requireConsent();
     final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '/ai-tutor/voice/sessions/${Uri.encodeComponent(sessionId)}/reconnect',
       data: <String, dynamic>{
@@ -97,6 +112,7 @@ class AiTutorApiService {
     AiTutorChatMode chatMode = AiTutorChatMode.general,
     AiTutorWritingSourceLanguage? writingSourceLanguage,
   }) async {
+    await _requireConsent();
     final AiTutorChatRequestModel request = AiTutorChatRequestModel(
       message: message,
       history: history,
@@ -116,6 +132,7 @@ class AiTutorApiService {
   }
 
   Future<AiTutorLevelProfileResponseModel> getLevelTestProfile() async {
+    await _requireConsent();
     final Response<dynamic> response = await _apiClient.dio.get<dynamic>(
       '/ai-tutor/level-test/profile',
     );
@@ -126,6 +143,7 @@ class AiTutorApiService {
     required String question,
     required String audioPath,
   }) async {
+    await _requireConsent();
     final FormData formData = FormData.fromMap(<String, dynamic>{
       'question': question.trim(),
       'audio': await MultipartFile.fromFile(
@@ -146,6 +164,7 @@ class AiTutorApiService {
   Future<AiTutorLevelTestResponseModel> evaluateLevelTest({
     required List<AiTutorLevelAnswerModel> answers,
   }) async {
+    await _requireConsent();
     final AiTutorLevelTestRequestModel request = AiTutorLevelTestRequestModel(
       answers: answers,
     );

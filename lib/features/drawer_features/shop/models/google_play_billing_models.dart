@@ -113,16 +113,26 @@ class PendingGooglePlayPurchaseModel {
   }
 }
 
-enum GooglePlayPurchaseOutcomeStatus { completed, pending, cancelled, failed }
+enum GooglePlayPurchaseOutcomeStatus {
+  completed,
+  pending,
+  cancelled,
+  failed,
+  accountConflict,
+}
 
 class GooglePlayPurchaseOutcome {
   const GooglePlayPurchaseOutcome({
     required this.status,
     required this.message,
     this.completion,
+    this.accountHint = '',
+    this.signInMethods = const <String>[],
   });
 
   final GooglePlayPurchaseOutcomeStatus status;
   final String message;
   final StorePurchaseCompletionModel? completion;
+  final String accountHint;
+  final List<String> signInMethods;
 }

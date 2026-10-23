@@ -772,6 +772,17 @@ class MessageCallController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  Future<void> setMutedFromNative(String callId, bool muted) async {
+    if (callId.trim() != _callId ||
+        !isActive.value ||
+        isEnding.value ||
+        _routeClosed) {
+      return;
+    }
+    await _callAgoraService.setMicrophoneMuted(muted);
+    isMuted.value = muted;
+  }
+
   Future<void> _terminateCall({required bool showError}) async {
     final String? callId = _callId;
     if (callId == null || callId.isEmpty || _terminationSent) {

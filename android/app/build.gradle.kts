@@ -195,4 +195,5 @@ dependencies {
     // in_app_purchase_android 0.5.1 declares Billing 8.0.0. Keep the same
     // compatible major API while taking Google's later native bug fixes.
     implementation("com.android.billingclient:billing:8.2.1")
+    implementation("com.google.android.play:integrity:1.6.0")
 }

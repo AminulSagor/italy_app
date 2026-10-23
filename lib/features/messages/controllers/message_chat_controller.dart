@@ -22,8 +22,7 @@ import 'message_user_info_controller.dart';
 import 'messages_controller.dart';
 import '../services/presence_service.dart';
 
-class MessageChatController extends GetxController
-    with WidgetsBindingObserver {
+class MessageChatController extends GetxController with WidgetsBindingObserver {
   final MessageThreadModel thread;
   final MessagesMockService _messagesMockService;
 
@@ -48,6 +47,88 @@ class MessageChatController extends GetxController
   final RxString blockStatus = 'none'.obs;
   final RxBool isInitialScrollReady = false.obs;
   int _currentPage = 1;
+
+  bool get isUnavailable => chat.value?.isUnavailable ?? thread.isUnavailable;
+
+  void _markContactUnavailable() {
+    final Set<String> pendingMessageIds = _pendingSends
+        .map((Map<String, String> pending) => pending['clientMessageId'] ?? '')
+        .where((String id) => id.isNotEmpty)
+        .toSet();
+    _pendingSends.clear();
+
+    final MessageChatModel? current = chat.value;
+    final List<MessageChatItemModel> remainingMessages = current == null
+        ? const <MessageChatItemModel>[]
+        : current.messages
+              .where(
+                (MessageChatItemModel message) =>
+                    !pendingMessageIds.contains(message.id),
+              )
+              .toList(growable: false);
+    String previewText = thread.lastMessage;
+    String previewTime = thread.timeLabel;
+    for (final MessageChatItemModel message in remainingMessages.reversed) {
+      if (message.text.trim().isEmpty) continue;
+      previewText = message.text;
+      previewTime = message.timeLabel;
+      break;
+    }
+
+    if (current != null) {
+      chat.value = current.copyWith(
+        contactName: 'user_unavailable'.tr,
+        contactStatus: 'account_no_longer_available'.tr,
+        contactAvatarUrl: '',
+        isOnline: false,
+        isUnavailable: true,
+        messages: remainingMessages,
+      );
+    }
+
+    try {
+      _socketService?.leaveInbox(thread.id);
+      _socketService?.leaveConversation(thread.id);
+    } catch (_) {}
+
+    if (Get.isRegistered<MessagesController>()) {
+      final MessagesController messagesController =
+          Get.find<MessagesController>();
+      final int index = messagesController.threads.indexWhere(
+        (MessageThreadModel item) => item.id == thread.id,
+      );
+      if (index >= 0) {
+        messagesController.threads[index] = messagesController.threads[index]
+            .copyWith(
+              learnerName: 'User unavailable',
+              lastMessage: previewText,
+              timeLabel: previewTime,
+              avatarUrl: '',
+              isOnline: false,
+              isUnavailable: true,
+            );
+      }
+    }
+  }
+
+  Future<MessageThreadModel> _resolveLatestThread() async {
+    if (thread.isUnavailable) return thread;
+
+    try {
+      final MessagesResponseModel response = await _messagesMockService
+          .fetchMessages();
+      final MessageThreadModel latest = response.threads.firstWhere(
+        (MessageThreadModel item) => item.id == thread.id,
+        orElse: () => thread,
+      );
+      if (latest.isUnavailable) {
+        _markContactUnavailable();
+      }
+      return latest;
+    } catch (_) {
+      return thread;
+    }
+  }
 
   @override
   void onInit() {
@@ -94,18 +175,19 @@ class MessageChatController extends GetxController
         rawCall['directConversationId']?.toString() ?? '';
     if (conversationId != thread.id) return;
     unawaited(
-      Future<void>.delayed(
-        const Duration(milliseconds: 250),
-        refreshChat,
-      ),
+      Future<void>.delayed(const Duration(milliseconds: 250), refreshChat),
     );
   }
 
   void _initPresenceSync() {
+    if (thread.isUnavailable) return;
+
     try {
       if (Get.isRegistered<PresenceService>()) {
         final PresenceService ps = Get.find<PresenceService>();
         ever(ps.presenceMap, (Map<String, MessagePresenceModel> map) {
+          if (isUnavailable) return;
+
           final String otherUserId =
               chat.value?.contactId ?? thread.contactId ?? thread.id;
           final MessagePresenceModel? p = map[otherUserId];
@@ -172,6 +254,8 @@ class MessageChatController extends GetxController
   }
 
   Future<void> checkBlockStatus() async {
+    if (thread.isUnavailable) return;
+
     try {
       if (!Get.isRegistered<UserBlockApiService>()) {
         Get.lazyPut<UserBlockApiService>(
@@ -225,8 +309,9 @@ class MessageChatController extends GetxController
     }
     isLoading.value = true;
     try {
+      final MessageThreadModel latestThread = await _resolveLatestThread();
       final MessageChatModel fetched = await _messagesMockService.fetchChat(
-        thread,
+        latestThread,
       );
 
       // Merge fetched messages with any messages that may have arrived via
@@ -269,6 +354,13 @@ class MessageChatController extends GetxController
       // the header status matches the user info screen.
       final String otherUserId =
           chat.value?.contactId ?? thread.contactId ?? thread.id;
+
+      if (isUnavailable) {
+        if (isInitialLoad) {
+          await _prepareInitialScrollPosition();
+        }
+        return;
+      }
 
       try {
         if (Get.isRegistered<PresenceService>()) {
@@ -389,12 +481,13 @@ class MessageChatController extends GetxController
       },
       onCallIncoming: (Map<String, dynamic> data) {},
       onConnect: () {
+        if (isUnavailable) return;
         try {
           _socketService?.joinConversation(thread.id);
           // Signal backend that we're actively in this inbox
           _socketService?.enterInbox(thread.id);
         } catch (_) {}
-        _flushPendingSends();
+        unawaited(_flushPendingSends());
       },
     );
   }
@@ -494,11 +587,13 @@ class MessageChatController extends GetxController
     await loadChat();
 
     // Re-join conversation to ensure socket state is up-to-date
-    try {
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      _socketService?.leaveConversation(thread.id);
-      _socketService?.joinConversation(thread.id);
-    } catch (_) {}
+    if (!isUnavailable) {
+      try {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        _socketService?.leaveConversation(thread.id);
+        _socketService?.joinConversation(thread.id);
+      } catch (_) {}
+    }
 
     // Attempt to scroll to bottom after refresh
     try {
@@ -524,14 +619,12 @@ class MessageChatController extends GetxController
 
       final String conversationId =
           data['conversationId']?.toString() ??
-              data['directConversationId']?.toString() ??
-              data['threadId']?.toString() ??
-              msg['conversationId']?.toString() ??
-              msg['directConversationId']?.toString() ??
-              (rawConversation is Map
-                  ? rawConversation['id']?.toString()
-                  : null) ??
-              '';
+          data['directConversationId']?.toString() ??
+          data['threadId']?.toString() ??
+          msg['conversationId']?.toString() ??
+          msg['directConversationId']?.toString() ??
+          (rawConversation is Map ? rawConversation['id']?.toString() : null) ??
+          '';
 
       // Ignore messages belonging to another conversation.
       if (conversationId.isEmpty || conversationId != thread.id) {
@@ -539,32 +632,25 @@ class MessageChatController extends GetxController
       }
 
       final String messageId =
-          data['messageId']?.toString() ??
-              data['id']?.toString() ??
-              '';
+          data['messageId']?.toString() ?? data['id']?.toString() ?? '';
 
       final String content =
-          data['content']?.toString() ??
-              data['text']?.toString() ??
-              '';
+          data['content']?.toString() ?? data['text']?.toString() ?? '';
 
       final String createdAt =
           data['createdAt']?.toString() ??
-              data['created_at']?.toString() ??
-              DateTime.now().toIso8601String();
+          data['created_at']?.toString() ??
+          DateTime.now().toIso8601String();
 
       final String senderId =
-          data['senderId']?.toString() ??
-              data['userId']?.toString() ??
-              '';
+          data['senderId']?.toString() ?? data['userId']?.toString() ?? '';
 
       final String clientMessageId =
           data['clientMessageId']?.toString() ??
-              data['client_msg_id']?.toString() ??
-              '';
+          data['client_msg_id']?.toString() ??
+          '';
 
-      final String statusFromServer =
-          data['status']?.toString() ?? '';
+      final String statusFromServer = data['status']?.toString() ?? '';
 
       final MessageChatItemModel item = MessageChatItemModel(
         id: messageId.isNotEmpty
@@ -577,8 +663,8 @@ class MessageChatController extends GetxController
         createdAtIso: createdAt,
         statusLabel: senderId == _currentUserId
             ? statusFromServer.isNotEmpty
-            ? statusFromServer
-            : 'delivered'.tr
+                  ? statusFromServer
+                  : 'delivered'.tr
             : '',
         isMine: senderId == _currentUserId,
       );
@@ -586,16 +672,15 @@ class MessageChatController extends GetxController
       final MessageChatModel? current = chat.value;
       if (current == null) return;
 
-      final int existingIndex = current.messages.indexWhere(
-            (MessageChatItemModel message) {
-          return (messageId.isNotEmpty && message.id == messageId) ||
-              (clientMessageId.isNotEmpty &&
-                  message.id == clientMessageId);
-        },
-      );
+      final int existingIndex = current.messages.indexWhere((
+        MessageChatItemModel message,
+      ) {
+        return (messageId.isNotEmpty && message.id == messageId) ||
+            (clientMessageId.isNotEmpty && message.id == clientMessageId);
+      });
 
       final List<MessageChatItemModel> updated =
-      List<MessageChatItemModel>.from(current.messages);
+          List<MessageChatItemModel>.from(current.messages);
 
       if (existingIndex >= 0) {
         // Replace the optimistic message with the server message.
@@ -627,7 +712,7 @@ class MessageChatController extends GetxController
       try {
         if (Get.isRegistered<MessagesController>()) {
           final MessagesController messagesController =
-          Get.find<MessagesController>();
+              Get.find<MessagesController>();
 
           messagesController.updateThreadPreview(
             threadId: conversationId,
@@ -654,7 +739,12 @@ class MessageChatController extends GetxController
 
   Future<void> sendMessage() async {
     final String text = chatTextController.text.trim();
-    if (text.isEmpty || isSending.value || blockStatus.value != 'none') return;
+    if (text.isEmpty ||
+        isSending.value ||
+        blockStatus.value != 'none' ||
+        isUnavailable) {
+      return;
+    }
 
     final MessageChatModel? current = chat.value;
     if (current == null) return;
@@ -692,11 +782,32 @@ class MessageChatController extends GetxController
     } catch (_) {}
 
     try {
-      _messagesMockService.sendMessageViaSocket(
-        conversationId: thread.id,
-        clientMessageId: clientMessageId,
-        content: text,
-      );
+      final Map<String, dynamic> response = await _messagesMockService
+          .sendMessageViaSocket(
+            conversationId: thread.id,
+            clientMessageId: clientMessageId,
+            content: text,
+          );
+
+      if (response['code'] == 'USER_UNAVAILABLE') {
+        updated.removeWhere(
+          (MessageChatItemModel message) => message.id == clientMessageId,
+        );
+        chat.value = current.copyWith(messages: updated);
+        _markContactUnavailable();
+        Get.snackbar(
+          'user_unavailable'.tr,
+          'account_no_longer_available'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      if (response['ok'] != true) {
+        throw StateError(
+          response['error']?.toString() ?? 'The message could not be sent.',
+        );
+      }
     } catch (_) {
       // If socket isn't connected, queue the message for later
       if (_socketService == null || !_socketService!.isConnected) {
@@ -727,8 +838,8 @@ class MessageChatController extends GetxController
     }
   }
 
-  void _flushPendingSends() {
-    if (_pendingSends.isEmpty) return;
+  Future<void> _flushPendingSends() async {
+    if (_pendingSends.isEmpty || isUnavailable) return;
     final MessageChatModel? current = chat.value;
     if (current == null) return;
 
@@ -738,11 +849,21 @@ class MessageChatController extends GetxController
       final String clientId = p['clientMessageId'] ?? '';
       final String content = p['content'] ?? '';
       try {
-        _messagesMockService.sendMessageViaSocket(
-          conversationId: thread.id,
-          clientMessageId: clientId,
-          content: content,
-        );
+        final Map<String, dynamic> response = await _messagesMockService
+            .sendMessageViaSocket(
+              conversationId: thread.id,
+              clientMessageId: clientId,
+              content: content,
+            );
+
+        if (response['code'] == 'USER_UNAVAILABLE') {
+          _markContactUnavailable();
+          return;
+        }
+
+        if (response['ok'] != true) {
+          continue;
+        }
 
         // update message status from Queued -> Sending
         final int idx = current.messages.indexWhere(
@@ -786,19 +907,24 @@ class MessageChatController extends GetxController
   }
 
   void callBack(MessageChatItemModel item) {
-    final MessageCallType callType =
-        item.callType == MessageChatCallType.video
+    final MessageCallType callType = item.callType == MessageChatCallType.video
         ? MessageCallType.video
         : MessageCallType.audio;
     _openCall(callType);
   }
 
   Future<void> _openCall(MessageCallType callType) async {
-    if (blockStatus.value != 'none') {
+    if (isUnavailable) {
       Get.snackbar(
-        'blocked'.tr,
-        'You cannot call this user.',
+        'user_unavailable'.tr,
+        'account_no_longer_available'.tr,
+        snackPosition: SnackPosition.BOTTOM,
       );
+      return;
+    }
+
+    if (blockStatus.value != 'none') {
+      Get.snackbar('blocked'.tr, 'You cannot call this user.');
       return;
     }
 
@@ -847,6 +973,15 @@ class MessageChatController extends GetxController
   }
 
   void openUserInfo() {
+    if (isUnavailable) {
+      Get.snackbar(
+        'user_unavailable'.tr,
+        'account_no_longer_available'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     Get.to<void>(
       () => const MessageUserInfoView(),
       binding: BindingsBuilder(() {

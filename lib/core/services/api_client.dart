@@ -14,7 +14,10 @@ class ApiClient {
   ApiClient({
     required TokenService tokenService,
     required StorageService storageService,
-  }) : _tokenService = tokenService,
+  }) : // Keep public dependency names for bindings and tests.
+       // ignore: prefer_initializing_formals
+       _tokenService = tokenService,
+       // ignore: prefer_initializing_formals
        _storageService = storageService {
     _dio = Dio(
       BaseOptions(
@@ -25,31 +28,41 @@ class ApiClient {
         headers: const <String, String>{
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          // Marks this build as supporting explicit AI-data consent. The
+          // backend uses it to distinguish this build from the already
+          // published legacy Android app during the compatibility rollout.
+          'X-Italir-Client-Capabilities': 'ai-consent-v1',
         },
       ),
     );
 
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (
-            RequestOptions options,
-            RequestInterceptorHandler handler,
-            ) {
-          final String? authorizationHeader =
-              _tokenService.authorizationHeader;
+        onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+          final String? authorizationHeader = _tokenService.authorizationHeader;
 
           if (authorizationHeader != null) {
-            options.headers['Authorization'] =
-                authorizationHeader;
+            options.headers['Authorization'] = authorizationHeader;
+          }
+
+          if (!options.path.contains('/course-device-access/')) {
+            final _CourseDeviceProof? proof = _courseDeviceProofFor(
+              options.path,
+            );
+            if (proof != null) {
+              options.headers['X-Course-Device-Key-Id'] = proof.deviceKeyId;
+              options.headers['X-Course-Device-Access-Token'] =
+                  proof.accessToken;
+            }
           }
 
           handler.next(options);
         },
         onError: (DioException error, ErrorInterceptorHandler handler) async {
           final AccountRestrictionDetails? restriction =
-          AccountRestrictionDetails.tryFromResponseData(
-            error.response?.data,
-          );
+              AccountRestrictionDetails.tryFromResponseData(
+                error.response?.data,
+              );
 
           if (restriction != null) {
             await _handleBannedSession(restriction);
@@ -82,8 +95,47 @@ class ApiClient {
   final StorageService _storageService;
   late final Dio _dio;
   bool _isHandlingSessionFailure = false;
+  final Map<String, _CourseDeviceProof> _courseDeviceProofs =
+      <String, _CourseDeviceProof>{};
+  String? _activeCourseDeviceProofCourseId;
 
   Dio get dio => _dio;
+
+  void setCourseDeviceProof({
+    required String courseId,
+    required String deviceKeyId,
+    required String accessToken,
+  }) {
+    _courseDeviceProofs[courseId] = _CourseDeviceProof(
+      deviceKeyId: deviceKeyId,
+      accessToken: accessToken,
+    );
+    _activeCourseDeviceProofCourseId = courseId;
+  }
+
+  void clearCourseDeviceProof({String? courseId}) {
+    if (courseId == null) {
+      _courseDeviceProofs.clear();
+      _activeCourseDeviceProofCourseId = null;
+      return;
+    }
+
+    _courseDeviceProofs.remove(courseId);
+    if (_activeCourseDeviceProofCourseId == courseId) {
+      _activeCourseDeviceProofCourseId = null;
+    }
+  }
+
+  _CourseDeviceProof? _courseDeviceProofFor(String requestPath) {
+    final List<String> pathSegments = Uri.parse(requestPath).pathSegments;
+    for (final MapEntry<String, _CourseDeviceProof> entry
+        in _courseDeviceProofs.entries) {
+      if (pathSegments.contains(entry.key)) return entry.value;
+    }
+
+    final String? activeCourseId = _activeCourseDeviceProofCourseId;
+    return activeCourseId == null ? null : _courseDeviceProofs[activeCourseId];
+  }
 
   String get _baseUrl {
     final String baseUrl = dotenv.env[_baseUrlEnvKey]?.trim() ?? '';
@@ -103,8 +155,8 @@ class ApiClient {
   }
 
   Future<void> _handleBannedSession(
-      AccountRestrictionDetails restriction,
-      ) async {
+    AccountRestrictionDetails restriction,
+  ) async {
     if (_isHandlingSessionFailure) {
       return;
     }
@@ -117,15 +169,10 @@ class ApiClient {
       if (Get.currentRoute != AppRoutes.accountSuspended) {
         await Future<void>.delayed(Duration.zero);
 
-        Get.offAllNamed(
-          AppRoutes.accountSuspended,
-          arguments: restriction,
-        );
+        Get.offAllNamed(AppRoutes.accountSuspended, arguments: restriction);
       }
     } finally {
-      await Future<void>.delayed(
-        const Duration(milliseconds: 300),
-      );
+      await Future<void>.delayed(const Duration(milliseconds: 300));
 
       _isHandlingSessionFailure = false;
     }
@@ -148,15 +195,14 @@ class ApiClient {
         Get.offAllNamed(AppRoutes.login);
       }
     } finally {
-      await Future<void>.delayed(
-        const Duration(milliseconds: 300),
-      );
+      await Future<void>.delayed(const Duration(milliseconds: 300));
 
       _isHandlingSessionFailure = false;
     }
   }
 
   Future<void> _clearLocalSession() async {
+    clearCourseDeviceProof();
     await Future.wait<void>(<Future<void>>[
       _tokenService.clearTokens(),
       _storageService.clearLoggedInData(),
@@ -166,4 +212,14 @@ class ApiClient {
       Get.find<UserSessionController>().clear();
     }
   }
+}
+
+class _CourseDeviceProof {
+  const _CourseDeviceProof({
+    required this.deviceKeyId,
+    required this.accessToken,
+  });
+
+  final String deviceKeyId;
+  final String accessToken;
 }

@@ -384,16 +384,30 @@ class CourseGooglePlayBillingService extends GetxService {
               pending.orderId.trim().toLowerCase()) {
         return latest;
       }
+      if (latest is SK2PurchaseDetails &&
+          (latest.status == PurchaseStatus.purchased ||
+              latest.status == PurchaseStatus.restored)) {
+        return latest;
+      }
 
       final List<SK2Transaction> transactions =
           await SK2Transaction.unfinishedTransactions();
-      final SK2Transaction? transaction = transactions.firstWhereOrNull(
+      SK2Transaction? transaction = transactions.firstWhereOrNull(
         (SK2Transaction item) =>
             item.productId == pending.productId &&
             item.appAccountToken?.trim().toLowerCase() ==
                 pending.orderId.trim().toLowerCase(),
       );
-      if (transaction == null) return null;
+      transaction ??= transactions.firstWhereOrNull(
+        (SK2Transaction item) => item.productId == pending.productId,
+      );
+
+      if (transaction == null) {
+        // A finished non-consumable is not returned by unfinishedTransactions.
+        // Ask StoreKit to replay owned purchases so the backend can verify
+        // whether it belongs to this Italir Pothe account or another one.
+        return _restoreAppStorePurchase(pending.productId);
+      }
 
       return SK2PurchaseDetails(
         productID: transaction.productId,

@@ -14,6 +14,8 @@ import 'callkit_pending_action_store.dart';
 
 typedef CallkitActionCallback =
     Future<void> Function(String callId, Map<String, dynamic> data);
+typedef CallkitMuteCallback =
+    Future<void> Function(String callId, bool isMuted);
 
 class CallkitIncomingService {
   static StreamSubscription<RemoteMessage>? _foregroundSubscription;
@@ -30,6 +32,7 @@ class CallkitIncomingService {
     required CallkitActionCallback onDecline,
     required CallkitActionCallback onEnded,
     required CallkitActionCallback onTimeout,
+    required CallkitMuteCallback onMute,
   }) async {
     await _foregroundSubscription?.cancel();
     await _callkitSubscription?.cancel();
@@ -53,6 +56,11 @@ class CallkitIncomingService {
             activation.complete();
           }
         }
+        return;
+      }
+
+      if (event is CallEventActionCallToggleMute) {
+        await onMute(event.id.trim(), event.isMuted);
         return;
       }
 
@@ -262,6 +270,10 @@ class CallkitIncomingService {
         supportsVideo: callType == 'video',
         maximumCallGroups: 1,
         maximumCallsPerCallGroup: 1,
+        supportsDTMF: false,
+        supportsHolding: false,
+        supportsGrouping: false,
+        supportsUngrouping: false,
         audioSessionMode: callType == 'video' ? 'videoChat' : 'voiceChat',
         audioSessionActive: true,
         ringtonePath: 'system_ringtone_default',

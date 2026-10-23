@@ -21,6 +21,10 @@ class ChapterVideoPlayerSurface extends StatefulWidget {
   final ValueListenable<String>? selectedQualityListenable;
   final Future<void> Function(ChapterVideoQualityOption? quality)?
   onQualityChanged;
+  final String? recoveryMessage;
+  final ValueListenable<String?>? recoveryMessageListenable;
+  final Future<void> Function()? onRetry;
+  final ValueChanged<bool>? onPlaybackIntentChanged;
   final VoidCallback? onFullscreenTap;
   final VoidCallback? onCloseFullscreenTap;
 
@@ -36,6 +40,10 @@ class ChapterVideoPlayerSurface extends StatefulWidget {
     this.qualityOptions = const <ChapterVideoQualityOption>[],
     this.selectedQualityListenable,
     this.onQualityChanged,
+    this.recoveryMessage,
+    this.recoveryMessageListenable,
+    this.onRetry,
+    this.onPlaybackIntentChanged,
     this.onFullscreenTap,
     this.onCloseFullscreenTap,
   });
@@ -67,6 +75,9 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
     super.initState();
     _wasPlaying = widget.controller.value.isPlaying;
     widget.controller.addListener(_handlePlaybackStateChanged);
+    widget.recoveryMessageListenable?.addListener(
+      _handleRecoveryMessageChanged,
+    );
     if (_wasPlaying) {
       _scheduleControlsHide();
     }
@@ -75,6 +86,16 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
   @override
   void didUpdateWidget(covariant ChapterVideoPlayerSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.recoveryMessageListenable !=
+        widget.recoveryMessageListenable) {
+      oldWidget.recoveryMessageListenable?.removeListener(
+        _handleRecoveryMessageChanged,
+      );
+      widget.recoveryMessageListenable?.addListener(
+        _handleRecoveryMessageChanged,
+      );
+    }
+
     if (oldWidget.controller == widget.controller) {
       return;
     }
@@ -90,7 +111,16 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
   void dispose() {
     _controlsHideTimer?.cancel();
     widget.controller.removeListener(_handlePlaybackStateChanged);
+    widget.recoveryMessageListenable?.removeListener(
+      _handleRecoveryMessageChanged,
+    );
     super.dispose();
+  }
+
+  void _handleRecoveryMessageChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _handlePlaybackStateChanged() {
@@ -119,11 +149,17 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
 
   Future<void> _togglePlayback() async {
     final VideoPlayerValue value = widget.controller.value;
-    if (!value.isInitialized || value.isBuffering) {
+    if (!value.isInitialized) {
+      return;
+    }
+
+    if (value.isBuffering || value.hasError) {
+      await widget.onRetry?.call();
       return;
     }
 
     if (value.isPlaying) {
+      widget.onPlaybackIntentChanged?.call(false);
       await widget.controller.pause();
       _showControlsPersistently();
       return;
@@ -133,6 +169,7 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
       await widget.controller.seekTo(Duration.zero);
     }
 
+    widget.onPlaybackIntentChanged?.call(true);
     await widget.controller.play();
     _showControlsTemporarily();
   }
@@ -148,9 +185,7 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
         .clamp(0, duration.inMilliseconds)
         .toInt();
 
-    await widget.controller.seekTo(
-      Duration(milliseconds: targetMilliseconds),
-    );
+    await widget.controller.seekTo(Duration(milliseconds: targetMilliseconds));
     _showControlsTemporarily();
   }
 
@@ -160,15 +195,10 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
       return;
     }
 
-    final int targetMilliseconds =
-        (value.position + offset).inMilliseconds.clamp(
-              0,
-              value.duration.inMilliseconds,
-            );
+    final int targetMilliseconds = (value.position + offset).inMilliseconds
+        .clamp(0, value.duration.inMilliseconds);
 
-    await widget.controller.seekTo(
-      Duration(milliseconds: targetMilliseconds),
-    );
+    await widget.controller.seekTo(Duration(milliseconds: targetMilliseconds));
     _showControlsTemporarily();
   }
 
@@ -176,38 +206,38 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
     _showControlsPersistently();
 
     final _VideoSettingsAction? action =
-    await showModalBottomSheet<_VideoSettingsAction>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext sheetContext) {
-        return _VideoBottomSheetFrame(
-          title: 'Settings',
-          children: <Widget>[
-            if (widget.onQualityChanged != null)
-              _VideoSettingsTile(
-                icon: Icons.high_quality_rounded,
-                title: 'Quality',
-                value: widget.selectedQualityListenable?.value ?? 'Auto',
-                onTap: () {
-                  Navigator.of(sheetContext).pop(
-                    _VideoSettingsAction.quality,
-                  );
-                },
-              ),
-            _VideoSettingsTile(
-              icon: Icons.speed_rounded,
-              title: 'Playback speed',
-              value: _speedLabel(widget.controller.value.playbackSpeed),
-              onTap: () {
-                Navigator.of(sheetContext).pop(
-                  _VideoSettingsAction.playbackSpeed,
-                );
-              },
-            ),
-          ],
+        await showModalBottomSheet<_VideoSettingsAction>(
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext sheetContext) {
+            return _VideoBottomSheetFrame(
+              title: 'Settings',
+              children: <Widget>[
+                if (widget.onQualityChanged != null)
+                  _VideoSettingsTile(
+                    icon: Icons.high_quality_rounded,
+                    title: 'Quality',
+                    value: widget.selectedQualityListenable?.value ?? 'Auto',
+                    onTap: () {
+                      Navigator.of(
+                        sheetContext,
+                      ).pop(_VideoSettingsAction.quality);
+                    },
+                  ),
+                _VideoSettingsTile(
+                  icon: Icons.speed_rounded,
+                  title: 'Playback speed',
+                  value: _speedLabel(widget.controller.value.playbackSpeed),
+                  onTap: () {
+                    Navigator.of(
+                      sheetContext,
+                    ).pop(_VideoSettingsAction.playbackSpeed);
+                  },
+                ),
+              ],
+            );
+          },
         );
-      },
-    );
 
     if (!mounted || action == null) {
       _scheduleControlsHideIfPlaying();
@@ -235,13 +265,15 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
       builder: (BuildContext sheetContext) {
         return _VideoBottomSheetFrame(
           title: 'Playback speed',
-          children: _playbackSpeeds.map((double speed) {
-            return _VideoSelectionTile(
-              title: _speedLabel(speed),
-              isSelected: (currentSpeed - speed).abs() < 0.001,
-              onTap: () => Navigator.of(sheetContext).pop(speed),
-            );
-          }).toList(growable: false),
+          children: _playbackSpeeds
+              .map((double speed) {
+                return _VideoSelectionTile(
+                  title: _speedLabel(speed),
+                  isSelected: (currentSpeed - speed).abs() < 0.001,
+                  onTap: () => Navigator.of(sheetContext).pop(speed),
+                );
+              })
+              .toList(growable: false),
         );
       },
     );
@@ -255,9 +287,7 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Unable to change playback speed.'),
-          ),
+          const SnackBar(content: Text('Unable to change playback speed.')),
         );
       }
     }
@@ -288,11 +318,10 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
               onTap: () => Navigator.of(sheetContext).pop('Auto'),
             ),
             ...widget.qualityOptions.reversed.map(
-                  (ChapterVideoQualityOption quality) => _VideoSelectionTile(
+              (ChapterVideoQualityOption quality) => _VideoSelectionTile(
                 title: quality.label,
                 isSelected: currentLabel == quality.label,
-                onTap: () =>
-                    Navigator.of(sheetContext).pop(quality.label),
+                onTap: () => Navigator.of(sheetContext).pop(quality.label),
               ),
             ),
           ],
@@ -356,8 +385,7 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
       return false;
     }
 
-    return value.position >=
-        value.duration - const Duration(milliseconds: 400);
+    return value.position >= value.duration - const Duration(milliseconds: 400);
   }
 
   String _speedLabel(double speed) {
@@ -394,8 +422,7 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
                     progressLabel: widget.progressLabel,
                     fallbackPositionLabel: widget.fallbackPositionLabel,
                     fallbackDurationLabel: widget.fallbackDurationLabel,
-                    hasWatchedFullyListenable:
-                    widget.hasWatchedFullyListenable,
+                    hasWatchedFullyListenable: widget.hasWatchedFullyListenable,
                     isFullscreen: widget.isFullscreen,
                     showSettings: widget.showSettings,
                     onSettingsTap: _showSettingsSheet,
@@ -403,6 +430,10 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
                     onRewindTap: () => _seekBy(const Duration(seconds: -10)),
                     onForwardTap: () => _seekBy(const Duration(seconds: 10)),
                     onSeek: _seekTo,
+                    recoveryMessage:
+                        widget.recoveryMessageListenable?.value ??
+                        widget.recoveryMessage,
+                    onRetry: widget.onRetry,
                     onFullscreenTap: widget.onFullscreenTap,
                     onCloseFullscreenTap: widget.onCloseFullscreenTap,
                   ),
@@ -448,7 +479,9 @@ class _VideoControlsOverlay extends StatelessWidget {
   final VoidCallback onPlayPauseTap;
   final VoidCallback onRewindTap;
   final VoidCallback onForwardTap;
-  final ValueChanged<double> onSeek;
+  final Future<void> Function(double milliseconds) onSeek;
+  final String? recoveryMessage;
+  final Future<void> Function()? onRetry;
   final VoidCallback? onFullscreenTap;
   final VoidCallback? onCloseFullscreenTap;
 
@@ -465,12 +498,13 @@ class _VideoControlsOverlay extends StatelessWidget {
     required this.onRewindTap,
     required this.onForwardTap,
     required this.onSeek,
+    this.recoveryMessage,
+    this.onRetry,
     this.onFullscreenTap,
     this.onCloseFullscreenTap,
   });
 
   @override
-
   Widget build(BuildContext context) {
     final double playButtonSize = isFullscreen ? 58 : 64.w;
     final double playIconSize = isFullscreen ? 34 : 38.w;
@@ -514,11 +548,11 @@ class _VideoControlsOverlay extends StatelessWidget {
                   tooltip: 'Back 10 seconds',
                   icon: Icons.replay_10_rounded,
                   isFullscreen: isFullscreen,
-                  onTap: value.isBuffering ? null : onRewindTap,
+                  onTap: onRewindTap,
                 ),
                 SizedBox(width: isFullscreen ? 14 : 14.w),
                 GestureDetector(
-                  onTap: value.isBuffering ? null : onPlayPauseTap,
+                  onTap: onPlayPauseTap,
                   child: Container(
                     width: playButtonSize,
                     height: playButtonSize,
@@ -540,9 +574,7 @@ class _VideoControlsOverlay extends StatelessWidget {
                               ),
                             )
                           : Icon(
-                              value.isPlaying
-                                  ? Icons.pause
-                                  : Icons.play_arrow,
+                              value.isPlaying ? Icons.pause : Icons.play_arrow,
                               color: AppColors.white,
                               size: playIconSize,
                             ),
@@ -554,11 +586,48 @@ class _VideoControlsOverlay extends StatelessWidget {
                   tooltip: 'Forward 10 seconds',
                   icon: Icons.forward_10_rounded,
                   isFullscreen: isFullscreen,
-                  onTap: value.isBuffering ? null : onForwardTap,
+                  onTap: onForwardTap,
                 ),
               ],
             ),
           ),
+
+          if (recoveryMessage != null && onRetry != null)
+            Align(
+              alignment: const Alignment(0, 0.58),
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: isFullscreen ? 420 : 300.w,
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isFullscreen ? 14 : 12.w,
+                  vertical: isFullscreen ? 8 : 7.h,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.black.withValues(alpha: 0.78),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(
+                        recoveryMessage!,
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton(
+                      onPressed: () => unawaited(onRetry!.call()),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
           Positioned(
             left: 0,
@@ -568,9 +637,7 @@ class _VideoControlsOverlay extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.only(
-                    right: isFullscreen ? 8 : 6.w,
-                  ),
+                  padding: EdgeInsets.only(right: isFullscreen ? 8 : 6.w),
                   child: _BottomVideoActions(
                     isFullscreen: isFullscreen,
                     onFullscreenTap: onFullscreenTap,
@@ -617,23 +684,21 @@ class _BottomVideoActions extends StatelessWidget {
               ? Icons.close_fullscreen_rounded
               : Icons.fullscreen_rounded,
           isFullscreen: isFullscreen,
-          onTap: isFullscreen
-              ? onCloseFullscreenTap
-              : onFullscreenTap,
+          onTap: isFullscreen ? onCloseFullscreenTap : onFullscreenTap,
         ),
       ],
     );
   }
 }
 
-class _VideoProgressControls extends StatelessWidget {
+class _VideoProgressControls extends StatefulWidget {
   final VideoPlayerValue value;
   final String progressLabel;
   final String fallbackPositionLabel;
   final String fallbackDurationLabel;
   final ValueListenable<bool> hasWatchedFullyListenable;
   final bool isFullscreen;
-  final ValueChanged<double> onSeek;
+  final Future<void> Function(double milliseconds) onSeek;
 
   const _VideoProgressControls({
     required this.value,
@@ -646,57 +711,118 @@ class _VideoProgressControls extends StatelessWidget {
   });
 
   @override
+  State<_VideoProgressControls> createState() => _VideoProgressControlsState();
+}
+
+class _VideoProgressControlsState extends State<_VideoProgressControls> {
+  double? _dragProgress;
+  bool _isDragging = false;
+
+  double? _progressFromPosition(double horizontalPosition, double trackWidth) {
+    if (widget.value.duration.inMilliseconds <= 0 || trackWidth <= 0) {
+      return null;
+    }
+
+    return (horizontalPosition / trackWidth).clamp(0.0, 1.0).toDouble();
+  }
+
+  void _startOrUpdateDrag(double horizontalPosition, double trackWidth) {
+    final double? progress = _progressFromPosition(
+      horizontalPosition,
+      trackWidth,
+    );
+    if (progress == null) {
+      return;
+    }
+
+    setState(() {
+      _isDragging = true;
+      _dragProgress = progress;
+    });
+  }
+
+  Future<void> _finishDrag() async {
+    final double? progress = _dragProgress;
+    if (progress == null) {
+      if (mounted) {
+        setState(() => _isDragging = false);
+      }
+      return;
+    }
+
+    final double targetMilliseconds =
+        progress * widget.value.duration.inMilliseconds;
+    try {
+      await widget.onSeek(targetMilliseconds);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDragging = false;
+          _dragProgress = null;
+        });
+      }
+    }
+  }
+
+  void _cancelDrag() {
+    if (!_isDragging && _dragProgress == null) {
+      return;
+    }
+    setState(() {
+      _isDragging = false;
+      _dragProgress = null;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final Duration duration = value.duration;
+    final Duration duration = widget.value.duration;
 
     final Duration position =
-    value.position > duration && duration.inMilliseconds > 0
+        widget.value.position > duration && duration.inMilliseconds > 0
         ? duration
-        : value.position;
+        : widget.value.position;
 
     final double progress = duration.inMilliseconds <= 0
         ? 0
         : (position.inMilliseconds / duration.inMilliseconds)
-        .clamp(0.0, 1.0)
-        .toDouble();
+              .clamp(0.0, 1.0)
+              .toDouble();
 
-    final double fontSize =
-    isFullscreen ? 12 : AppFont.font12.sp;
+    final double displayedProgress = _dragProgress ?? progress;
+    final Duration displayedPosition = _dragProgress == null
+        ? position
+        : Duration(
+            milliseconds: (duration.inMilliseconds * displayedProgress).round(),
+          );
 
-    final double horizontalGap =
-    isFullscreen ? 8 : 8.w;
+    final double fontSize = widget.isFullscreen ? 12 : AppFont.font12.sp;
 
-    final double verticalGap =
-    isFullscreen ? 4 : 4.h;
+    final double horizontalGap = widget.isFullscreen ? 8 : 8.w;
 
-    final double trackHeight =
-    isFullscreen ? 3 : 3.h;
+    final double verticalGap = widget.isFullscreen ? 4 : 4.h;
 
-    final double horizontalPadding =
-    isFullscreen ? 12 : 12.w;
+    final double trackHeight = widget.isFullscreen ? 3 : 3.h;
 
-    final double progressTouchHeight =
-    isFullscreen ? 16 : 16.h;
+    final double horizontalPadding = widget.isFullscreen ? 12 : 12.w;
+
+    final double progressTouchHeight = widget.isFullscreen ? 36 : 36.h;
+    final double normalThumbDiameter = widget.isFullscreen ? 8 : 8.w;
+    final double activeThumbDiameter = widget.isFullscreen ? 16 : 16.w;
 
     return ValueListenableBuilder<bool>(
-      valueListenable: hasWatchedFullyListenable,
-      builder: (
-          BuildContext context,
-          bool hasWatchedFully,
-          Widget? child,
-          ) {
+      valueListenable: widget.hasWatchedFullyListenable,
+      builder: (BuildContext context, bool hasWatchedFully, Widget? child) {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: horizontalPadding,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               child: Row(
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      progressLabel,
+                      widget.progressLabel,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -709,14 +835,8 @@ class _VideoProgressControls extends StatelessWidget {
                   ),
                   SizedBox(width: horizontalGap),
                   Text(
-                    '${_durationLabel(
-                      position,
-                      fallbackPositionLabel,
-                    )} / '
-                        '${_durationLabel(
-                      duration,
-                      fallbackDurationLabel,
-                    )}',
+                    '${_durationLabel(displayedPosition, widget.fallbackPositionLabel)} / '
+                    '${_durationLabel(duration, widget.fallbackDurationLabel)}',
                     style: TextStyle(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w900,
@@ -729,53 +849,103 @@ class _VideoProgressControls extends StatelessWidget {
             ),
             SizedBox(height: verticalGap),
             LayoutBuilder(
-              builder: (
-                  BuildContext context,
-                  BoxConstraints constraints,
-                  ) {
-                void seekToPosition(double horizontalPosition) {
-                  if (duration.inMilliseconds <= 0 ||
-                      constraints.maxWidth <= 0) {
-                    return;
-                  }
-
-                  final double seekProgress =
-                  (horizontalPosition / constraints.maxWidth)
-                      .clamp(0.0, 1.0)
-                      .toDouble();
-
-                  final double targetMilliseconds =
-                      seekProgress * duration.inMilliseconds;
-
-                  onSeek(targetMilliseconds);
-                }
+              builder: (BuildContext context, BoxConstraints constraints) {
+                final double thumbDiameter = _isDragging
+                    ? activeThumbDiameter
+                    : normalThumbDiameter;
+                final double thumbCenter =
+                    (constraints.maxWidth * displayedProgress)
+                        .clamp(
+                          thumbDiameter / 2,
+                          constraints.maxWidth - (thumbDiameter / 2),
+                        )
+                        .toDouble();
 
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
-
-                  onTapDown: (TapDownDetails details) {
-                    seekToPosition(details.localPosition.dx);
+                  onTapUp: (TapUpDetails details) {
+                    final double? tapProgress = _progressFromPosition(
+                      details.localPosition.dx,
+                      constraints.maxWidth,
+                    );
+                    if (tapProgress != null) {
+                      unawaited(
+                        widget.onSeek(tapProgress * duration.inMilliseconds),
+                      );
+                    }
                   },
-
                   onHorizontalDragStart: (DragStartDetails details) {
-                    seekToPosition(details.localPosition.dx);
+                    _startOrUpdateDrag(
+                      details.localPosition.dx,
+                      constraints.maxWidth,
+                    );
                   },
-
                   onHorizontalDragUpdate: (DragUpdateDetails details) {
-                    seekToPosition(details.localPosition.dx);
+                    _startOrUpdateDrag(
+                      details.localPosition.dx,
+                      constraints.maxWidth,
+                    );
                   },
+                  onHorizontalDragEnd: (_) => unawaited(_finishDrag()),
+                  onHorizontalDragCancel: _cancelDrag,
                   child: SizedBox(
                     width: double.infinity,
                     height: progressTouchHeight,
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: trackHeight,
-                        color: AppColors.homeLime,
-                        backgroundColor:
-                        AppColors.chapterProgressTrack,
-                      ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: <Widget>[
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 8,
+                          child: LinearProgressIndicator(
+                            value: displayedProgress,
+                            minHeight: trackHeight,
+                            color: AppColors.homeLime,
+                            backgroundColor: AppColors.chapterProgressTrack,
+                          ),
+                        ),
+                        Positioned(
+                          left: thumbCenter - (thumbDiameter / 2),
+                          bottom: 8 + (trackHeight / 2) - (thumbDiameter / 2),
+                          child: AnimatedContainer(
+                            duration: _isDragging
+                                ? Duration.zero
+                                : const Duration(milliseconds: 120),
+                            width: thumbDiameter,
+                            height: thumbDiameter,
+                            decoration: const BoxDecoration(
+                              color: AppColors.homeLime,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        if (_isDragging)
+                          Positioned(
+                            left: (thumbCenter - 26).clamp(
+                              0.0,
+                              constraints.maxWidth - 52,
+                            ),
+                            bottom: 26,
+                            child: Container(
+                              width: 52,
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.black.withValues(alpha: 0.78),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                _durationLabel(displayedPosition, ''),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: AppColors.white,
+                                  fontSize: widget.isFullscreen ? 12 : 11.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 );
@@ -787,10 +957,7 @@ class _VideoProgressControls extends StatelessWidget {
     );
   }
 
-  String _durationLabel(
-      Duration duration,
-      String fallback,
-      ) {
+  String _durationLabel(Duration duration, String fallback) {
     if (duration == Duration.zero && fallback.isNotEmpty) {
       return fallback;
     }
@@ -836,29 +1003,19 @@ class _VideoActionButton extends StatelessWidget {
           height: buttonSize,
         ),
         splashRadius: buttonSize / 2,
-        icon: Icon(
-          icon,
-          color: AppColors.white,
-          size: iconSize,
-        ),
+        icon: Icon(icon, color: AppColors.white, size: iconSize),
       ),
     );
   }
 }
 
-enum _VideoSettingsAction {
-  quality,
-  playbackSpeed,
-}
+enum _VideoSettingsAction { quality, playbackSpeed }
 
 class _VideoBottomSheetFrame extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _VideoBottomSheetFrame({
-    required this.title,
-    required this.children,
-  });
+  const _VideoBottomSheetFrame({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
@@ -868,9 +1025,7 @@ class _VideoBottomSheetFrame extends StatelessWidget {
       top: false,
       child: Material(
         color: colors.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         clipBehavior: Clip.antiAlias,
         child: ConstrainedBox(
           constraints: BoxConstraints(
@@ -939,10 +1094,9 @@ class _VideoSettingsTile extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.65),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.65),
             ),
           ),
           const SizedBox(width: 4),

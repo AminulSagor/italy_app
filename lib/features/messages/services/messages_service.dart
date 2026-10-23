@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-
 import 'package:dio/dio.dart';
 
 import '../../../core/services/api_client.dart';
@@ -88,6 +87,7 @@ class MessagesMockService {
               String learnerName = 'Conversation';
               String avatarUrl = '';
               String? contactId;
+              bool isUnavailable = c['isUnavailable'] == true;
 
               // Extract contact user from members (excluding current user)
               final dynamic members = c['members'];
@@ -121,8 +121,16 @@ class MessagesMockService {
                     contactId = user['id']?.toString();
                   } else {
                     contactId = contactMember['userId']?.toString();
+                    isUnavailable =
+                        contactMember['isUnavailable'] == true ||
+                        (contactId?.isNotEmpty ?? false);
                   }
                 }
+              }
+
+              if (isUnavailable) {
+                learnerName = 'User unavailable';
+                avatarUrl = '';
               }
 
               return MessageThreadModel(
@@ -137,6 +145,7 @@ class MessagesMockService {
                 isDelivered: isDelivered,
                 avatarUrl: avatarUrl,
                 contactId: contactId,
+                isUnavailable: isUnavailable,
                 previewTone: preview.tone,
               );
             })
@@ -476,12 +485,12 @@ class MessagesMockService {
     return <Map<String, dynamic>>[];
   }
 
-  void sendMessageViaSocket({
+  Future<Map<String, dynamic>> sendMessageViaSocket({
     required String conversationId,
     String? clientMessageId,
     String? content,
   }) {
-    _chatSocketService.sendMessage(
+    return _chatSocketService.sendMessage(
       conversationId: conversationId,
       clientMessageId: clientMessageId,
       content: content,

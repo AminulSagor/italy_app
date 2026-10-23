@@ -42,6 +42,27 @@ class SocialSignInService {
   Future<void>? _googleInitialization;
   bool _googleSignInInProgress = false;
 
+  Future<void> disconnectProvider(String provider) async {
+    switch (provider.trim().toLowerCase()) {
+      case 'google':
+        final String serverClientId =
+            dotenv.env['GOOGLE_SERVER_CLIENT_ID']?.trim() ?? '';
+        final String iosClientId =
+            dotenv.env['GOOGLE_IOS_CLIENT_ID']?.trim() ?? '';
+        await _ensureGoogleInitialized(
+          serverClientId: serverClientId,
+          iosClientId: iosClientId,
+        );
+        await _googleSignIn.disconnect();
+        return;
+      case 'facebook':
+        await FacebookAuth.instance.logOut();
+        return;
+      default:
+        return;
+    }
+  }
+
   Future<SocialProviderCredential?> getGoogleCredential() async {
     if (_googleSignInInProgress) return null;
 

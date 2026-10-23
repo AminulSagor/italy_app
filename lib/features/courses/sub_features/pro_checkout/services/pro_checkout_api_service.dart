@@ -374,17 +374,35 @@ class ProCheckoutApiService {
     required String courseName,
     required int lessonCount,
   }) {
-    final String status = _stringValue(order['status'], fallback: 'paid');
+    final String status = _stringValue(order['status']).toLowerCase();
+    if (status != 'paid' && status != 'completed') {
+      throw StateError('The course purchase has not been verified as paid.');
+    }
     final String orderNumber = _stringValue(
       order['orderNumber'],
       fallback: fallbackOrderNumber,
     );
+    final Map<String, dynamic> storeProduct = proJsonMap(order['storeProduct']);
+    final String accessType = _stringValue(storeProduct['accessType']);
+    final int durationDays = _intValue(storeProduct['durationDays']);
+    final String lessonSummary = lessonCount > 0
+        ? ' and its $lessonCount lessons'
+        : '';
+    final String description;
+    if (accessType == 'lifetime') {
+      description =
+          'Lifetime access to $courseName$lessonSummary is now active.';
+    } else if (accessType == 'time_limited' && durationDays > 0) {
+      description =
+          'Your $durationDays-day access to $courseName$lessonSummary is now active. Subscription renewals may extend access.';
+    } else {
+      description = 'Your access to $courseName$lessonSummary is now active.';
+    }
     return ProPurchaseResultModel(
       orderId: orderNumber,
       statusLabel: 'Status: ${_titleCase(status)}',
       title: 'Course Unlocked!',
-      description:
-          'You now have full access to $courseName and all $lessonCount lessons.',
+      description: description,
       buttonLabel: 'Start Learning Now',
     );
   }

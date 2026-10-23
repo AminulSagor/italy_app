@@ -3,12 +3,13 @@ import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../../core/services/callkit_incoming_service.dart';
 import '../models/message_call_models.dart';
-import 'package:flutter/widgets.dart';
+import 'ios_call_audio_session.dart';
 
 typedef CallAgoraTokenProvider = Future<MessageCallMediaModel> Function();
 
@@ -30,7 +31,7 @@ class CallAgoraException implements Exception {
   String toString() => message;
 }
 
-class CallAgoraService extends GetxService {
+class CallAgoraService extends GetxService with WidgetsBindingObserver {
   RtcEngine? _engine;
   MessageCallMediaModel? _activeMedia;
   Completer<void>? _joinCompleter;
@@ -52,6 +53,14 @@ class CallAgoraService extends GetxService {
 
   bool _supportsVideo = false;
   bool _videoPublishDesired = false;
+  bool _audioRestoreInProgress = false;
+
+  @override
+  void onInit() {
+    super.onInit();
+    WidgetsBinding.instance.addObserver(this);
+    IosCallAudioSession.setEventHandler(_handleIosAudioSessionEvent);
+  }
 
   void _log(String message, {Object? error, StackTrace? stackTrace}) {
     developer.log(
@@ -96,6 +105,12 @@ class CallAgoraService extends GetxService {
     }
 
     await leaveCall();
+
+    await IosCallAudioSession.configureCall(
+      isVideo: isVideoCall,
+      callKitManaged: true,
+      speaker: isVideoCall,
+    );
 
     final RtcEngine engine = createAgoraRtcEngine();
     _engine = engine;
@@ -206,6 +221,14 @@ class CallAgoraService extends GetxService {
 
     if (!reusePreparedEngine) {
       await leaveCall();
+    }
+
+    if (Platform.isIOS) {
+      await IosCallAudioSession.configureCall(
+        isVideo: isVideoCall,
+        callKitManaged: isCallKitAudioSessionManaged,
+        speaker: isVideoCall,
+      );
     }
 
     _activeMedia = media;
@@ -744,6 +767,18 @@ class CallAgoraService extends GetxService {
     return nextValue;
   }
 
+  Future<void> setMicrophoneMuted(bool muted) async {
+    final RtcEngine? activeEngine = _engine;
+    if (activeEngine == null || !isJoined.value) {
+      return;
+    }
+    if (!muted) {
+      await activeEngine.enableLocalAudio(true);
+    }
+    await activeEngine.muteLocalAudioStream(muted);
+    isMicrophoneEnabled.value = !muted;
+  }
+
   Future<bool> toggleSpeaker() async {
     if (!isJoined.value) {
       return isSpeakerEnabled.value;
@@ -849,6 +884,11 @@ class CallAgoraService extends GetxService {
     try {
       await activeEngine.release();
     } catch (_) {}
+    if (Platform.isIOS) {
+      try {
+        await IosCallAudioSession.endCall();
+      } catch (_) {}
+    }
     _log('leave complete');
   }
 
@@ -963,7 +1003,90 @@ class CallAgoraService extends GetxService {
       // the audio route is changed successfully.
     }
 
+    if (Platform.isIOS) {
+      final Map<String, dynamic> route = await IosCallAudioSession.setSpeaker(
+        enabled,
+      );
+      enabled = route['speaker'] as bool? ?? enabled;
+    }
+
     isSpeakerEnabled.value = enabled;
+  }
+
+  Future<void> _handleIosAudioSessionEvent(
+    String event,
+    Map<String, dynamic> data,
+  ) async {
+    _log('iOS audio event=$event data=$data');
+    if (event == 'routeChanged') {
+      final bool? speaker = data['speaker'] as bool?;
+      if (speaker != null) {
+        isSpeakerEnabled.value = speaker;
+      }
+      return;
+    }
+
+    if (event == 'interruptionEnded' && data['shouldResume'] != true) {
+      return;
+    }
+    if (event != 'interruptionEnded' &&
+        event != 'callKitAudioActivated' &&
+        event != 'mediaServicesReset') {
+      return;
+    }
+    await _restoreAudioAfterSystemEvent(event);
+  }
+
+  Future<void> _restoreAudioAfterSystemEvent(String trigger) async {
+    final RtcEngine? activeEngine = _engine;
+    if (activeEngine == null || !isJoined.value || _audioRestoreInProgress) {
+      return;
+    }
+
+    _audioRestoreInProgress = true;
+    try {
+      final Map<String, dynamic> state =
+          await IosCallAudioSession.ensureCallAudio();
+      if (state['active'] != true || state['sessionActive'] != true) {
+        return;
+      }
+
+      await activeEngine.enableAudio();
+      await activeEngine.enableLocalAudio(true);
+      await activeEngine.muteLocalAudioStream(!isMicrophoneEnabled.value);
+      await activeEngine.updateChannelMediaOptions(
+        ChannelMediaOptions(
+          channelProfile: ChannelProfileType.channelProfileCommunication,
+          autoSubscribeAudio: true,
+          autoSubscribeVideo: _supportsVideo,
+          publishMicrophoneTrack: true,
+          publishCameraTrack:
+              _supportsVideo && _videoPublishDesired && isCameraEnabled.value,
+        ),
+      );
+      await _setSpeakerphone(enabled: isSpeakerEnabled.value);
+      _log('audio restored trigger=$trigger');
+    } catch (error, stackTrace) {
+      // Interruption recovery is best effort. Agora also observes the native
+      // AVAudioSession notification and may have already recovered itself.
+      _log(
+        'audio restore failed trigger=$trigger',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    } finally {
+      _audioRestoreInProgress = false;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _log('Flutter lifecycle=$state joined=${isJoined.value}');
+    if (state != AppLifecycleState.resumed || !isJoined.value) {
+      // Inactive/hidden/paused are presentation changes, not call termination.
+      return;
+    }
+    unawaited(_restoreAudioAfterSystemEvent('app-resumed'));
   }
 
   Future<bool> _ensureMicrophonePermission() async {
@@ -1046,6 +1169,8 @@ class CallAgoraService extends GetxService {
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    IosCallAudioSession.setEventHandler(null);
     unawaited(leaveCall());
     super.onClose();
   }

@@ -53,6 +53,13 @@ class SettingsView extends GetView<SettingsController> {
                     title: controller.passwordActionLabel,
                     onTap: controller.changePassword,
                   ),
+                  SizedBox(height: 10.h),
+                  _SettingsActionTile(
+                    icon: Icons.link_rounded,
+                    title: SettingsL10n.text('connected_accounts'),
+                    subtitle: SettingsL10n.text('connected_accounts_subtitle'),
+                    onTap: controller.openConnectedAccounts,
+                  ),
                   SizedBox(height: 24.h),
                   _SectionTitle(title: SettingsL10n.text('privacy_and_legal')),
                   SizedBox(height: 10.h),
@@ -74,6 +81,12 @@ class SettingsView extends GetView<SettingsController> {
                           icon: Icons.description_outlined,
                           title: SettingsL10n.text('terms_of_service'),
                           onTap: controller.openTerms,
+                        ),
+                        const Divider(height: 1, indent: 62),
+                        _LegalTile(
+                          icon: Icons.smart_toy_outlined,
+                          title: SettingsL10n.text('ai_data_sharing'),
+                          onTap: controller.openAiDataSharingSettings,
                         ),
                         const Divider(height: 1, indent: 62),
                         _LegalTile(

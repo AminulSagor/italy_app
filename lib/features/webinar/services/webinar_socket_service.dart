@@ -12,13 +12,14 @@ class WebinarSocketService {
     required String webinarId,
     required void Function() onWebinarEnded,
     required void Function(WebinarParticipantModel participant)
-        onParticipantUpdated,
+    onParticipantUpdated,
     required void Function(WebinarParticipantModel participant)
-        onSpeakerApproved,
+    onSpeakerApproved,
     required void Function(WebinarParticipantModel participant)
-        onSpeakerRejected,
+    onSpeakerRejected,
     required void Function(WebinarLiveChatModel chatMessage)
-        onChatMessageCreated,
+    onChatMessageCreated,
+    required void Function(String messageId) onChatMessageRemoved,
   }) {
     disconnect();
 
@@ -53,6 +54,12 @@ class WebinarSocketService {
     _socket?.on('webinar_chat_message_created', (dynamic data) {
       final WebinarLiveChatModel? chatMessage = _chatMessageFromEvent(data);
       if (chatMessage != null) onChatMessageCreated(chatMessage);
+    });
+    _socket?.on('webinar_chat_message_removed', (dynamic data) {
+      if (data is Map) {
+        final String messageId = data['messageId']?.toString() ?? '';
+        if (messageId.isNotEmpty) onChatMessageRemoved(messageId);
+      }
     });
 
     _socket?.connect();

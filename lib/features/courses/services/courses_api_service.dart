@@ -29,7 +29,7 @@ class CoursesApiService {
   }) async {
     final List<Response<dynamic>> responses =
         await Future.wait(<Future<Response<dynamic>>>[
-          _apiClient.dio.get('/courses/$courseId'),
+          _apiClient.dio.get('/courses/me/$courseId'),
           _apiClient.dio.get('/courses/$courseId/syllabus'),
         ]);
 

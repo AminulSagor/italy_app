@@ -18,6 +18,7 @@ class MessageThreadModel {
   final bool isDelivered;
   final String avatarUrl;
   final String? contactId;
+  final bool isUnavailable;
   final MessageThreadPreviewTone previewTone;
 
   const MessageThreadModel({
@@ -32,6 +33,7 @@ class MessageThreadModel {
     required this.isDelivered,
     required this.avatarUrl,
     this.contactId,
+    this.isUnavailable = false,
     this.previewTone = MessageThreadPreviewTone.normal,
   });
 
@@ -48,6 +50,7 @@ class MessageThreadModel {
       isDelivered: json['isDelivered'] as bool,
       avatarUrl: json['avatarUrl'] as String,
       contactId: json['contactId'] as String?,
+      isUnavailable: json['isUnavailable'] as bool? ?? false,
       previewTone: MessageThreadPreviewTone.values.firstWhere(
         (MessageThreadPreviewTone tone) => tone.name == json['previewTone'],
         orElse: () => MessageThreadPreviewTone.normal,
@@ -68,6 +71,7 @@ class MessageThreadModel {
       'isDelivered': isDelivered,
       'avatarUrl': avatarUrl,
       'contactId': contactId,
+      'isUnavailable': isUnavailable,
       'previewTone': previewTone.name,
     };
   }
@@ -83,6 +87,7 @@ class MessageThreadModel {
     bool? isDelivered,
     String? avatarUrl,
     String? contactId,
+    bool? isUnavailable,
     String? blockStatus,
     MessageThreadPreviewTone? previewTone,
   }) {
@@ -98,6 +103,7 @@ class MessageThreadModel {
       isDelivered: isDelivered ?? this.isDelivered,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       contactId: contactId ?? this.contactId,
+      isUnavailable: isUnavailable ?? this.isUnavailable,
       previewTone: previewTone ?? this.previewTone,
     );
   }
@@ -239,6 +245,7 @@ class MessageChatModel {
   final String contactAvatarUrl;
   final bool isOnline;
   final String? contactId;
+  final bool isUnavailable;
   final List<MessageChatItemModel> messages;
 
   const MessageChatModel({
@@ -247,6 +254,7 @@ class MessageChatModel {
     required this.contactAvatarUrl,
     required this.isOnline,
     this.contactId,
+    this.isUnavailable = false,
     required this.messages,
   });
 
@@ -257,6 +265,7 @@ class MessageChatModel {
       contactAvatarUrl: json['contactAvatarUrl'] as String,
       contactId: json['contactId'] as String?,
       isOnline: json['isOnline'] as bool,
+      isUnavailable: json['isUnavailable'] as bool? ?? false,
       messages: (json['messages'] as List<dynamic>)
           .map(
             (dynamic item) =>
@@ -273,6 +282,7 @@ class MessageChatModel {
       'contactAvatarUrl': contactAvatarUrl,
       'contactId': contactId,
       'isOnline': isOnline,
+      'isUnavailable': isUnavailable,
       'messages': messages
           .map((MessageChatItemModel message) => message.toJson())
           .toList(),
@@ -285,6 +295,7 @@ class MessageChatModel {
     String? contactAvatarUrl,
     String? contactId,
     bool? isOnline,
+    bool? isUnavailable,
     List<MessageChatItemModel>? messages,
   }) {
     return MessageChatModel(
@@ -293,6 +304,7 @@ class MessageChatModel {
       contactAvatarUrl: contactAvatarUrl ?? this.contactAvatarUrl,
       contactId: contactId ?? this.contactId,
       isOnline: isOnline ?? this.isOnline,
+      isUnavailable: isUnavailable ?? this.isUnavailable,
       messages: messages ?? this.messages,
     );
   }

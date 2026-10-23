@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/services/api_error_handler.dart';
+import '../../../core/services/auth_service.dart';
+import '../../../core/widgets/app_drawer_controller.dart';
+import '../../../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import '../../cv_generation/controllers/cv_home_controller.dart';
 import '../../../routes/routes.dart';
 import 'controllers/google_play_purchase_controller.dart';
@@ -232,17 +235,21 @@ class ShopController extends GetxController {
     try {
       final GooglePlayPurchaseOutcome outcome = await _purchaseController
           .restoreAppStoreSubscription(package);
+      if (outcome.status == GooglePlayPurchaseOutcomeStatus.accountConflict) {
+        await _showSubscriptionAccountConflictDialog(outcome);
+        return;
+      }
       if (outcome.status == GooglePlayPurchaseOutcomeStatus.completed) {
         if (outcome.completion != null) {
           await _applyPurchaseCompletion(outcome.completion!);
         }
         await refreshBalances();
       }
-      Get.snackbar(
-        outcome.status == GooglePlayPurchaseOutcomeStatus.completed
+      await _showPurchaseStatusDialog(
+        title: outcome.status == GooglePlayPurchaseOutcomeStatus.completed
             ? 'Restored'
             : 'Restore Purchases',
-        outcome.message,
+        message: outcome.message,
       );
     } finally {
       isRestoringSubscription.value = false;
@@ -727,17 +734,124 @@ class ShopController extends GetxController {
           }
           return;
         case GooglePlayPurchaseOutcomeStatus.pending:
-          Get.snackbar('processing'.tr, outcome.message);
+          await _showPurchaseStatusDialog(
+            title: 'processing'.tr,
+            message: outcome.message,
+          );
           return;
         case GooglePlayPurchaseOutcomeStatus.cancelled:
-          Get.snackbar('request_cancelled'.tr, outcome.message);
+          if (Platform.isIOS && completedPurchase.value != null) return;
+          await _showPurchaseStatusDialog(
+            title: 'request_cancelled'.tr,
+            message: outcome.message,
+          );
           return;
         case GooglePlayPurchaseOutcomeStatus.failed:
           checkoutError.value = outcome.message;
           return;
+        case GooglePlayPurchaseOutcomeStatus.accountConflict:
+          await _showSubscriptionAccountConflictDialog(outcome);
+          return;
       }
     } finally {
       isCheckoutLoading.value = false;
+    }
+  }
+
+  Future<void> _showPurchaseStatusDialog({
+    required String title,
+    required String message,
+  }) async {
+    await Get.dialog<void>(
+      AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: <Widget>[
+          FilledButton(
+            onPressed: () => Get.back<void>(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showSubscriptionAccountConflictDialog(
+    GooglePlayPurchaseOutcome outcome,
+  ) async {
+    final String methods = outcome.signInMethods
+        .map(_formatSignInMethod)
+        .join(', ');
+    final StringBuffer message = StringBuffer(
+      'This monthly streak-freeze subscription was already purchased using your Apple Account and is linked to another Italir Pothe account. Please sign in to the original account to use it.',
+    );
+    if (outcome.accountHint.isNotEmpty) {
+      message.write('\n\nLinked account: ${outcome.accountHint}');
+    }
+    if (methods.isNotEmpty) {
+      message.write('\nSign in with: $methods');
+    }
+
+    await Get.dialog<void>(
+      AlertDialog(
+        title: const Text('Subscription Already Purchased'),
+        content: Text(message.toString()),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Get.back<void>();
+              unawaited(Get.toNamed(AppRoutes.contactSupport));
+            },
+            child: const Text('Contact Support'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Get.back<void>();
+              unawaited(_switchAccount());
+            },
+            child: const Text('Switch Account'),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  String _formatSignInMethod(String method) {
+    switch (method.toLowerCase()) {
+      case 'apple':
+        return 'Apple';
+      case 'google':
+        return 'Google';
+      case 'facebook':
+        return 'Facebook';
+      case 'email':
+        return 'Email';
+      case 'phone':
+        return 'Phone';
+      default:
+        return method;
+    }
+  }
+
+  Future<void> _switchAccount() async {
+    if (Get.isRegistered<NavbarAndAppbarWrapperController>()) {
+      await Get.find<NavbarAndAppbarWrapperController>().onLogoutTap();
+      return;
+    }
+
+    try {
+      await Get.find<AuthService>().logout();
+    } finally {
+      if (Get.isRegistered<UserSessionController>()) {
+        Get.find<UserSessionController>().clear();
+      }
+      if (Get.isRegistered<AppDrawerController>()) {
+        Get.find<AppDrawerController>().clear();
+      }
+      if (Get.currentRoute != AppRoutes.login) {
+        Get.offAllNamed(AppRoutes.login);
+      }
     }
   }
 

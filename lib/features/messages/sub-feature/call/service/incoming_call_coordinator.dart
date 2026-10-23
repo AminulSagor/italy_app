@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 
 import '../../../../../core/services/callkit_incoming_service.dart';
 import '../../../../../core/services/callkit_pending_action_store.dart';
+import '../../../controllers/messages_controller.dart';
 import '../controllers/message_incoming_call_controller.dart';
 import '../models/message_call_models.dart';
 import '../views/message_incoming_call_view.dart';
@@ -346,6 +347,8 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     final Map<String, dynamic> call = _toMap(payload['call']);
     final String callId = call['id']?.toString().trim() ?? '';
 
+    _syncIncomingCallConversation(payload);
+
     if (callId.isEmpty ||
         _activeIncomingCallId == callId ||
         _activeIncomingCallId != null ||
@@ -427,6 +430,39 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
     } catch (_) {
       await _finishIncomingCall(callId);
       rethrow;
+    }
+  }
+
+  void _syncIncomingCallConversation(Map<String, dynamic> payload) {
+    try {
+      if (!Get.isRegistered<MessagesController>()) {
+        return;
+      }
+
+      final Map<String, dynamic> call = _toMap(payload['call']);
+      final Map<String, dynamic> caller = _toMap(payload['caller']);
+      final String conversationId =
+          call['directConversationId']?.toString().trim() ?? '';
+
+      if (conversationId.isEmpty) {
+        return;
+      }
+
+      unawaited(
+        Get.find<MessagesController>().syncIncomingCallConversation(
+          conversationId: conversationId,
+          callerId:
+              caller['id']?.toString() ?? call['callerId']?.toString() ?? '',
+          callerName:
+              caller['fullName']?.toString() ??
+              caller['name']?.toString() ??
+              'Caller',
+          callerAvatarUrl: caller['avatarUrl']?.toString() ?? '',
+          isVideo: call['callType']?.toString().trim().toLowerCase() == 'video',
+        ),
+      );
+    } catch (_) {
+      // Inbox synchronization must never prevent the call UI from opening.
     }
   }
 
@@ -618,9 +654,19 @@ class IncomingCallCoordinator extends GetxService with WidgetsBindingObserver {
         isVideoCall: callType.isVideo,
       );
 
-      // Native CallKit has already fulfilled the answer action promptly, as
-      // required by iOS. Agora was prepared before this point when the main
-      // engine handled the event; cold starts replay activation after attach.
+      // Signaling is established and Agora is ready to attach. Fulfill the
+      // pending CXAnswerCallAction now so CallKit activates AVAudioSession.
+      // Foreground in-app answers have no pending native action yet; their
+      // action is completed after Agora joins via setCallConnected.
+      final bool completedPendingAnswer =
+          await CallkitIncomingService.completeNativeAnswer(callId);
+      developer.log(
+        'native answer ready callId=$callId completed=$completedPendingAnswer',
+        name: 'CallLifecycle.Accept',
+      );
+
+      // Agora was prepared before CallKit activation so it can attach as soon
+      // as provider(_:didActivate:) is delivered.
       final bool audioSessionActivated =
           await CallkitIncomingService.waitForIosAudioSessionActivation();
       if (!audioSessionActivated) {

@@ -1,6 +1,6 @@
 # App Store privacy answers
 
-Last audited: 2026-08-31
+Last audited: 2026-10-04
 
 These answers cover the iOS app and the third-party SDKs included in its archive. Keep them synchronized with `ios/Runner/PrivacyInfo.xcprivacy` and the public privacy policy whenever data handling or SDKs change.
 
@@ -43,6 +43,14 @@ Do not select Payment Info when payment details are entered into Apple's purchas
 Do not select Precise Location, Contacts, Health, Fitness, Browsing History, Advertising Data, or Sensitive Info based on the current implementation. Generic CV fields, documents, AI prompts, transcripts, and exam responses are represented by Other User Content. Retained voice recordings are represented by Audio Data.
 
 Live audio/video that is only transmitted to service a call and not retained does not independently count as collection. Stored message attachments, uploaded photos/videos, recordings, and transcripts do count and are declared above.
+
+## Third-party AI disclosure and permission
+
+- AI Tutor uses Google Gemini and may use configured LiveKit, speech, transcription, and voice processors for prompts, conversation context, live voice audio, transcripts, and language-level answers.
+- AI-assisted CV features use OpenAI for CV text, selected documents or images, and generated or edited content.
+- The app must obtain current, explicit AI data-sharing permission before the backend permits any endpoint that sends data to these providers.
+- Users can decline without losing non-AI functionality and can withdraw permission under Settings → AI data sharing.
+- UGC moderation uses the server-local keyword filter by default; direct messages and webinar chat are not sent to the OpenAI moderation helper without separate permission.
 
 ## SDK audit summary
 

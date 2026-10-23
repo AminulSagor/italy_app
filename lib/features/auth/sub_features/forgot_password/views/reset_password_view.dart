@@ -262,7 +262,7 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
       child: Column(
         children: <Widget>[
           _ChecklistItem(
-            label: 'password_minimum_six'.tr,
+            label: 'password_minimum'.tr,
             passed: reset.hasMinimumLength,
           ),
           SizedBox(height: 10.h),

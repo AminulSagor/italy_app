@@ -59,7 +59,8 @@ class MessageChatView extends GetView<MessageChatController> {
                   SizedBox(height: 14.h),
                   Expanded(
                     child: Obx(() {
-                      final bool isReady = controller.isInitialScrollReady.value;
+                      final bool isReady =
+                          controller.isInitialScrollReady.value;
 
                       return Stack(
                         children: <Widget>[
@@ -73,27 +74,28 @@ class MessageChatView extends GetView<MessageChatController> {
                                 physics: const BouncingScrollPhysics(),
                                 slivers: <Widget>[
                                   Obx(
-                                        () => controller.isLoadingMore.value
+                                    () => controller.isLoadingMore.value
                                         ? SliverToBoxAdapter(
-                                      child: Padding(
-                                        padding: EdgeInsets.only(
-                                          top: 12.h,
-                                          bottom: 8.h,
-                                        ),
-                                        child: Center(
-                                          child: SizedBox(
-                                            width: 20.w,
-                                            height: 20.w,
-                                            child: const CircularProgressIndicator(
-                                              strokeWidth: 2,
+                                            child: Padding(
+                                              padding: EdgeInsets.only(
+                                                top: 12.h,
+                                                bottom: 8.h,
+                                              ),
+                                              child: Center(
+                                                child: SizedBox(
+                                                  width: 20.w,
+                                                  height: 20.w,
+                                                  child:
+                                                      const CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                      ),
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                      ),
-                                    )
+                                          )
                                         : const SliverToBoxAdapter(
-                                      child: SizedBox.shrink(),
-                                    ),
+                                            child: SizedBox.shrink(),
+                                          ),
                                   ),
                                   SliverToBoxAdapter(
                                     child: SizedBox(height: 6.h),
@@ -106,43 +108,50 @@ class MessageChatView extends GetView<MessageChatController> {
                                       170.h,
                                     ),
                                     sliver: SliverList(
-                                      delegate: SliverChildBuilderDelegate(
-                                            (BuildContext context, int index) {
-                                          final MessageChatItemModel item =
-                                          chat.messages[index];
+                                      delegate: SliverChildBuilderDelegate((
+                                        BuildContext context,
+                                        int index,
+                                      ) {
+                                        final MessageChatItemModel item =
+                                            chat.messages[index];
 
-                                          final bool showDate =
-                                              index == 0 ||
-                                                  !_isSameDay(
-                                                    chat.messages[index - 1].createdAtIso,
-                                                    item.createdAtIso,
-                                                  );
+                                        final bool showDate =
+                                            index == 0 ||
+                                            !_isSameDay(
+                                              chat
+                                                  .messages[index - 1]
+                                                  .createdAtIso,
+                                              item.createdAtIso,
+                                            );
 
-                                          return Column(
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                            children: <Widget>[
-                                              if (showDate) ...<Widget>[
-                                                SizedBox(height: 12.h),
-                                                _DateChipLabel(
-                                                  iso: item.createdAtIso ??
-                                                      DateTime.now()
-                                                          .toIso8601String(),
-                                                ),
-                                                SizedBox(height: 12.h),
-                                              ],
-                                              ChatMessageBubble(
-                                                message: item,
-                                                onTap: item.canCallBack
-                                                    ? () => controller.callBack(item)
-                                                    : null,
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: <Widget>[
+                                            if (showDate) ...<Widget>[
+                                              SizedBox(height: 12.h),
+                                              _DateChipLabel(
+                                                iso:
+                                                    item.createdAtIso ??
+                                                    DateTime.now()
+                                                        .toIso8601String(),
                                               ),
                                               SizedBox(height: 12.h),
                                             ],
-                                          );
-                                        },
-                                        childCount: chat.messages.length,
-                                      ),
+                                            ChatMessageBubble(
+                                              message: item,
+                                              onTap:
+                                                  item.canCallBack &&
+                                                      !controller.isUnavailable
+                                                  ? () => controller.callBack(
+                                                      item,
+                                                    )
+                                                  : null,
+                                            ),
+                                            SizedBox(height: 12.h),
+                                          ],
+                                        );
+                                      }, childCount: chat.messages.length),
                                     ),
                                   ),
                                 ],
@@ -152,9 +161,7 @@ class MessageChatView extends GetView<MessageChatController> {
 
                           if (!isReady)
                             const Positioned.fill(
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
+                              child: Center(child: CircularProgressIndicator()),
                             ),
                         ],
                       );
@@ -252,21 +259,14 @@ class _DateChipLabel extends StatelessWidget {
 class _ChatHeader extends GetView<MessageChatController> {
   final MessageChatModel chat;
 
-  const _ChatHeader({
-    required this.chat,
-  });
+  const _ChatHeader({required this.chat});
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       bottom: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          8.w,
-          8.h,
-          8.w,
-          6.h,
-        ),
+        padding: EdgeInsets.fromLTRB(8.w, 8.h, 8.w, 6.h),
         child: Row(
           children: <Widget>[
             _HeaderIconButton(
@@ -281,15 +281,12 @@ class _ChatHeader extends GetView<MessageChatController> {
               onTap: controller.openUserInfo,
               behavior: HitTestBehavior.opaque,
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 4.w,
-                  vertical: 2.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
                 child: MessageAvatar(
                   imageUrl: chat.contactAvatarUrl,
                   size: 42.w,
-                  showStatus: true,
-                  isOnline: chat.isOnline,
+                  showStatus: !controller.isUnavailable,
+                  isOnline: !controller.isUnavailable && chat.isOnline,
                 ),
               ),
             ),
@@ -308,7 +305,9 @@ class _ChatHeader extends GetView<MessageChatController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        chat.contactName,
+                        controller.isUnavailable
+                            ? 'user_unavailable'.tr
+                            : chat.contactName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -320,7 +319,9 @@ class _ChatHeader extends GetView<MessageChatController> {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        chat.contactStatus,
+                        controller.isUnavailable
+                            ? 'account_no_longer_available'.tr
+                            : chat.contactStatus,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -341,8 +342,11 @@ class _ChatHeader extends GetView<MessageChatController> {
             SizedBox(width: 2.w),
 
             Obx(() {
-              final bool isBlocked =
-                  controller.blockStatus.value != 'none';
+              if (controller.isUnavailable) {
+                return const SizedBox.shrink();
+              }
+
+              final bool isBlocked = controller.blockStatus.value != 'none';
 
               if (isBlocked) {
                 return _HeaderIconButton(
@@ -404,11 +408,7 @@ class _HeaderIconButton extends StatelessWidget {
           child: SizedBox(
             width: 42.w,
             height: 42.w,
-            child: Icon(
-              icon,
-              size: 22.w,
-              color: AppColors.homePrimaryText,
-            ),
+            child: Icon(icon, size: 22.w, color: AppColors.homePrimaryText),
           ),
         ),
       ),

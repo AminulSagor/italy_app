@@ -382,6 +382,9 @@ class WebinarLiveChatSection extends StatelessWidget {
             ),
             message: message,
             compact: compact,
+            onLongPress: controller.canOpenSafetyActions(message)
+                ? () => controller.showMessageSafetyActions(message)
+                : null,
           );
         },
       );
@@ -414,10 +417,12 @@ class WebinarChatBubble extends StatelessWidget {
     super.key,
     required this.message,
     this.compact = false,
+    this.onLongPress,
   });
 
   final WebinarLiveChatModel message;
   final bool compact;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -447,140 +452,145 @@ class WebinarChatBubble extends StatelessWidget {
         ? AppColors.white
         : AppColors.bodyText;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Container(
-          width: 40.w,
-          height: 40.w,
-          decoration: BoxDecoration(
-            color: avatarColor,
-            shape: BoxShape.circle,
-            border: message.isHost
-                ? Border.all(color: AppColors.webinarHeroBorder, width: 3.w)
-                : compact
-                ? Border.all(color: AppColors.white.withValues(alpha: 0.35))
-                : null,
-          ),
-          child: ClipOval(
-            child:
-                message.senderProfilePhoto != null &&
-                    message.senderProfilePhoto!.trim().isNotEmpty
-                ? Image.network(
-                    message.senderProfilePhoto!,
-                    width: 40.w,
-                    height: 40.w,
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (
-                          BuildContext context,
-                          Object error,
-                          StackTrace? stackTrace,
-                        ) {
-                          return _buildInitialAvatar(avatarTextColor);
-                        },
-                  )
-                : _buildInitialAvatar(avatarTextColor),
-          ),
-        ),
-
-        SizedBox(width: compact ? 10.w : 16.w),
-
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: compact ? 12.w : 14.w,
-              vertical: compact ? 10.h : 14.h,
-            ),
+    return GestureDetector(
+      onLongPress: onLongPress,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            width: 40.w,
+            height: 40.w,
             decoration: BoxDecoration(
-              color: bubbleColor,
-              borderRadius: BorderRadius.circular(compact ? 18.r : kRadius28.r),
+              color: avatarColor,
+              shape: BoxShape.circle,
               border: message.isHost
-                  ? Border.all(color: AppColors.webinarHeroBorder, width: 2.w)
+                  ? Border.all(color: AppColors.webinarHeroBorder, width: 3.w)
                   : compact
-                  ? Border.all(color: AppColors.white.withValues(alpha: 0.20))
-                  : null,
-              boxShadow: compact
-                  ? <BoxShadow>[
-                      BoxShadow(
-                        color: AppColors.black.withValues(alpha: 0.35),
-                        blurRadius: 12.r,
-                        offset: Offset(0, 4.h),
-                      ),
-                    ]
+                  ? Border.all(color: AppColors.white.withValues(alpha: 0.35))
                   : null,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    if (message.isHost) ...<Widget>[
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 2.h,
+            child: ClipOval(
+              child:
+                  message.senderProfilePhoto != null &&
+                      message.senderProfilePhoto!.trim().isNotEmpty
+                  ? Image.network(
+                      message.senderProfilePhoto!,
+                      width: 40.w,
+                      height: 40.w,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (
+                            BuildContext context,
+                            Object error,
+                            StackTrace? stackTrace,
+                          ) {
+                            return _buildInitialAvatar(avatarTextColor);
+                          },
+                    )
+                  : _buildInitialAvatar(avatarTextColor),
+            ),
+          ),
+
+          SizedBox(width: compact ? 10.w : 16.w),
+
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 12.w : 14.w,
+                vertical: compact ? 10.h : 14.h,
+              ),
+              decoration: BoxDecoration(
+                color: bubbleColor,
+                borderRadius: BorderRadius.circular(
+                  compact ? 18.r : kRadius28.r,
+                ),
+                border: message.isHost
+                    ? Border.all(color: AppColors.webinarHeroBorder, width: 2.w)
+                    : compact
+                    ? Border.all(color: AppColors.white.withValues(alpha: 0.20))
+                    : null,
+                boxShadow: compact
+                    ? <BoxShadow>[
+                        BoxShadow(
+                          color: AppColors.black.withValues(alpha: 0.35),
+                          blurRadius: 12.r,
+                          offset: Offset(0, 4.h),
                         ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryGreen,
-                          borderRadius: BorderRadius.circular(20.r),
+                      ]
+                    : null,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      if (message.isHost) ...<Widget>[
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryGreen,
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: Text(
+                            'host'.tr,
+                            style: TextStyle(
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.white,
+                            ),
+                          ),
                         ),
+                        SizedBox(width: 6.w),
+                      ],
+
+                      Flexible(
                         child: Text(
-                          'host'.tr,
+                          message.senderName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 9.sp,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.white,
+                            fontSize: AppFont.font12.sp,
+                            fontWeight: FontWeight.w700,
+                            color: senderTextColor,
                           ),
                         ),
                       ),
-                      SizedBox(width: 6.w),
-                    ],
 
-                    Flexible(
-                      child: Text(
-                        message.senderName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      SizedBox(width: 8.w),
+
+                      Text(
+                        _formatChatTime(message.createdAt),
                         style: TextStyle(
-                          fontSize: AppFont.font12.sp,
-                          fontWeight: FontWeight.w700,
-                          color: senderTextColor,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w500,
+                          color: timeTextColor,
                         ),
                       ),
-                    ),
-
-                    SizedBox(width: 8.w),
-
-                    Text(
-                      _formatChatTime(message.createdAt),
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w500,
-                        color: timeTextColor,
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 4.h),
-
-                Text(
-                  message.message,
-                  maxLines: compact ? 2 : null,
-                  overflow: compact ? TextOverflow.ellipsis : null,
-                  style: TextStyle(
-                    fontSize: AppFont.font14.sp,
-                    fontWeight: compact ? FontWeight.w500 : FontWeight.w400,
-                    color: messageTextColor,
-                    height: 1.28,
+                    ],
                   ),
-                ),
-              ],
+
+                  SizedBox(height: 4.h),
+
+                  Text(
+                    message.message,
+                    maxLines: compact ? 2 : null,
+                    overflow: compact ? TextOverflow.ellipsis : null,
+                    style: TextStyle(
+                      fontSize: AppFont.font14.sp,
+                      fontWeight: compact ? FontWeight.w500 : FontWeight.w400,
+                      color: messageTextColor,
+                      height: 1.28,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -740,10 +750,12 @@ class WebinarAnimatedChatBubble extends StatefulWidget {
     super.key,
     required this.message,
     required this.compact,
+    this.onLongPress,
   });
 
   final WebinarLiveChatModel message;
   final bool compact;
+  final VoidCallback? onLongPress;
 
   @override
   State<WebinarAnimatedChatBubble> createState() =>
@@ -805,6 +817,7 @@ class _WebinarAnimatedChatBubbleState extends State<WebinarAnimatedChatBubble>
           child: WebinarChatBubble(
             message: widget.message,
             compact: widget.compact,
+            onLongPress: widget.onLongPress,
           ),
         ),
       ),

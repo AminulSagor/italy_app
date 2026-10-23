@@ -6,9 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 
+import '../../../../../core/controllers/user_session_controller.dart';
 import '../../../../../core/services/api_error_handler.dart';
+import '../../../../../core/services/auth_service.dart';
 import '../../../../../core/services/course_purchase_recovery_service.dart';
+import '../../../../../core/widgets/app_drawer_controller.dart';
+import '../../../../../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import '../../../../../routes/app_route_arguments.dart';
 import '../../../../../routes/app_routes.dart';
 import '../models/pro_checkout_models.dart';
@@ -39,6 +44,8 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       'GOOGLE_PLAY_PURCHASE_LINKED_TO_ANOTHER_COURSE';
   static const String _purchaseNotRestorableCode =
       'GOOGLE_PLAY_PURCHASE_NOT_RESTORABLE';
+  static const String _appStorePurchaseLinkedToAnotherUserCode =
+      'APP_STORE_PURCHASE_LINKED_TO_ANOTHER_USER';
 
   final ProCheckoutApiService _proCheckoutApiService;
   final CourseGooglePlayBillingService _billingService;
@@ -70,8 +77,11 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   Completer<ProPurchaseOutcome>? _activePurchaseCompleter;
   bool _billingFlowActive = false;
   bool _resumeCheckRunning = false;
+  bool _didNavigateAfterPurchase = false;
   ProPurchaseOutcome? _lastOutcome;
-  final Set<String> _processingTokens = <String>{};
+  final Map<String, Completer<void>> _processingPurchases =
+      <String, Completer<void>>{};
+  final Set<String> _verifyingOrderIds = <String>{};
   final Set<String> _appliedOrderIds = <String>{};
 
   String get _storeName => Platform.isIOS ? 'App Store' : 'Google Play';
@@ -395,16 +405,22 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         if (recovered != null) {
           await _verifyAndUnlock(recovered, existing);
           if (purchaseResult.value != null) {
-            await Get.offNamed(
-              AppRoutes.proPurchaseSuccess,
-              arguments: ControllerTagRouteArguments(
-                controllerTag: controllerTag,
-              ),
-            );
+            if (!Platform.isIOS) {
+              await Get.offNamed(
+                AppRoutes.proPurchaseSuccess,
+                arguments: ControllerTagRouteArguments(
+                  controllerTag: controllerTag,
+                ),
+              );
+            }
             return;
           }
         }
         if (_billingService.pendingPurchaseQueryFailed) {
+          Get.snackbar('restore_purchases'.tr, 'restore_check_pending'.tr);
+          return;
+        }
+        if (Platform.isIOS) {
           Get.snackbar('restore_purchases'.tr, 'restore_check_pending'.tr);
           return;
         }
@@ -447,10 +463,8 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       if (result.isSuccess && result.data != null) {
         purchaseResult.value = result.data;
         await _billingService.finishVerifiedPurchase(purchase);
-        await Get.offNamed(
-          AppRoutes.proPurchaseSuccess,
-          arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
-        );
+        await onPurchaseCompleted();
+        await _navigateToPurchasedCourse();
       }
     } finally {
       isRestoringSubscription.value = false;
@@ -529,12 +543,14 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         if (recovered) {
           final ProPurchaseOutcome? recoveredOutcome = _lastOutcome;
           if (recoveredOutcome?.status == ProPurchaseOutcomeStatus.completed) {
-            await Get.offNamed(
-              AppRoutes.proPurchaseSuccess,
-              arguments: ControllerTagRouteArguments(
-                controllerTag: controllerTag,
-              ),
-            );
+            if (!Platform.isIOS) {
+              await Get.offNamed(
+                AppRoutes.proPurchaseSuccess,
+                arguments: ControllerTagRouteArguments(
+                  controllerTag: controllerTag,
+                ),
+              );
+            }
             return;
           }
           if (recoveredOutcome?.status == ProPurchaseOutcomeStatus.pending) {
@@ -545,11 +561,23 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
             Get.snackbar('Purchase Unavailable', recoveredOutcome!.message);
             return;
           }
+          if (recoveredOutcome?.status ==
+              ProPurchaseOutcomeStatus.accountConflict) {
+            await _showCourseAlreadyPurchasedDialog();
+            return;
+          }
         }
         if (_billingService.pendingPurchaseQueryFailed) {
           Get.snackbar(
             'Payment Pending',
             '$_storeName could not confirm the previous purchase yet.',
+          );
+          return;
+        }
+        if (Platform.isIOS) {
+          Get.snackbar(
+            'Payment Pending',
+            'The App Store purchase is still being checked. Please try again shortly.',
           );
           return;
         }
@@ -616,12 +644,16 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
 
       switch (outcome.status) {
         case ProPurchaseOutcomeStatus.completed:
-          await Get.offNamed(
-            AppRoutes.proPurchaseSuccess,
-            arguments: ControllerTagRouteArguments(
-              controllerTag: controllerTag,
-            ),
-          );
+          if (Platform.isIOS) {
+            await _navigateToPurchasedCourse();
+          } else {
+            await Get.offNamed(
+              AppRoutes.proPurchaseSuccess,
+              arguments: ControllerTagRouteArguments(
+                controllerTag: controllerTag,
+              ),
+            );
+          }
           break;
         case ProPurchaseOutcomeStatus.pending:
           Get.snackbar('Payment Pending', outcome.message);
@@ -631,6 +663,9 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
           break;
         case ProPurchaseOutcomeStatus.failed:
           Get.snackbar('Purchase Failed', outcome.message);
+          break;
+        case ProPurchaseOutcomeStatus.accountConflict:
+          await _showCourseAlreadyPurchasedDialog();
           break;
       }
     } finally {
@@ -669,6 +704,20 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       }
       if (_billingService.pendingPurchaseQueryFailed) return;
 
+      if (Platform.isIOS) {
+        // A missing StoreKit transaction immediately after resume is not a
+        // cancellation; the successful purchase callback may arrive later.
+        _billingFlowActive = false;
+        _completeActive(
+          const ProPurchaseOutcome(
+            status: ProPurchaseOutcomeStatus.pending,
+            message:
+                'The App Store purchase is still being checked. It will be verified automatically.',
+          ),
+        );
+        return;
+      }
+
       await _billingService.clearPendingPurchase();
       _billingFlowActive = false;
       _completeActive(
@@ -686,6 +735,19 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
     final ProPendingGooglePlayPurchaseModel? pending = _billingService
         .loadPendingPurchase();
     if (pending == null || purchase.productID != pending.productId) return;
+    if (Platform.isIOS && purchase is SK2PurchaseDetails) {
+      final String transactionOrderId =
+          purchase.appAccountToken?.trim().toLowerCase() ?? '';
+      if (transactionOrderId.isNotEmpty &&
+          transactionOrderId != pending.orderId.toLowerCase()) {
+        if (purchase.status == PurchaseStatus.purchased ||
+            purchase.status == PurchaseStatus.restored) {
+          _billingFlowActive = false;
+          await _resolveMismatchedAppStorePurchase(purchase, pending);
+        }
+        return;
+      }
+    }
 
     switch (purchase.status) {
       case PurchaseStatus.pending:
@@ -698,6 +760,9 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         );
         return;
       case PurchaseStatus.canceled:
+        if (Platform.isIOS && _verifyingOrderIds.contains(pending.orderId)) {
+          return;
+        }
         _billingFlowActive = false;
         await _billingService.clearPendingPurchase();
         _completeActive(
@@ -723,7 +788,7 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         if (ownedPurchase != null &&
             (ownedPurchase.status == PurchaseStatus.purchased ||
                 ownedPurchase.status == PurchaseStatus.restored)) {
-          await _verifyAndUnlock(ownedPurchase, pending);
+          await _handlePurchase(ownedPurchase);
           return;
         }
 
@@ -764,7 +829,15 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
     ProPendingGooglePlayPurchaseModel pending,
   ) async {
     final String token = _purchaseToken(purchase);
-    if (token.isEmpty || !_processingTokens.add(token)) return;
+    if (token.isEmpty) return;
+    final Completer<void>? activeProcessing = _processingPurchases[token];
+    if (activeProcessing != null) {
+      await activeProcessing.future;
+      return;
+    }
+    final Completer<void> processing = Completer<void>();
+    _processingPurchases[token] = processing;
+    _verifyingOrderIds.add(pending.orderId);
 
     try {
       ProPurchaseResultModel? completed;
@@ -826,12 +899,18 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
       if (_appliedOrderIds.add(pending.orderId)) {
         await onPurchaseCompleted();
       }
+      final bool hasActiveCheckout =
+          _activePurchaseCompleter != null &&
+          !_activePurchaseCompleter!.isCompleted;
       _completeActive(
         const ProPurchaseOutcome(
           status: ProPurchaseOutcomeStatus.completed,
           message: 'Course purchase completed successfully.',
         ),
       );
+      if (Platform.isIOS && !hasActiveCheckout) {
+        await _navigateToPurchasedCourse();
+      }
     } catch (error, stackTrace) {
       AppLogger.log(
         'Course purchase verification did not finish.',
@@ -846,7 +925,167 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         ),
       );
     } finally {
-      _processingTokens.remove(token);
+      _verifyingOrderIds.remove(pending.orderId);
+      if (!processing.isCompleted) processing.complete();
+      _processingPurchases.remove(token);
+    }
+  }
+
+  Future<void> _resolveMismatchedAppStorePurchase(
+    SK2PurchaseDetails purchase,
+    ProPendingGooglePlayPurchaseModel pending,
+  ) async {
+    final String token = _purchaseToken(purchase);
+    if (token.isEmpty) return;
+    final Completer<void>? activeProcessing = _processingPurchases[token];
+    if (activeProcessing != null) {
+      await activeProcessing.future;
+      return;
+    }
+    final Completer<void> processing = Completer<void>();
+    _processingPurchases[token] = processing;
+
+    try {
+      final ApiResult<ProPurchaseResultModel> restore =
+          await ApiErrorHandler.call<ProPurchaseResultModel>(
+            () => _proCheckoutApiService.restoreAppStorePurchase(
+              productId: pending.productId,
+              signedTransactionInfo: token,
+              transactionId: _transactionId(purchase),
+              courseName: courseName,
+              lessonCount: lessonCount,
+            ),
+            showError: false,
+          );
+
+      if (restore.errorCode == _appStorePurchaseLinkedToAnotherUserCode) {
+        await _billingService.clearPendingPurchase();
+        _completeActive(
+          const ProPurchaseOutcome(
+            status: ProPurchaseOutcomeStatus.accountConflict,
+            message:
+                'This course was already purchased using your Apple Account and is linked to another Italir Pothe account. Please sign in to the original account to access it.',
+          ),
+        );
+        return;
+      }
+
+      final ProPurchaseResultModel? completed = restore.data;
+      if (!restore.isSuccess || completed == null) {
+        _completeActive(
+          const ProPurchaseOutcome(
+            status: ProPurchaseOutcomeStatus.pending,
+            message:
+                'The App Store purchase is still being checked. It will be verified automatically.',
+          ),
+        );
+        return;
+      }
+
+      await _billingService.finishVerifiedPurchase(purchase);
+      await _billingService.clearPendingPurchase();
+      purchaseResult.value = completed;
+      if (_appliedOrderIds.add(completed.orderId)) {
+        await onPurchaseCompleted();
+      }
+      final bool hasActiveCheckout =
+          _activePurchaseCompleter != null &&
+          !_activePurchaseCompleter!.isCompleted;
+      _completeActive(
+        const ProPurchaseOutcome(
+          status: ProPurchaseOutcomeStatus.completed,
+          message: 'Course purchase restored successfully.',
+        ),
+      );
+      if (!hasActiveCheckout) {
+        await _navigateToPurchasedCourse();
+      }
+    } catch (error, stackTrace) {
+      AppLogger.log(
+        'App Store account ownership verification did not finish.',
+        name: 'ProCheckoutController',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      _completeActive(
+        const ProPurchaseOutcome(
+          status: ProPurchaseOutcomeStatus.pending,
+          message: 'The purchase will be verified again when the app opens.',
+        ),
+      );
+    } finally {
+      if (!processing.isCompleted) processing.complete();
+      _processingPurchases.remove(token);
+    }
+  }
+
+  Future<void> _showCourseAlreadyPurchasedDialog() async {
+    await Get.dialog<void>(
+      AlertDialog(
+        title: const Text('Course Already Purchased'),
+        content: const Text(
+          'This course was already purchased using your Apple Account and is linked to another Italir Pothe account. Please sign in to the original account to access it.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Get.back<void>();
+              unawaited(Get.toNamed(AppRoutes.contactSupport));
+            },
+            child: const Text('Contact Support'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Get.back<void>();
+              unawaited(_switchAccount());
+            },
+            child: const Text('Switch Account'),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  Future<void> _navigateToPurchasedCourse() async {
+    if (_didNavigateAfterPurchase) return;
+    _didNavigateAfterPurchase = true;
+
+    await Future<void>.delayed(Duration.zero);
+    if (Get.currentRoute != AppRoutes.courseDetail) {
+      Get.until(
+        (Route<dynamic> route) =>
+            route.settings.name == AppRoutes.courseDetail || route.isFirst,
+      );
+      await Future<void>.delayed(Duration.zero);
+    }
+
+    if (Get.currentRoute == AppRoutes.courseDetail) {
+      Get.snackbar(
+        'Course Unlocked',
+        'Your purchase was successful. You can start the course now.',
+      );
+    }
+  }
+
+  Future<void> _switchAccount() async {
+    if (Get.isRegistered<NavbarAndAppbarWrapperController>()) {
+      await Get.find<NavbarAndAppbarWrapperController>().onLogoutTap();
+      return;
+    }
+
+    try {
+      await Get.find<AuthService>().logout();
+    } finally {
+      if (Get.isRegistered<UserSessionController>()) {
+        Get.find<UserSessionController>().clear();
+      }
+      if (Get.isRegistered<AppDrawerController>()) {
+        Get.find<AppDrawerController>().clear();
+      }
+      if (Get.currentRoute != AppRoutes.login) {
+        Get.offAllNamed(AppRoutes.login);
+      }
     }
   }
 

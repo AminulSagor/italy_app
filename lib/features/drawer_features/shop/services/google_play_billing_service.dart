@@ -543,6 +543,33 @@ class GooglePlayBillingService extends GetxService {
     }
   }
 
+  /// Returns only the unfinished StoreKit transaction whose app-account token
+  /// matches the current user's saved backend order. This is used after the
+  /// backend confirms that order is already completed, so the client can
+  /// safely finish StoreKit without restoring or touching another account's
+  /// transaction.
+  Future<PurchaseDetails?> queryMatchingUnfinishedAppStorePurchase() async {
+    _pendingPurchaseQueryFailed = false;
+    final PendingGooglePlayPurchaseModel? pending = loadPendingPurchase();
+    if (!Platform.isIOS || pending == null) return null;
+
+    await initialize();
+    if (!isAvailable.value) return null;
+
+    try {
+      return await _queryUnfinishedAppStorePurchase(pending);
+    } catch (error, stackTrace) {
+      _pendingPurchaseQueryFailed = true;
+      AppLogger.log(
+        'Could not query the matching unfinished App Store purchase.',
+        name: 'GooglePlayBillingService',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
   SK2PurchaseDetails _appStorePurchaseDetails(SK2Transaction transaction) {
     return SK2PurchaseDetails(
       productID: transaction.productId,

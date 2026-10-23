@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../../../core/controllers/user_session_controller.dart';
 import '../../../../../core/services/api_error_handler.dart';
 import '../../../../practice_hub/services/italian_tts_service.dart';
+import '../../../../practice_hub/controllers/practice_hub_controller.dart';
 import '../models/vocabulary_models.dart';
 import '../services/vocabulary_api_service.dart';
 import '../widgets/vocabulary_completion_dialog.dart';
@@ -17,7 +18,7 @@ class VocabularyController extends GetxController {
   final VocabularyApiService _vocabularyApiService;
   final UserSessionController _userSessionController;
   final ItalianTtsService _ttsService;
-  final RxBool isKnownSubmitting = false.obs;
+  final RxBool isCardChoiceSubmitting = false.obs;
 
   VocabularyController({
     required VocabularyApiService vocabularyApiService,
@@ -32,6 +33,8 @@ class VocabularyController extends GetxController {
   final RxBool isRevealed = false.obs;
   final RxBool isCompleting = false.obs;
   final RxBool isSpeaking = false.obs;
+  final RxBool isStartingWeakReview = false.obs;
+  final RxBool isWeakReviewMode = false.obs;
 
   final Rx<VocabularyDisplayMode> displayMode = VocabularyDisplayMode.list.obs;
 
@@ -49,6 +52,7 @@ class VocabularyController extends GetxController {
   final RxList<String> weakVocabularyIds = <String>[].obs;
 
   int _ttsRequestId = 0;
+  Timer? _dailyChallengeRefreshDebounce;
 
   VocabularyCardModel? get currentCard {
     final VocabularySessionModel? value = session.value;
@@ -65,6 +69,18 @@ class VocabularyController extends GetxController {
   }
 
   int get totalCards => session.value?.cards.length ?? 0;
+
+  List<VocabularyCardModel> get weakCards =>
+      (session.value?.cards ?? <VocabularyCardModel>[])
+          .where((VocabularyCardModel card) => card.masteryStatus == 'weak')
+          .toList(growable: false);
+
+  int get weakWordCount => weakCards.length;
+
+  bool get isCurrentCardMarkedWeak {
+    final VocabularyCardModel? card = currentCard;
+    return card != null && weakVocabularyIds.contains(card.id);
+  }
 
   List<VocabularyCardModel> get filteredCards {
     final List<VocabularyCardModel> cards =
@@ -133,6 +149,7 @@ class VocabularyController extends GetxController {
 
   @override
   void onClose() {
+    _dailyChallengeRefreshDebounce?.cancel();
     unawaited(stopSpeaking());
     super.onClose();
   }
@@ -161,6 +178,7 @@ class VocabularyController extends GetxController {
 
       knownVocabularyIds.clear();
       weakVocabularyIds.clear();
+      isWeakReviewMode.value = false;
 
       rightCount.value = 0;
       wrongCount.value = 0;
@@ -179,6 +197,58 @@ class VocabularyController extends GetxController {
 
     isPlayingAll.value = false;
     displayMode.value = mode;
+  }
+
+  Future<void> startWeakReview() async {
+    if (isStartingWeakReview.value || weakCards.isEmpty) {
+      return;
+    }
+
+    final String? currentLessonId = lessonId?.trim();
+    if (currentLessonId == null || currentLessonId.isEmpty) {
+      return;
+    }
+
+    final List<VocabularyCardModel> cards = List<VocabularyCardModel>.from(
+      weakCards,
+    );
+    isStartingWeakReview.value = true;
+
+    try {
+      await stopSpeaking();
+
+      final ApiResult<String> result = await ApiErrorHandler.call<String>(
+        () => _vocabularyApiService.startWeakReviewSession(
+          lessonId: currentLessonId,
+        ),
+        errorTitle: 'vocabulary_needs_attention'.tr,
+      );
+
+      final String sessionId = result.data?.trim() ?? '';
+      if (!result.isSuccess || sessionId.isEmpty) {
+        return;
+      }
+
+      final VocabularySessionModel current = session.value!;
+      session.value = VocabularySessionModel(
+        title: 'vocabulary_needs_review'.tr,
+        sessionId: sessionId,
+        currentCardIndex: 0,
+        streakDays: current.streakDays,
+        level: current.level,
+        cards: cards,
+      );
+      currentIndex.value = 0;
+      rightCount.value = 0;
+      wrongCount.value = 0;
+      knownVocabularyIds.clear();
+      weakVocabularyIds.clear();
+      isRevealed.value = false;
+      isWeakReviewMode.value = true;
+      displayMode.value = VocabularyDisplayMode.flashcard;
+    } finally {
+      isStartingWeakReview.value = false;
+    }
   }
 
   void setSearchQuery(String value) {
@@ -303,34 +373,43 @@ class VocabularyController extends GetxController {
   Future<void> studyAgain() async {
     final VocabularyCardModel? card = currentCard;
 
-    if (card == null || isCompleting.value) {
+    if (card == null || isCompleting.value || isCardChoiceSubmitting.value) {
       return;
     }
 
-    await stopSpeaking();
+    isCardChoiceSubmitting.value = true;
 
-    // Record this word as wrong only once.
-    if (!weakVocabularyIds.contains(card.id)) {
-      weakVocabularyIds.add(card.id);
-      wrongCount.value++;
+    try {
+      await stopSpeaking();
+
+      // Record this word as wrong only once.
+      if (!weakVocabularyIds.contains(card.id)) {
+        weakVocabularyIds.add(card.id);
+        wrongCount.value++;
+
+        // Give immediate visual feedback instead of waiting for the activity
+        // request to finish.
+        isRevealed.value = false;
+        await _recordCardReview(card.id, isKnown: false);
+        return;
+      }
+
+      // Flip back to the word. The primary action becomes "Next" for this card
+      // so advancing cannot overwrite the weak result.
+      isRevealed.value = false;
+    } finally {
+      isCardChoiceSubmitting.value = false;
     }
-
-    // Keep showing the same word from the front side.
-    isRevealed.value = false;
   }
 
   Future<void> markKnown() async {
     final VocabularyCardModel? card = currentCard;
 
-    if (card == null || isCompleting.value || isKnownSubmitting.value) {
+    if (card == null || isCompleting.value || isCardChoiceSubmitting.value) {
       return;
     }
 
-    final bool isLastCard = currentIndex.value >= totalCards - 1;
-
-    if (isLastCard) {
-      isKnownSubmitting.value = true;
-    }
+    isCardChoiceSubmitting.value = true;
 
     try {
       await stopSpeaking();
@@ -339,11 +418,45 @@ class VocabularyController extends GetxController {
           !knownVocabularyIds.contains(card.id)) {
         knownVocabularyIds.add(card.id);
         rightCount.value++;
+        await _recordCardReview(card.id, isKnown: true);
       }
 
       await _goToNextCard();
     } finally {
-      isKnownSubmitting.value = false;
+      isCardChoiceSubmitting.value = false;
+    }
+  }
+
+  Future<void> _recordCardReview(
+    String vocabularyId, {
+    required bool isKnown,
+  }) async {
+    final String? sessionId = session.value?.sessionId?.trim();
+    if (sessionId == null || sessionId.isEmpty) return;
+
+    final ApiResult<bool> result = await ApiErrorHandler.call<bool>(
+      () => _vocabularyApiService.recordCardReview(
+        sessionId: sessionId,
+        vocabularyId: vocabularyId,
+        isKnown: isKnown,
+      ),
+      showError: false,
+    );
+
+    // The full-session submission remains the retry/fallback if this optional
+    // immediate call fails (for example while an old backend is still rolling
+    // out). Refresh an already-mounted challenge dashboard without coupling the
+    // vocabulary flow to its availability.
+    if (result.isSuccess && Get.isRegistered<PracticeHubController>()) {
+      _dailyChallengeRefreshDebounce?.cancel();
+      _dailyChallengeRefreshDebounce = Timer(
+        const Duration(milliseconds: 400),
+        () => unawaited(
+          Get.find<PracticeHubController>().loadDailyChallenges(
+            showError: false,
+          ),
+        ),
+      );
     }
   }
 
@@ -371,7 +484,10 @@ class VocabularyController extends GetxController {
     isCompleting.value = true;
 
     try {
-      final VocabularyCompletionModel complete = await _completeSession();
+      final VocabularyCompletionModel? complete = await _completeSession();
+      if (complete == null) {
+        return;
+      }
 
       await Get.dialog<void>(
         VocabularyCompletionDialog(
@@ -438,11 +554,11 @@ class VocabularyController extends GetxController {
     return result.dataOr(_emptySession());
   }
 
-  Future<VocabularyCompletionModel> _completeSession() async {
+  Future<VocabularyCompletionModel?> _completeSession() async {
     final String? sessionId = session.value?.sessionId?.trim();
 
     if (sessionId == null || sessionId.isEmpty) {
-      return _localCompletion();
+      return null;
     }
 
     final ApiResult<VocabularyCompletionModel> result =
@@ -455,7 +571,7 @@ class VocabularyController extends GetxController {
           errorTitle: 'gen_vocabulary'.tr,
         );
 
-    return result.dataOr(_localCompletion());
+    return result.isSuccess ? result.data : null;
   }
 
   VocabularySessionModel _emptySession() {
@@ -465,15 +581,6 @@ class VocabularyController extends GetxController {
       streakDays: 0,
       level: 1,
       cards: const <VocabularyCardModel>[],
-    );
-  }
-
-  VocabularyCompletionModel _localCompletion() {
-    return VocabularyCompletionModel(
-      appName: 'italirpothe'.tr,
-      reviewedCount: reviewedCount,
-      rightCount: rightCount.value,
-      wrongCount: wrongCount.value,
     );
   }
 }

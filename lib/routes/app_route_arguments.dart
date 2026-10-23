@@ -4,10 +4,12 @@ import '../features/courses/sub_features/quiz/models/quiz_models.dart';
 class CourseDetailRouteArguments {
   final CourseCardModel course;
   final String controllerTag;
+  final HomeChapterRouteArguments? resumeChapter;
 
   const CourseDetailRouteArguments({
     required this.course,
     required this.controllerTag,
+    this.resumeChapter,
   });
 }
 
@@ -30,10 +32,7 @@ class ControllerTagRouteArguments {
 class VocabularyRouteArguments extends ControllerTagRouteArguments {
   final String? lessonId;
 
-  const VocabularyRouteArguments({
-    required super.controllerTag,
-    this.lessonId,
-  });
+  const VocabularyRouteArguments({required super.controllerTag, this.lessonId});
 }
 
 class QuizRouteArguments {
@@ -59,7 +58,6 @@ class QuizRouteArguments {
     this.externalAnswerHandler,
   });
 }
-
 
 class FinalExamRouteArguments {
   final String controllerTag;
@@ -99,7 +97,6 @@ class ProOrderSummaryRouteArguments {
   });
 }
 
-
 class CourseCertificateRouteArguments {
   final String controllerTag;
   final String attemptId;
@@ -109,13 +106,6 @@ class CourseCertificateRouteArguments {
     required this.attemptId,
   });
 }
-
-
-
-
-
-
-
 
 class HomeChapterRouteArguments {
   const HomeChapterRouteArguments({

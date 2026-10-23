@@ -2,7 +2,7 @@ name: italir_pothe
 description: "Italir Pothe — an interactive platform for learning Italian."
 publish_to: "none"
 
-version: 1.0.0+20
+version: 1.0.1+27
 
 environment:
   sdk: ^3.12.0

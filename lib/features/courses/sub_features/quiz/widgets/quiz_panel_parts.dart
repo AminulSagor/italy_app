@@ -6,12 +6,14 @@ class _ListeningPanel extends StatelessWidget {
     required this.selectedIndex,
     required this.showWrongResult,
     required this.onOptionTap,
+    required this.onAudioCompleted,
   });
 
   final QuizQuestionModel question;
   final int selectedIndex;
   final bool showWrongResult;
   final ValueChanged<int> onOptionTap;
+  final VoidCallback onAudioCompleted;
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +25,15 @@ class _ListeningPanel extends StatelessWidget {
           center: true,
         ),
 
-
-
         if ((question.prompt ?? '').isNotEmpty) ...<Widget>[
           SizedBox(height: 18.h),
           _PromptText(text: question.prompt!, center: true),
         ],
         SizedBox(height: 30.h),
-        AudioPromptCard(audioUrl: question.mediaUrl),
+        AudioPromptCard(
+          audioUrl: question.mediaUrl,
+          onCompleted: onAudioCompleted,
+        ),
         SizedBox(height: 46.h),
         ...List<Widget>.generate(question.options.length, (int index) {
           return Padding(
@@ -178,12 +181,14 @@ class _TrueFalsePanel extends StatelessWidget {
     required this.selectedIndex,
     required this.showWrongResult,
     required this.onOptionTap,
+    required this.onAudioCompleted,
   });
 
   final QuizQuestionModel question;
   final int selectedIndex;
   final bool showWrongResult;
   final ValueChanged<int> onOptionTap;
+  final VoidCallback onAudioCompleted;
 
   @override
   Widget build(BuildContext context) {
@@ -191,6 +196,14 @@ class _TrueFalsePanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _TitleBlock(title: question.title, subtitle: question.subtitle),
+        if (question.hasAudioMedia) ...<Widget>[
+          SizedBox(height: 24.h),
+          AudioPromptCard(
+            audioUrl: question.mediaUrl,
+            compact: true,
+            onCompleted: onAudioCompleted,
+          ),
+        ],
         SizedBox(height: 28.h),
         Container(
           width: double.infinity,

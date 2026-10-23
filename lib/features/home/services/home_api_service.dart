@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 
 import '../../../core/services/api_client.dart';
+import '../../../core/utils/local_date.dart';
 import '../models/home_models.dart';
 
 class HomeApiService {
@@ -10,11 +11,11 @@ class HomeApiService {
   final ApiClient _apiClient;
 
   Future<Map<String, dynamic>> fetchDashboardJson() async {
-    final Response<dynamic> response =
-    await _apiClient.dio.get(
+    final Response<dynamic> response = await _apiClient.dio.get(
       '/home/dashboard',
       queryParameters: <String, dynamic>{
         'weekStart': _currentWeekStart(),
+        'activityDate': formatLocalDate(DateTime.now()),
       },
     );
 
@@ -22,8 +23,7 @@ class HomeApiService {
   }
 
   Future<HomeDashboardModel> fetchDashboard() async {
-    final Map<String, dynamic> json =
-    await fetchDashboardJson();
+    final Map<String, dynamic> json = await fetchDashboardJson();
 
     return HomeDashboardModel.fromJson(json);
   }
@@ -45,12 +45,6 @@ class HomeApiService {
       now.month,
       now.day,
     ).subtract(Duration(days: now.weekday - DateTime.monday));
-    return _dateOnly(monday);
-  }
-
-  String _dateOnly(DateTime date) {
-    final String month = date.month.toString().padLeft(2, '0');
-    final String day = date.day.toString().padLeft(2, '0');
-    return '${date.year}-$month-$day';
+    return formatLocalDate(monday);
   }
 }

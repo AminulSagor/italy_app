@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -5,6 +7,7 @@ import '../../../../../core/services/api_error_handler.dart';
 import '../models/quiz_models.dart';
 import '../services/quiz_api_service.dart';
 import '../services/quiz_mock_service.dart';
+import '../../../../practice_hub/controllers/practice_hub_controller.dart';
 
 class QuizController extends GetxController {
   final QuizMockService _quizMockService;
@@ -29,8 +32,8 @@ class QuizController extends GetxController {
     this.questionCount = 15,
     this.initialQuestions = const <QuizQuestionModel>[],
     this.externalAnswerHandler,
-  })  : _quizMockService = quizMockService,
-        _quizApiService = quizApiService;
+  }) : _quizMockService = quizMockService,
+       _quizApiService = quizApiService;
 
   final RxBool isLoading = false.obs;
   final RxBool isSubmittingAnswer = false.obs;
@@ -59,8 +62,9 @@ class QuizController extends GetxController {
   String _externalCorrectMeaning = '';
 
   int get totalQuestions => questions.length;
-  int get correctAnswerCount =>
-      answerReviews.where((QuizAnswerReviewModel item) => item.isCorrect).length;
+  int get correctAnswerCount => answerReviews
+      .where((QuizAnswerReviewModel item) => item.isCorrect)
+      .length;
   bool get showWrongResult => hasCheckedAnswer.value && !isAnswerCorrect.value;
   bool get hasApiLessonQuiz => lessonId?.trim().isNotEmpty ?? false;
   QuizQuestionModel? get currentQuestion =>
@@ -94,6 +98,7 @@ class QuizController extends GetxController {
         return writingAnswerController.text.trim().isNotEmpty;
     }
   }
+
   String get currentCorrectAnswer {
     final String apiAnswer = _lastCheckResult?.correctAnswer ?? '';
     if (apiAnswer.isNotEmpty) {
@@ -163,12 +168,12 @@ class QuizController extends GetxController {
       } else if (hasApiLessonQuiz) {
         final ApiResult<QuizApiSessionModel> result =
             await ApiErrorHandler.call<QuizApiSessionModel>(
-          () => _quizApiService.startLessonQuiz(
-            lessonId: lessonId!.trim(),
-            startOver: startOver,
-          ),
-          errorTitle: 'quiz'.tr,
-        );
+              () => _quizApiService.startLessonQuiz(
+                lessonId: lessonId!.trim(),
+                startOver: startOver,
+              ),
+              errorTitle: 'quiz'.tr,
+            );
 
         if (!result.isSuccess || result.data == null) {
           return;
@@ -211,8 +216,6 @@ class QuizController extends GetxController {
     }
   }
 
-
-
   void swapMatchingRight(int fromIndex, int toIndex) {
     if (hasCheckedAnswer.value ||
         fromIndex == toIndex ||
@@ -232,8 +235,7 @@ class QuizController extends GetxController {
     matchingRightOrder.assignAll(updatedTexts);
 
     if (matchingRightPairIdOrder.length == updatedTexts.length) {
-      final List<String> updatedIds =
-      matchingRightPairIdOrder.toList();
+      final List<String> updatedIds = matchingRightPairIdOrder.toList();
 
       final String oldId = updatedIds[fromIndex];
       updatedIds[fromIndex] = updatedIds[toIndex];
@@ -253,12 +255,12 @@ class QuizController extends GetxController {
       if (_activeSessionId != null) {
         final ApiResult<QuizLessonCompleteModel> result =
             await ApiErrorHandler.call<QuizLessonCompleteModel>(
-          () => _quizApiService.completeSession(
-            sessionId: _activeSessionId!,
-            chapterTitle: chapterTitle ?? 'chapter_complete'.tr,
-          ),
-          errorTitle: 'quiz_complete'.tr,
-        );
+              () => _quizApiService.completeSession(
+                sessionId: _activeSessionId!,
+                chapterTitle: chapterTitle ?? 'chapter_complete'.tr,
+              ),
+              errorTitle: 'quiz_complete'.tr,
+            );
 
         if (result.isSuccess && result.data != null) {
           lessonComplete.value = result.data;
@@ -326,7 +328,6 @@ class QuizController extends GetxController {
     listeningSelectedWords.remove(word);
   }
 
-
   bool _canAddSequenceWord(RxList<String> selectedWords, String word) {
     if (hasCheckedAnswer.value) return false;
 
@@ -393,18 +394,18 @@ class QuizController extends GetxController {
       try {
         final QuizExternalAnswerResult externalResult =
             await externalAnswerHandler!(
-          question,
-          QuizAnswerInput(
-            selectedOptionIndex: selectedOptionIndex.value,
-            selectedLeftPairIndex: selectedLeftPairIndex.value,
-            selectedRightPairIndex: selectedRightPairIndex.value,
-            sentenceSelectedWords: sentenceSelectedWords.toList(),
-            listeningSelectedWords: listeningSelectedWords.toList(),
-            matchingRightOrder: matchingRightOrder.toList(),
-            matchingRightPairIdOrder: matchingRightPairIdOrder.toList(),
-            writtenAnswer: writingAnswerController.text.trim(),
-          ),
-        );
+              question,
+              QuizAnswerInput(
+                selectedOptionIndex: selectedOptionIndex.value,
+                selectedLeftPairIndex: selectedLeftPairIndex.value,
+                selectedRightPairIndex: selectedRightPairIndex.value,
+                sentenceSelectedWords: sentenceSelectedWords.toList(),
+                listeningSelectedWords: listeningSelectedWords.toList(),
+                matchingRightOrder: matchingRightOrder.toList(),
+                matchingRightPairIdOrder: matchingRightPairIdOrder.toList(),
+                writtenAnswer: writingAnswerController.text.trim(),
+              ),
+            );
 
         hasCheckedAnswer.value = true;
         isAnswerCorrect.value = externalResult.isCorrect;
@@ -432,17 +433,17 @@ class QuizController extends GetxController {
     try {
       final ApiResult<QuizApiCheckResult> result =
           await ApiErrorHandler.call<QuizApiCheckResult>(
-        () => _quizApiService.checkAnswer(
-          sessionId: _activeSessionId!,
-          question: question,
-          selectedOptionIndex: selectedOptionIndex.value,
-          sentenceSelectedWords: sentenceSelectedWords.toList(),
-          listeningSelectedWords: listeningSelectedWords.toList(),
-          matchingRightOrder: matchingRightOrder.toList(),
-          writtenAnswer: writingAnswerController.text.trim(),
-        ),
-        errorTitle: 'check_answer'.tr,
-      );
+            () => _quizApiService.checkAnswer(
+              sessionId: _activeSessionId!,
+              question: question,
+              selectedOptionIndex: selectedOptionIndex.value,
+              sentenceSelectedWords: sentenceSelectedWords.toList(),
+              listeningSelectedWords: listeningSelectedWords.toList(),
+              matchingRightOrder: matchingRightOrder.toList(),
+              writtenAnswer: writingAnswerController.text.trim(),
+            ),
+            errorTitle: 'check_answer'.tr,
+          );
 
       if (!result.isSuccess || result.data == null) {
         return false;
@@ -455,9 +456,44 @@ class QuizController extends GetxController {
         isAnswerCorrect.value,
         correctAnswer: result.data!.correctAnswer,
       );
+      if (Get.isRegistered<PracticeHubController>()) {
+        unawaited(
+          Get.find<PracticeHubController>().loadDailyChallenges(
+            showError: false,
+          ),
+        );
+      }
       return isAnswerCorrect.value;
     } finally {
       isSubmittingAnswer.value = false;
+    }
+  }
+
+  Future<void> recordCurrentAudioListened() async {
+    final QuizQuestionModel? question = currentQuestion;
+    final String currentCourseId = courseId?.trim() ?? '';
+    final String currentLessonId = lessonId?.trim() ?? '';
+    if (question == null ||
+        currentCourseId.isEmpty ||
+        currentLessonId.isEmpty) {
+      return;
+    }
+
+    final String sourceId = question.mediaFileId.trim().isNotEmpty
+        ? question.mediaFileId.trim()
+        : question.id;
+    final ApiResult<bool> result = await ApiErrorHandler.call<bool>(
+      () => _quizApiService.recordAudioListened(
+        courseId: currentCourseId,
+        lessonId: currentLessonId,
+        audioFileId: sourceId,
+      ),
+      showError: false,
+    );
+    if (result.isSuccess && Get.isRegistered<PracticeHubController>()) {
+      unawaited(
+        Get.find<PracticeHubController>().loadDailyChallenges(showError: false),
+      );
     }
   }
 

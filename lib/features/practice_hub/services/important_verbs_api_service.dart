@@ -1,12 +1,10 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart' hide Response;
 
 import '../../../core/services/api_client.dart';
+import '../../../core/utils/local_date.dart';
 import '../models/important_verb_detail_models.dart';
 import '../models/important_verb_models.dart';
-import 'package:get/get.dart' hide Response;
 
 class ImportantVerbsApiService {
   ImportantVerbsApiService({required ApiClient apiClient})
@@ -163,7 +161,8 @@ class ImportantVerbsApiService {
     await _apiClient.dio.post(
       '/important-verbs/$verbId/reviewed',
       data: <String, dynamic>{
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
+        'interaction': 'learning',
       },
     );
   }

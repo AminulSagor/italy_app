@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../../../core/services/api_client.dart';
+import '../../../../../core/utils/local_date.dart';
 import '../models/quiz_models.dart';
 import 'package:get/get.dart' hide Response;
 
@@ -40,7 +41,7 @@ class QuizApiService {
     final Response<dynamic> response = await _apiClient.dio.post(
       '/quiz-sessions/lessons/$lessonId/start',
       data: <String, dynamic>{
-        'clientActivityDate': DateTime.now().toUtc().toIso8601String(),
+        'clientActivityDate': formatLocalDateTimeWithOffset(DateTime.now()),
         if (startOver) 'mode': 'start_over',
       },
     );
@@ -103,7 +104,8 @@ class QuizApiService {
     final Response<dynamic> response = await _apiClient.dio.post(
       '/quiz-sessions/$sessionId/complete',
       data: <String, dynamic>{
-        'clientActivityDate': DateTime.now().toUtc().toIso8601String(),
+        'clientActivityDate': formatLocalDateTimeWithOffset(DateTime.now()),
+        'supportsIncrementalDailyChallengeTracking': true,
       },
     );
     final Map<String, dynamic> data = _responseMap(response);
@@ -134,6 +136,23 @@ class QuizApiService {
     });
   }
 
+  Future<bool> recordAudioListened({
+    required String courseId,
+    required String lessonId,
+    required String audioFileId,
+  }) async {
+    await _apiClient.dio.post(
+      '/learning-progress/lessons/audio-listened',
+      data: <String, dynamic>{
+        'courseId': courseId,
+        'lessonId': lessonId,
+        'audioFileId': audioFileId,
+        'clientActivityDate': formatLocalDate(DateTime.now()),
+      },
+    );
+    return true;
+  }
+
   Future<void> markLessonCompleted({
     required String courseId,
     required String lessonId,
@@ -143,7 +162,7 @@ class QuizApiService {
       data: <String, dynamic>{
         'courseId': courseId,
         'lessonId': lessonId,
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
   }
@@ -158,6 +177,7 @@ class QuizApiService {
   }) {
     final Map<String, dynamic> payload = <String, dynamic>{
       'questionId': question.id,
+      'clientActivityDate': formatLocalDateTimeWithOffset(DateTime.now()),
     };
 
     switch (question.type) {

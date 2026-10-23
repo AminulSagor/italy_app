@@ -27,6 +27,7 @@ class MainActivity : FlutterActivity() {
 
     private var navigationBarBottomInsetPx: Int = 0
     private var aiVoiceAudioEngine: AiVoiceAudioEngine? = null
+    private var courseDeviceIntegrityPlugin: CourseDeviceIntegrityPlugin? = null
 
     override fun onCreate(
         savedInstanceState: Bundle?
@@ -109,11 +110,17 @@ class MainActivity : FlutterActivity() {
             applicationContext,
             flutterEngine.dartExecutor.binaryMessenger
         ).also { it.register() }
+        courseDeviceIntegrityPlugin = CourseDeviceIntegrityPlugin(
+            applicationContext,
+            flutterEngine.dartExecutor.binaryMessenger,
+        ).also { it.register() }
     }
 
     override fun onDestroy() {
         aiVoiceAudioEngine?.dispose()
         aiVoiceAudioEngine = null
+        courseDeviceIntegrityPlugin?.dispose()
+        courseDeviceIntegrityPlugin = null
         super.onDestroy()
     }
 

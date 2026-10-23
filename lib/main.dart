@@ -218,6 +218,14 @@ Future<void> _initializeCallKitListeners() async {
         await CallkitIncomingService.endNativeSubsystemOnly(callId);
       }
     },
+    onMute: (String callId, bool isMuted) async {
+      if (Get.isRegistered<MessageCallController>()) {
+        await Get.find<MessageCallController>().setMutedFromNative(
+          callId,
+          isMuted,
+        );
+      }
+    },
     onEnded: (String callId, Map<String, dynamic> data) async {
       if (CallkitIncomingService.consumeRemoteTermination(callId)) {
         return;

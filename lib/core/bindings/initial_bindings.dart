@@ -10,6 +10,7 @@ import '../../features/ai_chat/services/ai_tutor_tts_service.dart';
 import '../../features/ai_chat/services/ai_tutor_voice_service.dart';
 import '../../features/courses/controllers/courses_controller.dart';
 import '../../features/courses/services/courses_api_service.dart';
+import '../../features/courses/services/course_device_access_service.dart';
 import '../../features/cv_generation/controllers/cv_home_controller.dart';
 import '../../features/cv_generation/services/resume_studio_api_service.dart';
 import '../../features/home/controllers/home_controller.dart';
@@ -39,6 +40,7 @@ import '../services/current_user_summary_service.dart';
 import '../widgets/app_drawer_controller.dart';
 import '../services/token_service.dart';
 import '../services/storage_service.dart';
+import '../services/ai_data_consent_service.dart';
 import '../../features/practice_hub/controllers/job_sentences_controller.dart';
 import '../../features/practice_hub/controllers/important_verbs_controller.dart';
 import '../../features/practice_hub/services/job_sentences_api_service.dart';
@@ -49,6 +51,12 @@ import '../../features/practice_hub/services/practice_hub_api_service.dart';
 class InitialBindings extends Bindings {
   @override
   void dependencies() {
+    if (!Get.isRegistered<AiDataConsentService>()) {
+      Get.put<AiDataConsentService>(
+        AiDataConsentService(apiClient: Get.find<ApiClient>()),
+        permanent: true,
+      );
+    }
     if (!Get.isRegistered<CurrentUserSummaryService>()) {
       Get.lazyPut<CurrentUserSummaryService>(
         () => CurrentUserSummaryService(apiClient: Get.find<ApiClient>()),
@@ -100,7 +108,10 @@ class InitialBindings extends Bindings {
       fenix: true,
     );
     Get.lazyPut<AiTutorApiService>(
-      () => AiTutorApiService(apiClient: Get.find<ApiClient>()),
+      () => AiTutorApiService(
+        apiClient: Get.find<ApiClient>(),
+        aiDataConsentService: Get.find<AiDataConsentService>(),
+      ),
       fenix: true,
     );
     Get.lazyPut<AiTutorPreferencesService>(
@@ -128,6 +139,13 @@ class InitialBindings extends Bindings {
     );
     Get.lazyPut<CoursesApiService>(
       () => CoursesApiService(apiClient: Get.find<ApiClient>()),
+      fenix: true,
+    );
+    Get.lazyPut<CourseDeviceAccessService>(
+      () => CourseDeviceAccessService(
+        apiClient: Get.find<ApiClient>(),
+        userSessionController: Get.find<UserSessionController>(),
+      ),
       fenix: true,
     );
     Get.lazyPut<CoursesController>(
@@ -322,7 +340,10 @@ class InitialBindings extends Bindings {
     );
 
     Get.lazyPut<AiTutorApiService>(
-      () => AiTutorApiService(apiClient: Get.find<ApiClient>()),
+      () => AiTutorApiService(
+        apiClient: Get.find<ApiClient>(),
+        aiDataConsentService: Get.find<AiDataConsentService>(),
+      ),
       fenix: true,
     );
     Get.lazyPut<AiTutorPreferencesService>(
@@ -350,7 +371,10 @@ class InitialBindings extends Bindings {
 
     if (!Get.isRegistered<ResumeStudioApiService>()) {
       Get.lazyPut<ResumeStudioApiService>(
-        () => ResumeStudioApiService(apiClient: Get.find<ApiClient>()),
+        () => ResumeStudioApiService(
+          apiClient: Get.find<ApiClient>(),
+          aiDataConsentService: Get.find<AiDataConsentService>(),
+        ),
         fenix: true,
       );
     }

@@ -5,6 +5,7 @@ class DailyChallengeTaskModel {
     required this.id,
     required this.taskKey,
     required this.title,
+    required this.details,
     required this.targetValue,
     required this.progressValue,
     required this.rewardXp,
@@ -14,6 +15,7 @@ class DailyChallengeTaskModel {
   final String id;
   final String taskKey;
   final String title;
+  final String details;
   final int targetValue;
   final int progressValue;
   final int rewardXp;
@@ -38,6 +40,7 @@ class DailyChallengeTaskModel {
       id: json['id']?.toString() ?? '',
       taskKey: json['taskKey']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
+      details: json['details']?.toString() ?? '',
       targetValue: _intValue(json['targetValue']),
       progressValue: _intValue(json['progressValue']),
       rewardXp: _intValue(json['rewardXp']),
@@ -50,6 +53,7 @@ class DailyChallengeTaskModel {
       'id': id,
       'taskKey': taskKey,
       'title': title,
+      'details': details,
       'targetValue': targetValue,
       'progressValue': progressValue,
       'rewardXp': rewardXp,
@@ -65,6 +69,7 @@ class DailyChallengeTaskModel {
     String? id,
     String? taskKey,
     String? title,
+    String? details,
     int? targetValue,
     int? progressValue,
     int? rewardXp,
@@ -74,6 +79,7 @@ class DailyChallengeTaskModel {
       id: id ?? this.id,
       taskKey: taskKey ?? this.taskKey,
       title: title ?? this.title,
+      details: details ?? this.details,
       targetValue: targetValue ?? this.targetValue,
       progressValue: progressValue ?? this.progressValue,
       rewardXp: rewardXp ?? this.rewardXp,
@@ -157,7 +163,9 @@ class DailyChallengeXpBoostModel {
       isActive: json['isActive'] == true,
       multiplier: _doubleValue(json['multiplier'], fallback: 1),
       remainingSeconds: _nullableInt(json['remainingSeconds']),
-      expiresAt: DateTime.tryParse(json['expiresAt']?.toString() ?? '')?.toLocal(),
+      expiresAt: DateTime.tryParse(
+        json['expiresAt']?.toString() ?? '',
+      )?.toLocal(),
     );
   }
 
@@ -321,9 +329,9 @@ class DailyChallengeDashboardModel {
       totalXp: _intValue(json['totalXp']),
       streak: DailyChallengeStreakModel.fromJson(_jsonMap(json['streak'])),
       xpBoost: DailyChallengeXpBoostModel.fromJson(_jsonMap(json['xpBoost'])),
-      tasks: _jsonList(json['tasks'])
-          .map(DailyChallengeTaskModel.fromJson)
-          .toList(growable: false),
+      tasks: _jsonList(
+        json['tasks'],
+      ).map(DailyChallengeTaskModel.fromJson).toList(growable: false),
       chest: DailyChestStateModel.fromJson(_jsonMap(json['chest'])),
     );
   }

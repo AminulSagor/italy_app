@@ -414,6 +414,86 @@ class MessagesController extends GetxController {
     await loadMessages();
   }
 
+  /// Make a newly-created direct conversation visible when its first event is
+  /// a call. Text messages already update the inbox through the chat socket,
+  /// while calls arrive through a separate socket.
+  Future<void> syncIncomingCallConversation({
+    required String conversationId,
+    required String callerId,
+    required String callerName,
+    required String callerAvatarUrl,
+    required bool isVideo,
+  }) async {
+    final String normalizedConversationId = conversationId.trim();
+    final String normalizedCallerId = callerId.trim();
+
+    if (normalizedConversationId.isEmpty) {
+      return;
+    }
+
+    final String normalizedCallerName = callerName.trim().isNotEmpty
+        ? callerName.trim()
+        : 'User';
+    final String normalizedAvatarUrl = callerAvatarUrl.trim();
+    final String preview = isVideo
+        ? 'Incoming video call'
+        : 'Incoming audio call';
+
+    final int existingIndex = threads.indexWhere(
+      (MessageThreadModel thread) =>
+          thread.id == normalizedConversationId ||
+          (normalizedCallerId.isNotEmpty &&
+              thread.contactId == normalizedCallerId),
+    );
+
+    if (existingIndex >= 0) {
+      final MessageThreadModel existing = threads[existingIndex];
+      final MessageThreadModel updated = existing.copyWith(
+        id: normalizedConversationId,
+        learnerName: normalizedCallerName,
+        avatarUrl: normalizedAvatarUrl.isNotEmpty
+            ? normalizedAvatarUrl
+            : existing.avatarUrl,
+        contactId: normalizedCallerId.isNotEmpty
+            ? normalizedCallerId
+            : existing.contactId,
+        lastMessage: preview,
+        timeLabel: _formatTimeLabel(DateTime.now().toIso8601String()),
+      );
+
+      threads
+        ..removeAt(existingIndex)
+        ..insert(0, updated)
+        ..refresh();
+    } else {
+      threads.insert(
+        0,
+        MessageThreadModel(
+          id: normalizedConversationId,
+          learnerName: normalizedCallerName,
+          lastMessage: preview,
+          timeLabel: _formatTimeLabel(DateTime.now().toIso8601String()),
+          unreadCount: 0,
+          isOnline: true,
+          blockStatus: 'none',
+          isHighlighted: false,
+          isDelivered: true,
+          avatarUrl: normalizedAvatarUrl,
+          contactId: normalizedCallerId.isNotEmpty
+              ? normalizedCallerId
+              : null,
+          previewTone: MessageThreadPreviewTone.ongoing,
+        ),
+      );
+      threads.refresh();
+    }
+
+    // Reconcile the optimistic entry with backend membership, unread and call
+    // history. A concurrent load also started after this call was created and
+    // therefore already contains the new conversation.
+    await loadMessages();
+  }
+
   void removeThread(String threadId) {
     threads.removeWhere((t) => t.id == threadId);
   }

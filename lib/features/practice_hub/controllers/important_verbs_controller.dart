@@ -452,9 +452,6 @@ class ImportantVerbsController extends GetxController {
         );
         expandedFormId.value = initialForm.id;
       }
-      if (_reviewedVerbIds.add(verbId)) {
-        unawaited(_markVerbReviewed(verbId));
-      }
     } finally {
       if (requestId == _detailsRequestId) {
         isVerbDetailsLoading.value = false;
@@ -523,6 +520,11 @@ class ImportantVerbsController extends GetxController {
           'Install or enable an Italian voice on this device and try again.',
           snackPosition: SnackPosition.BOTTOM,
         );
+      } else {
+        final String? verbId = selectedVerbSummary.value?.id;
+        if (verbId != null && _reviewedVerbIds.add(verbId)) {
+          unawaited(_markVerbReviewed(verbId));
+        }
       }
     } finally {
       isSpeaking.value = false;

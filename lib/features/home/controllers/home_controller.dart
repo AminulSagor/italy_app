@@ -12,6 +12,7 @@ import '../../../core/services/notification_permission_service.dart';
 import '../../../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import '../../../routes/app_route_arguments.dart';
 import '../../../routes/app_routes.dart';
+import '../../courses/models/course_models.dart';
 import '../models/home_models.dart';
 import '../services/home_api_service.dart';
 import '../services/home_dashboard_cache_service.dart';
@@ -65,6 +66,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   final Rx<HomeDashboardModel> dashboard = HomeDashboardModel.initial.obs;
 
   bool _requestInProgress = false;
+  bool _isOpeningCurrentChapter = false;
+  Completer<void>? _dashboardRequestCompleter;
   DateTime? _lastSuccessfulLoadAt;
 
   bool get isInitialLoading => isLoading.value && !hasLoadedOnce.value;
@@ -155,9 +158,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       // The continue card is activity-sensitive and must be confirmed by the
       // latest backend response. Other dashboard data can still be restored
       // immediately, but an old chapter must not briefly appear as current.
-      final Map<String, dynamic> cachedDashboard =
-          Map<String, dynamic>.from(cache.json)
-            ..['currentChapter'] = null;
+      final Map<String, dynamic> cachedDashboard = Map<String, dynamic>.from(
+        cache.json,
+      )..['currentChapter'] = null;
 
       dashboard.value = HomeDashboardModel.fromJson(cachedDashboard);
 
@@ -189,6 +192,11 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     Stopwatch? performanceStopwatch,
   }) async {
     if (_requestInProgress) {
+      // A caller such as Continue Learning may need the fresh dashboard
+      // before it can safely use the current lesson IDs. Join the request
+      // already in flight instead of returning while the old model is still
+      // visible.
+      await _dashboardRequestCompleter?.future;
       return;
     }
 
@@ -197,6 +205,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     }
 
     _requestInProgress = true;
+    final Completer<void> requestCompleter = Completer<void>();
+    _dashboardRequestCompleter = requestCompleter;
     errorMessage.value = '';
 
     if (hasLoadedOnce.value) {
@@ -283,6 +293,13 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     } finally {
       _requestInProgress = false;
 
+      if (!requestCompleter.isCompleted) {
+        requestCompleter.complete();
+      }
+      if (identical(_dashboardRequestCompleter, requestCompleter)) {
+        _dashboardRequestCompleter = null;
+      }
+
       if (!isClosed) {
         isLoading.value = false;
         isRefreshing.value = false;
@@ -318,23 +335,40 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     errorMessage.value = '';
   }
 
-  void openCurrentChapter() {
-    final HomeChapterModel? chapter = dashboard.value.currentChapter;
-
-    if (chapter == null) {
+  Future<void> openCurrentChapter() async {
+    if (_isOpeningCurrentChapter) {
       return;
     }
 
-    if (chapter.lessonId.isEmpty ||
-        chapter.courseId.isEmpty ||
-        chapter.chapterId.isEmpty) {
-      Get.snackbar('continue_learning'.tr, 'home_chapter_unavailable'.tr);
-      return;
-    }
+    _isOpeningCurrentChapter = true;
 
-    Get.toNamed<void>(
-      AppRoutes.chapterDetail,
-      arguments: HomeChapterRouteArguments(
+    try {
+      HomeChapterModel? chapter = dashboard.value.currentChapter;
+
+      if (chapter == null) {
+        return;
+      }
+
+      if (!_hasChapterNavigationTarget(chapter)) {
+        // Course binding/progress can be updating while Home still displays
+        // the previous response. Wait for an active refresh (or start one)
+        // and use the newly resolved chapter before telling the user it is
+        // unavailable.
+        await loadDashboard(force: true);
+
+        if (isClosed) {
+          return;
+        }
+
+        chapter = dashboard.value.currentChapter;
+      }
+
+      if (chapter == null || !_hasChapterNavigationTarget(chapter)) {
+        Get.snackbar('continue_learning'.tr, 'home_chapter_unavailable'.tr);
+        return;
+      }
+
+      final HomeChapterRouteArguments resumeChapter = HomeChapterRouteArguments(
         lessonId: chapter.lessonId,
         courseId: chapter.courseId,
         chapterId: chapter.chapterId,
@@ -343,8 +377,38 @@ class HomeController extends GetxController with WidgetsBindingObserver {
             ? chapter.chapterTitle
             : chapter.subtitle,
         progress: chapter.progress,
-      ),
-    );
+      );
+      final CourseCardModel course = CourseCardModel(
+        id: chapter.courseId,
+        title: chapter.courseTitle,
+        courseId: chapter.courseId,
+        chapterId: chapter.chapterId,
+        subtitle: chapter.subtitle,
+        progressLabel: chapter.progressLabel,
+        progress: chapter.progress,
+        statusLabel: 'current_study'.tr,
+        state: CourseCardState.active,
+      );
+      final String controllerTag =
+          'course_${chapter.courseId}_${DateTime.now().millisecondsSinceEpoch}';
+
+      await Get.toNamed<void>(
+        AppRoutes.courseDetail,
+        arguments: CourseDetailRouteArguments(
+          course: course,
+          controllerTag: controllerTag,
+          resumeChapter: resumeChapter,
+        ),
+      );
+    } finally {
+      _isOpeningCurrentChapter = false;
+    }
+  }
+
+  bool _hasChapterNavigationTarget(HomeChapterModel chapter) {
+    return chapter.lessonId.trim().isNotEmpty &&
+        chapter.courseId.trim().isNotEmpty &&
+        chapter.chapterId.trim().isNotEmpty;
   }
 
   void openQuickTool(HomeToolModel tool) {

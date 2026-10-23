@@ -43,7 +43,6 @@ class WebinarApiService {
     return WebinarParticipantsResponseModel.fromJson(_responseMap(response));
   }
 
-
   Future<WebinarChatMessagesResponseModel> getChatMessages({
     required String webinarId,
     int page = 1,
@@ -66,6 +65,71 @@ class WebinarApiService {
     );
     final Map<String, dynamic> data = _responseMap(response);
     return WebinarLiveChatModel.fromJson(_jsonMap(data['chatMessage']));
+  }
+
+  Future<List<Map<String, dynamic>>> getReportReasons() async {
+    final Response<dynamic> response = await _apiClient.dio.get<dynamic>(
+      '/user-reports/reasons',
+    );
+    final dynamic data = response.data is Map
+        ? (response.data as Map)['data']
+        : response.data;
+    if (data is! List) return <Map<String, dynamic>>[];
+    return data
+        .whereType<Map>()
+        .map((Map item) => Map<String, dynamic>.from(item))
+        .toList(growable: false);
+  }
+
+  Future<void> reportChatMessage({
+    required WebinarLiveChatModel message,
+    required String reasonId,
+  }) async {
+    final String context =
+        '[Webinar ${message.webinarId}; message ${message.id}] ${message.message}';
+    await _apiClient.dio.post<dynamic>(
+      '/user-reports',
+      data: <String, dynamic>{
+        'reportedUserId': message.senderUserId,
+        'reasonId': reasonId,
+        'description': context.length <= 500
+            ? context
+            : context.substring(0, 500),
+        'clientReportId':
+            'webinar-${message.id}-${DateTime.now().millisecondsSinceEpoch}',
+      },
+    );
+  }
+
+  Future<void> blockUser(String userId) async {
+    await _apiClient.dio.post<dynamic>(
+      '/user-blocks/${Uri.encodeComponent(userId)}',
+    );
+  }
+
+  Future<void> removeChatMessage({
+    required String webinarId,
+    required String messageId,
+  }) async {
+    await _apiClient.dio.delete<dynamic>(
+      '/webinars/${Uri.encodeComponent(webinarId)}/chat-messages/'
+      '${Uri.encodeComponent(messageId)}',
+    );
+  }
+
+  Future<Set<String>> getBlockedUserIds() async {
+    final Response<dynamic> response = await _apiClient.dio.get<dynamic>(
+      '/user-blocks',
+    );
+    final dynamic raw = response.data is Map
+        ? (response.data as Map)['data']
+        : null;
+    if (raw is! List) return <String>{};
+    return raw
+        .whereType<Map>()
+        .map((Map item) => item['blockedUserId']?.toString() ?? '')
+        .where((String id) => id.isNotEmpty)
+        .toSet();
   }
 
   Future<WebinarJoinResultModel> joinWebinar({
@@ -93,14 +157,15 @@ class WebinarApiService {
     return AgoraTokenModel.fromJson(_jsonMap(data['token']));
   }
 
-  Future<WebinarParticipantModel> leaveStage({required String webinarId}) async {
+  Future<WebinarParticipantModel> leaveStage({
+    required String webinarId,
+  }) async {
     final Response<dynamic> response = await _apiClient.dio.patch(
       '/webinars/$webinarId/leave-stage',
     );
     final Map<String, dynamic> data = _responseMap(response);
     return WebinarParticipantModel.fromJson(_jsonMap(data['participant']));
   }
-
 
   Map<String, dynamic> _jsonMap(dynamic value) {
     if (value is Map<String, dynamic>) return value;

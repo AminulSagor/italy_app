@@ -6,6 +6,7 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 import '../../controllers/practice_hub_controller.dart';
 import '../../models/daily_challenge_models.dart';
+import 'daily_challenge_details_view.dart';
 
 class DailyChallengesView extends GetView<PracticeHubController> {
   const DailyChallengesView({super.key});
@@ -17,8 +18,7 @@ class DailyChallengesView extends GetView<PracticeHubController> {
       body: SafeArea(
         bottom: false,
         child: Obx(() {
-          final bool isLoading =
-              controller.isDailyChallengesLoading.value;
+          final bool isLoading = controller.isDailyChallengesLoading.value;
 
           final bool hasDashboard =
               controller.dailyChallengeDashboard.value != null;
@@ -33,9 +33,7 @@ class DailyChallengesView extends GetView<PracticeHubController> {
                   ? 'daily_challenges_are_not_available_right_now'.tr
                   : controller.dailyChallengesError.value,
               onRetry: () {
-                controller.loadDailyChallenges(
-                  showError: true,
-                );
+                controller.loadDailyChallenges(showError: true);
               },
             );
           }
@@ -43,60 +41,37 @@ class DailyChallengesView extends GetView<PracticeHubController> {
           return RefreshIndicator(
             color: AppColors.primaryGreen,
             onRefresh: () {
-              return controller.loadDailyChallenges(
-                showError: true,
-              );
+              return controller.loadDailyChallenges(showError: true);
             },
             child: LayoutBuilder(
-              builder: (
-                  BuildContext context,
-                  BoxConstraints constraints,
-                  ) {
+              builder: (BuildContext context, BoxConstraints constraints) {
                 return SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(
                     parent: BouncingScrollPhysics(),
                   ),
-                  padding: EdgeInsets.only(
-                    bottom: 48.h,
-                  ),
+                  padding: EdgeInsets.only(bottom: 48.h),
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: 720,
-                      ),
+                      constraints: const BoxConstraints(maxWidth: 720),
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          16.w,
-                          14.h,
-                          16.w,
-                          0,
-                        ),
+                        padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
                         child: Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             const _DailyChallengeHeader(),
                             SizedBox(height: 14.h),
                             const _StreakHeroCard(),
                             SizedBox(height: 18.h),
-                            ...controller.dailyChallengeTasks.map(
-                                  (
-                                  DailyChallengeTaskModel task,
-                                  ) {
-                                return Padding(
-                                  padding: EdgeInsets.only(
-                                    bottom: 12.h,
-                                  ),
-                                  child: task.isClaimed
-                                      ? _ClaimedTaskCard(
-                                    task: task,
-                                  )
-                                      : _DailyTaskCard(
-                                    task: task,
-                                  ),
-                                );
-                              },
-                            ),
+                            ...controller.dailyChallengeTasks.map((
+                              DailyChallengeTaskModel task,
+                            ) {
+                              return Padding(
+                                padding: EdgeInsets.only(bottom: 12.h),
+                                child: task.isClaimed
+                                    ? _ClaimedTaskCard(task: task)
+                                    : _DailyTaskCard(task: task),
+                              );
+                            }),
                             SizedBox(height: 4.h),
                             const _DailyChestCard(),
                           ],
@@ -122,12 +97,7 @@ class _DailyChallengesLoadingView extends StatelessWidget {
     return Column(
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.fromLTRB(
-            16.w,
-            14.h,
-            16.w,
-            0,
-          ),
+          padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
           child: const _DailyChallengeHeader(),
         ),
         const Expanded(
@@ -160,12 +130,7 @@ class _DailyChallengesEmptyView extends StatelessWidget {
         SliverFillRemaining(
           hasScrollBody: false,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              16.w,
-              14.h,
-              16.w,
-              32.h,
-            ),
+            padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 32.h),
             child: Column(
               children: <Widget>[
                 const _DailyChallengeHeader(),
@@ -174,9 +139,7 @@ class _DailyChallengesEmptyView extends StatelessWidget {
                   width: 52.r,
                   height: 52.r,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryGreen.withValues(
-                      alpha: 0.10,
-                    ),
+                    color: AppColors.primaryGreen.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -188,9 +151,7 @@ class _DailyChallengesEmptyView extends StatelessWidget {
                 ),
                 SizedBox(height: 14.h),
                 ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: 360,
-                  ),
+                  constraints: const BoxConstraints(maxWidth: 360),
                   child: Text(
                     message,
                     textAlign: TextAlign.center,
@@ -205,24 +166,14 @@ class _DailyChallengesEmptyView extends StatelessWidget {
                 SizedBox(height: 16.h),
                 FilledButton.icon(
                   onPressed: onRetry,
-                  icon: const Icon(
-                    Icons.refresh_rounded,
-                  ),
-                  label: Text(
-                    'retry'.tr,
-                  ),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text('retry'.tr),
                   style: FilledButton.styleFrom(
-                    backgroundColor:
-                    AppColors.primaryGreen,
+                    backgroundColor: AppColors.primaryGreen,
                     foregroundColor: AppColors.white,
-                    minimumSize: Size(
-                      130.w,
-                      44.h,
-                    ),
+                    minimumSize: Size(130.w, 44.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        14.r,
-                      ),
+                      borderRadius: BorderRadius.circular(14.r),
                     ),
                   ),
                 ),
@@ -236,8 +187,7 @@ class _DailyChallengesEmptyView extends StatelessWidget {
   }
 }
 
-class _DailyChallengeHeader
-    extends GetView<PracticeHubController> {
+class _DailyChallengeHeader extends GetView<PracticeHubController> {
   const _DailyChallengeHeader();
 
   @override
@@ -277,24 +227,14 @@ class _DailyChallengeHeader
         ),
         SizedBox(width: 8.w),
         Obx(
-              () => Container(
-            constraints: BoxConstraints(
-              minHeight: 38.h,
-              maxWidth: 130.w,
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: 11.w,
-              vertical: 7.h,
-            ),
+          () => Container(
+            constraints: BoxConstraints(minHeight: 38.h, maxWidth: 130.w),
+            padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 7.h),
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(
-                999.r,
-              ),
+              borderRadius: BorderRadius.circular(999.r),
               border: Border.all(
-                color: AppColors.primaryGreen.withValues(
-                  alpha: 0.12,
-                ),
+                color: AppColors.primaryGreen.withValues(alpha: 0.12),
               ),
             ),
             child: Row(
@@ -310,12 +250,9 @@ class _DailyChallengeHeader
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      'daily_challenge_xp'.trParams(
-                        <String, String>{
-                          'xp': controller.dailyChallengeXp
-                              .toString(),
-                        },
-                      ),
+                      'daily_challenge_xp'.trParams(<String, String>{
+                        'xp': controller.dailyChallengeXp.toString(),
+                      }),
                       maxLines: 1,
                       style: TextStyle(
                         fontSize: AppFont.font13.sp,
@@ -334,40 +271,25 @@ class _DailyChallengeHeader
   }
 }
 
-class _StreakHeroCard
-    extends GetView<PracticeHubController> {
+class _StreakHeroCard extends GetView<PracticeHubController> {
   const _StreakHeroCard();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(
-        minHeight: 142.h,
-      ),
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        20.h,
-        14.w,
-        18.h,
-      ),
+      constraints: BoxConstraints(minHeight: 142.h),
+      padding: EdgeInsets.fromLTRB(20.w, 20.h, 14.w, 18.h),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: <Color>[
-            Color(0xFFFF4B2B),
-            Color(0xFFFF8A00),
-          ],
+          colors: <Color>[Color(0xFFFF4B2B), Color(0xFFFF8A00)],
         ),
-        borderRadius: BorderRadius.circular(
-          24.r,
-        ),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: const Color(0xFFFF7B10).withValues(
-              alpha: 0.20,
-            ),
+            color: const Color(0xFFFF7B10).withValues(alpha: 0.20),
             blurRadius: 16.r,
             offset: Offset(0, 7.h),
           ),
@@ -378,17 +300,13 @@ class _StreakHeroCard
           Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Obx(
-                      () => Text(
-                    'daily_streak_count'.trParams(
-                      <String, String>{
-                        'count':
-                        controller.dailyStreakDays.toString(),
-                      },
-                    ),
+                  () => Text(
+                    'daily_streak_count'.trParams(<String, String>{
+                      'count': controller.dailyStreakDays.toString(),
+                    }),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -409,28 +327,20 @@ class _StreakHeroCard
                     fontSize: AppFont.font13.sp,
                     height: 1.3,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.white.withValues(
-                      alpha: 0.90,
-                    ),
+                    color: AppColors.white.withValues(alpha: 0.90),
                   ),
                 ),
                 SizedBox(height: 14.h),
                 Obx(
-                      () => Container(
-                    constraints: BoxConstraints(
-                      minHeight: 30.h,
-                    ),
+                  () => Container(
+                    constraints: BoxConstraints(minHeight: 30.h),
                     padding: EdgeInsets.symmetric(
                       horizontal: 12.w,
                       vertical: 7.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.white.withValues(
-                        alpha: 0.20,
-                      ),
-                      borderRadius: BorderRadius.circular(
-                        999.r,
-                      ),
+                      color: AppColors.white.withValues(alpha: 0.20),
+                      borderRadius: BorderRadius.circular(999.r),
                     ),
                     child: Text(
                       controller.dailyChallengeLevelLabel,
@@ -451,9 +361,7 @@ class _StreakHeroCard
           Icon(
             Icons.local_fire_department_rounded,
             size: 88.r,
-            color: AppColors.white.withValues(
-              alpha: 0.92,
-            ),
+            color: AppColors.white.withValues(alpha: 0.92),
           ),
         ],
       ),
@@ -461,164 +369,129 @@ class _StreakHeroCard
   }
 }
 
-class _DailyTaskCard
-    extends GetView<PracticeHubController> {
-  const _DailyTaskCard({
-    required this.task,
-  });
+class _DailyTaskCard extends GetView<PracticeHubController> {
+  const _DailyTaskCard({required this.task});
 
   final DailyChallengeTaskModel task;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(
-        16.r,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(
-          20.r,
-        ),
-        border: Border.all(
-          color: const Color(0xFFE8EBE9),
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: 0.035,
-            ),
-            blurRadius: 12.r,
-            offset: Offset(0, 5.h),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _openTaskDetails(task),
+        borderRadius: BorderRadius.circular(20.r),
+        child: Ink(
+          width: double.infinity,
+          padding: EdgeInsets.all(16.r),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: const Color(0xFFE8EBE9)),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.035),
+                blurRadius: 12.r,
+                offset: Offset(0, 5.h),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-        children: <Widget>[
-          _TaskIcon(
-            icon: _taskIcon(task.taskKey),
-          ),
-          SizedBox(width: 13.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  task.title,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: AppFont.font14.sp,
-                    height: 1.3,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF505653),
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(
-                    999.r,
-                  ),
-                  child: LinearProgressIndicator(
-                    value: task.progress,
-                    minHeight: 7.h,
-                    backgroundColor:
-                    const Color(0xFFE5E8E6),
-                    valueColor:
-                    const AlwaysStoppedAnimation<Color>(
-                      Color(0xFF62CC35),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                Wrap(
-                  spacing: 10.w,
-                  runSpacing: 8.h,
-                  crossAxisAlignment:
-                  WrapCrossAlignment.center,
-                  alignment: WrapAlignment.spaceBetween,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _TaskIcon(icon: _taskIcon(task.taskKey)),
+              SizedBox(width: 13.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      'task_progress'.trParams(
-                        <String, String>{
-                          'current':
-                          task.progressValue.toString(),
-                          'target':
-                          task.targetValue.toString(),
-                          'unit': task.unit,
-                        },
-                      ),
+                      task.title,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: AppFont.font12.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(
-                          0xFF6D736F,
+                        fontSize: AppFont.font14.sp,
+                        height: 1.3,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF505653),
+                      ),
+                    ),
+                    SizedBox(height: 5.h),
+                    _TaskDetailsButton(task: task),
+                    SizedBox(height: 10.h),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(999.r),
+                      child: LinearProgressIndicator(
+                        value: task.progress,
+                        minHeight: 7.h,
+                        backgroundColor: const Color(0xFFE5E8E6),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF62CC35),
                         ),
                       ),
                     ),
-                    _TaskRewardButton(
-                      task: task,
+                    SizedBox(height: 10.h),
+                    Wrap(
+                      spacing: 10.w,
+                      runSpacing: 8.h,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      alignment: WrapAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'task_progress'.trParams(<String, String>{
+                            'current': task.progressValue.toString(),
+                            'target': task.targetValue.toString(),
+                            'unit': task.unit,
+                          }),
+                          style: TextStyle(
+                            fontSize: AppFont.font12.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF6D736F),
+                          ),
+                        ),
+                        _TaskRewardButton(task: task),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _TaskRewardButton
-    extends GetView<PracticeHubController> {
-  const _TaskRewardButton({
-    required this.task,
-  });
+class _TaskRewardButton extends GetView<PracticeHubController> {
+  const _TaskRewardButton({required this.task});
 
   final DailyChallengeTaskModel task;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final bool loading =
-          controller.isClaimingDailyTask.value;
+      final bool loading = controller.isClaimingDailyTask.value;
 
-      final bool enabled =
-          task.canClaim && !loading;
+      final bool enabled = task.canClaim && !loading;
 
       return Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: enabled
               ? () {
-            controller.claimDailyChallengeTask(
-              task,
-            );
-          }
+                  controller.claimDailyChallengeTask(task);
+                }
               : null,
-          borderRadius: BorderRadius.circular(
-            999.r,
-          ),
+          borderRadius: BorderRadius.circular(999.r),
           child: Container(
-            constraints: BoxConstraints(
-              minHeight: 34.h,
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: 13.w,
-              vertical: 7.h,
-            ),
+            constraints: BoxConstraints(minHeight: 34.h),
+            padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 7.h),
             decoration: BoxDecoration(
               color: task.canClaim
                   ? const Color(0xFFFFF4E4)
                   : const Color(0xFFF1F3F2),
-              borderRadius: BorderRadius.circular(
-                999.r,
-              ),
+              borderRadius: BorderRadius.circular(999.r),
               border: Border.all(
                 color: task.canClaim
                     ? const Color(0xFFFFC36E)
@@ -627,36 +500,29 @@ class _TaskRewardButton
             ),
             child: loading && task.canClaim
                 ? SizedBox(
-              width: 15.r,
-              height: 15.r,
-              child:
-              const CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Color(0xFF8C5200),
-              ),
-            )
+                    width: 15.r,
+                    height: 15.r,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Color(0xFF8C5200),
+                    ),
+                  )
                 : Text(
-              task.canClaim
-                  ? 'claim_xp'.trParams(
-                <String, String>{
-                  'xp':
-                  task.rewardXp.toString(),
-                },
-              )
-                  : 'reward_xp'.trParams(
-                <String, String>{
-                  'xp':
-                  task.rewardXp.toString(),
-                },
-              ),
-              style: TextStyle(
-                fontSize: AppFont.font11.sp,
-                fontWeight: FontWeight.w900,
-                color: task.canClaim
-                    ? const Color(0xFF8C5200)
-                    : const Color(0xFF858A87),
-              ),
-            ),
+                    task.canClaim
+                        ? 'claim_xp'.trParams(<String, String>{
+                            'xp': task.rewardXp.toString(),
+                          })
+                        : 'reward_xp'.trParams(<String, String>{
+                            'xp': task.rewardXp.toString(),
+                          }),
+                    style: TextStyle(
+                      fontSize: AppFont.font11.sp,
+                      fontWeight: FontWeight.w900,
+                      color: task.canClaim
+                          ? const Color(0xFF8C5200)
+                          : const Color(0xFF858A87),
+                    ),
+                  ),
           ),
         ),
       );
@@ -664,140 +530,150 @@ class _TaskRewardButton
   }
 }
 
-class _ClaimedTaskCard extends StatelessWidget {
-  const _ClaimedTaskCard({
-    required this.task,
-  });
+class _TaskDetailsButton extends StatelessWidget {
+  const _TaskDetailsButton({required this.task});
 
   final DailyChallengeTaskModel task;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(
-        15.r,
+    return TextButton.icon(
+      onPressed: () => _openTaskDetails(task),
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.primaryGreen,
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE5FFD9),
-        borderRadius: BorderRadius.circular(
-          20.r,
+      icon: Icon(Icons.info_outline_rounded, size: 17.r),
+      label: Text(
+        'details'.tr,
+        style: TextStyle(
+          fontSize: AppFont.font12.sp,
+          fontWeight: FontWeight.w800,
         ),
-        border: Border.all(
-          color: const Color(0xFFA8E88C),
-        ),
-      ),
-      child: Row(
-        children: <Widget>[
-          Container(
-            width: 44.r,
-            height: 44.r,
-            decoration: const BoxDecoration(
-              color: Color(0xFF237900),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.check_rounded,
-              size: 25.r,
-              color: AppColors.white,
-            ),
-          ),
-          SizedBox(width: 13.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  task.title,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: AppFont.font13.sp,
-                    height: 1.3,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF52734B),
-                    decoration:
-                    TextDecoration.lineThrough,
-                  ),
-                ),
-                SizedBox(height: 7.h),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 5.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.white.withValues(
-                      alpha: 0.75,
-                    ),
-                    borderRadius: BorderRadius.circular(
-                      999.r,
-                    ),
-                  ),
-                  child: Text(
-                    'reward_xp'.trParams(
-                      <String, String>{
-                        'xp': task.rewardXp.toString(),
-                      },
-                    ),
-                    style: TextStyle(
-                      fontSize: AppFont.font11.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.primaryGreen,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
 }
 
-class _DailyChestCard
-    extends GetView<PracticeHubController> {
+class _ClaimedTaskCard extends StatelessWidget {
+  const _ClaimedTaskCard({required this.task});
+
+  final DailyChallengeTaskModel task;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _openTaskDetails(task),
+        borderRadius: BorderRadius.circular(20.r),
+        child: Ink(
+          width: double.infinity,
+          padding: EdgeInsets.all(15.r),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE5FFD9),
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: const Color(0xFFA8E88C)),
+          ),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 44.r,
+                height: 44.r,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF237900),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.check_rounded,
+                  size: 25.r,
+                  color: AppColors.white,
+                ),
+              ),
+              SizedBox(width: 13.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      task.title,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: AppFont.font13.sp,
+                        height: 1.3,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF52734B),
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                    SizedBox(height: 7.h),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 5.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.white.withValues(alpha: 0.75),
+                        borderRadius: BorderRadius.circular(999.r),
+                      ),
+                      child: Text(
+                        'reward_xp'.trParams(<String, String>{
+                          'xp': task.rewardXp.toString(),
+                        }),
+                        style: TextStyle(
+                          fontSize: AppFont.font11.sp,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primaryGreen,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    _TaskDetailsButton(task: task),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void _openTaskDetails(DailyChallengeTaskModel task) {
+  Get.to<void>(() => DailyChallengeDetailsView(task: task));
+}
+
+class _DailyChestCard extends GetView<PracticeHubController> {
   const _DailyChestCard();
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final bool unlocked =
-          controller.isDailyChestUnlocked;
+      final bool unlocked = controller.isDailyChestUnlocked;
 
-      final bool opened =
-          controller.isDailyChestOpened;
+      final bool opened = controller.isDailyChestOpened;
 
-      final bool loading =
-          controller.isOpeningDailyChest.value;
+      final bool loading = controller.isOpeningDailyChest.value;
 
-      final int taskCount =
-          controller.dailyChallengeTasks.length;
+      final int taskCount = controller.dailyChallengeTasks.length;
 
-      final int completed =
-          controller.dailyCompletedTaskCount;
+      final int completed = controller.dailyCompletedTaskCount;
 
       return Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: loading
-              ? null
-              : controller.onDailyChestTap,
-          borderRadius: BorderRadius.circular(
-            22.r,
-          ),
+          onTap: loading ? null : controller.onDailyChestTap,
+          borderRadius: BorderRadius.circular(22.r),
           child: Ink(
             width: double.infinity,
-            padding: EdgeInsets.all(
-              16.r,
-            ),
+            padding: EdgeInsets.all(16.r),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(
-                22.r,
-              ),
+              borderRadius: BorderRadius.circular(22.r),
               gradient: const LinearGradient(
                 begin: Alignment.bottomLeft,
                 end: Alignment.topRight,
@@ -809,10 +685,7 @@ class _DailyChestCard
               ),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: const Color(0xFF174B36)
-                      .withValues(
-                    alpha: 0.18,
-                  ),
+                  color: const Color(0xFF174B36).withValues(alpha: 0.18),
                   blurRadius: 14.r,
                   offset: Offset(0, 6.h),
                 ),
@@ -826,75 +699,56 @@ class _DailyChestCard
                   child: Image.asset(
                     'assets/heroes/daily_chest.png',
                     fit: BoxFit.contain,
-                    errorBuilder: (
-                        BuildContext context,
-                        Object error,
-                        StackTrace? stackTrace,
+                    errorBuilder:
+                        (
+                          BuildContext context,
+                          Object error,
+                          StackTrace? stackTrace,
                         ) {
-                      return Icon(
-                        Icons.inventory_2_rounded,
-                        size: 54.r,
-                        color: const Color(
-                          0xFFD3F17C,
-                        ),
-                      );
-                    },
+                          return Icon(
+                            Icons.inventory_2_rounded,
+                            size: 54.r,
+                            color: const Color(0xFFD3F17C),
+                          );
+                        },
                   ),
                 ),
                 SizedBox(width: 13.w),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
                         opened
                             ? 'daily_chest_nopened'.tr
                             : unlocked
-                            ? 'daily_chest_nunlocked'
-                            .tr
-                            : 'unlock_the_ndaily_chest'
-                            .tr,
+                            ? 'daily_chest_nunlocked'.tr
+                            : 'unlock_the_ndaily_chest'.tr,
                         maxLines: 2,
-                        overflow:
-                        TextOverflow.ellipsis,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize:
-                          AppFont.font16.sp,
+                          fontSize: AppFont.font16.sp,
                           height: 1.15,
-                          fontWeight:
-                          FontWeight.w900,
+                          fontWeight: FontWeight.w900,
                           color: AppColors.white,
                         ),
                       ),
                       SizedBox(height: 5.h),
                       Text(
                         opened
-                            ? 'tap_to_view_your_reward'
-                            .tr
+                            ? 'tap_to_view_your_reward'.tr
                             : unlocked
-                            ? 'tap_to_open_your_reward'
-                            .tr
-                            : 'complete_all_tasks_to_open'
-                            .trParams(
-                          <String, String>{
-                            'count':
-                            taskCount.toString(),
-                          },
-                        ),
+                            ? 'tap_to_open_your_reward'.tr
+                            : 'complete_all_tasks_to_open'.trParams(
+                                <String, String>{'count': taskCount.toString()},
+                              ),
                         maxLines: 3,
-                        overflow:
-                        TextOverflow.ellipsis,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize:
-                          AppFont.font12.sp,
+                          fontSize: AppFont.font12.sp,
                           height: 1.3,
-                          fontWeight:
-                          FontWeight.w500,
-                          color: AppColors.white
-                              .withValues(
-                            alpha: 0.80,
-                          ),
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.white.withValues(alpha: 0.80),
                         ),
                       ),
                       SizedBox(height: 12.h),
@@ -902,11 +756,8 @@ class _DailyChestCard
                         SizedBox(
                           width: 20.r,
                           height: 20.r,
-                          child:
-                          const CircularProgressIndicator(
-                            color: Color(
-                              0xFF75FF35,
-                            ),
+                          child: const CircularProgressIndicator(
+                            color: Color(0xFF75FF35),
                             strokeWidth: 2.3,
                           ),
                         )
@@ -914,31 +765,22 @@ class _DailyChestCard
                         Wrap(
                           spacing: 6.w,
                           runSpacing: 6.h,
-                          children:
-                          List<Widget>.generate(
-                            taskCount,
-                                (int index) {
-                              final bool active =
-                                  index < completed;
+                          children: List<Widget>.generate(taskCount, (
+                            int index,
+                          ) {
+                            final bool active = index < completed;
 
-                              return Container(
-                                width: 9.r,
-                                height: 9.r,
-                                decoration:
-                                BoxDecoration(
-                                  color: active
-                                      ? const Color(
-                                    0xFF75FF35,
-                                  )
-                                      : AppColors.white
-                                      .withValues(
-                                    alpha: 0.25,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                              );
-                            },
-                          ),
+                            return Container(
+                              width: 9.r,
+                              height: 9.r,
+                              decoration: BoxDecoration(
+                                color: active
+                                    ? const Color(0xFF75FF35)
+                                    : AppColors.white.withValues(alpha: 0.25),
+                                shape: BoxShape.circle,
+                              ),
+                            );
+                          }),
                         ),
                     ],
                   ),
@@ -947,9 +789,7 @@ class _DailyChestCard
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 17.r,
-                  color: AppColors.white.withValues(
-                    alpha: 0.75,
-                  ),
+                  color: AppColors.white.withValues(alpha: 0.75),
                 ),
               ],
             ),
@@ -961,9 +801,7 @@ class _DailyChestCard
 }
 
 class _TaskIcon extends StatelessWidget {
-  const _TaskIcon({
-    required this.icon,
-  });
+  const _TaskIcon({required this.icon});
 
   final IconData icon;
 
@@ -977,11 +815,7 @@ class _TaskIcon extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: Icon(
-        icon,
-        size: 23.r,
-        color: AppColors.white,
-      ),
+      child: Icon(icon, size: 23.r, color: AppColors.white),
     );
   }
 }

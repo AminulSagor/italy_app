@@ -28,6 +28,7 @@ class QuizQuestionPanel extends StatelessWidget {
   final ValueChanged<String> onListeningWordTap;
   final ValueChanged<String> onListeningSelectedWordTap;
   final void Function(int oldIndex, int newIndex) onMatchingRightReorder;
+  final VoidCallback onAudioCompleted;
 
   const QuizQuestionPanel({
     super.key,
@@ -46,6 +47,7 @@ class QuizQuestionPanel extends StatelessWidget {
     required this.onListeningWordTap,
     required this.onListeningSelectedWordTap,
     required this.onMatchingRightReorder,
+    required this.onAudioCompleted,
   });
 
   @override
@@ -59,6 +61,7 @@ class QuizQuestionPanel extends StatelessWidget {
           selectedIndex: selectedIndex,
           showWrongResult: showWrongResult,
           onOptionTap: onOptionTap,
+          onAudioCompleted: onAudioCompleted,
         );
       case QuizQuestionType.wordTranslation:
         return _WordTranslationPanel(
@@ -81,6 +84,7 @@ class QuizQuestionPanel extends StatelessWidget {
           selectedIndex: selectedIndex,
           showWrongResult: showWrongResult,
           onOptionTap: onOptionTap,
+          onAudioCompleted: onAudioCompleted,
         );
       case QuizQuestionType.fillBlank:
         return _FillBlankPanel(
@@ -96,6 +100,7 @@ class QuizQuestionPanel extends StatelessWidget {
           showWrongResult: showWrongResult,
           onWordTap: onListeningWordTap,
           onSelectedWordTap: onListeningSelectedWordTap,
+          onAudioCompleted: onAudioCompleted,
         );
       case QuizQuestionType.matchingPairs:
         return _MatchingPairsPanel(

@@ -42,6 +42,7 @@ class MessageChatApiService {
           contactAvatarUrl: thread.avatarUrl,
           isOnline: thread.isOnline,
           contactId: thread.contactId,
+          isUnavailable: thread.isUnavailable,
           messages: messages,
         );
       }
@@ -59,6 +60,7 @@ class MessageChatApiService {
       contactAvatarUrl: thread.avatarUrl,
       isOnline: thread.isOnline,
       contactId: thread.contactId,
+      isUnavailable: thread.isUnavailable,
       messages: const <MessageChatItemModel>[],
     );
   }

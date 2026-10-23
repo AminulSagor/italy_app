@@ -34,6 +34,7 @@ String cvOptionLabel(String option) {
 String cvCategoryLabel(String category) {
   final String normalized = category.trim().toLowerCase();
   const Map<String, String> keys = <String, String>{
+    'standard': 'cvb_category_standard',
     'professional': 'cvb_category_professional',
     'modern': 'cvb_category_modern',
     'classic': 'cvb_category_classic',

@@ -401,9 +401,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     @objc public func showCallkitIncoming(_ data: Data, fromPushKit: Bool, onError: ((Error?) -> Void)? = nil) {
         self.isFromPushKit = fromPushKit
-        if(fromPushKit){
-            self.data = data
-        }
+        self.data = data
         
         if(data.isShowMissedCallNotification){
             CallkitNotificationManager.shared.addNotificationCategory(data.missedNotificationCallbackText)
@@ -429,10 +427,8 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             return
         }
         
-        self.configureAudioSession()
         self.sharedProvider?.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if(error == nil) {
-                self.configureAudioSession()
                 let call = Call(uuid: uuid, data: data)
                 call.handle = data.handle
                 self.callManager.addCall(call)
@@ -450,9 +446,7 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
     
     @objc public func showCallkitIncoming(_ data: Data, fromPushKit: Bool, completion: @escaping () -> Void) {
         self.isFromPushKit = fromPushKit
-        if(fromPushKit){
-            self.data = data
-        }
+        self.data = data
         
         if(data.isShowMissedCallNotification){
             CallkitNotificationManager.shared.addNotificationCategory(data.missedNotificationCallbackText)
@@ -482,7 +476,6 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
         
         self.sharedProvider?.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if(error == nil) {
-                self.configureAudioSession()
                 let call = Call(uuid: uuid, data: data)
                 call.handle = data.handle
                 self.callManager.addCall(call)
@@ -853,11 +846,18 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, FlutterPlugin, CXProvi
             appDelegate.onAccept(call, action)
         }
 
-        // Do not hold CXAnswerCallAction open while a Flutter engine cold
-        // starts, performs HTTP, or initializes Agora. A delayed action is
-        // timed out by CallKit and the system tears down the accepted call.
-        action.fulfill()
-        lifecycleLog("answer fulfilled uuid=\(action.callUUID.uuidString)")
+        if call.hasConnected {
+            // The in-app answer path joined Agora before requesting this
+            // CallKit transaction, so media is already ready.
+            action.fulfill()
+            lifecycleLog("answer fulfilled for connected call uuid=\(action.callUUID.uuidString)")
+        } else {
+            // Keep CallKit in its connecting state until Dart has acknowledged
+            // the call with the server and prepared Agora. completeAnswer or
+            // failAnswer resolves this action and activation follows fulfill.
+            pendingAnswerActions[action.callUUID] = action
+            lifecycleLog("answer pending uuid=\(action.callUUID.uuidString)")
+        }
 
         sendEvent(
             SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ACCEPT,

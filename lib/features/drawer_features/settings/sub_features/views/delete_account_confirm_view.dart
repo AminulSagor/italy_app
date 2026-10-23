@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/settings_localization.dart';
 import '../../settings_controller.dart';
@@ -15,7 +17,8 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
       backgroundColor: SettingsUi.background,
       body: SafeArea(
         child: Obx(() {
-          final String accountName = controller.profile.value?.fullName.trim() ?? '';
+          final String confirmationTarget =
+              controller.deleteAccountConfirmationTarget;
           return ListView(
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.fromLTRB(18.w, 12.h, 18.w, 28.h),
@@ -57,13 +60,59 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
                   color: SettingsUi.muted,
                 ),
               ),
+              if (defaultTargetPlatform == TargetPlatform.iOS) ...<Widget>[
+                SizedBox(height: 14.h),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(14.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF4E5),
+                    borderRadius: BorderRadius.circular(14.r),
+                    border: Border.all(color: const Color(0xFFF0C36D)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        SettingsL10n.text('apple_subscription_delete_warning'),
+                        style: TextStyle(
+                          fontSize: 12.5.sp,
+                          height: 1.45,
+                          fontWeight: FontWeight.w600,
+                          color: SettingsUi.text,
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => launchUrl(
+                          Uri.parse(
+                            'https://apps.apple.com/account/subscriptions',
+                          ),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        icon: const Icon(Icons.open_in_new_rounded),
+                        label: Text(
+                          SettingsL10n.text('manage_apple_subscription'),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => launchUrl(
+                          Uri.parse('https://reportaproblem.apple.com/'),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        icon: const Icon(Icons.receipt_long_outlined),
+                        label: Text(SettingsL10n.text('request_apple_refund')),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               SizedBox(height: 18.h),
               _DangerInformationCard(),
               SizedBox(height: 20.h),
               Text(
                 SettingsL10n.text(
                   'type_name_to_confirm',
-                  params: <String, String>{'name': accountName},
+                  params: <String, String>{'name': confirmationTarget},
                 ),
                 style: TextStyle(
                   fontSize: 12.sp,
@@ -73,8 +122,9 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
               ),
               SizedBox(height: 8.h),
               TextField(
-                enabled: accountName.isNotEmpty && !controller.isDeletingAccount.value,
-                onChanged: (String value) => controller.deleteConfirmText.value = value,
+                enabled: !controller.isDeletingAccount.value,
+                onChanged: (String value) =>
+                    controller.deleteConfirmText.value = value,
                 textInputAction: TextInputAction.done,
                 autocorrect: false,
                 enableSuggestions: false,
@@ -86,7 +136,7 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
-                  hintText: accountName,
+                  hintText: confirmationTarget,
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 16.w,
                     vertical: 16.h,
@@ -112,11 +162,8 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
                   !controller.canDeleteAccount) ...<Widget>[
                 SizedBox(height: 7.h),
                 Text(
-                  SettingsL10n.text('name_does_not_match'),
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    color: SettingsUi.danger,
-                  ),
+                  SettingsL10n.text('deletion_confirmation_does_not_match'),
+                  style: TextStyle(fontSize: 11.sp, color: SettingsUi.danger),
                 ),
               ],
               SizedBox(height: 22.h),
@@ -125,7 +172,8 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
                 icon: Icons.delete_forever_outlined,
                 color: SettingsUi.danger,
                 loadingColor: SettingsUi.danger,
-                enabled: controller.canDeleteAccount &&
+                enabled:
+                    controller.canDeleteAccount &&
                     !controller.isDeletingAccount.value,
                 isLoading: controller.isDeletingAccount.value,
                 onTap: controller.deleteAccountPermanently,
@@ -134,7 +182,9 @@ class DeleteAccountConfirmView extends GetView<SettingsController> {
               SizedBox(
                 height: 52.h,
                 child: OutlinedButton(
-                  onPressed: controller.isDeletingAccount.value ? null : Get.back,
+                  onPressed: controller.isDeletingAccount.value
+                      ? null
+                      : Get.back,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: SettingsUi.text,
                     side: const BorderSide(color: SettingsUi.border),
@@ -172,7 +222,11 @@ class _DangerInformationCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(Icons.warning_amber_rounded, size: 22.r, color: SettingsUi.danger),
+          Icon(
+            Icons.warning_amber_rounded,
+            size: 22.r,
+            color: SettingsUi.danger,
+          ),
           SizedBox(width: 10.w),
           Expanded(
             child: Text(

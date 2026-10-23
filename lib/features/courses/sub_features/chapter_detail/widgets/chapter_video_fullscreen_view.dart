@@ -21,6 +21,10 @@ class ChapterVideoFullscreenView extends StatefulWidget {
   final ValueListenable<String>? selectedQualityListenable;
   final Future<void> Function(ChapterVideoQualityOption? quality)?
   onQualityChanged;
+  final String? recoveryMessage;
+  final ValueListenable<String?>? recoveryMessageListenable;
+  final Future<void> Function()? onRetry;
+  final ValueChanged<bool>? onPlaybackIntentChanged;
 
   const ChapterVideoFullscreenView({
     super.key,
@@ -34,6 +38,10 @@ class ChapterVideoFullscreenView extends StatefulWidget {
     this.qualityOptions = const <ChapterVideoQualityOption>[],
     this.selectedQualityListenable,
     this.onQualityChanged,
+    this.recoveryMessage,
+    this.recoveryMessageListenable,
+    this.onRetry,
+    this.onPlaybackIntentChanged,
   });
 
   @override
@@ -45,53 +53,67 @@ class _ChapterVideoFullscreenViewState
     extends State<ChapterVideoFullscreenView> {
   bool _isClosing = false;
   bool _portraitRestored = false;
+  bool _isDisposed = false;
+  late final Future<void> _enterFullscreenFuture;
+  Future<void>? _portraitRestoreFuture;
 
   @override
   void initState() {
     super.initState();
 
-    unawaited(_enterFullscreenMode());
+    _enterFullscreenFuture = _enterFullscreenMode();
   }
 
   Future<void> _enterFullscreenMode() async {
-    /*
-     * Fullscreen course videos are allowed to rotate
-     * into either landscape direction.
-     */
-    await SystemChrome.setPreferredOrientations(
-      <DeviceOrientation>[
+    try {
+      /*
+       * Fullscreen course and job-introduction videos are allowed to rotate
+       * into either landscape direction.
+       */
+      await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
-      ],
-    );
+      ]);
 
-    await SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.immersiveSticky,
-    );
+      if (_isDisposed || _isClosing) {
+        return;
+      }
+
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } catch (_) {
+      // Keep the route usable if the platform rejects an orientation request.
+    }
   }
 
-  Future<void> _restoreNormalScreenMode() async {
-    if (_portraitRestored) {
+  Future<void> _restoreNormalScreenMode() {
+    return _portraitRestoreFuture ??= _performPortraitRestore();
+  }
+
+  Future<void> _performPortraitRestore() async {
+    await _enterFullscreenFuture;
+
+    if (_isDisposed || _portraitRestored) {
       return;
     }
 
-    /*
-     * Restore portrait before closing this route.
-     *
-     * This prevents the underlying course page from
-     * briefly rebuilding with landscape dimensions.
-     */
-    await SystemChrome.setPreferredOrientations(
-      <DeviceOrientation>[
+    try {
+      /*
+       * Restore portrait before closing this route. This prevents the
+       * underlying page from briefly rebuilding with landscape dimensions.
+       */
+      await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
         DeviceOrientation.portraitUp,
-      ],
-    );
+      ]);
 
-    await SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-    );
+      if (_isDisposed) {
+        return;
+      }
 
-    _portraitRestored = true;
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      _portraitRestored = true;
+    } catch (_) {
+      // Closing the route must remain possible even if restoration fails.
+    }
 
     /*
      * Keep the fullscreen route visible until Flutter
@@ -117,9 +139,7 @@ class _ChapterVideoFullscreenViewState
         return;
       }
 
-      await Future<void>.delayed(
-        const Duration(milliseconds: 30),
-      );
+      await Future<void>.delayed(const Duration(milliseconds: 30));
     }
   }
 
@@ -145,24 +165,20 @@ class _ChapterVideoFullscreenViewState
 
   @override
   void dispose() {
+    _isDisposed = true;
+
     /*
      * Fallback for cases where the route is removed
      * without using the fullscreen close action.
      */
     if (!_portraitRestored) {
       unawaited(
-        SystemChrome.setPreferredOrientations(
-          <DeviceOrientation>[
-            DeviceOrientation.portraitUp,
-          ],
-        ),
+        SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+          DeviceOrientation.portraitUp,
+        ]),
       );
 
-      unawaited(
-        SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.edgeToEdge,
-        ),
-      );
+      unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
     }
 
     super.dispose();
@@ -172,11 +188,7 @@ class _ChapterVideoFullscreenViewState
     if (controller == null || !controller.value.isInitialized) {
       return const ColoredBox(
         color: AppColors.black,
-        child: Center(
-          child: CircularProgressIndicator(
-            color: AppColors.white,
-          ),
-        ),
+        child: Center(child: CircularProgressIndicator(color: AppColors.white)),
       );
     }
 
@@ -191,6 +203,10 @@ class _ChapterVideoFullscreenViewState
       qualityOptions: widget.qualityOptions,
       selectedQualityListenable: widget.selectedQualityListenable,
       onQualityChanged: widget.onQualityChanged,
+      recoveryMessage: widget.recoveryMessage,
+      recoveryMessageListenable: widget.recoveryMessageListenable,
+      onRetry: widget.onRetry,
+      onPlaybackIntentChanged: widget.onPlaybackIntentChanged,
       onCloseFullscreenTap: () {
         unawaited(_closeFullscreen());
       },
@@ -204,10 +220,7 @@ class _ChapterVideoFullscreenViewState
 
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (
-          bool didPop,
-          Object? result,
-          ) {
+      onPopInvokedWithResult: (bool didPop, Object? result) {
         if (!didPop) {
           unawaited(_closeFullscreen());
         }
@@ -217,15 +230,16 @@ class _ChapterVideoFullscreenViewState
         body: controllerListenable == null
             ? _buildPlayer(widget.controller)
             : ValueListenableBuilder<VideoPlayerController?>(
-          valueListenable: controllerListenable,
-          builder: (
-              BuildContext context,
-              VideoPlayerController? controller,
-              Widget? child,
-              ) {
-            return _buildPlayer(controller);
-          },
-        ),
+                valueListenable: controllerListenable,
+                builder:
+                    (
+                      BuildContext context,
+                      VideoPlayerController? controller,
+                      Widget? child,
+                    ) {
+                      return _buildPlayer(controller);
+                    },
+              ),
       ),
     );
   }

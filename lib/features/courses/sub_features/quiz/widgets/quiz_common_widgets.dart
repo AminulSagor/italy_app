@@ -46,9 +46,7 @@ class QuizTopBar extends StatelessWidget {
         SizedBox(width: 12.w),
         Expanded(
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(
-              kHomePillRadius.r,
-            ),
+            borderRadius: BorderRadius.circular(kHomePillRadius.r),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: kQuizTopProgressHeight.h,
@@ -59,25 +57,18 @@ class QuizTopBar extends StatelessWidget {
         ),
         SizedBox(width: 12.w),
         Container(
-          constraints: BoxConstraints(
-            minWidth: 58.w,
-            minHeight: 36.h,
-          ),
+          constraints: BoxConstraints(minWidth: 58.w, minHeight: 36.h),
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: AppColors.legacyColorFFF1F2F2,
-            borderRadius: BorderRadius.circular(
-              kHomePillRadius.r,
-            ),
+            borderRadius: BorderRadius.circular(kHomePillRadius.r),
           ),
           child: Text(
-            'current_total'.trParams(
-              <String, String>{
-                'current': current.toString(),
-                'total': total.toString(),
-              },
-            ),
+            'current_total'.trParams(<String, String>{
+              'current': current.toString(),
+              'total': total.toString(),
+            }),
             maxLines: 1,
             style: TextStyle(
               fontSize: AppFont.font12.sp,
@@ -122,9 +113,7 @@ class QuizBottomAction extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(kRadius16.r),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(kRadius16.r)),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
@@ -137,58 +126,56 @@ class QuizBottomAction extends StatelessWidget {
         top: false,
         child: isExamMode
             ? Row(
-          children: <Widget>[
-            Expanded(
-              child: OutlinedButton(
-                onPressed: isLoading ? null : onSkipTap,
-                style: OutlinedButton.styleFrom(
-                  minimumSize: Size.fromHeight(54.h),
-                  side: const BorderSide(
-                    color: AppColors.primaryGreen,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      kHomePillRadius.r,
+                children: <Widget>[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: isLoading ? null : onSkipTap,
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: Size.fromHeight(54.h),
+                        side: const BorderSide(color: AppColors.primaryGreen),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            kHomePillRadius.r,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'skip'.tr,
+                        style: TextStyle(
+                          fontSize: AppFont.font14.sp,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryGreen,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                child: Text(
-                  'skip'.tr,
-                  style: TextStyle(
-                    fontSize: AppFont.font14.sp,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primaryGreen,
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: CustomButton.primary(
+                      text: 'submit'.tr,
+                      isLoading: isLoading,
+                      onPressed: onCheckTap,
+                    ),
                   ),
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: CustomButton.primary(
-                text: 'submit'.tr,
+                ],
+              )
+            : showWrongResult
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (feedback != null) feedback!,
+                  if (feedback != null) SizedBox(height: 14.h),
+                  CustomButton.primary(
+                    text: 'next_question'.tr,
+                    onPressed: onNextTap,
+                  ),
+                ],
+              )
+            : CustomButton.primary(
+                text: 'check_answer'.tr,
                 isLoading: isLoading,
                 onPressed: onCheckTap,
               ),
-            ),
-          ],
-        )
-            : showWrongResult
-            ? Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (feedback != null) feedback!,
-            if (feedback != null) SizedBox(height: 14.h),
-            CustomButton.primary(
-              text: 'next_question'.tr,
-              onPressed: onNextTap,
-            ),
-          ],
-        )
-            : CustomButton.primary(
-          text: 'check_answer'.tr,
-          isLoading: isLoading,
-          onPressed: onCheckTap,
-        ),
       ),
     );
   }
@@ -237,21 +224,13 @@ class CustomQuizButton extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: double.infinity,
-        constraints: BoxConstraints(
-          minHeight: height.h,
-        ),
-        padding: EdgeInsets.symmetric(
-          horizontal: 18.w,
-          vertical: 14.h,
-        ),
+        constraints: BoxConstraints(minHeight: height.h),
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(radius.r),
-          border: Border.all(
-            color: borderColor,
-            width: 2.w,
-          ),
+          border: Border.all(color: borderColor, width: 2.w),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: shadowColor,
@@ -280,27 +259,21 @@ class CustomQuizButton extends StatelessWidget {
 class AudioPromptCard extends StatefulWidget {
   final String audioUrl;
   final bool compact;
+  final VoidCallback? onCompleted;
 
   const AudioPromptCard({
     super.key,
     required this.audioUrl,
     this.compact = false,
+    this.onCompleted,
   });
 
   @override
-  State<AudioPromptCard> createState() =>
-      _AudioPromptCardState();
+  State<AudioPromptCard> createState() => _AudioPromptCardState();
 }
 
 class _AudioPromptCardState extends State<AudioPromptCard> {
-  static const List<double> _speeds = <double>[
-    0.5,
-    0.75,
-    1,
-    1.25,
-    1.5,
-    2,
-  ];
+  static const List<double> _speeds = <double>[0.5, 0.75, 1, 1.25, 1.5, 2];
 
   final AudioPlayer _player = AudioPlayer();
 
@@ -310,6 +283,7 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
   bool _hasError = false;
   bool _isPlaying = false;
   int _speedIndex = 2;
+  bool _didNotifyCompletion = false;
 
   double get _speed => _speeds[_speedIndex];
 
@@ -317,28 +291,31 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
   void initState() {
     super.initState();
 
-    _playerStateSubscription =
-        _player.playerStateStream.listen(
-              (PlayerState state) {
-            if (!mounted) {
-              return;
-            }
+    _playerStateSubscription = _player.playerStateStream.listen((
+      PlayerState state,
+    ) {
+      if (!mounted) {
+        return;
+      }
 
-            final bool isCompleted =
-                state.processingState == ProcessingState.completed;
+      final bool isCompleted =
+          state.processingState == ProcessingState.completed;
 
-            setState(() {
-              _isPlaying = state.playing && !isCompleted;
-              _isLoading =
-                  state.processingState == ProcessingState.loading ||
-                      state.processingState == ProcessingState.buffering;
-            });
+      setState(() {
+        _isPlaying = state.playing && !isCompleted;
+        _isLoading =
+            state.processingState == ProcessingState.loading ||
+            state.processingState == ProcessingState.buffering;
+      });
 
-            if (isCompleted && state.playing) {
-              unawaited(_player.pause());
-            }
-          },
-        );
+      if (isCompleted && state.playing) {
+        if (!_didNotifyCompletion) {
+          _didNotifyCompletion = true;
+          widget.onCompleted?.call();
+        }
+        unawaited(_player.pause());
+      }
+    });
 
     unawaited(_loadAudio());
   }
@@ -354,6 +331,7 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
 
   Future<void> _loadAudio() async {
     await _player.stop();
+    _didNotifyCompletion = false;
 
     if (!mounted) {
       return;
@@ -422,8 +400,7 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
       return;
     }
 
-    final int nextIndex =
-        (_speedIndex + 1) % _speeds.length;
+    final int nextIndex = (_speedIndex + 1) % _speeds.length;
 
     await _player.setSpeed(_speeds[nextIndex]);
 
@@ -465,9 +442,7 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
       ),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(
-          kCourseDetailCardRadius.r,
-        ),
+        borderRadius: BorderRadius.circular(kCourseDetailCardRadius.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: AppColors.homeNeutralShadow,
@@ -488,9 +463,7 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              _hasError
-                  ? Icons.audio_file_rounded
-                  : Icons.volume_up_rounded,
+              _hasError ? Icons.audio_file_rounded : Icons.volume_up_rounded,
               color: AppColors.primaryGreen,
               size: widget.compact ? 34.sp : 42.sp,
             ),
@@ -502,11 +475,9 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
                 child: Align(
                   alignment: Alignment.center,
                   child: _RoundAudioButton(
-                    label: 'audio_speed_multiplier'.trParams(
-                      <String, String>{
-                        'speed': _formatSpeed(_speed),
-                      },
-                    ),
+                    label: 'audio_speed_multiplier'.trParams(<String, String>{
+                      'speed': _formatSpeed(_speed),
+                    }),
                     isEnabled: !_isLoading && !_hasError,
                     onTap: _cycleSpeed,
                   ),
@@ -530,21 +501,20 @@ class _AudioPromptCardState extends State<AudioPromptCard> {
                         ),
                         child: _isLoading
                             ? SizedBox(
-                          width: 22.w,
-                          height: 22.w,
-                          child:
-                          const CircularProgressIndicator(
-                            color: AppColors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        )
+                                width: 22.w,
+                                height: 22.w,
+                                child: const CircularProgressIndicator(
+                                  color: AppColors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
                             : Icon(
-                          _isPlaying
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
-                          color: AppColors.white,
-                          size: 30.sp,
-                        ),
+                                _isPlaying
+                                    ? Icons.pause_rounded
+                                    : Icons.play_arrow_rounded,
+                                color: AppColors.white,
+                                size: 30.sp,
+                              ),
                       ),
                     ),
                   ),
@@ -604,27 +574,21 @@ class _RoundAudioButton extends StatelessWidget {
           ),
           child: icon == null
               ? FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 5.w,
-              ),
-              child: Text(
-                label ?? '',
-                maxLines: 1,
-                style: TextStyle(
-                  fontSize: AppFont.font12.sp,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.bodyText,
-                ),
-              ),
-            ),
-          )
-              : Icon(
-            icon,
-            color: AppColors.bodyText,
-            size: 20.sp,
-          ),
+                  fit: BoxFit.scaleDown,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 5.w),
+                    child: Text(
+                      label ?? '',
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontSize: AppFont.font12.sp,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.bodyText,
+                      ),
+                    ),
+                  ),
+                )
+              : Icon(icon, color: AppColors.bodyText, size: 20.sp),
         ),
       ),
     );

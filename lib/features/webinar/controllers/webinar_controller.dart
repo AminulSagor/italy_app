@@ -29,6 +29,7 @@ class WebinarController extends GetxController {
   final RxBool isRequesting = false.obs;
   final RxBool isLeaving = false.obs;
   final RxBool isSendingMessage = false.obs;
+  final RxBool isSubmittingSafetyAction = false.obs;
   final RxBool isParticipating = false.obs;
   final RxBool isChatFocused = false.obs;
   final RxBool isTalking = false.obs;
@@ -46,6 +47,7 @@ class WebinarController extends GetxController {
   final TextEditingController chatTextController = TextEditingController();
   final ScrollController chatScrollController = ScrollController();
   bool _shouldAutoScrollChat = true;
+  final Set<String> _blockedWebinarUserIds = <String>{};
 
   List<WebinarLiveChatModel> get latestStageMessages {
     if (liveMessages.length <= 3) return liveMessages.toList(growable: false);
@@ -83,16 +85,16 @@ class WebinarController extends GetxController {
     try {
       final ApiResult<WebinarListResponseModel> liveResult =
           await ApiErrorHandler.call(
-        () => _webinarApiService.getLiveWebinars(),
-      );
+            () => _webinarApiService.getLiveWebinars(),
+          );
       if (liveResult.isSuccess && liveResult.data != null) {
         liveWebinars.assignAll(liveResult.data!.webinars);
       }
 
       final ApiResult<WebinarListResponseModel> upcomingResult =
           await ApiErrorHandler.call(
-        () => _webinarApiService.getUpcomingWebinars(),
-      );
+            () => _webinarApiService.getUpcomingWebinars(),
+          );
       if (upcomingResult.isSuccess && upcomingResult.data != null) {
         upcomingWebinars.assignAll(upcomingResult.data!.webinars);
       }
@@ -109,8 +111,8 @@ class WebinarController extends GetxController {
       selectedWebinar.value = webinar;
       final ApiResult<WebinarJoinResultModel> result =
           await ApiErrorHandler.call(
-        () => _webinarApiService.joinWebinar(webinarId: webinar.id),
-      );
+            () => _webinarApiService.joinWebinar(webinarId: webinar.id),
+          );
       if (!result.isSuccess || result.data == null) {
         selectedWebinar.value = null;
 
@@ -125,6 +127,7 @@ class WebinarController extends GetxController {
         result.data!.participant.speakingPermission,
       );
       await agoraService.joinAsAudience(result.data!.token);
+      await _loadBlockedWebinarUsers();
       _connectSocket(webinar.id);
       await Future.wait(<Future<void>>[
         loadParticipants(webinar.id),
@@ -141,15 +144,14 @@ class WebinarController extends GetxController {
   Future<void> loadParticipants(String webinarId) async {
     final ApiResult<WebinarParticipantsResponseModel> result =
         await ApiErrorHandler.call(
-      () => _webinarApiService.getParticipants(webinarId: webinarId),
-      showError: false,
-    );
+          () => _webinarApiService.getParticipants(webinarId: webinarId),
+          showError: false,
+        );
     if (result.isSuccess && result.data != null) {
       participantsTotal.value = result.data!.participants
           .where(
-            (WebinarParticipantModel participant) =>
-        participant.leftAt == null,
-      )
+            (WebinarParticipantModel participant) => participant.leftAt == null,
+          )
           .length;
     }
   }
@@ -157,12 +159,25 @@ class WebinarController extends GetxController {
   Future<void> loadChatMessages(String webinarId) async {
     final ApiResult<WebinarChatMessagesResponseModel> result =
         await ApiErrorHandler.call(
-      () => _webinarApiService.getChatMessages(webinarId: webinarId),
-      showError: false,
-    );
+          () => _webinarApiService.getChatMessages(webinarId: webinarId),
+          showError: false,
+        );
     if (result.isSuccess && result.data != null) {
       liveMessages.assignAll(result.data!.chatMessages);
       _scrollChatToLatest(force: true);
+    }
+  }
+
+  Future<void> _loadBlockedWebinarUsers() async {
+    final ApiResult<Set<String>> result =
+        await ApiErrorHandler.call<Set<String>>(
+          _webinarApiService.getBlockedUserIds,
+          showError: false,
+        );
+    if (result.isSuccess && result.data != null) {
+      _blockedWebinarUserIds
+        ..clear()
+        ..addAll(result.data!);
     }
   }
 
@@ -201,8 +216,8 @@ class WebinarController extends GetxController {
     try {
       final ApiResult<WebinarParticipantModel> result =
           await ApiErrorHandler.call(
-        () => _webinarApiService.leaveStage(webinarId: webinar.id),
-      );
+            () => _webinarApiService.leaveStage(webinarId: webinar.id),
+          );
       if (!result.isSuccess) return;
       currentParticipant.value = result.data;
       speakerRequestStatus.value = 'none';
@@ -243,8 +258,7 @@ class WebinarController extends GetxController {
 
     isSendingMessage.value = true;
     try {
-      final ApiResult<WebinarLiveChatModel> result =
-          await ApiErrorHandler.call(
+      final ApiResult<WebinarLiveChatModel> result = await ApiErrorHandler.call(
         () => _webinarApiService.sendChatMessage(
           webinarId: webinar.id,
           message: text,
@@ -256,6 +270,161 @@ class WebinarController extends GetxController {
       }
     } finally {
       isSendingMessage.value = false;
+    }
+  }
+
+  bool canOpenSafetyActions(WebinarLiveChatModel message) {
+    final String currentUserId = currentParticipant.value?.userId ?? '';
+    return message.senderUserId.isNotEmpty &&
+        message.senderUserId != currentUserId;
+  }
+
+  Future<void> showMessageSafetyActions(WebinarLiveChatModel message) async {
+    if (!canOpenSafetyActions(message) || isSubmittingSafetyAction.value) {
+      return;
+    }
+    final String? action = await Get.bottomSheet<String>(
+      SafeArea(
+        child: Material(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.flag_outlined),
+                title: Text('report'.tr),
+                onTap: () => Get.back<String>(result: 'report'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.block_rounded),
+                title: Text('block_user'.tr),
+                onTap: () => Get.back<String>(result: 'block'),
+              ),
+              if (_currentUserCanModerateWebinar)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline_rounded),
+                  title: Text('remove_message'.tr),
+                  onTap: () => Get.back<String>(result: 'remove'),
+                ),
+              ListTile(
+                leading: const Icon(Icons.close_rounded),
+                title: Text('cancel'.tr),
+                onTap: () => Get.back<String>(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (action == 'report') await _reportWebinarMessage(message);
+    if (action == 'block') await _blockWebinarUser(message);
+    if (action == 'remove') await _removeWebinarMessage(message);
+  }
+
+  bool get _currentUserCanModerateWebinar {
+    final String role = currentParticipant.value?.role.toLowerCase() ?? '';
+    return role == 'admin' || role == 'moderator' || role == 'lead_moderator';
+  }
+
+  Future<void> _removeWebinarMessage(WebinarLiveChatModel message) async {
+    isSubmittingSafetyAction.value = true;
+    try {
+      final ApiResult<void> result = await ApiErrorHandler.call<void>(
+        () => _webinarApiService.removeChatMessage(
+          webinarId: message.webinarId,
+          messageId: message.id,
+        ),
+      );
+      if (result.isSuccess) {
+        liveMessages.removeWhere(
+          (WebinarLiveChatModel item) => item.id == message.id,
+        );
+      }
+    } finally {
+      isSubmittingSafetyAction.value = false;
+    }
+  }
+
+  Future<void> _reportWebinarMessage(WebinarLiveChatModel message) async {
+    isSubmittingSafetyAction.value = true;
+    try {
+      final ApiResult<List<Map<String, dynamic>>> reasonsResult =
+          await ApiErrorHandler.call<List<Map<String, dynamic>>>(
+            _webinarApiService.getReportReasons,
+          );
+      final List<Map<String, dynamic>> reasons =
+          reasonsResult.data ?? <Map<String, dynamic>>[];
+      if (reasons.isEmpty) return;
+      final String? reasonId = await Get.dialog<String>(
+        SimpleDialog(
+          title: Text('why_are_you_reporting_this_user'.tr),
+          children: reasons
+              .map((Map<String, dynamic> reason) {
+                final String id = reason['id']?.toString() ?? '';
+                final String title =
+                    reason['title']?.toString() ??
+                    reason['name']?.toString() ??
+                    '';
+                return SimpleDialogOption(
+                  onPressed: id.isEmpty
+                      ? null
+                      : () => Get.back<String>(result: id),
+                  child: Text(title),
+                );
+              })
+              .toList(growable: false),
+        ),
+      );
+      if (reasonId == null || reasonId.isEmpty) return;
+      final ApiResult<void> result = await ApiErrorHandler.call<void>(
+        () => _webinarApiService.reportChatMessage(
+          message: message,
+          reasonId: reasonId,
+        ),
+      );
+      if (result.isSuccess) {
+        Get.snackbar('report_submitted'.tr, 'report_submitted_desc'.tr);
+      }
+    } finally {
+      isSubmittingSafetyAction.value = false;
+    }
+  }
+
+  Future<void> _blockWebinarUser(WebinarLiveChatModel message) async {
+    final bool? confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text('block_user'.tr),
+        content: Text(
+          'block_user_confirmation'.trParams(<String, String>{
+            'name': message.senderName,
+          }),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Get.back<bool>(result: false),
+            child: Text('cancel'.tr),
+          ),
+          FilledButton(
+            onPressed: () => Get.back<bool>(result: true),
+            child: Text('yes_block_user'.tr),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    isSubmittingSafetyAction.value = true;
+    try {
+      final ApiResult<void> result = await ApiErrorHandler.call<void>(
+        () => _webinarApiService.blockUser(message.senderUserId),
+      );
+      if (!result.isSuccess) return;
+      _blockedWebinarUserIds.add(message.senderUserId);
+      liveMessages.removeWhere(
+        (WebinarLiveChatModel item) =>
+            item.senderUserId == message.senderUserId,
+      );
+      Get.snackbar('blocked'.tr, 'user_blocked'.tr);
+    } finally {
+      isSubmittingSafetyAction.value = false;
     }
   }
 
@@ -304,25 +473,17 @@ class WebinarController extends GetxController {
     await loadWebinars();
   }
 
-  Future<void> _promoteToSpeaker(
-      String webinarId,
-      ) async {
-    final ApiResult<AgoraTokenModel> tokenResult =
-    await ApiErrorHandler.call(
-          () => _webinarApiService.getSpeakerToken(
-        webinarId: webinarId,
-      ),
+  Future<void> _promoteToSpeaker(String webinarId) async {
+    final ApiResult<AgoraTokenModel> tokenResult = await ApiErrorHandler.call(
+      () => _webinarApiService.getSpeakerToken(webinarId: webinarId),
     );
 
-    if (!tokenResult.isSuccess ||
-        tokenResult.data == null) {
+    if (!tokenResult.isSuccess || tokenResult.data == null) {
       return;
     }
 
     try {
-      await agoraService.promoteToSpeaker(
-        tokenResult.data!,
-      );
+      await agoraService.promoteToSpeaker(tokenResult.data!);
 
       speakerRequestStatus.value = 'granted';
       isParticipating.value = true;
@@ -332,16 +493,13 @@ class WebinarController extends GetxController {
       isParticipating.value = false;
       isTalking.value = false;
 
-      final ApiResult<WebinarParticipantModel>
-      leaveResult = await ApiErrorHandler.call(
-            () => _webinarApiService.leaveStage(
-          webinarId: webinarId,
-        ),
-        showError: false,
-      );
+      final ApiResult<WebinarParticipantModel> leaveResult =
+          await ApiErrorHandler.call(
+            () => _webinarApiService.leaveStage(webinarId: webinarId),
+            showError: false,
+          );
 
-      if (leaveResult.isSuccess &&
-          leaveResult.data != null) {
+      if (leaveResult.isSuccess && leaveResult.data != null) {
         currentParticipant.value = leaveResult.data;
       }
 
@@ -369,9 +527,7 @@ class WebinarController extends GetxController {
       onSpeakerApproved: (WebinarParticipantModel participant) {
         if (!_isCurrentUser(participant.userId)) return;
         currentParticipant.value = participant;
-        unawaited(
-          _promoteToSpeaker(webinarId),
-        );
+        unawaited(_promoteToSpeaker(webinarId));
       },
       onSpeakerRejected: (WebinarParticipantModel participant) async {
         if (!_isCurrentUser(participant.userId)) return;
@@ -381,11 +537,17 @@ class WebinarController extends GetxController {
         await agoraService.demoteToAudience();
       },
       onChatMessageCreated: _upsertChatMessage,
+      onChatMessageRemoved: (String messageId) {
+        liveMessages.removeWhere(
+          (WebinarLiveChatModel message) => message.id == messageId,
+        );
+      },
     );
   }
 
   void _upsertChatMessage(WebinarLiveChatModel chatMessage) {
     if (chatMessage.id.isEmpty) return;
+    if (_blockedWebinarUserIds.contains(chatMessage.senderUserId)) return;
 
     final int existingIndex = liveMessages.indexWhere(
       (WebinarLiveChatModel item) => item.id == chatMessage.id,
@@ -396,7 +558,8 @@ class WebinarController extends GetxController {
       return;
     }
 
-    final bool shouldScroll = _shouldAutoScrollChat ||
+    final bool shouldScroll =
+        _shouldAutoScrollChat ||
         !chatScrollController.hasClients ||
         liveMessages.isEmpty;
 
@@ -410,23 +573,18 @@ class WebinarController extends GetxController {
     }
   }
 
-
   void _handleChatScroll() {
     if (!chatScrollController.hasClients) {
       return;
     }
 
-    final ScrollPosition position =
-        chatScrollController.position;
+    final ScrollPosition position = chatScrollController.position;
 
     // The newest message is now at the top.
-    _shouldAutoScrollChat =
-        position.pixels <= 48;
+    _shouldAutoScrollChat = position.pixels <= 48;
   }
 
-  void _scrollChatToLatest({
-    bool force = false,
-  }) {
+  void _scrollChatToLatest({bool force = false}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!chatScrollController.hasClients) {
         return;
@@ -462,5 +620,4 @@ class WebinarController extends GetxController {
     if (permission == 'pending') return 'pending';
     return 'none';
   }
-
 }

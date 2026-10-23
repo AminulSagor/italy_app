@@ -5,15 +5,26 @@ import 'package:get/get.dart' hide Response;
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/api_client.dart';
+import '../../../core/services/ai_data_consent_service.dart';
 import '../models/cv_library_model.dart';
 import '../models/cv_template_model.dart';
 import '../models/resume_studio_models.dart';
 
 class ResumeStudioApiService {
-  ResumeStudioApiService({required ApiClient apiClient})
-    : _apiClient = apiClient;
+  ResumeStudioApiService({
+    required ApiClient apiClient,
+    required AiDataConsentService aiDataConsentService,
+  }) : _apiClient = apiClient,
+       _aiDataConsentService = aiDataConsentService;
 
   final ApiClient _apiClient;
+  final AiDataConsentService _aiDataConsentService;
+
+  Future<void> _requireAiConsent() async {
+    if (!await _aiDataConsentService.requireConsent()) {
+      throw StateError('AI data-sharing permission was not granted.');
+    }
+  }
 
   Future<CvHomeBootstrapModel> fetchHomeBootstrap({
     int page = 1,
@@ -186,6 +197,7 @@ class ResumeStudioApiService {
     String organization = '',
     String language = 'English',
   }) async {
+    await _requireAiConsent();
     final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '/resume-studio/ai/field-suggestions',
       data: <String, dynamic>{
@@ -214,6 +226,7 @@ class ResumeStudioApiService {
     String tone = 'professional',
     String language = 'English',
   }) async {
+    await _requireAiConsent();
     final Response<dynamic> response = await _apiClient.dio.post<dynamic>(
       '/resume-studio/ai/summary-suggestions',
       data: <String, dynamic>{

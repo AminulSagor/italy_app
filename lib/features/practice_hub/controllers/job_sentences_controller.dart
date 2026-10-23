@@ -79,7 +79,9 @@ class JobSentencesController extends GetxController {
     unawaited(loadCareerTracks(showError: false));
   }
 
-  Future<ChapterVideoAccessModel?> loadCareerTrackVideoAccess() {
+  Future<ChapterVideoAccessModel?> loadCareerTrackVideoAccess({
+    bool forceRefresh = false,
+  }) {
     final String trackId =
         trackDetails.value?.id ?? selectedTrack.value?.id ?? '';
 
@@ -91,6 +93,10 @@ class JobSentencesController extends GetxController {
       _videoAccessTrackId = trackId;
       _cachedVideoAccess = null;
       _videoAccessFuture = null;
+    }
+
+    if (forceRefresh) {
+      _cachedVideoAccess = null;
     }
 
     final ChapterVideoAccessModel? cachedAccess = _cachedVideoAccess;

@@ -22,6 +22,9 @@ appTranslations = <String, Map<String, String>>{
     'vocabulary_no_search_result': 'No matching words found',
     'vocabulary_learned_progress': '@learned/@total learned',
     'vocabulary_practice_words': 'Practice these @count words',
+    'vocabulary_needs_attention': 'Needs attention',
+    'vocabulary_needs_review': 'Needs Review',
+    'vocabulary_weak_words_to_review': '@count weak words to review',
     'home_good_morning': 'Good morning',
     'home_good_afternoon': 'Good afternoon',
     'home_good_evening': 'Good evening',
@@ -203,6 +206,17 @@ appTranslations = <String, Map<String, String>>{
     'claim_xp': 'Claim +@xp XP',
     'reward_xp': '+@xp XP',
     'complete_all_tasks_to_open': 'Complete all @count tasks to open',
+    'details': 'Details',
+    'challenge_details': 'Challenge Details',
+    'how_to_complete': 'How to Complete',
+    'your_progress': 'Your progress',
+    'challenge_reward': '+@xp XP reward',
+    'in_progress': 'In progress',
+    'ready_to_claim': 'Ready to claim',
+    'challenge_details_unavailable':
+        'Completion instructions are not available for this challenge yet.',
+    'challenge_progress_updates_automatically':
+        'Your progress updates automatically when you complete the activity.',
     'home_no_activity_this_week': 'No learning activity recorded this week.',
     'home_dashboard_load_failed':
         'We could not load your home information. Please try again.',
@@ -1381,6 +1395,11 @@ appTranslations = <String, Map<String, String>>{
     'base_points': 'Base Points',
     'block_failed': 'Block Failed',
     'block_user': 'Block User',
+    'report': 'Report message',
+    'block_user_confirmation': 'Block @name? Their messages will be hidden.',
+    'report_submitted': 'Report submitted',
+    'report_submitted_desc': 'Our moderation team will review this message.',
+    'remove_message': 'Remove message',
     'blocked': 'Blocked',
     'bonus': 'Bonus',
     'bonus_xp_helps_you_climb_faster': 'Bonus XP Helps You Climb Faster',
@@ -2474,6 +2493,8 @@ appTranslations = <String, Map<String, String>>{
     'you_are': 'You are',
     'you_blocked_this_user': 'You Blocked this User ',
     'you_blocked_this_user_1': 'You Blocked This User',
+    'user_unavailable': 'User unavailable',
+    'account_no_longer_available': 'This account is no longer available.',
     'you_cannot_message_this_user': 'You Cannot Message this User',
     'you_have_been_promoted': 'You Have Been Promoted',
     'you_have_used_2_out_of_3_free_cv_generations':
@@ -3523,6 +3544,11 @@ appTranslations = <String, Map<String, String>>{
     'base_points': 'বেস পয়েন্ট',
     'block_failed': 'ব্লক করা ব্যর্থ হয়েছে',
     'block_user': 'ব্যবহারকারীকে ব্লক করুন',
+    'report': 'বার্তা রিপোর্ট করুন',
+    'block_user_confirmation': '@name-কে ব্লক করবেন? তার বার্তা লুকানো হবে।',
+    'report_submitted': 'রিপোর্ট জমা হয়েছে',
+    'report_submitted_desc': 'আমাদের মডারেশন দল বার্তাটি পর্যালোচনা করবে।',
+    'remove_message': 'বার্তা সরান',
     'blocked': 'ব্লক করা হয়েছে',
     'bonus': 'বোনাস',
     'bonus_xp_helps_you_climb_faster':
@@ -4639,6 +4665,8 @@ appTranslations = <String, Map<String, String>>{
     'you_are': 'আপনি',
     'you_blocked_this_user': 'আপনি এই ব্যবহারকারীকে ব্লক করেছেন ',
     'you_blocked_this_user_1': 'আপনি এই ব্যবহারকারীকে ব্লক করেছেন',
+    'user_unavailable': 'ব্যবহারকারী অনুপলব্ধ',
+    'account_no_longer_available': 'এই অ্যাকাউন্টটি আর উপলব্ধ নেই।',
     'you_cannot_message_this_user':
         'আপনি এই ব্যবহারকারীকে বার্তা পাঠাতে পারবেন না',
     'you_have_been_promoted': 'আপনি পদোন্নতি পেয়েছেন',
@@ -5080,6 +5108,17 @@ appTranslations = <String, Map<String, String>>{
     'claim_xp': '+@xp XP সংগ্রহ করুন',
     'reward_xp': '+@xp XP',
     'complete_all_tasks_to_open': 'খোলার জন্য সব @countটি কাজ সম্পন্ন করুন',
+    'details': 'বিস্তারিত',
+    'challenge_details': 'চ্যালেঞ্জের বিস্তারিত',
+    'how_to_complete': 'কীভাবে সম্পন্ন করবেন',
+    'your_progress': 'আপনার অগ্রগতি',
+    'challenge_reward': '+@xp XP পুরস্কার',
+    'in_progress': 'চলমান',
+    'ready_to_claim': 'সংগ্রহের জন্য প্রস্তুত',
+    'challenge_details_unavailable':
+        'এই চ্যালেঞ্জের নির্দেশনা এখনো পাওয়া যাচ্ছে না।',
+    'challenge_progress_updates_automatically':
+        'কাজটি সম্পন্ন করলে আপনার অগ্রগতি স্বয়ংক্রিয়ভাবে আপডেট হবে।',
     'home_cv_builder_unavailable': 'সিভি সেবা বর্তমানে পাওয়া যাচ্ছে না।',
     'you_re_ready': 'আপনি প্রস্তুত!',
     // Bangla
@@ -5268,6 +5307,9 @@ appTranslations = <String, Map<String, String>>{
     'vocabulary_no_search_result': 'কোনো শব্দ পাওয়া যায়নি',
     'vocabulary_learned_progress': '@learned/@total শেখা হয়েছে',
     'vocabulary_practice_words': 'এই @countটি শব্দ প্র্যাকটিস করুন',
+    'vocabulary_needs_attention': 'মনোযোগ প্রয়োজন',
+    'vocabulary_needs_review': 'আবার দেখা দরকার',
+    'vocabulary_weak_words_to_review': '@countটি দুর্বল শব্দ আবার দেখুন',
     'requires_video_percent': 'ভিডিওর @percent% দেখা প্রয়োজন',
   },
   'it_IT': <String, String>{
@@ -5288,6 +5330,9 @@ appTranslations = <String, Map<String, String>>{
     'vocabulary_no_search_result': 'Nessuna parola trovata',
     'vocabulary_learned_progress': '@learned/@total imparate',
     'vocabulary_practice_words': 'Pratica queste @count parole',
+    'vocabulary_needs_attention': 'Richiede attenzione',
+    'vocabulary_needs_review': 'Da ripassare',
+    'vocabulary_weak_words_to_review': '@count parole deboli da ripassare',
     'home_good_morning': 'Buongiorno',
     'home_good_afternoon': 'Buon pomeriggio',
     'home_good_evening': 'Buonasera',
@@ -5477,6 +5522,17 @@ appTranslations = <String, Map<String, String>>{
     'reward_xp': '+@xp XP',
     'complete_all_tasks_to_open':
         'Completa tutte le @count attività per aprire',
+    'details': 'Dettagli',
+    'challenge_details': 'Dettagli della sfida',
+    'how_to_complete': 'Come completarla',
+    'your_progress': 'I tuoi progressi',
+    'challenge_reward': 'Ricompensa: +@xp XP',
+    'in_progress': 'In corso',
+    'ready_to_claim': 'Pronta da riscattare',
+    'challenge_details_unavailable':
+        'Le istruzioni per questa sfida non sono ancora disponibili.',
+    'challenge_progress_updates_automatically':
+        'I progressi si aggiornano automaticamente quando completi l’attività.',
     'home_no_activity_this_week':
         'Nessuna attività di apprendimento registrata questa settimana.',
     'home_dashboard_load_failed':
@@ -6678,6 +6734,12 @@ appTranslations = <String, Map<String, String>>{
     'base_points': 'Punti base',
     'block_failed': 'Blocco non riuscito',
     'block_user': 'Blocca utente',
+    'report': 'Segnala messaggio',
+    'block_user_confirmation':
+        'Bloccare @name? I suoi messaggi verranno nascosti.',
+    'report_submitted': 'Segnalazione inviata',
+    'report_submitted_desc': 'Il team di moderazione esaminerà il messaggio.',
+    'remove_message': 'Rimuovi messaggio',
     'blocked': 'Bloccato',
     'bonus': 'Bonus',
     'bonus_xp_helps_you_climb_faster':
@@ -7803,6 +7865,8 @@ appTranslations = <String, Map<String, String>>{
     'you_are': 'Tu sei',
     'you_blocked_this_user': 'Hai bloccato questo utente ',
     'you_blocked_this_user_1': 'Hai bloccato questo utente',
+    'user_unavailable': 'Utente non disponibile',
+    'account_no_longer_available': 'Questo account non è più disponibile.',
     'you_cannot_message_this_user': 'Non puoi inviare messaggi a questo utente',
     'you_have_been_promoted': 'Sei stato promosso',
     'you_have_used_2_out_of_3_free_cv_generations':

@@ -27,15 +27,48 @@ class ProPurchaseSuccessView extends GetView<ProCheckoutController> {
 
   @override
   Widget build(BuildContext context) {
-    final ProPurchaseResultModel result =
-        controller.purchaseResult.value ??
-        ProPurchaseResultModel(
-          orderId: '#IT-SHK-1024',
-          statusLabel: 'status_completed'.tr,
-          title: 'gen_congratulations'.tr,
-          description: 'purchase_success_description'.tr,
-          buttonLabel: 'start_learning_now'.tr,
-        );
+    final ProPurchaseResultModel? result = controller.purchaseResult.value;
+
+    if (result == null) {
+      return Material(
+        color: AppColors.coursesDetailBg,
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    'Purchase verification is pending',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: AppFont.font24.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.homePrimaryText,
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'We will confirm your course access when the store purchase is verified.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: AppFont.font16.sp,
+                      color: AppColors.bodyText,
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+                  CustomButton.primary(
+                    text: 'Back to course',
+                    onPressed: _backToCourse,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Material(
       color: AppColors.coursesDetailBg,

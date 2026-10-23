@@ -2,6 +2,7 @@ import 'package:get/get.dart' hide Response, MultipartFile, FormData;
 import 'package:dio/dio.dart';
 
 import '../../../core/services/api_client.dart';
+import '../../../core/utils/local_date.dart';
 import '../models/daily_challenge_models.dart';
 import '../models/practice_hub_models.dart';
 import '../models/survival_italian_models.dart';
@@ -21,7 +22,12 @@ class PracticeHubApiService {
           queryParameters: <String, dynamic>{'page': 1, 'limit': 100},
         ),
         _apiClient.dio.get('/survival-italian/situations'),
-        _apiClient.dio.get('/daily-challenges/today'),
+        _apiClient.dio.get(
+          '/daily-challenges/today',
+          queryParameters: <String, dynamic>{
+            'date': formatLocalDate(DateTime.now()),
+          },
+        ),
         _apiClient.dio.get(
           '/webinars/live',
           queryParameters: <String, dynamic>{'page': 1, 'limit': 1},
@@ -99,16 +105,14 @@ class PracticeHubApiService {
   }
 
   Future<List<PracticeFinalExamCourseModel>>
-      fetchCurrentCourseFinalExams() async {
+  fetchCurrentCourseFinalExams() async {
     final Response<dynamic> response = await _apiClient.dio.get(
       '/final-exams/my-courses/gateways',
     );
     final Map<String, dynamic> body = _responseMap(response);
     return _jsonList(body['items'])
         .map(PracticeFinalExamCourseModel.fromJson)
-        .where(
-          (PracticeFinalExamCourseModel item) => item.courseId.isNotEmpty,
-        )
+        .where((PracticeFinalExamCourseModel item) => item.courseId.isNotEmpty)
         .toList(growable: false);
   }
 
@@ -132,7 +136,7 @@ class PracticeHubApiService {
     await _apiClient.dio.post(
       '/survival-italian/situations/$situationId/complete',
       data: <String, dynamic>{
-        'clientActivityDate': DateTime.now().toIso8601String(),
+        'clientActivityDate': formatLocalDate(DateTime.now()),
       },
     );
   }
@@ -140,6 +144,9 @@ class PracticeHubApiService {
   Future<DailyChallengeDashboardModel> fetchDailyChallenges() async {
     final Response<dynamic> response = await _apiClient.dio.get(
       '/daily-challenges/today',
+      queryParameters: <String, dynamic>{
+        'date': formatLocalDate(DateTime.now()),
+      },
     );
     DailyChallengeDashboardModel dashboard =
         DailyChallengeDashboardModel.fromJson(_responseMap(response));

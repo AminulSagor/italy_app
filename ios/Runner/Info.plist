@@ -100,17 +100,19 @@
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>NSMicrophoneUsageDescription</key>
-		<string>Microphone access is required for voice and video calls.</string>
+		<string>Italir Pothe uses the microphone for AI voice practice, speaking exercises and exams, audio messages, voice or video calls, and webinar speaker participation.</string>
 		<key>UIFileSharingEnabled</key>
 		<true/>
 		<key>LSSupportsOpeningDocumentsInPlace</key>
 		<true/>
 		<key>NSCameraUsageDescription</key>
-		<string>Camera access is required for video calls.</string>
+		<string>Italir Pothe uses the camera for profile or selected image uploads, video calls, and webinar speaker participation.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Photo library access is required to select images for your profile, CV, and messages.</string>
+		<string>Italir Pothe uses selected photos for your profile, CV, messages, report evidence, and other uploads you choose.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

@@ -2,7 +2,13 @@ enum ProCurrency { eur, bdt }
 
 enum ProPaymentMethod { card, googlePlay, appStore }
 
-enum ProPurchaseOutcomeStatus { completed, pending, cancelled, failed }
+enum ProPurchaseOutcomeStatus {
+  completed,
+  pending,
+  cancelled,
+  failed,
+  accountConflict,
+}
 
 class ProStoreProductModel {
   const ProStoreProductModel({

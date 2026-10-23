@@ -24,6 +24,7 @@ import '../features/courses/controllers/courses_controller.dart';
 import '../features/courses/models/course_models.dart';
 import '../features/courses/services/course_catalog_api_service.dart';
 import '../features/courses/services/courses_api_service.dart';
+import '../features/courses/services/course_device_access_service.dart';
 import '../features/courses/services/course_certificate_api_service.dart';
 import '../features/courses/sub_features/chapter_detail/controllers/chapter_detail_controller.dart';
 import '../features/courses/sub_features/chapter_detail/services/chapter_detail_api_service.dart';
@@ -132,18 +133,14 @@ import '../features/practice_hub/views/daily_challenges/daily_challenges_view.da
 void _ensureShopDependencies() {
   if (!Get.isRegistered<ShopApiService>()) {
     Get.put<ShopApiService>(
-      ShopApiService(
-        apiClient: Get.find<ApiClient>(),
-      ),
+      ShopApiService(apiClient: Get.find<ApiClient>()),
       permanent: true,
     );
   }
 
   if (!Get.isRegistered<ShopController>()) {
     Get.put<ShopController>(
-      ShopController(
-        apiService: Get.find<ShopApiService>(),
-      ),
+      ShopController(apiService: Get.find<ShopApiService>()),
       permanent: true,
     );
   }
@@ -183,16 +180,14 @@ class AppPages {
   static void _ensureHomeDependencies() {
     if (!Get.isRegistered<HomeApiService>()) {
       Get.lazyPut<HomeApiService>(
-            () => HomeApiService(
-          apiClient: Get.find<ApiClient>(),
-        ),
+        () => HomeApiService(apiClient: Get.find<ApiClient>()),
         fenix: true,
       );
     }
 
     if (!Get.isRegistered<HomeDashboardCacheService>()) {
       Get.lazyPut<HomeDashboardCacheService>(
-            () => HomeDashboardCacheService(
+        () => HomeDashboardCacheService(
           storageService: Get.find<StorageService>(),
         ),
         fenix: true,
@@ -201,12 +196,10 @@ class AppPages {
 
     if (!Get.isRegistered<HomeController>()) {
       Get.lazyPut<HomeController>(
-            () => HomeController(
+        () => HomeController(
           homeApiService: Get.find<HomeApiService>(),
-          homeDashboardCacheService:
-          Get.find<HomeDashboardCacheService>(),
-          userSessionController:
-          Get.find<UserSessionController>(),
+          homeDashboardCacheService: Get.find<HomeDashboardCacheService>(),
+          userSessionController: Get.find<UserSessionController>(),
         ),
         fenix: true,
       );
@@ -228,7 +221,7 @@ class AppPages {
         final dynamic rawArguments = Get.arguments;
 
         final AccountRestrictionDetails restriction =
-        rawArguments is AccountRestrictionDetails
+            rawArguments is AccountRestrictionDetails
             ? rawArguments
             : AccountRestrictionDetails.fallback;
 
@@ -332,9 +325,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.home,
       page: () => const HomeView(),
-      binding: BindingsBuilder(
-        _ensureHomeDependencies,
-      ),
+      binding: BindingsBuilder(_ensureHomeDependencies),
     ),
     GetPage(
       name: AppRoutes.wrapper,
@@ -346,7 +337,6 @@ class AppPages {
             fenix: true,
           );
         }
-
 
         _ensureCoursesApiService();
         if (!Get.isRegistered<CoursesController>()) {
@@ -425,7 +415,9 @@ class AppPages {
           () => CourseDetailController(
             controllerTag: args.controllerTag,
             course: args.course,
+            resumeChapter: args.resumeChapter,
             coursesApiService: Get.find<CoursesApiService>(),
+            courseDeviceAccessService: Get.find<CourseDeviceAccessService>(),
           ),
           tag: args.controllerTag,
         );
@@ -482,28 +474,23 @@ class AppPages {
       name: AppRoutes.vocabulary,
       page: () {
         final ControllerTagRouteArguments args =
-        _arguments<ControllerTagRouteArguments>();
+            _arguments<ControllerTagRouteArguments>();
 
-        return VocabularyView(
-          controllerTag: args.controllerTag,
-        );
+        return VocabularyView(controllerTag: args.controllerTag);
       },
       binding: BindingsBuilder(() {
         final Object routeArgs = Get.arguments as Object;
 
         final VocabularyRouteArguments args =
-        routeArgs is VocabularyRouteArguments
+            routeArgs is VocabularyRouteArguments
             ? routeArgs
             : VocabularyRouteArguments(
-          controllerTag:
-          (routeArgs as ControllerTagRouteArguments)
-              .controllerTag,
-        );
+                controllerTag:
+                    (routeArgs as ControllerTagRouteArguments).controllerTag,
+              );
 
         Get.lazyPut<VocabularyApiService>(
-              () => VocabularyApiService(
-            apiClient: Get.find<ApiClient>(),
-          ),
+          () => VocabularyApiService(apiClient: Get.find<ApiClient>()),
           tag: args.controllerTag,
         );
 
@@ -520,8 +507,6 @@ class AppPages {
         );
       }),
     ),
-
-
 
     GetPage(
       name: AppRoutes.quiz,
@@ -586,29 +571,23 @@ class AppPages {
       name: AppRoutes.proOrderSummary,
       page: () {
         final ProOrderSummaryRouteArguments args =
-        _arguments<ProOrderSummaryRouteArguments>();
+            _arguments<ProOrderSummaryRouteArguments>();
 
-        return ProOrderSummaryView(
-          controllerTag: args.controllerTag,
-        );
+        return ProOrderSummaryView(controllerTag: args.controllerTag);
       },
       binding: BindingsBuilder(() {
         final ProOrderSummaryRouteArguments args =
-        _arguments<ProOrderSummaryRouteArguments>();
+            _arguments<ProOrderSummaryRouteArguments>();
 
         Get.lazyPut<ProCheckoutController>(
-              () => ProCheckoutController(
-            proCheckoutApiService:
-            Get.find<ProCheckoutApiService>(),
-            billingService:
-            Get.find<CourseGooglePlayBillingService>(),
-            recoveryService:
-            Get.find<CoursePurchaseRecoveryService>(),
+          () => ProCheckoutController(
+            proCheckoutApiService: Get.find<ProCheckoutApiService>(),
+            billingService: Get.find<CourseGooglePlayBillingService>(),
+            recoveryService: Get.find<CoursePurchaseRecoveryService>(),
             courseId: args.courseId,
             courseName: args.courseName,
             lessonCount: args.lessonCount,
-            onPurchaseCompleted:
-            Get.find<CourseDetailController>(
+            onPurchaseCompleted: Get.find<CourseDetailController>(
               tag: args.courseDetailControllerTag,
             ).refreshAfterPurchase,
           ),
@@ -638,28 +617,23 @@ class AppPages {
       name: AppRoutes.courseCertificate,
       page: () {
         final CourseCertificateRouteArguments args =
-        _arguments<CourseCertificateRouteArguments>();
+            _arguments<CourseCertificateRouteArguments>();
 
-        return CourseCertificateView(
-          controllerTag: args.controllerTag,
-        );
+        return CourseCertificateView(controllerTag: args.controllerTag);
       },
       binding: BindingsBuilder(() {
         final CourseCertificateRouteArguments args =
-        _arguments<CourseCertificateRouteArguments>();
+            _arguments<CourseCertificateRouteArguments>();
 
         Get.lazyPut<CourseCertificateApiService>(
-              () => CourseCertificateApiService(
-            apiClient: Get.find<ApiClient>(),
-          ),
+          () => CourseCertificateApiService(apiClient: Get.find<ApiClient>()),
           tag: args.controllerTag,
         );
 
         Get.lazyPut<CourseCertificateController>(
-              () => CourseCertificateController(
+          () => CourseCertificateController(
             attemptId: args.attemptId,
-            certificateApiService:
-            Get.find<CourseCertificateApiService>(
+            certificateApiService: Get.find<CourseCertificateApiService>(
               tag: args.controllerTag,
             ),
           ),
@@ -732,14 +706,11 @@ class AppPages {
         final Object rawArguments = Get.arguments as Object;
 
         final String controllerTag =
-        rawArguments is FinalExamResultRouteArguments
+            rawArguments is FinalExamResultRouteArguments
             ? rawArguments.controllerTag
-            : (rawArguments as ControllerTagRouteArguments)
-            .controllerTag;
+            : (rawArguments as ControllerTagRouteArguments).controllerTag;
 
-        return FinalExamResultView(
-          controllerTag: controllerTag,
-        );
+        return FinalExamResultView(controllerTag: controllerTag);
       },
       binding: BindingsBuilder(() {
         final Object rawArguments = Get.arguments as Object;
@@ -749,31 +720,23 @@ class AppPages {
           return;
         }
 
-        final FinalExamResultRouteArguments args =
-            rawArguments;
+        final FinalExamResultRouteArguments args = rawArguments;
 
-        if (!Get.isRegistered<FinalExamApiService>(
-          tag: args.controllerTag,
-        )) {
+        if (!Get.isRegistered<FinalExamApiService>(tag: args.controllerTag)) {
           Get.lazyPut<FinalExamApiService>(
-                () => FinalExamApiService(
-              apiClient: Get.find<ApiClient>(),
-            ),
+            () => FinalExamApiService(apiClient: Get.find<ApiClient>()),
             tag: args.controllerTag,
           );
         }
 
-        if (!Get.isRegistered<FinalExamController>(
-          tag: args.controllerTag,
-        )) {
+        if (!Get.isRegistered<FinalExamController>(tag: args.controllerTag)) {
           Get.lazyPut<FinalExamController>(
-                () => FinalExamController(
+            () => FinalExamController(
               controllerTag: args.controllerTag,
               courseId: args.courseId,
               initialAttemptId: args.attemptId,
               loadOverviewOnInit: false,
-              finalExamApiService:
-              Get.find<FinalExamApiService>(
+              finalExamApiService: Get.find<FinalExamApiService>(
                 tag: args.controllerTag,
               ),
             ),
@@ -814,9 +777,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.shop,
       page: () => const ShopView(),
-      binding: BindingsBuilder(
-        _ensureShopDependencies,
-      ),
+      binding: BindingsBuilder(_ensureShopDependencies),
     ),
     GetPage(
       name: AppRoutes.aiRefillCenter,
@@ -837,18 +798,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.cvCreditStore,
       page: () => const CvCreditStoreView(),
-      binding: BindingsBuilder(
-        _ensureShopDependencies,
-      ),
+      binding: BindingsBuilder(_ensureShopDependencies),
     ),
 
     GetPage(
       name: AppRoutes.cvCreditOrderSummary,
-      page: () =>
-      const CvCreditOrderSummaryView(),
-      binding: BindingsBuilder(
-        _ensureShopDependencies,
-      ),
+      page: () => const CvCreditOrderSummaryView(),
+      binding: BindingsBuilder(_ensureShopDependencies),
     ),
     GetPage(
       name: AppRoutes.orderHistory,
@@ -1094,8 +1050,6 @@ class AppPages {
       }),
     ),
 
-
-
     GetPage(
       name: AppRoutes.jobSentences,
       page: () => const JobSentencesView(),
@@ -1170,7 +1124,6 @@ class AppPages {
       }),
     ),
 
-
     GetPage(
       name: AppRoutes.dailyChallenges,
       page: () => const DailyChallengesView(),
@@ -1188,32 +1141,24 @@ class AppPages {
       }),
     ),
 
-
     GetPage(
       name: AppRoutes.messages,
-      page: () => MessagesView(
-        onBackTap: () => Get.back<void>(),
-      ),
+      page: () => MessagesView(onBackTap: () => Get.back<void>()),
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<ChatSocketService>()) {
           Get.lazyPut<ChatSocketService>(
-                () => ChatSocketService(
-              tokenService: Get.find<TokenService>(),
-            ),
+            () => ChatSocketService(tokenService: Get.find<TokenService>()),
             fenix: true,
           );
         }
 
         if (!Get.isRegistered<PresenceService>()) {
-          Get.put<PresenceService>(
-            PresenceService(),
-            permanent: true,
-          );
+          Get.put<PresenceService>(PresenceService(), permanent: true);
         }
 
         if (!Get.isRegistered<MessagesMockService>()) {
           Get.lazyPut<MessagesMockService>(
-                () => MessagesMockService(
+            () => MessagesMockService(
               apiClient: Get.find<ApiClient>(),
               tokenService: Get.find<TokenService>(),
               chatSocketService: Get.find<ChatSocketService>(),
@@ -1224,9 +1169,8 @@ class AppPages {
 
         if (!Get.isRegistered<MessagesController>()) {
           Get.lazyPut<MessagesController>(
-                () => MessagesController(
-              messagesMockService:
-              Get.find<MessagesMockService>(),
+            () => MessagesController(
+              messagesMockService: Get.find<MessagesMockService>(),
             ),
             fenix: true,
           );

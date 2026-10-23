@@ -161,12 +161,32 @@ class UserSettingsService {
     return UserSettingsMessageModel.fromJson(_responseMap(response));
   }
 
-  Future<UserSettingsMessageModel> deleteAccount(String fullName) async {
+  Future<UserSettingsMessageModel> deleteAccount({
+    String? fullName,
+    String? confirmation,
+  }) async {
     final Response<dynamic> response = await _apiClient.dio.delete<dynamic>(
       '$_settingsEndpoint/account',
-      data: <String, dynamic>{'fullName': fullName.trim()},
+      data: <String, dynamic>{
+        if (fullName?.trim().isNotEmpty == true) 'fullName': fullName!.trim(),
+        if (confirmation?.trim().isNotEmpty == true)
+          'confirmation': confirmation!.trim(),
+      },
     );
     return UserSettingsMessageModel.fromJson(_responseMap(response));
+  }
+
+  Future<Map<String, dynamic>> getConnectedAccounts() async {
+    final Response<dynamic> response = await _apiClient.dio.get<dynamic>(
+      '/auth/social-accounts',
+    );
+    return _responseMap(response);
+  }
+
+  Future<void> disconnectSocialAccount(String provider) async {
+    await _apiClient.dio.delete<dynamic>(
+      '/auth/social-accounts/${Uri.encodeComponent(provider)}',
+    );
   }
 
   Future<AvatarUploadPreparationModel> _prepareAvatarUpload({

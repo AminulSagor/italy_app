@@ -393,7 +393,6 @@ class ChatSocketService {
       }
     });
 
-
     _socket?.on('account_banned', (dynamic data) {
       final Map<String, dynamic> payload = data is Map
           ? Map<String, dynamic>.from(data)
@@ -403,19 +402,14 @@ class ChatSocketService {
         scheme: 'italirpothe',
         host: 'account-suspended',
         queryParameters: <String, String>{
-          'reason':
-          payload['reason']?.toString().trim() ?? '',
-          'effectiveAt':
-          payload['effectiveAt']?.toString().trim() ?? '',
-          'caseNumber':
-          payload['caseNumber']?.toString().trim() ?? '',
+          'reason': payload['reason']?.toString().trim() ?? '',
+          'effectiveAt': payload['effectiveAt']?.toString().trim() ?? '',
+          'caseNumber': payload['caseNumber']?.toString().trim() ?? '',
         },
       );
 
       unawaited(
-        NotificationDeepLinkService.openAccountRestriction(
-          deepLink.toString(),
-        ),
+        NotificationDeepLinkService.openAccountRestriction(deepLink.toString()),
       );
     });
 
@@ -475,20 +469,51 @@ class ChatSocketService {
     } catch (_) {}
   }
 
-  void sendMessage({
+  Future<Map<String, dynamic>> sendMessage({
     required String conversationId,
     String? clientMessageId,
     String? content,
     String? messageType,
     List<Map<String, dynamic>>? attachments,
-  }) {
-    _socket?.emit('send_message', <String, dynamic>{
-      'conversationId': conversationId,
-      'clientMessageId': clientMessageId,
-      'content': content,
-      'messageType': messageType,
-      'attachments': attachments,
-    });
+  }) async {
+    final io.Socket? socket = _socket;
+    if (socket == null || !socket.connected) {
+      throw StateError('The chat socket is not connected.');
+    }
+
+    final Completer<Map<String, dynamic>> completer =
+        Completer<Map<String, dynamic>>();
+
+    socket.emitWithAck(
+      'send_message',
+      <String, dynamic>{
+        'conversationId': conversationId,
+        'clientMessageId': clientMessageId,
+        'content': content,
+        'messageType': messageType,
+        'attachments': attachments,
+      },
+      ack: (dynamic response) {
+        if (completer.isCompleted) return;
+
+        if (response is Map) {
+          completer.complete(Map<String, dynamic>.from(response));
+          return;
+        }
+
+        completer.complete(<String, dynamic>{
+          'ok': false,
+          'error': 'The server returned an invalid message response.',
+        });
+      },
+    );
+
+    return completer.future.timeout(
+      const Duration(seconds: 15),
+      onTimeout: () => throw TimeoutException(
+        'The message could not be confirmed by the server.',
+      ),
+    );
   }
 
   /// Refresh socket connection after login to apply the new token.
