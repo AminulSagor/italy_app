@@ -677,7 +677,10 @@ class SettingsController extends GetxController {
   }
 
   Future<void> openAiDataSharingSettings() async {
-    await Get.find<AiDataConsentService>().openConsentSettings();
+    await ApiErrorHandler.call<void>(
+      Get.find<AiDataConsentService>().openConsentSettings,
+      errorTitle: SettingsL10n.text('ai_data_sharing'),
+    );
   }
 
   Future<void> openConnectedAccounts() async {

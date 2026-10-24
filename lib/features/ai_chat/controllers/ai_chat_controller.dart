@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/services/api_error_handler.dart';
+import '../../../core/services/ai_data_consent_service.dart';
 import '../models/ai_tutor_guided_learning_models.dart';
 import '../models/ai_tutor_level_test_models.dart';
 import '../models/ai_tutor_models.dart';
@@ -102,6 +103,7 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   int _textSessionVersion = 0;
   Timer? _voiceCountdownTimer;
   Timer? _voiceHeartbeatTimer;
+  Timer? _voiceConsentTimer;
   bool _isEndingVoiceSession = false;
   bool _isSendingVoiceHeartbeat = false;
 
@@ -483,6 +485,7 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
       if (!assistantReady) {
         throw TimeoutException('The AI tutor did not join the voice room');
       }
+      _startVoiceConsentWatchdog();
       if (!_isLevelTestVoiceSession) {
         await _sendVoiceHeartbeat();
         _startVoiceUsageTimers();
@@ -541,7 +544,8 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
   }
 
   void _startVoiceUsageTimers() {
-    _stopVoiceUsageTimers();
+    _voiceCountdownTimer?.cancel();
+    _voiceHeartbeatTimer?.cancel();
     _voiceCountdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (_activeVoiceSession == null || !voiceService.isConnected) return;
       if (remainingVoiceSeconds.value > 0) {
@@ -556,11 +560,33 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
     });
   }
 
+  void _startVoiceConsentWatchdog() {
+    _voiceConsentTimer?.cancel();
+    _voiceConsentTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      unawaited(_verifyVoiceConsent());
+    });
+  }
+
+  Future<void> _verifyVoiceConsent() async {
+    if (_activeVoiceSession == null || _isEndingVoiceSession) return;
+    try {
+      final bool granted = await Get.find<AiDataConsentService>()
+          .hasCurrentConsent();
+      if (!granted) await endLiveVoiceSession();
+    } catch (_) {
+      // A direct provider socket must not keep processing when the app cannot
+      // revalidate account-level consent with the authoritative backend.
+      await endLiveVoiceSession();
+    }
+  }
+
   void _stopVoiceUsageTimers() {
     _voiceCountdownTimer?.cancel();
     _voiceCountdownTimer = null;
     _voiceHeartbeatTimer?.cancel();
     _voiceHeartbeatTimer = null;
+    _voiceConsentTimer?.cancel();
+    _voiceConsentTimer = null;
   }
 
   Future<void> _sendVoiceHeartbeat() async {
@@ -576,7 +602,10 @@ class AiChatController extends GetxController with WidgetsBindingObserver {
             () => _apiService.heartbeatVoiceSession(session.sessionId),
             showError: false,
           );
-      if (!result.isSuccess || result.data == null) return;
+      if (!result.isSuccess || result.data == null) {
+        await endLiveVoiceSession();
+        return;
+      }
 
       final AiTutorVoiceHeartbeatModel heartbeat = result.data!;
       remainingVoiceSeconds.value = heartbeat.sessionRemainingSeconds;

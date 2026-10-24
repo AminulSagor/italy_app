@@ -340,6 +340,7 @@ class AiTutorVoiceSessionModel {
     required this.ttlSeconds,
     required this.allocatedSeconds,
     required this.balances,
+    this.provider = 'unknown',
     this.model,
     this.setup = const <String, dynamic>{},
     this.credentialExpiresAt,
@@ -355,6 +356,7 @@ class AiTutorVoiceSessionModel {
   final int ttlSeconds;
   final int allocatedSeconds;
   final AiTutorBalanceModel balances;
+  final String provider;
   final String? model;
   final Map<String, dynamic> setup;
   final DateTime? credentialExpiresAt;
@@ -376,6 +378,7 @@ class AiTutorVoiceSessionModel {
           ? _intValue(json['allocatedSeconds'])
           : (ttl > 0 ? ttl : 900),
       balances: AiTutorBalanceModel.fromEnvelope(json),
+      provider: json['provider']?.toString().trim().toLowerCase() ?? 'unknown',
       model: _optionalText(json['model']),
       setup: _asJsonMap(json['setup']),
       credentialExpiresAt: DateTime.tryParse(

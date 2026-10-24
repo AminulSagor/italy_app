@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../../core/utils/app_logger.dart';
+import '../../../core/services/ai_data_consent_service.dart';
 import '../models/ai_tutor_models.dart';
 import 'native_ai_voice_audio_service.dart';
 
@@ -26,6 +27,9 @@ typedef AiTutorEventReporter =
 typedef AiTutorLevelTestCompletionHandler = Future<void> Function();
 
 class AiTutorVoiceService extends GetxService {
+  AiTutorVoiceService({required AiDataConsentService consentService})
+    : _consentService = consentService;
+
   static const int _inputSampleRate = 16000;
   static const int _maxReconnectAttempts = 3;
   static const double _speechThreshold = 0.035;
@@ -43,6 +47,7 @@ class AiTutorVoiceService extends GetxService {
   final RxList<AiTutorMessageModel> messages = <AiTutorMessageModel>[].obs;
 
   final NativeAiVoiceAudioService _nativeAudio = NativeAiVoiceAudioService();
+  final AiDataConsentService _consentService;
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _socketSubscription;
   Completer<void>? _assistantReadyCompleter;
@@ -69,6 +74,8 @@ class AiTutorVoiceService extends GetxService {
   bool _socketReady = false;
   bool _isFlushingEvents = false;
   bool _levelTestCompletionRequested = false;
+  bool _consentRevoked = false;
+  int _lifecycleGeneration = 0;
 
   bool get isConnected =>
       connectionState.value == AiTutorVoiceConnectionState.connected;
@@ -100,9 +107,14 @@ class AiTutorVoiceService extends GetxService {
     AiTutorLevelTestCompletionHandler? onLevelTestComplete,
   }) async {
     await disconnect();
+    if (_consentRevoked) {
+      throw StateError('AI data-sharing permission was withdrawn.');
+    }
+    final int generation = _lifecycleGeneration;
     connectionState.value = AiTutorVoiceConnectionState.connecting;
     status.value = 'Requesting microphone permission...';
     await _ensureMicrophonePermission();
+    _assertActiveGeneration(generation);
     _sessionId = session.sessionId;
     _isLevelTestSession = session.isLevelTest;
     _refreshCredential = refreshCredential;
@@ -111,8 +123,9 @@ class AiTutorVoiceService extends GetxService {
     _assistantReadyCompleter = Completer<void>();
     _resetUiForConnection();
     await _openAudio();
+    _assertActiveGeneration(generation);
     try {
-      await _connectSocket(session);
+      await _connectSocket(session, generation: generation);
     } catch (error, stackTrace) {
       _log('Gemini Live connection failed', error, stackTrace);
       connectionState.value = AiTutorVoiceConnectionState.error;
@@ -122,7 +135,11 @@ class AiTutorVoiceService extends GetxService {
     }
   }
 
-  Future<void> _connectSocket(AiTutorVoiceSessionModel session) async {
+  Future<void> _connectSocket(
+    AiTutorVoiceSessionModel session, {
+    required int generation,
+  }) async {
+    _assertActiveGeneration(generation);
     if (session.url.isEmpty || session.token.isEmpty || session.setup.isEmpty) {
       throw const FormatException('Invalid Gemini Live session credential');
     }
@@ -137,6 +154,7 @@ class AiTutorVoiceService extends GetxService {
     final WebSocketChannel channel = WebSocketChannel.connect(uri);
     _channel = channel;
     await channel.ready.timeout(const Duration(seconds: 15));
+    _assertActiveGeneration(generation);
     _socketSubscription = channel.stream.listen(
       _handleSocketMessage,
       onError: (Object error, StackTrace stackTrace) {
@@ -177,6 +195,7 @@ class AiTutorVoiceService extends GetxService {
   }
 
   Future<void> disconnect({bool preserveErrorState = false}) async {
+    _lifecycleGeneration++;
     if (_isDisconnecting) return;
     _isDisconnecting = true;
     try {
@@ -237,7 +256,9 @@ class AiTutorVoiceService extends GetxService {
   }
 
   void _sendMicrophoneChunk(Uint8List chunk) {
-    if (!_socketReady || isMuted.value || chunk.isEmpty) return;
+    if (_consentRevoked || !_socketReady || isMuted.value || chunk.isEmpty) {
+      return;
+    }
     final double level = _pcmLevel(chunk);
     if (assistantSpeaking.value) {
       userAudioLevel.value = 0;
@@ -308,6 +329,7 @@ class AiTutorVoiceService extends GetxService {
   }
 
   void _handleSocketMessage(dynamic payload) {
+    if (_consentRevoked) return;
     try {
       final String raw = payload is String
           ? payload
@@ -555,7 +577,13 @@ class AiTutorVoiceService extends GetxService {
   }
 
   Future<void> _handleUnexpectedDisconnect() async {
-    if (_isDisconnecting || _isReconnecting || _sessionId == null) return;
+    if (_consentRevoked ||
+        _isDisconnecting ||
+        _isReconnecting ||
+        _sessionId == null) {
+      return;
+    }
+    final int generation = _lifecycleGeneration;
     final AiTutorCredentialRefresher? refresher = _refreshCredential;
     if (refresher == null || _reconnectAttempt >= _maxReconnectAttempts) {
       connectionState.value = AiTutorVoiceConnectionState.error;
@@ -568,16 +596,21 @@ class AiTutorVoiceService extends GetxService {
     await _stopMicrophone(sendStreamEnd: false);
     await _interruptPlayback();
     try {
-      while (!_isDisconnecting && _reconnectAttempt < _maxReconnectAttempts) {
+      while (!_consentRevoked &&
+          generation == _lifecycleGeneration &&
+          !_isDisconnecting &&
+          _reconnectAttempt < _maxReconnectAttempts) {
         _reconnectAttempt++;
         try {
           await Future<void>.delayed(
             Duration(milliseconds: 500 * _reconnectAttempt),
           );
+          _assertActiveGeneration(generation);
           final AiTutorVoiceSessionModel credential = await refresher(
             _resumptionHandle,
           );
-          await _connectSocket(credential);
+          _assertActiveGeneration(generation);
+          await _connectSocket(credential, generation: generation);
           return;
         } catch (error, stackTrace) {
           _log('Gemini Live reconnect attempt failed', error, stackTrace);
@@ -603,7 +636,7 @@ class AiTutorVoiceService extends GetxService {
   }
 
   void _send(Map<String, dynamic> message) {
-    if (_channel == null) return;
+    if (_consentRevoked || _channel == null) return;
     _channel!.sink.add(jsonEncode(message));
   }
 
@@ -668,8 +701,26 @@ class AiTutorVoiceService extends GetxService {
     );
   }
 
+  void _assertActiveGeneration(int generation) {
+    if (_consentRevoked || generation != _lifecycleGeneration) {
+      throw StateError('AI voice session was invalidated.');
+    }
+  }
+
+  Future<void> _handleConsentState(bool granted) async {
+    _consentRevoked = !granted;
+    if (!granted) await disconnect();
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    _consentService.addStateHandler(_handleConsentState);
+  }
+
   @override
   void onClose() {
+    _consentService.removeStateHandler(_handleConsentState);
     unawaited(disconnect());
     super.onClose();
   }

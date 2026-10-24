@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../core/services/api_client.dart';
 import '../../../core/services/ai_data_consent_service.dart';
@@ -45,7 +46,7 @@ class AiTutorApiService {
       data: request.toJson(),
     );
 
-    return AiTutorVoiceSessionModel.fromJson(_asMap(response.data));
+    return _voiceSession(response.data);
   }
 
   Future<AiTutorVoiceSessionModel> startLevelTestVoiceSession() async {
@@ -54,7 +55,7 @@ class AiTutorApiService {
       '/ai-tutor/level-test/voice/session',
       options: Options(receiveTimeout: const Duration(seconds: 45)),
     );
-    return AiTutorVoiceSessionModel.fromJson(_asMap(response.data));
+    return _voiceSession(response.data);
   }
 
   Future<AiTutorBalanceModel> endVoiceSession(String sessionId) async {
@@ -85,7 +86,17 @@ class AiTutorApiService {
           'resumptionHandle': resumptionHandle!.trim(),
       },
     );
-    return AiTutorVoiceSessionModel.fromJson(_asMap(response.data));
+    return _voiceSession(response.data);
+  }
+
+  AiTutorVoiceSessionModel _voiceSession(dynamic data) {
+    final AiTutorVoiceSessionModel session =
+        AiTutorVoiceSessionModel.fromJson(_asMap(data));
+    if (defaultTargetPlatform == TargetPlatform.iOS &&
+        session.provider != 'gemini_live') {
+      throw StateError('iOS AI voice requires Google Gemini Live.');
+    }
+    return session;
   }
 
   Future<void> recordLiveEvents(

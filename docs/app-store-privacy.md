@@ -1,6 +1,6 @@
 # App Store privacy answers
 
-Last audited: 2026-10-04
+Last audited: 2026-10-24
 
 These answers cover the iOS app and the third-party SDKs included in its archive. Keep them synchronized with `ios/Runner/PrivacyInfo.xcprivacy` and the public privacy policy whenever data handling or SDKs change.
 
@@ -46,11 +46,14 @@ Live audio/video that is only transmitted to service a call and not retained doe
 
 ## Third-party AI disclosure and permission
 
-- AI Tutor uses Google Gemini and may use configured LiveKit, speech, transcription, and voice processors for prompts, conversation context, live voice audio, transcripts, and language-level answers.
-- AI-assisted CV features use OpenAI for CV text, selected documents or images, and generated or edited content.
+- On iOS, AI Tutor voice connects directly to Google Gemini for live tutoring, transcripts, session summaries, and language-level evaluation. The iOS AI voice path does not use Pipecat or LiveKit, and the backend rejects the legacy transport for authenticated iOS sessions.
+- OpenAI remains in use on iOS for AI Tutor text responses, level-test transcription, language and speech processing, and AI-assisted CV features involving CV text, selected documents or images, and generated or edited content.
+- The published legacy Android voice path remains available through Pipecat and may use LiveKit transport plus OpenAI speech recognition, language processing, and speech generation. This Android-only disclosure must remain in the cross-platform privacy policy.
 - The app must obtain current, explicit AI data-sharing permission before the backend permits any endpoint that sends data to these providers.
 - Users can decline without losing non-AI functionality and can withdraw permission under Settings → AI data sharing.
+- Withdrawal immediately stops microphone capture, playback, and the provider socket on that device. The backend invalidates account voice sessions and requests Pipecat worker shutdown. Other signed-in devices revalidate consent every 10 seconds while voice is active; a direct Gemini socket cannot be revoked provider-side by the backend, so cross-device shutdown is bounded by that check rather than claimed as instantaneous.
 - UGC moderation uses the server-local keyword filter by default; direct messages and webinar chat are not sent to the OpenAI moderation helper without separate permission.
+- Permanent account deletion queues eligible user-owned S3 objects, incomplete or not-yet-confirmed uploads, generated CV assets, and Resume Studio output for durable deletion with automatic retry. Files still shared with other users and narrowly retained report, certificate, or service-record evidence are preserved without retaining ownership by the deleted account.
 
 ## SDK audit summary
 

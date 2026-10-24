@@ -118,7 +118,11 @@ class InitialBindings extends Bindings {
       () => AiTutorPreferencesService(),
       fenix: true,
     );
-    Get.lazyPut<AiTutorVoiceService>(() => AiTutorVoiceService(), fenix: true);
+    Get.lazyPut<AiTutorVoiceService>(
+      () =>
+          AiTutorVoiceService(consentService: Get.find<AiDataConsentService>()),
+      fenix: true,
+    );
     Get.lazyPut<AiTutorTtsService>(() => AiTutorTtsService(), fenix: true);
     Get.lazyPut<AiChatController>(
       () => AiChatController(
@@ -350,7 +354,11 @@ class InitialBindings extends Bindings {
       () => AiTutorPreferencesService(),
       fenix: true,
     );
-    Get.lazyPut<AiTutorVoiceService>(() => AiTutorVoiceService(), fenix: true);
+    Get.lazyPut<AiTutorVoiceService>(
+      () =>
+          AiTutorVoiceService(consentService: Get.find<AiDataConsentService>()),
+      fenix: true,
+    );
     Get.lazyPut<AiTutorTtsService>(() => AiTutorTtsService(), fenix: true);
     Get.lazyPut<AiChatController>(
       () => AiChatController(
