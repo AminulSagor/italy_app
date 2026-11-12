@@ -216,6 +216,89 @@ class ShopCvCreditPackCard extends StatelessWidget {
   }
 }
 
+class ShopAdFreeCard extends StatelessWidget {
+  const ShopAdFreeCard({
+    super.key,
+    required this.onTap,
+    required this.title,
+    required this.subtitle,
+    required this.priceText,
+  });
+
+  final VoidCallback onTap;
+  final String title;
+  final String subtitle;
+  final String priceText;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(36.r),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(24.r),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEFF8F2),
+          borderRadius: BorderRadius.circular(36.r),
+          border: Border.all(color: const Color(0xFF9FD5AE)),
+        ),
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 56.r,
+              height: 56.r,
+              decoration: const BoxDecoration(
+                color: Color(0xFF006B3F),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.block_rounded, color: Colors.white, size: 28.r),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF173E28),
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      height: 1.35,
+                      color: const Color(0xFF506158),
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    priceText,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF006B3F),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Color(0xFF006B3F),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class ShopStreakFreezeCard extends StatelessWidget {
   const ShopStreakFreezeCard({
     required this.onTap,

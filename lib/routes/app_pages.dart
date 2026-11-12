@@ -96,6 +96,7 @@ import '../features/drawer_features/shop/streak_freeze_store/streak_freeze_store
 import '../features/drawer_features/shop/streak_freeze_store/order_summary_view.dart';
 import '../features/drawer_features/shop/cv_credit_store/cv_credit_store_view.dart';
 import '../features/drawer_features/shop/cv_credit_store/cv_credit_order_summary_view.dart';
+import '../features/drawer_features/shop/ad_free_store/ad_free_store_view.dart';
 import '../features/drawer_features/shop/order_history/order_history_view.dart';
 import '../features/drawer_features/guide/guide_controller.dart';
 import '../features/drawer_features/guide/views/guide_view.dart';
@@ -782,6 +783,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.aiRefillCenter,
       page: () => const AiRefillCenterPage(),
+    ),
+    GetPage(
+      name: AppRoutes.adFreeStore,
+      page: () => const AdFreeStoreView(),
+      binding: BindingsBuilder(_ensureShopDependencies),
     ),
     GetPage(name: AppRoutes.orderSummary, page: () => const OrderSummaryPage()),
     GetPage(name: AppRoutes.checkout, page: () => const CheckoutPage()),

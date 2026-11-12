@@ -1,7 +1,8 @@
 enum StorePackageType {
   aiBundle('ai_bundle'),
   streakFreeze('streak_freeze'),
-  cvCredit('cv_credit');
+  cvCredit('cv_credit'),
+  adFree('ad_free');
 
   const StorePackageType(this.apiValue);
   final String apiValue;
@@ -445,6 +446,8 @@ class StorePackageModel {
   final StoreProviderProductModel? storeProduct;
 
   bool get isMonthly => billingModel == 'monthly';
+  bool get isYearly => billingModel == 'yearly';
+  bool get isSubscription => isMonthly || isYearly;
   bool get isUnlimitedStreak => streakProtectionMode == 'monthly_unlimited';
 
   String get badgeLabel => marketingBadge == 'none' ? '' : marketingBadge;
@@ -460,6 +463,8 @@ class StorePackageModel {
         return '$streakFreezeCount Streak Freeze${streakFreezeCount == 1 ? '' : 's'}';
       case StorePackageType.cvCredit:
         return '$cvCredits CV Credit${cvCredits == 1 ? '' : 's'}';
+      case StorePackageType.adFree:
+        return isYearly ? '1 year without ads' : '1 month without ads';
     }
   }
 

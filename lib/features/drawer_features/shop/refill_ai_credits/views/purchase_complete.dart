@@ -82,27 +82,27 @@ class PurchaseCompletedPage extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                          Expanded(
-                            child: _creditCard(
-                              bgColor: blueCard,
-                              icon: _firstCompletionIcon(packageType),
-                              iconColor: const Color(0xFF006BAA),
-                              value: controller.completionFirstValue,
-                              label: controller.completionFirstLabel,
-                              textColor: const Color(0xFF075D97),
+                            Expanded(
+                              child: _creditCard(
+                                bgColor: blueCard,
+                                icon: _firstCompletionIcon(packageType),
+                                iconColor: const Color(0xFF006BAA),
+                                value: controller.completionFirstValue,
+                                label: controller.completionFirstLabel,
+                                textColor: const Color(0xFF075D97),
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 16.w),
-                          Expanded(
-                            child: _creditCard(
-                              bgColor: orangeCard,
-                              icon: _secondCompletionIcon(packageType),
-                              iconColor: const Color(0xFF9A5A00),
-                              value: controller.completionSecondValue,
-                              label: controller.completionSecondLabel,
-                              textColor: const Color(0xFF3A3434),
+                            SizedBox(width: 16.w),
+                            Expanded(
+                              child: _creditCard(
+                                bgColor: orangeCard,
+                                icon: _secondCompletionIcon(packageType),
+                                iconColor: const Color(0xFF9A5A00),
+                                value: controller.completionSecondValue,
+                                label: controller.completionSecondLabel,
+                                textColor: const Color(0xFF3A3434),
+                              ),
                             ),
-                          ),
                           ],
                         ),
                       );
@@ -111,9 +111,8 @@ class PurchaseCompletedPage extends StatelessWidget {
                     SizedBox(height: 42.h),
 
                     Obx(
-                      () => _orderStatusBox(
-                        orderId: controller.completedOrderId,
-                      ),
+                      () =>
+                          _orderStatusBox(orderId: controller.completedOrderId),
                     ),
                   ],
                 ),
@@ -334,6 +333,8 @@ class PurchaseCompletedPage extends StatelessWidget {
         return Icons.ac_unit_rounded;
       case StorePackageType.cvCredit:
         return Icons.description_outlined;
+      case StorePackageType.adFree:
+        return Icons.block_rounded;
       case null:
         return Icons.check_rounded;
     }
@@ -347,6 +348,8 @@ class PurchaseCompletedPage extends StatelessWidget {
         return Icons.inventory_2_outlined;
       case StorePackageType.cvCredit:
         return Icons.account_balance_wallet_outlined;
+      case StorePackageType.adFree:
+        return Icons.calendar_month_outlined;
       case null:
         return Icons.account_balance_wallet_outlined;
     }
