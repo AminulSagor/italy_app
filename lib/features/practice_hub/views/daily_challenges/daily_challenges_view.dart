@@ -6,6 +6,7 @@ import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
 import '../../controllers/practice_hub_controller.dart';
 import '../../models/daily_challenge_models.dart';
+import '../../../../core/services/rewarded_ads/rewarded_ads_service.dart';
 import 'daily_challenge_details_view.dart';
 
 class DailyChallengesView extends GetView<PracticeHubController> {
@@ -62,6 +63,8 @@ class DailyChallengesView extends GetView<PracticeHubController> {
                             SizedBox(height: 14.h),
                             const _StreakHeroCard(),
                             SizedBox(height: 18.h),
+                            const _RewardedXpCard(),
+                            SizedBox(height: 12.h),
                             ...controller.dailyChallengeTasks.map((
                               DailyChallengeTaskModel task,
                             ) {
@@ -86,6 +89,36 @@ class DailyChallengesView extends GetView<PracticeHubController> {
         }),
       ),
     );
+  }
+}
+
+class _RewardedXpCard extends GetView<PracticeHubController> {
+  const _RewardedXpCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final RewardedAdsService rewarded = Get.find<RewardedAdsService>();
+    return Obx(() {
+      final config = rewarded.configuration.value;
+      if (config == null || config.isAdFree || !config.adsEnabled) {
+        return const SizedBox.shrink();
+      }
+      final int remaining = config.dailyChallengeRemaining;
+      return SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          onPressed: remaining > 0 && !controller.isClaimingRewardedXp.value
+              ? controller.claimRewardedDailyXp
+              : null,
+          icon: const Icon(Icons.ondemand_video_rounded),
+          label: Text(
+            remaining > 0
+                ? 'Watch Ad for Bonus ${config.dailyChallengeXp} XP ($remaining left)'
+                : 'Daily bonus limit reached',
+          ),
+        ),
+      );
+    });
   }
 }
 

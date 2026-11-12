@@ -5,6 +5,7 @@ import 'package:italir_pothe/core/models/learning_activity_models.dart';
 import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
+import '../../../../core/models/rewarded_ads_models.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../controllers/important_verbs_controller.dart';
 import '../widgets/verb_serch_field.dart';
@@ -19,64 +20,64 @@ class SavedVerbsView extends GetView<ImportantVerbsController> {
       activityKind: LearningActivityKind.importantVerbs,
       sourceId: 'saved_verbs_view',
       child: Scaffold(
-      backgroundColor: AppColors.homeBackground,
-      appBar: SimpleAppbar(
-        title: 'gen_saved_verbs'.tr,
-        onBackTap: () => Navigator.of(context).pop(),
-      ),
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
-          if (notification.metrics.axis == Axis.vertical &&
-              notification.metrics.pixels >=
-                  notification.metrics.maxScrollExtent - 180.h) {
-            controller.loadMoreSavedVerbs();
-          }
-          return false;
-        },
-        child: RefreshIndicator(
-          onRefresh: () => controller.loadSavedVerbs(),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            padding: EdgeInsets.fromLTRB(22.w, 27.h, 22.w, 42.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Obx(
-                  () => VerbSearchField(
-                    textController: controller.savedVerbSearchController,
-                    hintText: 'gen_search_saved_verbs'.tr,
-                    query: controller.savedVerbSearchQuery.value,
-                    onChanged: controller.onSavedVerbSearchChanged,
-                    onClear: controller.clearSavedVerbSearch,
+        backgroundColor: AppColors.homeBackground,
+        appBar: SimpleAppbar(
+          title: 'gen_saved_verbs'.tr,
+          onBackTap: () => Navigator.of(context).pop(),
+        ),
+        body: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notification) {
+            if (notification.metrics.axis == Axis.vertical &&
+                notification.metrics.pixels >=
+                    notification.metrics.maxScrollExtent - 180.h) {
+              controller.loadMoreSavedVerbs();
+            }
+            return false;
+          },
+          child: RefreshIndicator(
+            onRefresh: () => controller.loadSavedVerbs(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: EdgeInsets.fromLTRB(22.w, 27.h, 22.w, 42.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Obx(
+                    () => VerbSearchField(
+                      textController: controller.savedVerbSearchController,
+                      hintText: 'gen_search_saved_verbs'.tr,
+                      query: controller.savedVerbSearchQuery.value,
+                      onChanged: controller.onSavedVerbSearchChanged,
+                      onClear: controller.clearSavedVerbSearch,
+                    ),
                   ),
-                ),
-                SizedBox(height: 27.h),
-                Obx(
-                  () => VerbFilterChips(
-                    filters: controller.verbFilters,
-                    selectedFilter: controller.selectedSavedVerbFilter.value,
-                    onSelected: controller.selectSavedVerbFilter,
+                  SizedBox(height: 27.h),
+                  Obx(
+                    () => VerbFilterChips(
+                      filters: controller.verbFilters,
+                      selectedFilter: controller.selectedSavedVerbFilter.value,
+                      onSelected: controller.selectSavedVerbFilter,
+                    ),
                   ),
-                ),
-                SizedBox(height: 28.h),
-                Obx(
-                  () => VerbLibraryList(
-                    verbs: controller.savedVerbItems,
-                    isLoading: controller.isSavedVerbsLoading.value,
-                    isLoadingMore:
-                        controller.isLoadingMoreSavedVerbs.value,
-                    error: controller.savedVerbsError.value,
-                    onRetry: controller.loadSavedVerbs,
+                  SizedBox(height: 28.h),
+                  Obx(
+                    () => VerbLibraryList(
+                      placement: NativeAdPlacement.savedVerbs,
+                      verbs: controller.savedVerbItems,
+                      isLoading: controller.isSavedVerbsLoading.value,
+                      isLoadingMore: controller.isLoadingMoreSavedVerbs.value,
+                      error: controller.savedVerbsError.value,
+                      onRetry: controller.loadSavedVerbs,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 }

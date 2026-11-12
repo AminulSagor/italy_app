@@ -4,6 +4,9 @@ import 'package:get/get.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
+import '../../../../core/models/rewarded_ads_models.dart';
+import '../../../../core/services/native_ads/native_ads_service.dart';
+import '../../../../core/widgets/ads/native_ad_slot.dart';
 
 class LeaderboardMilestoneCard extends StatelessWidget {
   final Map<String, dynamic>? milestone;
@@ -51,15 +54,8 @@ class LeaderboardMilestoneCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(
-        minHeight: 190.h,
-      ),
-      padding: EdgeInsets.fromLTRB(
-        24.w,
-        24.h,
-        24.w,
-        20.h,
-      ),
+      constraints: BoxConstraints(minHeight: 190.h),
+      padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 20.h),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(30.r),
@@ -295,18 +291,32 @@ class LeaderboardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverList.separated(
-      itemCount: users.length,
-      separatorBuilder: (_, _) => SizedBox(height: 14.h),
-      itemBuilder: (BuildContext context, int index) {
-        final Map<String, dynamic> user = users[index];
+    return Obx(() {
+      final NativeAdInsertionPlan plan = Get.find<NativeAdsService>()
+          .insertionPlan(
+            placement: NativeAdPlacement.league,
+            contentCount: users.length,
+          );
+      return SliverList.separated(
+        itemCount: plan.rows.length,
+        separatorBuilder: (_, _) => SizedBox(height: 14.h),
+        itemBuilder: (BuildContext context, int index) {
+          final NativeAdDisplayRow row = plan.rows[index];
+          if (row.isAd) {
+            return NativeAdSlot(
+              placement: NativeAdPlacement.league,
+              slotId: 'league:${row.adBoundary}',
+            );
+          }
+          final Map<String, dynamic> user = users[row.contentIndex!];
 
-        return _LeaderboardUserTile(
-          user: user,
-          onMessageTap: () => onMessageTap(user),
-        );
-      },
-    );
+          return _LeaderboardUserTile(
+            user: user,
+            onMessageTap: () => onMessageTap(user),
+          );
+        },
+      );
+    });
   }
 }
 
@@ -447,9 +457,7 @@ class _LeaderboardUserTile extends StatelessWidget {
             Flexible(
               flex: 0,
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: 72.w,
-                ),
+                constraints: BoxConstraints(maxWidth: 72.w),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[

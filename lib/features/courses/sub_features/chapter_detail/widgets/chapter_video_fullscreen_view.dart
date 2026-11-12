@@ -24,6 +24,7 @@ class ChapterVideoFullscreenView extends StatefulWidget {
   final String? recoveryMessage;
   final ValueListenable<String?>? recoveryMessageListenable;
   final Future<void> Function()? onRetry;
+  final Future<bool> Function()? onPlayRequested;
   final ValueChanged<bool>? onPlaybackIntentChanged;
 
   const ChapterVideoFullscreenView({
@@ -41,6 +42,7 @@ class ChapterVideoFullscreenView extends StatefulWidget {
     this.recoveryMessage,
     this.recoveryMessageListenable,
     this.onRetry,
+    this.onPlayRequested,
     this.onPlaybackIntentChanged,
   });
 
@@ -206,6 +208,7 @@ class _ChapterVideoFullscreenViewState
       recoveryMessage: widget.recoveryMessage,
       recoveryMessageListenable: widget.recoveryMessageListenable,
       onRetry: widget.onRetry,
+      onPlayRequested: widget.onPlayRequested,
       onPlaybackIntentChanged: widget.onPlaybackIntentChanged,
       onCloseFullscreenTap: () {
         unawaited(_closeFullscreen());

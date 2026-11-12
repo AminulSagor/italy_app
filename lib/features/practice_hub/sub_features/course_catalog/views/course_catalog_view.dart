@@ -5,6 +5,9 @@ import 'package:get/get.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import '../../../../../core/models/rewarded_ads_models.dart';
+import '../../../../../core/services/native_ads/native_ads_service.dart';
+import '../../../../../core/widgets/ads/native_ad_slot.dart';
 import '../../../../../core/widgets/simple_appbar.dart';
 import '../../../../courses/models/course_models.dart';
 import '../../../views/_widgets/practice_hub_course_card.dart';
@@ -59,38 +62,55 @@ class CourseCatalogView extends GetView<CourseCatalogController> {
               return RefreshIndicator(
                 color: AppColors.primaryGreen,
                 onRefresh: controller.refreshCourses,
-                child: ListView.separated(
-                  controller: controller.scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: BouncingScrollPhysics(),
-                  ),
-                  padding: EdgeInsets.fromLTRB(
-                    kHomeHorizontalPadding.w,
-                    4.h,
-                    kHomeHorizontalPadding.w,
-                    36.h,
-                  ),
-                  itemCount:
-                      controller.courses.length +
-                      (controller.isLoadingMore.value ? 1 : 0),
-                  separatorBuilder: (_, _) => SizedBox(height: 22.h),
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index >= controller.courses.length) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primaryGreen,
-                          ),
-                        ),
-                      );
-                    }
+                child: Builder(
+                  builder: (BuildContext context) {
+                    final NativeAdInsertionPlan plan =
+                        Get.find<NativeAdsService>().insertionPlan(
+                          placement: NativeAdPlacement.courseCatalog,
+                          contentCount: controller.courses.length,
+                        );
+                    return ListView.separated(
+                      controller: controller.scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      padding: EdgeInsets.fromLTRB(
+                        kHomeHorizontalPadding.w,
+                        4.h,
+                        kHomeHorizontalPadding.w,
+                        36.h,
+                      ),
+                      itemCount:
+                          plan.rows.length +
+                          (controller.isLoadingMore.value ? 1 : 0),
+                      separatorBuilder: (_, _) => SizedBox(height: 22.h),
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index >= plan.rows.length) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primaryGreen,
+                              ),
+                            ),
+                          );
+                        }
 
-                    final CourseCardModel course = controller.courses[index];
-                    return PracticeHubCourseCard(
-                      course: course,
-                      fullWidth: true,
-                      onTap: () => controller.onCourseTap(course),
+                        final NativeAdDisplayRow row = plan.rows[index];
+                        if (row.isAd) {
+                          return NativeAdSlot(
+                            placement: NativeAdPlacement.courseCatalog,
+                            slotId: 'course-catalog:${row.adBoundary}',
+                          );
+                        }
+                        final CourseCardModel course =
+                            controller.courses[row.contentIndex!];
+                        return PracticeHubCourseCard(
+                          course: course,
+                          fullWidth: true,
+                          onTap: () => controller.onCourseTap(course),
+                        );
+                      },
                     );
                   },
                 ),

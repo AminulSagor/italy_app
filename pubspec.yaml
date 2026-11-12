@@ -2,7 +2,7 @@ name: italir_pothe
 description: "Italir Pothe — an interactive platform for learning Italian."
 publish_to: "none"
 
-version: 1.0.1+27
+version: 1.0.1+28
 
 environment:
   sdk: ^3.12.0
@@ -61,6 +61,8 @@ dependencies:
   proximity_screen_lock: ^2.3.0
   pdfrx: ^2.4.7
   google_sign_in: ^7.2.0
+  google_mobile_ads: ^9.2.0
+  gma_mediation_meta: ^1.5.3
   flutter_facebook_auth: ^7.1.1
   sign_in_with_apple: ^8.1.0
   crypto: ^3.0.7

@@ -9,6 +9,9 @@ import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
+import '../../../../../core/models/rewarded_ads_models.dart';
+import '../../../../../core/services/native_ads/native_ads_service.dart';
+import '../../../../../core/widgets/ads/native_ad_slot.dart';
 import '../../../../../core/widgets/custom_button.dart';
 import '../controllers/vocabulary_controller.dart';
 import '../models/vocabulary_models.dart';
@@ -103,6 +106,7 @@ class VocabularyView extends GetView<VocabularyController> {
                         VocabularyDisplayMode.list)
                       Expanded(
                         child: _VocabularyListMode(
+                          slotContext: controller.lessonId ?? controllerTag,
                           cards: controller.filteredCards,
                           weakWordCount: controller.weakWordCount,
                           isStartingWeakReview:
@@ -349,6 +353,7 @@ class _VocabularyModeButton extends StatelessWidget {
 }
 
 class _VocabularyListMode extends StatelessWidget {
+  final String slotContext;
   final List<VocabularyCardModel> cards;
   final int weakWordCount;
   final bool isStartingWeakReview;
@@ -362,6 +367,7 @@ class _VocabularyListMode extends StatelessWidget {
   final VoidCallback onWeakReviewTap;
 
   const _VocabularyListMode({
+    required this.slotContext,
     required this.cards,
     required this.weakWordCount,
     required this.isStartingWeakReview,
@@ -465,22 +471,36 @@ class _VocabularyListMode extends StatelessWidget {
         Expanded(
           child: cards.isEmpty
               ? Center(child: Text('vocabulary_no_search_result'.tr))
-              : ListView.separated(
-                  padding: EdgeInsets.only(bottom: 12.h),
-                  itemCount: cards.length,
-                  separatorBuilder: (_, __) => SizedBox(height: 10.h),
-                  itemBuilder: (BuildContext context, int index) {
-                    final VocabularyCardModel card = cards[index];
+              : Obx(() {
+                  final NativeAdInsertionPlan plan =
+                      Get.find<NativeAdsService>().insertionPlan(
+                        placement: NativeAdPlacement.vocabulary,
+                        contentCount: cards.length,
+                      );
+                  return ListView.separated(
+                    padding: EdgeInsets.only(bottom: 12.h),
+                    itemCount: plan.rows.length,
+                    separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                    itemBuilder: (BuildContext context, int index) {
+                      final NativeAdDisplayRow row = plan.rows[index];
+                      if (row.isAd) {
+                        return NativeAdSlot(
+                          placement: NativeAdPlacement.vocabulary,
+                          slotId: 'vocabulary:$slotContext:${row.adBoundary}',
+                        );
+                      }
+                      final VocabularyCardModel card = cards[row.contentIndex!];
 
-                    return _VocabularyListCard(
-                      card: card,
-                      showMeaning: showMeanings,
-                      onAudioTap: () {
-                        onAudioTap(card);
-                      },
-                    );
-                  },
-                ),
+                      return _VocabularyListCard(
+                        card: card,
+                        showMeaning: showMeanings,
+                        onAudioTap: () {
+                          onAudioTap(card);
+                        },
+                      );
+                    },
+                  );
+                }),
         ),
 
         SizedBox(height: 10.h),

@@ -6,6 +6,9 @@ import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
+import '../../../../core/models/rewarded_ads_models.dart';
+import '../../../../core/services/native_ads/native_ads_service.dart';
+import '../../../../core/widgets/ads/native_ad_slot.dart';
 import '../../controllers/job_sentences_controller.dart';
 import '../../models/job_sentence_models.dart';
 
@@ -18,45 +21,37 @@ class JobPhraseDetailsScreen extends GetView<JobSentencesController> {
       activityKind: LearningActivityKind.jobSentences,
       sourceId: 'job_phrase_details_view',
       child: Scaffold(
-      backgroundColor: AppColors.homeBackground,
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          color: AppColors.primaryGreen,
-          onRefresh: () {
-            return controller.loadModuleSentences(
-              showError: false,
-            );
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            padding: EdgeInsets.fromLTRB(
-              24.w,
-              24.h,
-              24.w,
-              48.h,
-            ),
-            child: Column(
-              children: <Widget>[
-                const _PhraseDetailsHeader(),
-                SizedBox(height: 25.h),
-                const _PhraseSearchField(),
-                SizedBox(height: 31.h),
-                const _PhraseList(),
-              ],
+        backgroundColor: AppColors.homeBackground,
+        body: SafeArea(
+          bottom: false,
+          child: RefreshIndicator(
+            color: AppColors.primaryGreen,
+            onRefresh: () {
+              return controller.loadModuleSentences(showError: false);
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 48.h),
+              child: Column(
+                children: <Widget>[
+                  const _PhraseDetailsHeader(),
+                  SizedBox(height: 25.h),
+                  const _PhraseSearchField(),
+                  SizedBox(height: 31.h),
+                  const _PhraseList(),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 }
 
-class _PhraseDetailsHeader
-    extends GetView<JobSentencesController> {
+class _PhraseDetailsHeader extends GetView<JobSentencesController> {
   const _PhraseDetailsHeader();
 
   @override
@@ -67,21 +62,18 @@ class _PhraseDetailsHeader
 
       final String title =
           summary?.name ??
-              controller.selectedModule.value?.name ??
-              'Job Sentences';
+          controller.selectedModule.value?.name ??
+          'Job Sentences';
 
       final int completed =
           summary?.learnedSentences ??
-              controller
-                  .selectedModule
-                  .value
-                  ?.learnedSentenceCount ??
-              0;
+          controller.selectedModule.value?.learnedSentenceCount ??
+          0;
 
       final int total =
           summary?.totalSentences ??
-              controller.selectedModule.value?.sentenceCount ??
-              0;
+          controller.selectedModule.value?.sentenceCount ??
+          0;
 
       return Row(
         children: <Widget>[
@@ -107,34 +99,26 @@ class _PhraseDetailsHeader
               ),
             ),
           ),
-
         ],
       );
     });
   }
 }
 
-class _PhraseSearchField
-    extends GetView<JobSentencesController> {
+class _PhraseSearchField extends GetView<JobSentencesController> {
   const _PhraseSearchField();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 57.h,
-      padding: EdgeInsets.symmetric(
-        horizontal: 19.w,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 19.w),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(
-          999.r,
-        ),
+        borderRadius: BorderRadius.circular(999.r),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(
-              alpha: 0.035,
-            ),
+            color: Colors.black.withValues(alpha: 0.035),
             blurRadius: 16.r,
             offset: Offset(0, 7.h),
           ),
@@ -170,18 +154,16 @@ class _PhraseSearchField
             ),
           ),
           Obx(
-                () => controller.searchQuery.value.isEmpty
+            () => controller.searchQuery.value.isEmpty
                 ? const SizedBox.shrink()
                 : GestureDetector(
-              onTap: controller.clearSearch,
-              child: Icon(
-                Icons.close_rounded,
-                size: 21.r,
-                color: const Color(
-                  0xFF9EA2A5,
-                ),
-              ),
-            ),
+                    onTap: controller.clearSearch,
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 21.r,
+                      color: const Color(0xFF9EA2A5),
+                    ),
+                  ),
           ),
         ],
       ),
@@ -189,22 +171,16 @@ class _PhraseSearchField
   }
 }
 
-class _PhraseList
-    extends GetView<JobSentencesController> {
+class _PhraseList extends GetView<JobSentencesController> {
   const _PhraseList();
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.isSentencesLoading.value &&
-          controller.sentences.isEmpty) {
+      if (controller.isSentencesLoading.value && controller.sentences.isEmpty) {
         return Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 100.h,
-          ),
-          child: const CircularProgressIndicator(
-            color: AppColors.primaryGreen,
-          ),
+          padding: EdgeInsets.symmetric(vertical: 100.h),
+          child: const CircularProgressIndicator(color: AppColors.primaryGreen),
         );
       }
 
@@ -221,91 +197,72 @@ class _PhraseList
       if (controller.sentences.isEmpty) {
         return _PhraseMessageState(
           message: controller.searchQuery.value.isEmpty
-              ? 'no_sentences_are_available_in_this_module'
-              .tr
+              ? 'no_sentences_are_available_in_this_module'.tr
               : 'no_sentences_match_your_search'.tr,
         );
       }
 
+      final NativeAdInsertionPlan plan = Get.find<NativeAdsService>()
+          .insertionPlan(
+            placement: NativeAdPlacement.careerSentences,
+            contentCount: controller.sentences.length,
+          );
       return Column(
-        children: controller.sentences
+        children: plan.rows
             .map(
-              (JobSentenceModel phrase) => Padding(
-            padding: EdgeInsets.only(
-              bottom: 24.h,
-            ),
-            child: _PhraseCard(
-              key: ValueKey<String>(
-                phrase.id,
+              (NativeAdDisplayRow row) => Padding(
+                padding: EdgeInsets.only(bottom: 24.h),
+                child: row.isAd
+                    ? NativeAdSlot(
+                        placement: NativeAdPlacement.careerSentences,
+                        slotId:
+                            'career-sentences:${controller.selectedModule.value?.id ?? 'module'}:${row.adBoundary}',
+                      )
+                    : _PhraseCard(
+                        key: ValueKey<String>(
+                          controller.sentences[row.contentIndex!].id,
+                        ),
+                        phrase: controller.sentences[row.contentIndex!],
+                      ),
               ),
-              phrase: phrase,
-            ),
-          ),
-        )
-            .toList(
-          growable: false,
-        ),
+            )
+            .toList(growable: false),
       );
     });
   }
 }
 
-class _PhraseCard
-    extends GetView<JobSentencesController> {
-  const _PhraseCard({
-    required this.phrase,
-    super.key,
-  });
+class _PhraseCard extends GetView<JobSentencesController> {
+  const _PhraseCard({required this.phrase, super.key});
 
   final JobSentenceModel phrase;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final bool isCurrent =
-          controller.currentTtsSentenceId.value ==
-              phrase.id;
+      final bool isCurrent = controller.currentTtsSentenceId.value == phrase.id;
 
-      final bool isSpeaking =
-          isCurrent &&
-              controller.isTtsSpeaking.value;
+      final bool isSpeaking = isCurrent && controller.isTtsSpeaking.value;
 
       return GestureDetector(
         onTap: () {
-          controller.toggleSentenceTts(
-            phrase,
-          );
+          controller.toggleSentenceTts(phrase);
         },
         child: AnimatedContainer(
-          duration: const Duration(
-            milliseconds: 180,
-          ),
+          duration: const Duration(milliseconds: 180),
           width: double.infinity,
-          constraints: BoxConstraints(
-            minHeight: 145.h,
-          ),
-          padding: EdgeInsets.fromLTRB(
-            28.w,
-            27.h,
-            28.w,
-            24.h,
-          ),
+          constraints: BoxConstraints(minHeight: 145.h),
+          padding: EdgeInsets.fromLTRB(28.w, 27.h, 28.w, 24.h),
           decoration: BoxDecoration(
             color: AppColors.white,
-            borderRadius: BorderRadius.circular(
-              40.r,
-            ),
+            borderRadius: BorderRadius.circular(40.r),
             border: Border.all(
-              color: isCurrent
-                  ? const Color(0xFF70FF35)
-                  : AppColors.white,
+              color: isCurrent ? const Color(0xFF70FF35) : AppColors.white,
               width: 2.w,
             ),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(
-                  alpha: 0.035,
-                ),
+                color: Colors.black.withValues(alpha: 0.035),
                 blurRadius: 18.r,
                 offset: Offset(0, 9.h),
               ),
@@ -314,13 +271,11 @@ class _PhraseCard
           child: Column(
             children: <Widget>[
               Row(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
                           phrase.italianSentence,
@@ -329,24 +284,18 @@ class _PhraseCard
                             height: 1.25,
                             fontWeight: FontWeight.w900,
                             letterSpacing: -0.5,
-                            color:
-                            AppColors.primaryGreen,
+                            color: AppColors.primaryGreen,
                           ),
                         ),
-                        if (phrase
-                            .bengaliTranslation
-                            .isNotEmpty) ...<Widget>[
+                        if (phrase.bengaliTranslation.isNotEmpty) ...<Widget>[
                           SizedBox(height: 12.h),
                           Text(
                             phrase.bengaliTranslation,
                             style: TextStyle(
                               fontSize: 16.sp,
                               height: 1.35,
-                              fontWeight:
-                              FontWeight.w500,
-                              color: const Color(
-                                0xFF777C80,
-                              ),
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF777C80),
                             ),
                           ),
                         ],
@@ -354,9 +303,7 @@ class _PhraseCard
                     ),
                   ),
                   SizedBox(width: 16.w),
-                  _TtsActionButton(
-                    isSpeaking: isSpeaking,
-                  ),
+                  _TtsActionButton(isSpeaking: isSpeaking),
                 ],
               ),
               if (phrase.isLearned) ...<Widget>[
@@ -369,22 +316,15 @@ class _PhraseCard
                       vertical: 5.h,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(
-                        0xFFE5FFD7,
-                      ),
-                      borderRadius:
-                      BorderRadius.circular(
-                        999.r,
-                      ),
+                      color: const Color(0xFFE5FFD7),
+                      borderRadius: BorderRadius.circular(999.r),
                     ),
                     child: Text(
                       'completed'.tr,
                       style: TextStyle(
                         fontSize: 10.sp,
-                        fontWeight:
-                        FontWeight.w900,
-                        color:
-                        AppColors.primaryGreen,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primaryGreen,
                       ),
                     ),
                   ),
@@ -399,9 +339,7 @@ class _PhraseCard
 }
 
 class _TtsActionButton extends StatelessWidget {
-  const _TtsActionButton({
-    required this.isSpeaking,
-  });
+  const _TtsActionButton({required this.isSpeaking});
 
   final bool isSpeaking;
 
@@ -416,9 +354,7 @@ class _TtsActionButton extends StatelessWidget {
       ),
       child: Center(
         child: Icon(
-          isSpeaking
-              ? Icons.stop_rounded
-              : Icons.volume_up_rounded,
+          isSpeaking ? Icons.stop_rounded : Icons.volume_up_rounded,
           size: 29.r,
           color: AppColors.primaryGreen,
         ),
@@ -427,12 +363,8 @@ class _TtsActionButton extends StatelessWidget {
   }
 }
 
-class _PhraseMessageState
-    extends StatelessWidget {
-  const _PhraseMessageState({
-    required this.message,
-    this.onRetry,
-  });
+class _PhraseMessageState extends StatelessWidget {
+  const _PhraseMessageState({required this.message, this.onRetry});
 
   final String message;
   final VoidCallback? onRetry;
@@ -444,9 +376,7 @@ class _PhraseMessageState
       padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(
-          30.r,
-        ),
+        borderRadius: BorderRadius.circular(30.r),
       ),
       child: Column(
         children: <Widget>[
@@ -461,10 +391,7 @@ class _PhraseMessageState
           ),
           if (onRetry != null) ...<Widget>[
             SizedBox(height: 10.h),
-            TextButton(
-              onPressed: onRetry,
-              child: Text('retry'.tr),
-            ),
+            TextButton(onPressed: onRetry, child: Text('retry'.tr)),
           ],
         ],
       ),

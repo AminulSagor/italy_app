@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
+import '../../../core/models/rewarded_ads_models.dart';
+import '../../../core/widgets/ads/native_ad_slot.dart';
 import '../controllers/home_controller.dart';
 import '../models/home_models.dart';
 import '../widgets/current_chapter_card.dart';
@@ -25,17 +27,13 @@ class HomeView extends GetView<HomeController> {
         top: false,
         bottom: false,
         child: Obx(() {
-          final HomeDashboardModel data =
-              controller.dashboard.value;
+          final HomeDashboardModel data = controller.dashboard.value;
 
-          final bool isInitialLoading =
-              controller.isInitialLoading;
+          final bool isInitialLoading = controller.isInitialLoading;
 
-          final bool hasLoadedOnce =
-              controller.hasLoadedOnce.value;
+          final bool hasLoadedOnce = controller.hasLoadedOnce.value;
 
-          final String errorMessage =
-          controller.errorMessage.value.trim();
+          final String errorMessage = controller.errorMessage.value.trim();
 
           /*
            * First application load.
@@ -43,7 +41,6 @@ class HomeView extends GetView<HomeController> {
            * The full dashboard is not shown yet because there is
            * no successful dashboard response available.
            */
-
 
           /*
            * First request failed.
@@ -113,8 +110,7 @@ class _HomeDashboardContent extends StatelessWidget {
   final Future<void> Function() onRetryRefresh;
 
   final VoidCallback onContinueChapter;
-  final ValueChanged<HomeToolModel>
-  onOpenQuickTool;
+  final ValueChanged<HomeToolModel> onOpenQuickTool;
   final VoidCallback onOpenCareerTracks;
   final ValueChanged<HomeWorkItemModel> onOpenCareerTrack;
   final Future<void> Function() onOpenWhatsAppSupport;
@@ -125,12 +121,8 @@ class _HomeDashboardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (
-          BuildContext context,
-          BoxConstraints constraints,
-          ) {
-        final double horizontalPadding =
-        _horizontalPaddingForWidth(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double horizontalPadding = _horizontalPaddingForWidth(
           constraints.maxWidth,
         );
 
@@ -142,37 +134,26 @@ class _HomeDashboardContent extends StatelessWidget {
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
             ),
-            padding: EdgeInsets.only(
-              bottom: 72.h,
-            ),
+            padding: EdgeInsets.only(bottom: 72.h),
             child: Column(
               children: <Widget>[
                 AnimatedSwitcher(
-                  duration: const Duration(
-                    milliseconds: 200,
-                  ),
+                  duration: const Duration(milliseconds: 200),
                   child: isRefreshing
                       ? const LinearProgressIndicator(
-                    key: ValueKey<String>(
-                      'home-refreshing',
-                    ),
-                    minHeight: 2,
-                    color: AppColors.primaryGreen,
-                    backgroundColor:
-                    AppColors.homeProgressTrack,
-                  )
+                          key: ValueKey<String>('home-refreshing'),
+                          minHeight: 2,
+                          color: AppColors.primaryGreen,
+                          backgroundColor: AppColors.homeProgressTrack,
+                        )
                       : const SizedBox(
-                    key: ValueKey<String>(
-                      'home-not-refreshing',
-                    ),
-                    height: 2,
-                  ),
+                          key: ValueKey<String>('home-not-refreshing'),
+                          height: 2,
+                        ),
                 ),
                 Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 760,
-                    ),
+                    constraints: const BoxConstraints(maxWidth: 760),
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(
                         horizontalPadding,
@@ -181,11 +162,9 @@ class _HomeDashboardContent extends StatelessWidget {
                         0,
                       ),
                       child: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          if (refreshErrorMessage.isNotEmpty) ...<
-                              Widget>[
+                          if (refreshErrorMessage.isNotEmpty) ...<Widget>[
                             _HomeRefreshErrorBanner(
                               message: refreshErrorMessage,
                               onRetry: onRetryRefresh,
@@ -196,9 +175,7 @@ class _HomeDashboardContent extends StatelessWidget {
                           if (isInitialLoading)
                             const HomeOverviewSkeleton()
                           else
-                            DailyOverviewSection(
-                              overview: data.overview,
-                            ),
+                            DailyOverviewSection(overview: data.overview),
 
                           if (isInitialLoading) ...<Widget>[
                             SizedBox(height: 20.h),
@@ -211,12 +188,8 @@ class _HomeDashboardContent extends StatelessWidget {
                             ),
                           ],
 
-                          if (data.quickTools.isNotEmpty) ...<
-                              Widget>[
-                            SizedBox(
-                              height:
-                              kHomeSectionSpacing.h,
-                            ),
+                          if (data.quickTools.isNotEmpty) ...<Widget>[
+                            SizedBox(height: kHomeSectionSpacing.h),
                             QuickToolsSection(
                               tools: data.quickTools,
                               onToolTap: onOpenQuickTool,
@@ -257,15 +230,11 @@ class _HomeDashboardContent extends StatelessWidget {
 
                           SizedBox(height: 12.h),
 
-                          CulturalTipCard(
-                            tip: data.culturalTip,
-                          ),
+                          CulturalTipCard(tip: data.culturalTip),
 
                           SizedBox(height: 12.h),
 
-                          StreakCard(
-                            streak: data.streak,
-                          ),
+                          StreakCard(streak: data.streak),
 
                           SizedBox(height: 12.h),
 
@@ -277,10 +246,13 @@ class _HomeDashboardContent extends StatelessWidget {
                           SizedBox(height: 12.h),
 
                           DailyChallengesCard(
-                            challenges:
-                            data.dailyChallenges,
-                            onTap:
-                            onOpenDailyChallenges,
+                            challenges: data.dailyChallenges,
+                            onTap: onOpenDailyChallenges,
+                          ),
+                          SizedBox(height: 12.h),
+                          const NativeAdSlot(
+                            placement: NativeAdPlacement.home,
+                            slotId: 'home:daily-challenges',
                           ),
                         ],
                       ),
@@ -295,9 +267,7 @@ class _HomeDashboardContent extends StatelessWidget {
     );
   }
 
-  double _horizontalPaddingForWidth(
-      double width,
-      ) {
+  double _horizontalPaddingForWidth(double width) {
     if (width >= 900) {
       return 32;
     }
@@ -345,10 +315,7 @@ class _HomeInitialLoadingView extends StatelessWidget {
 }
 
 class _HomeInitialErrorView extends StatelessWidget {
-  const _HomeInitialErrorView({
-    required this.message,
-    required this.onRetry,
-  });
+  const _HomeInitialErrorView({required this.message, required this.onRetry});
 
   final String message;
   final Future<void> Function() onRetry;
@@ -365,9 +332,7 @@ class _HomeInitialErrorView extends StatelessWidget {
             hasScrollBody: false,
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 420,
-                ),
+                constraints: const BoxConstraints(maxWidth: 420),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 24.w,
@@ -380,10 +345,7 @@ class _HomeInitialErrorView extends StatelessWidget {
                         width: 58.r,
                         height: 58.r,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryGreen
-                              .withValues(
-                            alpha: 0.10,
-                          ),
+                          color: AppColors.primaryGreen.withValues(alpha: 0.10),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -400,38 +362,24 @@ class _HomeInitialErrorView extends StatelessWidget {
                           fontSize: 15.sp,
                           height: 1.45,
                           fontWeight: FontWeight.w600,
-                          color: const Color(
-                            0xFF4E5652,
-                          ),
+                          color: const Color(0xFF4E5652),
                         ),
                       ),
                       SizedBox(height: 18.h),
                       FilledButton.icon(
                         onPressed: onRetry,
-                        icon: const Icon(
-                          Icons.refresh_rounded,
-                        ),
-                        label: Text(
-                          'retry'.tr,
-                        ),
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: Text('retry'.tr),
                         style: FilledButton.styleFrom(
-                          backgroundColor:
-                          AppColors.primaryGreen,
+                          backgroundColor: AppColors.primaryGreen,
                           foregroundColor: Colors.white,
-                          minimumSize: const Size(
-                            140,
-                            46,
-                          ),
-                          padding:
-                          const EdgeInsets.symmetric(
+                          minimumSize: const Size(140, 46),
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 12,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.circular(
-                              14,
-                            ),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                         ),
                       ),
@@ -448,10 +396,7 @@ class _HomeInitialErrorView extends StatelessWidget {
 }
 
 class _HomeRefreshErrorBanner extends StatelessWidget {
-  const _HomeRefreshErrorBanner({
-    required this.message,
-    required this.onRetry,
-  });
+  const _HomeRefreshErrorBanner({required this.message, required this.onRetry});
 
   final String message;
   final Future<void> Function() onRetry;
@@ -460,18 +405,11 @@ class _HomeRefreshErrorBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(
-        14,
-        11,
-        8,
-        11,
-      ),
+      padding: const EdgeInsets.fromLTRB(14, 11, 8, 11),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF4E5),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFFF2D5A7),
-        ),
+        border: Border.all(color: const Color(0xFFF2D5A7)),
       ),
       child: Row(
         children: <Widget>[
@@ -497,18 +435,13 @@ class _HomeRefreshErrorBanner extends StatelessWidget {
           TextButton(
             onPressed: onRetry,
             style: TextButton.styleFrom(
-              foregroundColor:
-              const Color(0xFF8A5614),
+              foregroundColor: const Color(0xFF8A5614),
               minimumSize: const Size(0, 40),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
             ),
             child: Text(
               'retry'.tr,
-              style: const TextStyle(
-                fontWeight: FontWeight.w800,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ),
         ],

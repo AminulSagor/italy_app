@@ -12,6 +12,8 @@ import '../models/job_track_models.dart';
 
 import '../services/italian_tts_service.dart';
 import '../services/job_sentences_api_service.dart';
+import '../../../core/models/rewarded_ads_models.dart';
+import '../../../core/services/rewarded_ads/rewarded_ads_service.dart';
 
 class JobSentencesController extends GetxController {
   JobSentencesController({
@@ -242,7 +244,12 @@ class JobSentencesController extends GetxController {
     }
   }
 
-  void openModule(JobModuleModel module) {
+  Future<void> openModule(JobModuleModel module) async {
+    final bool allowed = await Get.find<RewardedAdsService>().gate(
+      RewardedPlacement.careerModule,
+      contextId: module.id,
+    );
+    if (!allowed) return;
     selectedModule.value = module;
     moduleSummary.value = null;
     sentences.clear();

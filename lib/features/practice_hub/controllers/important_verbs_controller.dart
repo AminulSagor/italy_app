@@ -10,6 +10,8 @@ import '../models/important_verb_models.dart';
 import '../services/important_verbs_api_service.dart';
 import '../services/italian_tts_service.dart';
 import '../views/important_verbs/saved_verbs_view.dart';
+import '../../../core/models/rewarded_ads_models.dart';
+import '../../../core/services/rewarded_ads/rewarded_ads_service.dart';
 
 class ImportantVerbsController extends GetxController {
   ImportantVerbsController({
@@ -410,7 +412,16 @@ class ImportantVerbsController extends GetxController {
     unawaited(loadVerbs());
   }
 
-  void openVerbDetails(ImportantVerbSummaryModel verb) {
+  Future<void> openVerbDetails(ImportantVerbSummaryModel verb) async {
+    final RewardedAdsService rewardedAds = Get.find<RewardedAdsService>();
+    final bool allowed = await rewardedAds.gate(
+      RewardedPlacement.verbDetail,
+      contextId: verb.id,
+    );
+    if (!allowed) {
+      _showPendingRewardMessage(rewardedAds);
+      return;
+    }
     selectedVerbSummary.value = verb;
     selectedVerbDetails.value = null;
     verbDetailsError.value = '';
@@ -418,6 +429,19 @@ class ImportantVerbsController extends GetxController {
     expandedFormId.value = '';
     Get.toNamed(AppRoutes.verbDetails);
     unawaited(loadVerbDetails(verb.id));
+  }
+
+  void _showPendingRewardMessage(RewardedAdsService rewardedAds) {
+    final failure = rewardedAds.lastGateFailure.value;
+    if (failure != RewardedGateFailure.verificationPending &&
+        failure != RewardedGateFailure.verificationRejected) {
+      return;
+    }
+    Get.snackbar(
+      'Reward verification pending',
+      'Your ad will not replay. Tap the verb again to check verification.',
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
 
   Future<void> loadVerbDetails(String verbId, {bool showError = true}) async {

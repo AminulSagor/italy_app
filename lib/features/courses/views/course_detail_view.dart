@@ -4,6 +4,9 @@ import 'package:get/get.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
+import '../../../core/models/rewarded_ads_models.dart';
+import '../../../core/services/native_ads/native_ads_service.dart';
+import '../../../core/widgets/ads/native_ad_slot.dart';
 import '../../../core/widgets/app_home_bottom_navigation_bar.dart';
 import '../../../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import '../../../routes/app_routes.dart';
@@ -108,6 +111,12 @@ class CourseDetailView extends GetView<CourseDetailController> {
             return const SizedBox.shrink();
           }
 
+          final NativeAdInsertionPlan chapterPlan = Get.find<NativeAdsService>()
+              .insertionPlan(
+                placement: NativeAdPlacement.courseDetail,
+                contentCount: detail.chapters.length,
+              );
+
           return CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: <Widget>[
@@ -166,19 +175,26 @@ class CourseDetailView extends GetView<CourseDetailController> {
                 ),
                 sliver: detail.chapters.isEmpty
                     ? const SliverToBoxAdapter(child: _EmptyLessonsCard())
-                    : SliverList(
-                        delegate: SliverChildBuilderDelegate((_, int index) {
-                          if (index.isOdd) {
-                            return SizedBox(height: 18.h);
+                    : SliverList.separated(
+                        itemCount: chapterPlan.rows.length,
+                        separatorBuilder: (_, _) => SizedBox(height: 18.h),
+                        itemBuilder: (_, int index) {
+                          final NativeAdDisplayRow row =
+                              chapterPlan.rows[index];
+                          if (row.isAd) {
+                            return NativeAdSlot(
+                              placement: NativeAdPlacement.courseDetail,
+                              slotId:
+                                  'course-detail:${detail.id}:${row.adBoundary}',
+                            );
                           }
-
                           final CourseChapterModel chapter =
-                              detail.chapters[index ~/ 2];
+                              detail.chapters[row.contentIndex!];
                           return CourseChapterCard(
                             chapter: chapter,
                             onTap: () => controller.openChapter(chapter),
                           );
-                        }, childCount: (detail.chapters.length * 2) - 1),
+                        },
                       ),
               ),
               if (detail.finalExam.isConfigured)

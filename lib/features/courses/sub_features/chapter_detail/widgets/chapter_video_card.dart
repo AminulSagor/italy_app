@@ -13,6 +13,8 @@ import '../../../../../core/themes/app_font.dart';
 import '../models/chapter_detail_models.dart';
 import 'chapter_video_fullscreen_view.dart';
 import 'chapter_video_player_surface.dart';
+import '../../../../../core/models/rewarded_ads_models.dart';
+import '../../../../../core/services/rewarded_ads/rewarded_ads_service.dart';
 
 class ChapterVideoCard extends StatefulWidget {
   final ChapterDetailModel detail;
@@ -22,6 +24,7 @@ class ChapterVideoCard extends StatefulWidget {
   loadVideoAccess;
   final ValueChanged<bool> onPlaybackChanged;
   final void Function(Duration position, Duration duration) onProgressChanged;
+  final bool isFreeLesson;
 
   const ChapterVideoCard({
     super.key,
@@ -31,6 +34,7 @@ class ChapterVideoCard extends StatefulWidget {
     required this.loadVideoAccess,
     required this.onPlaybackChanged,
     required this.onProgressChanged,
+    required this.isFreeLesson,
   });
 
   @override
@@ -39,6 +43,8 @@ class ChapterVideoCard extends StatefulWidget {
 
 class _ChapterVideoCardState extends State<ChapterVideoCard>
     with WidgetsBindingObserver {
+  static const int _rewardedAdThresholdPercent = 60;
+
   VideoPlayerController? _videoController;
   final VideoPlaybackWakelock _playbackWakelock = VideoPlaybackWakelock();
   Future<void>? _initializationFuture;
@@ -53,6 +59,8 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
   late final HlsPlaybackRecoveryCoordinator _recoveryCoordinator;
 
   ChapterVideoAccessModel? _videoAccess;
+  bool _rewardGatePassed = false;
+  Future<bool>? _rewardGateFuture;
   bool _isInitializing = false;
   bool _isChangingQuality = false;
   String? _errorMessage;
@@ -60,6 +68,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
   bool _lastReportedPlaying = false;
   bool _playbackIntent = false;
   int _lastReportedPercent = 0;
+  int _currentVideoPercent = 0;
 
   @override
   void initState() {
@@ -71,6 +80,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
     );
     _lastPlaybackCommand = widget.playbackCommand;
     _lastReportedPercent = widget.detail.progress.videoWatchPercent;
+    _currentVideoPercent = _lastReportedPercent;
     _hasWatchedFullyNotifier = ValueNotifier<bool>(
       widget.detail.progress.videoWatchPercent >= 100,
     );
@@ -87,6 +97,9 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
 
     if (oldWidget.detail.video?.fileId != widget.detail.video?.fileId) {
       _lastReportedPercent = widget.detail.progress.videoWatchPercent;
+      _currentVideoPercent = _lastReportedPercent;
+      _rewardGatePassed = false;
+      _rewardGateFuture = null;
       _hasWatchedFullyNotifier.value =
           widget.detail.progress.videoWatchPercent >= 100;
       _disposePlayer();
@@ -104,6 +117,9 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
     final int savedPercent = widget.detail.progress.videoWatchPercent;
     if (savedPercent > _lastReportedPercent) {
       _lastReportedPercent = savedPercent;
+    }
+    if (savedPercent > _currentVideoPercent) {
+      _currentVideoPercent = savedPercent;
     }
     if (savedPercent >= 100 && !_hasWatchedFullyNotifier.value) {
       _hasWatchedFullyNotifier.value = true;
@@ -335,12 +351,22 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
               .floor()
               .clamp(0, 99)
               .toInt();
+    _currentVideoPercent = percent;
+    final bool reachedRewardedAdThreshold =
+        widget.isFreeLesson &&
+        !_rewardGatePassed &&
+        _lastReportedPercent < _rewardedAdThresholdPercent &&
+        percent >= _rewardedAdThresholdPercent;
 
     if (isComplete && !_hasWatchedFullyNotifier.value) {
       _hasWatchedFullyNotifier.value = true;
     }
     if (isComplete) {
       _playbackIntent = false;
+    }
+
+    if (reachedRewardedAdThreshold) {
+      unawaited(_pauseForRewardedAdUnlock());
     }
 
     if (percent == 100 && _lastReportedPercent < 100) {
@@ -372,6 +398,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
   }
 
   Future<void> _play() async {
+    if (!await _ensureRewardGatePassed()) return;
     if (_videoController != null &&
         _videoController?.value.isInitialized != true &&
         _videoAccess != null) {
@@ -398,6 +425,79 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
     await controller.play();
     _playbackIntent = true;
     _reportPlaybackState(true);
+  }
+
+  Future<bool> _ensureRewardGatePassed() async {
+    if (!widget.isFreeLesson ||
+        _rewardGatePassed ||
+        _currentVideoPercent < _rewardedAdThresholdPercent) {
+      return true;
+    }
+    return _rewardGateFuture ??= _requestRewardedAdUnlock().whenComplete(() {
+      _rewardGateFuture = null;
+    });
+  }
+
+  Future<void> _pauseForRewardedAdUnlock() async {
+    final RewardedAdsConfiguration? currentConfiguration =
+        Get.find<RewardedAdsService>().configuration.value;
+    if (currentConfiguration != null &&
+        (!currentConfiguration.adsEnabled || currentConfiguration.isAdFree)) {
+      _rewardGatePassed = true;
+      return;
+    }
+
+    await _pause();
+    if (!mounted) return;
+    final bool allowed = await _ensureRewardGatePassed();
+    if (!allowed || !mounted) return;
+    await _play();
+  }
+
+  Future<bool> _requestRewardedAdUnlock() async {
+    final RewardedAdsService rewardedAds = Get.find<RewardedAdsService>();
+    final RewardedAdsConfiguration? configuration = await rewardedAds
+        .refreshConfiguration();
+    if (configuration == null ||
+        !configuration.adsEnabled ||
+        configuration.isAdFree) {
+      _rewardGatePassed = true;
+      return true;
+    }
+    if (!mounted) return false;
+
+    final bool accepted =
+        await showDialog<bool>(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext dialogContext) => AlertDialog(
+            title: Text('rewarded_video_unlock_title'.tr),
+            content: Text('rewarded_video_unlock_message'.tr),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text('notification_permission_not_now'.tr),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text('rewarded_video_watch_ad'.tr),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!accepted || !mounted) return false;
+
+    try {
+      final bool allowed = await rewardedAds.gate(
+        RewardedPlacement.freeVideo,
+        contextId: widget.detail.id,
+      );
+      if (allowed) _rewardGatePassed = true;
+      return allowed;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> _changeQuality(ChapterVideoQualityOption? quality) async {
@@ -659,6 +759,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
           onQualityChanged: _changeQuality,
           recoveryMessageListenable: _recoveryMessageNotifier,
           onRetry: _retryPlayback,
+          onPlayRequested: _ensureRewardGatePassed,
           onPlaybackIntentChanged: _handlePlaybackIntentChanged,
         ),
       ),
@@ -710,6 +811,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
                   onQualityChanged: _changeQuality,
                   recoveryMessageListenable: _recoveryMessageNotifier,
                   onRetry: _retryPlayback,
+                  onPlayRequested: _ensureRewardGatePassed,
                   onPlaybackIntentChanged: _handlePlaybackIntentChanged,
                   onFullscreenTap: _openFullscreen,
                 );

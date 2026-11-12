@@ -10,6 +10,8 @@ import '../models/vocabulary_models.dart';
 import '../services/vocabulary_api_service.dart';
 import '../widgets/vocabulary_completion_dialog.dart';
 import '../widgets/vocabulary_exit_dialog.dart';
+import '../../../../../core/models/rewarded_ads_models.dart';
+import '../../../../../core/services/rewarded_ads/rewarded_ads_service.dart';
 
 enum VocabularyDisplayMode { list, flashcard }
 
@@ -354,20 +356,28 @@ class VocabularyController extends GetxController {
     }
   }
 
-  void revealAnswer() {
+  Future<void> revealAnswer() async {
     if (currentCard == null) {
       return;
     }
 
-    isRevealed.value = true;
+    final bool allowed = await Get.find<RewardedAdsService>().gate(
+      RewardedPlacement.vocabularyReveal,
+      contextId: currentCard!.id,
+    );
+    if (allowed) isRevealed.value = true;
   }
 
-  void flipCard() {
+  Future<void> flipCard() async {
     if (currentCard == null) {
       return;
     }
 
-    isRevealed.toggle();
+    if (isRevealed.value) {
+      isRevealed.value = false;
+      return;
+    }
+    await revealAnswer();
   }
 
   Future<void> studyAgain() async {
