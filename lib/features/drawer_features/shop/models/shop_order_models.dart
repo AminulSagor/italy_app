@@ -1,7 +1,5 @@
 import 'shop_models.dart';
 
-
-
 class StoreOrderModel {
   const StoreOrderModel({
     required this.id,
@@ -31,31 +29,20 @@ class StoreOrderModel {
 
   final DateTime? createdAt;
 
-  factory StoreOrderModel.fromJson(
-      Map<String, dynamic> json,
-      ) {
-    final Map<String, dynamic> packageJson = shopJsonMap(
-      json['package'],
-    );
+  factory StoreOrderModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> packageJson = shopJsonMap(json['package']);
 
     final Map<String, dynamic> entitlementJson = shopJsonMap(
       packageJson['entitlements'],
     );
 
-    final Map<String, dynamic> pricingJson = shopJsonMap(
-      json['pricing'],
-    );
+    final Map<String, dynamic> pricingJson = shopJsonMap(json['pricing']);
 
-    final Map<String, dynamic> paymentJson = shopJsonMap(
-      json['payment'],
-    );
+    final Map<String, dynamic> paymentJson = shopJsonMap(json['payment']);
 
-    final int voiceMinutes = shopInt(
-      entitlementJson['voiceMinutes'],
-    );
+    final int voiceMinutes = shopInt(entitlementJson['voiceMinutes']);
 
-    final int voiceSeconds =
-    entitlementJson.containsKey('voiceSeconds')
+    final int voiceSeconds = entitlementJson.containsKey('voiceSeconds')
         ? shopInt(entitlementJson['voiceSeconds'])
         : voiceMinutes * 60;
 
@@ -65,19 +52,10 @@ class StoreOrderModel {
       status: shopString(json['status']),
       package: StorePackageModel(
         id: shopString(packageJson['id']),
-        type: StorePackageType.fromApi(
-          shopString(packageJson['type']),
-        ),
-        name: shopString(
-          packageJson['name'],
-          fallback: 'Package',
-        ),
-        description: shopString(
-          packageJson['description'],
-        ),
-        priceEur: shopDouble(
-          pricingJson['packagePriceEur'],
-        ),
+        type: StorePackageType.fromApi(shopString(packageJson['type'])),
+        name: shopString(packageJson['name'], fallback: 'Package'),
+        description: shopString(packageJson['description']),
+        priceEur: shopDouble(pricingJson['packagePriceEur']),
         billingModel: shopString(
           packageJson['billingModel'],
           fallback: 'one_time',
@@ -88,42 +66,22 @@ class StoreOrderModel {
         ),
         aiVoiceMinutes: voiceMinutes,
         aiVoiceSeconds: voiceSeconds,
-        aiTextTokens: shopInt(
-          entitlementJson['textTokens'],
-        ),
-        cvCredits: shopInt(
-          entitlementJson['cvCredits'],
-        ),
-        streakFreezeCount: shopInt(
-          entitlementJson['streakFreezes'],
-        ),
+        aiTextTokens: shopInt(entitlementJson['textTokens']),
+        cvCredits: shopInt(entitlementJson['cvCredits']),
+        streakFreezeCount: shopInt(entitlementJson['streakFreezes']),
         streakProtectionMode: shopString(
           entitlementJson['streakProtectionMode'],
         ),
         protectionDurationDays:
-        entitlementJson['protectionDurationDays'] == null
+            entitlementJson['protectionDurationDays'] == null
             ? null
-            : shopInt(
-          entitlementJson['protectionDurationDays'],
-        ),
-        couponEnabled: shopString(
-          pricingJson['couponCode'],
-        ).isNotEmpty,
+            : shopInt(entitlementJson['protectionDurationDays']),
         sortOrder: 0,
       ),
-      paymentProvider: shopString(
-        paymentJson['provider'],
-      ),
-      currency: shopString(
-        pricingJson['currency'],
-        fallback: 'EUR',
-      ),
-      paymentAmount: shopDouble(
-        pricingJson['paymentAmount'],
-      ),
-      formattedPaymentAmount: shopString(
-        pricingJson['formattedPaymentAmount'],
-      ),
+      paymentProvider: shopString(paymentJson['provider']),
+      currency: shopString(pricingJson['currency'], fallback: 'EUR'),
+      paymentAmount: shopDouble(pricingJson['paymentAmount']),
+      formattedPaymentAmount: shopString(pricingJson['formattedPaymentAmount']),
       googlePlayObfuscatedAccountId: shopString(
         json['googlePlayObfuscatedAccountId'],
       ).trim().toLowerCase(),
@@ -140,8 +98,7 @@ class StoreOrderModel {
     'currency': currency,
     'paymentAmount': paymentAmount,
     'formattedPaymentAmount': formattedPaymentAmount,
-    'googlePlayObfuscatedAccountId':
-    googlePlayObfuscatedAccountId,
+    'googlePlayObfuscatedAccountId': googlePlayObfuscatedAccountId,
     'createdAt': createdAt?.toIso8601String(),
   };
 
@@ -162,17 +119,13 @@ class StoreOrderModel {
       orderNumber: orderNumber ?? this.orderNumber,
       status: status ?? this.status,
       package: package ?? this.package,
-      paymentProvider:
-      paymentProvider ?? this.paymentProvider,
+      paymentProvider: paymentProvider ?? this.paymentProvider,
       currency: currency ?? this.currency,
-      paymentAmount:
-      paymentAmount ?? this.paymentAmount,
+      paymentAmount: paymentAmount ?? this.paymentAmount,
       formattedPaymentAmount:
-      formattedPaymentAmount ??
-          this.formattedPaymentAmount,
+          formattedPaymentAmount ?? this.formattedPaymentAmount,
       googlePlayObfuscatedAccountId:
-      googlePlayObfuscatedAccountId ??
-          this.googlePlayObfuscatedAccountId,
+          googlePlayObfuscatedAccountId ?? this.googlePlayObfuscatedAccountId,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -190,11 +143,8 @@ class StoreCheckoutResponseModel {
   List<StoreProviderOptionModel> get paymentMethods =>
       <StoreProviderOptionModel>[paymentMethod];
 
-  factory StoreCheckoutResponseModel.fromJson(
-      Map<String, dynamic> json,
-      ) {
-    Map<String, dynamic> paymentMethodJson =
-    shopJsonMap(json['paymentMethod']);
+  factory StoreCheckoutResponseModel.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> paymentMethodJson = shopJsonMap(json['paymentMethod']);
 
     /*
      * Supports the previous backend response where the
@@ -212,20 +162,14 @@ class StoreCheckoutResponseModel {
      * Final fallback to the product snapshot inside the order.
      */
     if (paymentMethodJson.isEmpty) {
-      final Map<String, dynamic> orderJson =
-      shopJsonMap(json['order']);
+      final Map<String, dynamic> orderJson = shopJsonMap(json['order']);
 
-      paymentMethodJson =
-          shopJsonMap(orderJson['storeProduct']);
+      paymentMethodJson = shopJsonMap(orderJson['storeProduct']);
     }
 
     return StoreCheckoutResponseModel(
-      order: StoreOrderModel.fromJson(
-        shopJsonMap(json['order']),
-      ),
-      paymentMethod: StoreProviderOptionModel.fromJson(
-        paymentMethodJson,
-      ),
+      order: StoreOrderModel.fromJson(shopJsonMap(json['order'])),
+      paymentMethod: StoreProviderOptionModel.fromJson(paymentMethodJson),
     );
   }
 }
@@ -278,9 +222,7 @@ class StorePurchaseCompletionModel {
       creditedStreakFreezes: shopInt(credited['streakFreezes']),
       creditedCvCredits: shopInt(credited['cvCredits']),
       streakProtectionMode: shopString(credited['streakProtectionMode']),
-      unlimitedProtectionUntil: shopDate(
-        credited['unlimitedProtectionUntil'],
-      ),
+      unlimitedProtectionUntil: shopDate(credited['unlimitedProtectionUntil']),
       balances: StoreBalancesModel.fromJson(shopJsonMap(json['balances'])),
     );
   }
@@ -302,8 +244,7 @@ class StorePurchaseCompletionModel {
       'streakFreezes': creditedStreakFreezes,
       'cvCredits': creditedCvCredits,
       'streakProtectionMode': streakProtectionMode,
-      'unlimitedProtectionUntil':
-          unlimitedProtectionUntil?.toIso8601String(),
+      'unlimitedProtectionUntil': unlimitedProtectionUntil?.toIso8601String(),
     },
     'balances': balances.toJson(),
   };
@@ -431,9 +372,9 @@ class StoreOrderHistoryResponseModel {
   factory StoreOrderHistoryResponseModel.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> meta = shopJsonMap(json['meta']);
     return StoreOrderHistoryResponseModel(
-      items: shopJsonList(json['items'])
-          .map(StoreOrderHistoryItemModel.fromJson)
-          .toList(growable: false),
+      items: shopJsonList(
+        json['items'],
+      ).map(StoreOrderHistoryItemModel.fromJson).toList(growable: false),
       page: shopInt(meta['page'], fallback: 1),
       total: shopInt(meta['total']),
       totalPages: shopInt(meta['totalPages'], fallback: 1),

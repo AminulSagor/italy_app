@@ -121,9 +121,7 @@ appTranslations = <String, Map<String, String>>{
     'purchase_success_description':
         'You now have full lifetime access to all Italir Pothe features. Your journey to fluency starts today.',
 
-    'coupon_applied': 'Coupon applied',
     'discount_value': 'Discount: @discount%',
-    'remove_coupon': 'Remove coupon',
     'store_price_notice':
         'The final price is controlled by Google Play or the App Store and may include VAT, tax, currency conversion, or regional pricing.',
 
@@ -169,7 +167,6 @@ appTranslations = <String, Map<String, String>>{
     'xp_label': 'XP: @xp',
     'time_label': 'Time: @time',
     'monthly_subscription': 'Monthly subscription',
-    'invalid_coupon': 'Invalid coupon',
     'you_ve_been_promoted_to': 'You’ve been promoted to',
     'league_name_value': '@leagueName League',
     'you_re_in_the_top_20_of_learners': 'You’re in the top 20% of learners',
@@ -352,13 +349,6 @@ appTranslations = <String, Map<String, String>>{
 
     'monthly_plan_already_active_badge': 'MONTHLY PLAN ALREADY ACTIVE',
 
-    'coupon_unavailable': 'Coupon unavailable',
-
-    'coupon_not_available_for_package':
-        'Coupons are not available for this package.',
-
-    'coupon_invalid_for_item':
-        'This coupon is not valid for the selected package.',
     'streak_freeze_refiller': 'Streak Freeze Refills',
     'streak_freeze_store': 'Streak Freeze Store',
     'protect_your_progress_in_italian': 'Protect your learning progress',
@@ -396,8 +386,6 @@ appTranslations = <String, Map<String, String>>{
     'best_value': 'BEST VALUE',
     'limited_time': 'LIMITED TIME',
     'course_features': 'Course features',
-    'coupon_code': 'Coupon code',
-    'applying_coupon': 'Applying coupon…',
     'unlock_this_course': 'Unlock this course!',
     'unlock_course_access_description':
         'Unlock @coursename to access all @lessoncount lessons and all included course features.',
@@ -1089,9 +1077,7 @@ appTranslations = <String, Map<String, String>>{
     'gen_streak_nfreezes': 'STREAK\nFREEZES',
     'gen_eur': 'EUR',
     'gen_bdt': 'BDT',
-    'gen_enter_coupon_code': 'Enter Coupon Code',
     'gen_search_orders': 'Search orders...',
-    'gen_welcome10': 'WELCOME10',
     'gen_ai_refill_center': 'AI Refill Center',
     'gen_basic_starter': 'Basic Starter',
     'gen_15_mins_voice_1_000_tokens': '15 Mins Voice | 1,000 Tokens',
@@ -1558,8 +1544,6 @@ appTranslations = <String, Map<String, String>>{
     'could_not_unblock_this_user_please_try_again':
         'Could not Unblock this User Please Try Again',
     'could_you_repeat_that_sentence': 'Could You Repeat that Sentence',
-    'coupon': 'Coupon',
-    'coupon_required': 'Coupon Required',
     'course_details': 'Course Details',
     'course_goal_reached': 'Course Goal Reached',
     'course_lesson': 'Course Lesson',
@@ -1640,7 +1624,6 @@ appTranslations = <String, Map<String, String>>{
     'emailupdated': 'Email Updated',
     'enable_italian_keyboard': 'Enable Italian Keyboard',
     'ended_call': 'Ended Call',
-    'enter_a_coupon_code_first': 'Enter a Coupon Code First',
     'enter_a_valid_email_address': 'Enter a Valid Email Address',
     'enter_a_valid_whatsapp_number': 'Enter a Valid Whatsapp Number',
     'enter_a_word_sentence_or_italian_draft':
@@ -2002,7 +1985,6 @@ appTranslations = <String, Map<String, String>>{
     'please_choose_a_photo_first': 'Please Choose a Photo First',
     'please_contact_support_from_the_help_center':
         'Please Contact Support from the Help Center',
-    'please_enter_a_coupon_code': 'Please Enter a Coupon Code',
     'please_enter_at_least_2_characters': 'Please Enter at Least 2 Characters',
     'please_hold_the_microphone_and_try_again':
         'Please Hold the Microphone and Try Again',
@@ -3096,9 +3078,7 @@ appTranslations = <String, Map<String, String>>{
     'gen_streak_nfreezes': 'স্ট্রীক\nফ্রিজ',
     'gen_eur': 'ইউরো',
     'gen_bdt': 'বিডিটি',
-    'gen_enter_coupon_code': 'কুপন কোড লিখুন',
     'gen_search_orders': 'অর্ডার অনুসন্ধান করুন...',
-    'gen_welcome10': 'স্বাগতম 10',
     'gen_ai_refill_center': 'এআই রিফিল সেন্টার',
     'gen_basic_starter': 'বেসিক স্টার্টার',
     'gen_15_mins_voice_1_000_tokens': '15 মিনিট ভয়েস | 1,000 টোকেন',
@@ -3712,8 +3692,6 @@ appTranslations = <String, Map<String, String>>{
     'could_not_unblock_this_user_please_try_again':
         'এই ব্যবহারকারীকে আনব্লক করা যায়নি। আবার চেষ্টা করুন',
     'could_you_repeat_that_sentence': 'আপনি কি বাক্যটি আবার বলতে পারেন?',
-    'coupon': 'কুপন',
-    'coupon_required': 'কুপন প্রয়োজন',
     'course_details': 'কোর্সের বিস্তারিত',
     'course_goal_reached': 'কোর্সের লক্ষ্য অর্জিত হয়েছে',
     'course_lesson': 'কোর্স পাঠ',
@@ -3795,7 +3773,6 @@ appTranslations = <String, Map<String, String>>{
     'emailupdated': 'ইমেইল হালনাগাদ হয়েছে',
     'enable_italian_keyboard': 'ইতালিয়ান কিবোর্ড চালু করুন',
     'ended_call': 'শেষ হওয়া কল',
-    'enter_a_coupon_code_first': 'প্রথমে একটি কুপন কোড লিখুন',
     'enter_a_valid_email_address': 'একটি বৈধ ইমেইল ঠিকানা লিখুন',
     'enter_a_valid_whatsapp_number': 'একটি বৈধ WhatsApp নম্বর লিখুন',
     'enter_a_word_sentence_or_italian_draft':
@@ -4161,7 +4138,6 @@ appTranslations = <String, Map<String, String>>{
     'please_choose_a_photo_first': 'প্রথমে একটি ছবি নির্বাচন করুন',
     'please_contact_support_from_the_help_center':
         'Help Center থেকে সাপোর্টে যোগাযোগ করুন',
-    'please_enter_a_coupon_code': 'একটি কুপন কোড লিখুন',
     'please_enter_at_least_2_characters': 'কমপক্ষে ২টি অক্ষর লিখুন',
     'please_hold_the_microphone_and_try_again':
         'মাইক্রোফোন চেপে ধরে আবার চেষ্টা করুন',
@@ -4931,8 +4907,6 @@ appTranslations = <String, Map<String, String>>{
     'unlock_course_access_description':
         '@coursename আনলক করে সব @lessoncountটি লেসন এবং কোর্সের অন্তর্ভুক্ত সব ফিচার ব্যবহার করুন।',
     'course_features': 'কোর্সের ফিচারসমূহ',
-    'coupon_code': 'কুপন কোড',
-    'applying_coupon': 'কুপন প্রয়োগ করা হচ্ছে…',
     'best_value': 'সেরা মূল্য',
     'limited_time': 'সীমিত সময়',
 
@@ -5009,12 +4983,6 @@ appTranslations = <String, Map<String, String>>{
 
     'monthly_plan_already_active_badge': 'মাসিক প্ল্যান ইতোমধ্যে সক্রিয়',
 
-    'coupon_unavailable': 'কুপন উপলভ্য নয়',
-
-    'coupon_not_available_for_package': 'এই প্যাকেজে কুপন ব্যবহার করা যাবে না।',
-
-    'coupon_invalid_for_item': 'এই কুপনটি নির্বাচিত প্যাকেজের জন্য বৈধ নয়।',
-    // Bangla
     'review_your_order': 'আপনার অর্ডার পর্যালোচনা করুন',
     'confirm_package_before_checkout':
         'এগিয়ে যাওয়ার আগে প্যাকেজের তথ্য যাচাই করুন।',
@@ -5147,7 +5115,6 @@ appTranslations = <String, Map<String, String>>{
     'xp_label': 'XP: @xp',
     'time_label': 'সময়: @time',
     'monthly_subscription': 'মাসিক সাবস্ক্রিপশন',
-    'invalid_coupon': 'অবৈধ কুপন',
     'you_ve_been_promoted_to': 'আপনাকে পদোন্নতি দেওয়া হয়েছে',
     'league_name_value': '@leagueName লিগ',
     'you_re_in_the_top_20_of_learners': 'আপনি শীর্ষ ২০% শিক্ষার্থীর মধ্যে আছেন',
@@ -5191,9 +5158,7 @@ appTranslations = <String, Map<String, String>>{
     'purchase_success_description':
         'আপনি এখন Italir Pothe-এর সব ফিচারে আজীবন পূর্ণ প্রবেশাধিকার পেয়েছেন। আজ থেকেই আপনার সাবলীলতার যাত্রা শুরু।',
 
-    'coupon_applied': 'কুপন প্রয়োগ করা হয়েছে',
     'discount_value': 'ছাড়: @discount%',
-    'remove_coupon': 'কুপন সরান',
     'store_price_notice':
         'চূড়ান্ত মূল্য Google Play বা App Store দ্বারা নির্ধারিত হয় এবং এতে VAT, কর, মুদ্রা রূপান্তর বা অঞ্চলভিত্তিক মূল্য অন্তর্ভুক্ত থাকতে পারে।',
 
@@ -5436,9 +5401,7 @@ appTranslations = <String, Map<String, String>>{
     'purchase_success_description':
         'Ora hai accesso completo a vita a tutte le funzionalità di Italir Pothe. Il tuo percorso verso la padronanza inizia oggi.',
 
-    'coupon_applied': 'Coupon applicato',
     'discount_value': 'Sconto: @discount%',
-    'remove_coupon': 'Rimuovi coupon',
     'store_price_notice':
         'Il prezzo finale è stabilito da Google Play o App Store e può includere IVA, tasse, conversione valutaria o prezzi regionali.',
 
@@ -5483,7 +5446,6 @@ appTranslations = <String, Map<String, String>>{
     'xp_label': 'XP: @xp',
     'time_label': 'Tempo: @time',
     'monthly_subscription': 'Abbonamento mensile',
-    'invalid_coupon': 'Coupon non valido',
     'you_ve_been_promoted_to': 'Sei stato promosso a',
     'league_name_value': 'Lega @leagueName',
     'you_re_in_the_top_20_of_learners': 'Sei nel 20% migliore degli studenti',
@@ -5669,13 +5631,6 @@ appTranslations = <String, Map<String, String>>{
 
     'monthly_plan_already_active_badge': 'PIANO MENSILE GIÀ ATTIVO',
 
-    'coupon_unavailable': 'Coupon non disponibile',
-
-    'coupon_not_available_for_package':
-        'I coupon non sono disponibili per questo pacchetto.',
-
-    'coupon_invalid_for_item':
-        'Questo coupon non è valido per il pacchetto selezionato.',
     'streak_freeze_refiller': 'Ricariche blocco serie',
     'streak_freeze_store': 'Negozio blocchi serie',
     'protect_your_progress_in_italian':
@@ -5712,8 +5667,6 @@ appTranslations = <String, Map<String, String>>{
     'best_value': 'MIGLIOR VALORE',
     'limited_time': 'TEMPO LIMITATO',
     'course_features': 'Funzionalità del corso',
-    'coupon_code': 'Codice coupon',
-    'applying_coupon': 'Applicazione del coupon…',
     'unlock_this_course': 'Sblocca questo corso!',
     'unlock_course_access_description':
         'Sblocca @coursename per accedere a tutte le @lessoncount lezioni e a tutte le funzionalità incluse nel corso.',
@@ -6420,9 +6373,7 @@ appTranslations = <String, Map<String, String>>{
     'gen_streak_nfreezes': 'STRISCIA\nBLOCCA',
     'gen_eur': 'euro',
     'gen_bdt': 'BDT',
-    'gen_enter_coupon_code': 'Inserisci il codice coupon',
     'gen_search_orders': 'Cerca ordini...',
-    'gen_welcome10': 'BENVENUTO10',
     'gen_ai_refill_center': 'Centro di ricarica AI',
     'gen_basic_starter': 'Inizio base',
     'gen_15_mins_voice_1_000_tokens': '15 minuti di voce | 1.000 gettoni',
@@ -6902,8 +6853,6 @@ appTranslations = <String, Map<String, String>>{
     'could_not_unblock_this_user_please_try_again':
         'Impossibile sbloccare questo utente. Riprova',
     'could_you_repeat_that_sentence': 'Puoi ripetere quella frase?',
-    'coupon': 'Coupon',
-    'coupon_required': 'Coupon richiesto',
     'course_details': 'Dettagli del corso',
     'course_goal_reached': 'Obiettivo del corso raggiunto',
     'course_lesson': 'Lezione del corso',
@@ -6986,7 +6935,6 @@ appTranslations = <String, Map<String, String>>{
     'emailupdated': 'Email aggiornata',
     'enable_italian_keyboard': 'Abilita la tastiera italiana',
     'ended_call': 'Chiamata terminata',
-    'enter_a_coupon_code_first': 'Inserisci prima un codice coupon',
     'enter_a_valid_email_address': 'Inserisci un indirizzo email valido',
     'enter_a_valid_whatsapp_number': 'Inserisci un numero WhatsApp valido',
     'enter_a_word_sentence_or_italian_draft':
@@ -7359,7 +7307,6 @@ appTranslations = <String, Map<String, String>>{
     'please_choose_a_photo_first': 'Scegli prima una foto',
     'please_contact_support_from_the_help_center':
         'Contatta l’assistenza dal Centro assistenza',
-    'please_enter_a_coupon_code': 'Inserisci un codice coupon',
     'please_enter_at_least_2_characters': 'Inserisci almeno 2 caratteri',
     'please_hold_the_microphone_and_try_again':
         'Tieni premuto il microfono e riprova',

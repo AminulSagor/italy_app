@@ -309,7 +309,6 @@ class AppColors {
   static const proPlanBorder = Color(0xFFCFE2C7);
   static const proPriceStruck = Color(0xFFB9B9B9);
   static const proHintText = Color(0xFFB7B9BA);
-  static const proCouponAppliedBg = Color(0xFFF1F2F2);
   static const proTrustedBg = Color(0xFFF1F2F2);
   static const proCheckoutProductBg = Color(0xFFF0F1F1);
   static const proPaypalBlue = Color(0xFF1F66B1);

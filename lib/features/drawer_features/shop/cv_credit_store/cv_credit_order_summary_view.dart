@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../shop_controller.dart';
-import '../widgets/shop_coupon_section.dart';
 
 class CvCreditOrderSummaryView extends GetView<ShopController> {
   const CvCreditOrderSummaryView({super.key});
@@ -52,31 +51,6 @@ class CvCreditOrderSummaryView extends GetView<ShopController> {
                     SizedBox(height: 22.h),
 
                     const _SelectedCvPackCard(),
-
-                    SizedBox(height: 20.h),
-
-                    Obx(
-                          () => controller.canUseCoupon
-                          ? Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-
-                        children: <Widget>[
-                          const _SectionTitle(
-                            titleKey: 'coupon_code',
-                            icon:
-                            Icons.local_offer_outlined,
-                          ),
-
-                          SizedBox(height: 10.h),
-
-                          const ShopCouponSection(),
-
-
-                        ],
-                      )
-                          : const SizedBox.shrink(),
-                    ),
 
                     SizedBox(height: 20.h),
 
@@ -187,10 +161,7 @@ class _SelectedCvPackCard extends GetView<ShopController> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(22.r),
-          border: Border.all(
-            color: _border,
-            width: 1.w,
-          ),
+          border: Border.all(color: _border, width: 1.w),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -278,11 +249,7 @@ class _SelectedCvPackCard extends GetView<ShopController> {
               ],
             ),
             SizedBox(height: 18.h),
-            Divider(
-              height: 1.h,
-              thickness: 1.h,
-              color: _border,
-            ),
+            Divider(height: 1.h, thickness: 1.h, color: _border),
             SizedBox(height: 16.h),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -335,10 +302,7 @@ class _SelectedCvPackCard extends GetView<ShopController> {
               SizedBox(height: 12.h),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(
-                  horizontal: 12.w,
-                  vertical: 10.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF2F8EF),
                   borderRadius: BorderRadius.circular(12.r),
@@ -346,11 +310,7 @@ class _SelectedCvPackCard extends GetView<ShopController> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Icon(
-                      Icons.autorenew_rounded,
-                      size: 18.r,
-                      color: _green,
-                    ),
+                    Icon(Icons.autorenew_rounded, size: 18.r, color: _green),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
@@ -375,10 +335,7 @@ class _SelectedCvPackCard extends GetView<ShopController> {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({
-    required this.titleKey,
-    required this.icon,
-  });
+  const _SectionTitle({required this.titleKey, required this.icon});
 
   final String titleKey;
   final IconData icon;
@@ -387,11 +344,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        Icon(
-          icon,
-          size: 19.r,
-          color: const Color(0xFF2D3032),
-        ),
+        Icon(icon, size: 19.r, color: const Color(0xFF2D3032)),
         SizedBox(width: 8.w),
         Expanded(
           child: Text(
@@ -418,8 +371,7 @@ class _PurchaseInformationCard extends GetView<ShopController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final bool isMonthly =
-          controller.selectedCvCreditOffer.isMonthly;
+      final bool isMonthly = controller.selectedCvCreditOffer.isMonthly;
 
       return Container(
         width: double.infinity,
@@ -427,10 +379,7 @@ class _PurchaseInformationCard extends GetView<ShopController> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(
-            color: _border,
-            width: 1.w,
-          ),
+          border: Border.all(color: _border, width: 1.w),
         ),
         child: Column(
           children: <Widget>[
@@ -440,11 +389,7 @@ class _PurchaseInformationCard extends GetView<ShopController> {
               description: 'payment_processed_securely'.tr,
             ),
             SizedBox(height: 14.h),
-            Divider(
-              height: 1.h,
-              thickness: 1.h,
-              color: _border,
-            ),
+            Divider(height: 1.h, thickness: 1.h, color: _border),
             SizedBox(height: 14.h),
             _InformationRow(
               icon: isMonthly
@@ -487,11 +432,7 @@ class _InformationRow extends StatelessWidget {
             color: const Color(0xFFF2F8EF),
             borderRadius: BorderRadius.circular(11.r),
           ),
-          child: Icon(
-            icon,
-            size: 19.r,
-            color: const Color(0xFF267A05),
-          ),
+          child: Icon(icon, size: 19.r, color: const Color(0xFF267A05)),
         ),
         SizedBox(width: 11.w),
         Expanded(
@@ -544,7 +485,7 @@ class _CheckoutBottomBar extends GetView<ShopController> {
           ],
         ),
         child: Obx(
-              () => _BuyButton(
+          () => _BuyButton(
             isLoading: controller.isCheckoutLoading.value,
             onTap: controller.confirmCvCreditPurchase,
           ),
@@ -555,10 +496,7 @@ class _CheckoutBottomBar extends GetView<ShopController> {
 }
 
 class _BuyButton extends StatelessWidget {
-  const _BuyButton({
-    required this.isLoading,
-    required this.onTap,
-  });
+  const _BuyButton({required this.isLoading, required this.onTap});
 
   final bool isLoading;
   final VoidCallback onTap;
@@ -585,32 +523,29 @@ class _BuyButton extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           child: isLoading
               ? SizedBox(
-            key: const ValueKey<String>('loading'),
-            width: 22.r,
-            height: 22.r,
-            child: const CircularProgressIndicator(
-              strokeWidth: 2.4,
-              color: Colors.white,
-            ),
-          )
+                  key: const ValueKey<String>('loading'),
+                  width: 22.r,
+                  height: 22.r,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    color: Colors.white,
+                  ),
+                )
               : Row(
-            key: const ValueKey<String>('button'),
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'continue_to_checkout'.tr,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
+                  key: const ValueKey<String>('button'),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'continue_to_checkout'.tr,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Icon(Icons.arrow_forward_rounded, size: 20.r),
+                  ],
                 ),
-              ),
-              SizedBox(width: 8.w),
-              Icon(
-                Icons.arrow_forward_rounded,
-                size: 20.r,
-              ),
-            ],
-          ),
         ),
       ),
     );

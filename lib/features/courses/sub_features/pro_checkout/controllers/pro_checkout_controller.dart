@@ -67,11 +67,6 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   final Rxn<ProPurchaseResultModel> purchaseResult =
       Rxn<ProPurchaseResultModel>();
   final RxString billingError = ''.obs;
-  final TextEditingController couponTextController = TextEditingController();
-  final RxString couponCode = ''.obs;
-  final RxBool isCouponApplied = false.obs;
-  final RxBool isApplyingCoupon = false.obs;
-  String _regularGooglePlayPrice = '';
 
   StreamSubscription<PurchaseDetails>? _purchaseSubscription;
   Completer<ProPurchaseOutcome>? _activePurchaseCompleter;
@@ -167,33 +162,13 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
         selectedCurrency.value = ProCurrency.eur;
       }
       if (localizedPrice.isNotEmpty) {
-        if (!currentOrder.hasCoupon) {
-          _regularGooglePlayPrice = localizedPrice;
-        } else if (_regularGooglePlayPrice.isEmpty) {
-          _regularGooglePlayPrice = currentOrder.plan.oldPriceLabel(
-            selectedCurrency.value,
-          );
-        }
-
-        final String oldPrice =
-            currentOrder.hasCoupon && _regularGooglePlayPrice.isNotEmpty
-            ? _regularGooglePlayPrice
-            : localizedPrice;
-        final String discountLabel = currentOrder.hasCoupon
-            ? _googlePlaySavingsLabel(
-                regularPriceText: oldPrice,
-                discountedPriceText: localizedPrice,
-                fallback: currentOrder.plan.discountLabel,
-              )
-            : _storeName.toUpperCase();
-
         order.value = currentOrder.copyWith(
           plan: currentOrder.plan.copyWith(
             eurPrice: localizedPrice,
-            eurOldPrice: oldPrice,
+            eurOldPrice: localizedPrice,
             bdtPrice: localizedPrice,
-            bdtOldPrice: oldPrice,
-            discountLabel: discountLabel,
+            bdtOldPrice: localizedPrice,
+            discountLabel: _storeName.toUpperCase(),
           ),
         );
       } else {
@@ -208,130 +183,6 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   void setCurrency(ProCurrency currency) {
     if (_billingService.localizedCurrencyCode.isNotEmpty) return;
     selectedCurrency.value = currency;
-  }
-
-  void onCouponChanged(String value) {
-    couponCode.value = value.trim();
-    billingError.value = '';
-    if (isCouponApplied.value) isCouponApplied.value = false;
-  }
-
-  Future<void> applyCoupon() async {
-    if (isApplyingCoupon.value) return;
-
-    final String code = couponTextController.text.trim();
-    if (code.isEmpty) {
-      Get.snackbar('coupon_required'.tr, 'please_enter_a_coupon_code'.tr);
-      return;
-    }
-
-    isApplyingCoupon.value = true;
-    billingError.value = '';
-    try {
-      final ApiResult<ProOrderModel> result =
-          await ApiErrorHandler.call<ProOrderModel>(
-            () => _proCheckoutApiService.fetchOrderSummary(
-              courseId: courseId,
-              fallbackCourseName: courseName,
-              lessonCount: lessonCount,
-              providerProductId: order.value?.selectedProviderProductId ?? '',
-              couponCode: code,
-            ),
-            showError: false,
-          );
-
-      if (!result.isSuccess || result.data == null) {
-        billingError.value = 'Coupon is not valid for this item.';
-        Get.snackbar('coupon'.tr, billingError.value);
-        return;
-      }
-
-      final bool ready = await _prepareGooglePlayProduct(result.data!);
-      if (!ready) {
-        Get.snackbar(
-          _storeName,
-          billingError.value.isEmpty
-              ? 'The discounted store product is unavailable.'
-              : billingError.value,
-        );
-        return;
-      }
-
-      billingError.value = '';
-      couponTextController.text = code;
-      couponCode.value = code;
-      isCouponApplied.value = true;
-    } finally {
-      isApplyingCoupon.value = false;
-    }
-  }
-
-  Future<void> clearCoupon() async {
-    if (isApplyingCoupon.value) return;
-
-    isApplyingCoupon.value = true;
-    billingError.value = '';
-    try {
-      final ApiResult<ProOrderModel> result =
-          await ApiErrorHandler.call<ProOrderModel>(
-            () => _proCheckoutApiService.fetchOrderSummary(
-              courseId: courseId,
-              fallbackCourseName: courseName,
-              lessonCount: lessonCount,
-              providerProductId: order.value?.selectedProviderProductId ?? '',
-            ),
-            showError: false,
-          );
-      if (result.isSuccess && result.data != null) {
-        couponTextController.clear();
-        couponCode.value = '';
-        isCouponApplied.value = false;
-        await _prepareGooglePlayProduct(result.data!);
-      }
-    } finally {
-      isApplyingCoupon.value = false;
-    }
-  }
-
-  String _googlePlaySavingsLabel({
-    required String regularPriceText,
-    required String discountedPriceText,
-    required String fallback,
-  }) {
-    final double? regular = _parseLocalizedAmount(regularPriceText);
-    final double? discounted = _parseLocalizedAmount(discountedPriceText);
-    if (regular == null || discounted == null || regular <= discounted) {
-      return fallback.isEmpty ? 'COUPON APPLIED' : fallback;
-    }
-
-    final String prefix = _localizedPricePrefix(regularPriceText);
-    return 'YOU SAVED $prefix${(regular - discounted).toStringAsFixed(2)}';
-  }
-
-  double? _parseLocalizedAmount(String value) {
-    String amount = value.replaceAll(RegExp(r'[^0-9,.-]'), '');
-    if (amount.isEmpty) return null;
-
-    final int lastComma = amount.lastIndexOf(',');
-    final int lastDot = amount.lastIndexOf('.');
-    if (lastComma > -1 && lastDot > -1) {
-      final bool commaIsDecimal = lastComma > lastDot;
-      amount = commaIsDecimal
-          ? amount.replaceAll('.', '').replaceAll(',', '.')
-          : amount.replaceAll(',', '');
-    } else if (lastComma > -1) {
-      final int decimals = amount.length - lastComma - 1;
-      amount = decimals == 2
-          ? amount.replaceAll(',', '.')
-          : amount.replaceAll(',', '');
-    }
-
-    return double.tryParse(amount);
-  }
-
-  String _localizedPricePrefix(String value) {
-    final RegExpMatch? match = RegExp(r'^\s*([^0-9.,-]+)').firstMatch(value);
-    return match?.group(1)?.trimRight() ?? '';
   }
 
   void selectPaymentMethod(ProPaymentMethod method) {
@@ -490,9 +341,6 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
             errorTitle: 'course_purchase'.tr,
           );
       if (result.isSuccess && result.data != null) {
-        couponTextController.clear();
-        couponCode.value = '';
-        isCouponApplied.value = false;
         await _prepareGooglePlayProduct(result.data!);
       }
     } finally {
@@ -589,7 +437,6 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
             () => _proCheckoutApiService.createStoreOrder(
               order: currentOrder,
               currency: selectedCurrency.value,
-              couponCode: currentOrder.hasCoupon ? currentOrder.couponCode : '',
             ),
             errorTitle: 'course_purchase'.tr,
           );
@@ -1152,7 +999,6 @@ class ProCheckoutController extends GetxController with WidgetsBindingObserver {
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
-    couponTextController.dispose();
 
     final StreamSubscription<PurchaseDetails>? subscription =
         _purchaseSubscription;

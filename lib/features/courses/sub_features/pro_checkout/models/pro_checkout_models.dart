@@ -122,15 +122,13 @@ class ProPlanModel {
     );
   }
 
-  String priceLabel(ProCurrency currency, {bool isCouponApplied = false}) {
+  String priceLabel(ProCurrency currency) {
     return currency == ProCurrency.bdt ? bdtPrice : eurPrice;
   }
 
-  String oldPriceLabel(ProCurrency currency, {bool isCouponApplied = false}) {
+  String oldPriceLabel(ProCurrency currency) {
     return currency == ProCurrency.bdt ? bdtOldPrice : eurOldPrice;
   }
-
-  String couponSaveLabelFor(ProCurrency currency) => discountLabel;
 
   ProPlanModel copyWith({
     String? title,
@@ -177,9 +175,6 @@ class ProOrderModel {
     required this.storeProduct,
     required this.selectedProviderProductId,
     required this.purchaseOptions,
-    required this.couponCode,
-    required this.discountPercentage,
-    required this.pricingNote,
   });
 
   final String courseId;
@@ -194,11 +189,6 @@ class ProOrderModel {
   final ProStoreProductModel storeProduct;
   final String selectedProviderProductId;
   final List<ProStoreProductModel> purchaseOptions;
-  final String couponCode;
-  final int discountPercentage;
-  final String pricingNote;
-
-  bool get hasCoupon => couponCode.trim().isNotEmpty;
 
   factory ProOrderModel.fromJson(Map<String, dynamic> json) {
     final List<dynamic> rawFeatures = json['features'] is List
@@ -250,13 +240,6 @@ class ProOrderModel {
                 ProStoreProductModel.fromJson(Map<String, dynamic>.from(item)),
           )
           .toList(growable: false),
-      couponCode: _stringValue(json['couponCode']),
-      discountPercentage: _intValue(json['discountPercentage']),
-      pricingNote: _stringValue(
-        json['pricingNote'],
-        fallback:
-            'Google Play or App Store controls the final localized amount charged.',
-      ),
     );
   }
 
@@ -265,9 +248,6 @@ class ProOrderModel {
     ProStoreProductModel? storeProduct,
     String? selectedProviderProductId,
     List<ProStoreProductModel>? purchaseOptions,
-    String? couponCode,
-    int? discountPercentage,
-    String? pricingNote,
   }) {
     return ProOrderModel(
       courseId: courseId,
@@ -283,9 +263,6 @@ class ProOrderModel {
       selectedProviderProductId:
           selectedProviderProductId ?? this.selectedProviderProductId,
       purchaseOptions: purchaseOptions ?? this.purchaseOptions,
-      couponCode: couponCode ?? this.couponCode,
-      discountPercentage: discountPercentage ?? this.discountPercentage,
-      pricingNote: pricingNote ?? this.pricingNote,
     );
   }
 }

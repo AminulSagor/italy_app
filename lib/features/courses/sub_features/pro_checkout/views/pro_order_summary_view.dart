@@ -96,7 +96,6 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
                         ProPlanCard(
                           plan: order.plan,
                           currency: controller.selectedCurrency.value,
-                          isCouponApplied: order.hasCoupon,
                         ),
                         if (order.purchaseOptions.length > 1) ...<Widget>[
                           SizedBox(height: 18.h),
@@ -143,22 +142,6 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
                         SizedBox(height: 12.h),
                         ProFeatureGrid(features: order.features),
                         SizedBox(height: 24.h),
-
-                        ...<Widget>[
-                          _SectionTitle(title: 'coupon_code'.tr),
-                          SizedBox(height: 12.h),
-                          ProCouponInput(
-                            controller: controller.couponTextController,
-                            isCouponApplied: order.hasCoupon,
-                            isLoading: controller.isApplyingCoupon.value,
-                            appliedCode: order.couponCode,
-                            discountPercentage: order.discountPercentage,
-                            pricingNote: order.pricingNote,
-                            onChanged: controller.onCouponChanged,
-                            onApplyTap: controller.applyCoupon,
-                            onRemoveTap: controller.clearCoupon,
-                          ),
-                        ],
 
                         if (controller
                             .billingError
@@ -209,7 +192,6 @@ class ProOrderSummaryView extends GetView<ProCheckoutController> {
 
         final bool isBusy =
             controller.isLoading.value ||
-            controller.isApplyingCoupon.value ||
             controller.isPreparingGooglePlay.value;
 
         return SafeArea(

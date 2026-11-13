@@ -12,7 +12,6 @@ class CheckoutProductCard extends StatelessWidget {
   final int lessonCount;
   final ProPlanModel plan;
   final ProCurrency currency;
-  final bool isCouponApplied;
 
   const CheckoutProductCard({
     super.key,
@@ -20,19 +19,12 @@ class CheckoutProductCard extends StatelessWidget {
     required this.lessonCount,
     required this.plan,
     required this.currency,
-    required this.isCouponApplied,
   });
 
   @override
   Widget build(BuildContext context) {
-    final String price = plan.priceLabel(
-      currency,
-      isCouponApplied: isCouponApplied,
-    );
-    final String oldPrice = plan.oldPriceLabel(
-      currency,
-      isCouponApplied: isCouponApplied,
-    );
+    final String price = plan.priceLabel(currency);
+    final String oldPrice = plan.oldPriceLabel(currency);
 
     return Container(
       width: double.infinity,

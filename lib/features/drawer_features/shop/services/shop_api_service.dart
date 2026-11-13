@@ -61,14 +61,12 @@ class ShopApiService {
   Future<StoreQuoteResponseModel> getQuote({
     required String packageId,
     required RefillCurrency currency,
-    String couponCode = '',
   }) async {
     final Response<dynamic> response = await _apiClient.dio.get(
       '$_endpoint/packages/$packageId/quote',
       queryParameters: <String, dynamic>{
         'provider': provider,
         'currency': currency.apiValue,
-        if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
       },
     );
     return StoreQuoteResponseModel.fromJson(_responseMap(response));

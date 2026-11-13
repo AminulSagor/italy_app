@@ -7,7 +7,8 @@ class ProCheckoutMockService {
     return ProOrderModel.fromJson(<String, dynamic>{
       'appName': 'Italian Shikhi',
       'headline': 'Unlock your Italian\nfuture!',
-      'description': 'You’ve finished the free trial. Join\n5,000+ students mastering Italian.',
+      'description':
+          'You’ve finished the free trial. Join\n5,000+ students mastering Italian.',
       'trustedLabel': 'TRUSTED BY 5K+ LEARNERS',
       'plan': <String, dynamic>{
         'title': 'Lifetime Access',
@@ -17,9 +18,6 @@ class ProCheckoutMockService {
         'bdtPrice': '৳4315',
         'bdtOldPrice': '৳12,949',
         'discountLabel': '66% OFF',
-        'couponCode': 'WELCOME10',
-        'couponEurPrice': '€19.99',
-        'couponSaveLabel': 'YOU SAVE €10.00',
       },
       'features': <Map<String, dynamic>>[
         <String, dynamic>{
@@ -46,10 +44,6 @@ class ProCheckoutMockService {
     });
   }
 
-  Future<void> applyCoupon(String code) async {
-    await Future<void>.delayed(const Duration(milliseconds: 260));
-  }
-
   Future<ProPurchaseResultModel> completePurchase({
     required ProCurrency currency,
     required ProPaymentMethod paymentMethod,
@@ -60,7 +54,8 @@ class ProCheckoutMockService {
       'orderId': '#IT-SHK-1024',
       'statusLabel': 'Status: Completed',
       'title': 'Congratulations!',
-      'description': 'You now have full lifetime access to all\nItalian Shikhi features. Your journey to\nfluency starts today.',
+      'description':
+          'You now have full lifetime access to all\nItalian Shikhi features. Your journey to\nfluency starts today.',
       'buttonLabel': 'Start Learning Now',
     });
   }

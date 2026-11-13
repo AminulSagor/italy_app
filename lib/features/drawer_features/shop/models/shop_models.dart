@@ -421,7 +421,6 @@ class StorePackageModel {
     required this.streakFreezeCount,
     required this.streakProtectionMode,
     required this.protectionDurationDays,
-    required this.couponEnabled,
     required this.sortOrder,
     this.aiVoiceSeconds = 0,
     this.storeProduct,
@@ -440,7 +439,6 @@ class StorePackageModel {
   final int streakFreezeCount;
   final String streakProtectionMode;
   final int? protectionDurationDays;
-  final bool couponEnabled;
   final int sortOrder;
   final StoreProviderProductModel? storeProduct;
 
@@ -484,7 +482,6 @@ class StorePackageModel {
       streakFreezeCount: _int(json['streakFreezeCount']),
       streakProtectionMode: _string(json['streakProtectionMode']),
       protectionDurationDays: _nullableInt(json['protectionDurationDays']),
-      couponEnabled: _bool(json['couponEnabled']),
       sortOrder: _int(json['sortOrder']),
       aiVoiceSeconds: voiceSeconds,
       storeProduct: product.isEmpty
@@ -508,7 +505,6 @@ class StorePackageModel {
     'streakFreezeCount': streakFreezeCount,
     'streakProtectionMode': streakProtectionMode,
     'protectionDurationDays': protectionDurationDays,
-    'couponEnabled': couponEnabled,
     'sortOrder': sortOrder,
     'storeProduct': storeProduct?.toJson(),
   };
@@ -661,26 +657,17 @@ class StoreQuotePricingModel {
   const StoreQuotePricingModel({
     required this.selectedCurrency,
     required this.originalAmount,
-    required this.couponCode,
-    required this.discountPercentage,
-    required this.discountAmount,
     required this.payableAmount,
   });
 
   final String selectedCurrency;
   final double originalAmount;
-  final String couponCode;
-  final int discountPercentage;
-  final double discountAmount;
   final double payableAmount;
 
   factory StoreQuotePricingModel.fromJson(Map<String, dynamic> json) {
     return StoreQuotePricingModel(
       selectedCurrency: _string(json['selectedCurrency'], fallback: 'EUR'),
       originalAmount: _double(json['originalAmount']),
-      couponCode: _string(json['couponCode']),
-      discountPercentage: _int(json['discountPercentage']),
-      discountAmount: _double(json['discountAmount']),
       payableAmount: _double(json['payableAmount']),
     );
   }
@@ -773,7 +760,6 @@ class CreateStoreOrderPayloadModel {
     required this.paymentProvider,
     required this.productId,
     required this.idempotencyKey,
-    required this.couponCode,
   });
 
   final String packageId;
@@ -781,7 +767,6 @@ class CreateStoreOrderPayloadModel {
   final String paymentProvider;
   final String productId;
   final String idempotencyKey;
-  final String couponCode;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'packageId': packageId,
@@ -789,7 +774,6 @@ class CreateStoreOrderPayloadModel {
     'paymentProvider': paymentProvider,
     'productId': productId,
     'idempotencyKey': idempotencyKey,
-    if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
   };
 }
 

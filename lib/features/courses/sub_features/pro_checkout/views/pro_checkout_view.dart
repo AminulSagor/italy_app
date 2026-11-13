@@ -51,7 +51,6 @@ class ProCheckoutView extends GetView<ProCheckoutController> {
                   lessonCount: order.lessonCount,
                   plan: order.plan,
                   currency: controller.selectedCurrency.value,
-                  isCouponApplied: order.hasCoupon,
                 ),
                 SizedBox(height: 10.h),
                 Center(

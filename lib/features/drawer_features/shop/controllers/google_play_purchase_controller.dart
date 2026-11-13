@@ -107,7 +107,6 @@ class GooglePlayPurchaseController extends GetxController
     required StorePackageModel package,
     required StoreProviderProductModel storeProduct,
     required RefillCurrency currency,
-    required String couponCode,
   }) async {
     if (isProcessing.value) {
       return const GooglePlayPurchaseOutcome(
@@ -209,7 +208,6 @@ class GooglePlayPurchaseController extends GetxController
                 paymentProvider: _provider,
                 productId: requestedProductId,
                 idempotencyKey: _uuid.v4(),
-                couponCode: couponCode,
               ),
             );
 

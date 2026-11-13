@@ -23,23 +23,12 @@ class ProCheckoutApiService {
     required String courseId,
     required String fallbackCourseName,
     required int lessonCount,
-    String couponCode = '',
     String providerProductId = '',
   }) async {
     final List<Response<dynamic>> responses =
         await Future.wait(<Future<Response<dynamic>>>[
-          _fetchQuote(
-            courseId,
-            'EUR',
-            couponCode: couponCode,
-            providerProductId: providerProductId,
-          ),
-          _fetchQuote(
-            courseId,
-            'BDT',
-            couponCode: couponCode,
-            providerProductId: providerProductId,
-          ),
+          _fetchQuote(courseId, 'EUR', providerProductId: providerProductId),
+          _fetchQuote(courseId, 'BDT', providerProductId: providerProductId),
         ]);
 
     final Map<String, dynamic> eur = _responseMap(responses[0]);
@@ -59,8 +48,6 @@ class ProCheckoutApiService {
     final String courseName = _stringValue(course['title']).isEmpty
         ? fallbackCourseName
         : _stringValue(course['title']);
-    final int discountPercentage = _intValue(eur['discountPercentage']);
-
     if (product.isEmpty || _stringValue(product['productId']).isEmpty) {
       throw DioException(
         requestOptions: responses[0].requestOptions,
@@ -102,11 +89,7 @@ class ProCheckoutApiService {
           ProCurrency.bdt,
           _stringValue(bdt['originalAmount']),
         ),
-        discountLabel: discountPercentage > 0
-            ? 'discount_off'.trParams(<String, String>{
-                'discount': discountPercentage.toString(),
-              })
-            : 'course_price'.tr,
+        discountLabel: 'course_price'.tr,
       ),
       features: <ProFeatureModel>[
         ProFeatureModel(
@@ -140,20 +123,12 @@ class ProCheckoutApiService {
       purchaseOptions: purchaseOptions.isEmpty
           ? <ProStoreProductModel>[ProStoreProductModel.fromJson(product)]
           : purchaseOptions,
-      couponCode: _stringValue(eur['couponCode']),
-      discountPercentage: discountPercentage,
-      pricingNote: _stringValue(
-        eur['pricingNote'],
-        fallback:
-            'Google Play or App Store controls the final localized amount charged.',
-      ),
     );
   }
 
   Future<ProPendingGooglePlayPurchaseModel> createStoreOrder({
     required ProOrderModel order,
     required ProCurrency currency,
-    required String couponCode,
   }) async {
     final Response<dynamic> response = await _apiClient.dio.post(
       '/course-commerce/orders',
@@ -164,7 +139,6 @@ class ProCheckoutApiService {
         'providerProductId': order.selectedProviderProductId,
         'currency': currency == ProCurrency.bdt ? 'BDT' : 'EUR',
         'idempotencyKey': _uuid.v4(),
-        if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
       },
     );
 
@@ -350,7 +324,6 @@ class ProCheckoutApiService {
   Future<Response<dynamic>> _fetchQuote(
     String courseId,
     String currency, {
-    String couponCode = '',
     String providerProductId = '',
   }) {
     if (!Platform.isAndroid && !Platform.isIOS) {
@@ -363,7 +336,6 @@ class ProCheckoutApiService {
         'provider': Platform.isAndroid ? 'google_play' : 'app_store',
         if (providerProductId.trim().isNotEmpty)
           'providerProductId': providerProductId.trim(),
-        if (couponCode.trim().isNotEmpty) 'couponCode': couponCode.trim(),
       },
     );
   }
