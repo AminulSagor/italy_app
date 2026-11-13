@@ -11,8 +11,6 @@ import '../models/resume_studio_models.dart';
 import '../services/resume_studio_api_service.dart';
 import '../views/cv_preview_view.dart';
 import 'cv_preview_controller.dart';
-import '../../../core/models/rewarded_ads_models.dart';
-import '../../../core/services/rewarded_ads/rewarded_ads_service.dart';
 
 class CvBuilderController extends GetxController {
   CvBuilderController({
@@ -850,17 +848,6 @@ class CvBuilderController extends GetxController {
       );
     } on DioException catch (error) {
       final bool noCredit = error.response?.statusCode == 402;
-      if (noCredit) {
-        isRendering.value = false;
-        final bool granted = await Get.find<RewardedAdsService>().gate(
-          RewardedPlacement.cvCredits,
-          contextId: _document?.id,
-        );
-        if (granted) {
-          await renderCv();
-          return;
-        }
-      }
       Get.snackbar(
         noCredit ? 'cvb_no_credit_title'.tr : 'cvb_create_pdf_failed'.tr,
         noCredit

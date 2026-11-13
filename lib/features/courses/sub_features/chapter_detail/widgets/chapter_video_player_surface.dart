@@ -24,7 +24,6 @@ class ChapterVideoPlayerSurface extends StatefulWidget {
   final String? recoveryMessage;
   final ValueListenable<String?>? recoveryMessageListenable;
   final Future<void> Function()? onRetry;
-  final Future<bool> Function()? onPlayRequested;
   final ValueChanged<bool>? onPlaybackIntentChanged;
   final VoidCallback? onFullscreenTap;
   final VoidCallback? onCloseFullscreenTap;
@@ -44,7 +43,6 @@ class ChapterVideoPlayerSurface extends StatefulWidget {
     this.recoveryMessage,
     this.recoveryMessageListenable,
     this.onRetry,
-    this.onPlayRequested,
     this.onPlaybackIntentChanged,
     this.onFullscreenTap,
     this.onCloseFullscreenTap,
@@ -71,7 +69,6 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
   Timer? _controlsHideTimer;
   bool _showControls = true;
   bool _wasPlaying = false;
-  bool _isPlayRequestPending = false;
 
   @override
   void initState() {
@@ -166,27 +163,6 @@ class _ChapterVideoPlayerSurfaceState extends State<ChapterVideoPlayerSurface> {
       await widget.controller.pause();
       _showControlsPersistently();
       return;
-    }
-
-    if (_isPlayRequestPending) {
-      return;
-    }
-
-    final Future<bool> Function()? onPlayRequested = widget.onPlayRequested;
-    if (onPlayRequested != null) {
-      _isPlayRequestPending = true;
-      try {
-        final bool allowed = await onPlayRequested();
-        if (!mounted) {
-          return;
-        }
-        if (!allowed) {
-          _showControlsPersistently();
-          return;
-        }
-      } finally {
-        _isPlayRequestPending = false;
-      }
     }
 
     if (_isAtVideoEnd(value)) {

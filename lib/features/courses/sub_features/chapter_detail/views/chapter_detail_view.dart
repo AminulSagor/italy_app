@@ -7,8 +7,6 @@ import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 import '../../../../../core/themes/app_colors.dart';
 import '../../../../../core/themes/app_constants.dart';
 import '../../../../../core/themes/app_font.dart';
-import '../../../../../core/models/rewarded_ads_models.dart';
-import '../../../../../core/widgets/ads/native_ad_slot.dart';
 import '../../../../../core/widgets/app_home_bottom_navigation_bar.dart';
 import '../../../../../core/widgets/custom_button.dart';
 import '../../../../../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
@@ -23,7 +21,10 @@ import '../widgets/lesson_content_card.dart';
 class ChapterDetailView extends GetView<ChapterDetailController> {
   final String controllerTag;
 
-  const ChapterDetailView({super.key, required this.controllerTag});
+  const ChapterDetailView({
+    super.key,
+    required this.controllerTag,
+  });
 
   @override
   String? get tag => controllerTag;
@@ -69,7 +70,9 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
 
             if (controller.isLoading.value && detail == null) {
               return const Center(
-                child: CircularProgressIndicator(color: AppColors.primaryGreen),
+                child: CircularProgressIndicator(
+                  color: AppColors.primaryGreen,
+                ),
               );
             }
 
@@ -110,39 +113,17 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                         shouldPlay: controller.shouldPlayVideo.value,
                         loadVideoAccess: controller.loadVideoAccess,
                         onPlaybackChanged: controller.onVideoPlaybackChanged,
-                        onProgressChanged:
-                            (Duration position, Duration duration) {
-                              controller.recordVideoProgress(
-                                position: position,
-                                duration: duration,
-                              );
-                            },
-                        isFreeLesson: controller.chapter.isFree,
+                        onProgressChanged: (
+                            Duration position,
+                            Duration duration,
+                            ) {
+                          controller.recordVideoProgress(
+                            position: position,
+                            duration: duration,
+                          );
+                        },
                       ),
                       SizedBox(height: 18.h),
-                      if (controller.showProgressNativeAd.value)
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: kChapterHorizontalPadding.w,
-                          ),
-                          child: NativeAdSlot(
-                            placement: NativeAdPlacement.freeVideoProgress,
-                            slotId: 'free-video-progress:${detail.id}',
-                          ),
-                        ),
-                      if (controller.showCompletionNativeAd.value)
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: kChapterHorizontalPadding.w,
-                          ),
-                          child: NativeAdSlot(
-                            placement: NativeAdPlacement.freeVideoComplete,
-                            slotId: 'free-video-complete:${detail.id}',
-                          ),
-                        ),
-                      if (controller.showProgressNativeAd.value ||
-                          controller.showCompletionNativeAd.value)
-                        SizedBox(height: 18.h),
                     ],
 
                     Padding(
@@ -157,7 +138,8 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                               lesson: detail.lessonContent!,
                               audio: detail.audio,
                               loadAudioUrl: controller.loadAudioUrl,
-                              onAudioCompleted: controller.recordAudioCompleted,
+                              onAudioCompleted:
+                              controller.recordAudioCompleted,
                             ),
                             SizedBox(height: 8.h),
                           ],
@@ -165,8 +147,10 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                           _ResourceSection(
                             theoryBook: detail.theoryBook,
                             vocabulary: detail.vocabulary,
-                            onTheoryBookTap: controller.openTheoryBook,
-                            onVocabularyTap: controller.openVocabulary,
+                            onTheoryBookTap:
+                            controller.openTheoryBook,
+                            onVocabularyTap:
+                            controller.openVocabulary,
                           ),
 
                           if (detail.quiz != null) ...<Widget>[
@@ -179,9 +163,12 @@ class ChapterDetailView extends GetView<ChapterDetailController> {
                             _BottomActions(
                               status: detail.quiz!.status,
                               hasVideo: detail.hasVideo,
-                              isLoading: controller.isResumeSubmitting.value,
-                              isVideoPlaying: controller.isVideoPlaying.value,
-                              onResumeTap: controller.toggleVideoPlayback,
+                              isLoading:
+                              controller.isResumeSubmitting.value,
+                              isVideoPlaying:
+                              controller.isVideoPlaying.value,
+                              onResumeTap:
+                              controller.toggleVideoPlayback,
                               onQuizTap: controller.openQuiz,
                             ),
                           ],
@@ -203,7 +190,10 @@ class _Header extends StatelessWidget {
   final String title;
   final VoidCallback onBackTap;
 
-  const _Header({required this.title, required this.onBackTap});
+  const _Header({
+    required this.title,
+    required this.onBackTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -267,9 +257,15 @@ class _ResourceSection extends StatelessWidget {
         if (useVerticalLayout) {
           return Column(
             children: <Widget>[
-              ChapterResourceCard(resource: theoryBook, onTap: onTheoryBookTap),
+              ChapterResourceCard(
+                resource: theoryBook,
+                onTap: onTheoryBookTap,
+              ),
               SizedBox(height: 12.h),
-              ChapterResourceCard(resource: vocabulary, onTap: onVocabularyTap),
+              ChapterResourceCard(
+                resource: vocabulary,
+                onTap: onVocabularyTap,
+              ),
             ],
           );
         }
@@ -389,6 +385,8 @@ class _BottomActions extends StatelessWidget {
       return Icons.lock_outline_rounded;
     }
 
-    return isVideoPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded;
+    return isVideoPlaying
+        ? Icons.pause_rounded
+        : Icons.play_arrow_rounded;
   }
 }

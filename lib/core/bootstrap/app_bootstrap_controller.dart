@@ -25,9 +25,6 @@ import '../services/notification_summary_service.dart';
 import '../services/otp_session_service.dart';
 import '../services/storage_service.dart';
 import '../services/token_service.dart';
-import '../services/rewarded_ads/rewarded_ads_service.dart';
-import '../services/banner_ads/banner_ads_service.dart';
-import '../services/native_ads/native_ads_service.dart';
 
 class AppBootstrapController extends GetxController {
   AppBootstrapController();
@@ -68,27 +65,6 @@ class AppBootstrapController extends GetxController {
           tokenService: Get.find<TokenService>(),
           storageService: Get.find<StorageService>(),
         ),
-        permanent: true,
-      );
-    }
-
-    if (!Get.isRegistered<RewardedAdsService>()) {
-      await Get.putAsync<RewardedAdsService>(
-        () => RewardedAdsService(apiClient: Get.find<ApiClient>()).init(),
-        permanent: true,
-      );
-    }
-
-    if (!Get.isRegistered<BannerAdsService>()) {
-      Get.put<BannerAdsService>(
-        BannerAdsService(rewardedAdsService: Get.find<RewardedAdsService>()),
-        permanent: true,
-      );
-    }
-
-    if (!Get.isRegistered<NativeAdsService>()) {
-      Get.put<NativeAdsService>(
-        NativeAdsService(rewardedAdsService: Get.find<RewardedAdsService>()),
         permanent: true,
       );
     }

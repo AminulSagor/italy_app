@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/services/api_error_handler.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/services/rewarded_ads/rewarded_ads_service.dart';
 import '../../../core/widgets/app_drawer_controller.dart';
 import '../../../core/widgets/navbar_and_appbar_wrapper/navbar_and_appbar_wrapper_controller.dart';
 import '../../cv_generation/controllers/cv_home_controller.dart';
@@ -23,7 +22,6 @@ class OrderHistoryFilterTitles {
   static String get aiRefills => 'ai_refills'.tr;
   static String get streakFreezes => 'streak_freezes'.tr;
   static String get cvCredits => 'cv_credits'.tr;
-  static String get adFree => 'Ad-Free';
 }
 
 class ShopController extends GetxController {
@@ -51,11 +49,9 @@ class ShopController extends GetxController {
   final RxList<StorePackageModel> aiPackages = <StorePackageModel>[].obs;
   final RxList<StorePackageModel> streakPackages = <StorePackageModel>[].obs;
   final RxList<StorePackageModel> cvPackages = <StorePackageModel>[].obs;
-  final RxList<StorePackageModel> adFreePackages = <StorePackageModel>[].obs;
   final RxString selectedAiPackageId = ''.obs;
   final RxString selectedStreakPackageId = ''.obs;
   final RxString selectedCvPackageId = ''.obs;
-  final RxString selectedAdFreePackageId = ''.obs;
   final Rxn<StorePackageModel> activePackage = Rxn<StorePackageModel>();
   final Rx<RefillCurrency> selectedCurrency = RefillCurrency.eur.obs;
   final TextEditingController couponTextController = TextEditingController();
@@ -101,8 +97,6 @@ class ShopController extends GetxController {
       _findPackage(streakPackages, selectedStreakPackageId.value);
   StorePackageModel? get selectedCvPackage =>
       _findPackage(cvPackages, selectedCvPackageId.value);
-  StorePackageModel? get selectedAdFreePackage =>
-      _findPackage(adFreePackages, selectedAdFreePackageId.value);
 
   int get aiVoiceMinutes => balances.value?.aiVoiceMinutes ?? 0;
 
@@ -188,7 +182,6 @@ class ShopController extends GetxController {
                 packageType: StorePackageType.streakFreeze,
               ),
               _apiService.getPackages(packageType: StorePackageType.cvCredit),
-              _apiService.getPackages(packageType: StorePackageType.adFree),
             ]);
           }, showError: false);
       if (!result.isSuccess || result.data == null) {
@@ -206,17 +199,9 @@ class ShopController extends GetxController {
         (data[2] as StorePackageListResponseModel).items,
       );
       cvPackages.assignAll((data[3] as StorePackageListResponseModel).items);
-      adFreePackages.assignAll(
-        (data[4] as StorePackageListResponseModel).items,
-      );
       _selectDefaults();
       await _billingService.prepareProducts(
-        <StorePackageModel>[
-              ...aiPackages,
-              ...streakPackages,
-              ...cvPackages,
-              ...adFreePackages,
-            ]
+        <StorePackageModel>[...aiPackages, ...streakPackages, ...cvPackages]
             .map((StorePackageModel item) => item.storeProduct)
             .whereType<StoreProviderProductModel>(),
       );
@@ -294,28 +279,20 @@ class ShopController extends GetxController {
     _resetQuote();
   }
 
-  void selectAdFreePackage(String packageId) {
-    selectedAdFreePackageId.value = packageId;
-    _resetQuote();
-  }
-
   bool isAiPackageSelected(String id) => selectedAiPackageId.value == id;
   bool isStreakPackageSelected(String id) =>
       selectedStreakPackageId.value == id;
   bool isCvPackageSelected(String id) => selectedCvPackageId.value == id;
-  bool isAdFreePackageSelected(String id) =>
-      selectedAdFreePackageId.value == id;
   String packagePriceText(StorePackageModel package) {
     final String price =
         _billingService.localizedPrice(package.storeProduct) ??
-        (package.type == StorePackageType.adFree
-            ? '\$${package.priceEur.toStringAsFixed(2)}'
-            : '€${package.priceEur.toStringAsFixed(2)}');
+        '€${package.priceEur.toStringAsFixed(2)}';
 
-    if (!package.isSubscription) {
+    if (!package.isMonthly) {
       return price;
     }
-    return package.isYearly ? '$price / year' : '$price / month';
+
+    return 'price_per_month'.trParams(<String, String>{'price': price});
   }
 
   bool get isStorePaymentSelected =>
@@ -429,14 +406,11 @@ class ShopController extends GetxController {
       activePackage.value ?? selectedAiPackage;
   String get selectedPlanTitle => checkoutPackage?.name ?? 'package'.tr;
   String get selectedPlanSubtitle => checkoutPackage?.entitlementSummary ?? '';
-  String get checkoutBillingLabel => checkoutPackage?.isYearly == true
-      ? '/ year'
-      : checkoutPackage?.isMonthly == true
-      ? '/ month'
-      : '/ one-time';
+  String get checkoutBillingLabel =>
+      checkoutPackage?.isMonthly == true ? '/ month' : '/ one-time';
   bool get isAppStoreSubscriptionCheckout =>
       Platform.isIOS &&
-      checkoutPackage?.isSubscription == true &&
+      checkoutPackage?.isMonthly == true &&
       quote.value?.storeProduct.isSubscription == true;
   String get appStoreSubscriptionTitle =>
       _billingService.localizedTitle(quote.value?.storeProduct) ??
@@ -460,7 +434,7 @@ class ShopController extends GetxController {
 
   Future<void> restoreCurrentAppStoreSubscription() async {
     final StorePackageModel? package = checkoutPackage;
-    if (package == null || !package.isSubscription) return;
+    if (package == null || !package.isMonthly) return;
     await restoreAppStoreSubscription(package);
   }
 
@@ -485,10 +459,6 @@ class ShopController extends GetxController {
 
   Future<void> onCvCreditTap() async {
     await _openPackageList(StorePackageType.cvCredit, AppRoutes.cvCreditStore);
-  }
-
-  Future<void> onAdFreeTap() async {
-    await _openPackageList(StorePackageType.adFree, AppRoutes.adFreeStore);
   }
 
   Future<void> confirmPurchase() async {
@@ -525,15 +495,6 @@ class ShopController extends GetxController {
 
   Future<void> goToCvCreditOrderSummary() async {
     await _openSummary(selectedCvPackage, AppRoutes.cvCreditOrderSummary);
-  }
-
-  Future<void> buySelectedAdFreePlan() async {
-    if (selectedAdFreePackage == null) {
-      Get.snackbar('select_a_package'.tr, 'please_select_a_package_first'.tr);
-      return;
-    }
-    activePackage.value = selectedAdFreePackage;
-    await buySelectedPlan();
   }
 
   Future<void> buySelectedPlan() async {
@@ -620,8 +581,6 @@ class ShopController extends GetxController {
         return "Your '${value.packageName}' protection is active and ready to protect your streak.";
       case StorePackageType.cvCredit:
         return "Your '${value.packageName}' credits are active and ready for CV generation.";
-      case StorePackageType.adFree:
-        return "Your '${value.packageName}' subscription is active. Ads have been removed.";
     }
   }
 
@@ -638,8 +597,6 @@ class ShopController extends GetxController {
             : '${value.creditedStreakFreezes}×';
       case StorePackageType.cvCredit:
         return '${value.creditedCvCredits}×';
-      case StorePackageType.adFree:
-        return '✓';
     }
   }
 
@@ -651,8 +608,6 @@ class ShopController extends GetxController {
         return 'protection_added'.tr;
       case StorePackageType.cvCredit:
         return 'cv_credits_added'.tr;
-      case StorePackageType.adFree:
-        return 'Ad-Free';
       case null:
         return 'credits_added'.tr;
     }
@@ -668,22 +623,13 @@ class ShopController extends GetxController {
         return '${value.balances.streakFreezeCount}×';
       case StorePackageType.cvCredit:
         return '${value.balances.cvCredits}×';
-      case StorePackageType.adFree:
-        return value.packageName.contains('Yearly') ? '1 year' : '1 month';
     }
   }
 
   String get completionSecondLabel {
-    switch (completedPurchase.value?.packageType) {
-      case StorePackageType.aiBundle:
-        return 'gen_ai_smart_tokens'.tr;
-      case StorePackageType.adFree:
-        return 'Subscription term';
-      case StorePackageType.streakFreeze:
-      case StorePackageType.cvCredit:
-      case null:
-        return 'current_balance'.tr;
-    }
+    return completedPurchase.value?.packageType == StorePackageType.aiBundle
+        ? 'gen_ai_smart_tokens'.tr
+        : 'current_balance'.tr;
   }
 
   void closePurchaseCompleted() {
@@ -928,10 +874,6 @@ class ShopController extends GetxController {
         showBlockingLoading: false,
       );
     }
-    if (completion.packageType == StorePackageType.adFree &&
-        Get.isRegistered<RewardedAdsService>()) {
-      await Get.find<RewardedAdsService>().refreshConfiguration();
-    }
     if (Get.currentRoute != AppRoutes.purchaseCompleted) {
       Get.offNamed(AppRoutes.purchaseCompleted);
     }
@@ -951,7 +893,6 @@ class ShopController extends GetxController {
     _selectDefaultStreakPackage();
 
     selectedCvPackageId.value = _preferred(cvPackages)?.id ?? '';
-    selectedAdFreePackageId.value = _preferred(adFreePackages)?.id ?? '';
   }
 
   void _selectDefaultStreakPackage() {
@@ -1074,8 +1015,6 @@ class ShopController extends GetxController {
         return streakPackages;
       case StorePackageType.cvCredit:
         return cvPackages;
-      case StorePackageType.adFree:
-        return adFreePackages;
     }
   }
 

@@ -33,7 +33,6 @@ class ShopOrderHistoryController extends GetxController {
     OrderHistoryFilterTitles.aiRefills,
     OrderHistoryFilterTitles.streakFreezes,
     OrderHistoryFilterTitles.cvCredits,
-    OrderHistoryFilterTitles.adFree,
   ];
 
   @override
@@ -99,10 +98,7 @@ class ShopOrderHistoryController extends GetxController {
   }
 
   void contactOrderSupport() {
-    Get.snackbar(
-      'gen_support'.tr,
-      'please_contact_support_from_the_help_center'.tr,
-    );
+    Get.snackbar('gen_support'.tr, 'please_contact_support_from_the_help_center'.tr);
   }
 
   String _historyCategory(String title) {
@@ -114,8 +110,6 @@ class ShopOrderHistoryController extends GetxController {
       return 'streak_freeze';
     } else if (title == OrderHistoryFilterTitles.cvCredits) {
       return 'cv_credit';
-    } else if (title == OrderHistoryFilterTitles.adFree) {
-      return 'ad_free';
     } else {
       return 'all';
     }

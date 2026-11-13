@@ -3,9 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/themes/app_colors.dart';
-import '../../../../../core/models/rewarded_ads_models.dart';
-import '../../../../../core/services/native_ads/native_ads_service.dart';
-import '../../../../../core/widgets/ads/native_ad_slot.dart';
 import '../../../controllers/important_verbs_controller.dart';
 import '../../../models/important_verb_models.dart';
 import 'important_verb_loading_widgets.dart';
@@ -210,24 +207,40 @@ class VerbFilterChips extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         itemCount: filters.length,
         separatorBuilder: (_, _) => SizedBox(width: 8.w),
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (
+            BuildContext context,
+            int index,
+            ) {
           final String filter = filters[index];
-          final bool isSelected = filter == selectedFilter;
+          final bool isSelected =
+              filter == selectedFilter;
 
-          final bool showSpinner = isLoading && isSelected;
+          final bool showSpinner =
+              isLoading && isSelected;
 
           return GestureDetector(
-            onTap: isLoading ? null : () => onSelected(filter),
+            onTap: isLoading
+                ? null
+                : () => onSelected(filter),
             child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 180),
-              opacity: isLoading && !isSelected ? 0.55 : 1,
+              duration: const Duration(
+                milliseconds: 180,
+              ),
+              opacity: isLoading && !isSelected
+                  ? 0.55
+                  : 1,
               child: Container(
                 height: 40.h,
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 20.w,
+                ),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryGreen : AppColors.white,
-                  borderRadius: BorderRadius.circular(999.r),
+                  color: isSelected
+                      ? AppColors.primaryGreen
+                      : AppColors.white,
+                  borderRadius:
+                  BorderRadius.circular(999.r),
                   border: Border.all(
                     color: isSelected
                         ? AppColors.primaryGreen
@@ -242,7 +255,8 @@ class VerbFilterChips extends StatelessWidget {
                       SizedBox(
                         width: 14.r,
                         height: 14.r,
-                        child: const CircularProgressIndicator(
+                        child:
+                        const CircularProgressIndicator(
                           strokeWidth: 2,
                           color: Colors.white,
                         ),
@@ -275,7 +289,6 @@ class VerbLibraryList extends StatelessWidget {
   const VerbLibraryList({
     super.key,
     required this.verbs,
-    required this.placement,
     required this.isLoading,
     required this.isLoadingMore,
     required this.error,
@@ -283,7 +296,6 @@ class VerbLibraryList extends StatelessWidget {
   });
 
   final List<ImportantVerbSummaryModel> verbs;
-  final NativeAdPlacement placement;
   final bool isLoading;
   final bool isLoadingMore;
   final String error;
@@ -305,55 +317,69 @@ class VerbLibraryList extends StatelessWidget {
     }
 
     if (verbs.isEmpty) {
-      return _VerbListMessage(message: 'no_verbs_found'.tr);
+      return _VerbListMessage(
+        message: 'no_verbs_found'.tr,
+      );
     }
 
     return Column(
       children: <Widget>[
         AnimatedSwitcher(
-          duration: const Duration(milliseconds: 180),
+          duration: const Duration(
+            milliseconds: 180,
+          ),
           child: isLoading
               ? Padding(
-                  key: const ValueKey<String>('verb-list-refreshing'),
-                  padding: EdgeInsets.only(bottom: 14.h),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(999.r),
-                    child: const LinearProgressIndicator(
-                      minHeight: 3,
-                      color: AppColors.primaryGreen,
-                      backgroundColor: Color(0xFFDDE8D8),
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(key: ValueKey<String>('verb-list-ready')),
-        ),
-        Obx(() {
-          final NativeAdInsertionPlan plan = Get.find<NativeAdsService>()
-              .insertionPlan(placement: placement, contentCount: verbs.length);
-          return AnimatedOpacity(
-            duration: const Duration(milliseconds: 180),
-            opacity: isLoading ? 0.65 : 1,
-            child: IgnorePointer(
-              ignoring: isLoading,
-              child: ListView.separated(
-                itemCount: plan.rows.length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                separatorBuilder: (_, _) => SizedBox(height: 14.h),
-                itemBuilder: (BuildContext context, int index) {
-                  final NativeAdDisplayRow row = plan.rows[index];
-                  return row.isAd
-                      ? NativeAdSlot(
-                          placement: placement,
-                          slotId: '${placement.apiValue}:${row.adBoundary}',
-                        )
-                      : VerbLibraryCard(verb: verbs[row.contentIndex!]);
-                },
+            key: const ValueKey<String>(
+              'verb-list-refreshing',
+            ),
+            padding: EdgeInsets.only(
+              bottom: 14.h,
+            ),
+            child: ClipRRect(
+              borderRadius:
+              BorderRadius.circular(999.r),
+              child:
+              const LinearProgressIndicator(
+                minHeight: 3,
+                color: AppColors.primaryGreen,
+                backgroundColor:
+                Color(0xFFDDE8D8),
               ),
             ),
-          );
-        }),
+          )
+              : const SizedBox.shrink(
+            key: ValueKey<String>(
+              'verb-list-ready',
+            ),
+          ),
+        ),
+        AnimatedOpacity(
+          duration: const Duration(
+            milliseconds: 180,
+          ),
+          opacity: isLoading ? 0.65 : 1,
+          child: IgnorePointer(
+            ignoring: isLoading,
+            child: ListView.separated(
+              itemCount: verbs.length,
+              shrinkWrap: true,
+              physics:
+              const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              separatorBuilder: (_, _) =>
+                  SizedBox(height: 14.h),
+              itemBuilder: (
+                  BuildContext context,
+                  int index,
+                  ) {
+                return VerbLibraryCard(
+                  verb: verbs[index],
+                );
+              },
+            ),
+          ),
+        ),
         if (isLoadingMore) ...<Widget>[
           SizedBox(height: 14.h),
           const VerbLoadMoreSkeleton(),
@@ -485,7 +511,8 @@ class VerbLibraryCard extends GetView<ImportantVerbsController> {
             ),
             SizedBox(width: 11.w),
             Obx(() {
-              final bool isSaving = controller.isVerbSavePending(verb.id);
+              final bool isSaving =
+              controller.isVerbSavePending(verb.id);
 
               return CircleVerbActionButton(
                 icon: controller.isVerbSaved(verb.id)
@@ -555,7 +582,9 @@ class CircleVerbActionButton extends StatelessWidget {
     return GestureDetector(
       onTap: isLoading ? null : onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
+        duration: const Duration(
+          milliseconds: 180,
+        ),
         width: 40.r,
         height: 40.r,
         decoration: const BoxDecoration(
@@ -565,14 +594,19 @@ class CircleVerbActionButton extends StatelessWidget {
         child: Center(
           child: isLoading
               ? SizedBox(
-                  width: 18.r,
-                  height: 18.r,
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 2.2,
-                    color: AppColors.primaryGreen,
-                  ),
-                )
-              : Icon(icon, size: 21.r, color: AppColors.primaryGreen),
+            width: 18.r,
+            height: 18.r,
+            child:
+            const CircularProgressIndicator(
+              strokeWidth: 2.2,
+              color: AppColors.primaryGreen,
+            ),
+          )
+              : Icon(
+            icon,
+            size: 21.r,
+            color: AppColors.primaryGreen,
+          ),
         ),
       ),
     );

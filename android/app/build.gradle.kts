@@ -49,18 +49,8 @@ val isReleaseBuildRequested = gradle.startParameter.taskNames.any { taskName ->
 
 val facebookAppId = providers.gradleProperty("FACEBOOK_APP_ID").orElse("0").get()
 val facebookClientToken = providers.gradleProperty("FACEBOOK_CLIENT_TOKEN").orElse("0").get()
-val googleSampleAdMobAppId = "ca-app-pub-3940256099942544~3347511713"
-val admobAndroidAppId = providers.gradleProperty("ADMOB_ANDROID_APP_ID")
-    .orElse(googleSampleAdMobAppId)
-    .get()
 
 if (isReleaseBuildRequested) {
-    if (admobAndroidAppId == googleSampleAdMobAppId) {
-        throw GradleException(
-            "Release build blocked: ADMOB_ANDROID_APP_ID must be set in " +
-                    "android/gradle.properties or ~/.gradle/gradle.properties.",
-        )
-    }
     if (facebookAppId == "0" || facebookClientToken == "0") {
         throw GradleException(
             "Release build blocked: FACEBOOK_APP_ID and FACEBOOK_CLIENT_TOKEN " +
@@ -144,7 +134,6 @@ android {
         resValue("string", "facebook_app_id", facebookAppId)
         resValue("string", "facebook_client_token", facebookClientToken)
         resValue("string", "fb_login_protocol_scheme", "fb$facebookAppId")
-        manifestPlaceholders["ADMOB_APP_ID"] = admobAndroidAppId
     }
 
     signingConfigs {

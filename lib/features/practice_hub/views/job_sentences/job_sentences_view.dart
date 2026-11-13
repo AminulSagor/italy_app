@@ -6,9 +6,6 @@ import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
-import '../../../../core/models/rewarded_ads_models.dart';
-import '../../../../core/services/native_ads/native_ads_service.dart';
-import '../../../../core/widgets/ads/native_ad_slot.dart';
 import '../../controllers/job_sentences_controller.dart';
 import '../../models/job_track_models.dart';
 import '_widgets/job_track_card_palette.dart';
@@ -131,26 +128,14 @@ class _CareerTrackList extends GetView<JobSentencesController> {
         return _MessageState(message: 'no_career_tracks_are_available'.tr);
       }
 
-      final NativeAdInsertionPlan plan = Get.find<NativeAdsService>()
-          .insertionPlan(
-            placement: NativeAdPlacement.careerTracks,
-            contentCount: controller.careerTracks.length,
-          );
       return Column(
-        children: plan.rows
-            .map((NativeAdDisplayRow row) {
-              return Padding(
+        children: controller.careerTracks
+            .map(
+              (JobCareerTrackModel item) => Padding(
                 padding: EdgeInsets.only(bottom: 24.h),
-                child: row.isAd
-                    ? NativeAdSlot(
-                        placement: NativeAdPlacement.careerTracks,
-                        slotId: 'career-tracks:${row.adBoundary}',
-                      )
-                    : _CareerTrackCard(
-                        item: controller.careerTracks[row.contentIndex!],
-                      ),
-              );
-            })
+                child: _CareerTrackCard(item: item),
+              ),
+            )
             .toList(growable: false),
       );
     });

@@ -374,7 +374,6 @@ class CoursesApiService {
       tagLabel: isAccessible ? (lessonIsFree ? 'free_1'.tr : null) : 'pro'.tr,
       progress: progress.progress,
       state: state,
-      isFree: courseIsFree || lessonIsFree,
     );
   }
 

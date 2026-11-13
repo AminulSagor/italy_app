@@ -4,8 +4,6 @@ import 'package:get/get.dart';
 
 import '../../core/themes/app_colors.dart';
 import '../../core/themes/app_constants.dart';
-import '../../core/models/rewarded_ads_models.dart';
-import '../../core/widgets/ads/native_ad_slot.dart';
 import 'controllers/ai_chat_controller.dart';
 import 'models/ai_tutor_models.dart';
 import 'views/widgets/ai_chat_home_widgets.dart';
@@ -81,11 +79,6 @@ class AiChatView extends GetView<AiChatController> {
             ),
             SizedBox(height: 20.h),
             const AiProTipCard(),
-            SizedBox(height: 20.h),
-            const NativeAdSlot(
-              placement: NativeAdPlacement.aiTutorLanding,
-              slotId: 'ai-tutor-landing:bottom',
-            ),
           ],
         ),
       ),

@@ -40,7 +40,6 @@ class AppRoutes {
   static const String webinarLive = '/webinar/live';
   static const String shop = '/shop';
   static const String aiRefillCenter = '/shop/ai-refill-center';
-  static const String adFreeStore = '/shop/ad-free';
   static const String orderSummary = '/shop/order-summary';
   static const String checkout = '/shop/checkout';
   static const String purchaseCompleted = '/purchase-completed';

@@ -727,10 +727,6 @@ appTranslations = <String, Map<String, String>>{
     'dont_have_account': 'Don\'t have an account? ',
     'back_to_login': 'Back to Login',
     'continue': 'Continue',
-    'rewarded_video_unlock_title': 'Continue this free video?',
-    'rewarded_video_unlock_message':
-        'Watch one ad to unlock the rest of this free video.',
-    'rewarded_video_watch_ad': 'Watch ad',
     'resend': 'Resend',
     'resend_code': 'Resend Code',
     'verify': 'Verify',
@@ -2737,10 +2733,6 @@ appTranslations = <String, Map<String, String>>{
     'dont_have_account': 'আপনার কি কোনো অ্যাকাউন্ট নেই? ',
     'back_to_login': 'লগইনে ফিরে যান',
     'continue': 'চালিয়ে যান',
-    'rewarded_video_unlock_title': 'এই বিনামূল্যের ভিডিওটি চালিয়ে যাবেন?',
-    'rewarded_video_unlock_message':
-        'এই বিনামূল্যের ভিডিওর বাকি অংশ আনলক করতে একটি বিজ্ঞাপন দেখুন।',
-    'rewarded_video_watch_ad': 'বিজ্ঞাপন দেখুন',
     'resend': 'আবার পাঠান',
     'resend_code': 'কোড পুনরায় পাঠান',
     'verify': 'ভেরিফাই',
@@ -6059,10 +6051,6 @@ appTranslations = <String, Map<String, String>>{
     'dont_have_account': 'Non hai un account? ',
     'back_to_login': 'Torna al login',
     'continue': 'Continua',
-    'rewarded_video_unlock_title': 'Continuare questo video gratuito?',
-    'rewarded_video_unlock_message':
-        'Guarda un annuncio per sbloccare il resto di questo video gratuito.',
-    'rewarded_video_watch_ad': 'Guarda l\'annuncio',
     'resend': 'Invia di nuovo',
     'resend_code': 'Reinvia codice',
     'verify': 'Verifica',

@@ -1,3 +1,0 @@
-// Copy this file to AdMobProduction.xcconfig and provide the iOS AdMob app ID.
-// The real file is ignored and must be supplied by the release environment.
-ADMOB_IOS_APP_ID=ca-app-pub-REPLACE_WITH_PRODUCTION_APP_ID

@@ -5,10 +5,6 @@ import 'package:italir_pothe/core/models/learning_activity_models.dart';
 import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
-import '../../../../core/models/rewarded_ads_models.dart';
-import '../../../../core/services/native_ads/native_ads_service.dart';
-import '../../../../core/widgets/ads/adaptive_banner_ad_slot.dart';
-import '../../../../core/widgets/ads/native_ad_slot.dart';
 import '../../controllers/important_verbs_controller.dart';
 import '../../models/important_verb_detail_models.dart';
 import '../../models/important_verb_models.dart';
@@ -24,95 +20,110 @@ class VerbDetailsView extends GetView<ImportantVerbsController> {
       activityKind: LearningActivityKind.importantVerbs,
       sourceId: 'verb_details_view',
       child: Scaffold(
-        backgroundColor: AppColors.homeBackground,
-        body: SafeArea(
-          bottom: false,
-          child: Obx(() {
-            final ImportantVerbSummaryModel? summary =
-                controller.currentVerbSummary;
+      backgroundColor: AppColors.homeBackground,
+      body: SafeArea(
+        bottom: false,
+        child: Obx(() {
+          final ImportantVerbSummaryModel? summary =
+              controller.currentVerbSummary;
 
-            final ImportantVerbDetailModel? details =
-                controller.selectedVerbDetails.value;
-            final NativeAdInsertionPlan? formPlan = details == null
-                ? null
-                : Get.find<NativeAdsService>().insertionPlan(
-                    placement: NativeAdPlacement.verbDetail,
-                    contentCount: details.forms.length,
-                  );
+          final ImportantVerbDetailModel? details =
+              controller.selectedVerbDetails.value;
 
-            if (summary == null) {
-              return _VerbDetailsMessage(
-                message: 'verb_information_is_unavailable'.tr,
-                onBack: controller.onVerbDetailBackTap,
+          if (summary == null) {
+            return _VerbDetailsMessage(
+              message: 'verb_information_is_unavailable'.tr,
+              onBack: controller.onVerbDetailBackTap,
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              if (controller.isVerbDetailsLoading.value) {
+                return;
+              }
+
+              await controller.loadVerbDetails(
+                summary.id,
               );
-            }
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: EdgeInsets.fromLTRB(
+                24.w,
+                15.h,
+                24.w,
+                42.h,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const VerbDetailsTopBar(),
 
-            return RefreshIndicator(
-              onRefresh: () async {
-                if (controller.isVerbDetailsLoading.value) {
-                  return;
-                }
+                  SizedBox(height: 13.h),
 
-                await controller.loadVerbDetails(summary.id);
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
-                ),
-                padding: EdgeInsets.fromLTRB(24.w, 15.h, 24.w, 42.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const VerbDetailsTopBar(),
+                  // This information already exists from the list,
+                  // so it appears immediately.
+                  VerbHeroCard(
+                    verb: summary,
+                  ),
 
-                    SizedBox(height: 13.h),
+                  SizedBox(height: 20.h),
 
-                    // This information already exists from the list,
-                    // so it appears immediately.
-                    VerbHeroCard(verb: summary),
+                  // First API load.
+                  if (controller.isVerbDetailsLoading.value &&
+                      details == null)
+                    const VerbDetailsSkeleton()
 
-                    AdaptiveBannerAdSlot(margin: EdgeInsets.only(top: 16.h)),
+                  // Initial API request failed.
+                  else if (controller.verbDetailsError.value.isNotEmpty &&
+                      details == null)
+                    _VerbDetailsRetry(
+                      message: controller.verbDetailsError.value,
+                      onRetry: () =>
+                          controller.loadVerbDetails(summary.id),
+                    )
 
-                    SizedBox(height: 20.h),
-
-                    // First API load.
-                    if (controller.isVerbDetailsLoading.value &&
-                        details == null)
-                      const VerbDetailsSkeleton()
-                    // Initial API request failed.
-                    else if (controller.verbDetailsError.value.isNotEmpty &&
-                        details == null)
-                      _VerbDetailsRetry(
-                        message: controller.verbDetailsError.value,
-                        onRetry: () => controller.loadVerbDetails(summary.id),
-                      )
-                    // Details are already available.
-                    else if (details != null) ...<Widget>[
+                  // Details are already available.
+                  else if (details != null) ...<Widget>[
                       // Show a small loading bar during refresh while
                       // keeping the existing content visible.
                       AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 180),
+                        duration: const Duration(
+                          milliseconds: 180,
+                        ),
                         child: controller.isVerbDetailsLoading.value
                             ? Padding(
-                                key: const ValueKey<String>(
-                                  'verb-detail-refreshing',
-                                ),
-                                padding: EdgeInsets.only(bottom: 14.h),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(999.r),
-                                  child: const LinearProgressIndicator(
-                                    minHeight: 3,
-                                    color: AppColors.primaryGreen,
-                                    backgroundColor: Color(0xFFDDE8D8),
-                                  ),
-                                ),
-                              )
+                          key: const ValueKey<String>(
+                            'verb-detail-refreshing',
+                          ),
+                          padding: EdgeInsets.only(
+                            bottom: 14.h,
+                          ),
+                          child: ClipRRect(
+                            borderRadius:
+                            BorderRadius.circular(999.r),
+                            child:
+                            const LinearProgressIndicator(
+                              minHeight: 3,
+                              color: AppColors.primaryGreen,
+                              backgroundColor:
+                              Color(0xFFDDE8D8),
+                            ),
+                          ),
+                        )
                             : const SizedBox.shrink(
-                                key: ValueKey<String>('verb-detail-ready'),
-                              ),
+                          key: ValueKey<String>(
+                            'verb-detail-ready',
+                          ),
+                        ),
                       ),
 
-                      VerbInformationCard(information: details.information),
+                      VerbInformationCard(
+                        information: details.information,
+                      ),
 
                       SizedBox(height: 32.h),
 
@@ -139,28 +150,33 @@ class VerbDetailsView extends GetView<ImportantVerbsController> {
                           ),
                         )
                       else
-                        ...formPlan!.rows.map((NativeAdDisplayRow row) {
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 14.h),
-                            child: row.isAd
-                                ? NativeAdSlot(
-                                    placement: NativeAdPlacement.verbDetail,
-                                    slotId:
-                                        'verb-detail:${summary.id}:${row.adBoundary}',
-                                  )
-                                : VerbFormSection(
-                                    form: details.forms[row.contentIndex!],
-                                  ),
-                          );
-                        }),
+                        ...details.forms.asMap().entries.map(
+                              (
+                              MapEntry<int, ImportantVerbFormModel>
+                              entry,
+                              ) {
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                bottom:
+                                entry.key ==
+                                    details.forms.length - 1
+                                    ? 0
+                                    : 14.h,
+                              ),
+                              child: VerbFormSection(
+                                form: entry.value,
+                              ),
+                            );
+                          },
+                        ),
                     ],
-                  ],
-                ),
+                ],
               ),
-            );
-          }),
-        ),
+            ),
+          );
+        }),
       ),
+    ),
     );
   }
 }

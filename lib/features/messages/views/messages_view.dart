@@ -5,9 +5,6 @@ import 'package:get/get.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 import '../../../core/themes/app_font.dart';
-import '../../../core/models/rewarded_ads_models.dart';
-import '../../../core/services/native_ads/native_ads_service.dart';
-import '../../../core/widgets/ads/native_ad_slot.dart';
 import '../controllers/messages_controller.dart';
 import '../models/message_models.dart';
 import '../widgets/message_avatar.dart';
@@ -15,7 +12,10 @@ import '../widgets/message_search_field.dart';
 import '../widgets/message_thread_card.dart';
 
 class MessagesView extends GetView<MessagesController> {
-  const MessagesView({super.key, required this.onBackTap});
+  const MessagesView({
+    super.key,
+    required this.onBackTap,
+  });
 
   final VoidCallback onBackTap;
 
@@ -26,18 +26,25 @@ class MessagesView extends GetView<MessagesController> {
       child: SafeArea(
         bottom: false,
         child: Obx(() {
-          if (controller.isLoading.value && controller.threads.isEmpty) {
+          if (controller.isLoading.value &&
+              controller.threads.isEmpty) {
             return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+              child: CircularProgressIndicator(
+                color: AppColors.primaryGreen,
+              ),
             );
           }
 
-          if (controller.hasError.value && controller.threads.isEmpty) {
+          if (controller.hasError.value &&
+              controller.threads.isEmpty) {
             return Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 24.w,
+                ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment:
+                  MainAxisAlignment.center,
                   children: <Widget>[
                     Icon(
                       Icons.error_outline,
@@ -56,14 +63,16 @@ class MessagesView extends GetView<MessagesController> {
                     SizedBox(height: 14.h),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryGreen,
+                        backgroundColor:
+                        AppColors.primaryGreen,
                         foregroundColor: AppColors.white,
                         padding: EdgeInsets.symmetric(
                           horizontal: 20.w,
                           vertical: 10.h,
                         ),
                       ),
-                      onPressed: controller.refreshMessages,
+                      onPressed:
+                      controller.refreshMessages,
                       child: Text(
                         'retry'.tr,
                         style: TextStyle(
@@ -83,7 +92,8 @@ class MessagesView extends GetView<MessagesController> {
             color: AppColors.primaryGreen,
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
+                parent:
+                AlwaysScrollableScrollPhysics(),
               ),
               slivers: <Widget>[
                 SliverPadding(
@@ -96,12 +106,15 @@ class MessagesView extends GetView<MessagesController> {
                   sliver: SliverToBoxAdapter(
                     child: _MessagesHeader(
                       onBackTap: onBackTap,
-                      onSearchChanged: controller.onSearchChanged,
+                      onSearchChanged:
+                      controller.onSearchChanged,
                     ),
                   ),
                 ),
 
-                if (controller.searchQuery.value.trim().isNotEmpty)
+                if (controller.searchQuery.value
+                    .trim()
+                    .isNotEmpty)
                   SliverPadding(
                     padding: EdgeInsets.fromLTRB(
                       kMessageScreenHorizontalPadding.w,
@@ -111,18 +124,23 @@ class MessagesView extends GetView<MessagesController> {
                     ),
                     sliver: SliverToBoxAdapter(
                       child: Obx(() {
-                        if (controller.isSearching.value) {
+                        if (controller
+                            .isSearching.value) {
                           return SizedBox(
                             height: 64.h,
                             child: const Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.primaryGreen,
+                              child:
+                              CircularProgressIndicator(
+                                color:
+                                AppColors.primaryGreen,
                               ),
                             ),
                           );
                         }
 
-                        final List<Map<String, dynamic>> results =
+                        final List<
+                            Map<String, dynamic>
+                        > results =
                             controller.searchResults;
 
                         if (results.isEmpty) {
@@ -132,41 +150,56 @@ class MessagesView extends GetView<MessagesController> {
                         return Column(
                           children: results
                               .map(
-                                (Map<String, dynamic> user) => _SearchUserItem(
-                                  user: user,
-                                  isLoading:
+                                (
+                                Map<String, dynamic>
+                                user,
+                                ) =>
+                                    _SearchUserItem(
+                                      user: user,
+                                      isLoading:
                                       controller.openingUserId.value ==
-                                      (user['id'] ?? user['userId'])
-                                          ?.toString()
-                                          .trim(),
-                                  onTap: () =>
-                                      controller.startDirectConversation(user),
-                                ),
-                              )
-                              .toList(growable: false),
+                                          (user['id'] ?? user['userId'])
+                                              ?.toString()
+                                              .trim(),
+                                      onTap: () =>
+                                          controller.startDirectConversation(
+                                            user,
+                                          ),
+                                    ),
+                          )
+                              .toList(
+                            growable: false,
+                          ),
                         );
                       }),
                     ),
                   ),
 
-                if (controller.threads.isEmpty && !controller.isLoading.value)
+                if (controller.threads.isEmpty &&
+                    !controller.isLoading.value)
                   SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment:
+                        MainAxisAlignment.center,
                         children: <Widget>[
                           Icon(
                             Icons.chat_bubble_outline,
                             size: 48.w,
-                            color: AppColors.bodyText.withValues(alpha: 0.5),
+                            color: AppColors.bodyText
+                                .withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                           SizedBox(height: 12.h),
                           Text(
                             'no_conversations_yet'.tr,
                             style: TextStyle(
-                              fontSize: AppFont.font16.sp,
-                              color: AppColors.bodyText,
+                              fontSize:
+                              AppFont.font16.sp,
+                              color:
+                              AppColors.bodyText,
                             ),
                           ),
                         ],
@@ -182,8 +215,10 @@ class MessagesView extends GetView<MessagesController> {
                       20.h,
                     ),
                     sliver: _MessagesList(
-                      threads: controller.filteredThreads,
-                      onThreadTap: controller.openChat,
+                      threads:
+                      controller.filteredThreads,
+                      onThreadTap:
+                      controller.openChat,
                     ),
                   ),
               ],
@@ -207,7 +242,8 @@ class _MessagesHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment:
+      CrossAxisAlignment.start,
       children: <Widget>[
         Row(
           children: <Widget>[
@@ -225,7 +261,8 @@ class _MessagesHeader extends StatelessWidget {
                 child: Icon(
                   Icons.arrow_back_rounded,
                   size: 22.w,
-                  color: AppColors.homePrimaryText,
+                  color:
+                  AppColors.homePrimaryText,
                 ),
               ),
             ),
@@ -242,7 +279,8 @@ class _MessagesHeader extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   height: 1.2,
                   letterSpacing: -0.5,
-                  color: AppColors.homePrimaryText,
+                  color:
+                  AppColors.homePrimaryText,
                 ),
               ),
             ),
@@ -251,45 +289,51 @@ class _MessagesHeader extends StatelessWidget {
 
         SizedBox(height: 18.h),
 
-        MessageSearchField(onChanged: onSearchChanged),
+        MessageSearchField(
+          onChanged: onSearchChanged,
+        ),
       ],
     );
   }
 }
 
 class _MessagesList extends StatelessWidget {
-  const _MessagesList({required this.threads, required this.onThreadTap});
+  const _MessagesList({
+    required this.threads,
+    required this.onThreadTap,
+  });
 
   final List<MessageThreadModel> threads;
-  final ValueChanged<MessageThreadModel> onThreadTap;
+  final ValueChanged<MessageThreadModel>
+  onThreadTap;
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final NativeAdInsertionPlan plan = Get.find<NativeAdsService>()
-          .insertionPlan(
-            placement: NativeAdPlacement.messages,
-            contentCount: threads.length,
-          );
-      return SliverList.separated(
-        itemCount: plan.rows.length,
-        separatorBuilder: (_, _) => SizedBox(height: 12.h),
-        itemBuilder: (BuildContext context, int index) {
-          final NativeAdDisplayRow row = plan.rows[index];
-          if (row.isAd) {
-            return NativeAdSlot(
-              placement: NativeAdPlacement.messages,
-              slotId: 'messages:${row.adBoundary}',
-            );
+    final int childCount = threads.isEmpty
+        ? 0
+        : (threads.length * 2) - 1;
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+            (
+            BuildContext context,
+            int index,
+            ) {
+          if (index.isOdd) {
+            return SizedBox(height: 12.h);
           }
-          final MessageThreadModel thread = threads[row.contentIndex!];
+
+          final MessageThreadModel thread =
+          threads[index ~/ 2];
+
           return MessageThreadCard(
             thread: thread,
             onTap: () => onThreadTap(thread),
           );
         },
-      );
-    });
+        childCount: childCount,
+      ),
+    );
   }
 }
 
@@ -307,48 +351,68 @@ class _SearchUserItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String name =
-        user['fullName']?.toString() ?? user['name']?.toString() ?? 'User';
+        user['fullName']?.toString() ??
+            user['name']?.toString() ??
+            'User';
 
-    final String avatar = user['avatarUrl']?.toString() ?? '';
+    final String avatar =
+        user['avatarUrl']?.toString() ??
+            '';
 
-    final bool isOnline = user['isOnline'] as bool? ?? false;
+    final bool isOnline =
+        user['isOnline'] as bool? ??
+            false;
 
     return AnimatedOpacity(
-      duration: const Duration(milliseconds: 180),
+      duration:
+      const Duration(milliseconds: 180),
       opacity: isLoading ? 0.72 : 1,
       child: GestureDetector(
         onTap: isLoading ? null : onTap,
         behavior: HitTestBehavior.opaque,
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 10.h),
+          padding: EdgeInsets.symmetric(
+            vertical: 10.h,
+          ),
           child: Row(
             children: <Widget>[
-              MessageAvatar(imageUrl: avatar, size: 40),
+              MessageAvatar(
+                imageUrl: avatar,
+                size: 40,
+              ),
               SizedBox(width: 10.w),
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
                       name,
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      overflow:
+                      TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: AppFont.font14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.homePrimaryText,
+                        fontSize:
+                        AppFont.font14.sp,
+                        fontWeight:
+                        FontWeight.w600,
+                        color: AppColors
+                            .homePrimaryText,
                       ),
                     ),
                     SizedBox(height: 4.h),
                     Text(
                       isLoading
-                          ? 'opening_conversation'.tr
+                          ? 'opening_conversation'
+                          .tr
                           : isOnline
                           ? 'online'.tr
                           : 'offline'.tr,
                       style: TextStyle(
-                        fontSize: AppFont.font12.sp,
-                        color: AppColors.bodyText,
+                        fontSize:
+                        AppFont.font12.sp,
+                        color:
+                        AppColors.bodyText,
                       ),
                     ),
                   ],
@@ -358,9 +422,11 @@ class _SearchUserItem extends StatelessWidget {
                 SizedBox(
                   width: 22.w,
                   height: 22.w,
-                  child: const CircularProgressIndicator(
+                  child:
+                  const CircularProgressIndicator(
                     strokeWidth: 2.2,
-                    color: AppColors.primaryGreen,
+                    color:
+                    AppColors.primaryGreen,
                   ),
                 )
               else

@@ -15,8 +15,6 @@ import '../models/quiz_models.dart';
 import '../widgets/quiz_common_widgets.dart';
 import '../widgets/quiz_panels.dart';
 import '../widgets/quiz_result_widgets.dart';
-import '../../../../../core/widgets/ads/adaptive_banner_ad_slot.dart';
-import '../../../../../core/services/banner_ads/banner_ads_service.dart';
 
 class QuizView extends GetView<QuizController> {
   final String controllerTag;
@@ -77,44 +75,57 @@ class QuizView extends GetView<QuizController> {
 
               return Stack(
                 children: <Widget>[
-                  _QuizQuestionScrollContent(
-                    questionId: question.id,
-                    bottomReserve:
-                        (showWrongResult ? 270.h : 150.h) + keyboardHeight,
-                    topBar: QuizTopBar(
-                      current: controller.currentIndex.value + 1,
-                      total: controller.totalQuestions,
-                      onCloseTap: _showQuitDialog,
+                  SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(
+                      kQuizHorizontalPadding.w,
+                      16.h,
+                      kQuizHorizontalPadding.w,
+                      (showWrongResult ? 270.h : 150.h) + keyboardHeight,
                     ),
-                    questionPanel: QuizQuestionPanel(
-                      key: ValueKey<String>(question.id),
-                      question: question,
-                      selectedIndex: controller.selectedOptionIndex.value,
-                      hasCheckedAnswer: controller.isExamMode
-                          ? false
-                          : controller.hasCheckedAnswer.value,
-                      isAnswerCorrect: controller.isExamMode
-                          ? false
-                          : controller.isAnswerCorrect.value,
-                      sentenceSelectedWords: controller.sentenceSelectedWords
-                          .toList(),
-                      listeningSelectedWords: controller.listeningSelectedWords
-                          .toList(),
-                      matchingRightOrder: controller.matchingRightOrder
-                          .toList(),
-                      matchingRightKeys: controller.matchingRightPairIdOrder
-                          .toList(),
-                      writingAnswerController:
-                          controller.writingAnswerController,
-                      onOptionTap: controller.selectOption,
-                      onSentenceWordTap: controller.addSentenceWord,
-                      onSentenceSelectedWordTap: controller.removeSentenceWord,
-                      onListeningWordTap: controller.addListeningWord,
-                      onListeningSelectedWordTap:
-                          controller.removeListeningWord,
-                      onMatchingRightReorder: controller.swapMatchingRight,
-                      onAudioCompleted: () =>
-                          unawaited(controller.recordCurrentAudioListened()),
+                    child: Column(
+                      children: <Widget>[
+                        QuizTopBar(
+                          current: controller.currentIndex.value + 1,
+                          total: controller.totalQuestions,
+                          onCloseTap: _showQuitDialog,
+                        ),
+                        SizedBox(height: 16.h),
+                        QuizQuestionPanel(
+                          key: ValueKey<String>(question.id),
+                          question: question,
+                          selectedIndex: controller.selectedOptionIndex.value,
+                          hasCheckedAnswer: controller.isExamMode
+                              ? false
+                              : controller.hasCheckedAnswer.value,
+                          isAnswerCorrect: controller.isExamMode
+                              ? false
+                              : controller.isAnswerCorrect.value,
+                          sentenceSelectedWords: controller
+                              .sentenceSelectedWords
+                              .toList(),
+                          listeningSelectedWords: controller
+                              .listeningSelectedWords
+                              .toList(),
+                          matchingRightOrder: controller.matchingRightOrder
+                              .toList(),
+                          matchingRightKeys: controller.matchingRightPairIdOrder
+                              .toList(),
+                          writingAnswerController:
+                              controller.writingAnswerController,
+                          onOptionTap: controller.selectOption,
+                          onSentenceWordTap: controller.addSentenceWord,
+                          onSentenceSelectedWordTap:
+                              controller.removeSentenceWord,
+                          onListeningWordTap: controller.addListeningWord,
+                          onListeningSelectedWordTap:
+                              controller.removeListeningWord,
+                          onMatchingRightReorder: controller.swapMatchingRight,
+                          onAudioCompleted: () => unawaited(
+                            controller.recordCurrentAudioListened(),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Positioned(
@@ -279,110 +290,6 @@ class QuizView extends GetView<QuizController> {
       ),
       barrierDismissible: false,
       barrierColor: AppColors.quizExitDialogOverlay,
-    );
-  }
-}
-
-class _QuizQuestionScrollContent extends StatefulWidget {
-  const _QuizQuestionScrollContent({
-    required this.questionId,
-    required this.bottomReserve,
-    required this.topBar,
-    required this.questionPanel,
-  });
-
-  final String questionId;
-  final double bottomReserve;
-  final Widget topBar;
-  final Widget questionPanel;
-
-  @override
-  State<_QuizQuestionScrollContent> createState() =>
-      _QuizQuestionScrollContentState();
-}
-
-class _QuizQuestionScrollContentState
-    extends State<_QuizQuestionScrollContent> {
-  final GlobalKey _topBarKey = GlobalKey();
-  final GlobalKey _questionPanelKey = GlobalKey();
-  bool _showBanner = false;
-  bool _measurementScheduled = false;
-  double _viewportHeight = 0;
-
-  @override
-  void didUpdateWidget(covariant _QuizQuestionScrollContent oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.questionId != widget.questionId && _showBanner) {
-      _showBanner = false;
-    }
-    _scheduleMeasurement();
-  }
-
-  void _scheduleMeasurement() {
-    if (_measurementScheduled) return;
-    _measurementScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _measurementScheduled = false;
-      if (!mounted) return;
-      final RenderBox? topBar =
-          _topBarKey.currentContext?.findRenderObject() as RenderBox?;
-      final RenderBox? panel =
-          _questionPanelKey.currentContext?.findRenderObject() as RenderBox?;
-      if (topBar == null || panel == null || _viewportHeight <= 0) return;
-
-      final double baseContentHeight =
-          16.h + topBar.size.height + 16.h + panel.size.height;
-      final bool hasSpaceForBanner = BannerAdsService.hasSufficientLayoutSpace(
-        viewportHeight: _viewportHeight,
-        bottomReserve: widget.bottomReserve,
-        contentHeight: baseContentHeight,
-        bannerAllowance: 100.h,
-      );
-      if (hasSpaceForBanner != _showBanner) {
-        setState(() => _showBanner = hasSpaceForBanner);
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        _viewportHeight = constraints.maxHeight;
-        _scheduleMeasurement();
-        return SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(
-            kQuizHorizontalPadding.w,
-            16.h,
-            kQuizHorizontalPadding.w,
-            widget.bottomReserve,
-          ),
-          child: Column(
-            children: <Widget>[
-              KeyedSubtree(key: _topBarKey, child: widget.topBar),
-              SizedBox(height: 16.h),
-              AdaptiveBannerAdSlot(
-                visible: _showBanner,
-                reserveSpaceWhileLoading: true,
-                margin: EdgeInsets.only(bottom: 12.h),
-              ),
-              NotificationListener<SizeChangedLayoutNotification>(
-                onNotification: (_) {
-                  _scheduleMeasurement();
-                  return false;
-                },
-                child: SizeChangedLayoutNotifier(
-                  child: KeyedSubtree(
-                    key: _questionPanelKey,
-                    child: widget.questionPanel,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

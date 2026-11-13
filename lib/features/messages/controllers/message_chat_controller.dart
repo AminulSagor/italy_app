@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/local_notification_service.dart';
@@ -21,8 +21,6 @@ import '../views/message_user_info_view.dart';
 import 'message_user_info_controller.dart';
 import 'messages_controller.dart';
 import '../services/presence_service.dart';
-import '../../../core/services/rewarded_ads/rewarded_ads_service.dart';
-import '../../../routes/app_routes.dart';
 
 class MessageChatController extends GetxController with WidgetsBindingObserver {
   final MessageThreadModel thread;
@@ -933,20 +931,6 @@ class MessageChatController extends GetxController with WidgetsBindingObserver {
     final MessageChatModel? currentChat = chat.value;
 
     if (currentChat == null) {
-      return;
-    }
-
-    final bool hasCallCredit = await Get.find<RewardedAdsService>()
-        .ensureOutgoingCallCredit();
-    if (!hasCallCredit) {
-      Get.snackbar(
-        'Call credit required',
-        'Get a call entitlement from the shop to continue.',
-        mainButton: TextButton(
-          onPressed: () => Get.toNamed<void>(AppRoutes.shop),
-          child: const Text('Open shop'),
-        ),
-      );
       return;
     }
 

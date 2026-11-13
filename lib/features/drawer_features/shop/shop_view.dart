@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../core/config/mobile_advertising_policy.dart';
 import '../../../core/widgets/widgets.dart';
 import '_widgets/shop_home_widgets.dart';
 import 'models/shop_models.dart';
@@ -44,9 +43,6 @@ class ShopView extends GetView<ShopController> {
           final StoreShopSectionModel? streak = controller.sectionFor(
             StorePackageType.streakFreeze,
           );
-          final StoreShopSectionModel? adFree = controller.sectionFor(
-            StorePackageType.adFree,
-          );
 
           return RefreshIndicator(
             onRefresh: controller.loadShop,
@@ -60,8 +56,7 @@ class ShopView extends GetView<ShopController> {
                     onTap: controller.onRefillCreditTap,
                     child: ShopRefillCreditCard(
                       title: ai?.title ?? 'refill_ai_credits'.tr,
-                      subtitle:
-                          ai?.subtitle ?? 'buy_more_minutes_and_tokens'.tr,
+                      subtitle: ai?.subtitle ?? 'buy_more_minutes_and_tokens'.tr,
                       priceText: _startingPrice(ai),
                     ),
                   ),
@@ -80,21 +75,6 @@ class ShopView extends GetView<ShopController> {
                     title: streak?.title ?? 'buy_streak_freeze'.tr,
                     priceText: _startingPrice(streak),
                   ),
-                  if (MobileAdvertisingPolicy.enabled) ...<Widget>[
-                    SizedBox(height: 32.h),
-                    ShopAdFreeCard(
-                      onTap: controller.onAdFreeTap,
-                      title: adFree?.title ?? 'Go Ad-Free',
-                      subtitle:
-                          adFree?.subtitle ??
-                          'Remove banner, native, interstitial, and rewarded ads.',
-                      priceText: controller.adFreePackages.isEmpty
-                          ? _startingPrice(adFree)
-                          : controller.packagePriceText(
-                              controller.adFreePackages.first,
-                            ),
-                    ),
-                  ],
                   SizedBox(height: 36.h),
                   Text(
                     'current_balance'.tr,
@@ -157,11 +137,7 @@ class ShopView extends GetView<ShopController> {
 
   String _startingPrice(StoreShopSectionModel? section) {
     final double? price = section?.startingPriceEur;
-    if (price == null) return 'view_packages'.tr;
-    final String symbol = section?.packageType == StorePackageType.adFree
-        ? '\$'
-        : '€';
-    return '$symbol${price.toStringAsFixed(2)}';
+    return price == null ? 'view_packages'.tr : '€${price.toStringAsFixed(2)}';
   }
 
   String _compact(int value) {

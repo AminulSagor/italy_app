@@ -2,5 +2,3 @@
 #include "Generated.xcconfig"
 #include "SocialAuth.xcconfig"
 APP_ATTEST_ENVIRONMENT=development
-// Google sample app ID is permitted only in debug builds.
-ADMOB_IOS_APP_ID=ca-app-pub-3940256099942544~1458002511

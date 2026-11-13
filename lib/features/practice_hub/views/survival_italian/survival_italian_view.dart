@@ -6,9 +6,6 @@ import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
-import '../../../../core/models/rewarded_ads_models.dart';
-import '../../../../core/services/native_ads/native_ads_service.dart';
-import '../../../../core/widgets/ads/native_ad_slot.dart';
 import '../../controllers/practice_hub_controller.dart';
 import '../../models/survival_italian_models.dart';
 import '_widgets/survival_situation_cards.dart';
@@ -18,7 +15,8 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
 
   @override
   Widget build(BuildContext context) {
-    final double bottomSafeArea = MediaQuery.paddingOf(context).bottom;
+    final double bottomSafeArea =
+        MediaQuery.paddingOf(context).bottom;
 
     return LearningActivityPageScope(
       activityKind: LearningActivityKind.survivalItalian,
@@ -32,7 +30,9 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
               child: RefreshIndicator(
                 color: AppColors.primaryGreen,
                 onRefresh: () {
-                  return controller.loadSurvivalItalian(showError: true);
+                  return controller.loadSurvivalItalian(
+                    showError: true,
+                  );
                 },
                 child: Obx(() {
                   if (controller.isSurvivalLoading.value &&
@@ -42,11 +42,15 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
 
                   if (controller.survivalItalianItems.isEmpty) {
                     return _SurvivalEmptyView(
-                      message: controller.survivalError.value.isEmpty
-                          ? 'no_survival_italian_situations_are_available'.tr
+                      message:
+                      controller.survivalError.value.isEmpty
+                          ? 'no_survival_italian_situations_are_available'
+                          .tr
                           : controller.survivalError.value,
                       onRetry: () {
-                        controller.loadSurvivalItalian(showError: true);
+                        controller.loadSurvivalItalian(
+                          showError: true,
+                        );
                       },
                     );
                   }
@@ -54,14 +58,16 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
                   final SurvivalSituationModel? hero =
                       controller.survivalHeroItem;
 
-                  final List<SurvivalSituationModel> normalItems =
+                  final List<SurvivalSituationModel>
+                  normalItems =
                       controller.survivalNormalItems;
 
                   final List<SurvivalSituationModel> wideItems =
                       controller.survivalWideItems;
 
                   return SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(
+                    physics:
+                    const AlwaysScrollableScrollPhysics(
                       parent: BouncingScrollPhysics(),
                     ),
 
@@ -74,16 +80,61 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
                     ),
 
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                      CrossAxisAlignment.start,
                       children: <Widget>[
                         const _SurvivalHeader(),
 
                         SizedBox(height: 26.h),
 
-                        _SurvivalSituationContent(
-                          hero: hero,
-                          normalItems: normalItems,
-                          wideItems: wideItems,
+                        if (hero != null) ...<Widget>[
+                          SurvivalHeroSituationCard(
+                            item: hero,
+                          ),
+
+                          SizedBox(height: 32.h),
+                        ],
+
+                        if (normalItems.isNotEmpty)
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics:
+                            const NeverScrollableScrollPhysics(),
+                            padding: EdgeInsets.zero,
+                            itemCount: normalItems.length,
+                            gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 24.w,
+                              mainAxisSpacing: 24.h,
+                              childAspectRatio: 0.94,
+                            ),
+                            itemBuilder: (
+                                BuildContext context,
+                                int index,
+                                ) {
+                              return SurvivalSmallSituationCard(
+                                item: normalItems[index],
+                              );
+                            },
+                          ),
+
+                        if (normalItems.isNotEmpty &&
+                            wideItems.isNotEmpty)
+                          SizedBox(height: 25.h),
+
+                        ...wideItems.map(
+                              (SurvivalSituationModel item) {
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                bottom: 20.h,
+                              ),
+                              child:
+                              SurvivalWideSituationCard(
+                                item: item,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -93,7 +144,9 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
             ),
 
             Obx(() {
-              if (controller.survivalItalianItems.isEmpty) {
+              if (controller
+                  .survivalItalianItems
+                  .isEmpty) {
                 return const SizedBox.shrink();
               }
 
@@ -114,104 +167,6 @@ class SurvivalItalianView extends GetView<PracticeHubController> {
   }
 }
 
-class _SurvivalSituationContent extends StatelessWidget {
-  const _SurvivalSituationContent({
-    required this.hero,
-    required this.normalItems,
-    required this.wideItems,
-  });
-
-  final SurvivalSituationModel? hero;
-  final List<SurvivalSituationModel> normalItems;
-  final List<SurvivalSituationModel> wideItems;
-
-  @override
-  Widget build(BuildContext context) {
-    final NativeAdsService service = Get.find<NativeAdsService>();
-    final NativeAdPlacementConfiguration? config = service
-        .placementConfiguration(NativeAdPlacement.survivalItalian);
-    final bool eligible =
-        service.canRequestPlacement(NativeAdPlacement.survivalItalian) &&
-        config?.firstAfter != null;
-    final int firstAfter = config?.firstAfter ?? 0;
-    final int heroCount = hero == null ? 0 : 1;
-    bool adAfterHero = false;
-    int? normalBoundary;
-    int? wideBoundary;
-    if (eligible && firstAfter <= heroCount) {
-      adAfterHero = true;
-    } else if (eligible && firstAfter <= heroCount + normalItems.length) {
-      normalBoundary = completeGridRowBoundary(
-        firstAfter: firstAfter,
-        leadingItemCount: heroCount,
-        gridItemCount: normalItems.length,
-        columnCount: 2,
-      );
-    } else if (eligible &&
-        firstAfter <= heroCount + normalItems.length + wideItems.length) {
-      wideBoundary = firstAfter - heroCount - normalItems.length;
-    }
-
-    final List<Widget> children = <Widget>[];
-    if (hero != null) {
-      children.add(SurvivalHeroSituationCard(item: hero!));
-      children.add(SizedBox(height: 32.h));
-    }
-    if (adAfterHero) {
-      children.add(_ad(firstAfter));
-      children.add(SizedBox(height: 25.h));
-    }
-    if (normalItems.isNotEmpty) {
-      final int split = normalBoundary ?? normalItems.length;
-      children.add(_normalGrid(normalItems.take(split).toList()));
-      if (normalBoundary != null) {
-        children.add(SizedBox(height: 25.h));
-        children.add(_ad(heroCount + split));
-        if (split < normalItems.length) {
-          children.add(SizedBox(height: 25.h));
-          children.add(_normalGrid(normalItems.skip(split).toList()));
-        }
-      }
-    }
-    if (normalItems.isNotEmpty && wideItems.isNotEmpty) {
-      children.add(SizedBox(height: 25.h));
-    }
-    for (int index = 0; index < wideItems.length; index += 1) {
-      children.add(
-        Padding(
-          padding: EdgeInsets.only(bottom: 20.h),
-          child: SurvivalWideSituationCard(item: wideItems[index]),
-        ),
-      );
-      if (wideBoundary == index + 1) {
-        children.add(_ad(heroCount + normalItems.length + index + 1));
-        children.add(SizedBox(height: 20.h));
-      }
-    }
-    return Column(children: children);
-  }
-
-  Widget _ad(int boundary) => NativeAdSlot(
-    placement: NativeAdPlacement.survivalItalian,
-    slotId: 'survival-italian:$boundary',
-  );
-
-  Widget _normalGrid(List<SurvivalSituationModel> items) => GridView.builder(
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    padding: EdgeInsets.zero,
-    itemCount: items.length,
-    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      crossAxisSpacing: 24.w,
-      mainAxisSpacing: 24.h,
-      childAspectRatio: 0.94,
-    ),
-    itemBuilder: (_, int index) =>
-        SurvivalSmallSituationCard(item: items[index]),
-  );
-}
-
 class _SurvivalLoadingView extends StatelessWidget {
   const _SurvivalLoadingView();
 
@@ -225,7 +180,12 @@ class _SurvivalLoadingView extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 0),
+                padding: EdgeInsets.fromLTRB(
+                  24.w,
+                  20.h,
+                  24.w,
+                  0,
+                ),
                 child: const _SurvivalHeader(),
               ),
 
@@ -245,7 +205,10 @@ class _SurvivalLoadingView extends StatelessWidget {
 }
 
 class _SurvivalEmptyView extends StatelessWidget {
-  const _SurvivalEmptyView({required this.message, required this.onRetry});
+  const _SurvivalEmptyView({
+    required this.message,
+    required this.onRetry,
+  });
 
   final String message;
   final VoidCallback onRetry;
@@ -258,7 +221,12 @@ class _SurvivalEmptyView extends StatelessWidget {
         SliverFillRemaining(
           hasScrollBody: false,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 120.h),
+            padding: EdgeInsets.fromLTRB(
+              24.w,
+              20.h,
+              24.w,
+              120.h,
+            ),
             child: Column(
               children: <Widget>[
                 const _SurvivalHeader(),
@@ -270,13 +238,17 @@ class _SurvivalEmptyView extends StatelessWidget {
                   height: 70.r,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryGreen.withValues(alpha: 0.08),
+                    color: AppColors.primaryGreen.withValues(
+                      alpha: 0.08,
+                    ),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.menu_book_outlined,
                     size: 34.r,
-                    color: AppColors.primaryGreen.withValues(alpha: 0.70),
+                    color: AppColors.primaryGreen.withValues(
+                      alpha: 0.70,
+                    ),
                   ),
                 ),
 
@@ -297,7 +269,9 @@ class _SurvivalEmptyView extends StatelessWidget {
 
                 TextButton.icon(
                   onPressed: onRetry,
-                  icon: const Icon(Icons.refresh_rounded),
+                  icon: const Icon(
+                    Icons.refresh_rounded,
+                  ),
                   label: Text('retry'.tr),
                 ),
 
@@ -311,7 +285,8 @@ class _SurvivalEmptyView extends StatelessWidget {
   }
 }
 
-class _SurvivalHeader extends GetView<PracticeHubController> {
+class _SurvivalHeader
+    extends GetView<PracticeHubController> {
   const _SurvivalHeader();
 
   @override
@@ -324,7 +299,8 @@ class _SurvivalHeader extends GetView<PracticeHubController> {
             color: AppColors.white,
             shape: const CircleBorder(),
             elevation: 1,
-            shadowColor: Colors.black.withValues(alpha: 0.10),
+            shadowColor:
+            Colors.black.withValues(alpha: 0.10),
             child: InkWell(
               onTap: controller.onSurvivalBackTap,
               customBorder: const CircleBorder(),
@@ -366,7 +342,8 @@ class _SurvivalHeader extends GetView<PracticeHubController> {
   }
 }
 
-class _SurvivalProgressBar extends GetView<PracticeHubController> {
+class _SurvivalProgressBar
+    extends GetView<PracticeHubController> {
   const _SurvivalProgressBar();
 
   @override
@@ -380,31 +357,45 @@ class _SurvivalProgressBar extends GetView<PracticeHubController> {
 
       child: SafeArea(
         top: false,
-        minimum: EdgeInsets.only(bottom: 4.h),
+        minimum: EdgeInsets.only(
+          bottom: 4.h,
+        ),
         child: Obx(() {
-          final int learned = controller.survivalSituationsLearned;
+          final int learned =
+              controller.survivalSituationsLearned;
 
-          final int total = controller.survivalTotalSituations;
+          final int total =
+              controller.survivalTotalSituations;
 
-          final double progress = controller.survivalLearningProgress
+          final double progress =
+          controller.survivalLearningProgress
               .clamp(0.0, 1.0)
               .toDouble();
 
           return Semantics(
             container: true,
             label:
-                '${'total_situations_learned'.tr}: '
+            '${'total_situations_learned'.tr}: '
                 '$learned / $total',
             child: Container(
               height: 66.h,
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+              padding: EdgeInsets.symmetric(
+                horizontal: 14.w,
+                vertical: 10.h,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.white,
-                borderRadius: BorderRadius.circular(22.r),
-                border: Border.all(color: const Color(0xFFD6E8CF), width: 1.w),
+                borderRadius:
+                BorderRadius.circular(22.r),
+                border: Border.all(
+                  color: const Color(0xFFD6E8CF),
+                  width: 1.w,
+                ),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
+                    color: Colors.black.withValues(
+                      alpha: 0.12,
+                    ),
                     blurRadius: 22.r,
                     offset: Offset(0, 7.h),
                   ),
@@ -433,30 +424,45 @@ class _SurvivalProgressBar extends GetView<PracticeHubController> {
 
                   Expanded(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment:
+                      MainAxisAlignment.center,
+                      crossAxisAlignment:
+                      CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
                           'total_situations_learned'.tr,
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          overflow:
+                          TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: AppFont.font14.sp,
+                            fontSize:
+                            AppFont.font14.sp,
                             height: 1,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF626A66),
+                            fontWeight:
+                            FontWeight.w700,
+                            color: const Color(
+                              0xFF626A66,
+                            ),
                           ),
                         ),
 
                         SizedBox(height: 8.h),
 
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(99.r),
-                          child: LinearProgressIndicator(
+                          borderRadius:
+                          BorderRadius.circular(
+                            99.r,
+                          ),
+                          child:
+                          LinearProgressIndicator(
                             value: progress,
                             minHeight: 5.h,
-                            backgroundColor: const Color(0xFFE4EBE1),
-                            color: AppColors.primaryGreen,
+                            backgroundColor:
+                            const Color(
+                              0xFFE4EBE1,
+                            ),
+                            color:
+                            AppColors.primaryGreen,
                           ),
                         ),
                       ],
@@ -466,25 +472,32 @@ class _SurvivalProgressBar extends GetView<PracticeHubController> {
                   SizedBox(width: 14.w),
 
                   AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 180),
-                    transitionBuilder:
-                        (Widget child, Animation<double> animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: ScaleTransition(
-                              scale: animation,
-                              child: child,
-                            ),
-                          );
-                        },
+                    duration: const Duration(
+                      milliseconds: 180,
+                    ),
+                    transitionBuilder: (
+                        Widget child,
+                        Animation<double> animation,
+                        ) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: ScaleTransition(
+                          scale: animation,
+                          child: child,
+                        ),
+                      );
+                    },
                     child: Text(
                       '$learned/$total',
-                      key: ValueKey<String>('$learned-$total'),
+                      key: ValueKey<String>(
+                        '$learned-$total',
+                      ),
                       style: TextStyle(
                         fontSize: AppFont.font16.sp,
                         height: 1,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.primaryGreen,
+                        color:
+                        AppColors.primaryGreen,
                       ),
                     ),
                   ),
@@ -505,7 +518,9 @@ class _PdfOpeningOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Positioned.fill(
       child: ColoredBox(
-        color: Colors.black.withValues(alpha: 0.24),
+        color: Colors.black.withValues(
+          alpha: 0.24,
+        ),
         child: Center(
           child: Container(
             width: 58.r,
@@ -513,10 +528,13 @@ class _PdfOpeningOverlay extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(18.r),
+              borderRadius:
+              BorderRadius.circular(18.r),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
+                  color: Colors.black.withValues(
+                    alpha: 0.12,
+                  ),
                   blurRadius: 20.r,
                 ),
               ],

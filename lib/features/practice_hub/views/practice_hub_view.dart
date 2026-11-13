@@ -6,8 +6,6 @@ import '../../../core/themes/app_colors.dart';
 import '../../../core/themes/app_constants.dart';
 // import '../../../core/themes/app_font.dart';
 import '../../../core/themes/app_font.dart';
-import '../../../core/models/rewarded_ads_models.dart';
-import '../../../core/widgets/ads/native_ad_slot.dart';
 import '../../courses/services/courses_api_service.dart';
 import '../controllers/practice_hub_controller.dart';
 import '../models/practice_hub_models.dart';
@@ -35,7 +33,9 @@ class PracticeHubView extends GetView<PracticeHubController> {
     );
   }
 
-  Future<void> _handleFinalExamAction(PracticeFinalExamCourseModel exam) async {
+  Future<void> _handleFinalExamAction(
+      PracticeFinalExamCourseModel exam,
+      ) async {
     switch (exam.action) {
       case PracticeFinalExamAction.startExam:
       case PracticeFinalExamAction.retakeExam:
@@ -62,7 +62,9 @@ class PracticeHubView extends GetView<PracticeHubController> {
     }
   }
 
-  void _showLockedFinalExamDialog(PracticeFinalExamCourseModel exam) {
+  void _showLockedFinalExamDialog(
+      PracticeFinalExamCourseModel exam,
+      ) {
     FinalExamGatewayDialogLocked.show<void>(
       onWatchMoreLessons: () async {
         if (Get.isDialogOpen ?? false) {
@@ -105,13 +107,6 @@ class PracticeHubView extends GetView<PracticeHubController> {
               ),
               SizedBox(height: 24.h),
               const _HorizontalPadding(child: PracticeHubSkillBuilderGrid()),
-              SizedBox(height: 24.h),
-              const _HorizontalPadding(
-                child: NativeAdSlot(
-                  placement: NativeAdPlacement.practiceHub,
-                  slotId: 'practice-hub:skill-builders',
-                ),
-              ),
               SizedBox(height: 24.h),
 
               Obx(() {

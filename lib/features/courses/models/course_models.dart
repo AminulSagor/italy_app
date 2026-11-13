@@ -357,7 +357,6 @@ class CourseChapterModel {
   final String? tagLabel;
   final double progress;
   final CourseChapterState state;
-  final bool isFree;
 
   const CourseChapterModel({
     required this.id,
@@ -369,7 +368,6 @@ class CourseChapterModel {
     required this.state,
     this.statusLabel,
     this.tagLabel,
-    this.isFree = true,
   });
 
   factory CourseChapterModel.fromJson(Map<String, dynamic> json) {
@@ -386,7 +384,6 @@ class CourseChapterModel {
         (CourseChapterState item) => item.name == json['state'],
         orElse: () => CourseChapterState.locked,
       ),
-      isFree: json['isFree'] as bool? ?? true,
     );
   }
 
@@ -401,7 +398,6 @@ class CourseChapterModel {
       'tagLabel': tagLabel,
       'progress': progress,
       'state': state.name,
-      'isFree': isFree,
     };
   }
 
@@ -415,7 +411,6 @@ class CourseChapterModel {
     String? tagLabel,
     double? progress,
     CourseChapterState? state,
-    bool? isFree,
   }) {
     return CourseChapterModel(
       id: id ?? this.id,
@@ -427,7 +422,6 @@ class CourseChapterModel {
       tagLabel: tagLabel ?? this.tagLabel,
       progress: progress ?? this.progress,
       state: state ?? this.state,
-      isFree: isFree ?? this.isFree,
     );
   }
 }
@@ -468,28 +462,46 @@ class CourseFinalExamModel {
     required this.unlockCompletionPercent,
   });
 
-  bool get canViewResult => resultReady && attemptId.trim().isNotEmpty;
+  bool get canViewResult =>
+      resultReady && attemptId.trim().isNotEmpty;
 
-  bool get isResultPending => hasAttempted && !resultReady;
+  bool get isResultPending =>
+      hasAttempted && !resultReady;
 
-  bool get hasCertificate => attemptStatus == 'certificate_issued';
+  bool get hasCertificate =>
+      attemptStatus == 'certificate_issued';
 
-  factory CourseFinalExamModel.fromJson(Map<String, dynamic> json) {
+  factory CourseFinalExamModel.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return CourseFinalExamModel(
       examId: json['examId']?.toString() ?? '',
       attemptId: json['attemptId']?.toString() ?? '',
-      attemptStatus: json['attemptStatus']?.toString() ?? '',
+      attemptStatus:
+      json['attemptStatus']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Final Exam',
-      description: json['description']?.toString() ?? '',
-      actionLabel: json['actionLabel']?.toString() ?? '',
-      helperLabel: json['helperLabel']?.toString() ?? '',
-      isConfigured: json['isConfigured'] as bool? ?? false,
-      canStart: json['canStart'] as bool? ?? false,
-      hasAttempted: json['hasAttempted'] as bool? ?? false,
-      isEligible: json['isEligible'] as bool? ?? false,
-      resultReady: json['resultReady'] as bool? ?? false,
-      courseProgressPercent: _intValue(json['courseProgressPercent']),
-      unlockCompletionPercent: _intValue(json['unlockCompletionPercent']),
+      description:
+      json['description']?.toString() ?? '',
+      actionLabel:
+      json['actionLabel']?.toString() ?? '',
+      helperLabel:
+      json['helperLabel']?.toString() ?? '',
+      isConfigured:
+      json['isConfigured'] as bool? ?? false,
+      canStart:
+      json['canStart'] as bool? ?? false,
+      hasAttempted:
+      json['hasAttempted'] as bool? ?? false,
+      isEligible:
+      json['isEligible'] as bool? ?? false,
+      resultReady:
+      json['resultReady'] as bool? ?? false,
+      courseProgressPercent: _intValue(
+        json['courseProgressPercent'],
+      ),
+      unlockCompletionPercent: _intValue(
+        json['unlockCompletionPercent'],
+      ),
     );
   }
 
@@ -508,7 +520,8 @@ class CourseFinalExamModel {
       'isEligible': isEligible,
       'resultReady': resultReady,
       'courseProgressPercent': courseProgressPercent,
-      'unlockCompletionPercent': unlockCompletionPercent,
+      'unlockCompletionPercent':
+      unlockCompletionPercent,
     };
   }
 }
@@ -575,20 +588,22 @@ class CourseLessonProgressModel {
   });
 
   const CourseLessonProgressModel.empty({required this.lessonId})
-    : videoWatchPercent = 0,
-      isTheoryRead = false,
-      isCompleted = false,
-      updatedAt = null;
+      : videoWatchPercent = 0,
+        isTheoryRead = false,
+        isCompleted = false,
+        updatedAt = null;
 
   factory CourseLessonProgressModel.fromJson(Map<String, dynamic> json) {
     return CourseLessonProgressModel(
       lessonId: json['lessonId']?.toString() ?? '',
-      videoWatchPercent: _intValue(
-        json['videoWatchPercent'],
-      ).clamp(0, 100).toInt(),
+      videoWatchPercent: _intValue(json['videoWatchPercent'])
+          .clamp(0, 100)
+          .toInt(),
       isTheoryRead: _boolValue(json['isTheoryRead']),
       isCompleted: _boolValue(json['isCompleted']),
-      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? ''),
+      updatedAt: DateTime.tryParse(
+        json['updatedAt']?.toString() ?? '',
+      ),
     );
   }
 

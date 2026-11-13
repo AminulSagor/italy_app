@@ -15,9 +15,6 @@ import '../../vocabulary/controllers/vocabulary_controller.dart';
 import '../../vocabulary/services/vocabulary_api_service.dart';
 import '../models/chapter_detail_models.dart';
 import '../services/chapter_detail_api_service.dart';
-import '../../../../../core/models/rewarded_ads_models.dart';
-import '../../../../../core/services/rewarded_ads/rewarded_ads_service.dart';
-import '../../../../../core/services/native_ads/native_ads_service.dart';
 
 class ChapterDetailController extends GetxController {
   final CourseChapterModel chapter;
@@ -35,9 +32,6 @@ class ChapterDetailController extends GetxController {
   final RxBool isVideoPlaying = false.obs;
   final RxBool shouldPlayVideo = false.obs;
   final RxInt videoPlaybackCommand = 0.obs;
-  final RxBool showProgressNativeAd = false.obs;
-  final RxBool showCompletionNativeAd = false.obs;
-  Worker? _nativeAdsWorker;
   bool _theoryReadRecorded = false;
   final Rx<ChapterQuizStatus> quizStatus = ChapterQuizStatus.disabled.obs;
   final Rxn<ChapterDetailModel> detail = Rxn<ChapterDetailModel>();
@@ -52,18 +46,11 @@ class ChapterDetailController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (Get.isRegistered<NativeAdsService>()) {
-      _nativeAdsWorker = ever<RewardedAdsConfiguration?>(
-        Get.find<NativeAdsService>().configuration,
-        (_) => _syncNativeVideoAdState(_lastRecordedVideoPercent),
-      );
-    }
     loadDetail();
   }
 
   @override
   void onClose() {
-    _nativeAdsWorker?.dispose();
     scrollController.dispose();
     super.onClose();
   }
@@ -112,7 +99,6 @@ class ChapterDetailController extends GetxController {
       _preloadChapterResources();
       _lastRecordedVideoPercent = result.data!.progress.videoWatchPercent;
       _isLessonCompletionSubmitted = result.data!.progress.isCompleted;
-      _syncNativeVideoAdState(_lastRecordedVideoPercent);
 
       if (result.data!.isQuizAvailabilityKnown &&
           result.data!.quiz == null &&
@@ -378,8 +364,6 @@ class ChapterDetailController extends GetxController {
             .clamp(0, 100)
             .toInt();
 
-    _syncNativeVideoAdState(percent);
-
     final ChapterQuizModel? quiz = current.quiz;
 
     final bool hasUnlockThreshold =
@@ -422,24 +406,6 @@ class ChapterDetailController extends GetxController {
         current.quiz == null) {
       await _markLessonCompletedIfNeeded();
     }
-  }
-
-  void _syncNativeVideoAdState(int percent) {
-    if (!chapter.isFree || !Get.isRegistered<NativeAdsService>()) {
-      showProgressNativeAd.value = false;
-      showCompletionNativeAd.value = false;
-      return;
-    }
-    final NativeAdsService service = Get.find<NativeAdsService>();
-    if (percent >= 100) {
-      showProgressNativeAd.value = false;
-      showCompletionNativeAd.value = service.canRequestPlacement(
-        NativeAdPlacement.freeVideoComplete,
-      );
-      return;
-    }
-    showCompletionNativeAd.value = false;
-    showProgressNativeAd.value = false;
   }
 
   Future<void> recordAudioCompleted() async {
@@ -582,12 +548,6 @@ class ChapterDetailController extends GetxController {
       }
       startOver = selection;
     }
-
-    final bool allowed = await Get.find<RewardedAdsService>().gate(
-      RewardedPlacement.quizOpen,
-      contextId: chapter.id,
-    );
-    if (!allowed) return;
 
     final String tag =
         'quiz_${chapter.id}_${DateTime.now().millisecondsSinceEpoch}';

@@ -6,8 +6,6 @@ import 'package:italir_pothe/core/widgets/learning_activity_page_scope.dart';
 
 import '../../../../core/themes/app_colors.dart';
 import '../../../../core/themes/app_font.dart';
-import '../../../../core/models/rewarded_ads_models.dart';
-import '../../../../core/widgets/ads/native_ad_slot.dart';
 import '../../controllers/job_sentences_controller.dart';
 import '../../models/job_track_models.dart';
 import '_widgets/job_intro_video_card.dart';
@@ -23,52 +21,49 @@ class JobDetailsView extends GetView<JobSentencesController> {
       activityKind: LearningActivityKind.jobSentences,
       sourceId: 'job_details_view',
       child: Scaffold(
-        backgroundColor: AppColors.homeBackground,
-        body: SafeArea(
-          bottom: false,
-          child: Obx(() {
-            final JobCareerTrackDetailsModel? details =
-                controller.trackDetails.value;
-            return RefreshIndicator(
-              color: AppColors.primaryGreen,
-              onRefresh: () =>
-                  controller.loadCareerTrackDetails(showError: false),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
-                ),
-                padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 48.h),
-                child: Column(
-                  children: <Widget>[
-                    _JobDetailsHeader(
-                      title:
-                          details?.title ??
-                          controller.selectedTrack.value?.title ??
-                          'Career Track',
-                    ),
-                    SizedBox(height: 21.h),
-                    if (controller.isTrackDetailsLoading.value &&
-                        details == null)
-                      const _DetailsLoadingState()
-                    else if (controller.trackDetailsError.value.isNotEmpty &&
-                        details == null)
-                      _DetailsMessageState(
-                        message: controller.trackDetailsError.value,
-                        onRetry: () => controller.loadCareerTrackDetails(),
-                      )
-                    else if (details != null)
-                      _CareerTrackContent(details: details)
-                    else
-                      _DetailsMessageState(
-                        message: 'career_track_details_are_unavailable'.tr,
-                      ),
-                  ],
-                ),
+      backgroundColor: AppColors.homeBackground,
+      body: SafeArea(
+        bottom: false,
+        child: Obx(() {
+          final JobCareerTrackDetailsModel? details =
+              controller.trackDetails.value;
+          return RefreshIndicator(
+            color: AppColors.primaryGreen,
+            onRefresh: () => controller.loadCareerTrackDetails(showError: false),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-            );
-          }),
-        ),
+              padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 48.h),
+              child: Column(
+                children: <Widget>[
+                  _JobDetailsHeader(
+                    title: details?.title ??
+                        controller.selectedTrack.value?.title ??
+                        'Career Track',
+                  ),
+                  SizedBox(height: 21.h),
+                  if (controller.isTrackDetailsLoading.value && details == null)
+                    const _DetailsLoadingState()
+                  else if (controller.trackDetailsError.value.isNotEmpty &&
+                      details == null)
+                    _DetailsMessageState(
+                      message: controller.trackDetailsError.value,
+                      onRetry: () => controller.loadCareerTrackDetails(),
+                    )
+                  else if (details != null)
+                    _CareerTrackContent(details: details)
+                  else
+                    _DetailsMessageState(
+                      message: 'career_track_details_are_unavailable'.tr,
+                    ),
+                ],
+              ),
+            ),
+          );
+        }),
       ),
+    ),
     );
   }
 }
@@ -97,9 +92,12 @@ class _CareerTrackContent extends GetView<JobSentencesController> {
         ],
         if (details.introVideo != null) ...<Widget>[
           JobIntroVideoCard(
-            key: ValueKey<String>('${details.id}:${details.introVideo!.id}'),
+            key: ValueKey<String>(
+              '${details.id}:${details.introVideo!.id}',
+            ),
             videoId: details.introVideo!.id,
-            loadVideoAccess: controller.loadCareerTrackVideoAccess,
+            loadVideoAccess:
+            controller.loadCareerTrackVideoAccess,
             initialProgressPercent: details.trackProgress.videoWatchPercent,
             onProgress: (int percent, int seconds) {
               controller.recordVideoProgress(
@@ -112,11 +110,6 @@ class _CareerTrackContent extends GetView<JobSentencesController> {
         ],
         _TrackProgressCard(progress: details.progress),
         SizedBox(height: 28.h),
-        NativeAdSlot(
-          placement: NativeAdPlacement.careerTrackDetail,
-          slotId: 'career-track-detail:${details.id}',
-        ),
-        SizedBox(height: 28.h),
         if (details.modules.isEmpty)
           _DetailsMessageState(
             message: 'no_sentence_modules_are_available_for_this_track'.tr,
@@ -128,7 +121,7 @@ class _CareerTrackContent extends GetView<JobSentencesController> {
               final double spacing = 17.w;
               final double itemWidth =
                   (constraints.maxWidth - (spacing * (crossAxisCount - 1))) /
-                  crossAxisCount;
+                      crossAxisCount;
               final double itemHeight = itemWidth < 158.w ? 190.h : 184.h;
               final JobTrackCardPalette palette = jobTrackCardPalette(
                 details.cardColor,
@@ -218,19 +211,28 @@ class _JobDetailsHeader extends GetView<JobSentencesController> {
 }
 
 class _TrackProgressCard extends StatelessWidget {
-  const _TrackProgressCard({required this.progress});
+  const _TrackProgressCard({
+    required this.progress,
+  });
 
   final JobLearningSummaryModel progress;
 
   @override
   Widget build(BuildContext context) {
-    final double percent = progress.completionPercent.clamp(0, 100).toDouble();
+    final double percent = progress.completionPercent
+        .clamp(0, 100)
+        .toDouble();
 
     final double progressValue = percent / 100.0;
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(22.w, 18.h, 22.w, 18.h),
+      padding: EdgeInsets.fromLTRB(
+        22.w,
+        18.h,
+        22.w,
+        18.h,
+      ),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(28.r),
@@ -257,7 +259,7 @@ class _TrackProgressCard extends StatelessWidget {
               children: <Widget>[
                 Text(
                   '${progress.learnedSentences} of '
-                  '${progress.totalSentences} sentences learned',
+                      '${progress.totalSentences} sentences learned',
                   style: TextStyle(
                     fontSize: AppFont.font14.sp,
                     fontWeight: FontWeight.w900,
@@ -271,7 +273,8 @@ class _TrackProgressCard extends StatelessWidget {
                     value: progressValue,
                     minHeight: 6.h,
                     backgroundColor: const Color(0xFFE4E7E6),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
+                    valueColor:
+                    const AlwaysStoppedAnimation<Color>(
                       AppColors.primaryGreen,
                     ),
                   ),
@@ -513,7 +516,10 @@ class _DetailsMessageState extends StatelessWidget {
           ),
           if (onRetry != null) ...<Widget>[
             SizedBox(height: 10.h),
-            TextButton(onPressed: onRetry, child: Text('retry'.tr)),
+            TextButton(
+              onPressed: onRetry,
+              child: Text('retry'.tr),
+            ),
           ],
         ],
       ),
@@ -532,7 +538,6 @@ IconData _moduleIcon(int index) {
   ];
   return icons[index % icons.length];
 }
-
 class JobPhraseDetailsView extends StatelessWidget {
   const JobPhraseDetailsView({super.key});
 

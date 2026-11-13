@@ -11,13 +11,14 @@ import '../../../../../routes/app_routes.dart';
 import '../controllers/quiz_controller.dart';
 import '../models/quiz_models.dart';
 import '../widgets/quiz_completion_widgets.dart';
-import '../../../../../core/models/rewarded_ads_models.dart';
-import '../../../../../core/services/rewarded_ads/rewarded_ads_service.dart';
 
 class QuizCompletionView extends GetView<QuizController> {
   final String controllerTag;
 
-  const QuizCompletionView({super.key, required this.controllerTag});
+  const QuizCompletionView({
+    super.key,
+    required this.controllerTag,
+  });
 
   @override
   String? get tag => controllerTag;
@@ -34,9 +35,12 @@ class QuizCompletionView extends GetView<QuizController> {
             final QuizLessonCompleteModel? complete =
                 controller.lessonComplete.value;
 
-            if (controller.isCompleting.value && complete == null) {
+            if (controller.isCompleting.value &&
+                complete == null) {
               return const Center(
-                child: CircularProgressIndicator(color: AppColors.primaryGreen),
+                child: CircularProgressIndicator(
+                  color: AppColors.primaryGreen,
+                ),
               );
             }
 
@@ -75,7 +79,9 @@ class QuizCompletionView extends GetView<QuizController> {
                   ),
                   SizedBox(height: 14.h),
 
-                  LessonTrophyHero(size: 108),
+                  LessonTrophyHero(
+                    size: 108,
+                  ),
                   SizedBox(height: 10.h),
 
                   Text(
@@ -92,7 +98,9 @@ class QuizCompletionView extends GetView<QuizController> {
                   ),
                   SizedBox(height: 18.h),
 
-                  _CompactXpCard(xpEarned: complete.xpEarned),
+                  _CompactXpCard(
+                    xpEarned: complete.xpEarned,
+                  ),
                   SizedBox(height: 14.h),
 
                   Row(
@@ -103,9 +111,12 @@ class QuizCompletionView extends GetView<QuizController> {
                           icon: Icons.track_changes_rounded,
                           value: '${complete.accuracyPercent}%',
                           label: 'gen_accuracy'.tr,
-                          backgroundColor: AppColors.lessonAccuracyBg,
-                          iconBackgroundColor: AppColors.homeLime,
-                          valueColor: AppColors.primaryGreen,
+                          backgroundColor:
+                          AppColors.lessonAccuracyBg,
+                          iconBackgroundColor:
+                          AppColors.homeLime,
+                          valueColor:
+                          AppColors.primaryGreen,
                         ),
                       ),
                       SizedBox(width: 12.w),
@@ -114,9 +125,12 @@ class QuizCompletionView extends GetView<QuizController> {
                           icon: Icons.timer_outlined,
                           value: complete.timeTaken,
                           label: 'gen_time_taken'.tr,
-                          backgroundColor: AppColors.lessonTimeBg,
-                          iconBackgroundColor: AppColors.reportReviewIconBg,
-                          valueColor: AppColors.lessonTimeText,
+                          backgroundColor:
+                          AppColors.lessonTimeBg,
+                          iconBackgroundColor:
+                          AppColors.reportReviewIconBg,
+                          valueColor:
+                          AppColors.lessonTimeText,
                         ),
                       ),
                     ],
@@ -138,9 +152,11 @@ class QuizCompletionView extends GetView<QuizController> {
                   LessonSimplePill(
                     icon: Icons.local_fire_department_rounded,
                     subtitle: 'gen_daily_streak'.tr,
-                    title: 'days_value'.trParams(<String, String>{
-                      'days': complete.streakDays.toString(),
-                    }),
+                    title: 'days_value'.trParams(
+                      <String, String>{
+                        'days': complete.streakDays.toString(),
+                      },
+                    ),
                     iconColor: AppColors.blockDangerRed,
                     backgroundColor: AppColors.lessonStreakBg,
                   ),
@@ -156,7 +172,8 @@ class QuizCompletionView extends GetView<QuizController> {
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment:
+                        MainAxisAlignment.center,
                         children: <Widget>[
                           Icon(
                             Icons.search_rounded,
@@ -180,6 +197,8 @@ class QuizCompletionView extends GetView<QuizController> {
                       ),
                     ),
                   ),
+
+
                 ],
               ),
             );
@@ -190,23 +209,25 @@ class QuizCompletionView extends GetView<QuizController> {
   }
 
   Future<void> _openReviewAnswers() async {
-    final bool allowed = await Get.find<RewardedAdsService>().gate(
-      RewardedPlacement.quizReview,
-      contextId: controllerTag,
-    );
-    if (!allowed) return;
     await Get.toNamed(
       AppRoutes.quizReviewAnswers,
-      arguments: ControllerTagRouteArguments(controllerTag: controllerTag),
+      arguments: ControllerTagRouteArguments(
+        controllerTag: controllerTag,
+      ),
     );
   }
+
+
 }
 
 class _CompletionTopBar extends StatelessWidget {
   final String title;
   final VoidCallback onCloseTap;
 
-  const _CompletionTopBar({required this.title, required this.onCloseTap});
+  const _CompletionTopBar({
+    required this.title,
+    required this.onCloseTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +261,10 @@ class _CompletionTopBar extends StatelessWidget {
           ),
         ),
         SizedBox(width: 8.w),
-        SizedBox(width: 38.w, height: 38.w),
+        SizedBox(
+          width: 38.w,
+          height: 38.w,
+        ),
       ],
     );
   }
@@ -249,13 +273,18 @@ class _CompletionTopBar extends StatelessWidget {
 class _CompactXpCard extends StatelessWidget {
   final int xpEarned;
 
-  const _CompactXpCard({required this.xpEarned});
+  const _CompactXpCard({
+    required this.xpEarned,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
+      padding: EdgeInsets.symmetric(
+        horizontal: 16.w,
+        vertical: 13.h,
+      ),
       decoration: BoxDecoration(
         color: AppColors.lessonAccuracyBg,
         borderRadius: BorderRadius.circular(20.r),
@@ -337,8 +366,13 @@ class _CompactMetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(minHeight: 118.h),
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 13.h),
+      constraints: BoxConstraints(
+        minHeight: 118.h,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: 10.w,
+        vertical: 13.h,
+      ),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(20.r),
@@ -361,7 +395,11 @@ class _CompactMetricCard extends StatelessWidget {
               color: iconBackgroundColor,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 21.sp, color: valueColor),
+            child: Icon(
+              icon,
+              size: 21.sp,
+              color: valueColor,
+            ),
           ),
           SizedBox(height: 7.h),
           Text(
