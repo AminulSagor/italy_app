@@ -213,8 +213,6 @@ class CheckoutPaymentMethodCard extends StatelessWidget {
         return 'google_play'.tr;
       case ProPaymentMethod.appStore:
         return 'App Store';
-      case ProPaymentMethod.card:
-        return 'card_stripe'.tr;
     }
   }
 }
@@ -226,26 +224,19 @@ class _PaymentMethodIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (method == ProPaymentMethod.googlePlay) {
-      return Icon(
-        Icons.play_circle_fill_rounded,
-        color: AppColors.primaryGreen,
-        size: 32.w,
-      );
+    switch (method) {
+      case ProPaymentMethod.googlePlay:
+        return Icon(
+          Icons.play_circle_fill_rounded,
+          color: AppColors.primaryGreen,
+          size: 32.w,
+        );
+      case ProPaymentMethod.appStore:
+        return Icon(
+          Icons.apple_rounded,
+          color: AppColors.primaryGreen,
+          size: 32.w,
+        );
     }
-
-    if (method == ProPaymentMethod.appStore) {
-      return Icon(
-        Icons.apple_rounded,
-        color: AppColors.primaryGreen,
-        size: 32.w,
-      );
-    }
-
-    return Icon(
-      Icons.credit_card_rounded,
-      color: AppColors.primaryGreen,
-      size: 26.w,
-    );
   }
 }

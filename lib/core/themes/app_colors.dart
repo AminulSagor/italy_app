@@ -311,8 +311,6 @@ class AppColors {
   static const proHintText = Color(0xFFB7B9BA);
   static const proTrustedBg = Color(0xFFF1F2F2);
   static const proCheckoutProductBg = Color(0xFFF0F1F1);
-  static const proPaypalBlue = Color(0xFF1F66B1);
-  static const proBkashPink = Color(0xFFD92264);
   static const proColosseumSky = Color(0xFF3DA1F2);
   static const proColosseum = Color(0xFF9A5B00);
 

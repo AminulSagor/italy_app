@@ -1,6 +1,6 @@
 enum ProCurrency { eur, bdt }
 
-enum ProPaymentMethod { card, googlePlay, appStore }
+enum ProPaymentMethod { googlePlay, appStore }
 
 enum ProPurchaseOutcomeStatus {
   completed,
