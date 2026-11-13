@@ -3,9 +3,10 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../../config/mobile_advertising_policy.dart';
 import '../../models/rewarded_ads_models.dart';
 import '../api_client.dart';
 
@@ -47,6 +48,8 @@ class RewardedAdsService extends GetxService {
   bool _showing = false;
 
   Future<RewardedAdsService> init() async {
+    if (!MobileAdvertisingPolicy.enabled) return this;
+
     final String platformAdUnitId = Platform.isIOS ? _iosId : _androidId;
     final String platformTestId = Platform.isIOS ? _iosTestId : _androidTestId;
     if (_releaseMode && platformAdUnitId == platformTestId) {
@@ -65,7 +68,20 @@ class RewardedAdsService extends GetxService {
       );
       final data = response.data;
       if (data == null) return configuration.value;
-      final parsed = RewardedAdsConfiguration.fromJson(data);
+      final backendConfiguration = RewardedAdsConfiguration.fromJson(data);
+      final parsed = MobileAdvertisingPolicy.enabled
+          ? backendConfiguration
+          : RewardedAdsConfiguration(
+              adsEnabled: false,
+              isAdFree: backendConfiguration.isAdFree,
+              dailyChallengeRemaining:
+                  backendConfiguration.dailyChallengeRemaining,
+              dailyChallengeXp: backendConfiguration.dailyChallengeXp,
+              callLimitEnabled: backendConfiguration.callLimitEnabled,
+              callFreeRemaining: backendConfiguration.callFreeRemaining,
+              callCredits: backendConfiguration.callCredits,
+              nativeAds: backendConfiguration.nativeAds,
+            );
       configuration.value = parsed;
       return parsed;
     } catch (_) {

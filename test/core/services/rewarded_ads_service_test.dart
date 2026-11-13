@@ -147,4 +147,26 @@ void main() {
       RewardedVerificationResult.pending,
     );
   });
+
+  test(
+    'app policy overrides an enabled backend advertising response',
+    () async {
+      final Dio dio = mockDio((RequestOptions options) async {
+        return Response<Map<String, dynamic>>(
+          requestOptions: options,
+          statusCode: 200,
+          data: configuration(),
+        );
+      });
+      final RewardedAdsService service = RewardedAdsService(dio: dio);
+
+      final RewardedAdsConfiguration? result = await service
+          .refreshConfiguration();
+
+      expect(result, isNotNull);
+      expect(result!.adsEnabled, isFalse);
+      expect(result.dailyChallengeRemaining, 3);
+      expect(result.callFreeRemaining, 1);
+    },
+  );
 }

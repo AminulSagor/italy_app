@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../core/config/mobile_advertising_policy.dart';
 import '../../../core/widgets/widgets.dart';
 import '_widgets/shop_home_widgets.dart';
 import 'models/shop_models.dart';
@@ -79,19 +80,21 @@ class ShopView extends GetView<ShopController> {
                     title: streak?.title ?? 'buy_streak_freeze'.tr,
                     priceText: _startingPrice(streak),
                   ),
-                  SizedBox(height: 32.h),
-                  ShopAdFreeCard(
-                    onTap: controller.onAdFreeTap,
-                    title: adFree?.title ?? 'Go Ad-Free',
-                    subtitle:
-                        adFree?.subtitle ??
-                        'Remove banner, native, interstitial, and rewarded ads.',
-                    priceText: controller.adFreePackages.isEmpty
-                        ? _startingPrice(adFree)
-                        : controller.packagePriceText(
-                            controller.adFreePackages.first,
-                          ),
-                  ),
+                  if (MobileAdvertisingPolicy.enabled) ...<Widget>[
+                    SizedBox(height: 32.h),
+                    ShopAdFreeCard(
+                      onTap: controller.onAdFreeTap,
+                      title: adFree?.title ?? 'Go Ad-Free',
+                      subtitle:
+                          adFree?.subtitle ??
+                          'Remove banner, native, interstitial, and rewarded ads.',
+                      priceText: controller.adFreePackages.isEmpty
+                          ? _startingPrice(adFree)
+                          : controller.packagePriceText(
+                              controller.adFreePackages.first,
+                            ),
+                    ),
+                  ],
                   SizedBox(height: 36.h),
                   Text(
                     'current_balance'.tr,
