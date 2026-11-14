@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../../config/mobile_ads_configuration.dart';
 import '../../models/rewarded_ads_models.dart';
 import '../rewarded_ads/rewarded_ads_service.dart';
 
@@ -64,15 +62,8 @@ class NativeAdsService extends GetxService {
     : _rewardedAdsService = rewardedAdsService;
 
   static const String androidTestAdUnitId =
-      'ca-app-pub-3940256099942544/2247696110';
-  static const String iosTestAdUnitId =
-      'ca-app-pub-3940256099942544/3986624511';
-  static const String _androidProductionAdUnitId = String.fromEnvironment(
-    'ADMOB_NATIVE_ANDROID_ID',
-  );
-  static const String _iosProductionAdUnitId = String.fromEnvironment(
-    'ADMOB_NATIVE_IOS_ID',
-  );
+      MobileAdsConfiguration.androidNativeTestId;
+  static const String iosTestAdUnitId = MobileAdsConfiguration.iosNativeTestId;
   static const int _maximumRetainedSlots = 20;
 
   final RewardedAdsService _rewardedAdsService;
@@ -138,20 +129,7 @@ class NativeAdsService extends GetxService {
     );
   }
 
-  String? get adUnitId {
-    if (!kReleaseMode) {
-      return Platform.isIOS ? iosTestAdUnitId : androidTestAdUnitId;
-    }
-    final String productionId = Platform.isIOS
-        ? _iosProductionAdUnitId.trim()
-        : _androidProductionAdUnitId.trim();
-    if (productionId.isEmpty ||
-        productionId == androidTestAdUnitId ||
-        productionId == iosTestAdUnitId) {
-      return null;
-    }
-    return productionId;
-  }
+  String? get adUnitId => MobileAdsConfiguration.nativeAdUnitId;
 
   Future<NativeAd?> acquire({
     required String slotId,

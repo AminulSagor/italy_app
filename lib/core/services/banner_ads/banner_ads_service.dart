@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:io';
-
 // ignore_for_file: prefer_initializing_formals
 
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../../config/mobile_ads_configuration.dart';
 import '../../models/rewarded_ads_models.dart';
 import '../rewarded_ads/rewarded_ads_service.dart';
 
@@ -16,15 +14,8 @@ class BannerAdsService extends GetxService {
     : _rewardedAdsService = rewardedAdsService;
 
   static const String androidTestAdUnitId =
-      'ca-app-pub-3940256099942544/6300978111';
-  static const String iosTestAdUnitId =
-      'ca-app-pub-3940256099942544/2934735716';
-  static const String _androidProductionAdUnitId = String.fromEnvironment(
-    'ADMOB_BANNER_ANDROID_ID',
-  );
-  static const String _iosProductionAdUnitId = String.fromEnvironment(
-    'ADMOB_BANNER_IOS_ID',
-  );
+      MobileAdsConfiguration.androidBannerTestId;
+  static const String iosTestAdUnitId = MobileAdsConfiguration.iosBannerTestId;
 
   final RewardedAdsService _rewardedAdsService;
 
@@ -51,21 +42,7 @@ class BannerAdsService extends GetxService {
     return viewportHeight - bottomReserve - contentHeight >= bannerAllowance;
   }
 
-  String? get adUnitId {
-    if (!kReleaseMode) {
-      return Platform.isIOS ? iosTestAdUnitId : androidTestAdUnitId;
-    }
-
-    final String productionId = Platform.isIOS
-        ? _iosProductionAdUnitId.trim()
-        : _androidProductionAdUnitId.trim();
-    if (productionId.isEmpty ||
-        productionId == androidTestAdUnitId ||
-        productionId == iosTestAdUnitId) {
-      return null;
-    }
-    return productionId;
-  }
+  String? get adUnitId => MobileAdsConfiguration.bannerAdUnitId;
 
   Future<AdSize?> adaptiveSize(int availableWidth) {
     if (availableWidth <= 0) return Future<AdSize?>.value(null);

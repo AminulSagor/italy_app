@@ -149,7 +149,7 @@ void main() {
   });
 
   test(
-    'app policy overrides an enabled backend advertising response',
+    'enabled app policy preserves an enabled backend advertising response',
     () async {
       final Dio dio = mockDio((RequestOptions options) async {
         return Response<Map<String, dynamic>>(
@@ -164,7 +164,7 @@ void main() {
           .refreshConfiguration();
 
       expect(result, isNotNull);
-      expect(result!.adsEnabled, isFalse);
+      expect(result!.adsEnabled, isTrue);
       expect(result.dailyChallengeRemaining, 3);
       expect(result.callFreeRemaining, 1);
     },

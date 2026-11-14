@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../core/services/mobile_ads/mobile_ads_consent_service.dart';
 import 'models/settings_localization.dart';
 import 'settings_controller.dart';
 import 'widgets/settings_profile_summary_card.dart';
@@ -88,6 +89,19 @@ class SettingsView extends GetView<SettingsController> {
                           title: SettingsL10n.text('ai_data_sharing'),
                           onTap: controller.openAiDataSharingSettings,
                         ),
+                        if (Get.isRegistered<MobileAdsConsentService>() &&
+                            Get.find<MobileAdsConsentService>()
+                                .privacyOptionsRequired
+                                .value) ...<Widget>[
+                          const Divider(height: 1, indent: 62),
+                          _LegalTile(
+                            icon: Icons.privacy_tip_outlined,
+                            title: SettingsL10n.text(
+                              'advertising_privacy_options',
+                            ),
+                            onTap: controller.openAdvertisingPrivacyOptions,
+                          ),
+                        ],
                         const Divider(height: 1, indent: 62),
                         _LegalTile(
                           icon: Icons.star_outline_rounded,

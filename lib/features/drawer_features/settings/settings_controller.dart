@@ -12,6 +12,8 @@ import '../../../core/services/api_error_handler.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/learning_activity_tracker_service.dart';
 import '../../../core/services/ai_data_consent_service.dart';
+import '../../../core/services/mobile_ads/mobile_ads_consent_service.dart';
+import '../../../core/services/rewarded_ads/rewarded_ads_service.dart';
 import '../../../core/services/social_sign_in_service.dart';
 import '../../../core/utils/otp_resend_cooldown.dart';
 import '../../../core/widgets/app_drawer_controller.dart';
@@ -681,6 +683,15 @@ class SettingsController extends GetxController {
       Get.find<AiDataConsentService>().openConsentSettings,
       errorTitle: SettingsL10n.text('ai_data_sharing'),
     );
+  }
+
+  Future<void> openAdvertisingPrivacyOptions() async {
+    if (!Get.isRegistered<MobileAdsConsentService>()) return;
+    final MobileAdsConsentService consent = Get.find<MobileAdsConsentService>();
+    await consent.showPrivacyOptions();
+    if (Get.isRegistered<RewardedAdsService>()) {
+      await Get.find<RewardedAdsService>().refreshConfiguration();
+    }
   }
 
   Future<void> openConnectedAccounts() async {

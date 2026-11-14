@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -7,8 +6,10 @@ import 'package:get/get.dart' hide Response;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../config/mobile_advertising_policy.dart';
+import '../../config/mobile_ads_configuration.dart';
 import '../../models/rewarded_ads_models.dart';
 import '../api_client.dart';
+import '../mobile_ads/mobile_ads_consent_service.dart';
 
 class RewardedAdsService extends GetxService {
   // Keep the public dependency name consistent with the other GetX services.
@@ -19,27 +20,19 @@ class RewardedAdsService extends GetxService {
     bool? releaseModeOverride,
     Future<void> Function(Duration duration)? delay,
     Future<RewardedAd?> Function()? adLoader,
+    MobileAdsConsentService? mobileAdsConsentService,
   }) : assert(apiClient != null || dio != null),
        _dio = dio ?? apiClient!.dio,
        _releaseMode = releaseModeOverride ?? kReleaseMode,
        _delay = delay ?? Future<void>.delayed,
-       _adLoaderOverride = adLoader;
-
-  static const String _androidTestId = 'ca-app-pub-3940256099942544/5224354917';
-  static const String _iosTestId = 'ca-app-pub-3940256099942544/1712485313';
-  static const String _androidId = String.fromEnvironment(
-    'ADMOB_REWARDED_ANDROID_ID',
-    defaultValue: _androidTestId,
-  );
-  static const String _iosId = String.fromEnvironment(
-    'ADMOB_REWARDED_IOS_ID',
-    defaultValue: _iosTestId,
-  );
+       _adLoaderOverride = adLoader,
+       _mobileAdsConsentService = mobileAdsConsentService;
 
   final Dio _dio;
   final bool _releaseMode;
   final Future<void> Function(Duration duration) _delay;
   final Future<RewardedAd?> Function()? _adLoaderOverride;
+  final MobileAdsConsentService? _mobileAdsConsentService;
   final Rxn<RewardedAdsConfiguration> configuration =
       Rxn<RewardedAdsConfiguration>();
   final Rx<RewardedGateFailure> lastGateFailure = RewardedGateFailure.none.obs;
@@ -50,14 +43,15 @@ class RewardedAdsService extends GetxService {
   Future<RewardedAdsService> init() async {
     if (!MobileAdvertisingPolicy.enabled) return this;
 
-    final String platformAdUnitId = Platform.isIOS ? _iosId : _androidId;
-    final String platformTestId = Platform.isIOS ? _iosTestId : _androidTestId;
-    if (_releaseMode && platformAdUnitId == platformTestId) {
-      throw StateError(
-        'Release builds require production rewarded ad unit IDs supplied with --dart-define.',
+    final MobileAdsConsentService? consent = _mobileAdsConsentService;
+    if (consent != null) {
+      await consent.init();
+    } else {
+      MobileAdsConfiguration.validateForCurrentPlatform(
+        releaseMode: _releaseMode,
       );
+      await MobileAds.instance.initialize();
     }
-    await MobileAds.instance.initialize();
     return this;
   }
 
@@ -69,7 +63,10 @@ class RewardedAdsService extends GetxService {
       final data = response.data;
       if (data == null) return configuration.value;
       final backendConfiguration = RewardedAdsConfiguration.fromJson(data);
-      final parsed = MobileAdvertisingPolicy.enabled
+      final bool advertisingAllowed =
+          MobileAdvertisingPolicy.enabled &&
+          (_mobileAdsConsentService?.canRequestAds.value ?? true);
+      final parsed = advertisingAllowed
           ? backendConfiguration
           : RewardedAdsConfiguration(
               adsEnabled: false,
@@ -142,7 +139,13 @@ class RewardedAdsService extends GetxService {
       final result = await _pollSession(sessionId);
       return _acceptVerificationResult(result, sessionId);
     }
-    return _show(sessionId);
+    final String? ssvUserId = data['ssvUserId']?.toString();
+    if (ssvUserId == null || ssvUserId.isEmpty) {
+      lastGateFailure.value = RewardedGateFailure.verificationFailed;
+      await _cancelSession(sessionId);
+      return false;
+    }
+    return _show(sessionId, ssvUserId);
   }
 
   Future<bool> ensureOutgoingCallCredit() async {
@@ -154,7 +157,7 @@ class RewardedAdsService extends GetxService {
     return gate(RewardedPlacement.callCredits);
   }
 
-  Future<bool> _show(String sessionId) async {
+  Future<bool> _show(String sessionId, String ssvUserId) async {
     _showing = true;
     try {
       final ad = await _loadAd();
@@ -164,7 +167,7 @@ class RewardedAdsService extends GetxService {
         return false;
       }
       ad.setServerSideOptions(
-        ServerSideVerificationOptions(customData: sessionId),
+        ServerSideVerificationOptions(customData: sessionId, userId: ssvUserId),
       );
       final completer = Completer<bool>();
       bool earned = false;
@@ -214,7 +217,7 @@ class RewardedAdsService extends GetxService {
         },
       );
       return completer.future.timeout(
-        const Duration(seconds: 75),
+        const Duration(minutes: 5),
         onTimeout: () {
           lastGateFailure.value = RewardedGateFailure.verificationPending;
           return false;
@@ -230,7 +233,7 @@ class RewardedAdsService extends GetxService {
     if (override != null) return override();
     final completer = Completer<RewardedAd?>();
     RewardedAd.load(
-      adUnitId: Platform.isIOS ? _iosId : _androidId,
+      adUnitId: MobileAdsConfiguration.rewardedAdUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: completer.complete,
@@ -268,7 +271,7 @@ class RewardedAdsService extends GetxService {
 
   Future<RewardedVerificationResult> _pollSession(
     String sessionId, {
-    int attempts = 15,
+    int attempts = 30,
   }) async {
     for (int attempt = 0; attempt < attempts; attempt++) {
       if (attempt > 0) await _delay(const Duration(seconds: 2));

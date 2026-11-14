@@ -53,11 +53,14 @@ val googleSampleAdMobAppId = "ca-app-pub-3940256099942544~3347511713"
 val admobAndroidAppId = providers.gradleProperty("ADMOB_ANDROID_APP_ID")
     .orElse(googleSampleAdMobAppId)
     .get()
+val admobAppIdPattern = Regex("^ca-app-pub-[0-9]+~[0-9]+$")
 
 if (isReleaseBuildRequested) {
-    if (admobAndroidAppId == googleSampleAdMobAppId) {
+    if (admobAndroidAppId == googleSampleAdMobAppId ||
+        !admobAppIdPattern.matches(admobAndroidAppId.trim())) {
         throw GradleException(
-            "Release build blocked: ADMOB_ANDROID_APP_ID must be set in " +
+            "Release build blocked: ADMOB_ANDROID_APP_ID must be a production " +
+                    "AdMob app ID in ca-app-pub-<publisher>~<app> format, set in " +
                     "android/gradle.properties or ~/.gradle/gradle.properties.",
         )
     }

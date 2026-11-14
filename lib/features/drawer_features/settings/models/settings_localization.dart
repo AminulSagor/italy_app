@@ -31,6 +31,7 @@ class SettingsL10n {
       'set_password': 'Set password',
       'add_contact_to_set_password': 'Add email or phone to set password',
       'privacy_policy': 'Privacy policy',
+      'advertising_privacy_options': 'Advertising privacy options',
       'terms_of_service': 'Terms of service',
       'delete_account': 'Delete account',
       'rate_app': 'Rate Italir Pothe',
@@ -164,6 +165,7 @@ class SettingsL10n {
       'set_password': 'পাসওয়ার্ড সেট করুন',
       'add_contact_to_set_password': 'পাসওয়ার্ডের জন্য ইমেইল বা ফোন যোগ করুন',
       'privacy_policy': 'গোপনীয়তা নীতি',
+      'advertising_privacy_options': 'বিজ্ঞাপন গোপনীয়তা বিকল্প',
       'terms_of_service': 'সেবার শর্তাবলি',
       'delete_account': 'অ্যাকাউন্ট মুছুন',
       'rate_app': 'Italir Pothe-কে রেট দিন',
@@ -299,6 +301,7 @@ class SettingsL10n {
       'add_contact_to_set_password':
           'Aggiungi email o telefono per la password',
       'privacy_policy': 'Informativa sulla privacy',
+      'advertising_privacy_options': 'Opzioni privacy pubblicitaria',
       'terms_of_service': 'Termini di servizio',
       'delete_account': 'Elimina account',
       'rate_app': 'Valuta Italir Pothe',

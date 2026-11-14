@@ -27,6 +27,7 @@ import '../services/storage_service.dart';
 import '../services/token_service.dart';
 import '../services/rewarded_ads/rewarded_ads_service.dart';
 import '../services/banner_ads/banner_ads_service.dart';
+import '../services/mobile_ads/mobile_ads_consent_service.dart';
 import '../services/native_ads/native_ads_service.dart';
 
 class AppBootstrapController extends GetxController {
@@ -72,9 +73,19 @@ class AppBootstrapController extends GetxController {
       );
     }
 
+    if (!Get.isRegistered<MobileAdsConsentService>()) {
+      await Get.putAsync<MobileAdsConsentService>(
+        () => MobileAdsConsentService().init(),
+        permanent: true,
+      );
+    }
+
     if (!Get.isRegistered<RewardedAdsService>()) {
       await Get.putAsync<RewardedAdsService>(
-        () => RewardedAdsService(apiClient: Get.find<ApiClient>()).init(),
+        () => RewardedAdsService(
+          apiClient: Get.find<ApiClient>(),
+          mobileAdsConsentService: Get.find<MobileAdsConsentService>(),
+        ).init(),
         permanent: true,
       );
     }
