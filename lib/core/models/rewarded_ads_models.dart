@@ -124,6 +124,8 @@ class RewardedAdsConfiguration {
     required this.callLimitEnabled,
     required this.callFreeRemaining,
     required this.callCredits,
+    required this.callCreditsPerAd,
+    required this.cvCreditsPerAd,
     this.nativeAds,
   });
   final bool adsEnabled;
@@ -133,6 +135,8 @@ class RewardedAdsConfiguration {
   final bool callLimitEnabled;
   final int callFreeRemaining;
   final int callCredits;
+  final int callCreditsPerAd;
+  final int cvCreditsPerAd;
   final NativeAdsConfiguration? nativeAds;
 
   factory RewardedAdsConfiguration.fromJson(Map<String, dynamic> json) {
@@ -150,6 +154,8 @@ class RewardedAdsConfiguration {
       callLimitEnabled: calls['limitEnabled'] == true,
       callFreeRemaining: (calls['freeRemaining'] as num?)?.toInt() ?? 0,
       callCredits: (calls['credits'] as num?)?.toInt() ?? 0,
+      callCreditsPerAd: (calls['creditsPerAd'] as num?)?.toInt() ?? 3,
+      cvCreditsPerAd: (json['cvCreditsPerAd'] as num?)?.toInt() ?? 1,
       nativeAds: json['nativeAds'] is Map
           ? NativeAdsConfiguration.fromJson(
               Map<String, dynamic>.from(json['nativeAds'] as Map),

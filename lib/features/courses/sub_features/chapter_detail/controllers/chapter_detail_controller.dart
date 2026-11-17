@@ -586,6 +586,7 @@ class ChapterDetailController extends GetxController {
     final bool allowed = await Get.find<RewardedAdsService>().gate(
       RewardedPlacement.quizOpen,
       contextId: chapter.id,
+      rewardDescription: 'rewarded_reward_quiz_open'.tr,
     );
     if (!allowed) return;
 

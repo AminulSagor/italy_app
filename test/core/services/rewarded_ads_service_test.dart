@@ -12,7 +12,9 @@ void main() {
       'limitEnabled': false,
       'freeRemaining': 1,
       'credits': 0,
+      'creditsPerAd': 3,
     },
+    'cvCreditsPerAd': 1,
   };
 
   Dio mockDio(
@@ -166,7 +168,10 @@ void main() {
       expect(result, isNotNull);
       expect(result!.adsEnabled, isTrue);
       expect(result.dailyChallengeRemaining, 3);
+      expect(result.dailyChallengeXp, 10);
       expect(result.callFreeRemaining, 1);
+      expect(result.callCreditsPerAd, 3);
+      expect(result.cvCreditsPerAd, 1);
     },
   );
 }

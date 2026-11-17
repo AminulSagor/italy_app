@@ -41,7 +41,7 @@ class ImportantVerbsView extends GetView<ImportantVerbsController> {
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
-              padding: EdgeInsets.fromLTRB(22.w, 22.h, 22.w, 42.h),
+              padding: EdgeInsets.fromLTRB(22.w, 12.h, 22.w, 42.h),
               child: Stack(
                 clipBehavior: Clip.none,
                 children: <Widget>[

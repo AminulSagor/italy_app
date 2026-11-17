@@ -14,6 +14,8 @@ RewardedAdsConfiguration _configuration({
     callLimitEnabled: false,
     callFreeRemaining: 0,
     callCredits: 0,
+    callCreditsPerAd: 3,
+    cvCreditsPerAd: 1,
   );
 }
 

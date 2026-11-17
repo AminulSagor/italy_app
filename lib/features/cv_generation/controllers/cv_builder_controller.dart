@@ -852,9 +852,15 @@ class CvBuilderController extends GetxController {
       final bool noCredit = error.response?.statusCode == 402;
       if (noCredit) {
         isRendering.value = false;
-        final bool granted = await Get.find<RewardedAdsService>().gate(
+        final RewardedAdsService rewardedAds = Get.find<RewardedAdsService>();
+        final int creditCount =
+            rewardedAds.configuration.value?.cvCreditsPerAd ?? 1;
+        final bool granted = await rewardedAds.gate(
           RewardedPlacement.cvCredits,
           contextId: _document?.id,
+          rewardDescription: 'rewarded_reward_cv_credits'.trParams(
+            <String, String>{'count': creditCount.toString()},
+          ),
         );
         if (granted) {
           await renderCv();

@@ -59,7 +59,8 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
   late final HlsPlaybackRecoveryCoordinator _recoveryCoordinator;
 
   ChapterVideoAccessModel? _videoAccess;
-  bool _rewardGatePassed = false;
+  bool _initialRewardGatePassed = false;
+  bool _thresholdRewardGatePassed = false;
   Future<bool>? _rewardGateFuture;
   bool _isInitializing = false;
   bool _isChangingQuality = false;
@@ -95,10 +96,11 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
   void didUpdateWidget(covariant ChapterVideoCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.detail.video?.fileId != widget.detail.video?.fileId) {
+    if (oldWidget.detail.id != widget.detail.id) {
       _lastReportedPercent = widget.detail.progress.videoWatchPercent;
       _currentVideoPercent = _lastReportedPercent;
-      _rewardGatePassed = false;
+      _initialRewardGatePassed = false;
+      _thresholdRewardGatePassed = false;
       _rewardGateFuture = null;
       _hasWatchedFullyNotifier.value =
           widget.detail.progress.videoWatchPercent >= 100;
@@ -354,7 +356,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
     _currentVideoPercent = percent;
     final bool reachedRewardedAdThreshold =
         widget.isFreeLesson &&
-        !_rewardGatePassed &&
+        !_thresholdRewardGatePassed &&
         _lastReportedPercent < _rewardedAdThresholdPercent &&
         percent >= _rewardedAdThresholdPercent;
 
@@ -428,14 +430,29 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
   }
 
   Future<bool> _ensureRewardGatePassed() async {
-    if (!widget.isFreeLesson ||
-        _rewardGatePassed ||
-        _currentVideoPercent < _rewardedAdThresholdPercent) {
+    if (!widget.isFreeLesson) {
       return true;
     }
-    return _rewardGateFuture ??= _requestRewardedAdUnlock().whenComplete(() {
-      _rewardGateFuture = null;
-    });
+
+    if (!_initialRewardGatePassed) {
+      return _requestRewardedAdGate(isThresholdGate: false);
+    }
+
+    if (_currentVideoPercent < _rewardedAdThresholdPercent ||
+        _thresholdRewardGatePassed) {
+      return true;
+    }
+
+    return _requestRewardedAdGate(isThresholdGate: true);
+  }
+
+  Future<bool> _requestRewardedAdGate({required bool isThresholdGate}) {
+    return _rewardGateFuture ??=
+        _requestRewardedAdUnlock(isThresholdGate: isThresholdGate).whenComplete(
+          () {
+            _rewardGateFuture = null;
+          },
+        );
   }
 
   Future<void> _pauseForRewardedAdUnlock() async {
@@ -443,7 +460,7 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
         Get.find<RewardedAdsService>().configuration.value;
     if (currentConfiguration != null &&
         (!currentConfiguration.adsEnabled || currentConfiguration.isAdFree)) {
-      _rewardGatePassed = true;
+      _thresholdRewardGatePassed = true;
       return;
     }
 
@@ -454,49 +471,42 @@ class _ChapterVideoCardState extends State<ChapterVideoCard>
     await _play();
   }
 
-  Future<bool> _requestRewardedAdUnlock() async {
+  Future<bool> _requestRewardedAdUnlock({required bool isThresholdGate}) async {
     final RewardedAdsService rewardedAds = Get.find<RewardedAdsService>();
     final RewardedAdsConfiguration? configuration = await rewardedAds
         .refreshConfiguration();
     if (configuration == null ||
         !configuration.adsEnabled ||
         configuration.isAdFree) {
-      _rewardGatePassed = true;
+      _markRewardGatePassed(isThresholdGate: isThresholdGate);
       return true;
     }
     if (!mounted) return false;
-
-    final bool accepted =
-        await showDialog<bool>(
-          context: context,
-          barrierDismissible: true,
-          builder: (BuildContext dialogContext) => AlertDialog(
-            title: Text('rewarded_video_unlock_title'.tr),
-            content: Text('rewarded_video_unlock_message'.tr),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text('notification_permission_not_now'.tr),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: Text('rewarded_video_watch_ad'.tr),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-    if (!accepted || !mounted) return false;
 
     try {
       final bool allowed = await rewardedAds.gate(
         RewardedPlacement.freeVideo,
         contextId: widget.detail.id,
+        rewardDescription:
+            (isThresholdGate
+                    ? 'rewarded_reward_free_video_remaining'
+                    : 'rewarded_reward_free_video_first')
+                .tr,
       );
-      if (allowed) _rewardGatePassed = true;
+      if (allowed) {
+        _markRewardGatePassed(isThresholdGate: isThresholdGate);
+      }
       return allowed;
     } catch (_) {
       return false;
+    }
+  }
+
+  void _markRewardGatePassed({required bool isThresholdGate}) {
+    if (isThresholdGate) {
+      _thresholdRewardGatePassed = true;
+    } else {
+      _initialRewardGatePassed = true;
     }
   }
 

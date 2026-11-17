@@ -985,6 +985,7 @@ class PracticeHubController extends GetxController {
     final bool allowed = await rewardedAds.gate(
       RewardedPlacement.verbDetail,
       contextId: id,
+      rewardDescription: 'rewarded_reward_verb_details'.tr,
     );
     if (!allowed) {
       final failure = rewardedAds.lastGateFailure.value;
@@ -1109,6 +1110,7 @@ class PracticeHubController extends GetxController {
     final bool allowed = await Get.find<RewardedAdsService>().gate(
       RewardedPlacement.survivalPdf,
       contextId: item.id,
+      rewardDescription: 'rewarded_reward_survival_pdf'.tr,
     );
     if (!allowed) return;
 
@@ -1680,6 +1682,7 @@ class PracticeHubController extends GetxController {
     final bool allowed = await Get.find<RewardedAdsService>().gate(
       RewardedPlacement.dailyChest,
       contextId: dashboard.challengeDate,
+      rewardDescription: 'rewarded_reward_daily_chest'.tr,
     );
     if (!allowed) return;
 
@@ -1707,9 +1710,14 @@ class PracticeHubController extends GetxController {
     if (isClaimingRewardedXp.value) return;
     isClaimingRewardedXp.value = true;
     try {
-      final bool granted = await Get.find<RewardedAdsService>().gate(
+      final RewardedAdsService rewardedAds = Get.find<RewardedAdsService>();
+      final int xp = rewardedAds.configuration.value?.dailyChallengeXp ?? 0;
+      final bool granted = await rewardedAds.gate(
         RewardedPlacement.dailyChallengeXp,
         contextId: dailyChallengeDashboard.value?.challengeDate,
+        rewardDescription: 'rewarded_reward_daily_challenge_xp'.trParams(
+          <String, String>{'count': xp.toString()},
+        ),
       );
       if (granted) await loadDailyChallenges(showError: false);
     } finally {

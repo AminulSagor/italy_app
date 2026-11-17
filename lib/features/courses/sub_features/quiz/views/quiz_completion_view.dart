@@ -193,6 +193,7 @@ class QuizCompletionView extends GetView<QuizController> {
     final bool allowed = await Get.find<RewardedAdsService>().gate(
       RewardedPlacement.quizReview,
       contextId: controllerTag,
+      rewardDescription: 'rewarded_reward_quiz_review'.tr,
     );
     if (!allowed) return;
     await Get.toNamed(

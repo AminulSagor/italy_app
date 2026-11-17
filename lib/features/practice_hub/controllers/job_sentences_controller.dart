@@ -248,6 +248,7 @@ class JobSentencesController extends GetxController {
     final bool allowed = await Get.find<RewardedAdsService>().gate(
       RewardedPlacement.careerModule,
       contextId: module.id,
+      rewardDescription: 'rewarded_reward_career_module'.tr,
     );
     if (!allowed) return;
     selectedModule.value = module;

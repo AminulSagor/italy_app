@@ -417,6 +417,7 @@ class ImportantVerbsController extends GetxController {
     final bool allowed = await rewardedAds.gate(
       RewardedPlacement.verbDetail,
       contextId: verb.id,
+      rewardDescription: 'rewarded_reward_verb_details'.tr,
     );
     if (!allowed) {
       _showPendingRewardMessage(rewardedAds);

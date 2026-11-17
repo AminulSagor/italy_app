@@ -727,10 +727,35 @@ appTranslations = <String, Map<String, String>>{
     'dont_have_account': 'Don\'t have an account? ',
     'back_to_login': 'Back to Login',
     'continue': 'Continue',
-    'rewarded_video_unlock_title': 'Continue this free video?',
-    'rewarded_video_unlock_message':
-        'Watch one ad to unlock the rest of this free video.',
-    'rewarded_video_watch_ad': 'Watch ad',
+    'rewarded_ad_opt_in_title': 'Watch a rewarded ad?',
+    'rewarded_ad_opt_in_message': 'Watch one ad to receive @reward.',
+    'rewarded_ad_opt_in_verification_note':
+        'The reward is granted after the ad is completed and verified.',
+    'rewarded_ad_watch_action': 'Watch ad',
+    'rewarded_ad_preparing_title': 'Preparing your ad…',
+    'rewarded_ad_preparing_message':
+        'This usually takes only a few seconds. Please keep the app open.',
+    'rewarded_ad_verifying_title': 'Verifying your reward…',
+    'rewarded_ad_verifying_message':
+        'We are confirming completion securely. This may take a moment.',
+    'rewarded_ad_unavailable_title': 'Ad unavailable',
+    'rewarded_ad_unavailable_message':
+        'No rewarded ad is ready right now. Please check your connection and try again.',
+    'rewarded_reward_free_video_first':
+        'access to the first 60% of this free video',
+    'rewarded_reward_free_video_remaining':
+        'access to the remaining 40% of this free video',
+    'rewarded_reward_daily_challenge_xp': '@count bonus XP',
+    'rewarded_reward_daily_chest':
+        'access to open today’s Daily Chest and receive its reward',
+    'rewarded_reward_career_module': 'access to this career module',
+    'rewarded_reward_quiz_open': 'access to this quiz',
+    'rewarded_reward_quiz_review': 'access to review your quiz answers',
+    'rewarded_reward_vocabulary_reveal': 'the answer on this vocabulary card',
+    'rewarded_reward_survival_pdf': 'access to this Survival Italian PDF',
+    'rewarded_reward_verb_details': 'access to these verb details',
+    'rewarded_reward_call_credits': '@count call credits',
+    'rewarded_reward_cv_credits': '@count CV creation credit',
     'resend': 'Resend',
     'resend_code': 'Resend Code',
     'verify': 'Verify',
@@ -2737,10 +2762,35 @@ appTranslations = <String, Map<String, String>>{
     'dont_have_account': 'আপনার কি কোনো অ্যাকাউন্ট নেই? ',
     'back_to_login': 'লগইনে ফিরে যান',
     'continue': 'চালিয়ে যান',
-    'rewarded_video_unlock_title': 'এই বিনামূল্যের ভিডিওটি চালিয়ে যাবেন?',
-    'rewarded_video_unlock_message':
-        'এই বিনামূল্যের ভিডিওর বাকি অংশ আনলক করতে একটি বিজ্ঞাপন দেখুন।',
-    'rewarded_video_watch_ad': 'বিজ্ঞাপন দেখুন',
+    'rewarded_ad_opt_in_title': 'রিওয়ার্ড বিজ্ঞাপন দেখবেন?',
+    'rewarded_ad_opt_in_message': '@reward পেতে একটি বিজ্ঞাপন দেখুন।',
+    'rewarded_ad_opt_in_verification_note':
+        'বিজ্ঞাপনটি সম্পন্ন ও যাচাই হওয়ার পর রিওয়ার্ড দেওয়া হবে।',
+    'rewarded_ad_watch_action': 'বিজ্ঞাপন দেখুন',
+    'rewarded_ad_preparing_title': 'বিজ্ঞাপন প্রস্তুত হচ্ছে…',
+    'rewarded_ad_preparing_message':
+        'সাধারণত কয়েক সেকেন্ড সময় লাগে। অনুগ্রহ করে অ্যাপটি খোলা রাখুন।',
+    'rewarded_ad_verifying_title': 'আপনার রিওয়ার্ড যাচাই হচ্ছে…',
+    'rewarded_ad_verifying_message':
+        'আমরা নিরাপদভাবে বিজ্ঞাপন সম্পন্ন হওয়া নিশ্চিত করছি। একটু সময় লাগতে পারে।',
+    'rewarded_ad_unavailable_title': 'বিজ্ঞাপন পাওয়া যাচ্ছে না',
+    'rewarded_ad_unavailable_message':
+        'এখন কোনো রিওয়ার্ড বিজ্ঞাপন প্রস্তুত নেই। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।',
+    'rewarded_reward_free_video_first':
+        'এই বিনামূল্যের ভিডিওর প্রথম ৬০% দেখার সুযোগ',
+    'rewarded_reward_free_video_remaining':
+        'এই বিনামূল্যের ভিডিওর বাকি ৪০% দেখার সুযোগ',
+    'rewarded_reward_daily_challenge_xp': '@count বোনাস XP',
+    'rewarded_reward_daily_chest':
+        'আজকের ডেইলি চেস্ট খুলে এর রিওয়ার্ড নেওয়ার সুযোগ',
+    'rewarded_reward_career_module': 'এই ক্যারিয়ার মডিউলে প্রবেশাধিকার',
+    'rewarded_reward_quiz_open': 'এই কুইজে প্রবেশাধিকার',
+    'rewarded_reward_quiz_review': 'কুইজের উত্তর পর্যালোচনার সুযোগ',
+    'rewarded_reward_vocabulary_reveal': 'এই শব্দভান্ডার কার্ডের উত্তর',
+    'rewarded_reward_survival_pdf': 'এই সারভাইভাল ইতালিয়ান PDF-এ প্রবেশাধিকার',
+    'rewarded_reward_verb_details': 'এই ক্রিয়াপদের বিস্তারিত দেখার সুযোগ',
+    'rewarded_reward_call_credits': '@countটি কল ক্রেডিট',
+    'rewarded_reward_cv_credits': '@countটি CV তৈরির ক্রেডিট',
     'resend': 'আবার পাঠান',
     'resend_code': 'কোড পুনরায় পাঠান',
     'verify': 'ভেরিফাই',
@@ -6059,10 +6109,38 @@ appTranslations = <String, Map<String, String>>{
     'dont_have_account': 'Non hai un account? ',
     'back_to_login': 'Torna al login',
     'continue': 'Continua',
-    'rewarded_video_unlock_title': 'Continuare questo video gratuito?',
-    'rewarded_video_unlock_message':
-        'Guarda un annuncio per sbloccare il resto di questo video gratuito.',
-    'rewarded_video_watch_ad': 'Guarda l\'annuncio',
+    'rewarded_ad_opt_in_title': 'Guardare un annuncio con premio?',
+    'rewarded_ad_opt_in_message': 'Guarda un annuncio per ottenere: @reward.',
+    'rewarded_ad_opt_in_verification_note':
+        'Il premio viene assegnato dopo il completamento e la verifica dell’annuncio.',
+    'rewarded_ad_watch_action': 'Guarda l\'annuncio',
+    'rewarded_ad_preparing_title': 'Preparazione dell’annuncio…',
+    'rewarded_ad_preparing_message':
+        'Di solito bastano pochi secondi. Mantieni l’app aperta.',
+    'rewarded_ad_verifying_title': 'Verifica del premio…',
+    'rewarded_ad_verifying_message':
+        'Stiamo confermando il completamento in modo sicuro. Potrebbe richiedere qualche istante.',
+    'rewarded_ad_unavailable_title': 'Annuncio non disponibile',
+    'rewarded_ad_unavailable_message':
+        'Nessun annuncio con premio è pronto al momento. Controlla la connessione e riprova.',
+    'rewarded_reward_free_video_first':
+        'l’accesso al primo 60% di questo video gratuito',
+    'rewarded_reward_free_video_remaining':
+        'l’accesso al restante 40% di questo video gratuito',
+    'rewarded_reward_daily_challenge_xp': '@count XP bonus',
+    'rewarded_reward_daily_chest':
+        'l’accesso al forziere giornaliero di oggi e alla sua ricompensa',
+    'rewarded_reward_career_module': 'l’accesso a questo modulo professionale',
+    'rewarded_reward_quiz_open': 'l’accesso a questo quiz',
+    'rewarded_reward_quiz_review':
+        'l’accesso alla revisione delle risposte del quiz',
+    'rewarded_reward_vocabulary_reveal':
+        'la risposta di questa scheda di vocabolario',
+    'rewarded_reward_survival_pdf':
+        'l’accesso a questo PDF di italiano di sopravvivenza',
+    'rewarded_reward_verb_details': 'l’accesso ai dettagli di questo verbo',
+    'rewarded_reward_call_credits': '@count crediti di chiamata',
+    'rewarded_reward_cv_credits': '@count credito per la creazione del CV',
     'resend': 'Invia di nuovo',
     'resend_code': 'Reinvia codice',
     'verify': 'Verifica',

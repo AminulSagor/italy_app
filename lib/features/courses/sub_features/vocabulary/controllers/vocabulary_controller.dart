@@ -364,6 +364,7 @@ class VocabularyController extends GetxController {
     final bool allowed = await Get.find<RewardedAdsService>().gate(
       RewardedPlacement.vocabularyReveal,
       contextId: currentCard!.id,
+      rewardDescription: 'rewarded_reward_vocabulary_reveal'.tr,
     );
     if (allowed) isRevealed.value = true;
   }

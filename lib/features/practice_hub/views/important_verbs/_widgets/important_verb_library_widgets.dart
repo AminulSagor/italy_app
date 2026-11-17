@@ -347,6 +347,7 @@ class VerbLibraryList extends StatelessWidget {
                       ? NativeAdSlot(
                           placement: placement,
                           slotId: '${placement.apiValue}:${row.adBoundary}',
+                          height: 400,
                         )
                       : VerbLibraryCard(verb: verbs[row.contentIndex!]);
                 },

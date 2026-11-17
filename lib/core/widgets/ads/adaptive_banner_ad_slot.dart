@@ -24,12 +24,20 @@ class AdaptiveBannerAdSlot extends StatefulWidget {
 }
 
 class _AdaptiveBannerAdSlotState extends State<AdaptiveBannerAdSlot> {
+  static const List<Duration> _retryDelays = <Duration>[
+    Duration(seconds: 5),
+    Duration(seconds: 15),
+    Duration(seconds: 30),
+  ];
+
   late final BannerAdsService _service;
   late final Worker _eligibilityWorker;
   BannerAd? _banner;
   AdSize? _size;
+  Timer? _retryTimer;
   int _width = 0;
   int _loadGeneration = 0;
+  int _retryAttempt = 0;
   bool _loading = false;
   bool _failed = false;
 
@@ -47,6 +55,10 @@ class _AdaptiveBannerAdSlotState extends State<AdaptiveBannerAdSlot> {
   @override
   void didUpdateWidget(covariant AdaptiveBannerAdSlot oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.visible && !widget.visible) {
+      _disposeBanner();
+      return;
+    }
     if (!oldWidget.visible && widget.visible) {
       _ensureLoaded();
     }
@@ -90,8 +102,7 @@ class _AdaptiveBannerAdSlotState extends State<AdaptiveBannerAdSlot> {
     final AdSize? size = await _service.adaptiveSize(_width);
     if (!mounted || generation != _loadGeneration) return;
     if (size == null) {
-      _loading = false;
-      _failed = true;
+      _handleLoadFailure();
       return;
     }
     setState(() => _size = size);
@@ -104,16 +115,39 @@ class _AdaptiveBannerAdSlotState extends State<AdaptiveBannerAdSlot> {
     _loading = false;
     if (banner == null || !_service.canRequestBanner) {
       banner?.dispose();
-      setState(() {
-        _failed = true;
-        _size = null;
-      });
+      _handleLoadFailure();
       return;
     }
+    _cancelRetry(resetAttempt: true);
     setState(() => _banner = banner);
   }
 
+  void _handleLoadFailure() {
+    if (!mounted) return;
+    setState(() {
+      _loading = false;
+      _failed = true;
+      _size = null;
+    });
+    if (!widget.visible || !_service.canRequestBanner) return;
+    if (_retryAttempt >= _retryDelays.length) return;
+    final Duration delay = _retryDelays[_retryAttempt++];
+    _retryTimer?.cancel();
+    _retryTimer = Timer(delay, () {
+      if (!mounted || !widget.visible || !_service.canRequestBanner) return;
+      setState(() => _failed = false);
+      unawaited(_ensureLoaded());
+    });
+  }
+
+  void _cancelRetry({required bool resetAttempt}) {
+    _retryTimer?.cancel();
+    _retryTimer = null;
+    if (resetAttempt) _retryAttempt = 0;
+  }
+
   void _disposeBanner({bool notify = true}) {
+    _cancelRetry(resetAttempt: true);
     _loadGeneration += 1;
     _loading = false;
     _failed = false;
