@@ -489,9 +489,20 @@ class GooglePlayBillingService extends GetxService {
         if (response.error != null) {
           throw StateError(response.error!.message);
         }
+        // Monthly and yearly share one product ID, so an existing
+        // subscription matches any new Ad-Free order by product alone. A
+        // purchase made before the order was created cannot belong to it;
+        // returning it would retry verification against the wrong order
+        // forever ("verification still in progress").
+        final int orderCreatedMs = pending.createdAt
+            .subtract(const Duration(minutes: 2))
+            .millisecondsSinceEpoch;
         for (final GooglePlayPurchaseDetails purchase
             in response.pastPurchases) {
-          if (purchase.productID == pending.productId) return purchase;
+          if (purchase.productID == pending.productId &&
+              purchase.billingClientPurchase.purchaseTime >= orderCreatedMs) {
+            return purchase;
+          }
         }
         return null;
       }

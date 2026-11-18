@@ -123,14 +123,40 @@ class CheckoutPage extends StatelessWidget {
                       : const Color(0xFFE9FFDF),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Text(
-                  notice,
-                  style: TextStyle(
-                    color: blocked ? const Color(0xFF8A5300) : _darkGreen,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    height: 1.35,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      notice,
+                      style: TextStyle(
+                        color: blocked ? const Color(0xFF8A5300) : _darkGreen,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        height: 1.35,
+                      ),
+                    ),
+                    if (controller
+                            .adFreeSubscriptionChange
+                            ?.offersManageSubscription ==
+                        true)
+                      TextButton(
+                        onPressed: controller.openAdFreeSubscriptionManagement,
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.only(top: 8),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'ad_free_manage_subscription'.tr,
+                          style: const TextStyle(
+                            color: Color(0xFF8A5300),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               );
             }),
@@ -143,7 +169,7 @@ class CheckoutPage extends StatelessWidget {
                     ? 'ad_free_already_active'.tr
                     : !controller.hasAppStoreSubscriptionPrice
                     ? 'loading_app_store_price'.tr
-                    : controller.adFreeSubscriptionChange?.isSwitch == true
+                    : controller.adFreeSubscriptionChange?.isUpgrade == true
                     ? 'ad_free_switch_plan'.tr
                     : 'complete_purchase'.tr,
                 onPressed: !controller.canConfirmCheckout

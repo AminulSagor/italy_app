@@ -692,7 +692,9 @@ class StoreQuotePricingModel {
 }
 
 /// How an Ad-Free checkout relates to the user's current Ad-Free plan.
-/// mode: new | already_subscribed | switch | managed_elsewhere
+/// mode: new | already_subscribed | upgrade | downgrade | managed_elsewhere
+/// Upgrade (monthly -> yearly) is an in-app plan replacement. Downgrade
+/// (yearly -> monthly) is blocked so the paid year is not cut short.
 class AdFreeSubscriptionChangeModel {
   const AdFreeSubscriptionChangeModel({
     required this.mode,
@@ -700,6 +702,7 @@ class AdFreeSubscriptionChangeModel {
     required this.currentProvider,
     required this.currentProductId,
     required this.currentBasePlanId,
+    required this.currentExpiresAt,
   });
 
   final String mode;
@@ -707,11 +710,17 @@ class AdFreeSubscriptionChangeModel {
   final String currentProvider;
   final String currentProductId;
   final String currentBasePlanId;
+  final DateTime? currentExpiresAt;
 
   bool get isAlreadySubscribed => mode == 'already_subscribed';
-  bool get isSwitch => mode == 'switch';
+  bool get isUpgrade => mode == 'upgrade';
+  bool get isDowngrade => mode == 'downgrade';
   bool get isManagedElsewhere => mode == 'managed_elsewhere';
-  bool get blocksPurchase => isAlreadySubscribed || isManagedElsewhere;
+  bool get blocksPurchase =>
+      isAlreadySubscribed || isDowngrade || isManagedElsewhere;
+
+  /// Blocked cases where the store's subscription page is the next step.
+  bool get offersManageSubscription => isAlreadySubscribed || isDowngrade;
 
   factory AdFreeSubscriptionChangeModel.fromJson(Map<String, dynamic> json) {
     return AdFreeSubscriptionChangeModel(
@@ -720,6 +729,9 @@ class AdFreeSubscriptionChangeModel {
       currentProvider: _string(json['currentProvider']),
       currentProductId: _string(json['currentProductId']),
       currentBasePlanId: _string(json['currentBasePlanId']),
+      currentExpiresAt: DateTime.tryParse(
+        _string(json['currentExpiresAt']),
+      )?.toLocal(),
     );
   }
 }

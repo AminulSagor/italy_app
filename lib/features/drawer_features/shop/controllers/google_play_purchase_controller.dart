@@ -510,7 +510,7 @@ class GooglePlayPurchaseController extends GetxController
                   ? GooglePlayPurchaseOutcomeStatus.pending
                   : GooglePlayPurchaseOutcomeStatus.failed,
               message: localOrderStillExists
-                  ? 'The App Store purchase was found, but account verification is still in progress. Please try again shortly.'
+                  ? 'The store purchase was found, but account verification is still in progress. Please try again shortly.'
                   : 'The previous store purchase could not be verified and has been cleared. Please try again.',
             ),
           );
@@ -613,7 +613,7 @@ class GooglePlayPurchaseController extends GetxController
     return const GooglePlayPurchaseOutcome(
       status: GooglePlayPurchaseOutcomeStatus.pending,
       message:
-          'Your previous App Store purchase was found and will be verified automatically.',
+          'Your previous store purchase was found and will be verified automatically.',
     );
   }
 

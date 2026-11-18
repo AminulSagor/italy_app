@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/controllers/user_session_controller.dart';
 import '../../../core/services/api_error_handler.dart';
 import '../../../core/services/auth_service.dart';
@@ -454,7 +456,7 @@ class ShopController extends GetxController {
       quote.value?.subscriptionChange;
 
   /// Message shown instead of buying when the checkout is blocked or is a
-  /// plan switch. Empty for a normal purchase.
+  /// plan upgrade. Empty for a normal purchase.
   String get adFreeSubscriptionNotice {
     final AdFreeSubscriptionChangeModel? change = adFreeSubscriptionChange;
     if (change == null) return '';
@@ -464,10 +466,35 @@ class ShopController extends GetxController {
     if (change.isManagedElsewhere) {
       return 'ad_free_managed_elsewhere'.tr;
     }
-    if (change.isSwitch) {
-      return 'ad_free_switch_notice'.tr;
+    if (change.isDowngrade) {
+      final DateTime? until = change.currentExpiresAt;
+      return 'ad_free_downgrade_notice'.trParams(<String, String>{
+        'date': until == null ? '' : DateFormat.yMMMd().format(until),
+      });
+    }
+    if (change.isUpgrade) {
+      return 'ad_free_upgrade_notice'.tr;
     }
     return '';
+  }
+
+  /// Opens the store's subscription management page for the Ad-Free plan.
+  Future<void> openAdFreeSubscriptionManagement() async {
+    final String productId =
+        adFreeSubscriptionChange?.currentProductId.trim() ?? '';
+    final Uri uri = Platform.isIOS
+        ? Uri.parse('https://apps.apple.com/account/subscriptions')
+        : Uri.https('play.google.com', '/store/account/subscriptions', {
+            'package': 'com.shafacode.italir_pothe',
+            if (productId.isNotEmpty) 'sku': productId,
+          });
+    final bool opened = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened) {
+      checkoutError.value = 'ad_free_manage_unavailable'.tr;
+    }
   }
 
   String get appStoreSubscriptionBillingDuration {
@@ -804,7 +831,7 @@ class ShopController extends GetxController {
             storeProduct: currentQuote.storeProduct,
             currency: selectedCurrency.value,
             couponCode: isCouponApplied.value ? couponCode.value : '',
-            replacesProductId: adFreeSubscriptionChange?.isSwitch == true
+            replacesProductId: adFreeSubscriptionChange?.isUpgrade == true
                 ? adFreeSubscriptionChange!.currentProductId
                 : '',
           );
