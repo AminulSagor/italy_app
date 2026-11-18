@@ -108,6 +108,7 @@ class GooglePlayPurchaseController extends GetxController
     required StoreProviderProductModel storeProduct,
     required RefillCurrency currency,
     required String couponCode,
+    String replacesProductId = '',
   }) async {
     if (isProcessing.value) {
       return const GooglePlayPurchaseOutcome(
@@ -286,6 +287,9 @@ class GooglePlayPurchaseController extends GetxController
               obfuscatedAccountId: obfuscatedAccountId,
               createdAt: DateTime.now(),
               appStorePromotionalOffer: paymentMethod.promotionalOffer,
+              replacesProductId: Platform.isAndroid
+                  ? replacesProductId.trim()
+                  : '',
             );
           }, showError: false);
 

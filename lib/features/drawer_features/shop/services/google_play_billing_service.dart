@@ -361,9 +361,33 @@ class GooglePlayBillingService extends GetxService {
 
       late final PurchaseParam purchaseParam;
       if (Platform.isAndroid) {
+        ChangeSubscriptionParam? changeSubscriptionParam;
+        if (pendingPurchase.productType ==
+                StoreProviderProductType.subscription &&
+            pendingPurchase.replacesProductId.isNotEmpty) {
+          final GooglePlayPurchaseDetails? oldPurchase =
+              await _findActiveSubscriptionPurchase(
+                pendingPurchase.replacesProductId,
+              );
+          if (oldPurchase == null) {
+            // Without the old purchase Play would start a second, parallel
+            // subscription and charge for both. Stop instead.
+            await clearPendingPurchase();
+            lastError.value =
+                'Your current subscription could not be found on this Google '
+                'Play account. Please change your plan from Google Play.';
+            return false;
+          }
+          changeSubscriptionParam = ChangeSubscriptionParam(
+            oldPurchaseDetails: oldPurchase,
+            // Immediate switch; unused time of the old plan is credited.
+            replacementMode: ReplacementMode.withTimeProration,
+          );
+        }
         purchaseParam = GooglePlayPurchaseParam(
           productDetails: details,
           applicationUserName: obfuscatedAccountId,
+          changeSubscriptionParam: changeSubscriptionParam,
           offerToken:
               pendingPurchase.productType ==
                   StoreProviderProductType.subscription
@@ -760,6 +784,40 @@ class GooglePlayBillingService extends GetxService {
           ? offer.offerId == null
           : offer.offerId == mapping.offerId;
       if (basePlanMatches && offerMatches) return item;
+    }
+    return null;
+  }
+
+  /// Active (purchased, not pending) Google Play subscription purchase for
+  /// [productId] on this device's Play account, used as the purchase being
+  /// replaced in a plan switch.
+  Future<GooglePlayPurchaseDetails?> _findActiveSubscriptionPurchase(
+    String productId,
+  ) async {
+    try {
+      final InAppPurchaseAndroidPlatformAddition addition = _inAppPurchase
+          .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+      final QueryPurchaseDetailsResponse response = await addition
+          .queryPastPurchases();
+      if (response.error != null) {
+        AppLogger.log(
+          'Past purchase lookup failed: ${response.error!.message}',
+          name: 'GooglePlayBillingService',
+        );
+      }
+      for (final GooglePlayPurchaseDetails purchase in response.pastPurchases) {
+        if (purchase.productID == productId &&
+            purchase.status != PurchaseStatus.pending &&
+            purchase.billingClientPurchase.purchaseState ==
+                PurchaseStateWrapper.purchased) {
+          return purchase;
+        }
+      }
+    } catch (error) {
+      AppLogger.log(
+        'Past purchase lookup threw: $error',
+        name: 'GooglePlayBillingService',
+      );
     }
     return null;
   }

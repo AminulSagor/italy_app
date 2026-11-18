@@ -16,6 +16,7 @@ class PendingGooglePlayPurchaseModel {
     required this.createdAt,
     this.appStorePromotionalOffer,
     this.verifiedCompletion,
+    this.replacesProductId = '',
   });
 
   final String appUserId;
@@ -31,6 +32,10 @@ class PendingGooglePlayPurchaseModel {
   final DateTime createdAt;
   final AppStorePromotionalOfferModel? appStorePromotionalOffer;
   final StorePurchaseCompletionModel? verifiedCompletion;
+
+  /// Google Play: product ID of the active subscription this purchase
+  /// replaces (plan switch). Empty for a normal purchase.
+  final String replacesProductId;
 
   factory PendingGooglePlayPurchaseModel.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> completion = shopJsonMap(
@@ -64,6 +69,7 @@ class PendingGooglePlayPurchaseModel {
       verifiedCompletion: completion.isEmpty
           ? null
           : StorePurchaseCompletionModel.fromJson(completion),
+      replacesProductId: shopString(json['replacesProductId']),
     );
   }
 
@@ -89,6 +95,7 @@ class PendingGooglePlayPurchaseModel {
             'signature': appStorePromotionalOffer!.signature,
           },
     'verifiedCompletion': verifiedCompletion?.toJson(),
+    'replacesProductId': replacesProductId,
   };
 
   PendingGooglePlayPurchaseModel copyWith({
@@ -109,6 +116,7 @@ class PendingGooglePlayPurchaseModel {
       createdAt: createdAt,
       appStorePromotionalOffer: appStorePromotionalOffer,
       verifiedCompletion: verifiedCompletion ?? this.verifiedCompletion,
+      replacesProductId: replacesProductId,
     );
   }
 }

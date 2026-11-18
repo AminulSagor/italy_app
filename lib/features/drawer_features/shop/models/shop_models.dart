@@ -691,6 +691,39 @@ class StoreQuotePricingModel {
   }
 }
 
+/// How an Ad-Free checkout relates to the user's current Ad-Free plan.
+/// mode: new | already_subscribed | switch | managed_elsewhere
+class AdFreeSubscriptionChangeModel {
+  const AdFreeSubscriptionChangeModel({
+    required this.mode,
+    required this.currentPackageId,
+    required this.currentProvider,
+    required this.currentProductId,
+    required this.currentBasePlanId,
+  });
+
+  final String mode;
+  final String currentPackageId;
+  final String currentProvider;
+  final String currentProductId;
+  final String currentBasePlanId;
+
+  bool get isAlreadySubscribed => mode == 'already_subscribed';
+  bool get isSwitch => mode == 'switch';
+  bool get isManagedElsewhere => mode == 'managed_elsewhere';
+  bool get blocksPurchase => isAlreadySubscribed || isManagedElsewhere;
+
+  factory AdFreeSubscriptionChangeModel.fromJson(Map<String, dynamic> json) {
+    return AdFreeSubscriptionChangeModel(
+      mode: _string(json['mode'], fallback: 'new'),
+      currentPackageId: _string(json['currentPackageId']),
+      currentProvider: _string(json['currentProvider']),
+      currentProductId: _string(json['currentProductId']),
+      currentBasePlanId: _string(json['currentBasePlanId']),
+    );
+  }
+}
+
 class StoreQuoteResponseModel {
   const StoreQuoteResponseModel({
     required this.package,
@@ -698,6 +731,7 @@ class StoreQuoteResponseModel {
     required this.balances,
     required this.storeProduct,
     required this.supportedProviders,
+    this.subscriptionChange,
   });
 
   final StorePackageModel package;
@@ -705,6 +739,9 @@ class StoreQuoteResponseModel {
   final StoreBalancesModel balances;
   final StoreProviderProductModel storeProduct;
   final List<StoreProviderOptionModel> supportedProviders;
+
+  /// Present only for Ad-Free subscriptions.
+  final AdFreeSubscriptionChangeModel? subscriptionChange;
 
   factory StoreQuoteResponseModel.fromJson(Map<String, dynamic> json) {
     final StorePackageModel package = StorePackageModel.fromJson(
@@ -726,6 +763,11 @@ class StoreQuoteResponseModel {
       pricing: StoreQuotePricingModel.fromJson(_map(json['pricing'])),
       balances: StoreBalancesModel.fromJson(_map(json['balances'])),
       storeProduct: product,
+      subscriptionChange: json['subscriptionChange'] is Map
+          ? AdFreeSubscriptionChangeModel.fromJson(
+              _map(json['subscriptionChange']),
+            )
+          : null,
       supportedProviders: <StoreProviderOptionModel>[
         StoreProviderOptionModel(
           provider: provider,

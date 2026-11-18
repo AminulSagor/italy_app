@@ -1526,6 +1526,11 @@ appTranslations = <String, Map<String, String>>{
     'complete_ieri_maria_al_mercato': 'Complete Ieri Maria Al Mercato',
     'complete_noi_italiano_ogni_giorno': 'Complete Noi Italiano Ogni Giorno',
     'complete_purchase': 'Complete Purchase',
+    'ad_free_already_subscribed': 'You already have this Ad-Free plan. Manage it from your store subscriptions.',
+    'ad_free_managed_elsewhere': 'Your Ad-Free plan was bought in the other app store. Change or cancel it there.',
+    'ad_free_switch_notice': 'This replaces your current Ad-Free plan. Unused time is credited by the store.',
+    'ad_free_switch_plan': 'Switch Plan',
+    'ad_free_already_active': 'Already Ad-Free',
     'complete_the_chapter_quiz_when_it_is_available_you':
         'Complete the chapter quiz when it is available.',
     'complete_the_exam_sections': 'Complete the Exam Sections',
@@ -3707,6 +3712,11 @@ appTranslations = <String, Map<String, String>>{
     'complete_noi_italiano_ogni_giorno':
         'বাক্যটি পূরণ করুন: Noi italiano ogni giorno',
     'complete_purchase': 'ক্রয় সম্পন্ন করুন',
+    'ad_free_already_subscribed': 'আপনার এই অ্যাড-ফ্রি প্ল্যানটি ইতিমধ্যে চালু আছে। স্টোরের সাবস্ক্রিপশন থেকে এটি পরিচালনা করুন।',
+    'ad_free_managed_elsewhere': 'আপনার অ্যাড-ফ্রি প্ল্যানটি অন্য অ্যাপ স্টোর থেকে কেনা। সেখান থেকে পরিবর্তন বা বাতিল করুন।',
+    'ad_free_switch_notice': 'এটি আপনার বর্তমান অ্যাড-ফ্রি প্ল্যান প্রতিস্থাপন করবে। অব্যবহৃত সময় স্টোর সমন্বয় করবে।',
+    'ad_free_switch_plan': 'প্ল্যান পরিবর্তন করুন',
+    'ad_free_already_active': 'ইতিমধ্যে অ্যাড-ফ্রি',
     'complete_the_chapter_quiz_when_it_is_available_you':
         'অধ্যায়ের কুইজ উপলভ্য হলে সম্পন্ন করুন',
     'complete_the_exam_sections': 'পরীক্ষার অংশগুলো সম্পন্ন করুন',
@@ -6930,6 +6940,11 @@ appTranslations = <String, Map<String, String>>{
     'complete_ieri_maria_al_mercato': 'Completa: Ieri Maria al mercato',
     'complete_noi_italiano_ogni_giorno': 'Completa: Noi italiano ogni giorno',
     'complete_purchase': 'Completa l’acquisto',
+    'ad_free_already_subscribed': 'Hai già questo piano senza pubblicità. Gestiscilo dagli abbonamenti dello store.',
+    'ad_free_managed_elsewhere': 'Il tuo piano senza pubblicità è stato acquistato nell’altro store. Modificalo o annullalo lì.',
+    'ad_free_switch_notice': 'Sostituisce il tuo piano senza pubblicità attuale. Il tempo non usato viene accreditato dallo store.',
+    'ad_free_switch_plan': 'Cambia piano',
+    'ad_free_already_active': 'Già senza pubblicità',
     'complete_the_chapter_quiz_when_it_is_available_you':
         'Completa il quiz del capitolo quando è disponibile',
     'complete_the_exam_sections': 'Completa le sezioni dell’esame',

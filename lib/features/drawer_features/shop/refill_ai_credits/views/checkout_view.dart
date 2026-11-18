@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:italir_pothe/core/themes/app_colors.dart';
@@ -82,30 +84,67 @@ class CheckoutPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Obx(
-              () => controller.isAppStoreSubscriptionCheckout
-                  ? Column(
-                      children: <Widget>[
-                        AppStoreSubscriptionDisclosure(
-                          title: controller.appStoreSubscriptionTitle,
-                          price: controller.appStoreSubscriptionPrice,
-                          billingDuration:
-                              controller.appStoreSubscriptionBillingDuration,
-                          isRestoring: controller.isRestoringSubscription.value,
-                          onRestore:
-                              controller.restoreCurrentAppStoreSubscription,
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                    )
-                  : const SizedBox.shrink(),
-            ),
+            // iOS only: on Android isAppStoreSubscriptionCheckout short-circuits
+            // on Platform.isIOS without reading any Rx, and GetX throws for an
+            // Obx with no observables (rendered as a grey box in release).
+            if (Platform.isIOS)
+              Obx(
+                () => controller.isAppStoreSubscriptionCheckout
+                    ? Column(
+                        children: <Widget>[
+                          AppStoreSubscriptionDisclosure(
+                            title: controller.appStoreSubscriptionTitle,
+                            price: controller.appStoreSubscriptionPrice,
+                            billingDuration:
+                                controller.appStoreSubscriptionBillingDuration,
+                            isRestoring:
+                                controller.isRestoringSubscription.value,
+                            onRestore:
+                                controller.restoreCurrentAppStoreSubscription,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            Obx(() {
+              // Reads quote.value, so this Obx always has an observable.
+              final String notice = controller.adFreeSubscriptionNotice;
+              if (notice.isEmpty) return const SizedBox.shrink();
+              final bool blocked =
+                  controller.adFreeSubscriptionChange?.blocksPurchase == true;
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: blocked
+                      ? const Color(0xFFFFF4E5)
+                      : const Color(0xFFE9FFDF),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  notice,
+                  style: TextStyle(
+                    color: blocked ? const Color(0xFF8A5300) : _darkGreen,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    height: 1.35,
+                  ),
+                ),
+              );
+            }),
             Obx(
               () => CustomButton.primary(
                 text: controller.isCheckoutLoading.value
                     ? 'processing'.tr
+                    : controller.adFreeSubscriptionChange?.blocksPurchase ==
+                          true
+                    ? 'ad_free_already_active'.tr
                     : !controller.hasAppStoreSubscriptionPrice
                     ? 'loading_app_store_price'.tr
+                    : controller.adFreeSubscriptionChange?.isSwitch == true
+                    ? 'ad_free_switch_plan'.tr
                     : 'complete_purchase'.tr,
                 onPressed: !controller.canConfirmCheckout
                     ? () {}

@@ -445,7 +445,31 @@ class ShopController extends GetxController {
   bool get hasAppStoreSubscriptionPrice =>
       !isAppStoreSubscriptionCheckout || appStoreSubscriptionPrice.isNotEmpty;
   bool get canConfirmCheckout =>
-      !isCheckoutLoading.value && hasAppStoreSubscriptionPrice;
+      !isCheckoutLoading.value &&
+      hasAppStoreSubscriptionPrice &&
+      adFreeSubscriptionChange?.blocksPurchase != true;
+
+  /// Ad-Free only: relation of this checkout to the current Ad-Free plan.
+  AdFreeSubscriptionChangeModel? get adFreeSubscriptionChange =>
+      quote.value?.subscriptionChange;
+
+  /// Message shown instead of buying when the checkout is blocked or is a
+  /// plan switch. Empty for a normal purchase.
+  String get adFreeSubscriptionNotice {
+    final AdFreeSubscriptionChangeModel? change = adFreeSubscriptionChange;
+    if (change == null) return '';
+    if (change.isAlreadySubscribed) {
+      return 'ad_free_already_subscribed'.tr;
+    }
+    if (change.isManagedElsewhere) {
+      return 'ad_free_managed_elsewhere'.tr;
+    }
+    if (change.isSwitch) {
+      return 'ad_free_switch_notice'.tr;
+    }
+    return '';
+  }
+
   String get appStoreSubscriptionBillingDuration {
     final StoreBillingPeriod? period = _billingService.subscriptionPeriod(
       quote.value?.storeProduct,
@@ -780,6 +804,9 @@ class ShopController extends GetxController {
             storeProduct: currentQuote.storeProduct,
             currency: selectedCurrency.value,
             couponCode: isCouponApplied.value ? couponCode.value : '',
+            replacesProductId: adFreeSubscriptionChange?.isSwitch == true
+                ? adFreeSubscriptionChange!.currentProductId
+                : '',
           );
       switch (outcome.status) {
         case GooglePlayPurchaseOutcomeStatus.completed:
