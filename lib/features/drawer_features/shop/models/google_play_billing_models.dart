@@ -17,6 +17,7 @@ class PendingGooglePlayPurchaseModel {
     this.appStorePromotionalOffer,
     this.verifiedCompletion,
     this.replacesProductId = '',
+    this.preexistingPurchaseTokens = const <String>[],
   });
 
   final String appUserId;
@@ -36,6 +37,11 @@ class PendingGooglePlayPurchaseModel {
   /// Google Play: product ID of the active subscription this purchase
   /// replaces (plan switch). Empty for a normal purchase.
   final String replacesProductId;
+
+  /// Google Play: purchase tokens for this product that already existed when
+  /// the order was created. They belong to earlier orders and must never be
+  /// verified against this one (monthly and yearly share one product ID).
+  final List<String> preexistingPurchaseTokens;
 
   factory PendingGooglePlayPurchaseModel.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> completion = shopJsonMap(
@@ -70,6 +76,11 @@ class PendingGooglePlayPurchaseModel {
           ? null
           : StorePurchaseCompletionModel.fromJson(completion),
       replacesProductId: shopString(json['replacesProductId']),
+      preexistingPurchaseTokens: json['preexistingPurchaseTokens'] is List
+          ? (json['preexistingPurchaseTokens'] as List)
+                .map((dynamic item) => item.toString())
+                .toList()
+          : const <String>[],
     );
   }
 
@@ -96,6 +107,7 @@ class PendingGooglePlayPurchaseModel {
           },
     'verifiedCompletion': verifiedCompletion?.toJson(),
     'replacesProductId': replacesProductId,
+    'preexistingPurchaseTokens': preexistingPurchaseTokens,
   };
 
   PendingGooglePlayPurchaseModel copyWith({
@@ -117,6 +129,7 @@ class PendingGooglePlayPurchaseModel {
       appStorePromotionalOffer: appStorePromotionalOffer,
       verifiedCompletion: verifiedCompletion ?? this.verifiedCompletion,
       replacesProductId: replacesProductId,
+      preexistingPurchaseTokens: preexistingPurchaseTokens,
     );
   }
 }

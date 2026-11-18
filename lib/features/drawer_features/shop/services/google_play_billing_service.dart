@@ -494,12 +494,19 @@ class GooglePlayBillingService extends GetxService {
         // purchase made before the order was created cannot belong to it;
         // returning it would retry verification against the wrong order
         // forever ("verification still in progress").
+        // The order is created before the store sheet opens, so its own
+        // purchase is always newer; the small margin only covers clock skew.
         final int orderCreatedMs = pending.createdAt
-            .subtract(const Duration(minutes: 2))
+            .subtract(const Duration(seconds: 15))
             .millisecondsSinceEpoch;
+        final Set<String> preexisting = pending.preexistingPurchaseTokens
+            .toSet();
         for (final GooglePlayPurchaseDetails purchase
             in response.pastPurchases) {
           if (purchase.productID == pending.productId &&
+              !preexisting.contains(
+                purchase.billingClientPurchase.purchaseToken,
+              ) &&
               purchase.billingClientPurchase.purchaseTime >= orderCreatedMs) {
             return purchase;
           }
@@ -797,6 +804,35 @@ class GooglePlayBillingService extends GetxService {
       if (basePlanMatches && offerMatches) return item;
     }
     return null;
+  }
+
+  /// Purchase tokens Google Play currently holds for [productId] on this
+  /// device's account. Empty if the lookup fails.
+  Future<List<String>> ownedPurchaseTokens(String productId) async {
+    if (!Platform.isAndroid) return const <String>[];
+    try {
+      await initialize();
+      if (!isAvailable.value) return const <String>[];
+      final InAppPurchaseAndroidPlatformAddition addition = _inAppPurchase
+          .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+      final QueryPurchaseDetailsResponse response = await addition
+          .queryPastPurchases();
+      return response.pastPurchases
+          .where(
+            (GooglePlayPurchaseDetails item) => item.productID == productId,
+          )
+          .map(
+            (GooglePlayPurchaseDetails item) =>
+                item.billingClientPurchase.purchaseToken,
+          )
+          .toList();
+    } catch (error) {
+      AppLogger.log(
+        'Owned purchase lookup failed: $error',
+        name: 'GooglePlayBillingService',
+      );
+      return const <String>[];
+    }
   }
 
   /// Active (purchased, not pending) Google Play subscription purchase for

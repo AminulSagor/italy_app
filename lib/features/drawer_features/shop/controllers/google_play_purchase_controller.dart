@@ -203,6 +203,12 @@ class GooglePlayPurchaseController extends GetxController
     try {
       final ApiResult<PendingGooglePlayPurchaseModel> orderResult =
           await ApiErrorHandler.call<PendingGooglePlayPurchaseModel>(() async {
+            // Snapshot purchases that already exist before this order, so a
+            // previous subscription is never matched to it later.
+            final List<String> preexistingPurchaseTokens =
+                Platform.isAndroid && storeProduct.isSubscription
+                ? await _billingService.ownedPurchaseTokens(requestedProductId)
+                : const <String>[];
             final StoreOrderModel order = await _apiService.createOrder(
               CreateStoreOrderPayloadModel(
                 packageId: package.id,
@@ -290,6 +296,7 @@ class GooglePlayPurchaseController extends GetxController
               replacesProductId: Platform.isAndroid
                   ? replacesProductId.trim()
                   : '',
+              preexistingPurchaseTokens: preexistingPurchaseTokens,
             );
           }, showError: false);
 
